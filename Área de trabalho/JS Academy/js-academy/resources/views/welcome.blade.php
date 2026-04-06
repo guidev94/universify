@@ -72,6 +72,10 @@
                         data-lesson-title="{{ $nextLesson->title }}"
                         data-lesson-content="{{ $nextLesson->content }}"
                         data-lesson-starter="{{ $nextLesson->starter_code }}"
+                        data-lesson-tips="{{ $nextLesson->tips }}"
+                        data-lesson-examples="{{ $nextLesson->examples }}"
+                        data-lesson-case="{{ $nextLesson->real_world_case }}"
+                        data-lesson-docs="{{ $nextLesson->docs_link }}"
                         class="lesson-btn inline-flex px-8 py-3 bg-cyan-400 text-zinc-950 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-cyan-300 transition-all active:scale-95 shadow-xl shadow-cyan-400/20">
                         Continuar Agora
                     </button>
@@ -97,10 +101,14 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- O Caminho (Trilhas) -->
-        <div id="o-caminho" class="lg:col-span-8 order-2 lg:order-1">
+        <div id="o-caminho" class="lg:col-span-6 order-2 lg:order-1">
             <h2 class="text-3xl font-black text-white mb-10 flex items-center gap-4">
-                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-zinc-950 text-xl shadow-lg shadow-yellow-400/20">📍</div>
-                The Path (Trilhas)
+                <div class="w-10 h-10 bg-yellow-400/10 border border-yellow-400/20 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-yellow-400/5">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                </div>
+                Trilhas de Aprendizado
             </h2>
             
             <div class="space-y-12 pl-10 border-l-2 border-zinc-900 light:border-zinc-200 ml-4 relative">
@@ -112,33 +120,29 @@
                 <div class="relative group">
                     <div class="absolute -left-[51px] top-0 w-6 h-6 rounded-full {{ $isCompleted ? 'bg-green-500' : ($isLocked ? 'bg-zinc-800' : 'bg-yellow-400') }} border-[6px] border-zinc-950 light:border-white z-10 transition-transform group-hover:scale-125 shadow-xl"></div>
                     
-                    <div class="bento-card p-8 bg-zinc-900/40 light:bg-white hover:bg-zinc-900/60 transition-all relative overflow-hidden group opacity-100">
+                    <div class="bento-card p-6 bg-zinc-900/40 light:bg-white hover:bg-zinc-900/60 transition-all relative overflow-hidden group opacity-100">
                         @if($isLocked)
                         <div class="absolute inset-0 bg-zinc-950/40 backdrop-blur-[2px] flex items-center justify-center z-20">
                             <span class="bg-zinc-800 border border-white/10 px-4 py-2 rounded-2xl text-xs font-bold text-zinc-500 uppercase tracking-widest shadow-2xl flex items-center gap-2 light:bg-white light:text-zinc-400">
-                                🔒 Módulo Bloqueado
+                                🔒 Bloqueado
                             </span>
                         </div>
                         @endif
 
-                        <div class="flex flex-col md:flex-row justify-between items-start gap-6">
-                            <div class="max-w-md">
-                                <span class="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
-                                <h3 class="text-3xl font-black text-white mt-1 group-hover:text-yellow-400 transition-colors light:text-zinc-900">{{ $track->name }}</h3>
-                                <p class="text-zinc-500 text-sm mt-4 leading-relaxed light:text-zinc-600">{{ $track->description }}</p>
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex-grow">
+                                <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
+                                <h3 class="text-2xl font-black text-white mt-1 group-hover:text-yellow-400 transition-colors light:text-zinc-900">{{ $track->name }}</h3>
                             </div>
-                            
-                            <div class="flex items-center gap-4">
-                                @if($track->badge)
-                                <div class="w-16 h-16 rounded-2xl bg-zinc-800/50 light:bg-zinc-100 border border-white/5 flex items-center justify-center text-3xl shadow-inner group-hover:border-yellow-500/20 transition-all" title="{{ $track->badge->name }}">
-                                    {{ $track->badge->icon }}
-                                </div>
-                                @endif
+                            @if($track->badge)
+                            <div class="w-12 h-12 rounded-xl bg-zinc-800/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner" title="{{ $track->badge->name }}">
+                                {{ $track->badge->icon }}
                             </div>
+                            @endif
                         </div>
 
-                        <!-- Lista de Lições -->
-                        <div class="mt-8 pt-8 border-t border-white/5 light:border-zinc-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                        <!-- Lista de Lições Slim -->
+                        <div class="mt-6 space-y-2">
                             @foreach($track->lessons as $lesson)
                             @php
                                 $lessonCompleted = $user ? $user->progress()->where('lesson_id', $lesson->id)->where('status', 'completed')->exists() : false;
@@ -148,15 +152,21 @@
                                 data-lesson-title="{{ $lesson->title }}"
                                 data-lesson-content="{{ $lesson->content }}"
                                 data-lesson-starter="{{ $lesson->starter_code }}"
-                                class="lesson-btn flex items-center gap-4 p-4 rounded-2xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }}"
+                                data-lesson-tips="{{ $lesson->tips }}"
+                                data-lesson-examples="{{ $lesson->examples }}"
+                                data-lesson-case="{{ $lesson->real_world_case }}"
+                                data-lesson-docs="{{ $lesson->docs_link }}"
+                                class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }}"
                                 {{ $isLocked ? 'disabled' : '' }}>
-                                <div class="w-10 h-10 rounded-xl border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400 shadow-lg shadow-green-500/20' : 'bg-zinc-800 border-white/5 group-hover:border-yellow-400/50' }}">
-                                    <span class="text-sm font-black {{ $lessonCompleted ? 'text-white' : 'text-zinc-500' }}">{{ $lesson->order }}</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400' : 'bg-zinc-800 border-white/5' }}">
+                                        <span class="text-[10px] font-black {{ $lessonCompleted ? 'text-white' : 'text-zinc-500' }}">{{ $lesson->order }}</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-white light:text-zinc-900">{{ $lesson->title }}</span>
                                 </div>
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-bold text-white light:text-zinc-900">{{ $lesson->title }}</span>
-                                    <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">{{ $lessonCompleted ? 'Concluído' : 'Disponível' }}</span>
-                                </div>
+                                @if($lessonCompleted)
+                                <span class="text-[8px] font-black text-green-500 uppercase tracking-widest">OK</span>
+                                @endif
                             </button>
                             @endforeach
                         </div>
@@ -166,50 +176,74 @@
             </div>
         </div>
 
-        <!-- Lateral: IDE Sandbox -->
-        <div class="lg:col-span-4 order-1 lg:order-2">
-            <div id="editor-section" class="lg:sticky lg:top-24 bento-card bg-zinc-950 border-zinc-900 light:bg-white light:border-zinc-200 shadow-2xl overflow-hidden flex flex-col h-[650px] opacity-100">
-                <!-- Lesson Info Header -->
-                <div id="lesson-info" class="p-6 bg-gradient-to-b from-zinc-900/50 to-transparent border-b border-white/5 hidden">
-                    <span id="lesson-module-tag" class="text-[9px] font-mono text-yellow-500 uppercase tracking-widest">Módulo 1</span>
-                    <h3 id="current-lesson-title" class="text-xl font-black text-white mt-1">Selecione uma lição</h3>
-                    <p id="current-lesson-desc" class="text-xs text-zinc-500 mt-2 leading-relaxed">Clique em uma das aulas da trilha ao lado para começar seu desafio de código.</p>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-zinc-900/50 light:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        <span class="ml-4 text-[10px] font-mono text-zinc-500 uppercase tracking-widest">sandbox.js</span>
+        <!-- Lateral: Arena de Desafio -->
+        <div class="lg:col-span-6 order-1 lg:order-2">
+            <div id="editor-section" class="lg:sticky lg:top-24 flex flex-col gap-6">
+                <!-- Conteúdo Educacional (Tabs) -->
+                <div class="bento-card bg-zinc-900/80 border-zinc-800 overflow-hidden flex flex-col min-h-[300px]">
+                    <div class="flex border-b border-white/5 bg-zinc-950/50 overflow-x-auto custom-scrollbar">
+                        <button onclick="switchTab('tab-desc')" class="tab-btn active px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all flex-shrink-0">Explicação</button>
+                        <button onclick="switchTab('tab-tips')" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all flex-shrink-0">Dicas</button>
+                        <button onclick="switchTab('tab-examples')" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all flex-shrink-0">Exemplos</button>
+                        <button onclick="switchTab('tab-case')" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all flex-shrink-0">Caso Real</button>
+                        <button onclick="switchTab('tab-docs')" class="tab-btn px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all flex-shrink-0">Docs Oficiais 📚</button>
+                    </div>
+                    
+                    <div class="p-8 flex-grow">
+                        <div id="tab-desc" class="tab-content">
+                            <h3 id="lesson-title-display" class="text-2xl font-black text-white light:text-zinc-900 mb-4">Bem-vindo à Arena</h3>
+                            <p id="lesson-desc-display" class="text-zinc-400 light:text-zinc-600 leading-relaxed">Selecione uma lição na trilha para começar seu aprendizado técnico.</p>
+                        </div>
+                        <div id="tab-tips" class="tab-content hidden">
+                            <h4 class="text-sm font-bold text-yellow-500 uppercase mb-4 tracking-widest">Dicas do Mentor</h4>
+                            <p id="lesson-tips-display" class="text-zinc-400 italic">Nada aqui ainda...</p>
+                        </div>
+                        <div id="tab-examples" class="tab-content hidden">
+                            <h4 class="text-sm font-bold text-cyan-500 uppercase mb-4 tracking-widest">Código de Exemplo</h4>
+                            <pre class="bg-zinc-950 p-4 rounded-xl text-xs font-mono text-zinc-300 overflow-x-auto"><code id="lesson-examples-display">// Selecione uma lição</code></pre>
+                        </div>
+                        <div id="tab-case" class="tab-content hidden">
+                            <h4 class="text-sm font-bold text-pink-500 uppercase mb-4 tracking-widest">Uso no Mercado</h4>
+                            <p id="lesson-case-display" class="text-zinc-400">Como isso é aplicado em projetos reais?</p>
+                        </div>
+                        <div id="tab-docs" class="tab-content hidden text-center py-10">
+                            <div class="mb-6 text-4xl">📚</div>
+                            <h4 class="text-xl font-black text-white mb-2 uppercase">Documentação MDN</h4>
+                            <p class="text-zinc-500 text-sm mb-6">Aprofunde-se na fonte oficial da Mozilla.</p>
+                            <a id="lesson-docs-display" href="#" target="_blank" class="inline-flex px-6 py-3 bg-zinc-800 text-white rounded-xl font-bold text-xs uppercase tracking-widest border border-white/10 hover:bg-zinc-700 transition-all">Abrir MDN Docs</a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Monaco Editor Container -->
-                <div id="monaco-editor" class="flex-grow w-full"></div>
+                <!-- Editor IDE -->
+                <div class="bento-card bg-zinc-950 border-zinc-900 shadow-2xl overflow-hidden flex flex-col h-[400px]">
+                    <div class="flex items-center justify-between p-4 bg-zinc-900/50 border-b border-zinc-800">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                            <span class="ml-4 text-[10px] font-mono text-zinc-500 uppercase tracking-widest">sandbox.js</span>
+                        </div>
+                    </div>
 
-                <!-- Saída do Console -->
-                <div class="h-40 bg-zinc-950 light:bg-zinc-900 border-t border-zinc-900 p-4 font-mono">
-                    <h4 class="text-[10px] font-bold text-zinc-600 uppercase mb-3 tracking-widest flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-                        Saída do Console
-                    </h4>
-                    <div id="console-output" class="text-[11px] text-zinc-500 overflow-y-auto max-h-24 custom-scrollbar">
-                        > Selecione uma lição para começar...
+                    <div id="monaco-editor" class="flex-grow w-full"></div>
+
+                    <!-- Console Slim -->
+                    <div class="h-20 bg-zinc-950 border-t border-zinc-900 p-3 font-mono">
+                        <div id="console-output" class="text-[10px] text-zinc-600 overflow-y-auto max-h-full custom-scrollbar">> Pronto para executar...</div>
                     </div>
                 </div>
 
-                <!-- Botões de Ação -->
-                <div class="p-4 grid grid-cols-1 gap-2">
-                    <button id="validate-btn" class="w-full py-4 bg-white text-zinc-950 light:bg-zinc-950 light:text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 shadow-xl shadow-white/5">Validar Código 🚀</button>
-                </div>
+                <!-- Botão de Validação -->
+                <button id="validate-btn" class="w-full py-5 bg-white text-zinc-950 rounded-2xl font-black text-base uppercase tracking-widest hover:bg-yellow-400 transition-all active:scale-95 shadow-2xl shadow-white/5 border-b-4 border-zinc-300 hover:border-yellow-600">
+                    Validar Código 🚀
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Forçar visibilidade caso GSAP falhe */
     .bento-card {
         border-radius: 2rem;
         border: 1px solid rgba(255, 255, 255, 0.05);
@@ -220,14 +254,28 @@
         visibility: visible !important;
     }
     
-    .bento-card:hover { transform: translateY(-4px); }
+    .tab-btn.active {
+        color: white;
+        border-bottom-color: #F7DF1E;
+        background: rgba(247, 223, 30, 0.05);
+    }
 
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
+    .light-mode .tab-btn.active {
+        color: #0f172a;
+        background: rgba(247, 223, 30, 0.1);
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #27272a;
-        border-radius: 10px;
-    }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 </style>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.remove('hidden');
+        event.currentTarget.classList.add('active');
+    }
+</script>
 @endsection

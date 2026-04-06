@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Track;
 use App\Models\Badge;
+use App\Models\Track;
+use Illuminate\Database\Seeder;
 
 class TrackSeeder extends Seeder
 {
@@ -14,12 +14,54 @@ class TrackSeeder extends Seeder
             [
                 'name' => 'Unidade 1: Lógica Fundamental',
                 'slug' => 'logica-fundamental',
-                'description' => 'Domine o básico: variáveis, loops e funções.',
+                'description' => 'Domine o básico: variáveis, loops, condicionais e funções.',
                 'badge' => ['name' => 'Logic Master', 'icon' => '🧩', 'description' => 'Dominou a lógica básica.'],
                 'lessons' => [
-                    ['title' => 'Variáveis e Tipos', 'slug' => 'variaveis-tipos', 'content' => 'Explore let, const e os tipos primitivos.', 'starter_code' => 'let x = 10;', 'solution_code' => 'let x = 10; console.log(x);'],
-                    ['title' => 'Projeto: Calculadora', 'slug' => 'projeto-calculadora', 'content' => 'Crie uma calculadora funcional.', 'starter_code' => 'function add(a, b) { }', 'solution_code' => 'function add(a, b) { return a + b; }'],
-                ]
+                    [
+                        'title' => 'Variáveis e Tipos',
+                        'slug' => 'variaveis-tipos',
+                        'content' => 'JavaScript possui três formas de declarar variáveis: var, let e const. Atualmente, recomendamos o uso de let para valores que mudam e const para valores fixos.',
+                        'starter_code' => '// Declare uma variável chamada "idade" com o valor 25\n',
+                        'solution_code' => 'let idade = 25; console.log(idade);',
+                        'tips' => 'Use const se o valor não precisar ser reatribuído. Use let se você pretende mudar o valor depois.',
+                        'examples' => 'const PI = 3.14;\nlet contador = 0;\ncontador++;',
+                        'real_world_case' => 'Em um sistema de e-commerce, usamos const para o ID de um produto e let para a quantidade no carrinho.',
+                        'docs_link' => 'https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Grammar_and_types#declarando_vari%C3%A1veis',
+                    ],
+                    [
+                        'title' => 'Condicionais (If/Else)',
+                        'slug' => 'condicionais',
+                        'content' => 'Estruturas condicionais permitem que seu código tome decisões baseadas em valores booleanos (true/false).',
+                        'starter_code' => 'let nota = 8;\n// Se a nota for maior ou igual a 7, logue "Aprovado"\n',
+                        'solution_code' => 'let nota = 8; if(nota >= 7) { console.log("Aprovado"); }',
+                        'tips' => 'O operador >= significa "maior ou igual".',
+                        'examples' => 'if (idade >= 18) {\n  console.log("Adulto");\n} else {\n  console.log("Menor");\n}',
+                        'real_world_case' => 'Sistemas de login usam condicionais para verificar se a senha digitada coincide com a salva no banco.',
+                        'docs_link' => 'https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Statements/if...else',
+                    ],
+                    [
+                        'title' => 'Loops (For)',
+                        'slug' => 'loops-for',
+                        'content' => 'Loops permitem repetir uma ação várias vezes. O loop "for" é o mais comum para contagens definidas.',
+                        'starter_code' => '// Crie um loop que conte de 1 a 5 no console\n',
+                        'solution_code' => 'for(let i=1; i<=5; i++) { console.log(i); }',
+                        'tips' => 'A estrutura do for é: (início; condição; incremento).',
+                        'examples' => 'for(let i=0; i<10; i++) {\n  console.log(i);\n}',
+                        'real_world_case' => 'Redes sociais usam loops para percorrer a lista de posts e renderizá-los um por um no seu feed.',
+                        'docs_link' => 'https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Loops_and_iteration#for_statement',
+                    ],
+                    [
+                        'title' => 'Projeto: Calculadora',
+                        'slug' => 'projeto-calculadora',
+                        'content' => 'Funções são blocos de código que executam tarefas específicas. Vamos criar uma função que soma dois números.',
+                        'starter_code' => 'function somar(a, b) {\n  // Seu código aqui\n}',
+                        'solution_code' => 'function somar(a, b) { return a + b; }',
+                        'tips' => 'A palavra-chave "return" envia o valor resultante para fora da função.',
+                        'examples' => 'function saudacao(nome) {\n  return "Olá " + nome;\n}',
+                        'real_world_case' => 'Calculadoras de frete em sites usam funções para processar o peso e a distância.',
+                        'docs_link' => 'https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Functions',
+                    ],
+                ],
             ],
             [
                 'name' => 'Unidade 2: DOM & LocalStorage',
@@ -27,76 +69,55 @@ class TrackSeeder extends Seeder
                 'description' => 'Interaja com o navegador e persista dados.',
                 'badge' => ['name' => 'DOM Ninja', 'icon' => '🌐', 'description' => 'Manipula o DOM como um mestre.'],
                 'lessons' => [
-                    ['title' => 'Selecionando Elementos', 'slug' => 'selecionando-elementos', 'content' => 'Use querySelector e getElementById.', 'starter_code' => '// Selecione o h1', 'solution_code' => 'const h1 = document.querySelector("h1");'],
-                    ['title' => 'Projeto: TaskManager', 'slug' => 'projeto-taskmanager', 'content' => 'Gerenciador de tarefas com LocalStorage.', 'starter_code' => 'const save = (tasks) => { }', 'solution_code' => 'const save = (tasks) => localStorage.setItem("tasks", JSON.stringify(tasks));'],
-                ]
-            ],
-            [
-                'name' => 'Unidade 3: ES6+ (Arrow, Classes, Modules)',
-                'slug' => 'es6-moderno',
-                'description' => 'JS Moderno com as melhores features.',
-                'badge' => ['name' => 'ES6 Pro', 'icon' => '🚀', 'description' => 'Maestria em JavaScript moderno.'],
-                'lessons' => [
-                    ['title' => 'Arrow Functions', 'slug' => 'arrow-functions', 'content' => 'Simplifique suas funções.', 'starter_code' => 'function sayHello() { }', 'solution_code' => 'const sayHello = () => "Hello";'],
-                    ['title' => 'Projeto: Busca JS', 'slug' => 'projeto-busca', 'content' => 'Sistema de busca usando filter e map.', 'starter_code' => 'const search = (q) => { }', 'solution_code' => 'const search = (q) => items.filter(i => i.includes(q));'],
-                ]
-            ],
-            [
-                'name' => 'Unidade 4: Async/Await & APIs',
-                'slug' => 'async-apis',
-                'description' => 'Consuma dados reais com fetch e promises.',
-                'badge' => ['name' => 'API Wizard', 'icon' => '📡', 'description' => 'Integração perfeita com serviços externos.'],
-                'lessons' => [
-                    ['title' => 'Fetch API', 'slug' => 'fetch-api', 'content' => 'Fazendo requisições assíncronas.', 'starter_code' => 'async function getData() { }', 'solution_code' => 'async function getData() { const res = await fetch("/"); return res.json(); }'],
-                    ['title' => 'Projeto: Crypto Dashboard', 'slug' => 'projeto-crypto', 'content' => 'Dashboard de preços em tempo real.', 'starter_code' => 'const updatePrice = () => { }', 'solution_code' => 'const updatePrice = async () => { const p = await getPrice(); document.body.innerText = p; }'],
-                ]
-            ],
-            [
-                'name' => 'Unidade 5: Patterns & Refactoring',
-                'slug' => 'patterns-refactoring',
-                'description' => 'Código limpo e padrões de projeto.',
-                'badge' => ['name' => 'Clean Coder', 'icon' => '✨', 'description' => 'Código legível e escalável.'],
-                'lessons' => [
-                    ['title' => 'Clean Code Principles', 'slug' => 'clean-code-intro', 'content' => 'Nomes claros e funções curtas.', 'starter_code' => 'function d(a, b) { return a + b; }', 'solution_code' => 'function addNumbers(num1, num2) { return num1 + num2; }'],
-                    ['title' => 'Projeto: Checkout Clean Code', 'slug' => 'projeto-checkout', 'content' => 'Refatore um checkout complexo.', 'starter_code' => 'const process = () => { }', 'solution_code' => 'const processCheckout = (cart) => { validate(cart); save(cart); };'],
-                ]
-            ],
-            [
-                'name' => 'Unidade 6: Node & Testing (Intro)',
-                'slug' => 'node-testing',
-                'description' => 'Backend e Testes Automatizados.',
-                'badge' => ['name' => 'Fullstack Hero', 'icon' => '🛡️', 'description' => 'Conhecimento de ponta a ponta.'],
-                'lessons' => [
-                    ['title' => 'Intro ao Node.js', 'slug' => 'node-intro', 'content' => 'Ambiente de execução backend.', 'starter_code' => 'const fs = require("fs");', 'solution_code' => 'const fs = require("fs"); fs.writeFileSync("test.txt", "JS Academy");'],
-                    ['title' => 'Projeto: Validador de Dados', 'slug' => 'projeto-validador', 'content' => 'Crie testes para um validador.', 'starter_code' => 'test("isEmailValid", () => { })', 'solution_code' => 'test("isEmailValid", () => expect(isEmailValid("test@test.com")).toBe(true));'],
-                ]
+                    [
+                        'title' => 'Selecionando Elementos',
+                        'slug' => 'selecionando-elementos',
+                        'content' => 'O DOM permite que o JS acesse o HTML. querySelector é a ferramenta mais poderosa para isso.',
+                        'starter_code' => '// Selecione o elemento h1 e mude seu texto para "JS Academy"\n',
+                        'solution_code' => 'const h1 = document.querySelector("h1"); h1.innerText = "JS Academy";',
+                        'tips' => 'Você pode usar seletores de CSS como "#id", ".classe" ou "tag".',
+                        'examples' => 'const btn = document.querySelector(".btn-submit");\nbtn.style.color = "red";',
+                        'real_world_case' => 'Quando você clica em "curtir", o JS seleciona o ícone e muda sua cor.',
+                        'docs_link' => 'https://developer.mozilla.org/pt-BR/docs/Web/API/Document/querySelector',
+                    ],
+                ],
             ],
         ];
 
         foreach ($units as $unitData) {
-            $track = Track::create([
-                'name' => $unitData['name'],
-                'slug' => $unitData['slug'],
-                'description' => $unitData['description'],
-            ]);
+            $track = Track::updateOrCreate(
+                ['slug' => $unitData['slug']],
+                [
+                    'name' => $unitData['name'],
+                    'description' => $unitData['description'],
+                ]
+            );
 
-            Badge::create([
-                'name' => $unitData['badge']['name'],
-                'icon' => $unitData['badge']['icon'],
-                'description' => $unitData['badge']['description'],
-                'track_id' => $track->id,
-            ]);
+            Badge::updateOrCreate(
+                ['track_id' => $track->id],
+                [
+                    'name' => $unitData['badge']['name'],
+                    'icon' => $unitData['badge']['icon'],
+                    'description' => $unitData['badge']['description'],
+                ]
+            );
 
             foreach ($unitData['lessons'] as $index => $lessonData) {
-                $track->lessons()->create([
-                    'title' => $lessonData['title'],
-                    'slug' => $lessonData['slug'],
-                    'content' => $lessonData['content'],
-                    'starter_code' => $lessonData['starter_code'],
-                    'solution_code' => $lessonData['solution_code'],
-                    'xp_reward' => ($index + 1) * 50,
-                    'order' => $index + 1
-                ]);
+                $track->lessons()->updateOrCreate(
+                    ['slug' => $lessonData['slug']],
+                    [
+                        'title' => $lessonData['title'],
+                        'content' => $lessonData['content'],
+                        'starter_code' => $lessonData['starter_code'],
+                        'solution_code' => $lessonData['solution_code'],
+                        'tips' => $lessonData['tips'] ?? null,
+                        'examples' => $lessonData['examples'] ?? null,
+                        'real_world_case' => $lessonData['real_world_case'] ?? null,
+                        'docs_link' => $lessonData['docs_link'] ?? null,
+                        'xp_reward' => 50,
+                        'order' => $index + 1,
+                    ]
+                );
             }
         }
     }

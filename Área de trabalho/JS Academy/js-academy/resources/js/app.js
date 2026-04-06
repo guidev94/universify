@@ -36,9 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Lógica de seleção de lições
         const lessonButtons = document.querySelectorAll('.lesson-btn');
-        const lessonInfo = document.getElementById('lesson-info');
-        const lessonTitle = document.getElementById('current-lesson-title');
-        const lessonDesc = document.getElementById('current-lesson-desc');
+        const lessonTitleDisplay = document.getElementById('lesson-title-display');
+        const lessonDescDisplay = document.getElementById('lesson-desc-display');
+        const lessonTipsDisplay = document.getElementById('lesson-tips-display');
+        const lessonExamplesDisplay = document.getElementById('lesson-examples-display');
+        const lessonCaseDisplay = document.getElementById('lesson-case-display');
+        const lessonDocsDisplay = document.getElementById('lesson-docs-display');
+        
         let currentLessonId = null;
 
         lessonButtons.forEach(btn => {
@@ -47,21 +51,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const title = btn.getAttribute('data-lesson-title');
                 const content = btn.getAttribute('data-lesson-content');
                 const starter = btn.getAttribute('data-lesson-starter');
+                const tips = btn.getAttribute('data-lesson-tips');
+                const examples = btn.getAttribute('data-lesson-examples');
+                const realCase = btn.getAttribute('data-lesson-case');
+                const docs = btn.getAttribute('data-lesson-docs');
 
                 currentLessonId = id;
                 
-                // Atualiza UI
-                if (lessonInfo) lessonInfo.classList.remove('hidden');
-                if (lessonTitle) lessonTitle.textContent = title;
-                if (lessonDesc) lessonDesc.textContent = content;
+                // Atualiza UI Educacional
+                if (lessonTitleDisplay) lessonTitleDisplay.textContent = title;
+                if (lessonDescDisplay) lessonDescDisplay.textContent = content;
+                if (lessonTipsDisplay) lessonTipsDisplay.textContent = tips || 'Sem dicas para esta lição.';
+                if (lessonExamplesDisplay) lessonExamplesDisplay.textContent = examples || '// Sem exemplos.';
+                if (lessonCaseDisplay) lessonCaseDisplay.textContent = realCase || 'Uso geral em desenvolvimento.';
+                if (lessonDocsDisplay) {
+                    if (docs) {
+                        lessonDocsDisplay.href = docs;
+                        lessonDocsDisplay.style.display = 'inline-flex';
+                    } else {
+                        lessonDocsDisplay.style.display = 'none';
+                    }
+                }
                 
+                // Reset tab to Explanation
+                document.querySelector('[onclick="switchTab(\'tab-desc\')"]').click();
+
                 // Carrega no editor
                 editor.setValue(starter || '// Comece a codar aqui...');
                 
                 // Scroll suave para o editor
                 const editorSection = document.getElementById('editor-section');
                 if (editorSection) {
-                    editorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    editorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
 
                 // Limpa console
