@@ -1,100 +1,76 @@
-# Guia de Deploy - JS Academy
+# 🚀 Guia de Deploy - JS Academy
 
-Este documento detalha os passos para realizar o deploy do JS Academy em um ambiente de produção (Ubuntu/Debian com Nginx, PHP 8.3+ e MySQL/Postgres).
+Este guia explica como hospedar a plataforma **JS Academy** em servidores profissionais (VPS) e opções gratuitas ideais para Laravel.
 
-## 1. Servidor Web (Nginx)
+---
 
-Configure o host virtual do Nginx apontando para a pasta `public/`:
+## ☁️ 1. Hospedagem Grátis (Recomendado)
+
+Diferente de sites estáticos, o Laravel exige um servidor que rode PHP e um banco de dados persistente. **Vercel e Netlify não são ideais** para o backend Laravel, embora seja possível com hacks.
+
+### Melhores Opções:
+1.  **Railway.app (O melhor):** Oferece deploy automático via GitHub e banco PostgreSQL integrado.
+2.  **Render.com:** Possui plano grátis para instâncias Web e bancos de dados.
+3.  **Fly.io:** Excelente para performance global.
+
+### Como subir no Railway:
+1.  Conecte seu GitHub ao Railway.
+2.  Crie um novo projeto e selecione este repositório.
+3.  Vá em **Variables** e adicione:
+    *   `APP_KEY`: Gere com `php artisan key:generate --show`.
+    *   `APP_ENV`: `production`
+    *   `DB_CONNECTION`: `pgsql`
+4.  O Railway irá ler seu `composer.json` e `package.json` e fazer o deploy automaticamente.
+
+---
+
+## 🖥️ 2. Deploy em VPS (Ubuntu + Nginx)
+
+Esta é a opção mais robusta para escala real.
+
+### Servidor Nginx (Vhost):
+Aponte o `root` para a pasta `/public` do projeto:
 
 ```nginx
 server {
     listen 80;
     server_name seu-dominio.com;
-    root /home/programador05/Área de trabalho/JS Academy/js-academy/public;
-
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
+    root /var/www/js-academy/public;
     index index.php;
-
-    charset utf-8;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
     location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
     }
 }
 ```
 
-## 2. SSL (Certbot)
-
+### Comandos Essenciais:
 ```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d seu-dominio.com
-```
+# Permissões de escrita
+sudo chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
-## 3. PHP & Composer
-
-Instale as dependências de produção:
-
-```bash
+# Instalação limpa
 composer install --optimize-autoloader --no-dev
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-## 4. Banco de Dados
-
-Rode as migrações:
-
-```bash
+npm install && npm run build
 php artisan migrate --force
+php artisan optimize
 ```
 
-## 5. Filas (Queues) com Supervisor
+---
 
-Configure o Supervisor para manter o `queue:work` rodando:
+## 🛠️ FAQ (Perguntas Frequentes)
 
-```ini
-[program:js-academy-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /home/programador05/Área de trabalho/JS Academy/js-academy/artisan queue:work --sleep=3 --tries=3 --max-time=3600
-autostart=true
-autorestart=true
-user=www-data
-redirect_stderr=true
-stdout_logfile=/home/programador05/Área de trabalho/JS Academy/js-academy/storage/logs/worker.log
-stopwaitsecs=3600
-```
+**Posso rodar na Vercel?**  
+Sim, mas precisará instalar o pacote `vercel-php` e configurar um arquivo `vercel.json`. Para este projeto (que usa banco de dados e Monaco Editor), recomendamos Railway ou VPS.
 
-## 6. Vite (Compilação de Assets)
+**Como atualizar o código no ar?**  
+Basta fazer um `git pull` no servidor e rodar `php artisan optimize`.
 
-No servidor (ou CI/CD):
-
-```bash
-npm install
-npm run build
-```
-
-## 7. Agendador (Cron)
-
-Adicione ao crontab do usuário:
-
-```cron
-* * * * * cd /home/programador05/Área de trabalho/JS Academy/js-academy && php artisan schedule:run >> /dev/null 2>&1
-```
+---
+*Desenvolvido com foco em Performance, Segurança e Clean Code.*

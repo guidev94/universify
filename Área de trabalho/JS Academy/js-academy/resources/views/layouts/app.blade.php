@@ -25,7 +25,7 @@
                     </div>
                     <div class="flex flex-col leading-none">
                         <span class="text-2xl font-black tracking-tighter text-white group-hover:text-yellow-400 transition-colors">ACADEMY</span>
-                        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.4em] group-hover:text-zinc-300">Mastery 2026</span>
+                        <a href="https://github.com/aquinogui" target="_blank" class="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.4em] group-hover:text-yellow-500 transition-colors">BY AQUINODEV</a>
                     </div>
                 </a>
 
