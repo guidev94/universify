@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressController;
 use App\Models\Lesson;
+use App\Models\LogicChallenge;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,7 @@ Route::get('/', function () {
 
 Route::post('/progress/update-xp', [ProgressController::class, 'updateXP']);
 Route::post('/progress/complete-lesson/{id}', [ProgressController::class, 'completeLesson']);
+Route::post('/progress/skip-track/{id}', [ProgressController::class, 'skipTrack']);
 Route::post('/progress/freeze-streak', [ProgressController::class, 'freezeStreak']);
 Route::get('/progress/ranking-json', [ProgressController::class, 'ranking']);
 
@@ -37,7 +39,9 @@ Route::get('/ranking', function () {
 })->name('ranking');
 
 Route::get('/desafios', function () {
-    return view('desafios');
+    $challenges = LogicChallenge::all();
+
+    return view('desafios', compact('challenges'));
 })->name('desafios');
 
 Route::get('/dashboard', function () {

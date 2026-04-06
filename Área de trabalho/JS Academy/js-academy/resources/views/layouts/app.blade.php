@@ -16,16 +16,16 @@
         <nav class="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-white/5 py-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                 <!-- Logo Profissional (Unificado) -->
-                <a href="/" class="group flex items-center">
+                <a href="/" class="group flex items-center gap-2.5">
                     <div class="relative flex items-center">
-                        <div class="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-xl blur opacity-25 group-hover:opacity-75 transition-opacity duration-500"></div>
-                        <div class="relative w-10 h-10 bg-[#F7DF1E] rounded-xl flex items-center justify-center shadow-lg transform group-hover:rotate-3 transition-all duration-300">
+                        <div class="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition-opacity duration-500"></div>
+                        <div class="relative w-10 h-10 bg-[#F7DF1E] rounded-xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-all duration-300">
                             <span class="text-zinc-950 font-black text-xl tracking-tighter leading-none select-none">JS</span>
                         </div>
                     </div>
-                    <div class="flex flex-col leading-[0.7] ml-3 mt-1">
-                        <span class="text-2xl font-black tracking-tighter text-white group-hover:text-yellow-400 transition-colors uppercase italic leading-none">Academy</span>
-                        <a href="https://github.com/aquinogui" target="_blank" class="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.2em] font-bold hover:text-yellow-500 transition-colors">Mastery 2026 By AquinoDev</a>
+                    <div class="flex flex-col leading-[0.8]">
+                        <span class="text-2xl font-black tracking-tighter text-white group-hover:text-yellow-400 transition-colors uppercase italic">Academy</span>
+                        <span class="text-[11px] font-mono text-zinc-500 uppercase tracking-[0.1em] font-bold group-hover:text-yellow-500 transition-colors">By AquinoDev</span>
                     </div>
                 </a>
 

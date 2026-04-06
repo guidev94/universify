@@ -71,6 +71,7 @@
                         data-lesson-id="{{ $nextLesson->id }}"
                         data-lesson-title="{{ $nextLesson->title }}"
                         data-lesson-content="{{ $nextLesson->content }}"
+                        data-lesson-task="{{ $nextLesson->task }}"
                         data-lesson-starter="{{ $nextLesson->starter_code }}"
                         data-lesson-tips="{{ $nextLesson->tips }}"
                         data-lesson-examples="{{ $nextLesson->examples }}"
@@ -129,16 +130,21 @@
                         </div>
                         @endif
 
-                        <div class="flex justify-between items-start gap-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div class="flex-grow">
                                 <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
                                 <h3 class="text-2xl font-black text-white mt-1 group-hover:text-yellow-400 transition-colors light:text-zinc-900">{{ $track->name }}</h3>
                             </div>
-                            @if($track->badge)
-                            <div class="w-12 h-12 rounded-xl bg-zinc-800/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner" title="{{ $track->badge->name }}">
-                                {{ $track->badge->icon }}
+                            <div class="flex items-center gap-3">
+                                @if(!$isLocked && !$isCompleted)
+                                <button onclick="skipTrack({{ $track->id }})" class="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-white/5 text-[9px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-700 transition-all uppercase tracking-widest">Pular Módulo</button>
+                                @endif
+                                @if($track->badge)
+                                <div class="w-12 h-12 rounded-xl bg-zinc-800/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner" title="{{ $track->badge->name }}">
+                                    {{ $track->badge->icon }}
+                                </div>
+                                @endif
                             </div>
-                            @endif
                         </div>
 
                         <!-- Lista de Lições Slim -->
@@ -151,21 +157,25 @@
                                 data-lesson-id="{{ $lesson->id }}"
                                 data-lesson-title="{{ $lesson->title }}"
                                 data-lesson-content="{{ $lesson->content }}"
+                                data-lesson-task="{{ $lesson->task }}"
                                 data-lesson-starter="{{ $lesson->starter_code }}"
                                 data-lesson-tips="{{ $lesson->tips }}"
                                 data-lesson-examples="{{ $lesson->examples }}"
                                 data-lesson-case="{{ $lesson->real_world_case }}"
                                 data-lesson-docs="{{ $lesson->docs_link }}"
-                                class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }}"
+                                class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }} {{ $lessonCompleted ? 'border-green-500/50 bg-green-500/5' : '' }}"
                                 {{ $isLocked ? 'disabled' : '' }}>
                                 <div class="flex items-center gap-3">
-                                    <div class="w-7 h-7 rounded-lg border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400' : 'bg-zinc-800 border-white/5' }}">
+                                    <div class="w-7 h-7 rounded-lg border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400 shadow-lg shadow-green-500/20' : 'bg-zinc-800 border-white/5' }}">
                                         <span class="text-[10px] font-black {{ $lessonCompleted ? 'text-white' : 'text-zinc-500' }}">{{ $lesson->order }}</span>
                                     </div>
                                     <span class="text-xs font-bold text-white light:text-zinc-900">{{ $lesson->title }}</span>
                                 </div>
                                 @if($lessonCompleted)
-                                <span class="text-[8px] font-black text-green-500 uppercase tracking-widest">OK</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[8px] font-black text-green-500 uppercase tracking-widest">Concluído</span>
+                                    <svg class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                </div>
                                 @endif
                             </button>
                             @endforeach
@@ -191,20 +201,24 @@
                     
                     <div class="p-8 flex-grow">
                         <div id="tab-desc" class="tab-content">
-                            <h3 id="lesson-title-display" class="text-2xl font-black text-white light:text-zinc-900 mb-4">Bem-vindo à Arena</h3>
-                            <p id="lesson-desc-display" class="text-zinc-400 light:text-zinc-600 leading-relaxed">Selecione uma lição na trilha para começar seu aprendizado técnico.</p>
+                            <h3 id="lesson-title-display" class="text-2xl font-black text-white light:text-zinc-900 mb-4 uppercase italic tracking-tighter">Bem-vindo à Arena</h3>
+                            <div id="lesson-desc-display" class="text-zinc-400 light:text-zinc-600 leading-relaxed text-sm space-y-4">
+                                <p>Selecione uma lição na trilha ao lado para carregar o conteúdo técnico e começar seu aprendizado.</p>
+                            </div>
                         </div>
                         <div id="tab-tips" class="tab-content hidden">
-                            <h4 class="text-sm font-bold text-yellow-500 uppercase mb-4 tracking-widest">Dicas do Mentor</h4>
-                            <p id="lesson-tips-display" class="text-zinc-400 italic">Nada aqui ainda...</p>
+                            <h4 class="text-sm font-bold text-yellow-500 uppercase mb-4 tracking-widest">Dicas do Mentor 👨‍🏫</h4>
+                            <p id="lesson-tips-display" class="text-zinc-400 italic text-sm">Nada aqui ainda...</p>
                         </div>
                         <div id="tab-examples" class="tab-content hidden">
-                            <h4 class="text-sm font-bold text-cyan-500 uppercase mb-4 tracking-widest">Código de Exemplo</h4>
-                            <pre class="bg-zinc-950 p-4 rounded-xl text-xs font-mono text-zinc-300 overflow-x-auto"><code id="lesson-examples-display">// Selecione uma lição</code></pre>
+                            <h4 class="text-sm font-bold text-cyan-500 uppercase mb-4 tracking-widest">Código de Exemplo 💻</h4>
+                            <div class="bg-zinc-950 rounded-xl overflow-hidden border border-white/5">
+                                <pre class="p-4 text-xs font-mono text-cyan-300 overflow-x-auto custom-scrollbar"><code id="lesson-examples-display">// Selecione uma lição</code></pre>
+                            </div>
                         </div>
                         <div id="tab-case" class="tab-content hidden">
-                            <h4 class="text-sm font-bold text-pink-500 uppercase mb-4 tracking-widest">Uso no Mercado</h4>
-                            <p id="lesson-case-display" class="text-zinc-400">Como isso é aplicado em projetos reais?</p>
+                            <h4 class="text-sm font-bold text-pink-500 uppercase mb-4 tracking-widest">Uso no Mercado 💼</h4>
+                            <p id="lesson-case-display" class="text-zinc-400 text-sm">Como isso é aplicado em projetos reais?</p>
                         </div>
                         <div id="tab-docs" class="tab-content hidden text-center py-10">
                             <div class="mb-6 text-4xl">📚</div>
@@ -215,8 +229,29 @@
                     </div>
                 </div>
 
+                <!-- MISSÃO (O QUE FAZER) -->
+                <div id="task-container" class="bento-card p-8 bg-gradient-to-br from-yellow-400/20 via-orange-500/10 to-transparent border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.1)] relative overflow-hidden hidden group/task">
+                    <!-- Decorativo -->
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-500/10 rounded-full blur-3xl group-hover/task:bg-yellow-500/20 transition-all"></div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-yellow-400 flex items-center justify-center text-zinc-950 shadow-lg shadow-yellow-400/20 animate-pulse">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-[11px] font-black text-yellow-500 uppercase tracking-[0.3em]">Missão de Treinamento</h4>
+                                <p class="text-xs text-zinc-500 uppercase font-mono">Objetivo Prioritário</p>
+                            </div>
+                        </div>
+                        <p id="lesson-task-display" class="text-white font-black text-lg leading-tight italic tracking-tight"></p>
+                    </div>
+                </div>
+
                 <!-- Editor IDE -->
-                <div class="bento-card bg-zinc-950 border-zinc-900 shadow-2xl overflow-hidden flex flex-col h-[400px]">
+                <div class="bento-card bg-zinc-950 border-zinc-900 shadow-2xl overflow-hidden flex flex-col h-[350px]">
                     <div class="flex items-center justify-between p-4 bg-zinc-900/50 border-b border-zinc-800">
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
@@ -267,6 +302,11 @@
 
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+    
+    /* Markdown Styles for Content */
+    #lesson-desc-display p { margin-bottom: 1rem; }
+    #lesson-desc-display ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    #lesson-desc-display strong { color: white; font-weight: 800; }
 </style>
 
 <script>
@@ -277,5 +317,61 @@
         document.getElementById(tabId).classList.remove('hidden');
         event.currentTarget.classList.add('active');
     }
+
+    function skipTrack(trackId) {
+        if(confirm('Deseja pular este módulo? Você não ganhará os pontos das lições não concluídas.')) {
+            fetch(`/progress/skip-track/${trackId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(res => res.json()).then(data => {
+                if(data.success) window.location.reload();
+            });
+        }
+    }
+
+    function showShareModal(xp, lessonTitle) {
+        const modal = document.getElementById('share-modal');
+        document.getElementById('share-xp-text').textContent = xp;
+        document.getElementById('share-lesson-text').textContent = lessonTitle;
+        
+        // Configurar links de compartilhamento
+        const text = encodeURIComponent(`Acabei de completar a lição "${lessonTitle}" na JS Academy e ganhei ${xp} XP! 🚀 #JSAcademy #JavaScript #Coding`);
+        const url = encodeURIComponent(window.location.origin);
+        
+        document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 </script>
+
+<!-- Modal de Compartilhamento -->
+<div id="share-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-md">
+    <div class="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-[3rem] p-10 text-center shadow-2xl">
+        <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-4xl text-green-500">🎉</span>
+        </div>
+        <h3 class="text-3xl font-black text-white uppercase italic tracking-tighter">Parabéns!</h3>
+        <p class="text-zinc-400 mt-4 leading-relaxed text-sm">Você concluiu <br><span id="share-lesson-text" class="text-white font-bold text-lg"></span> <br>e faturou <span id="share-xp-text" class="text-yellow-500 font-bold"></span> XP!</p>
+        
+        <div class="grid grid-cols-2 gap-4 mt-10">
+            <a id="share-x" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group">
+                <span class="text-2xl group-hover:scale-110 transition-transform">𝕏</span>
+                <span class="text-[9px] font-bold uppercase text-zinc-500">Postar no X</span>
+            </a>
+            <a id="share-linkedin" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/5 group">
+                <span class="text-2xl text-blue-500 group-hover:scale-110 transition-transform">in</span>
+                <span class="text-[9px] font-bold uppercase text-zinc-500">LinkedIn</span>
+            </a>
+        </div>
+
+        <button onclick="window.location.reload()" class="w-full py-4 mt-8 bg-white text-zinc-950 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all">
+            Continuar Aprendendo
+        </button>
+    </div>
+</div>
 @endsection

@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const lessonExamplesDisplay = document.getElementById('lesson-examples-display');
         const lessonCaseDisplay = document.getElementById('lesson-case-display');
         const lessonDocsDisplay = document.getElementById('lesson-docs-display');
+        const lessonTaskDisplay = document.getElementById('lesson-task-display');
+        const taskContainer = document.getElementById('task-container');
+        const consoleOutput = document.getElementById('console-output');
         
         let currentLessonId = null;
 
@@ -55,21 +58,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 const examples = btn.getAttribute('data-lesson-examples');
                 const realCase = btn.getAttribute('data-lesson-case');
                 const docs = btn.getAttribute('data-lesson-docs');
+                const task = btn.getAttribute('data-lesson-task');
 
                 currentLessonId = id;
                 
+                // Função auxiliar para tratar quebras de linha vindas do data-attribute
+                const formatContent = (str) => {
+                    if (!str) return '';
+                    return str.replace(/\\n/g, '\n');
+                };
+
                 // Atualiza UI Educacional
                 if (lessonTitleDisplay) lessonTitleDisplay.textContent = title;
-                if (lessonDescDisplay) lessonDescDisplay.textContent = content;
-                if (lessonTipsDisplay) lessonTipsDisplay.textContent = tips || 'Sem dicas para esta lição.';
-                if (lessonExamplesDisplay) lessonExamplesDisplay.textContent = examples || '// Sem exemplos.';
-                if (lessonCaseDisplay) lessonCaseDisplay.textContent = realCase || 'Uso geral em desenvolvimento.';
+                
+                // O conteúdo (descrição) pode ter markdown básico (pelo seeder), 
+                // para simplicidade vamos apenas converter \n em <br> se não estiver usando um parser
+                if (lessonDescDisplay) {
+                    lessonDescDisplay.innerHTML = formatContent(content).replace(/\n/g, '<br>');
+                }
+
+                if (lessonTipsDisplay) lessonTipsDisplay.textContent = formatContent(tips) || 'Sem dicas para esta lição.';
+                if (lessonExamplesDisplay) lessonExamplesDisplay.textContent = formatContent(examples) || '// Sem exemplos.';
+                if (lessonCaseDisplay) lessonCaseDisplay.textContent = formatContent(realCase) || 'Uso geral em desenvolvimento.';
+                
+                if (lessonTaskDisplay) {
+                    lessonTaskDisplay.textContent = formatContent(task);
+                    taskContainer.classList.remove('hidden');
+                }
+
                 if (lessonDocsDisplay) {
                     if (docs) {
                         lessonDocsDisplay.href = docs;
-                        lessonDocsDisplay.style.display = 'inline-flex';
+                        lessonDocsDisplay.parentElement.classList.remove('hidden');
                     } else {
-                        lessonDocsDisplay.style.display = 'none';
+                        lessonDocsDisplay.parentElement.classList.add('hidden');
                     }
                 }
                 
@@ -77,7 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('[onclick="switchTab(\'tab-desc\')"]').click();
 
                 // Carrega no editor
-                editor.setValue(starter || '// Comece a codar aqui...');
+                editor.setValue(formatContent(starter) || '// Comece a codar aqui...');
+
+                // Configurar compartilhamento
+                window.currentLessonData = { title, id };
                 
                 // Scroll suave para o editor
                 const editorSection = document.getElementById('editor-section');
@@ -92,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Lógica do Runner (Execução de código no navegador)
         const validateBtn = document.getElementById('validate-btn');
-        const consoleOutput = document.getElementById('console-output');
 
         if (validateBtn && consoleOutput) {
             validateBtn.addEventListener('click', () => {
@@ -133,12 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         .then(data => {
                             if (data.success) {
                                 const xpMsg = document.createElement('div');
-                                xpMsg.className = 'text-[10px] text-yellow-500 font-bold uppercase';
-                                xpMsg.textContent = '+50 XP GANHADOS!';
+                                xpMsg.className = 'text-[10px] text-yellow-500 font-bold uppercase mt-1';
+                                xpMsg.textContent = '+100 XP GANHADOS!';
                                 consoleOutput.appendChild(xpMsg);
                                 
-                                // Opcional: Atualizar UI de progresso ou recarregar após alguns segundos
-                                setTimeout(() => window.location.reload(), 2000);
+                                // Abre o modal de compartilhamento após sucesso
+                                setTimeout(() => {
+                                    if (window.showShareModal) {
+                                        window.showShareModal(100, window.currentLessonData.title);
+                                    }
+                                }, 1000);
                             }
                         });
                     }
@@ -146,10 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Efeito de Confete em caso de sucesso 🎉
                     import('canvas-confetti').then(confetti => {
                         confetti.default({
-                            particleCount: 100,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#F7DF1E', '#FFFFFF', '#000000']
+                            particleCount: 150,
+                            spread: 80,
+                            origin: { y: 0.7 },
+                            colors: ['#F7DF1E', '#FFFFFF', '#000000', '#EC4899']
                         });
                     });
                 } catch (err) {
@@ -177,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 stagger: 0.1, 
                 duration: 0.8, 
                 ease: "power3.out",
-                clearProps: "all" // Remove estilos inline após a animação
+                clearProps: "all"
             }
         );
     }

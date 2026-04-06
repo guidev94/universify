@@ -31,7 +31,7 @@
         </div>
         
         <div class="text-center">
-            <p class="text-xs font-mono text-zinc-500 uppercase tracking-widest">Mastery 2026 • Secure & Encrypted</p>
+            <p class="text-xs font-mono text-zinc-500 uppercase tracking-widest">By AquinoDev • Secure & Encrypted</p>
         </div>
     </div>
 

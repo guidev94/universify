@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lesson;
 use App\Models\Progress;
+use App\Models\Track;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -130,6 +131,22 @@ class ProgressController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => 'Diamantes insuficientes'], 400);
+    }
+
+    /**
+     * Pula um módulo (atribui badge mas não XP das lições restantes).
+     */
+    public function skipTrack($trackId)
+    {
+        $user = auth()->user() ?: User::find(1);
+        $track = Track::findOrFail($trackId);
+
+        $badge = $track->badge;
+        if ($badge && ! $user->badges()->where('badge_id', $badge->id)->exists()) {
+            $user->badges()->attach($badge->id);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
