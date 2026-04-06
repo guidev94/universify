@@ -67,7 +67,14 @@
                 <h3 class="text-3xl font-black text-white light:text-zinc-900 group-hover:text-cyan-400 transition-colors">{{ $nextLesson->title }}</h3>
                 <p class="text-xs text-zinc-500 mt-2">Módulo: {{ $nextLesson->track->name }}</p>
                 <div class="mt-8">
-                    <a href="#editor-section" class="inline-flex px-8 py-3 bg-cyan-400 text-zinc-950 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-cyan-300 transition-all active:scale-95 shadow-xl shadow-cyan-400/20">Continuar Agora</a>
+                    <button 
+                        data-lesson-id="{{ $nextLesson->id }}"
+                        data-lesson-title="{{ $nextLesson->title }}"
+                        data-lesson-content="{{ $nextLesson->content }}"
+                        data-lesson-starter="{{ $nextLesson->starter_code }}"
+                        class="lesson-btn inline-flex px-8 py-3 bg-cyan-400 text-zinc-950 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-cyan-300 transition-all active:scale-95 shadow-xl shadow-cyan-400/20">
+                        Continuar Agora
+                    </button>
                 </div>
                 @else
                 <h3 class="text-3xl font-black text-white light:text-zinc-900">Todas as trilhas concluídas! 🎉</h3>
@@ -93,7 +100,7 @@
         <div id="o-caminho" class="lg:col-span-8 order-2 lg:order-1">
             <h2 class="text-3xl font-black text-white mb-10 flex items-center gap-4">
                 <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-zinc-950 text-xl shadow-lg shadow-yellow-400/20">📍</div>
-                O Caminho (Trilhas)
+                The Path (Trilhas)
             </h2>
             
             <div class="space-y-12 pl-10 border-l-2 border-zinc-900 light:border-zinc-200 ml-4 relative">
@@ -117,7 +124,7 @@
                         <div class="flex flex-col md:flex-row justify-between items-start gap-6">
                             <div class="max-w-md">
                                 <span class="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
-                                <h3 class="text-3xl font-black text-white light:text-zinc-900 mt-1 group-hover:text-yellow-400 transition-colors">{{ $track->name }}</h3>
+                                <h3 class="text-3xl font-black text-white mt-1 group-hover:text-yellow-400 transition-colors light:text-zinc-900">{{ $track->name }}</h3>
                                 <p class="text-zinc-500 text-sm mt-4 leading-relaxed light:text-zinc-600">{{ $track->description }}</p>
                             </div>
                             
@@ -136,7 +143,13 @@
                             @php
                                 $lessonCompleted = $user ? $user->progress()->where('lesson_id', $lesson->id)->where('status', 'completed')->exists() : false;
                             @endphp
-                            <button class="flex items-center gap-4 p-4 rounded-2xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left">
+                            <button 
+                                data-lesson-id="{{ $lesson->id }}"
+                                data-lesson-title="{{ $lesson->title }}"
+                                data-lesson-content="{{ $lesson->content }}"
+                                data-lesson-starter="{{ $lesson->starter_code }}"
+                                class="lesson-btn flex items-center gap-4 p-4 rounded-2xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }}"
+                                {{ $isLocked ? 'disabled' : '' }}>
                                 <div class="w-10 h-10 rounded-xl border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400 shadow-lg shadow-green-500/20' : 'bg-zinc-800 border-white/5 group-hover:border-yellow-400/50' }}">
                                     <span class="text-sm font-black {{ $lessonCompleted ? 'text-white' : 'text-zinc-500' }}">{{ $lesson->order }}</span>
                                 </div>
@@ -156,6 +169,13 @@
         <!-- Lateral: IDE Sandbox -->
         <div class="lg:col-span-4 order-1 lg:order-2">
             <div id="editor-section" class="lg:sticky lg:top-24 bento-card bg-zinc-950 border-zinc-900 light:bg-white light:border-zinc-200 shadow-2xl overflow-hidden flex flex-col h-[650px] opacity-100">
+                <!-- Lesson Info Header -->
+                <div id="lesson-info" class="p-6 bg-gradient-to-b from-zinc-900/50 to-transparent border-b border-white/5 hidden">
+                    <span id="lesson-module-tag" class="text-[9px] font-mono text-yellow-500 uppercase tracking-widest">Módulo 1</span>
+                    <h3 id="current-lesson-title" class="text-xl font-black text-white mt-1">Selecione uma lição</h3>
+                    <p id="current-lesson-desc" class="text-xs text-zinc-500 mt-2 leading-relaxed">Clique em uma das aulas da trilha ao lado para começar seu desafio de código.</p>
+                </div>
+
                 <div class="flex items-center justify-between p-4 bg-zinc-900/50 light:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200">
                     <div class="flex items-center gap-2">
                         <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
@@ -175,7 +195,7 @@
                         Saída do Console
                     </h4>
                     <div id="console-output" class="text-[11px] text-zinc-500 overflow-y-auto max-h-24 custom-scrollbar">
-                        > Aguardando execução de código...
+                        > Selecione uma lição para começar...
                     </div>
                 </div>
 
@@ -196,7 +216,7 @@
         background: rgba(24, 24, 27, 0.4);
         backdrop-filter: blur(20px);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        opacity: 1 !important; /* Garantir que seja visível */
+        opacity: 1 !important;
         visibility: visible !important;
     }
     

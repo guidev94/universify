@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgressController;
 use App\Models\Lesson;
 use App\Models\Track;
 use App\Models\User;
@@ -23,6 +24,11 @@ Route::get('/', function () {
 
     return view('welcome', compact('tracks', 'user', 'rankingPosition', 'nextLesson'));
 });
+
+Route::post('/progress/update-xp', [ProgressController::class, 'updateXP']);
+Route::post('/progress/complete-lesson/{id}', [ProgressController::class, 'completeLesson']);
+Route::post('/progress/freeze-streak', [ProgressController::class, 'freezeStreak']);
+Route::get('/progress/ranking-json', [ProgressController::class, 'ranking']);
 
 Route::get('/ranking', function () {
     $users = User::orderBy('xp', 'desc')->take(20)->get();

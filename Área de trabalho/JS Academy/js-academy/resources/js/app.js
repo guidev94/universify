@@ -34,6 +34,41 @@ document.addEventListener('DOMContentLoaded', () => {
             monaco.editor.setTheme(e.detail.theme === 'light' ? 'vs' : 'vs-dark');
         });
 
+        // Lógica de seleção de lições
+        const lessonButtons = document.querySelectorAll('.lesson-btn');
+        const lessonInfo = document.getElementById('lesson-info');
+        const lessonTitle = document.getElementById('current-lesson-title');
+        const lessonDesc = document.getElementById('current-lesson-desc');
+        let currentLessonId = null;
+
+        lessonButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-lesson-id');
+                const title = btn.getAttribute('data-lesson-title');
+                const content = btn.getAttribute('data-lesson-content');
+                const starter = btn.getAttribute('data-lesson-starter');
+
+                currentLessonId = id;
+                
+                // Atualiza UI
+                if (lessonInfo) lessonInfo.classList.remove('hidden');
+                if (lessonTitle) lessonTitle.textContent = title;
+                if (lessonDesc) lessonDesc.textContent = content;
+                
+                // Carrega no editor
+                editor.setValue(starter || '// Comece a codar aqui...');
+                
+                // Scroll suave para o editor
+                const editorSection = document.getElementById('editor-section');
+                if (editorSection) {
+                    editorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Limpa console
+                if (consoleOutput) consoleOutput.innerHTML = '> Lendo enunciados...';
+            });
+        });
+
         // Lógica do Runner (Execução de código no navegador)
         const validateBtn = document.getElementById('validate-btn');
         const consoleOutput = document.getElementById('console-output');
@@ -63,6 +98,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     successMsg.className = 'py-2 text-green-400 font-bold font-mono';
                     successMsg.textContent = '✓ Código executado com sucesso!';
                     consoleOutput.appendChild(successMsg);
+
+                    // Se houver uma lição selecionada, marcar como concluída no servidor
+                    if (currentLessonId) {
+                        fetch(`/progress/complete-lesson/${currentLessonId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                const xpMsg = document.createElement('div');
+                                xpMsg.className = 'text-[10px] text-yellow-500 font-bold uppercase';
+                                xpMsg.textContent = '+50 XP GANHADOS!';
+                                consoleOutput.appendChild(xpMsg);
+                                
+                                // Opcional: Atualizar UI de progresso ou recarregar após alguns segundos
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        });
+                    }
                     
                     // Efeito de Confete em caso de sucesso 🎉
                     import('canvas-confetti').then(confetti => {
