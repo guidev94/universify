@@ -309,6 +309,126 @@
         </div>
     </section>
 
+    <!-- 3. VITTORIA CHATBOT HIGHLIGHT -->
+    <section id="vittoria-section" class="py-24 md:py-32 relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden bg-white dark:bg-[#050505]">
+        <div class="max-w-[1200px] mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                
+                <div class="section-reveal order-2 lg:order-1">
+                    <h2 class="text-4xl md:text-5xl lg:text-[3.5rem] font-display font-black tracking-tighter mb-6 leading-[1.05]">
+                        E se uma IA resolvesse<br/>
+                        <span class="text-primary">85% dos chamados</span> do seu RH?
+                    </h2>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-10">
+                        A <strong>VittórIA</strong> é a assistente de IA da Let's Work que atende colaboradores 24/7, responde dúvidas de férias, folha e benefícios — e libera seu time de RH pra focar no que importa.
+                    </p>
+                    <ul class="space-y-6 mb-10">
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="rocket" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Tempo médio de resposta: 3 segundos</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Contra 4h+ de espera em empresas sem automação</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="link" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Integra com qualquer ERP e Folha</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Sistema homologado pela ABNT — plug and play</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="message-square" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Funciona no WhatsApp</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Onde as pessoas já estão, sem app novo</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow hover:scale-105 transition-all items-center gap-2">
+                        Quero a VittórIA na minha empresa
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <div class="relative flex justify-center w-full max-w-[380px] mx-auto lg:ml-auto h-[650px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#E5DDD5] dark:bg-[#0B141A] shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden chat-phone perspective-1000 order-1 lg:order-2">
+                    
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-[#18181B] rounded-b-2xl z-30"></div>
+
+                    <div class="h-20 bg-[#1F2C34] flex items-end pb-3 px-4 gap-3 text-white z-20 w-full absolute top-0 shadow-md">
+                        <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-white"></i></div>
+                        <div class="flex-1">
+                            <div class="font-bold text-base leading-tight text-white">VittórIA • Assistente de RH</div>
+                            <div class="text-xs text-green-400 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Respondendo agora...</div>
+                        </div>
+                        <i data-lucide="more-vertical" class="w-5 h-5 text-white/80 mb-1"></i>
+                    </div>
+
+                    <div class="w-full h-full pt-24 pb-20 px-4 flex flex-col gap-3 overflow-y-auto hide-scroll relative" id="chat-messages-container">
+                        <div class="absolute inset-0 opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
+                        
+                        <div class="text-center w-full z-10"><span class="bg-[#D9DDF0] dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[11px] px-3 py-1 rounded-lg font-medium shadow-sm">Hoje, 08:47</span></div>
+
+                        <div class="chat-msg-user-1 opacity-0 translate-y-4 bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10">
+                            Preciso do relatório de banco de horas do time comercial pra reunião das 10h ⏰
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47 ✓✓</div>
+                        </div>
+
+                        <div class="chat-typing-1 opacity-0 translate-y-4 bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                        </div>
+
+                        <div class="chat-msg-bot-1 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-4 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
+                            Pronto! 📊 Resumo do <strong>time comercial</strong> (mar/26):<br><br>
+                            <div class="bg-gray-50 dark:bg-[#1A2328] p-3 rounded-lg space-y-1">
+                                👥 <strong>12 colaboradores</strong><br>
+                                ✅ 8 com saldo positivo (+14h)<br>
+                                ⚠️ 3 com saldo negativo (-6h)<br>
+                                🔴 1 excedente crítico: <strong>+42h</strong>
+                            </div>
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
+                        </div>
+
+                        <div class="chat-msg-bot-2 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 border border-gray-100 dark:border-none">
+                            ⚡ <strong>Alerta:</strong> Carlos Silva tem 42h acumuladas — prazo legal vence em 8 dias. Notifico ele?
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
+                        </div>
+
+                        <div class="chat-msg-user-2 hidden bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10 mt-2">
+                            Sim! Notifica e me manda o PDF completo 👍
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:48 ✓✓</div>
+                        </div>
+
+                        <div class="chat-typing-2 hidden bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                        </div>
+
+                        <div class="chat-msg-bot-3 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
+                            Feito! ✅ Carlos notificado por WhatsApp e PDF enviado no seu e-mail. Bom dia, gestora! ☕
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:48</div>
+                        </div>
+
+                        <div class="chat-system-msg hidden text-center w-full z-10 mt-4">
+                            <span class="bg-white border border-gray-200 shadow-sm dark:border-none dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[10px] px-3 py-1.5 rounded-full font-bold flex items-center justify-center gap-1 w-fit mx-auto">
+                                <i data-lucide="zap" class="w-3 h-3 text-primary"></i> Resolvido em 12s • Sem abrir nenhuma planilha
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-0 w-full h-16 bg-[#F0F2F5] dark:bg-[#1F2C34] px-3 flex items-center gap-2 z-20">
+                        <i data-lucide="smile" class="w-6 h-6 text-[#54656F] dark:text-[#8696A0]"></i>
+                        <div class="flex-1 h-10 bg-white dark:bg-[#2A3942] rounded-full px-4 flex items-center text-sm text-subtle-light dark:text-subtle-dark border border-gray-200 dark:border-transparent">Digite uma mensagem...</div>
+                        <i data-lucide="mic" class="w-5 h-5 text-[#54656F] dark:text-[#8696A0]"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
     <!-- 3. SCROLL STORYTELLING (Bug-free via CSS Sticky + CSS Mockups Exclusivos) -->
     <section id="solucoes" class="relative bg-surface-light dark:bg-dark border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1400px] mx-auto px-6 relative">
@@ -694,66 +814,77 @@
         </div>
     </section>
 
-    <!-- 6.5. DEPOIMENTOS (Novidade Exclusiva) -->
-    <section class="py-24 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark overflow-hidden">
-        <div class="max-w-[1400px] mx-auto px-6">
+    <!-- 6.5. DEPOIMENTOS (Marquee) -->
+    <section class="py-24 bg-[#F8FAFC] dark:bg-[#030303] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
+        <div class="max-w-[1400px] mx-auto px-6 relative z-10">
             <div class="text-center mb-16 section-reveal">
-                <div class="inline-flex px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
-                    <i data-lucide="star" class="w-3 h-3"></i> O que dizem sobre nós
+                <div class="inline-flex px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
+                    <i data-lucide="star" class="w-3 h-3 fill-current"></i> O que dizem sobre nós
                 </div>
                 <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Parcerias de longo prazo.</h2>
                 <p class="text-lg text-subtle-light dark:text-subtle-dark max-w-2xl mx-auto">Não vendemos apenas software. Entregamos tranquilidade operacional e atendimento incomparável.</p>
             </div>
+        </div>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Depoimento 1 -->
-                <div class="solid-card p-8 rounded-3xl section-reveal flex flex-col hover:-translate-y-2 transition-transform duration-300">
-                    <div class="text-primary text-4xl font-serif leading-none mb-4">"</div>
-                    <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1">
-                        Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa, facilitando as marcações de ponto que nos proporcionou um controle muito mais eficaz e efetivo da jornada.
-                    </p>
+        <div class="relative w-full overflow-hidden py-4 flex" style="mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);">
+            <div class="testimonial-track flex gap-6 px-3">
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa..."</p>
                     <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">L</div>
-                        <div>
-                            <h4 class="font-bold text-black dark:text-white">Luciene</h4>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p>
-                        </div>
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">L</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Luciene</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
                     </div>
                 </div>
 
-                <!-- Depoimento 2 -->
-                <div class="solid-card p-8 rounded-3xl section-reveal flex flex-col hover:-translate-y-2 transition-transform duration-300" style="transition-delay: 0.1s;">
-                    <div class="text-primary text-4xl font-serif leading-none mb-4">"</div>
-                    <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1">
-                        Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente. Por termos várias lojas, a flexibilidade é essencial e o app funciona em todos os formatos com extrema segurança.
-                    </p>
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente..."</p>
                     <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">K</div>
-                        <div>
-                            <h4 class="font-bold text-black dark:text-white">Kaue</h4>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p>
-                        </div>
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">K</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Kaue</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
                     </div>
                 </div>
 
-                <!-- Depoimento 3 -->
-                <div class="solid-card p-8 rounded-3xl section-reveal flex flex-col hover:-translate-y-2 transition-transform duration-300" style="transition-delay: 0.2s;">
-                    <div class="text-primary text-4xl font-serif leading-none mb-4">"</div>
-                    <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1">
-                        Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte de vocês nunca deixa a empresa sem resposta. Começamos a comparar com outros softwares e o nível da Let's Work é top.
-                    </p>
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte nunca deixa a empresa sem resposta."</p>
                     <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">D</div>
-                        <div>
-                            <h4 class="font-bold text-black dark:text-white">Dani (CEAL) & Vanessa</h4>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p>
-                        </div>
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">D</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Dani (CEAL)</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                    </div>
+                </div>
+                
+                <!-- Duplicate -->
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa..."</p>
+                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">L</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Luciene</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+                    </div>
+                </div>
+
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente..."</p>
+                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">K</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Kaue</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                    </div>
+                </div>
+
+                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
+                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte nunca deixa a empresa sem resposta."</p>
+                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">D</div>
+                        <div><h4 class="font-bold text-black dark:text-white text-sm">Dani (CEAL)</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
     <!-- 7. PLANOS (Clean Pricing) -->
     <section id="planos" class="py-24 md:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1200px] mx-auto px-6">
@@ -878,82 +1009,6 @@
         </div>
     </section>
 
-    <!-- 7.5. CALCULADORA DE RH / IA CHATBOT (VittorIA) -->
-    <section class="py-24 md:py-32 bg-[#F8FAFC] dark:bg-[#050505] relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden" id="vittoria-section">
-        <div class="max-w-[1200px] mx-auto px-6">
-            <div class="flex flex-col lg:flex-row items-center gap-16">
-                
-                <div class="w-full lg:w-1/2 section-reveal">
-                    <div class="inline-flex px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded text-xs font-bold mb-6 tracking-widest uppercase">
-                        Automação Inteligente
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">Conheça a VittorIA.</h2>
-                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-8">
-                        A inteligência artificial do Let's Work atende seus colaboradores 24 horas por dia, direto no celular. Ela responde dúvidas sobre a folha, acessa o saldo do banco de horas e até mesmo auxilia no apontamento de ponto. 
-                    </p>
-                    <ul class="space-y-4 mb-10">
-                        <li class="flex items-center gap-3 font-medium text-black dark:text-white"><i data-lucide="bot" class="w-5 h-5 text-green-500"></i> Respostas instantâneas via Chat</li>
-                        <li class="flex items-center gap-3 font-medium text-black dark:text-white"><i data-lucide="zap" class="w-5 h-5 text-green-500"></i> Desafoga o Departamento Pessoal (DP)</li>
-                        <li class="flex items-center gap-3 font-medium text-black dark:text-white"><i data-lucide="smartphone" class="w-5 h-5 text-green-500"></i> Acessível no App ou WhatsApp</li>
-                    </ul>
-                </div>
-
-                <div class="w-full lg:w-1/2 flex justify-center perspective-2000 relative">
-                    <!-- Chatbot UI Mockup CSS Puro (Animado via GSAP Timeline) -->
-                    <div class="w-full max-w-[340px] bg-white dark:bg-[#111] border-[6px] border-[#18181B] rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col chat-app-container transform-style-3d tilt-element">
-                        <!-- Status Bar VittorIA -->
-                        <div class="h-16 bg-[#128C7E] flex items-center px-4 gap-3 text-white z-10 shadow-sm relative">
-                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"><i data-lucide="bot" class="w-6 h-6"></i></div>
-                            <div>
-                                <div class="font-bold text-sm">VittorIA (Let's Work)</div>
-                                <div class="text-[10px] text-green-100 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse"></span> Online</div>
-                            </div>
-                        </div>
-
-                        <!-- Chat Area (Scrolls down during animation) -->
-                        <div class="flex-1 p-4 flex flex-col gap-4 relative bg-[#E5DDD5] dark:bg-[#0A0A0A] overflow-hidden" id="chat-simulation">
-                            <div class="absolute inset-0 opacity-[0.05] dark:opacity-[0.02]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
-                            
-                            <!-- Msg 1: VittorIA -->
-                            <div class="chat-msg opacity-0 translate-y-4 max-w-[85%] bg-white dark:bg-[#1E1E20] text-black dark:text-white p-3 rounded-2xl rounded-tl-sm text-sm shadow-sm self-start relative z-10">
-                                Olá, João! Sou a VittorIA do Let's Work. Como posso te ajudar hoje?
-                            </div>
-                            
-                            <!-- Msg 2: User -->
-                            <div class="chat-msg opacity-0 translate-y-4 max-w-[85%] bg-[#DCF8C6] dark:bg-[#056162] text-black dark:text-white p-3 rounded-2xl rounded-tr-sm text-sm shadow-sm self-end relative z-10 mt-2">
-                                Quantas horas eu tenho no banco de horas?
-                            </div>
-                            
-                            <!-- Msg 3: VittorIA Loading (Typing...) -->
-                            <div class="chat-msg opacity-0 translate-y-4 max-w-[85%] bg-white dark:bg-[#1E1E20] p-3 rounded-2xl rounded-tl-sm text-sm shadow-sm self-start flex gap-1 items-center relative z-10 mt-2" id="chat-typing">
-                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
-                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
-                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                            </div>
-
-                            <!-- Msg 4: VittorIA Final Response (Initially Hidden) -->
-                            <div class="max-w-[85%] bg-white dark:bg-[#1E1E20] text-black dark:text-white p-3 rounded-2xl rounded-tl-sm text-sm shadow-sm self-start hidden relative z-10 mt-2" id="chat-final">
-                                Verifiquei aqui! Você possui <strong>14h e 30min</strong> de saldo positivo. <br><br> Deseja solicitar uma folga usando esse saldo?
-                            </div>
-                            
-                            <!-- Action Chips (Initially Hidden) -->
-                            <div class="flex gap-2 self-start hidden relative z-10 mt-2" id="chat-chips">
-                                <span class="px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full text-[11px] font-bold border border-green-500/20 cursor-pointer">Sim, solicitar folga</span>
-                            </div>
-                        </div>
-
-                        <!-- Input Area -->
-                        <div class="h-16 bg-[#F0F0F0] dark:bg-[#111] px-4 flex items-center justify-between gap-3 relative z-10">
-                            <div class="flex-1 h-10 bg-white dark:bg-[#222] rounded-full flex items-center px-4 text-subtle-light dark:text-subtle-dark text-sm">Mensagem...</div>
-                            <div class="w-10 h-10 rounded-full bg-[#128C7E] text-white flex items-center justify-center"><i data-lucide="send" class="w-4 h-4 ml-0.5"></i></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
     <!-- 8. CTA FINAL (Brutalist Banner) -->
     <section class="py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] text-center border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[800px] mx-auto px-6 section-reveal">
@@ -1066,9 +1121,9 @@
     <!-- SCRIPTS CORE: GSAP & Interactions -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
 
     <script>
-        // Init Lucide Icons
         lucide.createIcons();
 
         // --- THEME TOGGLE LOGIC ---
@@ -1078,22 +1133,14 @@
 
         function updateIcon() {
             if (document.documentElement.classList.contains('dark')) {
-                darkIcon.classList.remove('hidden');
-                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden'); lightIcon.classList.add('hidden');
             } else {
-                lightIcon.classList.remove('hidden');
-                darkIcon.classList.add('hidden');
+                lightIcon.classList.remove('hidden'); darkIcon.classList.add('hidden');
             }
         }
-        
         function toggleTheme() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             updateIcon();
         }
         themeToggleBtn.addEventListener('click', toggleTheme);
@@ -1104,16 +1151,57 @@
         window.addEventListener('scroll', () => {
             if (window.scrollY > 20) {
                 nav.classList.add('shadow-sm');
+                nav.classList.replace('border-transparent', 'border-borderline-light');
+                if(document.documentElement.classList.contains('dark')){
+                    nav.classList.replace('border-borderline-light', 'border-borderline-dark');
+                }
             } else {
-                nav.classList.remove('shadow-sm');
+                nav.classList.remove('shadow-sm', 'border-borderline-light', 'border-borderline-dark');
+                nav.classList.add('border-transparent');
             }
         }, { passive: true });
 
+        // PRICING TOGGLE LOGIC
+        const pricingToggle = document.getElementById('pricing-toggle');
+        const btnMensal = document.getElementById('btn-mensal');
+        const btnAnual = document.getElementById('btn-anual');
+        const pricingBg = document.getElementById('pricing-bg');
+        const priceVals = document.querySelectorAll('.price-val');
+        let isAnnual = false;
+
+        if(pricingToggle) {
+            pricingToggle.addEventListener('click', () => {
+                isAnnual = !isAnnual;
+                if(isAnnual) {
+                    pricingBg.style.transform = "translateX(100px)";
+                    pricingBg.style.width = "140px";
+                    btnMensal.classList.remove("text-white", "dark:text-black");
+                    btnMensal.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                    btnAnual.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                    btnAnual.classList.add("text-white", "dark:text-black");
+                    priceVals.forEach(el => {
+                        el.innerText = el.getAttribute("data-annual");
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    });
+                } else {
+                    pricingBg.style.transform = "translateX(0)";
+                    pricingBg.style.width = "100px";
+                    btnAnual.classList.remove("text-white", "dark:text-black");
+                    btnAnual.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                    btnMensal.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                    btnMensal.classList.add("text-white", "dark:text-black");
+                    priceVals.forEach(el => {
+                        el.innerText = el.getAttribute("data-monthly");
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    });
+                }
+            });
+        }
+
         // --- GSAP ANIMATIONS & INTERACTIONS ---
-        gsap.registerPlugin(ScrollTrigger);
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
         let mm = gsap.matchMedia();
 
-        // Universal Reveals
         gsap.utils.toArray('.section-reveal').forEach(elem => {
             gsap.from(elem, {
                 scrollTrigger: { trigger: elem, start: "top 85%" },
@@ -1121,7 +1209,6 @@
             });
         });
 
-        // Counters
         const counters = document.querySelectorAll('.counter');
         counters.forEach(counter => {
             gsap.to(counter, {
@@ -1132,18 +1219,16 @@
         });
 
         mm.add("(min-width: 1024px)", () => {
-            // Hero Entrance
+            // Hero
             const heroTl = gsap.timeline();
             heroTl.from(".hero-reveal", { y: 20, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out", delay: 0.1 })
                   .from(".hero-dash", { x: 50, opacity: 0, duration: 1.5, ease: "power3.out" }, "-=0.8")
-                  .from(".hero-mobile", { y: 50, x: -30, opacity: 0, duration: 1.5, ease: "back.out(1.2)" }, "-=1.2")
-                  .from(".hero-widget", { y: 20, opacity: 0, duration: 1, ease: "back.out(1.5)" }, "-=1.0");
+                  .from(".hero-mobile", { y: 50, x: -30, opacity: 0, duration: 1.5, ease: "back.out(1.2)" }, "-=1.2");
 
             // Scroll Storytelling Animado via GSAP nativo
             const stepTexts = gsap.utils.toArray('.step-text');
             const visuals = gsap.utils.toArray('.feature-visual');
 
-            // Pin the right side containing the visuals
             ScrollTrigger.create({
                 trigger: "#solucoes",
                 start: "top top",
@@ -1152,21 +1237,18 @@
                 pinSpacing: false
             });
 
-            // Sync text blocks with visuals
             stepTexts.forEach((text, i) => {
                 const innerCard = text.querySelector('div');
-                
                 ScrollTrigger.create({
                     trigger: text,
                     start: "top center",
                     end: "bottom center",
-                    onEnter: () => activateStep(i, innerCard),
-                    onEnterBack: () => activateStep(i, innerCard),
+                    onEnter: () => activateStep(i),
+                    onEnterBack: () => activateStep(i),
                 });
             });
 
-            function activateStep(index, currentCard) {
-                // Style active/inactive text blocks
+            function activateStep(index) {
                 stepTexts.forEach((t, i) => {
                     const card = t.querySelector('div');
                     if (i === index) {
@@ -1178,7 +1260,6 @@
                     }
                 });
 
-                // Transition Visuals
                 visuals.forEach((vis, i) => {
                     if (i === index) {
                         vis.style.opacity = "1";
@@ -1197,33 +1278,37 @@
             }
 
             // VittorIA Chat Sequence
-            if(document.querySelector(".chat-app-container")) {
+            if(document.querySelector(".chat-phone")) {
                 const chatTl = gsap.timeline({
                     scrollTrigger: {
-                        trigger: ".chat-app-container",
+                        trigger: ".chat-phone",
                         start: "top 60%",
                         once: true
                     }
                 });
 
-                chatTl.to(".chat-msg", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" })
+                chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" })
                       .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.3 }, "+=0.5")
                       .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.5")
                       .set(".chat-msg-bot-1", { display: "block" })
                       .fromTo(".chat-msg-bot-1", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
                       .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
                       .fromTo(".chat-msg-bot-2", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
                       .set(".chat-msg-user-2", { display: "block" }, "+=1.2")
                       .fromTo(".chat-msg-user-2", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
                       .set(".chat-typing-2", { display: "flex" }, "+=0.5")
                       .fromTo(".chat-typing-2", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3 })
                       .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.5")
                       .set(".chat-msg-bot-3", { display: "block" })
                       .fromTo(".chat-msg-bot-3", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
-                      .to("#chat-messages-container", { scrollTo: "max", duration: 1, ease: "power2.out" }, "-=0.2"); // Auto-scroll to bottom
+                      .set(".chat-system-msg", { display: "block" }, "+=0.5")
+                      .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" });
             }
         });
-
     </script>
 </body>
 </html>
