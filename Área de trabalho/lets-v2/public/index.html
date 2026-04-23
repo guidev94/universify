@@ -37,7 +37,7 @@
                         primary: '#FF2D2D',
                         dark: '#000000', /* Preto absoluto para contraste OLED */
                         surface: { dark: '#0A0A0A', light: '#FFFFFF' },
-                        subtle: { dark: '#888888', light: '#64748B' },
+                        subtle: { dark: '#A1A1AA', light: '#475569' },
                         borderline: { dark: 'rgba(255,255,255,0.08)', light: 'rgba(0,0,0,0.08)' }
                     },
                     boxShadow: {
@@ -101,17 +101,39 @@
         .solid-card:hover { border-color: #FF2D2D; }
 
         /* Marquee Custom */
-        .marquee-container { overflow: hidden; display: flex; white-space: nowrap; }
-        .marquee-content { display: flex; animation: marquee 30s linear infinite; }
+        .marquee-container { overflow: hidden; display: flex; white-space: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: flex; animation: marquee 40s linear infinite; }
         @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
         .client-logo { height: 2.5rem; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s; }
-        @media (min-width: 1024px) {
-            .client-logo { height: 3rem; }
-        }
+        @media (min-width: 1024px) { .client-logo { height: 3rem; } }
         .client-logo:hover { filter: grayscale(0%) opacity(1); transform: scale(1.05); }
         .dark .client-logo { filter: brightness(0) invert(1) opacity(0.5); }
         .dark .client-logo:hover { filter: brightness(1) invert(0) opacity(1); }
+
+        /* 3D Depoimentos Marquee */
+        .testimonial-container {
+            perspective: 1500px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            padding: 40px 0;
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+        .testimonial-track {
+            display: flex;
+            gap: 2rem;
+            width: max-content;
+            animation: scroll-3d 50s linear infinite;
+            transform-style: preserve-3d;
+            transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg); /* Efeito 3D Deitado Elegante */
+        }
+        .testimonial-track:hover { animation-play-state: paused; }
+        @keyframes scroll-3d {
+            0% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(0); }
+            100% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(-50%); }
+        }
 
         /* GSAP Pinned Section Utilities */
         .pin-spacer { margin: 0 !important; padding: 0 !important; }
@@ -120,9 +142,16 @@
         .btn-primary {
             background: #FF2D2D; color: white; border: 1px solid #FF2D2D;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
         }
         .btn-primary:hover {
-            background: transparent; color: #FF2D2D; box-shadow: inset 0 0 0 1px #FF2D2D;
+            background: transparent; color: #FF2D2D; box-shadow: inset 0 0 0 1px #FF2D2D; transform: scale(1.02);
+        }
+        .btn-primary:focus-visible {
+            box-shadow: 0 0 0 2px rgba(255,45,45,0.5);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
         }
 
     </style>
@@ -178,7 +207,7 @@
     </nav>
 
     <!-- 1. HERO SECTION (Asymmetrical & Compact - Startup Level) -->
-    <section class="relative pt-32 pb-16 md:pt-40 md:pb-24 border-b border-borderline-light dark:border-borderline-dark overflow-hidden">
+    <section class="relative pt-32 lg:pt-40 pb-24 lg:pb-32 border-b border-borderline-light dark:border-borderline-dark overflow-hidden">
         <div class="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-20">
             
             <!-- Left Column: Copy & CTA -->
@@ -198,11 +227,11 @@
                 </p>
                 
             <div class="hero-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button class="bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 transition-transform duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
+                <button class="bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
                     Começar Teste Grátis
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                 </button>
-                <button class="bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary transition-colors duration-300 flex items-center justify-center">
+                <button class="bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
                     Falar com Especialista
                 </button>
             </div>
@@ -310,7 +339,7 @@
     </section>
 
     <!-- 3. VITTORIA CHATBOT HIGHLIGHT -->
-    <section id="vittoria-section" class="py-24 md:py-32 relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden bg-white dark:bg-[#050505]">
+    <section id="vittoria-section" class="py-24 lg:py-32 relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden bg-white dark:bg-[#050505]">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 
@@ -345,7 +374,7 @@
                             </div>
                         </li>
                     </ul>
-                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow hover:scale-105 transition-all items-center gap-2">
+                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
                         Quero a VittórIA na minha empresa
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
@@ -436,7 +465,7 @@
                 
                 <!-- Esquerda (Textos Rolando Naturalmente) -->
                 <div class="w-full lg:w-1/2 relative z-10">
-                    <div class="pt-32 pb-16">
+                    <div class="pt-24 lg:pt-32 pb-12 lg:pb-16">
                         <h2 class="text-4xl md:text-5xl font-display font-black tracking-tight text-gradient mb-4">
                             Uma plataforma.<br/>Zero atrito.
                         </h2>
@@ -531,23 +560,23 @@
                                 <div class="flex gap-3 items-center">
                                     <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">AM</div>
                                     <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
                                     </div>
                                 </div>
                                 <div class="flex gap-3 items-center">
                                     <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-600 dark:text-orange-400">JS</div>
                                     <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded"></div>
-                                        <div class="h-8 bg-primary/20 rounded border border-primary/50 relative overflow-hidden">
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                        <div class="h-8 bg-primary/20 rounded-xl border border-primary/50 relative overflow-hidden">
                                             <div class="absolute inset-0 bg-primary/10 animate-pulse"></div>
                                         </div>
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
                                     </div>
                                 </div>
                             </div>
@@ -587,7 +616,7 @@
     </section>
 
     <!-- 4. VAGAS COM IA (Technical / Editor UI) -->
-    <section class="py-32 bg-[#F8FAFC] dark:bg-[#050505] relative border-b border-borderline-light dark:border-borderline-dark">
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#050505] relative border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="flex flex-col lg:flex-row items-center gap-16">
                 
@@ -617,7 +646,7 @@
 
                         <div class="space-y-3 relative z-10">
                             <!-- Item 1 -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded flex items-center justify-between">
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Juliana Costa</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Sólida experiência em DP e implantação de ponto."</span>
@@ -628,7 +657,7 @@
                                 </div>
                             </div>
                             <!-- Item 2 -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded flex items-center justify-between">
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Rafael Souza</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Conhecimento em folha de pagamento e benefícios."</span>
@@ -639,7 +668,7 @@
                                 </div>
                             </div>
                             <!-- Item 3 (Grayscale) -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded flex items-center justify-between opacity-50 grayscale">
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between opacity-50 grayscale">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Carlos Mendes</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Analista de Marketing Pleno"</span>
@@ -663,7 +692,7 @@
     </section>
 
     <!-- 5. GESTÃO DE FÉRIAS E PROCESSOS (Refatoração da Seção) -->
-    <section id="experiencias" class="py-24 md:py-32 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC]/50 dark:bg-[#0A0A0A]/50">
+    <section id="experiencias" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC]/50 dark:bg-[#0A0A0A]/50">
         <div class="max-w-[1400px] mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <!-- Direita UI Customizada (Calendário / Férias) -->
@@ -755,7 +784,7 @@
     </section>
 
     <!-- 6. COMPLIANCE LEGAL E RESULTADOS -->
-    <section id="compliance" class="py-24 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC] dark:bg-[#050505]">
+    <section id="compliance" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC] dark:bg-[#050505]">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-16 items-center mb-24">
                 <div class="section-reveal">
@@ -814,8 +843,8 @@
         </div>
     </section>
 
-    <!-- 6.5. DEPOIMENTOS (Marquee) -->
-    <section class="py-24 bg-[#F8FAFC] dark:bg-[#030303] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
+    <!-- 6.5. DEPOIMENTOS (Marquee 3D) -->
+    <section class="py-24 lg:py-32 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
         <div class="max-w-[1400px] mx-auto px-6 relative z-10">
             <div class="text-center mb-16 section-reveal">
                 <div class="inline-flex px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
@@ -826,67 +855,73 @@
             </div>
         </div>
 
-        <div class="relative w-full overflow-hidden py-4 flex" style="mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);">
-            <div class="testimonial-track flex gap-6 px-3">
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa..."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">L</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Luciene</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+        <div class="testimonial-container">
+            <div class="testimonial-track">
+                <!-- Group 1 -->
+                <div class="flex gap-8 px-4">
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa, facilitando as marcações de ponto que nos proporcionou um controle muito mais eficaz e efetivo da jornada."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">L</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Luciene</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente. Por termos várias lojas, a flexibilidade é essencial e o app funciona em todos os formatos com extrema segurança."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">K</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Kaue</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte de vocês nunca deixa a empresa sem resposta. Começamos a comparar com outros softwares e o nível da Let's Work é top."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">D</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Dani (CEAL)</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente..."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">K</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Kaue</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                <!-- Group 2 (Duplicate for Infinite Loop) -->
+                <div class="flex gap-8 px-4" aria-hidden="true">
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa, facilitando as marcações de ponto que nos proporcionou um controle muito mais eficaz e efetivo da jornada."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">L</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Luciene</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte nunca deixa a empresa sem resposta."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">D</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Dani (CEAL)</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente. Por termos várias lojas, a flexibilidade é essencial e o app funciona em todos os formatos com extrema segurança."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">K</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Kaue</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Duplicate -->
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa..."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">L</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Luciene</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
-                    </div>
-                </div>
 
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente..."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">K</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Kaue</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
-                    </div>
-                </div>
-
-                <div class="solid-card p-8 rounded-3xl w-[350px] md:w-[420px] shrink-0 flex flex-col bg-white dark:bg-[#0A0A0A] hover:border-primary/50 transition-colors shadow-soft">
-                    <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                    <p class="text-black dark:text-white text-base md:text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte nunca deixa a empresa sem resposta."</p>
-                    <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-sm">D</div>
-                        <div><h4 class="font-bold text-black dark:text-white text-sm">Dani (CEAL)</h4><p class="text-xs text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte de vocês nunca deixa a empresa sem resposta. Começamos a comparar com outros softwares e o nível da Let's Work é top."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">D</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Dani (CEAL)</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
     <!-- 7. PLANOS (Clean Pricing) -->
-    <section id="planos" class="py-24 md:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
+    <section id="planos" class="py-24 lg:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="text-center mb-16 section-reveal">
                 <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Investimento escalável.</h2>
@@ -913,7 +948,7 @@
                         <span class="text-4xl font-display font-black price-val" data-mensal="R$89" data-anual="R$71">R$89</span>
                         <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
                     </div>
-                    <button class="w-full py-3 rounded text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors mb-8">Testar Grátis</button>
+                    <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Testar Grátis</button>
                     <ul class="space-y-4 text-sm font-medium flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Reconhecimento Facial</li>
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Ponto Offline</li>
@@ -930,7 +965,7 @@
                         <span class="text-5xl font-display font-black price-val" data-mensal="R$299" data-anual="R$239">R$299</span>
                         <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
                     </div>
-                    <button class="btn-primary w-full py-3 rounded text-sm font-bold mb-8">Assinar Agora</button>
+                    <button class="btn-primary w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
                     <ul class="space-y-4 text-sm font-bold flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Ponto via WhatsApp</li>
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Gestão de Escalas Completa</li>
@@ -946,7 +981,7 @@
                     <div class="mb-8 flex items-baseline gap-1">
                         <span class="text-4xl font-display font-black">Custom</span>
                     </div>
-                    <button class="w-full py-3 rounded text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors mb-8">Falar com Vendas</button>
+                    <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Falar com Vendas</button>
                     <ul class="space-y-4 text-sm font-medium flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Módulos Ilimitados</li>
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Gestão de Vagas com IA</li>
@@ -959,7 +994,7 @@
     </section>
 
     <!-- 7.5 FAQ SECTION (Quebra de Objeções) -->
-    <section class="py-24 bg-[#F8FAFC] dark:bg-[#0A0A0A] border-b border-borderline-light dark:border-borderline-dark">
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[800px] mx-auto px-6">
             <div class="text-center mb-16 section-reveal">
                 <h2 class="text-3xl md:text-5xl font-display font-bold tracking-tight mb-4">Perguntas Frequentes.</h2>
@@ -1005,12 +1040,64 @@
                         Ao contrário de muitos concorrentes, nós temos suporte humanizado multicanal e uma implantação assistida passo a passo. Você pode acionar nossa equipe diretamente via WhatsApp para resolver qualquer configuração ou dúvida da contabilidade.
                     </div>
                 </details>
+
+                <!-- FAQ Item 4 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        E se o funcionário bater ponto pelo celular de outro?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        O aplicativo possui mecanismos antifraude avançados, como reconhecimento facial e vinculação do registro ao identificador único do aparelho. Dessa forma, bloqueamos e alertamos sobre qualquer tentativa de registro em dispositivos não autorizados.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 5 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        A implantação é demorada?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        De forma alguma. O sistema é 100% em nuvem e nossa equipe de Implantação Assistida guia você passo a passo. A maior parte dos nossos clientes já começa a operar o controle de ponto no mesmo dia da contratação.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 6 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        O sistema integra com a minha folha de pagamento / contabilidade?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        Sim! Exportamos arquivos nos padrões AFD e AFDT exigidos por lei, e geramos relatórios prontos que se integram facilmente com os principais sistemas de folha de pagamento e escritórios de contabilidade do mercado.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 7 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        Os funcionários terão dificuldade para usar?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        O aplicativo foi desenhado com foco absoluto em usabilidade. O registro é feito com um único toque na tela. Para perfis com menos familiaridade com tecnologia, oferecemos tutoriais simples e a opção de bater ponto em um tablet fixo (totem) na empresa.
+                    </div>
+                </details>
             </div>
         </div>
     </section>
 
     <!-- 8. CTA FINAL (Brutalist Banner) -->
-    <section class="py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] text-center border-b border-borderline-light dark:border-borderline-dark">
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] text-center border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[800px] mx-auto px-6 section-reveal">
             <h2 class="text-5xl md:text-7xl font-display font-black tracking-tighter mb-8">
                 Sua empresa merece <br/> um RH moderno.
@@ -1018,7 +1105,7 @@
             <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark mb-10">
                 Ponto geolocalizado, escalas arrastáveis e segurança jurídica em um só clique.
             </p>
-            <button class="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-bold text-lg hover:-translate-y-1 transition-transform duration-300 shadow-soft">
+            <button class="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 shadow-soft">
                 Agendar Demonstração Gratuita
             </button>
             <p class="text-xs text-subtle-light dark:text-subtle-dark mt-6 font-bold tracking-widest uppercase"><i data-lucide="shield-check" class="inline w-3 h-3 mr-1 mb-0.5"></i> Suporte Humanizado Garantido</p>
@@ -1026,93 +1113,86 @@
     </section>
 
     <!-- 9. FOOTER -->
-    <footer class="pt-20 pb-10 bg-white dark:bg-[#000]">
+    <footer class="pt-20 pb-10 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1400px] mx-auto px-6">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-16">
-                <div class="col-span-2 lg:col-span-2">
-                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 md:h-12 object-contain dark:brightness-0 dark:invert transition-all mb-6">
-                    <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed mb-6 max-w-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
+                <!-- 1) Logo & About & Social -->
+                <div class="flex flex-col gap-6">
+                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 object-contain dark:brightness-0 dark:invert transition-all self-start">
+                    <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed max-w-sm">
                         A solução definitiva para controle de jornada, produtividade e gestão de equipe em um só lugar.
                     </p>
                     <div class="flex items-center gap-4">
-                        <a href="https://www.instagram.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-                        <a href="https://www.linkedin.com/company/letsworkapp/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-                        <a href="https://www.facebook.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-                        <a href="https://www.youtube.com/channel/UCPfqYcFei0THbnNWfHjyIug" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
+                        <a href="https://www.instagram.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="instagram" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.linkedin.com/company/letsworkapp/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="linkedin" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.facebook.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="facebook" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.youtube.com/channel/UCPfqYcFei0THbnNWfHjyIug" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="youtube" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
                     </div>
                 </div>
-    </section>
 
-    <!-- 9. FOOTER PRESERVADO DA LETSWORK.COM.BR -->
-    <footer class="pt-20 pb-10 bg-white dark:bg-[#000]">
-        <div class="max-w-[1400px] mx-auto px-6">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-16">
-                <div class="col-span-2 lg:col-span-2">
-                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-8 object-contain dark:brightness-0 dark:invert transition-all mb-6">
-                    <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed mb-6 max-w-xs">
-                        A solução definitiva para controle de jornada, produtividade e gestão de equipe em um só lugar.
-                    </p>
-                    <div class="flex items-center gap-4">
-                        <a href="https://www.instagram.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-                        <a href="https://www.facebook.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-                        <a href="https://www.youtube.com/channel/UCPfqYcFei0THbnNWfHjyIug" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
-                    </div>
-                </div>
+                <!-- 2) Soluções -->
                 <div>
-                    <h4 class="font-bold mb-4 text-black dark:text-white">Soluções</h4>
-                    <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
-                        <li><a href="#" class="hover:text-primary transition-colors">Ponto Eletrônico</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Rastreamento de Rotas</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Gestão de Documentos</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Comunicação de Equipe</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Gerenciamento de Férias</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Gestão de Processos</a></li>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Soluções</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="hover:text-primary transition-colors">Ponto Eletrônico</a></li>
+                        <li><a href="https://www.letswork.com.br/rastreamento/" class="hover:text-primary transition-colors">Rastreamento de Rotas</a></li>
+                        <li><a href="https://www.letswork.com.br/gestao-de-documentos/" class="hover:text-primary transition-colors">Gestão de Documentos</a></li>
+                        <li><a href="https://www.letswork.com.br/comunicacao-de-equipe/" class="hover:text-primary transition-colors">Comunicação de Equipe</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-ferias/" class="hover:text-primary transition-colors">Gerenciamento de Férias</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="hover:text-primary transition-colors">Gestão de Processos</a></li>
                     </ul>
                 </div>
+                
+                <!-- 3) Segmentos -->
                 <div>
-                    <h4 class="font-bold mb-4 text-black dark:text-white">Segmentos</h4>
-                    <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
-                        <li><a href="#" class="hover:text-primary transition-colors">Hospitais & Clínicas</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Logística & Entregas</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Empresas de Segurança</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Equipes de Limpeza</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Lojas de Varejo</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Obras & Construção</a></li>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Segmentos</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/hospitais-clinicas-e-laboratorios/" class="hover:text-primary transition-colors">Hospitais & Clínicas</a></li>
+                        <li><a href="https://www.letswork.com.br/logistica-e-transporte/" class="hover:text-primary transition-colors">Logística & Entregas</a></li>
+                        <li><a href="https://www.letswork.com.br/empresas-de-seguranca/" class="hover:text-primary transition-colors">Empresas de Segurança</a></li>
+                        <li><a href="https://www.letswork.com.br/equipe-de-limpeza-e-manutencao/" class="hover:text-primary transition-colors">Equipes de Limpeza</a></li>
+                        <li><a href="https://www.letswork.com.br/varejo-e-restaurantes/" class="hover:text-primary transition-colors">Lojas de Varejo</a></li>
+                        <li><a href="https://www.letswork.com.br/construcao-civil/" class="hover:text-primary transition-colors">Obras & Construção</a></li>
                     </ul>
                 </div>
+                
+                <!-- 4) A Empresa -->
                 <div>
-                    <h4 class="font-bold mb-4 text-black dark:text-white">A Empresa</h4>
-                    <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
-                        <li><a href="#" class="hover:text-primary transition-colors">Sobre a Let's Work</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Parceiros</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Planos para Pequenas</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Planos para Grandes</a></li>
-                        <li><a href="#" class="hover:text-primary transition-colors">Downloads App</a></li>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">A Empresa</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/sobre-o-letswork/" class="hover:text-primary transition-colors">Sobre a Let's Work</a></li>
+                        <li><a href="https://www.letswork.com.br/seja-nosso-parceiro/" class="hover:text-primary transition-colors">Parceiros</a></li>
+                        <li><a href="#planos" class="hover:text-primary transition-colors">Planos e Preços</a></li>
+                        <li><a href="https://www.letswork.com.br/downloads/" class="hover:text-primary transition-colors">Downloads App</a></li>
                     </ul>
                 </div>
-                <div class="col-span-2 lg:col-span-1">
-                    <h4 class="font-bold mb-4 text-black dark:text-white">Contato (09h-18h)</h4>
-                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark">
+                
+                <!-- 5) Contato -->
+                <div>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Contato Rápido</h4>
+                    <ul class="space-y-5 text-sm text-subtle-light dark:text-subtle-dark">
                         <li>
-                            <span class="block font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider">Comercial</span>
-                            <a href="https://api.whatsapp.com/send?phone=5511934670924" target="_blank" class="hover:text-primary transition-colors block font-medium">WhatsApp: 11 93467-0924</a>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="phone" class="w-3 h-3 text-primary"></i> Comercial</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511934670924" target="_blank" class="hover:text-primary transition-colors block font-medium">11 93467-0924</a>
                         </li>
                         <li>
-                            <span class="block font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider">Suporte</span>
-                            <a href="https://web.whatsapp.com/send?phone=5511971163576" target="_blank" class="hover:text-primary transition-colors block font-medium">WhatsApp: 11 97116-3576</a>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="wrench" class="w-3 h-3 text-primary"></i> Suporte Técnico</span>
+                            <a href="https://web.whatsapp.com/send?phone=5511971163576" target="_blank" class="hover:text-primary transition-colors block font-medium">11 97116-3576</a>
                         </li>
                         <li>
-                            <span class="block font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider">Implantação</span>
-                            <a href="https://api.whatsapp.com/send?phone=5511998514728" target="_blank" class="hover:text-primary transition-colors block font-medium">WhatsApp: 11 99851-4728</a>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="rocket" class="w-3 h-3 text-primary"></i> Implantação</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511998514728" target="_blank" class="hover:text-primary transition-colors block font-medium">11 99851-4728</a>
                         </li>
                     </ul>
                 </div>
             </div>
+
+            <!-- Bottom Line -->
             <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-borderline-light dark:border-borderline-dark text-xs text-subtle-light dark:text-subtle-dark font-medium">
-                <p>&copy; 2026 LET'S WORK TECNOLOGIA LTDA. CNPJ: 45.992.151/0001-01.</p>
+                <p>&copy; 2026 LET'S WORK TECNOLOGIA LTDA. CNPJ: 45.992.151/0001-01. Todos os direitos reservados.</p>
                 <div class="flex gap-6 mt-4 md:mt-0">
-                    <a href="#" class="hover:text-primary transition-colors">Política de Privacidade</a>
-                    <a href="#" class="hover:text-primary transition-colors">Termos de Uso</a>
+                    <a href="https://www.letswork.com.br/politica-de-privacidade/" class="hover:text-primary transition-colors">Política de Privacidade</a>
+                    <a href="https://www.letswork.com.br/termos-de-uso/" class="hover:text-primary transition-colors">Termos de Uso</a>
                 </div>
             </div>
         </div>
