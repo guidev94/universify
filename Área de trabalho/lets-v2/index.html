@@ -341,7 +341,7 @@
             <div class="marquee-content flex items-center gap-12 md:gap-16 px-8">
                 
                 <!-- LOOP INTERNO 1 -->
-                <div class="flex items-center gap-12 md:gap-16 shrink-0 ml-[100vw]">
+                <div class="flex flex-row items-center gap-12 md:gap-16 shrink-0">
                     <!-- BLOCO 1: INVESTIDORES -->
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
@@ -380,7 +380,7 @@
                 </div>
 
                 <!-- LOOP INTERNO 2 (DUPLICATA PARA ANIMAÇÃO INIFINITA) -->
-                <div class="flex items-center gap-12 md:gap-16 shrink-0">
+                <div class="flex flex-row items-center gap-12 md:gap-16 shrink-0">
                     <!-- BLOCO 1: INVESTIDORES (CLONE) -->
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
@@ -1789,9 +1789,9 @@
         const marqueeContent = document.querySelector('.marquee-content');
         if(marqueeContent) {
             gsap.fromTo(marqueeContent, 
-                { xPercent: -50 },
+                { xPercent: 0 },
                 {
-                    xPercent: 0,
+                    xPercent: -50,
                     ease: "none",
                     duration: 50,
                     repeat: -1,
