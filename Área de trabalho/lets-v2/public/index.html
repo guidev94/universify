@@ -402,7 +402,6 @@
                     </div>
 
                     <div class="w-full h-full pt-24 pb-20 px-4 flex flex-col gap-3 overflow-y-auto hide-scroll relative" id="chat-messages-container">
-                        <div class="absolute inset-0 opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
                         
                         <div class="text-center w-full z-10"><span class="bg-[#D9DDF0] dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[11px] px-3 py-1 rounded-lg font-medium shadow-sm">Hoje, 08:47</span></div>
 
@@ -1022,27 +1021,24 @@
                 </div>
             </div>
 
-            <!-- Dados de Impacto (Elegance/Modern Grid) -->
-            <div class="bg-[#0A0A0A] text-white rounded-[3rem] p-10 md:p-16 relative overflow-hidden section-reveal shadow-2xl">
-                <!-- Background Pattern -->
-                <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 relative z-10 divide-x divide-white/10">
+            <!-- Dados de Impacto (Clean Brutalist Grid) -->
+            <div class="bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark rounded-sm p-10 md:p-16 relative overflow-hidden section-reveal shadow-[4px_4px_0px_rgba(0,0,0,0.05)] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.05)]">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 relative z-10 divide-x divide-borderline-light dark:divide-white/10">
                     <div class="text-center pl-0">
-                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">-25%</div>
-                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Processos Trabalhistas</div>
+                        <div class="text-5xl lg:text-7xl font-display font-black text-black dark:text-white mb-3">-25%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Processos Trabalhistas</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">+25%</div>
-                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Produtividade RH</div>
+                        <div class="text-5xl lg:text-7xl font-display font-black text-black dark:text-white mb-3">+25%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Produtividade RH</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-primary to-primary/50 mb-3">-45%</div>
-                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Erros de Horas Extras</div>
+                        <div class="text-5xl lg:text-7xl font-display font-black text-primary mb-3">-45%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Erros de Horas Extras</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">98%</div>
-                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Aprovação do Sistema</div>
+                        <div class="text-5xl lg:text-7xl font-display font-black text-black dark:text-white mb-3">98%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Aprovação do Sistema</div>
                     </div>
                 </div>
             </div>
@@ -1572,12 +1568,32 @@
 
             // VittorIA Chat Sequence
             if(document.querySelector(".chat-phone")) {
-                gsap.set(".chat-msg-user-1", { y: 0, opacity: 1 });
-                gsap.set(".chat-msg-bot-1", { display: "block", y: 0, opacity: 1 });
-                gsap.set(".chat-msg-bot-2", { display: "block", y: 0, opacity: 1 });
-                gsap.set(".chat-msg-user-2", { display: "block", y: 0, opacity: 1 });
-                gsap.set(".chat-msg-bot-3", { display: "block", y: 0, opacity: 1 });
-                gsap.set(".chat-system-msg", { display: "block", y: 0, opacity: 1 });
+                gsap.set([".chat-msg-bot-1", ".chat-msg-bot-2", ".chat-msg-user-2", ".chat-msg-bot-3", ".chat-system-msg", ".chat-typing-2"], { display: "none", opacity: 0, y: 15 });
+                
+                const chatTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: ".chat-phone",
+                        start: "top 70%",
+                        once: true
+                    }
+                });
+
+                chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                      .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.2 }, "+=0.3")
+                      .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.2")
+                      .set(".chat-msg-bot-1", { display: "block" })
+                      .to(".chat-msg-bot-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                      .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
+                      .to(".chat-msg-bot-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                      .set(".chat-msg-user-2", { display: "block" }, "+=1.5")
+                      .to(".chat-msg-user-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                      .set(".chat-typing-2", { display: "flex" }, "+=0.3")
+                      .to(".chat-typing-2", { y: 0, opacity: 1, duration: 0.2 })
+                      .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.2")
+                      .set(".chat-msg-bot-3", { display: "block" })
+                      .to(".chat-msg-bot-3", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                      .set(".chat-system-msg", { display: "block" }, "+=0.5")
+                      .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" });
             }
         });
     
