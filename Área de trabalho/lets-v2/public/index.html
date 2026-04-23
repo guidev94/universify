@@ -839,94 +839,185 @@
     </section>
 
     <!-- 5. GESTÃO DE FÉRIAS E PROCESSOS (Refatoração da Seção) -->
-    <section id="experiencias" class="py-20 lg:py-24 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC]/50 dark:bg-[#0A0A0A]/50">
-        <div class="max-w-[1400px] mx-auto px-6">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <!-- Direita UI Customizada (Calendário / Férias) -->
-                <div class="order-2 lg:order-1 flex justify-center tilt-wrapper section-reveal">
-                    <div class="tilt-element w-full max-w-[550px] solid-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                        <div class="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full"></div>
-                        <div class="relative z-10">
-                            <div class="flex justify-between items-end mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">
-                                <div>
-                                    <h4 class="font-bold text-lg flex items-center gap-2"><i data-lucide="plane" class="w-5 h-5 text-blue-500"></i> Agendamento de Férias</h4>
-                                    <p class="text-xs text-subtle-light dark:text-subtle-dark">Visão Geral da Empresa</p>
-                                </div>
-                                <span class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full animate-pulse border border-primary/20">Atenção Necessária</span>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <!-- Colaborador 1 (Aprovado) -->
-                                <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500"></div>
-                                        <div>
-                                            <div class="text-sm font-bold">Roberto Alves</div>
-                                            <div class="text-xs text-subtle-light dark:text-subtle-dark">15 Nov - 30 Nov</div>
-                                        </div>
-                                    </div>
-                                    <div class="px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold rounded flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Aprovado</div>
-                                </div>
-                                
-                                <!-- Colaborador 2 (Conflito Simulado) -->
-                                <div class="magnetic bg-white dark:bg-[#111] border border-primary/40 shadow-[0_0_15px_rgba(255,45,45,0.1)] p-3 rounded-xl flex flex-col gap-3 relative overflow-hidden">
-                                    <div data-parallax="0.05" class="absolute inset-0 bg-primary/5 animate-pulse"></div>
-                                    <div class="flex items-center justify-between relative z-10">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500"></div>
-                                            <div>
-                                                <div class="text-sm font-bold">Camila Souza</div>
-                                                <div class="text-xs text-primary font-bold">12 Nov - 02 Dez</div>
-                                            </div>
-                                        </div>
-                                        <div class="px-2 py-1 bg-red-500/10 text-primary text-xs font-bold rounded">Revisão</div>
-                                    </div>
-                                    <div class="text-xs bg-red-500/10 text-primary p-2 rounded relative z-10 flex gap-2">
-                                        <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
-                                        <span>Conflito detectado: 3 pessoas do mesmo departamento em férias neste período.</span>
-                                    </div>
-                                </div>
-                            </div>
+    <section id="experiencias" class="py-24 lg:py-32 border-y border-borderline-light dark:border-borderline-dark bg-[#0A0A0A] text-white relative overflow-hidden">
+        <!-- Glow effects -->
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none translate-y-1/2 -translate-x-1/3"></div>
 
-                            <div class="mt-8 pt-4 border-t border-borderline-light dark:border-borderline-dark flex items-center justify-between text-xs text-subtle-light dark:text-subtle-dark">
-                                <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3 text-green-500"></i> Conformidade CLT mantida</span>
-                            </div>
+        <div class="max-w-[1400px] mx-auto px-6 relative z-10">
+            <div class="flex flex-col lg:flex-row gap-20 items-center">
+                <!-- Text Content - Asymmetric Left -->
+                <div class="w-full lg:w-[45%] section-reveal">
+                    <div class="inline-flex px-4 py-2 bg-white/5 border border-white/10 rounded-full text-xs font-bold mb-8 tracking-widest uppercase items-center gap-2 text-white/80">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Gestão de Férias e Folgas
+                    </div>
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter mb-8 leading-[1.05]">
+                        Controle total, sem <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">choques na operação.</span>
+                    </h2>
+                    <p class="text-lg md:text-xl text-white/60 leading-relaxed mb-10 font-medium">
+                        Na plataforma da Let's Work, você tem visibilidade global sobre o cronograma de descanso de todos os colaboradores. Nossa tecnologia alerta você antes de aprovar períodos que desfalcam um mesmo departamento.
+                    </p>
+                    
+                    <div class="space-y-8 border-l-2 border-white/10 pl-6">
+                        <div class="relative">
+                            <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]"></div>
+                            <strong class="block text-xl mb-2">Prevenção de Furos (Anti-Conflito)</strong>
+                            <span class="text-white/50 leading-relaxed block">O sistema acusa sobreposição de datas críticas entre profissionais essenciais.</span>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-white/20"></div>
+                            <strong class="block text-xl mb-2">Aprovação em 1 Clique</strong>
+                            <span class="text-white/50 leading-relaxed block">Agende, valide ou recuse pedidos de folga que já atualizam o espelho de ponto instantaneamente.</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Textos e Benefícios -->
-                <div class="order-1 lg:order-2 section-reveal">
-                    <div class="inline-flex px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
-                        <i data-lucide="calendar-check" class="w-4 h-4"></i> Gestão de Férias e Folgas
+                <!-- Custom UI Dashboard - Floating Right -->
+                <div class="w-full lg:w-[55%] section-reveal flex justify-center lg:justify-end">
+                    <div class="w-full max-w-[600px] bg-[#111111] border border-white/10 rounded-3xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden tilt-element">
+                        <!-- Top Navigation Mock -->
+                        <div class="flex justify-between items-center mb-10 border-b border-white/10 pb-6">
+                            <div>
+                                <h4 class="font-bold text-xl flex items-center gap-3"><i data-lucide="calendar" class="w-6 h-6 text-blue-500"></i> Agendamento de Férias</h4>
+                                <p class="text-sm text-white/50 mt-1">Visão Geral da Empresa</p>
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span class="text-xs font-bold text-amber-500">Atenção Necessária</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline UI -->
+                        <div class="relative">
+                            <!-- Line connecting items -->
+                            <div class="absolute left-[28px] top-0 bottom-0 w-px bg-white/5"></div>
+
+                            <!-- User 1 (Approved) -->
+                            <div class="relative pl-16 mb-8 group">
+                                <div class="absolute left-0 top-3 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-lg border-4 border-[#111] shadow-lg z-10 group-hover:scale-105 transition-transform">RA</div>
+                                <div class="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-white/10 transition-colors">
+                                    <div>
+                                        <div class="text-base font-bold mb-1">Roberto Alves</div>
+                                        <div class="text-sm text-white/50 font-medium">15 Nov — 30 Nov</div>
+                                    </div>
+                                    <div class="px-3 py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold rounded-lg flex items-center gap-2">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Aprovado
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- User 2 (Conflict) -->
+                            <div class="relative pl-16 group">
+                                <div class="absolute left-0 top-3 w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-bold text-lg border-4 border-[#111] shadow-lg z-10 group-hover:scale-105 transition-transform">CS</div>
+                                <div class="bg-primary/10 border border-primary/30 p-5 rounded-2xl flex flex-col gap-4 relative overflow-hidden shadow-[0_0_30px_rgba(255,45,45,0.05)]">
+                                    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCA0NSwgNDUsIDAuMSkiLz48L3N2Zz4=')] opacity-50"></div>
+                                    <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <div class="text-base font-bold mb-1">Camila Souza</div>
+                                            <div class="text-sm text-primary font-bold">12 Nov — 02 Dez</div>
+                                        </div>
+                                        <div class="px-3 py-1.5 bg-red-500/20 text-white text-xs font-bold rounded-lg">Pendente Revisão</div>
+                                    </div>
+                                    <div class="relative z-10 bg-[#111] border border-primary/20 p-3 rounded-xl flex items-start gap-3 mt-2">
+                                        <i data-lucide="alert-triangle" class="w-5 h-5 text-primary shrink-0 mt-0.5"></i>
+                                        <p class="text-sm text-white/80 leading-relaxed">
+                                            <strong class="text-white block mb-0.5">Conflito de Escala</strong>
+                                            3 pessoas do departamento <em>"Vendas Internas"</em> estarão em férias neste mesmo período.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="mt-10 pt-6 border-t border-white/10 flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-xs font-bold text-white/50 uppercase tracking-widest"><i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i> Conformidade CLT mantida</span>
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <i data-lucide="more-horizontal" class="w-4 h-4 text-white/50"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">Controle total, sem choques na operação.</h2>
-                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-8">
-                        Na plataforma da Let's Work, você tem visibilidade global sobre o cronograma de descanso de todos os colaboradores. Nossa tecnologia alerta você antes de aprovar períodos que desfalcam um mesmo departamento.
-                    </p>
-                    
-                    <ul class="space-y-5 mb-8">
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 mt-1">
-                                <i data-lucide="bell-ring" class="w-4 h-4 text-blue-500"></i>
-                            </div>
-                            <div>
-                                <strong class="block text-black dark:text-white">Prevenção de Furos (Anti-Conflito)</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">O sistema acusa sobreposição de datas críticas entre profissionais essenciais.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <div class="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 mt-1">
-                                <i data-lucide="calendar" class="w-4 h-4 text-blue-500"></i>
-                            </div>
-                            <div>
-                                <strong class="block text-black dark:text-white">Aprovação em 1 Clique</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Agende, valide ou recuse pedidos de folga que já atualizam o espelho de ponto instantaneamente.</span>
-                            </div>
-                        </li>
-                    </ul>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- 6. COMPLIANCE LEGAL E RESULTADOS -->
+    <section id="compliance" class="py-24 lg:py-32 bg-white dark:bg-[#050505] border-b border-borderline-light dark:border-borderline-dark relative">
+        <div class="max-w-[1400px] mx-auto px-6">
+            
+            <div class="flex flex-col lg:flex-row gap-16 lg:gap-24 mb-24">
+                
+                <!-- Headings Authority -->
+                <div class="w-full lg:w-1/2 section-reveal">
+                    <h2 class="text-5xl md:text-6xl font-display font-black tracking-tighter mb-8 leading-[1.05]">
+                        O RH <span class="text-primary underline decoration-primary/30 underline-offset-8">100% dentro da Lei.</span>
+                    </h2>
+                    <p class="text-xl text-subtle-light dark:text-subtle-dark leading-relaxed">
+                        A legislação não tolera improvisos. Não assuma riscos com softwares paralelos e planilhas perdidas. A Let's Work blinda sua empresa atendendo integralmente à legislação trabalhista e de proteção de dados.
+                    </p>
+                </div>
+
+                <!-- Legal Badges Grid -->
+                <div class="w-full lg:w-1/2 grid sm:grid-cols-2 gap-6 section-reveal">
+                    <!-- Card 1 -->
+                    <div class="p-8 rounded-[2rem] bg-[#F8FAFC] dark:bg-[#111] border border-borderline-light dark:border-borderline-dark hover:border-primary/50 transition-colors group">
+                        <div class="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="gavel" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="font-bold text-xl mb-3">Portaria 671 MTP</h4>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">Adequado e homologado para controle de ponto eletrônico válido judicialmente.</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="p-8 rounded-[2rem] bg-[#F8FAFC] dark:bg-[#111] border border-borderline-light dark:border-borderline-dark hover:border-primary/50 transition-colors group">
+                        <div class="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-badge-2" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="font-bold text-xl mb-3">Certificado ABNT</h4>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">Software auditado e homologado como Registro Eletrônico de Ponto por Programa (REP-P).</p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="sm:col-span-2 p-8 rounded-[2rem] bg-primary/5 border border-primary/20 hover:border-primary/50 transition-colors group flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                        <div class="w-16 h-16 shrink-0 bg-primary/10 text-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="shield-check" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xl mb-2">Criptografia e LGPD</h4>
+                            <p class="text-subtle-light dark:text-subtle-dark text-sm md:text-base leading-relaxed">Dados sensíveis, biometria facial e documentos estão blindados na nuvem com criptografia de ponta a ponta. Privacidade garantida por padrão.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados de Impacto (Elegance/Modern Grid) -->
+            <div class="bg-[#0A0A0A] text-white rounded-[3rem] p-10 md:p-16 relative overflow-hidden section-reveal shadow-2xl">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 relative z-10 divide-x divide-white/10">
+                    <div class="text-center pl-0">
+                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">-25%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Processos Trabalhistas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">+25%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Produtividade RH</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-primary to-primary/50 mb-3">-45%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Erros de Horas Extras</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 mb-3">98%</div>
+                        <div class="text-xs font-bold tracking-widest uppercase text-white/50">Aprovação do Sistema</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
