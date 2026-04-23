@@ -50,6 +50,15 @@
     </script>
 
     <style>
+        /* Noise Overlay */
+        .noise-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+        }
+        .dark .noise-overlay {
+            opacity: 0.05;
+        }
+
         /* Base & Reset Technical */
         body {
             background-color: #FFFFFF;
@@ -99,6 +108,13 @@
         }
         .dark .solid-card { background: #0A0A0A; }
         .solid-card:hover { border-color: #FF2D2D; }
+
+        /* Magnetic Utility */
+        .magnetic {
+            /* Prevent CSS transition from fighting with GSAP transforms */
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s !important;
+            will-change: transform;
+        }
 
         /* Marquee Custom */
         .marquee-container { overflow: hidden; display: flex; white-space: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
@@ -157,6 +173,7 @@
     </style>
 </head>
 <body class="selection:bg-primary selection:text-white">
+    <div class="noise-overlay fixed inset-0 pointer-events-none z-50"></div>
     <div class="tech-grid"></div>
 
     <!-- NAVBAR -->
@@ -199,7 +216,7 @@
                     <i data-lucide="moon" id="theme-toggle-dark-icon" class="w-4 h-4 hidden"></i>
                 </button>
                 <a href="https://app.letswork.com.br" class="text-sm font-bold hover:text-primary transition-colors">Login</a>
-                <button class="btn-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-glow">
+                <button class="btn-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-glow magnetic">
                     Falar com Vendas
                 </button>
             </div>
@@ -227,42 +244,33 @@
                 </p>
                 
             <div class="hero-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <button class="bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
+                <button class="magnetic bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
                     Começar Teste Grátis
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                 </button>
-                <button class="bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
+                <button class="magnetic bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
                     Falar com Especialista
                 </button>
             </div>
 
-            <!-- Human Social Proof / Avatares -->
-            <div class="hero-reveal mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm font-medium">
-                <div class="flex -space-x-3">
-                    <img src="https://i.pravatar.cc/100?img=47" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
-                    <img src="https://i.pravatar.cc/100?img=32" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
-                    <img src="https://i.pravatar.cc/100?img=12" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
-                    <img src="https://i.pravatar.cc/100?img=60" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
-                </div>
-                <div class="flex flex-col items-center sm:items-start">
-                    <div class="flex items-center gap-1 text-amber-500 mb-1">
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </div>
-                    <span class="text-xs text-subtle-light dark:text-subtle-dark font-bold tracking-wide uppercase">Aprovado por +500 Gestores de RH</span>
+            <!-- B2B Social Proof / Logos -->
+            <div class="hero-reveal mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 text-sm font-medium">
+                <span class="text-xs text-subtle-light dark:text-subtle-dark font-bold tracking-widest uppercase">Confiado por equipes de:</span>
+                <div class="flex items-center gap-6 opacity-60 grayscale">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
                 </div>
             </div>
             </div>
 
             <!-- Right Column: Interactive Cluster -->
             <div class="lg:col-span-6 relative h-[450px] md:h-[550px] w-full hidden lg:block perspective-2000 mt-10 lg:mt-0">
-                <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
+                <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full" data-parallax="0.05"></div>
                 
                 <!-- Background: Dashboard -->
-                <div class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] bg-white dark:bg-[#0A0A0A] will-change-transform">
+                <div class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] bg-white dark:bg-[#0A0A0A] will-change-transform lg:-mt-4" data-parallax="-0.02">
                     <div class="h-10 bg-gray-50 dark:bg-[#111] border-b border-borderline-light dark:border-borderline-dark flex items-center px-4 gap-2">
                         <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                         <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
@@ -272,7 +280,7 @@
                 </div>
 
                     <!-- Foreground: Mobile App Mockup UI CSS (iPhone Style) -->
-                    <div class="hero-mobile absolute left-[5%] bottom-5 w-[260px] h-[550px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#0A0A0A] shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-30 will-change-transform flex flex-col relative overflow-hidden">
+                    <div class="hero-mobile absolute left-[2%] bottom-0 w-[260px] h-[550px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#0A0A0A] shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-30 will-change-transform flex flex-col relative overflow-hidden" data-parallax="0.06">
                         <!-- Dynamic Island / Notch -->
                         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#18181B] rounded-b-2xl z-40"></div>
                         
@@ -374,7 +382,7 @@
                             </div>
                         </li>
                     </ul>
-                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
+                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="magnetic btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
                         Quero a VittórIA na minha empresa
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
@@ -636,9 +644,12 @@
                     </a>
                 </div>
 
-                <div class="w-full lg:w-1/2 section-reveal">
+                <div class="w-full lg:w-1/2 section-reveal relative mt-8 lg:mt-0 lg:-ml-8" data-parallax="0.03">
+                    <!-- Absolute Decorative Blob -->
+                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-primary/10 rounded-full blur-[60px] pointer-events-none z-0"></div>
+                    
                     <!-- Technical UI Mockup -->
-                    <div class="solid-card rounded-2xl p-6 shadow-xl relative overflow-hidden font-mono text-sm">
+                    <div class="solid-card rounded-2xl p-6 shadow-xl relative overflow-hidden font-mono text-sm z-10">
                         <div class="flex items-center justify-between mb-6 pb-4 border-b border-borderline-light dark:border-borderline-dark">
                             <span class="text-xs font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest">Pipeline: Coordenador de RH</span>
                             <span class="flex items-center gap-2 text-primary text-xs"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> IA Processing</span>
@@ -844,7 +855,7 @@
     </section>
 
     <!-- 6.5. DEPOIMENTOS (Marquee 3D) -->
-    <section class="py-24 lg:py-32 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
+    <section class="pt-24 lg:pt-32 pb-10 lg:pb-12 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
         <div class="max-w-[1400px] mx-auto px-6 relative z-10">
             <div class="text-center mb-16 section-reveal">
                 <div class="inline-flex px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
@@ -921,7 +932,7 @@
     </section>
 
     <!-- 7. PLANOS (Clean Pricing) -->
-    <section id="planos" class="py-24 lg:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
+    <section id="planos" class="pt-16 lg:pt-20 pb-24 lg:pb-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="text-center mb-16 section-reveal">
                 <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Investimento escalável.</h2>
@@ -965,7 +976,7 @@
                         <span class="text-5xl font-display font-black price-val" data-mensal="R$299" data-anual="R$239">R$299</span>
                         <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
                     </div>
-                    <button class="btn-primary w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
+                    <button class="magnetic btn-primary w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
                     <ul class="space-y-4 text-sm font-bold flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Ponto via WhatsApp</li>
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Gestão de Escalas Completa</li>
@@ -1105,7 +1116,7 @@
             <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark mb-10">
                 Ponto geolocalizado, escalas arrastáveis e segurança jurídica em um só clique.
             </p>
-            <button class="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 shadow-soft">
+            <button class="magnetic bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 shadow-soft">
                 Agendar Demonstração Gratuita
             </button>
             <p class="text-xs text-subtle-light dark:text-subtle-dark mt-6 font-bold tracking-widest uppercase"><i data-lucide="shield-check" class="inline w-3 h-3 mr-1 mb-0.5"></i> Suporte Humanizado Garantido</p>
@@ -1388,6 +1399,51 @@
                       .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
                       .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" });
             }
+
+            // Magnetic Buttons
+            document.querySelectorAll('.magnetic').forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    gsap.to(btn, { scale: 1.02, duration: 0.3, ease: "power2.out" });
+                });
+
+                btn.addEventListener('mousemove', e => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    
+                    gsap.to(btn, {
+                        x: x * 0.3,
+                        y: y * 0.3,
+                        duration: 0.4,
+                        ease: "power2.out"
+                    });
+                });
+
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, {
+                        x: 0,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.7,
+                        ease: "elastic.out(1, 0.3)"
+                    });
+                });
+            });
+
+            // Subtle Parallax
+            gsap.utils.toArray('[data-parallax]').forEach(el => {
+                const speed = parseFloat(el.getAttribute('data-parallax'));
+                gsap.to(el, {
+                    y: () => (ScrollTrigger.maxScroll(window) ? speed * 300 : 0),
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: el,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true
+                    }
+                });
+            });
         });
     </script>
 </body>
