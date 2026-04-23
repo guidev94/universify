@@ -105,15 +105,22 @@
         .solid-card:hover { border-color: #FF2D2D; }
 
         /* Marquee Custom */
-        .marquee-container { overflow: hidden; display: flex; white-space: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
-        .marquee-content { display: flex; animation: marquee 40s linear infinite; }
-        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-        .client-logo { height: 2.5rem; width: 120px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s; }
-        @media (min-width: 1024px) { .client-logo { height: 3.5rem; width: 140px; } }
-        .client-logo:hover { filter: grayscale(0%) opacity(1); transform: scale(1.05); }
-        .dark .client-logo { filter: brightness(0) invert(1) opacity(0.5); }
-        .dark .client-logo:hover { filter: brightness(1) invert(0) opacity(1); }
+        .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; }
+        
+        .client-logo { height: 36px; width: auto; max-width: 160px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s ease; }
+        .client-logo.highlight { height: 52px; max-width: 200px; filter: grayscale(0%) opacity(1) !important; }
+        
+        @media (min-width: 1024px) { 
+            .client-logo { height: 48px; max-width: 180px; } 
+            .client-logo.highlight { height: 72px; max-width: 240px; }
+        }
+        .client-logo:hover { filter: grayscale(0%) opacity(1); transform: translateY(-4px); }
+        .client-logo.highlight:hover { transform: translateY(-4px); }
+        
+        .dark .client-logo { filter: brightness(0) invert(1) opacity(0.4); }
+        .dark .client-logo.highlight { filter: brightness(0) invert(1) opacity(1) !important; }
+        .dark .client-logo:hover { filter: brightness(0) invert(1) opacity(1); }
 
         /* 3D Depoimentos Marquee */
         .testimonial-container {
@@ -339,83 +346,89 @@
     </section>
 
     <!-- 2. CLIENTES (Stark Marquee) -->
-    <section class="py-14 border-b border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-dark overflow-hidden flex flex-col items-center">
+    <section class="py-14 border-b border-borderline-light dark:border-borderline-dark bg-white dark:bg-[#0A0A0A] overflow-hidden flex flex-col items-center">
         <p class="text-sm font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-10 text-center px-4">
             Quem confia em nossa plataforma
         </p>
         <div class="marquee-container w-full">
-            <div class="marquee-content gap-24 items-center px-8">
-                <!-- Marcas agrupadas com labels -->
-                <div class="flex items-center gap-24">
-                    <div class="flex flex-col items-center gap-4">
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Clientes</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
-                        </div>
+            <div class="marquee-content flex items-center gap-12 md:gap-16 px-8">
+                
+                <!-- LOOP INTERNO 1 -->
+                <div class="flex items-center gap-12 md:gap-16 shrink-0">
+                    <!-- BLOCO 1: INVESTIDORES -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Investidores</span>
                     </div>
-                    
-                    <div class="flex flex-col items-center gap-4 relative">
-                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Parceiros & Certificações</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
-                        </div>
-                    </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo highlight shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo highlight shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo highlight shrink-0">
 
-                    <div class="flex flex-col items-center gap-4 relative">
-                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Investidores</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
-                        </div>
+                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
+
+                    <!-- BLOCO 2: PARCEIROS -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Parceiros</span>
                     </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo shrink-0">
+
+                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
+
+                    <!-- BLOCO 3: CLIENTES -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Clientes</span>
+                    </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo shrink-0">
                 </div>
 
-                <!-- Duplicata para Loop Infinito Perfeito -->
-                <div class="flex items-center gap-24">
-                    <div class="flex flex-col items-center gap-4">
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Clientes</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
-                        </div>
+                <!-- LOOP INTERNO 2 (DUPLICATA PARA ANIMAÇÃO INIFINITA) -->
+                <div class="flex items-center gap-12 md:gap-16 shrink-0">
+                    <!-- BLOCO 1: INVESTIDORES (CLONE) -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Investidores</span>
                     </div>
-                    
-                    <div class="flex flex-col items-center gap-4 relative">
-                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Parceiros & Certificações</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
-                        </div>
-                    </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo highlight shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo highlight shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo highlight shrink-0">
 
-                    <div class="flex flex-col items-center gap-4 relative">
-                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Investidores</span>
-                        <div class="flex items-center gap-16">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
-                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
-                        </div>
+                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
+
+                    <!-- BLOCO 2: PARCEIROS (CLONE) -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Parceiros</span>
                     </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo shrink-0">
+
+                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
+
+                    <!-- BLOCO 3: CLIENTES (CLONE) -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Clientes</span>
+                    </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo shrink-0">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo shrink-0">
                 </div>
+                
             </div>
         </div>
     </section>
@@ -490,10 +503,10 @@
                             <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Ecossistema Inteligente
                         </div>
                         <h2 class="text-4xl md:text-5xl lg:text-[3.5rem] font-display font-black tracking-tighter mb-6 leading-[1.05] text-black dark:text-white">
-                            Uma plataforma.<br/>
-                            <span class="text-primary">Zero atrito.</span>
+                            Muito além de bater o ponto.<br/>
+                            <span class="text-primary">Tudo em um só lugar.</span>
                         </h2>
-                        <p class="text-subtle-light dark:text-subtle-dark text-lg md:text-xl font-medium max-w-md leading-relaxed">Desenhado para ser invisível no dia a dia do colaborador, mas implacável e robusto na visão do gestor.</p>
+                        <p class="text-subtle-light dark:text-subtle-dark text-lg md:text-xl font-medium max-w-md leading-relaxed">Simplifique processos, agilize admissões e conecte o desenvolvimento da sua equipe usando um único hub invisível ao colaborador, mas poderoso para o RH.</p>
                     </div>
 
                     <!-- Blocos de Texto (Cada um ocupa espaço de rolagem) -->
@@ -521,14 +534,14 @@
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary lg:group-[.active]:text-primary">
-                                    <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                                    <i data-lucide="briefcase" class="w-6 h-6"></i>
                                 </div>
-                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Gestão de Escalas</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Gestão de Vagas</h3>
                             </div>
                             <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-8">
-                                Crie horários, gerencie folgas e evite horas extras indesejadas com antecedência. O sistema alerta automaticamente o RH e o Gestor sobre conflitos ou furos na escala da equipe.
+                                Atraia, avalie e contrate os melhores talentos em tempo recorde. Crie um portal de carreiras profissional, gerencie etapas do funil e unifique a comunicação com os candidatos.
                             </p>
-                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
+                            <a href="https://www.letswork.com.br/recrutamento-e-selecao/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
                                 Conhecer módulo
                                 <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                             </a>
@@ -540,14 +553,14 @@
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary lg:group-[.active]:text-primary">
-                                    <i data-lucide="folder-open" class="w-6 h-6"></i>
+                                    <i data-lucide="trending-up" class="w-6 h-6"></i>
                                 </div>
-                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Documentos & Férias</h3>
+                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Avaliação & Desempenho (T&D)</h3>
                             </div>
                             <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-8">
-                                Todos os atestados e holerites em um cofre digital. Além disso, centralize os pedidos de férias e a comunicação da equipe em um só lugar. O RH aprova com um clique, mantendo o histórico auditável.
+                                Desenvolva seu time de forma contínua. Aplique avaliações 360º, monte PDIs (Planos de Desenvolvimento Individual) e conecte treinamentos a metas de desempenho num único hub.
                             </p>
-                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
+                            <a href="https://www.letswork.com.br/treinamento-e-desenvolvimento/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
                                 Conhecer módulo
                                 <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                             </a>
@@ -580,64 +593,88 @@
                         </div>
                     </div>
 
-                    <!-- Mockup 2: Escalas -->
+                    <!-- Mockup 2: Vagas (Kanban UI) -->
                     <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-2">
-                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="font-bold text-black dark:text-white">Escala Semanal</div>
-                                <div class="flex gap-2">
-                                    <span class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded text-[10px] font-bold">1 Conflito</span>
-                                </div>
+                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-5 overflow-hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="font-bold text-black dark:text-white">Vaga: Coordenador de RH</div>
+                                <div class="px-2 py-1 bg-primary/10 text-primary rounded text-[10px] font-bold uppercase tracking-wide">Em Andamento</div>
                             </div>
-                            <div class="space-y-3">
-                                <div class="flex gap-3 items-center">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">AM</div>
-                                    <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <!-- Coluna 1 -->
+                                <div class="bg-gray-50 dark:bg-[#111] p-3 rounded-xl border border-borderline-light dark:border-borderline-dark">
+                                    <div class="text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase mb-2">Triagem (12)</div>
+                                    <div class="bg-white dark:bg-[#1A1A1A] p-2 rounded shadow-sm border border-gray-100 dark:border-[#222] mb-2">
+                                        <div class="text-xs font-bold text-black dark:text-white">Ana Costa</div>
+                                        <div class="text-[9px] text-gray-400">Match: 95%</div>
+                                    </div>
+                                    <div class="bg-white dark:bg-[#1A1A1A] p-2 rounded shadow-sm border border-gray-100 dark:border-[#222] opacity-50">
+                                        <div class="text-[10px] bg-gray-200 dark:bg-gray-800 h-3 w-3/4 rounded"></div>
                                     </div>
                                 </div>
-                                <div class="flex gap-3 items-center">
-                                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-600 dark:text-orange-400">JS</div>
-                                    <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
-                                        <div class="h-8 bg-primary/20 rounded-xl border border-primary/50 relative overflow-hidden">
-                                            <div class="absolute inset-0 bg-primary/10 animate-pulse"></div>
-                                        </div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                <!-- Coluna 2 -->
+                                <div class="bg-gray-50 dark:bg-[#111] p-3 rounded-xl border border-borderline-light dark:border-borderline-dark">
+                                    <div class="text-[10px] font-bold text-blue-500 uppercase mb-2">Entrevista (3)</div>
+                                    <div class="bg-white dark:bg-[#1A1A1A] p-2 rounded shadow-sm border border-blue-500/30 relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-blue-500/5 animate-pulse"></div>
+                                        <div class="text-xs font-bold text-black dark:text-white">Carlos Mendes</div>
+                                        <div class="text-[9px] text-blue-500">Hoje, 14h00</div>
+                                    </div>
+                                </div>
+                                <!-- Coluna 3 -->
+                                <div class="bg-gray-50 dark:bg-[#111] p-3 rounded-xl border border-borderline-light dark:border-borderline-dark opacity-70">
+                                    <div class="text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase mb-2">Proposta (0)</div>
+                                    <div class="border border-dashed border-gray-300 dark:border-gray-700 h-10 rounded flex items-center justify-center text-gray-400">
+                                        <i data-lucide="plus" class="w-3 h-3"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Mockup 3: Documentos -->
+                    <!-- Mockup 3: Avaliação & Desempenho (Radar/Stats) -->
                     <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-3">
                         <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
                             <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
-                                <span class="font-bold text-black dark:text-white">Atestados Pendentes</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded text-xs font-bold">Auditado</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">LM</div>
+                                    <div>
+                                        <div class="font-bold text-black dark:text-white">Lucas Mendes</div>
+                                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Avaliação 360º - Q3</div>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded text-xs font-bold">Concluído</span>
                             </div>
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-borderline-light dark:border-borderline-dark hover:border-primary/50 transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-500">
-                                            <i data-lucide="file-text" class="w-5 h-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-black dark:text-white">Atestado_Medico_2dias.pdf</div>
-                                            <div class="text-xs text-subtle-light dark:text-subtle-dark">João Silva - Há 2 horas</div>
-                                        </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold mb-1">
+                                        <span class="text-black dark:text-white">Liderança</span>
+                                        <span class="text-primary">9.2 / 10</span>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <button class="w-8 h-8 rounded bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="check" class="w-4 h-4"></i></button>
-                                        <button class="w-8 h-8 rounded bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                    <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                                        <div class="bg-primary h-2 rounded-full" style="width: 92%"></div>
                                     </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold mb-1">
+                                        <span class="text-black dark:text-white">Comunicação</span>
+                                        <span class="text-green-500">8.8 / 10</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 88%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold mb-1">
+                                        <span class="text-black dark:text-white">Resolução de Conflitos</span>
+                                        <span class="text-amber-500">6.5 / 10</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                                        <div class="bg-amber-500 h-2 rounded-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-borderline-light dark:border-borderline-dark">
+                                    <div class="text-xs text-subtle-light dark:text-subtle-dark font-medium"><i data-lucide="alert-circle" class="w-3 h-3 inline mr-1 text-amber-500"></i> Sugestão de PDI gerada: Treinamento em CNV (Comunicação Não Violenta)</div>
                                 </div>
                             </div>
                         </div>
@@ -1465,8 +1502,8 @@
     </footer>
 
     <!-- MODAL DE CAPTAÇÃO / LEAD -->
-    <div id="lead-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-[#111] w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 border border-borderline-light dark:border-borderline-dark mx-4 relative flex flex-col text-center">
+    <div id="lead-modal" class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 px-4 py-8 overflow-y-auto">
+        <div class="bg-white dark:bg-[#111] w-[90%] md:w-[80%] max-w-[600px] my-auto rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 border border-borderline-light dark:border-borderline-dark relative flex flex-col text-center shrink-0">
             <button id="close-modal" class="absolute top-4 right-4 p-2 text-subtle-light dark:text-subtle-dark hover:text-black dark:hover:text-white transition-colors bg-gray-100 dark:bg-white/10 rounded-full z-10">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -1477,9 +1514,9 @@
                 <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow">
                     <i data-lucide="rocket" class="w-8 h-8"></i>
                 </div>
-                <h3 class="text-3xl font-display font-black text-black dark:text-white mb-2 tracking-tight">Comece sua evolução.</h3>
-                <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark max-w-[280px] mx-auto leading-relaxed">
-                    Deixe seus dados e nossa equipe de especialistas montará seu ambiente <strong>100% gratuito</strong> e pronto para uso em minutos.
+                <h3 class="text-3xl font-display font-black text-black dark:text-white mb-2 tracking-tight">Transforme o seu RH agora.</h3>
+                <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark max-w-sm mx-auto leading-relaxed">
+                    Deixe seus dados e nossa equipe de especialistas montará seu ambiente <strong>100% gratuito</strong>. Aposente planilhas e comece a escalar hoje mesmo.
                 </p>
             </div>
 
@@ -1649,6 +1686,22 @@
         // --- GSAP ANIMATIONS & INTERACTIONS ---
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
         let mm = gsap.matchMedia();
+
+        // 1. Iniciar o Loop Marquee apenas quando a seção aparecer na tela (Performance + Efeito de Controle)
+        const marqueeContent = document.querySelector('.marquee-content');
+        if(marqueeContent) {
+            gsap.to(marqueeContent, {
+                x: () => -(marqueeContent.scrollWidth / 2) + "px",
+                ease: "none",
+                duration: 40,
+                repeat: -1,
+                scrollTrigger: {
+                    trigger: ".marquee-container",
+                    start: "top 90%", // Só começa a rodar quando está bem visível
+                    toggleActions: "play pause resume pause"
+                }
+            });
+        }
 
         gsap.utils.toArray('.section-reveal').forEach(elem => {
             gsap.from(elem, {
