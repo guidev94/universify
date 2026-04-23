@@ -1717,9 +1717,9 @@
         const marqueeContent = document.querySelector('.marquee-content');
         if(marqueeContent) {
             gsap.fromTo(marqueeContent, 
-                { xPercent: -50 },
+                { xPercent: 0 },
                 {
-                    xPercent: 0,
+                    xPercent: -50,
                     ease: "none",
                     duration: 50,
                     repeat: -1,
