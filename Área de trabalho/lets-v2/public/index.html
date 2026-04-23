@@ -275,7 +275,7 @@
                 <div data-parallax="0.05" class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
                 
                 <!-- Background: Dashboard -->
-                <div class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] will-change-transform border border-borderline-light dark:border-borderline-dark">
+                <div class="hero-dash absolute right-0 top-0 w-[85%] will-change-transform">
                     <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/frame.webp" alt="Dashboard Let's Work" class="w-full object-cover">
                 </div>
 
@@ -304,7 +304,7 @@
             
             <!-- Mobile Image Fallback -->
             <div class="lg:hidden w-full mt-10 relative">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/frame.webp" alt="Dashboard" class="w-full rounded-xl border border-borderline-light dark:border-borderline-dark shadow-xl">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/frame.webp" alt="Dashboard" class="w-full object-cover">
             </div>
 
         </div>
@@ -473,57 +473,70 @@
                 <!-- Esquerda (Textos Rolando Naturalmente) -->
                 <div class="w-full lg:w-1/2 relative z-10">
                     <div class="pt-20 lg:pt-24 pb-12 lg:pb-16">
-                        <h2 class="text-4xl md:text-5xl font-display font-black tracking-tight text-gradient mb-4">
-                            Uma plataforma.<br/>Zero atrito.
+                        <div class="inline-flex px-3 py-1 bg-gray-100 dark:bg-white/5 border border-borderline-light dark:border-borderline-dark rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Ecossistema Inteligente
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-display font-black tracking-tighter mb-6 leading-[1.05] text-black dark:text-white">
+                            Uma plataforma.<br/>
+                            <span class="text-primary">Zero atrito.</span>
                         </h2>
-                        <p class="text-subtle-light dark:text-subtle-dark text-lg max-w-md">Desenhado para ser invisível no dia a dia do colaborador, mas implacável e robusto na visão do gestor.</p>
+                        <p class="text-subtle-light dark:text-subtle-dark text-lg md:text-xl font-medium max-w-md leading-relaxed">Desenhado para ser invisível no dia a dia do colaborador, mas implacável e robusto na visão do gestor.</p>
                     </div>
 
                     <!-- Blocos de Texto (Cada um ocupa espaço de rolagem) -->
                     <div class="step-text min-h-[70vh] flex flex-col justify-center pr-4 lg:pr-10" id="step-1">
-                        <div class="p-8 md:p-10 rounded-sm bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark shadow-[4px_4px_0px_rgba(0,0,0,0.05)] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.05)] transition-all duration-500">
-                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
-                                <i data-lucide="smartphone" class="w-6 h-6 text-primary"></i>
-                                Ponto Eletrônico c/ Reconhecimento Facial
-                            </h3>
-                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                        <div class="p-8 md:p-10 rounded-3xl bg-white dark:bg-[#0A0A0A] border border-borderline-light dark:border-borderline-dark shadow-soft transition-all duration-500 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors"></div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                    <i data-lucide="smartphone" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Ponto Facial</h3>
+                            </div>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-8">
                                 Abandone os relógios físicos caros e com manutenção. O colaborador bate ponto de qualquer lugar via <strong>WhatsApp</strong> ou App nativo, com reconhecimento facial antifraude (Liveness Detection) e validação ativa por GPS.
                             </p>
-                            <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
+                            <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
                                 Conhecer módulo
-                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                             </a>
                         </div>
                     </div>
 
                     <div class="step-text min-h-[70vh] flex flex-col justify-center pr-4 lg:pr-10" id="step-2">
-                        <div class="p-8 md:p-10 rounded-sm bg-transparent border border-transparent opacity-50 transition-all duration-500">
-                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
-                                <i data-lucide="calendar-days" class="w-6 h-6 text-primary"></i>
-                                Gestão de Escalas
-                            </h3>
-                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-40 transition-all duration-500 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary">
+                                    <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Gestão de Escalas</h3>
+                            </div>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-8">
                                 Crie horários, gerencie folgas e evite horas extras indesejadas com antecedência. O sistema alerta automaticamente o RH e o Gestor sobre conflitos ou furos na escala da equipe.
                             </p>
-                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
+                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
                                 Conhecer módulo
-                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                             </a>
                         </div>
                     </div>
                     
                     <div class="step-text min-h-[70vh] flex flex-col justify-center pr-4 lg:pr-10 pb-32" id="step-3">
-                        <div class="p-8 md:p-10 rounded-sm bg-transparent border border-transparent opacity-50 transition-all duration-500">
-                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
-                                <i data-lucide="folder-open" class="w-6 h-6 text-primary"></i>
-                                Documentos, Férias & Comunicação
-                            </h3>
-                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-40 transition-all duration-500 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary">
+                                    <i data-lucide="folder-open" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold text-black dark:text-white leading-tight">Documentos & Férias</h3>
+                            </div>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-8">
                                 Todos os atestados e holerites em um cofre digital. Além disso, centralize os pedidos de férias e a comunicação da equipe em um só lugar. O RH aprova com um clique, mantendo o histórico auditável.
                             </p>
-                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
-                                Conhecer módulos
-                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="inline-flex items-center text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group/link">
+                                Conhecer módulo
+                                <i data-lucide="arrow-right" class="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                             </a>
                         </div>
                     </div>
@@ -532,23 +545,23 @@
                 <!-- Direita Fixa (Mockups em CSS puro) -->
                 <div class="hidden lg:flex w-1/2 h-screen sticky top-0 items-center justify-center">
                     
-                    <!-- Mockup 1: Ponto (Phone UI iPhone Style) -->
+                    <!-- Mockup 1: Ponto (Phone UI) -->
                     <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-700 opacity-100 scale-100 translate-y-0" id="vis-1">
-                        <div class="w-full h-full bg-[#0A0A0A] rounded-[3rem] border-[8px] border-[#18181B] shadow-2xl relative overflow-hidden flex flex-col items-center">
-                            <div class="absolute top-0 w-32 h-6 bg-[#18181B] rounded-b-2xl z-10"></div>
+                        <div class="w-full h-full bg-white dark:bg-[#111] rounded-[2.5rem] border-[6px] border-black shadow-[16px_16px_0px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col items-center">
+                            <div class="absolute top-0 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                             
-                            <div class="mt-16 w-24 h-24 rounded-full border-2 border-dashed border-primary flex items-center justify-center relative">
-                                <div class="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse"></div>
-                                <i data-lucide="scan-face" class="w-10 h-10 text-primary"></i>
+                            <div class="mt-20 w-28 h-28 rounded-full border-[3px] border-dashed border-primary flex items-center justify-center relative bg-primary/5">
+                                <div class="absolute inset-0 bg-primary/10 rounded-full animate-pulse"></div>
+                                <i data-lucide="scan-face" class="w-12 h-12 text-primary"></i>
                             </div>
-                            <div class="mt-6 text-center">
-                                <div class="text-white font-bold text-xl">14:02</div>
-                                <div class="text-subtle-dark text-xs mt-1">R. Funchal, 418 - SP</div>
+                            <div class="mt-8 text-center px-4">
+                                <div class="text-black dark:text-white font-black text-3xl mb-1">14:02</div>
+                                <div class="text-subtle-light dark:text-subtle-dark text-xs font-bold uppercase tracking-widest border border-borderline-light dark:border-borderline-dark px-3 py-1 rounded-sm">R. Funchal, 418</div>
                             </div>
                             
                             <div class="mt-auto w-full p-6">
-                                <div class="w-full bg-primary text-white py-4 rounded-full flex justify-center items-center gap-2 font-bold shadow-glow">
-                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Ponto Registrado
+                                <div class="w-full bg-green-500 text-white py-4 rounded-sm flex justify-center items-center gap-2 font-bold shadow-[4px_4px_0px_rgba(0,0,0,0.2)]">
+                                    <i data-lucide="check-square" class="w-5 h-5"></i> Ponto Sincronizado
                                 </div>
                             </div>
                         </div>
@@ -556,34 +569,34 @@
 
                     <!-- Mockup 2: Escalas -->
                     <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-2">
-                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="font-bold text-black dark:text-white">Escala Semanal</div>
+                        <div class="bg-white dark:bg-[#111] rounded-sm border border-black dark:border-white shadow-[8px_8px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_rgba(255,255,255,0.1)] p-8">
+                            <div class="flex justify-between items-center mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                                <div class="font-black text-black dark:text-white text-lg uppercase tracking-wider">Escala Semanal</div>
                                 <div class="flex gap-2">
-                                    <span class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded text-[10px] font-bold">1 Conflito</span>
+                                    <span class="px-3 py-1.5 bg-red-100 text-primary dark:bg-primary/20 rounded-sm border border-primary/30 text-[10px] font-bold uppercase tracking-widest">1 Conflito</span>
                                 </div>
                             </div>
-                            <div class="space-y-3">
-                                <div class="flex gap-3 items-center">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">AM</div>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 items-center">
+                                    <div class="w-10 h-10 rounded-sm bg-black dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black">AM</div>
                                     <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
+                                        <div class="h-10 bg-gray-100 dark:bg-[#222] rounded-sm border border-borderline-light dark:border-white/10"></div>
+                                        <div class="h-10 bg-gray-100 dark:bg-[#222] rounded-sm border border-borderline-light dark:border-white/10"></div>
                                     </div>
                                 </div>
-                                <div class="flex gap-3 items-center">
-                                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-600 dark:text-orange-400">JS</div>
+                                <div class="flex gap-4 items-center">
+                                    <div class="w-10 h-10 rounded-sm border border-borderline-light dark:border-white/20 flex items-center justify-center text-xs font-bold text-black dark:text-white">JS</div>
                                     <div class="flex-1 grid grid-cols-5 gap-2">
-                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
-                                        <div class="h-8 bg-primary/20 rounded-xl border border-primary/50 relative overflow-hidden">
-                                            <div class="absolute inset-0 bg-primary/10 animate-pulse"></div>
+                                        <div class="h-10 bg-gray-100 dark:bg-[#222] rounded-sm border border-borderline-light dark:border-white/10"></div>
+                                        <div class="h-10 bg-primary rounded-sm border border-black shadow-[2px_2px_0px_rgba(0,0,0,0.2)] relative overflow-hidden flex items-center justify-center text-white">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
                                         </div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
-                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
+                                        <div class="h-10 bg-green-500 rounded-sm border border-green-600 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"></div>
                                     </div>
                                 </div>
                             </div>
@@ -592,25 +605,25 @@
 
                     <!-- Mockup 3: Documentos -->
                     <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-3">
-                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
-                            <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
-                                <span class="font-bold text-black dark:text-white">Atestados Pendentes</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded text-xs font-bold">Auditado</span>
+                        <div class="bg-white dark:bg-[#111] rounded-sm border border-black dark:border-white shadow-[8px_8px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_rgba(255,255,255,0.1)] p-8">
+                            <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-4 mb-6">
+                                <span class="font-black text-black dark:text-white text-lg uppercase tracking-wider">Atestados Pendentes</span>
+                                <span class="px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-green-200 dark:border-green-800">Cofre Ativo</span>
                             </div>
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-borderline-light dark:border-borderline-dark hover:border-primary/50 transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-500">
-                                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                                <div class="flex items-center justify-between p-4 bg-surface-light dark:bg-[#0A0A0A] rounded-sm border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white transition-colors shadow-sm">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-sm bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
+                                            <i data-lucide="file-text" class="w-6 h-6"></i>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-bold text-black dark:text-white">Atestado_Medico_2dias.pdf</div>
-                                            <div class="text-xs text-subtle-light dark:text-subtle-dark">João Silva - Há 2 horas</div>
+                                            <div class="text-sm font-bold text-black dark:text-white mb-0.5">Atestado_Medico.pdf</div>
+                                            <div class="text-xs text-subtle-light dark:text-subtle-dark font-medium uppercase tracking-wider">João Silva • Há 2 horas</div>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="w-8 h-8 rounded bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="check" class="w-4 h-4"></i></button>
-                                        <button class="w-8 h-8 rounded bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                        <button class="w-10 h-10 rounded-sm bg-green-500 text-white flex items-center justify-center hover:scale-105 hover:shadow-[2px_2px_0px_rgba(0,0,0,0.2)] transition-all"><i data-lucide="check" class="w-5 h-5"></i></button>
+                                        <button class="w-10 h-10 rounded-sm border-2 border-borderline-light dark:border-borderline-dark text-subtle-light dark:text-subtle-dark flex items-center justify-center hover:border-primary hover:text-primary transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -1541,11 +1554,11 @@
                 stepTexts.forEach((t, i) => {
                     const card = t.querySelector('div');
                     if (i === index) {
-                        card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft');
-                        card.classList.remove('bg-transparent', 'border-transparent', 'opacity-50');
+                        card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                        card.classList.remove('bg-transparent', 'border-transparent', 'opacity-40');
                     } else {
-                        card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft');
-                        card.classList.add('bg-transparent', 'border-transparent', 'opacity-50');
+                        card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                        card.classList.add('bg-transparent', 'border-transparent', 'opacity-40');
                     }
                 });
 
