@@ -66,18 +66,7 @@
         ::-webkit-scrollbar-thumb { background-color: #FF2D2D; border-radius: 10px; border: 3px solid #F1F5F9; }
         .dark ::-webkit-scrollbar-thumb { border: 3px solid #050505; }
 
-        /* Minimalist Grid Background */
-        .tech-grid {
-            position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background-image: 
-                linear-gradient(to right, var(--border-color) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
-            background-size: 80px 80px;
-            mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
-            -webkit-mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
-        }
-        body { --border-color: rgba(0,0,0,0.03); }
-        .dark body { --border-color: rgba(255,255,255,0.03); }
+        /* (Removed Tech Grid for cleaner fluid background) */
 
         /* Typography Mastery */
         .text-huge {
@@ -108,12 +97,12 @@
         .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; }
         
-        .client-logo { height: 42px; width: auto; max-width: 160px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s ease; }
-        .client-logo.highlight { height: 64px; max-width: 220px; filter: grayscale(0%) opacity(1) !important; }
+        .client-logo { height: 60px; width: 160px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s ease; }
+        .client-logo.highlight { height: 75px; width: 190px; filter: grayscale(0%) opacity(1) !important; }
         
         @media (min-width: 1024px) { 
-            .client-logo { height: 55px; max-width: 180px; } 
-            .client-logo.highlight { height: 85px; max-width: 260px; }
+            .client-logo { height: 70px; width: 200px; } 
+            .client-logo.highlight { height: 90px; width: 240px; }
         }
         .client-logo:hover { filter: grayscale(0%) opacity(1); transform: translateY(-4px); }
         .client-logo.highlight:hover { transform: translateY(-4px); }
@@ -177,8 +166,6 @@
     </style>
 </head>
 <body class="selection:bg-primary selection:text-white">
-    <div class="fixed inset-0 pointer-events-none z-50 opacity-[0.03] dark:opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
-    <div class="tech-grid"></div>
 
     <!-- NAVBAR -->
     <nav class="fixed w-full z-50 transition-all duration-300 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-borderline-light dark:border-borderline-dark" id="navbar">
@@ -1691,17 +1678,16 @@
         const marqueeContent = document.querySelector('.marquee-content');
         if(marqueeContent) {
             gsap.fromTo(marqueeContent, 
-                { x: () => -(marqueeContent.scrollWidth / 2) + "px" },
+                { xPercent: -50 },
                 {
-                    x: 0,
+                    xPercent: 0,
                     ease: "none",
-                    duration: 45,
+                    duration: 50,
                     repeat: -1,
                     scrollTrigger: {
                         trigger: ".marquee-container",
                         start: "top 90%", // Só começa a rodar quando está bem visível
-                        toggleActions: "play pause resume pause",
-                        invalidateOnRefresh: true // Recalcula larguras se o usuário girar o celular/monitor
+                        toggleActions: "play pause resume pause"
                     }
                 }
             );
