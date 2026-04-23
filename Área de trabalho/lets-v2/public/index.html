@@ -1578,39 +1578,46 @@
                     }
                 });
             }
+        }); // END MATCHMEDIA DESKTOP ONLY
 
-            // VittorIA Chat Sequence
-            if(document.querySelector(".chat-phone")) {
-                gsap.set([".chat-msg-bot-1", ".chat-msg-bot-2", ".chat-msg-user-2", ".chat-msg-bot-3", ".chat-system-msg", ".chat-typing-2"], { display: "none", opacity: 0, y: 15 });
-                
-                const chatTl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".chat-phone",
-                        start: "top 70%",
-                        once: true
-                    }
-                });
+        // VittorIA Chat Sequence (Global Mobile & Desktop)
+        if(document.querySelector(".chat-phone")) {
+            gsap.set([".chat-msg-bot-1", ".chat-msg-bot-2", ".chat-msg-user-2", ".chat-msg-bot-3", ".chat-system-msg", ".chat-typing-2"], { display: "none", opacity: 0, y: 15 });
+            
+            const chatContainer = document.getElementById("chat-messages-container");
 
-                chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                      .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.2 }, "+=0.3")
-                      .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.2")
-                      .set(".chat-msg-bot-1", { display: "block" })
-                      .to(".chat-msg-bot-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                      .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
-                      .to(".chat-msg-bot-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                      .set(".chat-msg-user-2", { display: "block" }, "+=1.5")
-                      .to(".chat-msg-user-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                      .set(".chat-typing-2", { display: "flex" }, "+=0.3")
-                      .to(".chat-typing-2", { y: 0, opacity: 1, duration: 0.2 })
-                      .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.2")
-                      .set(".chat-msg-bot-3", { display: "block" })
-                      .to(".chat-msg-bot-3", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                      .set(".chat-system-msg", { display: "block" }, "+=0.5")
-                      .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" });
-            }
-        });
+            const chatTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".chat-phone",
+                    start: "top 70%",
+                    once: true
+                }
+            });
+
+            chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.2 }, "+=0.3")
+                  .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.2")
+                  .set(".chat-msg-bot-1", { display: "block" })
+                  .to(".chat-msg-bot-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
+                  .to(".chat-msg-bot-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-msg-user-2", { display: "block" }, "+=1.5")
+                  .to(".chat-msg-user-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-typing-2", { display: "flex" }, "+=0.3")
+                  .to(".chat-typing-2", { y: 0, opacity: 1, duration: 0.2 })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.2")
+                  .set(".chat-msg-bot-3", { display: "block" })
+                  .to(".chat-msg-bot-3", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-system-msg", { display: "block" }, "+=0.5")
+                  .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; });
+        }
     
-        
         // --- PARALLAX ---
         gsap.utils.toArray('[data-parallax]').forEach(elem => {
             const speed = elem.getAttribute('data-parallax');
