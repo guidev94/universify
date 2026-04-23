@@ -6,7 +6,7 @@ Siga os passos abaixo para colocar a plataforma **JS Academy (Versão 2026 Ready
 Antes de começar, certifique-se de ter instalado:
 *   **PHP 8.2+**
 *   **Composer** (Gerenciador de dependências PHP)
-*   **Node.js 20+** e **NPM**
+*   **Node.js 22+** e **NPM**
 *   **SQLite3** (ou MySQL/Postgres se preferir alterar o `.env`)
 
 ---
@@ -15,7 +15,7 @@ Antes de começar, certifique-se de ter instalado:
 
 ### 1. Clonar e Acessar o Projeto
 ```bash
-cd "/home/programador05/Área de trabalho/JS Academy/js-academy"
+cd "seu-projeto"
 ```
 
 ### 2. Instalar Dependências

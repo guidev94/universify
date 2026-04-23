@@ -37,6 +37,10 @@ class ProgressController extends Controller
             // Atualiza o XP do usuário
             $this->updateXPLogic($user, $lesson->xp_reward);
 
+            // Atualiza os Diamantes do usuário
+            $user->diamonds += $lesson->diamond_reward;
+            $user->save();
+
             // Verifica se a trilha (Track) foi finalizada para dar a Badge
             $track = $lesson->track;
             $totalLessons = $track->lessons()->count();
@@ -134,17 +138,31 @@ class ProgressController extends Controller
     }
 
     /**
-     * Pula um módulo (atribui badge mas não XP das lições restantes).
+     * Pula um módulo (atribui badge gastando diamantes).
      */
     public function skipTrack($trackId)
     {
         $user = auth()->user() ?: User::find(1);
-        $track = Track::findOrFail($trackId);
+        $cost = 200; // Custo para pular módulo
+
+        if ($user->diamonds < $cost) {
+            return response()->json(['success' => false, 'message' => 'Diamantes insuficientes (Necessário: 200)'], 400);
+        }
+
+        $track = \App\Models\Track::findOrFail($trackId);
+        
+        // Deduz diamantes
+        $user->diamonds -= $cost;
+        $user->save();
 
         $badge = $track->badge;
-        if ($badge && ! $user->badges()->where('badge_id', $badge->id)->exists()) {
+        if ($badge && !$user->badges()->where('badge_id', $badge->id)->exists()) {
             $user->badges()->attach($badge->id);
         }
+
+        return response()->json(['success' => true]);
+    }
+
 
         return response()->json(['success' => true]);
     }

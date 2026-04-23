@@ -1,1 +1,99 @@
 @import "tailwindcss";
+
+@theme {
+    --color-js-yellow: #F7DF1E;
+    --color-accent-pink: #EC4899;
+    --color-accent-cyan: #22D3EE;
+    --color-zinc-950: #09090b;
+    --color-zinc-900: #18181b;
+    --color-zinc-800: #27272a;
+
+    --radius-bento: 2.5rem;
+    --radius-bento-sm: 1.5rem;
+}
+
+@layer base {
+    body {
+        @apply bg-zinc-950 text-white selection:bg-js-yellow/30 selection:text-js-yellow;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+}
+
+@layer components {
+    /* Design System: Bento Cards */
+    .bento-card {
+        @apply rounded-bento border border-white/5 bg-zinc-900/40 backdrop-blur-xl transition-all duration-500 ease-out;
+    }
+
+    .bento-card-hover {
+        @apply hover:border-white/10 hover:bg-zinc-900/60 hover:shadow-2xl hover:shadow-black/50 hover:-translate-y-1;
+    }
+
+    /* Design System: Buttons */
+    .btn-primary {
+        @apply px-8 py-3 rounded-bento-sm font-black uppercase tracking-widest text-xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-white text-zinc-950 hover:bg-js-yellow shadow-xl shadow-white/5 hover:shadow-js-yellow/20;
+    }
+
+    .btn-accent {
+        @apply px-8 py-3 rounded-bento-sm font-black uppercase tracking-widest text-xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-accent-pink text-white hover:bg-pink-400 shadow-xl shadow-pink-500/20;
+    }
+
+    .btn-outline {
+        @apply px-8 py-3 rounded-bento-sm font-black uppercase tracking-widest text-xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:border-white/20;
+    }
+
+    /* Design System: Inputs */
+    .input-field {
+        @apply w-full bg-zinc-950 border border-white/5 rounded-bento-sm px-5 py-4 text-sm focus:border-js-yellow focus:ring-1 focus:ring-js-yellow/20 transition-all outline-none text-white placeholder:text-zinc-600;
+    }
+
+    /* Design System: Typography */
+    .heading-huge {
+        @apply text-6xl md:text-8xl font-black leading-[0.85] tracking-tighter uppercase italic;
+    }
+
+    .heading-section {
+        @apply text-3xl font-black tracking-tighter uppercase italic;
+    }
+
+    /* Design System: Scrollbars */
+    .custom-scrollbar::-webkit-scrollbar {
+        @apply w-1.5 h-1.5;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-zinc-800 rounded-full hover:bg-zinc-700;
+    }
+}
+
+/* Light Mode Overrides */
+.light-mode {
+    --color-zinc-950: #f8fafc;
+    --color-zinc-900: #ffffff;
+    --color-zinc-800: #f1f5f9;
+}
+
+.light-mode .bento-card {
+    @apply border-zinc-200 bg-white shadow-xl shadow-zinc-200/50;
+}
+
+.light-mode body {
+    @apply text-zinc-950;
+}
+
+.light-mode .text-zinc-500, .light-mode .text-zinc-400 {
+    @apply text-zinc-500;
+}
+
+/* Animations */
+.text-glow {
+    text-shadow: 0 0 20px rgba(247, 223, 30, 0.3);
+}
+
+.text-glow-pink {
+    text-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+}

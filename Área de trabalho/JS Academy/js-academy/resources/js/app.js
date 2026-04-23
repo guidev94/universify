@@ -4,6 +4,12 @@ import * as monaco from 'monaco-editor';
 import { gsap } from 'gsap';
 
 window.Alpine = Alpine;
+
+// Store global para Auth
+Alpine.store('auth', {
+    guest: document.body.hasAttribute('data-guest')
+});
+
 Alpine.start();
 
 /**

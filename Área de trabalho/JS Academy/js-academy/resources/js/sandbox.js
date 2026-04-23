@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor';
+import documentation from './documentation';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 
@@ -36,7 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
             contextmenu: false,
         });
 
-        window.editor = editor;
+editor.onMouseMove(function (e) {
+            const word = editor.getModel().getWordAtPosition(e.target.position);
+            if (word && documentation[word.word]) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'monaco-editor-hover';
+                tooltip.style.position = 'absolute';
+                tooltip.style.top = e.event.clientY + 'px';
+                tooltip.style.left = e.event.clientX + 'px';
+                tooltip.style.backgroundColor = '#000';
+                tooltip.style.color = '#fff';
+                tooltip.style.padding = '5px';
+                tooltip.style.zIndex = '1000';
+                tooltip.innerHTML = `<a href="${documentation[word.word].link}" target="_blank">${documentation[word.word].description}</a>`;
+                document.body.appendChild(tooltip);
+
+                editor.onMouseLeave(function () {
+                    tooltip.remove();
+                });
+            }
+        });
 
         // Impedir Copy-Paste no Editor
         editorContainer.addEventListener('paste', (e) => {

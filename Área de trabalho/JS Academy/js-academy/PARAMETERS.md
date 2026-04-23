@@ -6,7 +6,7 @@ Este documento detalha as configurações, variáveis e a lógica de negócio po
 *   **Backend:** Laravel 11 (PHP 8.3)
 *   **Frontend:** Tailwind CSS v4, GSAP (Animações), Monaco Editor (IDE).
 *   **Admin:** FilamentPHP v3 (TALL Stack).
-*   **Database:** Eloquent ORM (SQLite/MySQL).
+*   **Database:** Eloquent ORM (SQLite/MySQL/PostgreSQL - Produção em Railway.app com PostgreSQL).
 
 ---
 
@@ -41,7 +41,7 @@ Este documento detalha as configurações, variáveis e a lógica de negócio po
 
 ### 🧪 Validador de Código
 *   **Sandbox:** Execução via `iframe` com atributo `sandbox="allow-scripts"`.
-*   **Test Cases:** O sistema compara o `output` do console do usuário com o `expected_output` definido no banco de dados.
+*   **Test Cases:** O sistema compara o `output` do console do usuário com o `expected_output` definido no banco de dados. A execução é feita com `new Function`, não `eval`.
 
 ---
 
