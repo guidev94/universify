@@ -339,37 +339,83 @@
     </section>
 
     <!-- 2. CLIENTES (Stark Marquee) -->
-    <section class="py-10 border-b border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-dark overflow-hidden">
+    <section class="py-14 border-b border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-dark overflow-hidden flex flex-col items-center">
+        <p class="text-sm font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-10 text-center px-4">
+            Quem confia em nossa plataforma
+        </p>
         <div class="marquee-container w-full">
             <div class="marquee-content gap-24 items-center px-8">
-                <!-- Marcas originais exclusivas (sem repetição no mesmo bloco) -->
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
-                <!-- Duplicate for Loop Infinito Perfeito -->
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
+                <!-- Marcas agrupadas com labels -->
+                <div class="flex items-center gap-24">
+                    <div class="flex flex-col items-center gap-4">
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Clientes</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center gap-4 relative">
+                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Parceiros & Certificações</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 relative">
+                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Investidores</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicata para Loop Infinito Perfeito -->
+                <div class="flex items-center gap-24">
+                    <div class="flex flex-col items-center gap-4">
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Clientes</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center gap-4 relative">
+                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Parceiros & Certificações</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 relative">
+                        <div class="absolute -left-12 top-1/2 w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
+                        <span class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Investidores</span>
+                        <div class="flex items-center gap-16">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
+                            <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
