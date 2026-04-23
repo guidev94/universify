@@ -51,6 +51,7 @@
 
     <style>
         /* Base & Reset Technical */
+        svg.lucide { width: 1em; height: 1em; display: inline-block; }
         body {
             background-color: #FFFFFF;
             color: #0F172A;
@@ -208,8 +209,8 @@
             
             <div class="hidden lg:flex gap-6 items-center">
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-subtle-light dark:text-subtle-dark">
-                    <i data-lucide="sun" id="theme-toggle-light-icon" class="w-4 h-4 hidden"></i>
-                    <i data-lucide="moon" id="theme-toggle-dark-icon" class="w-4 h-4 hidden"></i>
+                    <span class="hidden dark:block"><i data-lucide="sun" class="w-4 h-4"></i></span>
+                    <span class="block dark:hidden"><i data-lucide="moon" class="w-4 h-4"></i></span>
                 </button>
                 <a href="https://app.letswork.com.br" class="text-sm font-bold hover:text-primary transition-colors">Login</a>
                 <button class="btn-primary magnetic px-6 py-2.5 rounded-full text-sm font-bold shadow-glow">
@@ -220,8 +221,8 @@
             <!-- Mobile Menu Toggle -->
             <div class="flex lg:hidden items-center gap-4">
                 <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-subtle-light dark:text-subtle-dark">
-                    <i data-lucide="sun" id="theme-toggle-light-icon-mobile" class="w-4 h-4 hidden"></i>
-                    <i data-lucide="moon" id="theme-toggle-dark-icon-mobile" class="w-4 h-4 hidden"></i>
+                    <span class="hidden dark:block"><i data-lucide="sun" class="w-4 h-4"></i></span>
+                    <span class="block dark:hidden"><i data-lucide="moon" class="w-4 h-4"></i></span>
                 </button>
                 <button id="mobile-menu-btn" class="text-black dark:text-white p-2">
                     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -383,32 +384,33 @@
                         <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Inteligência Artificial
                     </div>
                     <h2 class="text-4xl md:text-5xl lg:text-[3.5rem] font-display font-black tracking-tighter mb-6 leading-[1.05] text-black dark:text-white">
-                        E se uma IA resolvesse<br/>
-                        <span class="text-primary">85% dos chamados</span> do seu RH?
+                        Transforme perguntas em<br/>
+                        <span class="text-primary">ações de RH</span> em segundos.
                     </h2>
                     <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-10">
-                        A <strong>VittórIA</strong> é a assistente de IA da Let's Work que atende colaboradores 24/7, responde dúvidas de férias, folha e benefícios — e libera seu time de RH pra focar no que importa.
+                        O <strong>VittórIA</strong> é o copiloto inteligente dentro do painel da Let's Work.<br>
+                        Em vez de perder tempo navegando por vários relatórios, você e sua equipe resolvem <strong>ponto, férias e documentos</strong> direto no chat.
                     </p>
                     <ul class="space-y-6 mb-10">
                         <li class="flex items-start gap-4">
-                            <i data-lucide="rocket" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <i data-lucide="zap" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
                             <div>
-                                <strong class="block text-black dark:text-white">Tempo médio de resposta: 3 segundos</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Contra 4h+ de espera em empresas sem automação</span>
+                                <strong class="block text-black dark:text-white">IA com ação real no sistema</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Peça em linguagem natural e a IA abre relatórios, aplica filtros e apoia o fechamento da folha.</span>
                             </div>
                         </li>
                         <li class="flex items-start gap-4">
-                            <i data-lucide="link" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <i data-lucide="shield-check" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
                             <div>
-                                <strong class="block text-black dark:text-white">Integra com qualquer ERP e Folha</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Sistema homologado pela ABNT — plug and play</span>
+                                <strong class="block text-black dark:text-white">Segurança e controle por perfil</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Cada pessoa vê e faz apenas o que tem permissão. Ações sensíveis sempre exigem sua confirmação.</span>
                             </div>
                         </li>
                         <li class="flex items-start gap-4">
-                            <i data-lucide="message-square" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <i data-lucide="user-check" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
                             <div>
-                                <strong class="block text-black dark:text-white">Funciona no WhatsApp</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Onde as pessoas já estão, sem app novo</span>
+                                <strong class="block text-black dark:text-white">Autoatendimento do colaborador</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Garante autonomia para o time consultar banco de horas, pendências e atestados sem precisar acionar o RH.</span>
                             </div>
                         </li>
                     </ul>
@@ -418,78 +420,13 @@
                     </a>
                 </div>
 
-                <div class="relative flex justify-center w-full max-w-[380px] mx-auto lg:ml-auto h-[650px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#E5DDD5] dark:bg-[#0B141A] shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden chat-phone perspective-1000 order-1 lg:order-2">
+                <div class="relative flex justify-center w-full max-w-[380px] mx-auto lg:ml-auto h-[650px] rounded-[3rem] border-[8px] border-[#18181B] bg-black shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden chat-phone perspective-1000 order-1 lg:order-2">
                     
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-[#18181B] rounded-b-2xl z-30"></div>
 
-                    <div class="h-20 bg-[#1F2C34] flex items-end pb-3 px-4 gap-3 text-white z-20 w-full absolute top-0 shadow-md">
-                        <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-white"></i></div>
-                        <div class="flex-1">
-                            <div class="font-bold text-base leading-tight text-white">VittórIA • Assistente de RH</div>
-                            <div class="text-xs text-green-400 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Respondendo agora...</div>
-                        </div>
-                        <i data-lucide="more-vertical" class="w-5 h-5 text-white/80 mb-1"></i>
-                    </div>
+                    <!-- Vídeo MP4 Local reproduzido em loop a partir de 3 segundos -->
+                    <video src="https://cdn.jumpshare.com/preview/el_NEnciKghDw4uAAXOLJ9hbVpV8ZXtHkKcn3X_VOnCtcOSBwuNaiKOqKw57YwdrBOKm-WddCjPdlHRuSs75g5QJnGbNu-_k81veS9CcfsxUmwYpRZZowWsjs63_D7Ltb_1Sy9a8KuFEhcUv6O_3dm6yjbN-I2pg_cnoHs_AmgI.mp4#t=3" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-10" style="object-position: center top;"></video>
 
-                    <div class="w-full h-full pt-24 pb-20 px-4 flex flex-col gap-3 overflow-hidden relative" id="chat-messages-container">
-                        
-                        <div class="text-center w-full z-10"><span class="bg-[#D9DDF0] dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[11px] px-3 py-1 rounded-lg font-medium shadow-sm">Hoje, 08:47</span></div>
-
-                        <div class="chat-msg-user-1 opacity-0 translate-y-4 bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10">
-                            Preciso do relatório de banco de horas do time comercial pra reunião das 10h ⏰
-                            <div class="text-[10px] text-right mt-1 opacity-60">08:47 ✓✓</div>
-                        </div>
-
-                        <div class="chat-typing-1 opacity-0 translate-y-4 bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                        </div>
-
-                        <div class="chat-msg-bot-1 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-4 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
-                            Pronto! 📊 Resumo do <strong>time comercial</strong> (mar/26):<br><br>
-                            <div class="bg-gray-50 dark:bg-[#1A2328] p-3 rounded-lg space-y-1">
-                                👥 <strong>12 colaboradores</strong><br>
-                                ✅ 8 com saldo positivo (+14h)<br>
-                                ⚠️ 3 com saldo negativo (-6h)<br>
-                                🔴 1 excedente crítico: <strong>+42h</strong>
-                            </div>
-                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
-                        </div>
-
-                        <div class="chat-msg-bot-2 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 border border-gray-100 dark:border-none">
-                            ⚡ <strong>Alerta:</strong> Carlos Silva tem 42h acumuladas — prazo legal vence em 8 dias. Notifico ele?
-                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
-                        </div>
-
-                        <div class="chat-msg-user-2 hidden bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10 mt-2">
-                            Sim! Notifica e me manda o PDF completo 👍
-                            <div class="text-[10px] text-right mt-1 opacity-60">08:48 ✓✓</div>
-                        </div>
-
-                        <div class="chat-typing-2 hidden bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
-                        </div>
-
-                        <div class="chat-msg-bot-3 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
-                            Feito! ✅ Carlos notificado por WhatsApp e PDF enviado no seu e-mail. Bom dia, gestora! ☕
-                            <div class="text-[10px] text-right mt-1 opacity-60">08:48</div>
-                        </div>
-
-                        <div class="chat-system-msg hidden text-center w-full z-10 mt-4">
-                            <span class="bg-white border border-gray-200 shadow-sm dark:border-none dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[10px] px-3 py-1.5 rounded-full font-bold flex items-center justify-center gap-1 w-fit mx-auto">
-                                <i data-lucide="zap" class="w-3 h-3 text-primary"></i> Resolvido em 12s • Sem abrir nenhuma planilha
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="absolute bottom-0 w-full h-16 bg-[#F0F2F5] dark:bg-[#1F2C34] px-3 flex items-center gap-2 z-20">
-                        <i data-lucide="smile" class="w-6 h-6 text-[#54656F] dark:text-[#8696A0]"></i>
-                        <div class="flex-1 h-10 bg-white dark:bg-[#2A3942] rounded-full px-4 flex items-center text-sm text-subtle-light dark:text-subtle-dark border border-gray-200 dark:border-transparent">Digite uma mensagem...</div>
-                        <i data-lucide="mic" class="w-5 h-5 text-[#54656F] dark:text-[#8696A0]"></i>
-                    </div>
                 </div>
 
             </div>
@@ -1204,9 +1141,9 @@
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6 items-stretch">
+            <div class="grid md:grid-cols-3 gap-6 items-stretch max-w-sm md:max-w-none mx-auto">
                 <!-- Plano 1 -->
-                <div class="solid-card p-8 rounded-2xl flex flex-col section-reveal">
+                <div class="solid-card p-6 md:p-8 rounded-2xl flex flex-col section-reveal">
                     <h3 class="text-xl font-bold mb-1">Time Ágil 10</h3>
                     <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Até 10 Vidas</p>
                     <div class="mb-8 flex items-baseline gap-1">
@@ -1215,16 +1152,16 @@
                     </div>
                     <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Testar Grátis</button>
                     <ul class="space-y-4 text-sm font-medium flex-1">
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Reconhecimento Facial</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Ponto Offline</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Geolocalização GPS</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Reconhecimento Facial</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Ponto Offline</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Geolocalização GPS</li>
                     </ul>
                 </div>
 
                 <!-- Plano 2 (Destaque) -->
-                <div class="solid-card p-8 rounded-2xl border-primary relative flex flex-col section-reveal md:-translate-y-4 shadow-soft">
+                <div class="solid-card p-6 md:p-8 rounded-2xl border-primary relative flex flex-col section-reveal md:-translate-y-4 shadow-soft">
                     <div class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-widest">Mais Adotado</div>
-                    <h3 class="text-2xl font-bold mb-1">Equipe Dinâmica 50</h3>
+                    <h3 class="text-2xl font-bold mb-1 pr-16">Equipe Dinâmica 50</h3>
                     <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Até 50 Vidas</p>
                     <div class="mb-8 flex items-baseline gap-1">
                         <span class="text-5xl font-display font-black price-val" data-mensal="R$299" data-anual="R$239">R$299</span>
@@ -1232,15 +1169,15 @@
                     </div>
                     <button class="btn-primary magnetic w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
                     <ul class="space-y-4 text-sm font-bold flex-1">
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Ponto via WhatsApp</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Gestão de Escalas Completa</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Relatórios para Contabilidade</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Suporte Humanizado e Dedicado</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Ponto via WhatsApp</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Gestão de Escalas Completa</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Relatórios para Contabilidade</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Suporte Humanizado e Dedicado</li>
                     </ul>
                 </div>
 
                 <!-- Plano 3 -->
-                <div class="solid-card p-8 rounded-2xl flex flex-col section-reveal">
+                <div class="solid-card p-6 md:p-8 rounded-2xl flex flex-col section-reveal">
                     <h3 class="text-xl font-bold mb-1">Enterprise Scale</h3>
                     <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Acima de 50 Vidas</p>
                     <div class="mb-8 flex items-baseline gap-1">
@@ -1248,10 +1185,10 @@
                     </div>
                     <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Falar com Vendas</button>
                     <ul class="space-y-4 text-sm font-medium flex-1">
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Módulos Ilimitados</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Gestão de Vagas com IA</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Automação VittorIA (Chat)</li>
-                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Implantação Assistida</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Módulos Ilimitados</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Gestão de Vagas com IA</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Automação VittorIA (Chat)</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500 shrink-0"></i> Implantação Assistida</li>
                     </ul>
                 </div>
             </div>
@@ -1492,31 +1429,14 @@
         // --- THEME TOGGLE LOGIC ---
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeToggleMobileBtn = document.getElementById('theme-toggle-mobile');
-        const darkIcon = document.getElementById('theme-toggle-dark-icon');
-        const lightIcon = document.getElementById('theme-toggle-light-icon');
-        const darkIconMobile = document.getElementById('theme-toggle-dark-icon-mobile');
-        const lightIconMobile = document.getElementById('theme-toggle-light-icon-mobile');
 
-        function updateIcon() {
-            const isDark = document.documentElement.classList.contains('dark');
-            if (isDark) {
-                darkIcon.classList.remove('hidden'); lightIcon.classList.add('hidden');
-                if(darkIconMobile) darkIconMobile.classList.remove('hidden');
-                if(lightIconMobile) lightIconMobile.classList.add('hidden');
-            } else {
-                lightIcon.classList.remove('hidden'); darkIcon.classList.add('hidden');
-                if(lightIconMobile) lightIconMobile.classList.remove('hidden');
-                if(darkIconMobile) darkIconMobile.classList.add('hidden');
-            }
-        }
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            updateIcon();
         }
+        
         if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
         if(themeToggleMobileBtn) themeToggleMobileBtn.addEventListener('click', toggleTheme);
-        updateIcon();
 
         // --- MOBILE MENU LOGIC ---
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -1665,6 +1585,7 @@
         }); // END MATCHMEDIA DESKTOP ONLY
 
         // VittorIA Chat Sequence (Global Mobile & Desktop)
+        /* Comentado temporariamente para rodar o vídeo
         if(document.querySelector(".chat-phone")) {
             gsap.set([".chat-msg-bot-1", ".chat-msg-bot-2", ".chat-msg-user-2", ".chat-msg-bot-3", ".chat-system-msg", ".chat-typing-2"], { display: "none", opacity: 0, y: 15 });
             
@@ -1673,14 +1594,14 @@
             const chatTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".chat-phone",
-                    start: "top 70%",
+                    start: "top 60%",
                     once: true
                 }
             });
 
             chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
-                  .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.2 }, "+=0.3")
-                  .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.2")
+                  .to(".chat-typing-1", { y: 0, opacity: 1, duration: 0.2 }, "+=0.2")
+                  .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.5")
                   .set(".chat-msg-bot-1", { display: "block" })
                   .to(".chat-msg-bot-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
                   .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
@@ -1690,7 +1611,7 @@
                   .set(".chat-msg-user-2", { display: "block" }, "+=1.5")
                   .to(".chat-msg-user-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
                   .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
-                  .set(".chat-typing-2", { display: "flex" }, "+=0.3")
+                  .set(".chat-typing-2", { display: "flex" }, "+=0.2")
                   .to(".chat-typing-2", { y: 0, opacity: 1, duration: 0.2 })
                   .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
                   .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.2")
@@ -1701,6 +1622,7 @@
                   .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
                   .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; });
         }
+        */
     
         // --- PARALLAX ---
         gsap.utils.toArray('[data-parallax]').forEach(elem => {
