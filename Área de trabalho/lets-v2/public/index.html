@@ -50,15 +50,6 @@
     </script>
 
     <style>
-        /* Noise Overlay */
-        .noise-overlay {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.04;
-        }
-        .dark .noise-overlay {
-            opacity: 0.05;
-        }
-
         /* Base & Reset Technical */
         body {
             background-color: #FFFFFF;
@@ -109,13 +100,6 @@
         .dark .solid-card { background: #0A0A0A; }
         .solid-card:hover { border-color: #FF2D2D; }
 
-        /* Magnetic Utility */
-        .magnetic {
-            /* Prevent CSS transition from fighting with GSAP transforms */
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s !important;
-            will-change: transform;
-        }
-
         /* Marquee Custom */
         .marquee-container { overflow: hidden; display: flex; white-space: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; animation: marquee 40s linear infinite; }
@@ -136,19 +120,28 @@
             padding: 40px 0;
             mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            cursor: pointer;
+        }
+        .testimonial-wrapper-3d {
+            transform-style: preserve-3d;
+            transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg);
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            width: max-content;
+            display: flex;
+        }
+        .testimonial-wrapper-3d.is-flat {
+            transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02);
         }
         .testimonial-track {
             display: flex;
             gap: 2rem;
             width: max-content;
-            animation: scroll-3d 50s linear infinite;
-            transform-style: preserve-3d;
-            transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg); /* Efeito 3D Deitado Elegante */
+            animation: scroll-flat 50s linear infinite;
         }
-        .testimonial-track:hover { animation-play-state: paused; }
-        @keyframes scroll-3d {
-            0% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(0); }
-            100% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(-50%); }
+        .testimonial-container:hover .testimonial-track { animation-play-state: paused; }
+        @keyframes scroll-flat {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         /* GSAP Pinned Section Utilities */
@@ -173,7 +166,7 @@
     </style>
 </head>
 <body class="selection:bg-primary selection:text-white">
-    <div class="noise-overlay fixed inset-0 pointer-events-none z-50"></div>
+    <div class="fixed inset-0 pointer-events-none z-50 opacity-[0.03] dark:opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
     <div class="tech-grid"></div>
 
     <!-- NAVBAR -->
@@ -193,7 +186,7 @@
                         Soluções <i data-lucide="chevron-down" class="w-4 h-4 opacity-50"></i>
                     </button>
                     <div class="absolute left-0 top-full pt-4 opacity-0 translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-300">
-                        <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark rounded-xl shadow-xl w-56 overflow-hidden flex flex-col py-2">
+                        <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark rounded-xl shadow-xl w-56 overflow-hidden flex flex-col py-2">
                             <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Controle de Ponto</a>
                             <a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Projetos</a>
                             <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Escalas</a>
@@ -216,7 +209,7 @@
                     <i data-lucide="moon" id="theme-toggle-dark-icon" class="w-4 h-4 hidden"></i>
                 </button>
                 <a href="https://app.letswork.com.br" class="text-sm font-bold hover:text-primary transition-colors">Login</a>
-                <button class="btn-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-glow magnetic">
+                <button class="btn-primary magnetic px-6 py-2.5 rounded-full text-sm font-bold shadow-glow">
                     Falar com Vendas
                 </button>
             </div>
@@ -245,32 +238,41 @@
                 
             <div class="hero-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <button class="magnetic bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
-                    Começar Teste Grátis
+                    <span class="pointer-events-none">Começar Teste Grátis</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 <button class="magnetic bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
-                    Falar com Especialista
+                    <span class="pointer-events-none">Falar com Especialista</span>
                 </button>
             </div>
 
-            <!-- B2B Social Proof / Logos -->
-            <div class="hero-reveal mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 text-sm font-medium">
-                <span class="text-xs text-subtle-light dark:text-subtle-dark font-bold tracking-widest uppercase">Confiado por equipes de:</span>
-                <div class="flex items-center gap-6 opacity-60 grayscale">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="h-5 object-contain dark:brightness-0 dark:invert hover:grayscale-0 hover:opacity-100 transition-all">
+            <!-- Human Social Proof / Avatares -->
+            <div class="hero-reveal mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm font-medium">
+                <div class="flex -space-x-3">
+                    <img src="https://i.pravatar.cc/100?img=47" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=32" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=12" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=60" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                </div>
+                <div class="flex flex-col items-center sm:items-start">
+                    <div class="flex items-center gap-1 text-amber-500 mb-1">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <span class="text-xs text-subtle-light dark:text-subtle-dark font-bold tracking-wide uppercase">Aprovado por +500 Gestores de RH</span>
                 </div>
             </div>
             </div>
 
             <!-- Right Column: Interactive Cluster -->
             <div class="lg:col-span-6 relative h-[450px] md:h-[550px] w-full hidden lg:block perspective-2000 mt-10 lg:mt-0">
-                <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full" data-parallax="0.05"></div>
+                <div data-parallax="0.05" class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
                 
                 <!-- Background: Dashboard -->
-                <div class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] bg-white dark:bg-[#0A0A0A] will-change-transform lg:-mt-4" data-parallax="-0.02">
+                <div data-parallax="-0.02" class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] bg-white dark:bg-[#0A0A0A] will-change-transform">
                     <div class="h-10 bg-gray-50 dark:bg-[#111] border-b border-borderline-light dark:border-borderline-dark flex items-center px-4 gap-2">
                         <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                         <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
@@ -280,7 +282,7 @@
                 </div>
 
                     <!-- Foreground: Mobile App Mockup UI CSS (iPhone Style) -->
-                    <div class="hero-mobile absolute left-[2%] bottom-0 w-[260px] h-[550px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#0A0A0A] shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-30 will-change-transform flex flex-col relative overflow-hidden" data-parallax="0.06">
+                    <div data-parallax="0.06" class="hero-mobile absolute left-[5%] bottom-5 w-[260px] h-[550px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#0A0A0A] shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-30 will-change-transform flex flex-col relative overflow-hidden">
                         <!-- Dynamic Island / Notch -->
                         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#18181B] rounded-b-2xl z-40"></div>
                         
@@ -382,7 +384,7 @@
                             </div>
                         </li>
                     </ul>
-                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="magnetic btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
+                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary magnetic inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
                         Quero a VittórIA na minha empresa
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
@@ -644,12 +646,9 @@
                     </a>
                 </div>
 
-                <div class="w-full lg:w-1/2 section-reveal relative mt-8 lg:mt-0 lg:-ml-8" data-parallax="0.03">
-                    <!-- Absolute Decorative Blob -->
-                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-primary/10 rounded-full blur-[60px] pointer-events-none z-0"></div>
-                    
+                <div class="w-full lg:w-1/2 section-reveal">
                     <!-- Technical UI Mockup -->
-                    <div class="solid-card rounded-2xl p-6 shadow-xl relative overflow-hidden font-mono text-sm z-10">
+                    <div class="solid-card rounded-2xl p-6 shadow-xl relative overflow-hidden font-mono text-sm">
                         <div class="flex items-center justify-between mb-6 pb-4 border-b border-borderline-light dark:border-borderline-dark">
                             <span class="text-xs font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest">Pipeline: Coordenador de RH</span>
                             <span class="flex items-center gap-2 text-primary text-xs"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> IA Processing</span>
@@ -657,7 +656,7 @@
 
                         <div class="space-y-3 relative z-10">
                             <!-- Item 1 -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                            <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Juliana Costa</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Sólida experiência em DP e implantação de ponto."</span>
@@ -668,7 +667,7 @@
                                 </div>
                             </div>
                             <!-- Item 2 -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                            <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Rafael Souza</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Conhecimento em folha de pagamento e benefícios."</span>
@@ -679,7 +678,7 @@
                                 </div>
                             </div>
                             <!-- Item 3 (Grayscale) -->
-                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between opacity-50 grayscale">
+                            <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between opacity-50 grayscale">
                                 <div class="flex flex-col gap-1">
                                     <span class="font-bold font-sans">Carlos Mendes</span>
                                     <span class="text-xs text-subtle-light dark:text-subtle-dark">"Analista de Marketing Pleno"</span>
@@ -721,7 +720,7 @@
                             
                             <div class="space-y-4">
                                 <!-- Colaborador 1 (Aprovado) -->
-                                <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                                <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500"></div>
                                         <div>
@@ -733,8 +732,8 @@
                                 </div>
                                 
                                 <!-- Colaborador 2 (Conflito Simulado) -->
-                                <div class="bg-white dark:bg-[#111] border border-primary/40 shadow-[0_0_15px_rgba(255,45,45,0.1)] p-3 rounded-xl flex flex-col gap-3 relative overflow-hidden">
-                                    <div class="absolute inset-0 bg-primary/5 animate-pulse"></div>
+                                <div class="magnetic bg-white dark:bg-[#111] border border-primary/40 shadow-[0_0_15px_rgba(255,45,45,0.1)] p-3 rounded-xl flex flex-col gap-3 relative overflow-hidden">
+                                    <div data-parallax="0.05" class="absolute inset-0 bg-primary/5 animate-pulse"></div>
                                     <div class="flex items-center justify-between relative z-10">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500"></div>
@@ -866,8 +865,9 @@
             </div>
         </div>
 
-        <div class="testimonial-container">
-            <div class="testimonial-track">
+        <div class="testimonial-container" id="testimonial-container">
+            <div class="testimonial-wrapper-3d" id="testimonial-wrapper">
+                <div class="testimonial-track">
                 <!-- Group 1 -->
                 <div class="flex gap-8 px-4">
                     <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
@@ -932,7 +932,7 @@
     </section>
 
     <!-- 7. PLANOS (Clean Pricing) -->
-    <section id="planos" class="pt-16 lg:pt-20 pb-24 lg:pb-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
+    <section id="planos" class="py-24 lg:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1200px] mx-auto px-6">
             <div class="text-center mb-16 section-reveal">
                 <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Investimento escalável.</h2>
@@ -976,7 +976,7 @@
                         <span class="text-5xl font-display font-black price-val" data-mensal="R$299" data-anual="R$239">R$299</span>
                         <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
                     </div>
-                    <button class="magnetic btn-primary w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
+                    <button class="btn-primary magnetic w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
                     <ul class="space-y-4 text-sm font-bold flex-1">
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Ponto via WhatsApp</li>
                         <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Gestão de Escalas Completa</li>
@@ -1399,52 +1399,47 @@
                       .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
                       .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" });
             }
-
-            // Magnetic Buttons
-            document.querySelectorAll('.magnetic').forEach(btn => {
-                btn.addEventListener('mouseenter', () => {
-                    gsap.to(btn, { scale: 1.02, duration: 0.3, ease: "power2.out" });
-                });
-
-                btn.addEventListener('mousemove', e => {
-                    const rect = btn.getBoundingClientRect();
-                    const x = e.clientX - rect.left - rect.width / 2;
-                    const y = e.clientY - rect.top - rect.height / 2;
-                    
-                    gsap.to(btn, {
-                        x: x * 0.3,
-                        y: y * 0.3,
-                        duration: 0.4,
-                        ease: "power2.out"
-                    });
-                });
-
-                btn.addEventListener('mouseleave', () => {
-                    gsap.to(btn, {
-                        x: 0,
-                        y: 0,
-                        scale: 1,
-                        duration: 0.7,
-                        ease: "elastic.out(1, 0.3)"
-                    });
-                });
-            });
-
-            // Subtle Parallax
-            gsap.utils.toArray('[data-parallax]').forEach(el => {
-                const speed = parseFloat(el.getAttribute('data-parallax'));
-                gsap.to(el, {
-                    y: () => (ScrollTrigger.maxScroll(window) ? speed * 300 : 0),
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: el,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: true
-                    }
-                });
+        });
+    
+        
+        // --- PARALLAX ---
+        gsap.utils.toArray('[data-parallax]').forEach(elem => {
+            const speed = elem.getAttribute('data-parallax');
+            gsap.to(elem, {
+                y: () => (ScrollTrigger.maxScroll(window) * speed),
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
             });
         });
+
+        // --- TESTIMONIAL TOGGLE ---
+        const testimonialContainer = document.getElementById('testimonial-container');
+        const testimonialWrapper = document.getElementById('testimonial-wrapper');
+        if(testimonialContainer && testimonialWrapper) {
+            testimonialContainer.addEventListener('click', () => {
+                testimonialWrapper.classList.toggle('is-flat');
+            });
+        }
+
+        // --- MAGNETIC BUTTONS ---
+        const magneticElements = document.querySelectorAll('.magnetic');
+        magneticElements.forEach(elem => {
+            elem.addEventListener('mousemove', (e) => {
+                const rect = elem.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(elem, { x: x * 0.2, y: y * 0.2, duration: 0.3, ease: 'power2.out' });
+            });
+            elem.addEventListener('mouseleave', () => {
+                gsap.to(elem, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+
     </script>
 </body>
 </html>
