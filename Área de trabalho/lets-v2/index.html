@@ -108,8 +108,8 @@
         .marquee-content { display: flex; animation: marquee 40s linear infinite; }
         @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        .client-logo { height: 2.5rem; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s; }
-        @media (min-width: 1024px) { .client-logo { height: 3rem; } }
+        .client-logo { height: 2.5rem; width: 120px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s; }
+        @media (min-width: 1024px) { .client-logo { height: 3.5rem; width: 140px; } }
         .client-logo:hover { filter: grayscale(0%) opacity(1); transform: scale(1.05); }
         .dark .client-logo { filter: brightness(0) invert(1) opacity(0.5); }
         .dark .client-logo:hover { filter: brightness(1) invert(0) opacity(1); }
@@ -329,8 +329,8 @@
                         <span class="relative w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"></span>
                     </div>
                     <div>
-                        <div class="text-xs md:text-sm font-bold text-black dark:text-white">142 Em Jornada</div>
-                        <div class="text-[10px] md:text-xs text-subtle-light dark:text-subtle-dark">Painel Sincronizado</div>
+                        <div class="text-xs md:text-sm font-bold text-black dark:text-white">142 Ativos Agora</div>
+                        <div class="text-[10px] md:text-xs text-subtle-light dark:text-subtle-dark">Atualizado em tempo real</div>
                     </div>
                 </div>
             </div>
@@ -1259,9 +1259,9 @@
     </section>
 
     <!-- 7.5 FAQ SECTION (Quebra de Objeções) -->
-    <section class="py-20 lg:py-24 border-b border-borderline-light dark:border-borderline-dark">
+    <section class="pt-12 pb-20 lg:pt-16 lg:pb-24 border-b border-borderline-light dark:border-borderline-dark">
         <div class="max-w-[1400px] mx-auto px-6">
-            <div class="max-w-[800px] mx-auto text-center mb-16 section-reveal">
+            <div class="max-w-[800px] mx-auto text-center mb-10 section-reveal">
                 <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Dúvidas Comuns
                 </div>
@@ -1271,94 +1271,94 @@
                     <p class="text-subtle-light dark:text-subtle-dark text-lg">Dúvidas comuns de quem já migrou para a Let's Work.</p>
                 </div>
             
-            <div class="space-y-4 section-reveal">
+            <div class="space-y-2 section-reveal">
                 <!-- FAQ Item 1 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 mt-4 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         O aplicativo funciona sem internet (offline)?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         Sim! O colaborador pode bater o ponto normalmente mesmo se estiver em áreas sem cobertura (como em construções isoladas). O app armazena a batida com geolocalização e criptografia e sincroniza com o painel assim que detectar rede.
                     </div>
                 </details>
                 
                 <!-- FAQ Item 2 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         É realmente aceito pelo Ministério do Trabalho?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         100%. A Let's Work atende integralmente à Portaria 671 (MTP) e atua sob o modelo REP-P. Além disso, o software possui a rigorosa certificação da ABNT que atesta a inviolabilidade dos registros.
                     </div>
                 </details>
                 
                 <!-- FAQ Item 3 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         Como funciona o Suporte se eu tiver dúvidas?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         Ao contrário de muitos concorrentes, nós temos suporte humanizado multicanal e uma implantação assistida passo a passo. Você pode acionar nossa equipe diretamente via WhatsApp para resolver qualquer configuração ou dúvida da contabilidade.
                     </div>
                 </details>
 
                 <!-- FAQ Item 4 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         E se o funcionário bater ponto pelo celular de outro?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         O aplicativo possui mecanismos antifraude avançados, como reconhecimento facial e vinculação do registro ao identificador único do aparelho. Dessa forma, bloqueamos e alertamos sobre qualquer tentativa de registro em dispositivos não autorizados.
                     </div>
                 </details>
 
                 <!-- FAQ Item 5 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         A implantação é demorada?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         De forma alguma. O sistema é 100% em nuvem e nossa equipe de Implantação Assistida guia você passo a passo. A maior parte dos nossos clientes já começa a operar o controle de ponto no mesmo dia da contratação.
                     </div>
                 </details>
 
                 <!-- FAQ Item 6 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         O sistema integra com a minha folha de pagamento / contabilidade?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         Sim! Exportamos arquivos nos padrões AFD e AFDT exigidos por lei, e geramos relatórios prontos que se integram facilmente com os principais sistemas de folha de pagamento e escritórios de contabilidade do mercado.
                     </div>
                 </details>
 
                 <!-- FAQ Item 7 -->
-                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                <details class="group glass py-3 px-5 rounded-2xl cursor-pointer marker:content-['']">
                     <summary class="flex justify-between items-center font-bold text-lg list-none">
                         Os funcionários terão dificuldade para usar?
                         <span class="transition group-open:rotate-180">
                             <i data-lucide="chevron-down" class="w-5 h-5"></i>
                         </span>
                     </summary>
-                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                    <div class="text-subtle-light dark:text-subtle-dark mt-2 leading-relaxed font-medium">
                         O aplicativo foi desenhado com foco absoluto em usabilidade. O registro é feito com um único toque na tela. Para perfis com menos familiaridade com tecnologia, oferecemos tutoriais simples e a opção de bater ponto em um tablet fixo (totem) na empresa.
                     </div>
                 </details>
@@ -1469,12 +1469,11 @@
                     </ul>
                 </div>
             </div>
-            </div>
 
             <!-- Bottom Line -->
-            <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-borderline-light dark:border-borderline-dark text-xs text-subtle-light dark:text-subtle-dark font-medium">
+            <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-borderline-light dark:border-borderline-dark text-xs text-subtle-light dark:text-subtle-dark font-medium text-center md:text-left">
                 <p>&copy; 2026 LET'S WORK TECNOLOGIA LTDA. CNPJ: 45.992.151/0001-01. Todos os direitos reservados.</p>
-                <div class="flex gap-6 mt-4 md:mt-0">
+                <div class="flex gap-6 mt-4 md:mt-0 justify-center">
                     <a href="https://www.letswork.com.br/politica-de-privacidade/" class="hover:text-primary transition-colors">Política de Privacidade</a>
                     <a href="https://www.letswork.com.br/termos-de-uso/" class="hover:text-primary transition-colors">Termos de Uso</a>
                 </div>
