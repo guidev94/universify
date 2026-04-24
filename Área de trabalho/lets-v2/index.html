@@ -97,19 +97,19 @@
         .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; align-items: center; }
         
-        .client-logo { height: 40px; width: auto; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s ease; }
-        .client-logo.highlight { height: 40px; filter: grayscale(0%) opacity(1) !important; }
+        .client-logo { height: 40px; width: auto; object-fit: contain; filter: grayscale(100%); transition: all 0.3s ease; }
+        .client-logo.highlight { height: 40px; filter: grayscale(0%) !important; }
         
         @media (min-width: 1024px) { 
             .client-logo { height: 50px; } 
             .client-logo.highlight { height: 50px; }
         }
-        .client-logo:hover { filter: grayscale(0%) opacity(1); transform: scale(1.05); }
+        .client-logo:hover { filter: grayscale(0%); transform: scale(1.05); }
         .client-logo.highlight:hover { transform: scale(1.05) !important; }
         
-        .dark .client-logo { filter: brightness(0) invert(1) opacity(0.4); }
-        .dark .client-logo.highlight { filter: brightness(0) invert(1) opacity(1) !important; }
-        .dark .client-logo:hover { filter: brightness(0) invert(1) opacity(1); }
+        .dark .client-logo { filter: brightness(0) invert(1); }
+        .dark .client-logo.highlight { filter: brightness(0) invert(1) !important; }
+        .dark .client-logo:hover { filter: brightness(0) invert(1); }
 
         /* 3D Depoimentos Marquee */
         .testimonial-container {
@@ -341,7 +341,7 @@
             <div class="marquee-content flex items-center gap-12 md:gap-16 px-8 justify-start">
                 
                 <!-- LOOP INTERNO 1 -->
-                <div class="flex flex-row items-center gap-12 md:gap-16 shrink-0 ml-[100vw]">
+                <div class="flex flex-row items-center gap-12 md:gap-16 shrink-0 ml-[35vw]">
                     <!-- BLOCO 1: INVESTIDORES -->
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
@@ -420,79 +420,7 @@
             </div>
         </div>
     </section>
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo shrink-0">
-
-                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
-
-                <!-- BLOCO 3: CLIENTES -->
-                <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Clientes</span>
-                </div>
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo transform scale-[1.4] shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo transform scale-[1.4] shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo transform scale-[1.4] shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo transform scale-[1.4] shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo transform scale-[1.4] shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo shrink-0" style="transform: scale(1.1) translateY(4px);">
-
-                <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0 mx-4"></div>
-
-                <!-- ================== CLONE EXATO PARA LOOP INFINITO PERFEITO ================== -->
-
-                <!-- BLOCO 1: INVESTIDORES (CLONE) -->
-                <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Investidores</span>
-                </div>
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo highlight shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo highlight shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo highlight shrink-0">
-
-                <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
-
-                <!-- BLOCO 2: PARCEIROS (CLONE) -->
-                <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Parceiros</span>
-                </div>
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo shrink-0">
-
-                <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
-
-                <!-- BLOCO 3: CLIENTES (CLONE) -->
-                <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Clientes</span>
-                </div>
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo shrink-0">
-                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo shrink-0">
-            </div>
-        </div>
-    </section>
-
-                    <div class="w-px h-8 bg-borderline-light dark:bg-borderline-dark shrink-0"></div>
-
-                    <!-- BLOCO 3: CLIENTES (CLONE) -->
-                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-full border border-borderline-light dark:border-borderline-dark shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span class="text-xs font-bold uppercase tracking-widest text-subtle-light dark:text-subtle-dark">Clientes</span>
-                    </div>
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo shrink-0">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo shrink-0">
-                </div>
-                
+                    
             </div>
         </div>
     </section>
@@ -1751,7 +1679,7 @@
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
         let mm = gsap.matchMedia();
 
-        // 1. Iniciar o Loop Marquee apenas quando a seção aparecer na tela (Performance + Efeito de Controle)
+        // 1. Iniciar o Loop Marquee assim que a seção entrar na viewport
         const marqueeContent = document.querySelector('.marquee-content');
         if(marqueeContent) {
             gsap.fromTo(marqueeContent, 
@@ -1759,13 +1687,8 @@
                 {
                     xPercent: -50,
                     ease: "none",
-                    duration: 50,
-                    repeat: -1,
-                    scrollTrigger: {
-                        trigger: ".marquee-container",
-                        start: "top 90%", // Só começa a rodar quando está bem visível
-                        toggleActions: "play pause resume pause"
-                    }
+                    duration: 30,
+                    repeat: -1
                 }
             );
         }

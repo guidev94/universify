@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Documentos | Let's Work</title>
+    <meta name="description" content="Armazene e gerencie atestados, holerites e contratos em um cofre digital 100% seguro e em conformidade com a LGPD.">
+    <meta name="keywords" content="controle de ponto digital, aplicativo de ponto, ponto eletrônico, RH, gestão de jornada, let's work">
+    <meta property="og:title" content="Gestão de Documentos | Let's Work">
+    <meta property="og:description" content="Armazene e gerencie atestados, holerites e contratos em um cofre digital 100% seguro e em conformidade com a LGPD.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.letswork.com.br/gestao-de-documentos/">
+    <meta property="og:image" content="https://www.letswork.com.br/wp-content/uploads/2022/07/mockups-5.png">
+    <link rel="canonical" href="https://www.letswork.com.br/gestao-de-documentos/">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Plus Jakarta Sans para aquele visual "Linear/Vercel", Inter para dados -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF2D2D',
+                        dark: '#000000', /* Preto absoluto para contraste OLED */
+                        surface: { dark: '#0A0A0A', light: '#FFFFFF' },
+                        subtle: { dark: '#A1A1AA', light: '#475569' },
+                        borderline: { dark: 'rgba(255,255,255,0.08)', light: 'rgba(0,0,0,0.08)' }
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(0,0,0,0.05)',
+                        'glow': '0 0 30px rgba(255,45,45,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base & Reset Technical */
+        svg.lucide { width: 1em; height: 1em; display: inline-block; }
+        body {
+            background-color: #FFFFFF;
+            color: #0F172A;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease;
+        }
+        .dark body { background-color: #000000; color: #FFFFFF; }
+        ::-webkit-scrollbar { width: 14px; background: #F1F5F9; }
+        .dark ::-webkit-scrollbar { background: #050505; }
+        ::-webkit-scrollbar-thumb { background-color: #FF2D2D; border-radius: 10px; border: 3px solid #F1F5F9; }
+        .dark ::-webkit-scrollbar-thumb { border: 3px solid #050505; }
+
+        /* (Removed Tech Grid for cleaner fluid background) */
+
+        /* Typography Mastery */
+        .text-huge {
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(180deg, #000 0%, #666 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .dark .gradient-text {
+            background: linear-gradient(180deg, #FFF 0%, #888 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Solid Cards instead of Glass (Modern SaaS Look) */
+        .solid-card {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .dark .solid-card { background: #0A0A0A; }
+        .solid-card:hover { border-color: #FF2D2D; }
+
+        /* Marquee Custom */
+        .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; align-items: center; }
+        
+        .client-logo { height: 40px; width: auto; object-fit: contain; filter: grayscale(100%); transition: all 0.3s ease; }
+        .client-logo.highlight { height: 40px; filter: grayscale(0%) !important; }
+        
+        @media (min-width: 1024px) { 
+            .client-logo { height: 50px; } 
+            .client-logo.highlight { height: 50px; }
+        }
+        .client-logo:hover { filter: grayscale(0%); transform: scale(1.05); }
+        .client-logo.highlight:hover { transform: scale(1.05) !important; }
+        
+        .dark .client-logo { filter: brightness(0) invert(1); }
+        .dark .client-logo.highlight { filter: brightness(0) invert(1) !important; }
+        .dark .client-logo:hover { filter: brightness(0) invert(1); }
+
+        /* 3D Depoimentos Marquee */
+        .testimonial-container {
+            perspective: 1500px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            padding: 40px 0;
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            cursor: pointer;
+        }
+        .testimonial-wrapper-3d {
+            transform-style: preserve-3d;
+            transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg);
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            width: max-content;
+            display: flex;
+        }
+        .testimonial-container:hover .testimonial-wrapper-3d {
+            transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02);
+        }
+        .testimonial-track {
+            display: flex;
+            gap: 2rem;
+            width: max-content;
+            animation: scroll-flat 50s linear infinite;
+        }
+        .testimonial-container:hover .testimonial-track { animation-play-state: paused; }
+        @keyframes scroll-flat {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* GSAP Pinned Section Utilities */
+        .pin-spacer { margin: 0 !important; padding: 0 !important; }
+        
+        /* Custom Button */
+        .btn-primary {
+            background: #FF2D2D; color: white; border: 1px solid #FF2D2D;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+        .btn-primary:hover {
+            background: transparent; color: #FF2D2D; box-shadow: inset 0 0 0 1px #FF2D2D; transform: scale(1.02);
+        }
+        .btn-primary:focus-visible {
+            box-shadow: 0 0 0 2px rgba(255,45,45,0.5);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+    </style>
+
+    <!-- SEO Schema.org Markup (Rich Snippets) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Let's Work - Gestão de Documentos",
+          "operatingSystem": "Android, iOS, Web",
+          "applicationCategory": "BusinessApplication",
+          "url": "https://www.letswork.com.br/gestao-de-documentos/",
+          "offers": {
+            "@type": "Offer",
+            "price": "89.90",
+            "priceCurrency": "BRL"
+          }
+        }
+      ]
+    }
+    </script>
+</head>
+<body class="selection:bg-primary selection:text-white">
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 transition-all duration-300 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-borderline-light dark:border-borderline-dark" id="navbar">
+        <div class="max-w-[1400px] mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 md:h-12 lg:h-14 object-contain dark:brightness-0 dark:invert transition-all">
+            </div>
+            
+            <div class="hidden lg:flex gap-8 text-sm font-semibold text-subtle-light dark:text-subtle-dark">
+                <a href="https://www.letswork.com.br/transformando-o-controle-de-ponto-com-inteligencia-artificial/" class="hover:text-black dark:hover:text-white transition-colors">IA no RH</a>
+                <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/" class="hover:text-black dark:hover:text-white transition-colors">Conheça</a>
+                
+                <!-- Dropdown Soluções -->
+                <div class="relative group">
+                    <button class="hover:text-black dark:hover:text-white transition-colors flex items-center gap-1">
+                        Soluções <i data-lucide="chevron-down" class="w-4 h-4 opacity-50"></i>
+                    </button>
+                    <div class="absolute left-0 top-full pt-4 opacity-0 translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-300">
+                        <div class="magnetic bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark rounded-xl shadow-xl w-56 overflow-hidden flex flex-col py-2">
+                            <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Controle de Ponto</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Projetos</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Escalas</a>
+                            <a href="https://www.letswork.com.br/rastreamento/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Rastreamento de Rotas</a>
+                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Documentos</a>
+                            <a href="https://www.letswork.com.br/comunicacao-de-equipe/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Comunicação da Equipe</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-ferias/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Férias</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-vagas/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Vagas</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="https://www.letswork.com.br/downloads/" class="hover:text-black dark:hover:text-white transition-colors">Download App</a>
+                <a href="#planos" class="hover:text-black dark:hover:text-white transition-colors text-primary font-bold">Planos</a>
+            </div>
+            
+            <div class="hidden lg:flex gap-6 items-center">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-subtle-light dark:text-subtle-dark">
+                    <span class="hidden dark:block"><i data-lucide="sun" class="w-4 h-4"></i></span>
+                    <span class="block dark:hidden"><i data-lucide="moon" class="w-4 h-4"></i></span>
+                </button>
+                <a href="https://app.letswork.com.br" class="text-sm font-bold hover:text-primary transition-colors">Login</a>
+                <button class="btn-primary magnetic px-6 py-2.5 rounded-full text-sm font-bold shadow-glow open-modal-btn">
+                    Falar com Vendas
+                </button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="flex lg:hidden items-center gap-4">
+                <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-subtle-light dark:text-subtle-dark">
+                    <span class="hidden dark:block"><i data-lucide="sun" class="w-4 h-4"></i></span>
+                    <span class="block dark:hidden"><i data-lucide="moon" class="w-4 h-4"></i></span>
+                </button>
+                <button id="mobile-menu-btn" class="text-black dark:text-white p-2">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="10" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="fixed inset-0 bg-white dark:bg-[#0a0a0a] z-40 translate-x-full transition-transform duration-300 lg:hidden flex flex-col pt-24 px-6 pb-6 h-screen overflow-y-auto">
+            <div class="flex flex-col gap-6 text-lg font-bold">
+                <a href="https://www.letswork.com.br/transformando-o-controle-de-ponto-com-inteligencia-artificial/" class="text-black dark:text-white">IA no RH</a>
+                <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/" class="text-black dark:text-white">Conheça</a>
+                <a href="https://www.letswork.com.br/downloads/" class="text-black dark:text-white">Download App</a>
+                <a href="#planos" class="text-primary">Planos</a>
+                <div class="h-[1px] w-full bg-borderline-light dark:bg-borderline-dark my-2"></div>
+                <a href="https://app.letswork.com.br" class="text-black dark:text-white">Login</a>
+                <button class="btn-primary w-full py-4 rounded-xl text-center mt-2 open-modal-btn">
+                    Falar com Vendas
+                </button>
+            </div>
+            <button id="mobile-menu-close" class="absolute top-6 right-6 text-black dark:text-white p-2">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </nav>
+
+
+<!-- TITLE BAR + LEAD CAPTURE -->
+<header class="pt-32 md:pt-40 pb-16 md:pb-24 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+    <!-- Grid Pattern de Fundo sutil -->
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" style="background-size: 32px 32px;"></div>
+    
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+        
+        <!-- Lado Esquerdo: Textos do Header -->
+        <div class="lg:col-span-6 lg:pr-4">
+            <nav class="flex items-center gap-2 text-sm text-subtle-light dark:text-subtle-dark mb-6 font-medium">
+                <a href="/" class="hover:text-primary transition-colors">Início</a> 
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+                <a href="#" class="hover:text-primary transition-colors">Soluções</a> 
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+                <span class="text-black dark:text-white">Gestão de Documentos</span>
+            </nav>
+            
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
+                Sistema de <span class="text-primary">Gestão de Documentos</span>
+            </h1>
+            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark max-w-3xl leading-relaxed">
+                Armazene e gerencie atestados, holerites e contratos em um cofre digital 100% seguro e em conformidade com a LGPD.
+            </p>
+            
+            <div class="mt-10 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                <p class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-4">Aprovado por investidores e parceiros</p>
+                <div class="flex flex-wrap items-center gap-6 lg:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Orgânica" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado Direito: Formulário -->
+        <div class="lg:col-span-6 relative">
+            <div id="agendar-demonstracao">
+                <div class="solid-card p-6 md:p-8 rounded-[2rem] bg-gradient-to-br from-surface-light to-white dark:from-surface-dark dark:to-black relative overflow-hidden shadow-glow border-primary/20">
+                    <!-- Elemento decorativo -->
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="mb-8">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
+                                Comece Agora
+                            </div>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-3">Agende uma Demonstração</h2>
+                            <p class="text-subtle-light dark:text-subtle-dark">Preencha os dados abaixo para fazer uma avaliação gratuita do nosso sistema e transformar o controle de ponto da sua empresa.</p>
+                        </div>
+
+                        <form class="space-y-5" onsubmit="event.preventDefault(); alert('Formulário enviado com sucesso!');">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Nome Completo</label>
+                                    <input type="text" required placeholder="Ex: João Silva" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">E-mail Corporativo</label>
+                                    <input type="email" required placeholder="joao@suaempresa.com.br" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Telefone / WhatsApp</label>
+                                    <input type="tel" required placeholder="(11) 90000-0000" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Quantidade de Funcionários</label>
+                                    <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
+                                        <option value="" disabled selected>Selecione a quantidade...</option>
+                                        <option value="1-10">1 a 10</option>
+                                        <option value="11-25">11 a 25</option>
+                                        <option value="26-50">26 a 50</option>
+                                        <option value="51-100">51 a 100</option>
+                                        <option value="101-999">101 a 999</option>
+                                        <option value="1000+">+ 1000</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-sm font-semibold text-black dark:text-white">De onde você veio?</label>
+                                <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
+                                    <option value="" disabled selected>Como nos conheceu?</option>
+                                    <option value="Google">Google</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Indicacao">Indicação</option>
+                                    <option value="Email Marketing">Email Marketing</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-6 flex justify-center items-center gap-2 magnetic">
+                                Solicitar Avaliação Gratuita <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                            <p class="text-xs text-center text-subtle-light dark:text-subtle-dark mt-4 flex justify-center items-center gap-1">
+                                <i data-lucide="shield-check" class="w-3 h-3"></i> Seus dados estão protegidos. Não enviamos spam.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</header>
+
+
+<!-- MAIN CONTENT + SIDEBAR LAYOUT -->
+<div class="py-16 md:py-24 relative">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4wNSkiLz48L3N2Zz4=')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
+
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+        
+        <!-- CONTENT COLUMN -->
+        <main class="lg:col-span-8 space-y-20">
+            
+            
+            
+            <!-- Section: Como Funciona -->
+            <section class="space-y-8">
+                <h2 class="text-3xl font-display font-bold text-black dark:text-white tracking-tight">Sobre a Gestão de Documentos</h2>
+                <div class="prose prose-lg dark:prose-invert max-w-none text-subtle-light dark:text-subtle-dark leading-relaxed">
+                    <p>
+                        Todas as batidas são registradas por reconhecimento facial, com a posição exata do colaborador, tendo a opção de delimitar o endereço e perímetro que ele possa efetuar o registro.
+                    </p>
+                    <p>
+                        Transforme o seu RH em uma área realmente estratégica através da automação inteligente e dados em tempo real.
+                    </p>
+                </div>
+                
+                <figure class="mt-10 max-w-xl mx-auto rounded-[2rem] overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/mockups-5.png" alt="Interface do Aplicativo de Controle de Ponto Digital da Let's Work rodando em um smartphone" class="w-full h-auto bg-surface-light dark:bg-surface-dark object-cover">
+                </figure>
+            </section>
+
+            <!-- Section: Funcionalidades (Grid interna) -->
+            <section>
+                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Recursos do Aplicativo</h2>
+                <div class="grid sm:grid-cols-1 gap-6">
+
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Cofre Digital</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Arquivos protegidos e criptografados na nuvem.</p>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="file-signature" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Assinatura Eletrônica</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Assinatura digital de contratos e holerites com validade jurídica.</p>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Busca Inteligente</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Encontre qualquer documento do colaborador em segundos.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Integração WhatsApp -->
+            <section class="solid-card p-8 md:p-12 rounded-[2rem] bg-surface-light dark:bg-surface-dark border-primary/20 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <i data-lucide="message-circle" class="w-48 h-48 text-[#25D366]"></i>
+                </div>
+                <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366]/10 text-[#25D366] font-bold text-xs mb-4 uppercase tracking-wider">
+                            Exclusividade
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-display font-bold text-black dark:text-white mb-4">Integrado com WhatsApp</h2>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm md:text-base leading-relaxed mb-6">
+                            Com o Let's Work, os colaboradores podem marcar seu ponto através do próprio Whatsapp, de forma fácil e rápida. Trazemos uma solução inovadora que utiliza a popularidade do WhatsApp para proporcionar maior eficiência.
+                        </p>
+                        <ol class="space-y-4">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                                <span class="text-sm text-black dark:text-white font-medium">A empresa cadastra o número dos celulares.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                                <span class="text-sm text-black dark:text-white font-medium">O funcionário recebe o link para bater ponto com biometria facial e localização.</span>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="flex justify-center">
+                        <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/WhatsApp-Image-2022-04-13-at-11.23.21-4.jpeg" alt="Demonstração do Registro de Ponto Digital via Integração com WhatsApp" class="w-[200px] rounded-3xl shadow-soft border-4 border-white dark:border-[#222]">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: FAQ -->
+            <section>
+                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Dúvidas Frequentes</h2>
+                <div class="space-y-4">
+                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
+                            Como funciona o registro de ponto?
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </span>
+                        </summary>
+                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
+                            O registro de ponto é feito por reconhecimento facial, garantindo precisão e segurança. A localização do colaborador é registrada e é possível definir o endereço e perímetro para a marcação.
+                        </div>
+                    </details>
+
+                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
+                            O aplicativo funciona em quais dispositivos?
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </span>
+                        </summary>
+                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
+                            O Let’s Work pode ser utilizado em smartphones, tablets, notebooks e desktops, tanto para colaboradores internos quanto externos, facilitando o controle em qualquer modelo de trabalho.
+                        </div>
+                    </details>
+
+                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
+                            O sistema é fácil de usar para funcionários e gestores?
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </span>
+                        </summary>
+                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
+                            Sim. O painel é intuitivo e permite fácil administração, geração de relatórios automáticos e envio de notificações para colaboradores e gestores.
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+        
+            
+
+        </main>
+
+        <!-- SIDEBAR COLUMN -->
+        <aside class="lg:col-span-4">
+            <div class="sticky top-32 space-y-6">
+                
+                <!-- CTA Widget -->
+                <div class="solid-card p-8 rounded-2xl text-center shadow-glow border-primary/20 bg-gradient-to-b from-surface-light to-white dark:from-surface-dark dark:to-black">
+                    <div class="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="calendar-days" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl mb-3 text-black dark:text-white">Quer melhorar sua gestão de funcionários?</h3>
+                    <p class="text-sm text-subtle-light dark:text-subtle-dark mb-6">Agende uma demonstração gratuita e veja como nosso sistema de ponto pode transformar seu RH.</p>
+                    
+                    <a href="#agendar-demonstracao" class="btn-primary w-full block py-3 rounded-xl font-bold flex items-center justify-center gap-2 magnetic">
+                        Falar com Especialista <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark mt-4">Avaliação 100% gratuita.</p>
+                </div>
+
+                <!-- Plan Widget -->
+                <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-surface-dark">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
+                        <h4 class="font-bold text-black dark:text-white">Plano Mais Vendido</h4>
+                    </div>
+                    <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark uppercase font-bold tracking-wider mb-1">Equipe Dinâmica</div>
+                        <div class="text-3xl font-display font-bold text-primary mb-1">R$ 299<span class="text-lg">,90</span></div>
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Até 50 funcionários por mês</div>
+                    </div>
+                    <ul class="text-sm space-y-3 text-subtle-light dark:text-subtle-dark mb-6">
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Reconhecimento Facial</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Registro Offline</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Gestão de Escalas</li>
+                    </ul>
+                    <a href="https://www.letswork.com.br/preco-de-aplicativo-de-ponto-com-reconhecimento-facial/" class="text-primary text-sm font-bold flex items-center gap-2 hover:underline">
+                        Ver todos os planos <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- IA Banner Widget -->
+                <a href="https://www.letswork.com.br/transformando-o-controle-de-ponto-com-inteligencia-artificial/" class="group solid-card p-6 rounded-2xl block border-primary/10 hover:border-primary/50 transition-colors">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-primary uppercase tracking-wider">Novo Recurso</span>
+                        <i data-lucide="sparkles" class="w-4 h-4 text-primary group-hover:animate-pulse"></i>
+                    </div>
+                    <h4 class="font-bold text-black dark:text-white mb-2">Inteligência Artificial no RH</h4>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark">Descubra como a IA analisa dados para identificar melhorias na gestão de tempo.</p>
+                </a>
+            </div>
+        </aside>
+
+    </div>
+</div>
+<footer class="pt-20 pb-10 border-t border-borderline-light dark:border-borderline-dark text-center lg:text-left">
+        <div class="max-w-[1400px] mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
+                <!-- 1) Logo & About & Social -->
+                <div class="flex flex-col items-center lg:items-start gap-6">
+                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 object-contain dark:brightness-0 dark:invert transition-all">
+                    <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed max-w-sm">
+                        A solução definitiva para controle de jornada, produtividade e gestão de equipe em um só lugar.
+                    </p>
+                    <div class="flex items-center justify-center lg:justify-start gap-4">
+                        <a href="https://www.instagram.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary transition-all group">
+                            <svg class="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/company/letsworkapp/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary transition-all group">
+                            <svg class="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                        </a>
+                        <a href="https://www.facebook.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary transition-all group">
+                            <svg class="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </a>
+                        <a href="https://www.youtube.com/channel/UCPfqYcFei0THbnNWfHjyIug" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary transition-all group">
+                            <svg class="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.1c.3-1.5 1.5-2.8 3-3.1C8.6 3.5 12 3.5 12 3.5s3.4 0 6.5.5c1.5.3 2.7 1.6 3 3.1.5 1.9.5 5.9.5 5.9s0 4-.5 5.9c-.3 1.5-1.5 2.8-3 3.1-3.1.5-6.5.5-6.5.5s-3.4 0-6.5-.5c-1.5-.3-2.7-1.6-3-3.1-.5-1.9-.5-5.9-.5-5.9s0-4 .5-5.9z"/><path d="m9.5 15.5 6-3.5-6-3.5v7z"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2) Soluções -->
+                <div class="flex flex-col items-center lg:items-start">
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Soluções</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium flex flex-col items-center lg:items-start">
+                        <li><a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="hover:text-primary transition-colors">Ponto Eletrônico</a></li>
+                        <li><a href="https://www.letswork.com.br/rastreamento/" class="hover:text-primary transition-colors">Rastreamento de Rotas</a></li>
+                        <li><a href="https://www.letswork.com.br/gestao-de-documentos/" class="hover:text-primary transition-colors">Gestão de Documentos</a></li>
+                        <li><a href="https://www.letswork.com.br/comunicacao-de-equipe/" class="hover:text-primary transition-colors">Comunicação de Equipe</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-ferias/" class="hover:text-primary transition-colors">Gerenciamento de Férias</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="hover:text-primary transition-colors">Gestão de Processos</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 3) Segmentos -->
+                <div class="flex flex-col items-center lg:items-start">
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Segmentos</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium flex flex-col items-center lg:items-start">
+                        <li><a href="https://www.letswork.com.br/hospitais-clinicas-e-laboratorios/" class="hover:text-primary transition-colors">Hospitais & Clínicas</a></li>
+                        <li><a href="https://www.letswork.com.br/logistica-e-transporte/" class="hover:text-primary transition-colors">Logística & Entregas</a></li>
+                        <li><a href="https://www.letswork.com.br/empresas-de-seguranca/" class="hover:text-primary transition-colors">Empresas de Segurança</a></li>
+                        <li><a href="https://www.letswork.com.br/equipe-de-limpeza-e-manutencao/" class="hover:text-primary transition-colors">Equipes de Limpeza</a></li>
+                        <li><a href="https://www.letswork.com.br/varejo-e-restaurantes/" class="hover:text-primary transition-colors">Lojas de Varejo</a></li>
+                        <li><a href="https://www.letswork.com.br/construcao-civil/" class="hover:text-primary transition-colors">Obras & Construção</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 4) A Empresa -->
+                <div class="flex flex-col items-center lg:items-start">
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">A Empresa</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium flex flex-col items-center lg:items-start">
+                        <li><a href="https://www.letswork.com.br/sobre-o-letswork/" class="hover:text-primary transition-colors">Sobre a Let's Work</a></li>
+                        <li><a href="https://www.letswork.com.br/seja-nosso-parceiro/" class="hover:text-primary transition-colors">Parceiros</a></li>
+                        <li><a href="#planos" class="hover:text-primary transition-colors">Planos e Preços</a></li>
+                        <li><a href="https://www.letswork.com.br/downloads/" class="hover:text-primary transition-colors">Downloads App</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 5) Contato -->
+                <div class="flex flex-col items-center lg:items-start">
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Contato Rápido</h4>
+                    <ul class="space-y-5 text-sm text-subtle-light dark:text-subtle-dark flex flex-col items-center lg:items-start">
+                        <li class="flex flex-col items-center lg:items-start">
+                            <span class="flex items-center justify-center lg:justify-start gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider w-full"><svg class="w-3 h-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Comercial</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511934670924" target="_blank" class="hover:text-primary transition-colors block font-medium">11 93467-0924</a>
+                        </li>
+                        <li class="flex flex-col items-center lg:items-start">
+                            <span class="flex items-center justify-center lg:justify-start gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider w-full"><i data-lucide="headset" class="w-3 h-3 text-primary"></i> Suporte Técnico</span>
+                            <a href="https://web.whatsapp.com/send?phone=5511971163576" target="_blank" class="hover:text-primary transition-colors block font-medium">11 97116-3576</a>
+                        </li>
+                        <li class="flex flex-col items-center lg:items-start">
+                            <span class="flex items-center justify-center lg:justify-start gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider w-full"><i data-lucide="settings" class="w-3 h-3 text-primary"></i> Implantação</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511998514728" target="_blank" class="hover:text-primary transition-colors block font-medium">11 99851-4728</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Line -->
+            <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-borderline-light dark:border-borderline-dark text-xs text-subtle-light dark:text-subtle-dark font-medium text-center md:text-left">
+                <p>&copy; 2026 LET'S WORK TECNOLOGIA LTDA. CNPJ: 45.992.151/0001-01. Todos os direitos reservados.</p>
+                <div class="flex gap-6 mt-4 md:mt-0 justify-center">
+                    <a href="https://www.letswork.com.br/politica-de-privacidade/" class="hover:text-primary transition-colors">Política de Privacidade</a>
+                    <a href="https://www.letswork.com.br/termos-de-uso/" class="hover:text-primary transition-colors">Termos de Uso</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DE CAPTAÇÃO / LEAD -->
+    <div id="lead-modal" class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 px-4 py-8 overflow-y-auto">
+        <div class="bg-white dark:bg-[#111] w-[90%] md:w-[80%] max-w-[600px] my-auto rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 border border-borderline-light dark:border-borderline-dark relative flex flex-col text-center shrink-0">
+            <button id="close-modal" class="absolute top-4 right-4 p-2 text-subtle-light dark:text-subtle-dark hover:text-black dark:hover:text-white transition-colors bg-gray-100 dark:bg-white/10 rounded-full z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <!-- Banner Modal -->
+            <div class="bg-primary/5 pt-10 pb-6 px-8 border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+                <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow">
+                    <i data-lucide="rocket" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-3xl font-display font-black text-black dark:text-white mb-2 tracking-tight">Transforme o seu RH agora.</h3>
+                <p class="text-sm font-medium text-subtle-light dark:text-subtle-dark max-w-sm mx-auto leading-relaxed">
+                    Deixe seus dados e nossa equipe de especialistas montará seu ambiente <strong>100% gratuito</strong>. Aposente planilhas e comece a escalar hoje mesmo.
+                </p>
+            </div>
+
+            <!-- Form -->
+            <div class="p-8 bg-white dark:bg-[#111]">
+                <form class="space-y-5 text-left" onsubmit="event.preventDefault(); alert('🚀 Solicitação recebida! Em breve um especialista entrará em contato pelo seu WhatsApp.'); document.getElementById('close-modal').click();">
+                    <div>
+                        <label class="block text-[11px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-1.5 pl-1">Nome Completo</label>
+                        <input type="text" required placeholder="Ex: João Silva" class="w-full bg-gray-50 dark:bg-[#1A1A1A] border border-borderline-light dark:border-borderline-dark rounded-xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-1.5 pl-1">E-mail Corporativo</label>
+                        <input type="email" required placeholder="joao@suaempresa.com.br" class="w-full bg-gray-50 dark:bg-[#1A1A1A] border border-borderline-light dark:border-borderline-dark rounded-xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-1.5 pl-1">WhatsApp para Contato</label>
+                        <input type="tel" required placeholder="(11) 99999-9999" class="w-full bg-gray-50 dark:bg-[#1A1A1A] border border-borderline-light dark:border-borderline-dark rounded-xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary hover:bg-red-600 text-white font-bold py-4 rounded-xl shadow-glow transition-transform active:scale-95 mt-4 flex items-center justify-center gap-2">
+                        Solicitar Acesso Gratuito
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                    <p class="text-center text-[10px] font-medium text-subtle-light dark:text-subtle-dark mt-4">
+                        <i data-lucide="lock" class="w-3 h-3 inline-block -mt-0.5 mr-0.5 opacity-70"></i> Seus dados estão seguros conosco.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS CORE: GSAP & Interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+    <script>
+        lucide.createIcons();
+
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleMobileBtn = document.getElementById('theme-toggle-mobile');
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+        
+        if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
+        if(themeToggleMobileBtn) themeToggleMobileBtn.addEventListener('click', toggleTheme);
+
+        // --- MOBILE MENU LOGIC ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenuClose = document.getElementById('mobile-menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if(mobileMenuBtn && mobileMenu && mobileMenuClose) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('translate-x-full');
+            });
+            mobileMenuClose.addEventListener('click', () => {
+                mobileMenu.classList.add('translate-x-full');
+            });
+        }
+
+        // --- MODAL LOGIC ---
+        const modal = document.getElementById('lead-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const openModalBtns = document.querySelectorAll('.open-modal-btn');
+        const modalInner = modal ? modal.querySelector('div') : null;
+
+        if (modal && closeModalBtn) {
+            function openModal(e) {
+                if(e) e.preventDefault();
+                modal.classList.remove('hidden');
+                // Pequeno delay pra ativar opacidade
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    if(modalInner) modalInner.classList.remove('scale-95');
+                }, 10);
+            }
+            
+            function closeModal() {
+                modal.classList.add('opacity-0');
+                if(modalInner) modalInner.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // Tempo da transição
+            }
+
+            openModalBtns.forEach(btn => {
+                btn.addEventListener('click', openModal);
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            
+            // Clicar fora para fechar
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeModal();
+            });
+        }
+
+        // --- NAVBAR SCROLL ---
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-sm');
+                nav.classList.replace('border-transparent', 'border-borderline-light');
+                if(document.documentElement.classList.contains('dark')){
+                    nav.classList.replace('border-borderline-light', 'border-borderline-dark');
+                }
+            } else {
+                nav.classList.remove('shadow-sm', 'border-borderline-light', 'border-borderline-dark');
+                nav.classList.add('border-transparent');
+            }
+        }, { passive: true });
+
+        // PRICING TOGGLE LOGIC
+        const btnMensal = document.getElementById('btn-mensal');
+        const btnAnual = document.getElementById('btn-anual');
+        const pricingBg = document.getElementById('pricing-toggle-bg');
+        const priceVals = document.querySelectorAll('.price-val');
+        const pricePeriods = document.querySelectorAll('.price-period');
+        let isAnnual = false;
+
+        function updatePricingUI() {
+            if(isAnnual) {
+                pricingBg.style.transform = "translateX(100px)";
+                pricingBg.style.width = "140px";
+                btnMensal.classList.remove("text-white", "dark:text-black");
+                btnMensal.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                btnAnual.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                btnAnual.classList.add("text-white", "dark:text-black");
+                
+                priceVals.forEach(el => {
+                    const newVal = el.getAttribute("data-anual");
+                    if(newVal) {
+                        el.innerText = newVal;
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    }
+                });
+                pricePeriods.forEach(el => el.innerText = ",90/mês (cobrado anualmente)");
+            } else {
+                pricingBg.style.transform = "translateX(0)";
+                pricingBg.style.width = "100px";
+                btnAnual.classList.remove("text-white", "dark:text-black");
+                btnAnual.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                btnMensal.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                btnMensal.classList.add("text-white", "dark:text-black");
+                
+                priceVals.forEach(el => {
+                    const newVal = el.getAttribute("data-mensal");
+                    if(newVal) {
+                        el.innerText = newVal;
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    }
+                });
+                pricePeriods.forEach(el => el.innerText = ",90/mês");
+            }
+        }
+
+        if(btnMensal && btnAnual) {
+            btnMensal.addEventListener('click', () => { if(isAnnual) { isAnnual = false; updatePricingUI(); } });
+            btnAnual.addEventListener('click', () => { if(!isAnnual) { isAnnual = true; updatePricingUI(); } });
+        }
+
+        // --- GSAP ANIMATIONS & INTERACTIONS ---
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+        let mm = gsap.matchMedia();
+
+        // 1. Iniciar o Loop Marquee assim que a seção entrar na viewport
+        const marqueeContent = document.querySelector('.marquee-content');
+        if(marqueeContent) {
+            gsap.fromTo(marqueeContent, 
+                { xPercent: 0 },
+                {
+                    xPercent: -50,
+                    ease: "none",
+                    duration: 30,
+                    repeat: -1
+                }
+            );
+        }
+
+        gsap.utils.toArray('.section-reveal').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                y: 30, opacity: 0, duration: 0.8, ease: "power3.out"
+            });
+        });
+
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            gsap.to(counter, {
+                scrollTrigger: { trigger: counter, start: "top 85%", once: true },
+                innerHTML: counter.getAttribute('data-val'),
+                duration: 2, snap: { innerHTML: 1 }, ease: "power2.out"
+            });
+        });
+
+        mm.add("(min-width: 1024px)", () => {
+            // Hero
+            const heroTl = gsap.timeline();
+            heroTl.from(".hero-reveal", { y: 20, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out", delay: 0.1 })
+                  .from(".hero-dash", { x: 50, opacity: 0, duration: 1.5, ease: "power3.out" }, "-=0.8")
+                  .from(".hero-mobile", { y: 50, x: -30, opacity: 0, duration: 1.5, ease: "back.out(1.2)" }, "-=1.2");
+
+            // Scroll Storytelling Animado via GSAP nativo
+            const stepTexts = gsap.utils.toArray('.step-text');
+            const visuals = gsap.utils.toArray('.feature-visual');
+
+            ScrollTrigger.create({
+                trigger: "#solucoes",
+                start: "top top",
+                end: "bottom bottom",
+                pin: ".lg\\:flex.w-1\\/2.h-screen.sticky",
+                pinSpacing: false
+            });
+
+            stepTexts.forEach((text, i) => {
+                const innerCard = text.querySelector('div');
+                ScrollTrigger.create({
+                    trigger: text,
+                    start: "top center",
+                    end: "bottom center",
+                    onEnter: () => activateStep(i),
+                    onEnterBack: () => activateStep(i),
+                });
+            });
+
+            function activateStep(index) {
+                stepTexts.forEach((t, i) => {
+                    const card = t.querySelector('div');
+                    if (i === index) {
+                        card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                        card.classList.remove('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                    } else {
+                        card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                        card.classList.add('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                    }
+                });
+
+                visuals.forEach((vis, i) => {
+                    if (i === index) {
+                        vis.style.opacity = "1";
+                        vis.style.transform = "translateY(0) scale(1)";
+                        vis.style.zIndex = "10";
+                    } else if (i < index) {
+                        vis.style.opacity = "0";
+                        vis.style.transform = "translateY(-40px) scale(0.95)";
+                        vis.style.zIndex = "1";
+                    } else {
+                        vis.style.opacity = "0";
+                        vis.style.transform = "translateY(40px) scale(0.95)";
+                        vis.style.zIndex = "1";
+                    }
+                });
+            }
+        }); // END MATCHMEDIA DESKTOP ONLY
+
+        // VittorIA Chat Sequence (Global Mobile & Desktop)
+        /* Comentado temporariamente para rodar o vídeo
+        if(document.querySelector(".chat-phone")) {
+            gsap.set([".chat-msg-bot-1", ".chat-msg-bot-2", ".chat-msg-user-2", ".chat-msg-bot-3", ".chat-system-msg", ".chat-typing-2"], { display: "none", opacity: 0, y: 15 });
+            
+            const chatContainer = document.getElementById("chat-messages-container");
+
+            const chatTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".chat-phone",
+                    start: "top 60%",
+                    once: true
+                }
+            });
+
+            chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .to(".chat-typing-1", { y: 0, opacity: 1, duration: 0.2 }, "+=0.2")
+                  .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.5")
+                  .set(".chat-msg-bot-1", { display: "block" })
+                  .to(".chat-msg-bot-1", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
+                  .to(".chat-msg-bot-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-msg-user-2", { display: "block" }, "+=1.5")
+                  .to(".chat-msg-user-2", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-typing-2", { display: "flex" }, "+=0.2")
+                  .to(".chat-typing-2", { y: 0, opacity: 1, duration: 0.2 })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.2")
+                  .set(".chat-msg-bot-3", { display: "block" })
+                  .to(".chat-msg-bot-3", { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; })
+                  .set(".chat-system-msg", { display: "block" }, "+=0.5")
+                  .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
+                  .add(() => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; });
+        }
+        */
+    
+        // --- PARALLAX ---
+        gsap.utils.toArray('[data-parallax]').forEach(elem => {
+            const speed = elem.getAttribute('data-parallax');
+            gsap.to(elem, {
+                y: () => (ScrollTrigger.maxScroll(window) * speed),
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        });
+
+        
+
+        // --- MAGNETIC BUTTONS ---
+        const magneticElements = document.querySelectorAll('.magnetic');
+        magneticElements.forEach(elem => {
+            elem.addEventListener('mousemove', (e) => {
+                const rect = elem.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(elem, { x: x * 0.2, y: y * 0.2, duration: 0.3, ease: 'power2.out' });
+            });
+            elem.addEventListener('mouseleave', () => {
+                gsap.to(elem, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+
+    </script>
+</body>
+</html>
