@@ -291,7 +291,7 @@
     <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
         
         <!-- Contatos Diretos -->
-        <div class="lg:col-span-5 space-y-6">
+        <div class="lg:col-span-7 flex flex-col justify-center">
             <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-6">Nossos Canais</h2>
             
             <!-- Horário de Funcionamento -->
@@ -305,7 +305,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid sm:grid-cols-2 gap-6">
                 <!-- Comercial -->
                 <div class="solid-card p-6 rounded-2xl flex gap-5 group hover:border-primary transition-colors">
                     <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -365,15 +365,15 @@
         </div>
 
         <!-- Formulário -->
-        <div class="lg:col-span-7">
-            <div class="solid-card p-8 md:p-12 rounded-[2rem] shadow-soft">
+        <div class="lg:col-span-5">
+            <div class="solid-card p-8 md:p-10 rounded-[2rem] shadow-glow border-primary/20 sticky top-32">
                 <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-6">Envie uma mensagem</h2>
                 <form class="space-y-5" onsubmit="event.preventDefault(); alert('Mensagem enviada com sucesso!');">
                     <div class="space-y-1.5">
                         <label class="text-sm font-semibold text-black dark:text-white">Nome Completo</label>
                         <input type="text" required class="w-full px-4 py-3 rounded-xl bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white">
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-5">
                         <div class="space-y-1.5">
                             <label class="text-sm font-semibold text-black dark:text-white">E-mail</label>
                             <input type="email" required class="w-full px-4 py-3 rounded-xl bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white">
