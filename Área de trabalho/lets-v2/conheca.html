@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conheça a Let's Work | Sobre Nós</title>
-    <meta name="description" content="Saiba mais sobre a Let's Work. Nossa missão, visão e como revolucionamos a gestão de Recursos Humanos através da tecnologia.">
+    <title>Conheça a Let's Work | Características</title>
+    <meta name="description" content="Conheça as características do aplicativo de ponto da Let's Work e descubra como revolucionamos o RH.">
     <meta name="keywords" content="controle de ponto digital, aplicativo de ponto, ponto eletrônico, RH, gestão de jornada, let's work">
     <meta property="og:title" content="Sistema de Controle de Ponto Digital | Let's Work">
     <meta property="og:description" content="Otimize a gestão da jornada de trabalho com reconhecimento facial e integração via WhatsApp.">
@@ -277,55 +277,205 @@
             </button>
         </div>
     </nav>
-<!-- TITLE BAR -->
-<header class="pt-32 md:pt-40 pb-16 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark">
-    <div class="max-w-[1400px] mx-auto px-6 text-center">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
-            Conheça a <span class="text-primary">Let's Work</span>
-        </h1>
-        <p class="text-lg text-subtle-light dark:text-subtle-dark max-w-2xl mx-auto">
-            Somos apaixonados por inovação e obcecados em simplificar a vida do profissional de RH. Entenda a revolução que estamos liderando.
-        </p>
+<!-- TITLE BAR (Internal Page Aesthetic) -->
+<header class="pt-32 md:pt-40 pb-16 md:pb-24 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+    <!-- Grid Pattern de Fundo sutil -->
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" style="background-size: 32px 32px;"></div>
+    
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+        
+        <!-- Lado Esquerdo: Textos do Header -->
+        <div class="lg:col-span-6 lg:pr-4">
+            <nav class="flex items-center gap-2 text-sm text-subtle-light dark:text-subtle-dark mb-6 font-medium">
+                <a href="index.html" class="hover:text-primary transition-colors">Início</a> 
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+                <span class="text-black dark:text-white">Conheça</span>
+            </nav>
+            
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
+                Revolucionando o <span class="text-primary">RH</span>
+            </h1>
+            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark max-w-3xl leading-relaxed">
+                Com a Let’s Work, você permite que seus colaboradores façam o registro do ponto pelo navegador ou pelo aplicativo mobile de forma simples, cumprindo a Portaria nº 671/21 do MTE.
+            </p>
+            
+            <div class="mt-10 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                <p class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-4">Aprovado por investidores e parceiros</p>
+                <div class="flex flex-wrap items-center gap-6 lg:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Orgânica" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado Direito: Formulário Lead Generation -->
+        <div class="lg:col-span-6 relative">
+            <div id="agendar-demonstracao">
+                <div class="solid-card p-6 md:p-8 rounded-[2rem] bg-gradient-to-br from-surface-light to-white dark:from-surface-dark dark:to-black relative overflow-hidden shadow-glow border-primary/20">
+                    <!-- Elemento decorativo -->
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="mb-8">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
+                                Comece Agora
+                            </div>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-3">Agende uma Demonstração</h2>
+                            <p class="text-subtle-light dark:text-subtle-dark">Preencha os dados abaixo para fazer uma avaliação gratuita.</p>
+                        </div>
+
+                        <form class="space-y-5" onsubmit="event.preventDefault(); alert('Formulário enviado com sucesso!');">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Nome Completo</label>
+                                    <input type="text" required placeholder="Ex: João Silva" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">E-mail Corporativo</label>
+                                    <input type="email" required placeholder="joao@suaempresa.com.br" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Telefone / WhatsApp</label>
+                                    <input type="tel" required placeholder="(11) 90000-0000" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Qtd Funcionários</label>
+                                    <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
+                                        <option value="" disabled selected>Selecione...</option>
+                                        <option value="1-10">1 a 10</option>
+                                        <option value="11-25">11 a 25</option>
+                                        <option value="26-50">26 a 50</option>
+                                        <option value="101-999">101 a 999</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-6 flex justify-center items-center gap-2 magnetic">
+                                Solicitar Avaliação <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </header>
 
-<main class="py-20 relative">
-    <div class="max-w-[1000px] mx-auto px-6 space-y-16">
+<!-- MAIN CONTENT + SIDEBAR LAYOUT -->
+<div class="py-16 md:py-24 relative">
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
         
-        <div class="prose prose-lg dark:prose-invert max-w-none">
-            <p>
-                A Let’s Work nasceu da necessidade de acabar com a burocracia e processos manuais que engessam os departamentos de recursos humanos em todo o Brasil. Entendemos que o controle de ponto não deveria ser uma dor de cabeça no fim do mês, mas sim uma fonte de dados estratégicos.
-            </p>
-            <p>
-                Nossa plataforma não é apenas um "relógio de ponto digital". Somos um ecossistema completo de <strong>Workforce Management</strong> projetado para escalar a operação de empresas de 10 a 10.000 funcionários, centralizando jornada, comunicação, benefícios e recrutamento em uma única interface amigável.
-            </p>
-        </div>
+        <!-- CONTENT COLUMN -->
+        <main class="lg:col-span-8 space-y-20">
+            
+            <!-- Section: Benefícios -->
+            <section class="space-y-8">
+                <h2 class="text-3xl font-display font-bold text-black dark:text-white tracking-tight">Benefícios de utilizar o Let's Work</h2>
+                <div class="prose prose-lg dark:prose-invert max-w-none text-subtle-light dark:text-subtle-dark leading-relaxed">
+                    <ul class="space-y-4 list-disc pl-5">
+                        <li><strong>Reconhecimento Facial:</strong> Medida realizada por um cálculo complexo considerando mais de 100 pontos nodais da face, tornando o processo mais preciso e confiável.</li>
+                        <li><strong>Implantação fácil:</strong> Apenas com o uso de celulares e tablets.</li>
+                        <li><strong>Economia de tempo e recursos:</strong> Otimiza e agiliza o fechamento da folha de pagamento, liberando a equipe do RH para atividades estratégicas.</li>
+                        <li><strong>Automatização de processos:</strong> O sistema automatiza os cálculos de horas trabalhadas, extras e descontos, eliminando a necessidade de planilhas.</li>
+                        <li><strong>Redução de custos:</strong> Evita pagamentos indevidos de horas extras e erros de cálculo.</li>
+                        <li><strong>Segurança:</strong> Alta redução na probabilidade de fraude. Todos os dados são armazenados na nuvem de forma segura.</li>
+                        <li><strong>Autonomia e flexibilidade:</strong> Funcionários têm autonomia para acompanhar sua jornada e solicitar correções através de um app próprio.</li>
+                        <li><strong>Sustentabilidade (ESG):</strong> Preserva o meio ambiente sem a necessidade de impressão de comprovantes ou espelhos de ponto, promovendo a não exploração da mão de obra.</li>
+                    </ul>
+                </div>
+            </section>
 
-        <div class="grid sm:grid-cols-3 gap-6">
-            <div class="solid-card p-8 rounded-2xl text-center">
-                <i data-lucide="target" class="w-10 h-10 text-primary mx-auto mb-4"></i>
-                <h3 class="font-bold text-black dark:text-white mb-2">Missão</h3>
-                <p class="text-sm text-subtle-light dark:text-subtle-dark">Automatizar a rotina operacional do RH para que as empresas possam focar no que importa: pessoas.</p>
-            </div>
-            <div class="solid-card p-8 rounded-2xl text-center">
-                <i data-lucide="eye" class="w-10 h-10 text-primary mx-auto mb-4"></i>
-                <h3 class="font-bold text-black dark:text-white mb-2">Visão</h3>
-                <p class="text-sm text-subtle-light dark:text-subtle-dark">Ser a plataforma SaaS de gestão de força de trabalho líder e mais amada da América Latina.</p>
-            </div>
-            <div class="solid-card p-8 rounded-2xl text-center">
-                <i data-lucide="heart" class="w-10 h-10 text-primary mx-auto mb-4"></i>
-                <h3 class="font-bold text-black dark:text-white mb-2">Valores</h3>
-                <p class="text-sm text-subtle-light dark:text-subtle-dark">Inovação contínua, transparência total e sucesso absoluto do cliente em primeiro lugar.</p>
-            </div>
-        </div>
+            <!-- Section: Ecossistema -->
+            <section>
+                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Ecossistema Completo</h2>
+                <div class="grid sm:grid-cols-2 gap-6">
+                    
+                    <a href="gestao-de-documentos.html" class="solid-card p-6 rounded-2xl group flex flex-col hover:border-primary transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="file-lock-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-black dark:text-white mb-2">Gestão de Documentos</h3>
+                        <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed mb-4 flex-grow">Gerencie holerites, NFs e atestados em um cofre digital 100% seguro com acesso fácil pelo APP.</p>
+                        <span class="text-primary text-sm font-bold flex items-center gap-2 group-hover:underline mt-auto">Conheça <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
+                    </a>
 
-        <div class="pt-10 border-t border-borderline-light dark:border-borderline-dark text-center">
-            <h2 class="text-3xl font-display font-bold text-black dark:text-white mb-6">Venha fazer parte dessa história</h2>
-            <a href="contato.html" class="btn-primary inline-block px-8 py-4 rounded-full font-bold">Fale Conosco</a>
-        </div>
+                    <a href="gerenciamento-de-projetos.html" class="solid-card p-6 rounded-2xl group flex flex-col hover:border-primary transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="briefcase" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-black dark:text-white mb-2">Timesheet / Processos</h3>
+                        <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed mb-4 flex-grow">Associe tarefas a projetos, planeje a capacidade produtiva da equipe e calcule a rentabilidade.</p>
+                        <span class="text-primary text-sm font-bold flex items-center gap-2 group-hover:underline mt-auto">Conheça <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
+                    </a>
+
+                    <a href="rastreamento.html" class="solid-card p-6 rounded-2xl group flex flex-col hover:border-primary transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="map-pin" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-black dark:text-white mb-2">Rastreamento de Rotas</h3>
+                        <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed mb-4 flex-grow">Acompanhe se os funcionários externos estão nos locais devidos, otimizando deslocamentos e segurança.</p>
+                        <span class="text-primary text-sm font-bold flex items-center gap-2 group-hover:underline mt-auto">Conheça <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
+                    </a>
+
+                    <a href="comunicacao-de-equipe.html" class="solid-card p-6 rounded-2xl group flex flex-col hover:border-primary transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="message-square" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-black dark:text-white mb-2">Comunicação de Equipe</h3>
+                        <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed mb-4 flex-grow">Crie grupos, envie áudios e documentos de forma segura com ajuda da nossa IA (Assistente Virtual).</p>
+                        <span class="text-primary text-sm font-bold flex items-center gap-2 group-hover:underline mt-auto">Conheça <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
+                    </a>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- SIDEBAR COLUMN -->
+        <aside class="lg:col-span-4">
+            <div class="sticky top-32 space-y-6">
+                
+                <!-- CTA Widget -->
+                <div class="solid-card p-8 rounded-2xl text-center shadow-glow border-primary/20 bg-gradient-to-b from-surface-light to-white dark:from-surface-dark dark:to-black">
+                    <div class="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="calendar-days" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl mb-3 text-black dark:text-white">Pronto para o futuro?</h3>
+                    <p class="text-sm text-subtle-light dark:text-subtle-dark mb-6">Agende uma demonstração gratuita e integre todas as nossas soluções.</p>
+                    
+                    <a href="#agendar-demonstracao" class="btn-primary w-full block py-3 rounded-xl font-bold flex items-center justify-center gap-2 magnetic">
+                        Falar com Especialista <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Plan Widget -->
+                <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-surface-dark">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
+                        <h4 class="font-bold text-black dark:text-white">Plano Mais Vendido</h4>
+                    </div>
+                    <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark uppercase font-bold tracking-wider mb-1">Equipe Dinâmica</div>
+                        <div class="text-3xl font-display font-bold text-primary mb-1">R$ 299<span class="text-lg">,90</span></div>
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Até 50 funcionários por mês</div>
+                    </div>
+                    <ul class="text-sm space-y-3 text-subtle-light dark:text-subtle-dark mb-6">
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Reconhecimento Facial</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> App do Colaborador</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Integração Contábil</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
 
     </div>
-</main>
+</div>
 <footer class="pt-20 pb-10 border-t border-borderline-light dark:border-borderline-dark text-center lg:text-left">
         <div class="max-w-[1400px] mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
