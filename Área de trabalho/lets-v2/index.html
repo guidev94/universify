@@ -489,11 +489,13 @@
                                 hls.loadSource(videoSrc);
                                 hls.attachMedia(video);
                                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                                    video.currentTime = 2; // Começar do segundo 2
                                     video.play().catch(function(e) { console.log("Auto-play prevented", e); });
                                 });
                             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                video.src = videoSrc;
+                                video.src = videoSrc + '#t=2'; // Fallback para Apple
                                 video.addEventListener('loadedmetadata', function() {
+                                    video.currentTime = 2;
                                     video.play().catch(function(e) { console.log("Auto-play prevented", e); });
                                 });
                             }
