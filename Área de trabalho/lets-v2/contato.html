@@ -292,47 +292,76 @@
         
         <!-- Contatos Diretos -->
         <div class="lg:col-span-5 space-y-6">
-            <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8">Nossos Canais</h2>
+            <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-6">Nossos Canais</h2>
             
-            <a href="https://api.whatsapp.com/send?phone=5511934670924" class="solid-card p-6 rounded-2xl flex items-center gap-5 group hover:border-[#25D366]">
-                <div class="w-12 h-12 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center shrink-0">
-                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            <!-- Horário de Funcionamento -->
+            <div class="flex items-center gap-4 p-5 rounded-2xl bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark mb-8">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-black dark:text-white">Comercial</h3>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">11 93467-0924 (09h às 18h)</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-subtle-light dark:text-subtle-dark mb-1">Horário de Atendimento</p>
+                    <p class="text-sm font-semibold text-black dark:text-white">Segunda a Sexta, das 09:00 às 18:00</p>
                 </div>
-            </a>
+            </div>
 
-            <a href="https://web.whatsapp.com/send?phone=5511971163576" class="solid-card p-6 rounded-2xl flex items-center gap-5 group hover:border-[#25D366]">
-                <div class="w-12 h-12 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center shrink-0">
-                    <i data-lucide="life-buoy" class="w-6 h-6"></i>
+            <div class="grid grid-cols-1 gap-4">
+                <!-- Comercial -->
+                <div class="solid-card p-6 rounded-2xl flex gap-5 group hover:border-primary transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    </div>
+                    <div class="w-full">
+                        <h3 class="font-bold text-black dark:text-white mb-3">Comercial</h3>
+                        <div class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                            <a href="https://api.whatsapp.com/send?phone=5511934670924" class="flex items-center gap-2 hover:text-[#25D366] transition-colors"><i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> (11) 93467-0924</a>
+                            <a href="mailto:atendimento@letswork.com.br" class="flex items-center gap-2 hover:text-primary transition-colors"><i data-lucide="mail" class="w-4 h-4 opacity-70"></i> atendimento@letswork.com.br</a>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-bold text-black dark:text-white">Suporte Técnico</h3>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">11 97116-3576 (09h às 18h)</p>
-                </div>
-            </a>
 
-            <a href="https://api.whatsapp.com/send?phone=5511998514728" class="solid-card p-6 rounded-2xl flex items-center gap-5 group hover:border-[#25D366]">
-                <div class="w-12 h-12 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center shrink-0">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
+                <!-- Suporte Técnico -->
+                <div class="solid-card p-6 rounded-2xl flex gap-5 group hover:border-primary transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <i data-lucide="life-buoy" class="w-6 h-6"></i>
+                    </div>
+                    <div class="w-full">
+                        <h3 class="font-bold text-black dark:text-white mb-3">Suporte Técnico</h3>
+                        <div class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                            <a href="https://web.whatsapp.com/send?phone=5511971163576" class="flex items-center gap-2 hover:text-[#25D366] transition-colors"><i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> (11) 97116-3576</a>
+                            <a href="mailto:suporte@letswork.com.br" class="flex items-center gap-2 hover:text-primary transition-colors"><i data-lucide="mail" class="w-4 h-4 opacity-70"></i> suporte@letswork.com.br</a>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-bold text-black dark:text-white">Implantação</h3>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">11 99851-4728 (09h às 18h)</p>
-                </div>
-            </a>
 
-            <a href="https://api.whatsapp.com/send?phone=5511997558180" class="solid-card p-6 rounded-2xl flex items-center gap-5 group hover:border-[#25D366]">
-                <div class="w-12 h-12 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center shrink-0">
-                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                <!-- Implantação -->
+                <div class="solid-card p-6 rounded-2xl flex gap-5 group hover:border-primary transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <i data-lucide="settings" class="w-6 h-6"></i>
+                    </div>
+                    <div class="w-full">
+                        <h3 class="font-bold text-black dark:text-white mb-3">Implantação</h3>
+                        <div class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                            <a href="https://api.whatsapp.com/send?phone=5511998514728" class="flex items-center gap-2 hover:text-[#25D366] transition-colors"><i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> (11) 99851-4728</a>
+                            <a href="mailto:implantacao@wvtodoz.com.br" class="flex items-center gap-2 hover:text-primary transition-colors"><i data-lucide="mail" class="w-4 h-4 opacity-70"></i> implantacao@wvtodoz.com.br</a>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-bold text-black dark:text-white">Financeiro</h3>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">11 99755-8180 (09h às 18h)</p>
+
+                <!-- Financeiro -->
+                <div class="solid-card p-6 rounded-2xl flex gap-5 group hover:border-primary transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                    <div class="w-full">
+                        <h3 class="font-bold text-black dark:text-white mb-3">Financeiro</h3>
+                        <div class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                            <a href="https://api.whatsapp.com/send?phone=5511997558180" class="flex items-center gap-2 hover:text-[#25D366] transition-colors"><i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> (11) 99755-8180</a>
+                            <a href="mailto:financeiro@letswork.com.br" class="flex items-center gap-2 hover:text-primary transition-colors"><i data-lucide="mail" class="w-4 h-4 opacity-70"></i> financeiro@letswork.com.br</a>
+                        </div>
+                    </div>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Formulário -->
