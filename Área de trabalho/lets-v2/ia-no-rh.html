@@ -277,77 +277,263 @@
             </button>
         </div>
     </nav>
-<!-- TITLE BAR -->
-<header class="pt-32 md:pt-40 pb-16 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark overflow-hidden relative">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,45,45,0.05),transparent_50%)]"></div>
-    <div class="max-w-[1400px] mx-auto px-6 relative z-10 text-center">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-6 uppercase tracking-wider">
-            <i data-lucide="sparkles" class="w-4 h-4"></i> Inovação Let's Work
+<!-- TITLE BAR (Internal Page Aesthetic) -->
+<header class="pt-32 md:pt-40 pb-16 md:pb-24 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+    <!-- Grid Pattern de Fundo sutil -->
+    <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" style="background-size: 32px 32px;"></div>
+    
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+        
+        <!-- Lado Esquerdo: Textos do Header -->
+        <div class="lg:col-span-6 lg:pr-4">
+            <nav class="flex items-center gap-2 text-sm text-subtle-light dark:text-subtle-dark mb-6 font-medium">
+                <a href="index.html" class="hover:text-primary transition-colors">Início</a> 
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+                <a href="#" class="hover:text-primary transition-colors">Soluções</a> 
+                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+                <span class="text-black dark:text-white">IA no RH</span>
+            </nav>
+            
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> Inovação Let's Work
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
+                O Futuro do RH com <span class="text-primary">IA</span>
+            </h1>
+            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark max-w-3xl leading-relaxed">
+                Libere o potencial da sua equipe delegando tarefas repetitivas para a nossa Assistente Virtual e gere relatórios de produtividade analíticos.
+            </p>
+            
+            <div class="mt-10 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                <p class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-4">Aprovado por investidores e parceiros</p>
+                <div class="flex flex-wrap items-center gap-6 lg:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Orgânica" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
+                </div>
+            </div>
         </div>
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
-            O Futuro do RH com <span class="text-primary">Inteligência Artificial</span>
-        </h1>
-        <p class="text-lg text-subtle-light dark:text-subtle-dark max-w-2xl mx-auto">
-            Libere o potencial da sua equipe delegando tarefas repetitivas para a nossa Assistente Virtual. Relatórios analíticos e controle de ponto inteligente.
-        </p>
+
+        <!-- Lado Direito: Formulário Lead Generation (copiado igual) -->
+        <div class="lg:col-span-6 relative">
+            <div id="agendar-demonstracao">
+                <div class="solid-card p-6 md:p-8 rounded-[2rem] bg-gradient-to-br from-surface-light to-white dark:from-surface-dark dark:to-black relative overflow-hidden shadow-glow border-primary/20">
+                    <!-- Elemento decorativo -->
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="mb-8">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
+                                Comece Agora
+                            </div>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-3">Agende uma Demonstração</h2>
+                            <p class="text-subtle-light dark:text-subtle-dark">Preencha os dados abaixo para fazer uma avaliação gratuita da nossa Inteligência Artificial.</p>
+                        </div>
+
+                        <form class="space-y-5" onsubmit="event.preventDefault(); alert('Formulário enviado com sucesso!');">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Nome Completo</label>
+                                    <input type="text" required placeholder="Ex: João Silva" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">E-mail Corporativo</label>
+                                    <input type="email" required placeholder="joao@suaempresa.com.br" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Telefone / WhatsApp</label>
+                                    <input type="tel" required placeholder="(11) 90000-0000" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-semibold text-black dark:text-white">Qtd Funcionários</label>
+                                    <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
+                                        <option value="" disabled selected>Selecione...</option>
+                                        <option value="1-10">1 a 10</option>
+                                        <option value="11-25">11 a 25</option>
+                                        <option value="26-50">26 a 50</option>
+                                        <option value="101-999">101 a 999</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-6 flex justify-center items-center gap-2 magnetic">
+                                Solicitar Avaliação <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </header>
 
-<main class="py-20 relative">
-    <div class="max-w-[1400px] mx-auto px-6 space-y-24">
+<!-- MAIN CONTENT + SIDEBAR LAYOUT -->
+<div class="py-16 md:py-24 relative">
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
         
-        <!-- Bloco 1: Assistente Virtual -->
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div class="order-2 md:order-1 relative">
-                <div class="absolute -inset-4 bg-primary/5 rounded-[3rem] transform -rotate-3"></div>
-                <img src="https://images.unsplash.com/photo-1531746790731-6c08cd263439?auto=format&fit=crop&q=80&w=800" alt="IA Assitente" class="rounded-3xl shadow-soft relative z-10 w-full object-cover h-[400px]">
-            </div>
-            <div class="order-1 md:order-2">
-                <h2 class="text-3xl font-display font-bold text-black dark:text-white mb-6">Sua Nova Maneira Inteligente de Gerenciar Ponto</h2>
-                <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-6">
-                    A Assistente Virtual do Let's Work utiliza algoritmos avançados para conversar com seus colaboradores via chat, respondendo a dúvidas de RH, saldo de banco de horas e auxiliando em correções de espelhos de ponto sem a necessidade de intervenção humana.
-                </p>
-                <ul class="space-y-4">
-                    <li class="flex items-start gap-3">
-                        <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0"></i>
-                        <span class="text-black dark:text-white">Respostas imediatas a dúvidas de colaboradores 24/7.</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0"></i>
-                        <span class="text-black dark:text-white">Redução de até 60% do tempo gasto em tarefas operacionais de DP.</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <!-- CONTENT COLUMN -->
+        <main class="lg:col-span-8 space-y-20">
+            
+            <!-- Section: Como Funciona -->
+            <section class="space-y-8">
+                <h2 class="text-3xl font-display font-bold text-black dark:text-white tracking-tight">Sobre a Inteligência Artificial</h2>
+                <div class="prose prose-lg dark:prose-invert max-w-none text-subtle-light dark:text-subtle-dark leading-relaxed">
+                    <p>
+                        A Assistente Virtual do Let's Work utiliza algoritmos avançados para conversar com seus colaboradores via chat, respondendo a dúvidas de RH, saldo de banco de horas e auxiliando em correções de espelhos de ponto sem a necessidade de intervenção humana.
+                    </p>
+                    <p>
+                        Ao analisar o comportamento dos colaboradores, é possível identificar oportunidades de melhoria em diferentes áreas, prevenindo burnout, excesso de horas extras não planejadas e otimizando a produtividade do time.
+                    </p>
+                </div>
+                
+                <figure class="mt-10 max-w-xl mx-auto rounded-[2rem] overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" alt="Dashboard Analítico" class="w-full h-auto bg-surface-light dark:bg-surface-dark object-cover">
+                </figure>
+            </section>
 
-        <!-- Bloco 2: Relatório Analítico -->
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-                <h2 class="text-3xl font-display font-bold text-black dark:text-white mb-6">Relatório Analítico com Inteligência Artificial</h2>
-                <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-6">
-                    A inteligência artificial analisa os dados de entrada, saída, pausas e horas extras para gerar insights poderosos sobre a sua operação.
-                </p>
-                <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-6">
-                    Ao analisar o comportamento dos colaboradores, é possível identificar oportunidades de melhoria em diferentes áreas, prevenindo burnout, excesso de horas extras não planejadas e otimizando a produtividade do time.
-                </p>
-            </div>
-            <div class="relative">
-                <div class="absolute -inset-4 bg-gray-100 dark:bg-white/5 rounded-[3rem] transform rotate-3"></div>
-                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" alt="Dashboard Analítico" class="rounded-3xl shadow-soft relative z-10 w-full object-cover h-[400px]">
-            </div>
-        </div>
+            <!-- Section: Funcionalidades -->
+            <section>
+                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Recursos da IA</h2>
+                <div class="grid sm:grid-cols-1 gap-6">
+                    
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Assistente Virtual 24/7</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Respostas imediatas para os colaboradores sobre banco de horas, férias e correções de ponto.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="line-chart" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Prevenção de Burnout</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">A IA identifica padrões de excesso de horas trabalhadas e alerta o gestor para agir preventivamente.</p>
+                        </div>
+                    </div>
 
-        <!-- Call to Action -->
-        <div class="solid-card p-12 rounded-[2rem] text-center bg-gradient-to-br from-surface-light to-white dark:from-surface-dark dark:to-black shadow-glow border-primary/20 max-w-4xl mx-auto">
-            <h2 class="text-3xl font-display font-bold text-black dark:text-white mb-4">Pronto para o Futuro?</h2>
-            <p class="text-subtle-light dark:text-subtle-dark mb-8 text-lg">Agende uma demonstração gratuita e veja nossa IA em ação.</p>
-            <a href="contato.html" class="btn-primary magnetic inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-lg">
-                Falar com Especialista <i data-lucide="arrow-right" class="w-5 h-5"></i>
-            </a>
-        </div>
+                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <i data-lucide="zap" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-black dark:text-white mb-2">Automação de DP</h3>
+                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Redução de até 60% do tempo gasto em fechamento de folha e processos manuais operacionais.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Section: Destaque Específico -->
+            <section class="solid-card p-8 md:p-12 rounded-[2rem] bg-surface-light dark:bg-surface-dark border-primary/20 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <i data-lucide="brain-circuit" class="w-48 h-48 text-primary"></i>
+                </div>
+                <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
+                            Inteligência
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-display font-bold text-black dark:text-white mb-4">Relatório Analítico Preditivo</h2>
+                        <p class="text-subtle-light dark:text-subtle-dark text-sm md:text-base leading-relaxed mb-6">
+                            A inteligência artificial analisa os dados de entrada, saída, pausas e horas extras para gerar insights poderosos sobre a sua operação.
+                        </p>
+                        <ol class="space-y-4">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                <span class="text-sm text-black dark:text-white font-medium">Previsão de Gastos com Horas Extras.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                <span class="text-sm text-black dark:text-white font-medium">Análise comportamental de times.</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: FAQ -->
+            <section>
+                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Dúvidas Frequentes</h2>
+                <div class="space-y-4">
+                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
+                            A IA substitui o RH?
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </span>
+                        </summary>
+                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
+                            De forma alguma. A IA atua como um assistente, removendo tarefas burocráticas (como responder qual o saldo de horas do funcionário X) para que o RH tenha tempo de agir estrategicamente e focar nas pessoas.
+                        </div>
+                    </details>
+
+                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
+                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
+                            Preciso pagar a mais para ter a IA?
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </span>
+                        </summary>
+                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
+                            As funcionalidades da nossa Assistente Virtual estão inclusas nos planos "Equipe Dinâmica" e "Time de Elite". Consulte nossa equipe comercial.
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- SIDEBAR COLUMN -->
+        <aside class="lg:col-span-4">
+            <div class="sticky top-32 space-y-6">
+                
+                <!-- CTA Widget -->
+                <div class="solid-card p-8 rounded-2xl text-center shadow-glow border-primary/20 bg-gradient-to-b from-surface-light to-white dark:from-surface-dark dark:to-black">
+                    <div class="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="calendar-days" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-xl mb-3 text-black dark:text-white">Quer melhorar sua gestão de funcionários?</h3>
+                    <p class="text-sm text-subtle-light dark:text-subtle-dark mb-6">Agende uma demonstração gratuita e veja como nosso sistema de ponto pode transformar seu RH.</p>
+                    
+                    <a href="#agendar-demonstracao" class="btn-primary w-full block py-3 rounded-xl font-bold flex items-center justify-center gap-2 magnetic">
+                        Falar com Especialista <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark mt-4">Avaliação 100% gratuita.</p>
+                </div>
+
+                <!-- Plan Widget -->
+                <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-surface-dark">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
+                        <h4 class="font-bold text-black dark:text-white">Plano Mais Vendido</h4>
+                    </div>
+                    <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark uppercase font-bold tracking-wider mb-1">Equipe Dinâmica</div>
+                        <div class="text-3xl font-display font-bold text-primary mb-1">R$ 299<span class="text-lg">,90</span></div>
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Até 50 funcionários por mês</div>
+                    </div>
+                    <ul class="text-sm space-y-3 text-subtle-light dark:text-subtle-dark mb-6">
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Assistente Virtual via Chat</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Relatórios Preditivos</li>
+                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Integração com ERPs</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
 
     </div>
-</main>
+</div>
 <footer class="pt-20 pb-10 border-t border-borderline-light dark:border-borderline-dark text-center lg:text-left">
         <div class="max-w-[1400px] mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
