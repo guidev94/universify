@@ -478,7 +478,27 @@
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-[#18181B] rounded-b-2xl z-30"></div>
 
                     <!-- Vídeo MP4 Local reproduzido em loop a partir de 3 segundos -->
-                    <video src="https://cdn.jumpshare.com/preview/el_NEnciKghDw4uAAXOLJ9hbVpV8ZXtHkKcn3X_VOnCtcOSBwuNaiKOqKw57YwdrBOKm-WddCjPdlHRuSs75g5QJnGbNu-_k81veS9CcfsxUmwYpRZZowWsjs63_D7Ltb_1Sy9a8KuFEhcUv6O_3dm6yjbN-I2pg_cnoHs_AmgI.mp4#t=3" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-10" style="object-position: center top;"></video>
+                    <video id="chatbot-video" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-10" style="object-position: center top;"></video>
+                    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            var video = document.getElementById('chatbot-video');
+                            var videoSrc = 'https://stream.mux.com/OZWW6lobNXvaUYetbBKgIyRqzqNhG2vUR3MLlfyEt9Y.m3u8?redundant_streams=true';
+                            if (Hls.isSupported()) {
+                                var hls = new Hls();
+                                hls.loadSource(videoSrc);
+                                hls.attachMedia(video);
+                                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                                    video.play().catch(function(e) { console.log("Auto-play prevented", e); });
+                                });
+                            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                                video.src = videoSrc;
+                                video.addEventListener('loadedmetadata', function() {
+                                    video.play().catch(function(e) { console.log("Auto-play prevented", e); });
+                                });
+                            }
+                        });
+                    </script>
 
                 </div>
 
