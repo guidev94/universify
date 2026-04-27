@@ -734,10 +734,10 @@
                 </div>
 
                 <!-- Direita Fixa (Mockups em CSS puro) -->
-                <div class="hidden lg:flex w-1/2 h-screen sticky top-0 items-center justify-center">
+                <div class="hidden lg:flex w-1/2 h-screen sticky top-0 items-center justify-center pt-20">
                     
                     <!-- Mockup 1: Ponto (Phone UI) -->
-                    <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-300 opacity-100 scale-100 translate-y-0" id="vis-1">
+                    <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-500 opacity-100 scale-100 translate-y-0" id="vis-1">
                         <div class="w-full h-full bg-white dark:bg-[#111] rounded-[2.5rem] border-[6px] border-black shadow-[16px_16px_0px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col items-center">
                             <div class="absolute top-0 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                             
@@ -766,7 +766,7 @@
                     </div>
 
                     <!-- Mockup 2: Vagas (Kanban UI) -->
-                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-300 opacity-0 scale-95 translate-y-12" id="vis-2">
+                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-500 opacity-0 scale-95 translate-y-12" id="vis-2">
                         <div class="bg-white dark:bg-[#0A0A0A] rounded-3xl border border-borderline-light dark:border-borderline-dark shadow-[0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] p-6 md:p-8 overflow-hidden transform md:-translate-x-4">
                             <div class="flex justify-between items-center mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
                                 <div class="font-bold text-black dark:text-white text-lg">Vaga: Coordenador de RH</div>
@@ -806,7 +806,7 @@
                     </div>
 
                     <!-- Mockup 3: Avaliação & Desempenho (Radar/Stats) -->
-                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-300 opacity-0 scale-95 translate-y-12" id="vis-3">
+                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-500 opacity-0 scale-95 translate-y-12" id="vis-3">
                         <div class="bg-white dark:bg-[#0A0A0A] rounded-3xl border border-borderline-light dark:border-borderline-dark shadow-[0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] p-6 md:p-8 transform md:translate-x-4">
                             <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-5 mb-5">
                                 <div class="flex items-center gap-4">
@@ -2139,8 +2139,8 @@
                 const innerCard = text.querySelector('div');
                 ScrollTrigger.create({
                     trigger: text,
-                    start: "top 60%",
-                    end: "bottom 60%",
+                    start: "top 70%",
+                    end: "bottom 70%",
                     onEnter: () => activateStep(i),
                     onEnterBack: () => activateStep(i),
                 });
