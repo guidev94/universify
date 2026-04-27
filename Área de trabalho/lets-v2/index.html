@@ -2206,9 +2206,18 @@
                 });
 
                 visuals.forEach((vis, i) => {
+                    // Manter o translate-x nativo para cada tela
+                    let baseTransform = "";
+                    if (window.innerWidth >= 1024) { // Aplicar os offsets apenas no Desktop, no mobile não precisa pois não flutua ao lado
+                        if (vis.id === 'vis-1') baseTransform = "translateX(200px) ";
+                        else if (vis.id === 'vis-2') baseTransform = "translateX(-16px) ";
+                        else if (vis.id === 'vis-3') baseTransform = "translateX(16px) ";
+                    }
+
                     if (i === index) {
                         vis.style.opacity = "1";
-                        vis.style.transform = "translateY(0) scale(1)";
+                        // Apenas removemos o translateY e garantimos que o baseTransform atue sozinho no estado 'ativo'
+                        vis.style.transform = baseTransform + "translateY(0) scale(1)";
                         vis.style.zIndex = "10";
                         vis.style.filter = "blur(0px)";
                         
@@ -2231,12 +2240,12 @@
                         
                     } else if (i < index) {
                         vis.style.opacity = "0";
-                        vis.style.transform = "translateY(-60px) scale(0.85)";
+                        vis.style.transform = baseTransform + "translateY(-60px) scale(0.85)";
                         vis.style.zIndex = "1";
                         vis.style.filter = "blur(10px)";
                     } else {
                         vis.style.opacity = "0";
-                        vis.style.transform = "translateY(60px) scale(1.15)";
+                        vis.style.transform = baseTransform + "translateY(60px) scale(1.15)";
                         vis.style.zIndex = "1";
                         vis.style.filter = "blur(10px)";
                     }
