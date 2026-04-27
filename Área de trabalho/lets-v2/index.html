@@ -685,7 +685,7 @@
                         <div class="step-text min-h-screen py-12 lg:py-20 flex flex-col justify-center pr-4 lg:pr-10 relative" id="step-1">
                             <!-- Dot Indicator -->
                             <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
-                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
+                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary lg:group-[.active]:text-primary">
@@ -706,7 +706,7 @@
                         <div class="step-text min-h-screen py-12 lg:py-20 flex flex-col justify-center pr-4 lg:pr-10 relative" id="step-2">
                             <!-- Dot Indicator -->
                             <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
-                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
+                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary lg:group-[.active]:text-primary">
@@ -727,7 +727,7 @@
                         <div class="step-text min-h-screen py-12 lg:py-20 flex flex-col justify-center pr-4 lg:pr-10 pb-[15vh] relative" id="step-3">
                             <!-- Dot Indicator -->
                             <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
-                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
+                        <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/5 text-black dark:text-white flex items-center justify-center shrink-0 transition-colors group-[.active]:bg-primary/10 group-[.active]:text-primary lg:group-[.active]:text-primary">
@@ -2175,11 +2175,11 @@
                     const dot = t.querySelector('.indicator-dot');
                     if (i === index) {
                         card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
-                        card.classList.remove('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                        card.classList.remove('bg-transparent', 'border-transparent');
                         if(dot) { dot.classList.add('border-primary', 'bg-primary'); dot.classList.remove('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
                     } else {
                         card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
-                        card.classList.add('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                        card.classList.add('bg-transparent', 'border-transparent');
                         if(dot) { dot.classList.remove('border-primary', 'bg-primary'); dot.classList.add('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
                     }
                 });
