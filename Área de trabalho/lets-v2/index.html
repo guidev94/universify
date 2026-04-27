@@ -174,8 +174,9 @@
         <div class="max-w-[1400px] mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="index.html" class="inline-block transition-transform hover:scale-105">
-                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 md:h-12 lg:h-14 object-contain dark:hidden transition-all">
-                    <img src="https://app.letswork.com.br/administrativo-assets/logo/letswork-bgblack.png" alt="Let's Work Logo" class="h-10 md:h-12 lg:h-14 object-contain hidden dark:block transition-all">
+                    <!-- Ambos os logos (light e dark) compartilhando a mesma proporção de escala (Scale) para não haver salto de tamanho -->
+                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo Light" class="h-10 md:h-12 lg:h-[46px] w-auto object-contain dark:hidden transition-all scale-[1.05] origin-left">
+                    <img src="https://app.letswork.com.br/administrativo-assets/logo/letswork-bgblack.png" alt="Let's Work Logo Dark" class="h-10 md:h-12 lg:h-[46px] w-auto object-contain hidden dark:block transition-all scale-100 origin-left">
                 </a>
             </div>
             
