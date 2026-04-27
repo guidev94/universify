@@ -97,14 +97,14 @@
         .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; align-items: center; }
         
-        .client-logo { height: 40px; width: auto; object-fit: contain; transition: all 0.3s ease; }
-        @media (min-width: 1024px) { .client-logo { height: 50px; } }
+        .client-logo { height: 55px; width: auto; object-fit: contain; transition: all 0.3s ease; }
+        @media (min-width: 1024px) { .client-logo { height: 75px; } }
         .client-logo:hover { transform: scale(1.05); }
 
         /* Light Mode */
-        html:not(.dark) .client-logo { filter: brightness(0) opacity(0.6); }
-        html:not(.dark) .client-logo:hover { filter: brightness(0) opacity(1); }
-        html:not(.dark) .client-logo.highlight { filter: brightness(0) opacity(1) !important; }
+        html:not(.dark) .client-logo { filter: grayscale(0) opacity(0.8); }
+        html:not(.dark) .client-logo:hover { filter: grayscale(0) opacity(1); }
+        html:not(.dark) .client-logo.highlight { filter: grayscale(0) opacity(1) !important; }
 
         /* Dark Mode */
         .dark .client-logo { filter: brightness(0) invert(1) opacity(0.6); }
