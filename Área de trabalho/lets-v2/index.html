@@ -646,11 +646,30 @@
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
                 
-                <div class="flex flex-col items-center gap-4">
-                    <!-- Security / LGPD Badge -->
-                    <div class="flex items-center justify-center gap-1.5 text-xs text-subtle-light dark:text-subtle-dark font-medium opacity-80 mt-1">
-                        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                        <span>100% Adequado à LGPD • Criptografia Bancária</span>
+                <div class="flex flex-col items-center gap-4 w-full">
+                    <!-- Security / LGPD Badges (Enhanced Seals) -->
+                    <div class="flex flex-wrap items-center justify-center gap-4 mt-2">
+                        <!-- Badge LGPD -->
+                        <div class="flex items-center gap-2.5 px-4 py-2 bg-white dark:bg-[#111] border border-borderline-light dark:border-white/10 rounded-xl shadow-sm hover:-translate-y-0.5 transition-transform">
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span class="text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-wider leading-none mb-0.5">Certificação</span>
+                                <span class="text-xs font-bold text-black dark:text-white leading-none">100% LGPD</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Badge Criptografia -->
+                        <div class="flex items-center gap-2.5 px-4 py-2 bg-white dark:bg-[#111] border border-borderline-light dark:border-white/10 rounded-xl shadow-sm hover:-translate-y-0.5 transition-transform">
+                            <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+                                <i data-lucide="lock" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span class="text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-wider leading-none mb-0.5">Segurança</span>
+                                <span class="text-xs font-bold text-black dark:text-white leading-none">Criptografia de Ponta</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
