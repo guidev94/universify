@@ -431,7 +431,7 @@
     </section>
 
     <!-- 3. VITTORIA CHATBOT HIGHLIGHT (REDESIGNED BENTO & VIDEO FOCUS) -->
-    <section id="vittoria-section" class="py-20 lg:py-32 relative overflow-hidden bg-[#FAFAFA] dark:bg-[#050505] border-b border-borderline-light dark:border-borderline-dark">
+    <section id="vittoria-section" class="pt-16 pb-12 lg:pt-20 lg:pb-16 relative overflow-hidden bg-[#FAFAFA] dark:bg-[#050505] border-b border-borderline-light dark:border-borderline-dark">
         <!-- Subtle Glow Background -->
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,45,45,0.08)_0%,transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(255,45,45,0.12)_0%,transparent_50%)] pointer-events-none"></div>
 
@@ -663,7 +663,7 @@
                 
                 <!-- Esquerda (Textos Rolando Naturalmente) -->
                 <div class="w-full lg:w-1/2 relative z-10">
-                    <div class="pt-24 lg:pt-32 pb-12 lg:pb-16">
+                    <div class="pt-12 lg:pt-16 pb-8 lg:pb-12">
                         <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Ecossistema Inteligente
                         </div>
@@ -737,38 +737,36 @@
                 <div class="hidden lg:flex w-1/2 h-screen sticky top-0 items-center justify-center">
                     
                     <!-- Mockup 1: Ponto (Phone UI) -->
-                    <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-700 opacity-100 scale-100 translate-y-0" id="vis-1">
+                    <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-300 opacity-100 scale-100 translate-y-0" id="vis-1">
                         <div class="w-full h-full bg-white dark:bg-[#111] rounded-[2.5rem] border-[6px] border-black shadow-[16px_16px_0px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col items-center">
                             <div class="absolute top-0 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
                             
                             <div class="mt-16 w-36 h-36 rounded-full border-[3px] border-dashed border-primary flex items-center justify-center relative bg-primary/5 overflow-hidden shadow-[0_0_20px_rgba(255,45,45,0.2)]">
                                 <div class="absolute inset-0 bg-primary/10 rounded-full animate-pulse"></div>
-                                <div class="absolute top-0 left-0 w-full h-[4px] bg-primary shadow-[0_0_15px_rgba(255,45,45,0.9)] animate-[scanline_2s_linear_infinite]"></div>
-                                <svg xmlns="http://www.0.0.org/2000/svg" class="w-16 h-16 text-primary relative z-10 drop-shadow-md group-hover:scale-110 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-  <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-  <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-  <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-  <path d="M9 9h.01"></path>
-  <path d="M15 9h.01"></path>
-</svg>
+                                <div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white relative z-10 shadow-lg cursor-pointer hover:scale-95 transition-transform">
+                                    <i data-lucide="fingerprint" class="w-10 h-10"></i>
+                                </div>
                             </div>
-                            <div class="mt-8 text-center px-4">
-                                <div class="text-black dark:text-white font-black text-3xl mb-1">14:02</div>
-                                <div class="text-subtle-light dark:text-subtle-dark text-xs font-bold uppercase tracking-widest border border-borderline-light dark:border-borderline-dark px-3 py-1 rounded-sm">R. Funchal, 418</div>
+                            <div class="text-center mt-6">
+                                <div class="text-2xl font-display font-bold text-black dark:text-white">08:45</div>
+                                <div class="text-xs font-medium text-subtle-light dark:text-subtle-dark">Segunda, 12 Ago</div>
                             </div>
                             
-                            <div class="mt-auto w-full p-6">
-                                <div class="w-full bg-green-500 text-white py-4 rounded-sm flex justify-center items-center gap-2 font-bold shadow-[4px_4px_0px_rgba(0,0,0,0.2)]">
-                                    <i data-lucide="check-square" class="w-5 h-5"></i> Ponto Sincronizado
+                            <div class="w-full px-6 mt-8 space-y-3">
+                                <div class="w-full h-12 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl flex items-center justify-between px-4 border border-borderline-light dark:border-borderline-dark">
+                                    <span class="text-xs font-bold text-gray-400">Entrada</span>
+                                    <span class="text-sm font-bold text-black dark:text-white">08:45</span>
+                                </div>
+                                <div class="w-full h-12 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl flex items-center justify-between px-4 border border-borderline-light dark:border-borderline-dark">
+                                    <span class="text-xs font-bold text-gray-400">Saída Almoço</span>
+                                    <span class="text-sm font-bold text-gray-300">--:--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Mockup 2: Vagas (Kanban UI) -->
-                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-2">
+                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-300 opacity-0 scale-95 translate-y-12" id="vis-2">
                         <div class="bg-white dark:bg-[#0A0A0A] rounded-3xl border border-borderline-light dark:border-borderline-dark shadow-[0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] p-6 md:p-8 overflow-hidden transform md:-translate-x-4">
                             <div class="flex justify-between items-center mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
                                 <div class="font-bold text-black dark:text-white text-lg">Vaga: Coordenador de RH</div>
@@ -808,7 +806,7 @@
                     </div>
 
                     <!-- Mockup 3: Avaliação & Desempenho (Radar/Stats) -->
-                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-3">
+                    <div class="absolute feature-visual w-full max-w-[600px] transition-all duration-300 opacity-0 scale-95 translate-y-12" id="vis-3">
                         <div class="bg-white dark:bg-[#0A0A0A] rounded-3xl border border-borderline-light dark:border-borderline-dark shadow-[0_30px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] p-6 md:p-8 transform md:translate-x-4">
                             <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-5 mb-5">
                                 <div class="flex items-center gap-4">
@@ -2141,8 +2139,8 @@
                 const innerCard = text.querySelector('div');
                 ScrollTrigger.create({
                     trigger: text,
-                    start: "top center",
-                    end: "bottom center",
+                    start: "top 60%",
+                    end: "bottom 60%",
                     onEnter: () => activateStep(i),
                     onEnterBack: () => activateStep(i),
                 });
