@@ -434,85 +434,102 @@
         </div>
     </section>
 
-    <!-- 3. VITTORIA CHATBOT HIGHLIGHT -->
+    <!-- 3. VITTORIA CHATBOT HIGHLIGHT (REDESIGNED DESKTOP) -->
     <section id="vittoria-section" class="py-24 lg:py-32 relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden bg-white dark:bg-[#050505]">
-        <div class="max-w-[1400px] mx-auto px-6">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                
-                <div class="section-reveal order-2 lg:order-1">
-                    <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Inteligência Artificial
-                    </div>
-                    <h2 class="text-4xl md:text-5xl lg:text-[3.5rem] font-display font-black tracking-tighter mb-6 leading-[1.05] text-black dark:text-white">
-                        Transforme perguntas em<br/>
-                        <span class="text-primary">ações de RH</span> em segundos.
-                    </h2>
-                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-10">
-                        O <strong>VittórIA</strong> é o copiloto inteligente dentro do painel da Let's Work.<br>
-                        Em vez de perder tempo navegando por vários relatórios, você e sua equipe resolvem <strong>ponto, férias e documentos</strong> direto no chat.
-                    </p>
-                    <ul class="space-y-6 mb-10">
-                        <li class="flex items-start gap-4">
-                            <i data-lucide="zap" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
-                            <div>
-                                <strong class="block text-black dark:text-white">IA com ação real no sistema</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Peça em linguagem natural e a IA abre relatórios, aplica filtros e apoia o fechamento da folha.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <i data-lucide="shield-check" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
-                            <div>
-                                <strong class="block text-black dark:text-white">Segurança e controle por perfil</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Cada pessoa vê e faz apenas o que tem permissão. Ações sensíveis sempre exigem sua confirmação.</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-4">
-                            <i data-lucide="user-check" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
-                            <div>
-                                <strong class="block text-black dark:text-white">Autoatendimento do colaborador</strong>
-                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Garante autonomia para o time consultar banco de horas, pendências e atestados sem precisar acionar o RH.</span>
-                            </div>
-                        </li>
-                    </ul>
-                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary magnetic inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
-                        Quero a VittórIA na minha empresa
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
+        <div class="max-w-[1200px] mx-auto px-6 flex flex-col items-center">
+            
+            <!-- Title & Intro -->
+            <div class="text-center max-w-3xl mb-12 lg:mb-16 section-reveal">
+                <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Inteligência Artificial
                 </div>
-
-                <div class="relative flex justify-center w-full max-w-[380px] mx-auto lg:ml-auto h-[650px] rounded-[3rem] border-[8px] border-[#18181B] bg-black shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden chat-phone perspective-1000 order-1 lg:order-2">
-                    
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-[#18181B] rounded-b-2xl z-30"></div>
-
-                    <!-- Vídeo MP4 Local reproduzido em loop a partir de 3 segundos -->
-                    <video id="chatbot-video" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-10" style="object-position: center top;"></video>
-                    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var video = document.getElementById('chatbot-video');
-                            var videoSrc = 'https://stream.mux.com/OZWW6lobNXvaUYetbBKgIyRqzqNhG2vUR3MLlfyEt9Y.m3u8?redundant_streams=true';
-                            if (Hls.isSupported()) {
-                                var hls = new Hls();
-                                hls.loadSource(videoSrc);
-                                hls.attachMedia(video);
-                                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                                    video.currentTime = 2; // Começar do segundo 2
-                                    video.play().catch(function(e) { console.log("Auto-play prevented", e); });
-                                });
-                            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                video.src = videoSrc + '#t=2'; // Fallback para Apple
-                                video.addEventListener('loadedmetadata', function() {
-                                    video.currentTime = 2;
-                                    video.play().catch(function(e) { console.log("Auto-play prevented", e); });
-                                });
-                            }
-                        });
-                    </script>
-
-                </div>
-
+                <h2 class="text-4xl md:text-5xl lg:text-[4rem] font-display font-black tracking-tighter mb-6 leading-[1.05] text-black dark:text-white">
+                    Transforme perguntas em<br/>
+                    <span class="text-primary">ações de RH</span> em segundos.
+                </h2>
+                <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark leading-relaxed">
+                    O <strong>VittórIA</strong> é o copiloto inteligente dentro do painel da Let's Work. Em vez de perder tempo navegando por vários relatórios, você e sua equipe resolvem <strong>ponto, férias e documentos</strong> direto no chat.
+                </p>
             </div>
+
+            <!-- Desktop Mockup (Center/Top) -->
+            <div class="w-full relative section-reveal perspective-1000 mb-16">
+                <!-- Glow effect behind -->
+                <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-90"></div>
+                
+                <div class="relative w-full rounded-2xl border border-borderline-light dark:border-borderline-dark bg-[#1A1A1A] shadow-[0_30px_80px_rgba(0,0,0,0.4)] overflow-hidden ring-1 ring-white/10 transition-transform duration-700 hover:scale-[1.02]">
+                    <!-- Mac-like Header -->
+                    <div class="h-10 w-full bg-[#2A2A2A] flex items-center px-4 gap-2 border-b border-white/10">
+                        <div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+                        <div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+                        <div class="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+                    </div>
+                    <!-- Video Container -->
+                    <div class="relative w-full aspect-[16/9] bg-black">
+                        <video id="chatbot-video" autoplay loop muted playsinline class="w-full h-full object-cover object-center"></video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Texts and Features (Bottom) -->
+            <div class="grid md:grid-cols-3 gap-8 text-left section-reveal mb-12">
+                <div class="bg-surface-light dark:bg-[#111] p-8 rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                        <i data-lucide="zap" class="w-6 h-6 text-primary"></i>
+                    </div>
+                    <strong class="block text-black dark:text-white text-xl mb-3">IA com ação real</strong>
+                    <p class="text-base text-subtle-light dark:text-subtle-dark leading-relaxed">Peça em linguagem natural e a IA abre relatórios, aplica filtros e apoia o fechamento da folha.</p>
+                </div>
+                
+                <div class="bg-surface-light dark:bg-[#111] p-8 rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-primary"></i>
+                    </div>
+                    <strong class="block text-black dark:text-white text-xl mb-3">Controle por perfil</strong>
+                    <p class="text-base text-subtle-light dark:text-subtle-dark leading-relaxed">Cada pessoa vê e faz apenas o que tem permissão. Ações sensíveis sempre exigem sua confirmação.</p>
+                </div>
+                
+                <div class="bg-surface-light dark:bg-[#111] p-8 rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                        <i data-lucide="user-check" class="w-6 h-6 text-primary"></i>
+                    </div>
+                    <strong class="block text-black dark:text-white text-xl mb-3">Autoatendimento</strong>
+                    <p class="text-base text-subtle-light dark:text-subtle-dark leading-relaxed">Garante autonomia para o time consultar banco de horas, pendências e atestados sem precisar acionar o RH.</p>
+                </div>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="section-reveal text-center">
+                <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary magnetic inline-flex px-10 py-5 rounded-full text-lg font-bold shadow-glow transition-all items-center gap-3 hover:scale-105">
+                    Quero a VittórIA na minha empresa
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+
         </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var video = document.getElementById('chatbot-video');
+                var videoSrc = 'https://stream.mux.com/OZWW6lobNXvaUYetbBKgIyRqzqNhG2vUR3MLlfyEt9Y.m3u8?redundant_streams=true';
+                if (Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(videoSrc);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.currentTime = 2; // Começar do segundo 2
+                        video.play().catch(function(e) { console.log("Auto-play prevented", e); });
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = videoSrc + '#t=2'; // Fallback para Apple
+                    video.addEventListener('loadedmetadata', function() {
+                        video.currentTime = 2;
+                        video.play().catch(function(e) { console.log("Auto-play prevented", e); });
+                    });
+                }
+            });
+        </script>
     </section>
     <!-- 3. SCROLL STORYTELLING (Bug-free via CSS Sticky + CSS Mockups Exclusivos) -->
     <section id="solucoes" class="relative border-b border-borderline-light dark:border-borderline-dark">
