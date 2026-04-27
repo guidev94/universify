@@ -713,7 +713,7 @@
                         </div>
                     </div>
                     
-                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pb-32" id="step-3">
+                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pb-[20vh]" id="step-3">
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -2133,14 +2133,6 @@
             // Scroll Storytelling Animado via GSAP nativo
             const stepTexts = gsap.utils.toArray('.step-text');
             const visuals = gsap.utils.toArray('.feature-visual');
-
-            ScrollTrigger.create({
-                trigger: "#solucoes",
-                start: "top top",
-                end: "bottom bottom",
-                pin: ".lg\\:flex.w-1\\/2.h-screen.sticky",
-                pinSpacing: false
-            });
 
             stepTexts.forEach((text, i) => {
                 const innerCard = text.querySelector('div');
