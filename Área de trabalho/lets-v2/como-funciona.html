@@ -280,346 +280,319 @@
 
 
 <!-- TITLE BAR + LEAD CAPTURE -->
-<header class="pt-32 md:pt-40 pb-16 md:pb-24 bg-surface-light dark:bg-surface-dark border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
-    <!-- Grid Pattern de Fundo sutil -->
+
+<header class="pt-32 pb-16 md:pt-40 md:pb-24 bg-surface-light dark:bg-[#050505] border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+    <!-- Grid/Dot Background -->
     <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" style="background-size: 32px 32px;"></div>
     
-    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+    <div class="max-w-[1000px] mx-auto px-6 relative z-10 text-center">
+        <nav class="flex items-center justify-center gap-2 text-sm text-subtle-light dark:text-subtle-dark mb-8 font-medium">
+            <a href="/" class="hover:text-primary transition-colors">Início</a> 
+            <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
+            <span class="text-black dark:text-white">Como Funciona</span>
+        </nav>
         
-        <!-- Lado Esquerdo: Textos do Header -->
-        <div class="lg:col-span-6 lg:pr-4">
-            <nav class="flex items-center gap-2 text-sm text-subtle-light dark:text-subtle-dark mb-6 font-medium">
-                <a href="/" class="hover:text-primary transition-colors">Início</a> 
-                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
-                <a href="#" class="hover:text-primary transition-colors">Soluções</a> 
-                <i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>
-                <span class="text-black dark:text-white">Controle de Ponto Digital</span>
-            </nav>
-            
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-black dark:text-white tracking-tight mb-6">
-                        Sistema de Controle de <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Ponto Digital</span>
-                    </h1>
-            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark max-w-3xl leading-relaxed">
-                Controle de ponto via WhatsApp com reconhecimento facial e geolocalização. Gestão eficiente da jornada de trabalho dos colaboradores internos e externos.
-            </p>
-            
-            <div class="mt-10 pt-6 border-t border-borderline-light dark:border-borderline-dark">
-                <p class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark mb-4">Aprovado por investidores e parceiros</p>
-                <div class="flex flex-wrap items-center gap-6 lg:gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Orgânica" class="h-6 md:h-8 object-contain dark:brightness-0 dark:invert">
-                </div>
-            </div>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-white dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)]">
+            <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Plataforma All-in-One
         </div>
 
-        <!-- Lado Direito: Formulário -->
-        <div class="lg:col-span-6 relative">
-            <div id="agendar-demonstracao">
-                <div class="solid-card p-6 md:p-8 rounded-[2rem] bg-gradient-to-br from-surface-light to-white dark:from-surface-dark dark:to-black relative overflow-hidden shadow-glow border-primary/20">
-                    <!-- Elemento decorativo -->
-                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="mb-8">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs mb-4 uppercase tracking-wider">
-                                Comece Agora
-                            </div>
-                            <h2 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-3">Agende uma Demonstração</h2>
-                            <p class="text-subtle-light dark:text-subtle-dark">Preencha os dados abaixo para fazer uma avaliação gratuita do nosso sistema e transformar o controle de ponto da sua empresa.</p>
-                        </div>
-
-                        <form class="space-y-5" onsubmit="event.preventDefault(); alert('Formulário enviado com sucesso!');">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="space-y-1.5">
-                                    <label class="text-sm font-semibold text-black dark:text-white">Nome Completo</label>
-                                    <input type="text" required placeholder="Ex: João Silva" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label class="text-sm font-semibold text-black dark:text-white">E-mail Corporativo</label>
-                                    <input type="email" required placeholder="joao@suaempresa.com.br" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="space-y-1.5">
-                                    <label class="text-sm font-semibold text-black dark:text-white">Telefone / WhatsApp</label>
-                                    <input type="tel" required placeholder="(11) 90000-0000" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white placeholder:text-subtle-light/50 dark:placeholder:text-subtle-dark/50">
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label class="text-sm font-semibold text-black dark:text-white">Quantidade de Funcionários</label>
-                                    <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
-                                        <option value="" disabled selected>Selecione a quantidade...</option>
-                                        <option value="1-10">1 a 10</option>
-                                        <option value="11-25">11 a 25</option>
-                                        <option value="26-50">26 a 50</option>
-                                        <option value="51-100">51 a 100</option>
-                                        <option value="101-999">101 a 999</option>
-                                        <option value="1000+">+ 1000</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-semibold text-black dark:text-white">De onde você veio?</label>
-                                <select required class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-black dark:text-white appearance-none cursor-pointer">
-                                    <option value="" disabled selected>Como nos conheceu?</option>
-                                    <option value="Google">Google</option>
-                                    <option value="LinkedIn">LinkedIn</option>
-                                    <option value="Instagram">Instagram</option>
-                                    <option value="Indicacao">Indicação</option>
-                                    <option value="Email Marketing">Email Marketing</option>
-                                    <option value="Outros">Outros</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold text-lg mt-6 flex justify-center items-center gap-2 magnetic">
-                                Solicitar Avaliação Gratuita <i data-lucide="send" class="w-5 h-5"></i>
-                            </button>
-                            <p class="text-xs text-center text-subtle-light dark:text-subtle-dark mt-4 flex justify-center items-center gap-1">
-                                <i data-lucide="shield-check" class="w-3 h-3"></i> Seus dados estão protegidos. Não enviamos spam.
-                            </p>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-display font-black text-black dark:text-white tracking-tight mb-8 leading-[1.1]">
+            A Evolução da Gestão de RH com <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Inteligência Artificial</span>
+        </h1>
         
+        <p class="text-xl md:text-2xl text-subtle-light dark:text-subtle-dark max-w-3xl mx-auto leading-relaxed mb-12">
+            A Let's Work é uma plataforma completa que integra IA, automação e usabilidade para aprimorar a forma como empresas contratam, desenvolvem e gerenciam pessoas. Nossa proposta é simples: <strong>reduzir a complexidade e aumentar a eficiência operacional</strong>.
+        </p>
+
+        <a href="https://api.whatsapp.com/send?phone=5511934670924&text=Ol%C3%A1%2C%20gostaria%20de%20falar%20com%20um%20especialista%20da%20Let%27s%20Work%21" target="_blank" class="magnetic bg-black dark:bg-white text-white dark:text-black px-10 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] inline-flex items-center gap-2 mx-auto">
+            Agendar Demonstração
+            <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+        </a>
     </div>
 </header>
 
-
-<!-- MAIN CONTENT + SIDEBAR LAYOUT -->
-<div class="py-16 md:py-24 relative">
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4wNSkiLz48L3N2Zz4=')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
-
-    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+<!-- MAIN CONTENT -->
+<div class="py-20 md:py-32 relative bg-white dark:bg-[#0A0A0A]">
+    <div class="max-w-[1000px] mx-auto px-6 relative z-10 space-y-24 md:space-y-32">
         
-        <!-- CONTENT COLUMN -->
-        <main class="lg:col-span-8 space-y-20">
-            
-            
-            
-            <!-- Section: Como Funciona -->
-            <section class="space-y-8">
-                <h2 class="text-3xl font-display font-bold text-black dark:text-white tracking-tight">Como Funciona o Let's Work</h2>
-                <div class="prose prose-lg dark:prose-invert max-w-none text-subtle-light dark:text-subtle-dark leading-relaxed">
-                    <p>
-                        Todas as batidas são registradas por reconhecimento facial, com a posição exata do colaborador, tendo a opção de delimitar o endereço e perímetro que ele possa efetuar o registro.
-                    </p>
-                    <p>
-                        Transforme o seu RH em uma área realmente estratégica através da automação inteligente e dados em tempo real.
-                    </p>
-                </div>
-                
-                <figure class="mt-10 max-w-xl mx-auto rounded-[2rem] overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft">
-                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/mockups-5.png" alt="Interface do Aplicativo de Controle de Ponto Digital da Let's Work rodando em um smartphone" class="w-full h-auto bg-surface-light dark:bg-surface-dark object-cover">
-                </figure>
-            </section>
+        <!-- O Problema -->
+        <section class="border-l-4 border-primary pl-6 md:pl-10">
+            <h2 class="text-sm font-bold tracking-widest uppercase text-primary mb-4">O Cenário Atual</h2>
+            <h3 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-6">O Problema</h3>
+            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark mb-8 leading-relaxed">
+                Empresas ainda enfrentam desafios críticos na gestão de RH que atrasam o crescimento e aumentam os custos operacionais:
+            </p>
+            <ul class="space-y-4">
+                <li class="flex items-start gap-4">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-500 shrink-0 mt-0.5"></i>
+                    <span class="text-lg text-black dark:text-white font-medium">Processos de recrutamento lentos e manuais</span>
+                </li>
+                <li class="flex items-start gap-4">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-500 shrink-0 mt-0.5"></i>
+                    <span class="text-lg text-black dark:text-white font-medium">Falta de integração entre ferramentas</span>
+                </li>
+                <li class="flex items-start gap-4">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-500 shrink-0 mt-0.5"></i>
+                    <span class="text-lg text-black dark:text-white font-medium">Dificuldade em acompanhar performance e desenvolvimento</span>
+                </li>
+                <li class="flex items-start gap-4">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-500 shrink-0 mt-0.5"></i>
+                    <span class="text-lg text-black dark:text-white font-medium">Gestão ineficiente de ponto, escalas e produtividade</span>
+                </li>
+                <li class="flex items-start gap-4">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-red-500 shrink-0 mt-0.5"></i>
+                    <span class="text-lg text-black dark:text-white font-medium">Alto custo operacional e retrabalho</span>
+                </li>
+            </ul>
+        </section>
 
-            <!-- Section: Funcionalidades (Grid interna) -->
-            <section>
-                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Recursos do Aplicativo</h2>
-                <div class="grid sm:grid-cols-2 gap-6">
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="wifi-off" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Marcação Offline</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Registre o ponto dos funcionários mesmo estando sem conexão de rede.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="clock" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Timeline em Tempo Real</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Veja instantaneamente as marcações e registros efetuados pela equipe.</p>
-                        </div>
-                    </div>
-
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="bell" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Notificações</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Cadastre alertas para evitar que os colaboradores esqueçam de bater o ponto.</p>
-                        </div>
-                    </div>
-
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="file-signature" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Assinatura Digital</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Assine digitalmente os espelhos de ponto com total validade jurídica.</p>
-                        </div>
-                    </div>
-
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <svg xmlns="http://www.0.0.org/2000/svg" class="w-12 h-12 text-white relative z-10 drop-shadow-md group-hover:scale-110 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-  <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-  <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-  <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-  <path d="M9 9h.01"></path>
-  <path d="M15 9h.01"></path>
-</svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Reconhecimento Facial</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Evite fraudes fazendo o registro de ponto com biometria facial avançada.</p>
-                        </div>
-                    </div>
-
-                    <div class="solid-card p-6 rounded-2xl group flex gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="map-pin" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-black dark:text-white mb-2">Localização Precisa</h3>
-                            <p class="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">Veja no mapa o local exato em que os registros de ponto foram efetuados.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section: Integração WhatsApp -->
-            <section class="solid-card p-8 md:p-12 rounded-[2rem] bg-surface-light dark:bg-surface-dark border-primary/20 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-10">
-                    <i data-lucide="message-circle" class="w-48 h-48 text-[#25D366]"></i>
-                </div>
-                <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
-                    <div>
-                        <div class="magnetic bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] inline-flex items-center justify-center gap-2">
-                            Exclusividade
-                        </div>
-                        <h2 class="text-2xl md:text-3xl font-display font-bold text-black dark:text-white mb-4">Integrado com WhatsApp</h2>
-                        <p class="text-subtle-light dark:text-subtle-dark text-sm md:text-base leading-relaxed mb-6">
-                            Com o Let's Work, os colaboradores podem marcar seu ponto através do próprio Whatsapp, de forma fácil e rápida. Trazemos uma solução inovadora que utiliza a popularidade do WhatsApp para proporcionar maior eficiência.
-                        </p>
-                        <ol class="space-y-4">
-                            <li class="flex gap-3">
-                                <span class="magnetic bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] inline-flex items-center justify-center gap-2">1</span>
-                                <span class="text-sm text-black dark:text-white font-medium">A empresa cadastra o número dos celulares.</span>
-                            </li>
-                            <li class="flex gap-3">
-                                <span class="magnetic bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] inline-flex items-center justify-center gap-2">2</span>
-                                <span class="text-sm text-black dark:text-white font-medium">O funcionário recebe o link para bater ponto com biometria facial e localização.</span>
-                            </li>
-                        </ol>
-                    </div>
-                    <div class="flex justify-center">
-                        <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/WhatsApp-Image-2022-04-13-at-11.23.21-4.jpeg" alt="Demonstração do Registro de Ponto Digital via Integração com WhatsApp" class="w-[200px] rounded-3xl shadow-soft border-4 border-white dark:border-[#222]">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section: FAQ -->
-            <section>
-                <h2 class="text-2xl font-display font-bold text-black dark:text-white mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">Dúvidas Frequentes</h2>
-                <div class="space-y-4">
-                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
-                            Como funciona o registro de ponto?
-                            <span class="transition group-open:rotate-180">
-                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
-                            </span>
-                        </summary>
-                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
-                            O registro de ponto é feito por reconhecimento facial, garantindo precisão e segurança. A localização do colaborador é registrada e é possível definir o endereço e perímetro para a marcação.
-                        </div>
-                    </details>
-
-                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
-                            O aplicativo funciona em quais dispositivos?
-                            <span class="transition group-open:rotate-180">
-                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
-                            </span>
-                        </summary>
-                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
-                            O Let’s Work pode ser utilizado em smartphones, tablets, notebooks e desktops, tanto para colaboradores internos quanto externos, facilitando o controle em qualquer modelo de trabalho.
-                        </div>
-                    </details>
-
-                    <details class="group solid-card p-6 rounded-2xl cursor-pointer">
-                        <summary class="flex justify-between items-center font-bold text-black dark:text-white list-none">
-                            O sistema é fácil de usar para funcionários e gestores?
-                            <span class="transition group-open:rotate-180">
-                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
-                            </span>
-                        </summary>
-                        <div class="text-sm text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed">
-                            Sim. O painel é intuitivo e permite fácil administração, geração de relatórios automáticos e envio de notificações para colaboradores e gestores.
-                        </div>
-                    </details>
-                </div>
-            </section>
-
-        
-            
-
-        </main>
-
-        <!-- SIDEBAR COLUMN -->
-        <aside class="lg:col-span-4">
-            <div class="sticky top-32 space-y-6">
-                
-                <!-- CTA Widget -->
-                <div class="solid-card p-8 rounded-2xl text-center shadow-glow border-primary/20 bg-gradient-to-b from-surface-light to-white dark:from-surface-dark dark:to-black">
-                    <div class="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-                        <i data-lucide="calendar-days" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="font-display font-bold text-xl mb-3 text-black dark:text-white">Quer melhorar sua gestão de funcionários?</h3>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark mb-6">Agende uma demonstração gratuita e veja como nosso sistema de ponto pode transformar seu RH.</p>
-                    
-                    <a href="#agendar-demonstracao" class="btn-primary w-full block py-3 rounded-xl font-bold flex items-center justify-center gap-2 magnetic">
-                        Falar com Especialista <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
-                    <p class="text-xs text-subtle-light dark:text-subtle-dark mt-4">Avaliação 100% gratuita.</p>
-                </div>
-
-                <!-- Plan Widget -->
-                <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-surface-dark">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
-                        <h4 class="font-bold text-black dark:text-white">Plano Mais Vendido</h4>
-                    </div>
-                    <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
-                        <div class="text-xs text-subtle-light dark:text-subtle-dark uppercase font-bold tracking-wider mb-1">Equipe Dinâmica</div>
-                        <div class="text-3xl font-display font-bold text-primary mb-1">R$ 299<span class="text-lg">,90</span></div>
-                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Até 50 funcionários por mês</div>
-                    </div>
-                    <ul class="text-sm space-y-3 text-subtle-light dark:text-subtle-dark mb-6">
-                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Reconhecimento Facial</li>
-                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Registro Offline</li>
-                        <li class="flex gap-2 items-start"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i> Gestão de Escalas</li>
+        <!-- A Solução -->
+        <section class="solid-card p-8 md:p-16 rounded-[2rem] bg-black dark:bg-white text-white dark:text-black border-transparent relative overflow-hidden group shadow-2xl">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div class="relative z-10">
+                <h2 class="text-sm font-bold tracking-widest uppercase text-white/50 dark:text-black/50 mb-4">A Revolução</h2>
+                <h3 class="text-3xl md:text-5xl font-display font-bold mb-6">A Solução Let's Work</h3>
+                <p class="text-xl md:text-2xl font-light mb-10 leading-relaxed text-white/80 dark:text-black/80">
+                    A Let's Work representa a evolução do RH, centralizando toda a jornada do colaborador em uma única plataforma, com apoio da <strong>Vittoria</strong>, nossa assistente de IA.
+                </p>
+                <div class="bg-white/10 dark:bg-black/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10 dark:border-black/10">
+                    <h4 class="text-xl font-bold mb-4 flex items-center gap-3">
+                        <i data-lucide="bot" class="w-6 h-6 text-primary"></i> A Vittoria como facilitadora
+                    </h4>
+                    <p class="mb-6 text-white/70 dark:text-black/70">A Vittoria não é apenas um recurso — ela atua como uma facilitadora da operação:</p>
+                    <ul class="grid md:grid-cols-2 gap-4">
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-400 dark:text-green-600"></i> Entende comandos em linguagem natural</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-400 dark:text-green-600"></i> Navega automaticamente pela plataforma</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-400 dark:text-green-600"></i> Executa tarefas com rapidez e precisão</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-400 dark:text-green-600"></i> Apoia gestores na tomada de decisão</li>
                     </ul>
-                    <a href="https://www.letswork.com.br/preco-de-aplicativo-de-ponto-com-reconhecimento-facial/" class="text-primary text-sm font-bold flex items-center gap-2 hover:underline">
-                        Ver todos os planos <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Como Funciona Steps -->
+        <section>
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-display font-black text-black dark:text-white mb-6">Como Funciona</h2>
+                <p class="text-xl text-subtle-light dark:text-subtle-dark max-w-2xl mx-auto">Uma suíte completa dividida em 9 pilares fundamentais, todos impulsionados por Inteligência Artificial.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Step 1 -->
+                <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] flex flex-col md:flex-row gap-6 items-start group hover:border-primary/50 transition-colors">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                        <span class="text-2xl font-black">1</span>
+                    </div>
+                    <div class="w-full">
+                        <h3 class="text-2xl font-bold text-black dark:text-white mb-4">Criação de Vagas com IA</h3>
+                        <div class="bg-white dark:bg-black/50 p-4 rounded-xl border border-borderline-light dark:border-borderline-dark mb-4 italic text-subtle-light dark:text-subtle-dark text-sm md:text-base flex items-center gap-3">
+                            <i data-lucide="mic" class="w-5 h-5 text-primary shrink-0"></i>
+                            "Vittoria, crie uma vaga para desenvolvedor backend"
+                        </div>
+                        <ul class="grid sm:grid-cols-3 gap-3 text-sm md:text-base text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Gera descrição da vaga</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Sugere requisitos</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Publica automaticamente</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- IA Banner Widget -->
-                <a href="ia-no-rh.html" class="group solid-card p-6 rounded-2xl block border-primary/10 hover:border-primary/50 transition-colors">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-primary uppercase tracking-wider">Novo Recurso</span>
-                        <i data-lucide="sparkles" class="w-4 h-4 text-primary group-hover:animate-pulse"></i>
+                <!-- Step 2 -->
+                <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] flex flex-col md:flex-row gap-6 items-start group hover:border-primary/50 transition-colors">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                        <span class="text-2xl font-black">2</span>
                     </div>
-                    <h4 class="font-bold text-black dark:text-white mb-2">Inteligência Artificial no RH</h4>
-                    <p class="text-xs text-subtle-light dark:text-subtle-dark">Descubra como a IA analisa dados para identificar melhorias na gestão de tempo.</p>
-                </a>
+                    <div class="w-full">
+                        <h3 class="text-2xl font-bold text-black dark:text-white mb-4">Recrutamento Inteligente</h3>
+                        <ul class="grid sm:grid-cols-2 gap-4 text-sm md:text-base text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Triagem automatizada de currículos</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Análise de perfil e compatibilidade</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Apoio na avaliação de entrevistas</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Classificação dos candidatos mais aderentes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 3 & 4 (Grid) -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                            <span class="text-xl font-black">3</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-black dark:text-white mb-4">Admissão Digital</h3>
+                        <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Contratação realizada dentro da plataforma</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Coleta e assinatura de documentos</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Organização completa do dossiê</li>
+                        </ul>
+                    </div>
+                    <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                            <span class="text-xl font-black">4</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-black dark:text-white mb-4">Gestão de Documentos</h3>
+                        <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Armazenamento seguro e estruturado</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Assinaturas digitais</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Acesso rápido e centralizado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 5 & 6 (Grid) -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                            <span class="text-xl font-black">5</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-black dark:text-white mb-4">PDI e Performance</h3>
+                        <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Criação de PDI</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Definição de metas e entregáveis</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Acompanhamento contínuo de desempenho</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Insights gerados por IA</li>
+                        </ul>
+                    </div>
+                    <div class="solid-card p-6 md:p-8 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+                            <span class="text-xl font-black">6</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-black dark:text-white mb-4">Treinamento e Desenvolvimento</h3>
+                        <ul class="space-y-3 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Gestão da evolução dos colaboradores</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Desenvolvimento orientado por dados</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0"></i> Fortalecimento de competências estratégicas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 7, 8 & 9 (Grid) -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <span class="font-black">7</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-black dark:text-white mb-3">Controle de Ponto</h3>
+                        <ul class="space-y-2 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Registro de ponto simplificado</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Controle de horas extras</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Banco de horas automatizado</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Gestão de atrasos e atestados</li>
+                        </ul>
+                    </div>
+                    <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <span class="font-black">8</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-black dark:text-white mb-3">Gestão de Escalas</h3>
+                        <ul class="space-y-2 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Ajustes visuais e rápidos</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Melhor distribuição da jornada</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Redução de conflitos e horas</li>
+                        </ul>
+                    </div>
+                    <div class="solid-card p-6 rounded-2xl bg-surface-light dark:bg-[#111] group hover:border-primary/50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <span class="font-black">9</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-black dark:text-white mb-3">Processos e Projetos</h3>
+                        <ul class="space-y-2 text-sm text-subtle-light dark:text-subtle-dark">
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Gestão de tarefas por colaborador</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Timesheet integrado</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Acompanhamento de produtividade</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-primary mt-0.5 shrink-0"></i> Relatórios gerenciais completos</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </aside>
+        </section>
+
+        <!-- Diferencial & Benefícios -->
+        <section class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-sm font-bold tracking-widest uppercase text-primary mb-2">O Diferencial</h2>
+                    <h3 class="text-3xl md:text-4xl font-display font-bold text-black dark:text-white mb-6">A Inteligência por trás: Vittoria</h3>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark mb-6 leading-relaxed">
+                        A Vittoria torna a operação mais simples e eficiente. O <strong>resultado</strong> é mais produtividade com menos esforço operacional.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4 text-black dark:text-white font-medium">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><i data-lucide="message-square" class="w-5 h-5"></i></div>
+                            Interface baseada em conversa
+                        </li>
+                        <li class="flex items-center gap-4 text-black dark:text-white font-medium">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><i data-lucide="mouse-pointer-click" class="w-5 h-5"></i></div>
+                            Redução da necessidade de navegação manual
+                        </li>
+                        <li class="flex items-center gap-4 text-black dark:text-white font-medium">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><i data-lucide="zap" class="w-5 h-5"></i></div>
+                            Respostas rápidas e contextualizadas
+                        </li>
+                        <li class="flex items-center gap-4 text-black dark:text-white font-medium">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><i data-lucide="users" class="w-5 h-5"></i></div>
+                            Apoio contínuo ao gestor
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-8 md:p-12 rounded-[2rem] shadow-lg">
+                <h3 class="text-2xl font-bold text-black dark:text-white mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">Benefícios da Plataforma</h3>
+                <ul class="space-y-6">
+                    <li class="flex items-start gap-4">
+                        <i data-lucide="trending-down" class="w-6 h-6 text-green-500 shrink-0"></i>
+                        <div>
+                            <span class="block font-bold text-black dark:text-white text-lg">Redução de custos operacionais</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i data-lucide="zap" class="w-6 h-6 text-primary shrink-0"></i>
+                        <div>
+                            <span class="block font-bold text-black dark:text-white text-lg">Maior eficiência do RH</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i data-lucide="bar-chart" class="w-6 h-6 text-blue-500 shrink-0"></i>
+                        <div>
+                            <span class="block font-bold text-black dark:text-white text-lg">Decisões seguras com base em dados</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i data-lucide="heart" class="w-6 h-6 text-red-500 shrink-0"></i>
+                        <div>
+                            <span class="block font-bold text-black dark:text-white text-lg">Melhor experiência para gestores e colaboradores</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <i data-lucide="layers" class="w-6 h-6 text-purple-500 shrink-0"></i>
+                        <div>
+                            <span class="block font-bold text-black dark:text-white text-lg">Centralização da gestão de pessoas</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Conclusão e CTA -->
+        <section class="text-center bg-black dark:bg-white text-white dark:text-black p-10 md:p-16 rounded-[2rem] relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/30 blur-3xl rounded-full"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500/30 blur-3xl rounded-full"></div>
+            
+            <div class="relative z-10 max-w-3xl mx-auto">
+                <h2 class="text-sm font-bold tracking-widest uppercase text-white/60 dark:text-black/60 mb-4">Posicionamento</h2>
+                <p class="text-2xl md:text-4xl font-display font-black mb-6 leading-tight">A Let's Work representa a evolução natural do RH: <br><span class="text-primary">Mais integrado, mais eficiente e mais inteligente.</span></p>
+                <p class="text-lg md:text-xl font-light text-white/80 dark:text-black/80 mb-10">Aprimoramos a gestão de RH com tecnologia, mantendo a segurança e a consistência que sua empresa precisa.</p>
+                
+                <div class="pt-8 border-t border-white/20 dark:border-black/20">
+                    <p class="font-bold text-xl mb-6">Dê o próximo passo na gestão de pessoas.</p>
+                    <a href="https://api.whatsapp.com/send?phone=5511934670924&text=Ol%C3%A1%2C%20gostaria%20de%20falar%20com%20um%20especialista%20da%20Let%27s%20Work%21" target="_blank" class="magnetic bg-white dark:bg-black text-black dark:text-white px-10 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-xl inline-flex items-center gap-2">
+                        A evolução do RH começa agora
+                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
 
     </div>
 </div>
