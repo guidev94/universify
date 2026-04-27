@@ -459,12 +459,12 @@
             </div>
 
             <!-- MAIN BENTO GRID (Mockup inside Grid) -->
-            <div class="w-full grid lg:grid-cols-12 gap-6 lg:gap-8 section-reveal">
+            <div class="w-full grid lg:grid-cols-1 gap-6 lg:gap-8 section-reveal">
                 
-                <!-- THE VIDEO MOCKUP (Massive, spanning 8 columns) -->
-                <div class="lg:col-span-8 relative group">
+                <!-- THE VIDEO MOCKUP (Massive, spanning full width) -->
+                <div class="w-full relative group">
                     <!-- Glow behind mockup -->
-                    <div class="absolute -inset-2 bg-primary/20 blur-[60px] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="absolute -inset-2 bg-primary/20 blur-[80px] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     
                     <!-- Floating Bubble 1 (Left) -->
                     <div class="absolute -left-4 lg:-left-10 top-16 lg:top-24 z-30 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 p-3 lg:p-4 rounded-2xl rounded-tl-sm shadow-[0_10px_40px_rgba(0,0,0,0.15)] max-w-[180px] lg:max-w-[220px] animate-[float_4s_ease-in-out_infinite] hidden md:block pointer-events-none transition-transform hover:scale-105">
@@ -476,7 +476,7 @@
                     </div>
 
                     <!-- Computer Frame -->
-                    <div class="relative h-full w-full rounded-3xl border border-borderline-light dark:border-white/10 bg-[#0A0A0A] shadow-sm overflow-hidden flex flex-col">
+                    <div class="relative w-full rounded-2xl lg:rounded-[2.5rem] border border-borderline-light dark:border-white/10 bg-[#0A0A0A] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
                         
                         <!-- Mac OS Header -->
                         <div class="h-10 lg:h-12 w-full bg-[#1A1A1A] flex items-center px-4 lg:px-6 gap-1.5 lg:gap-2 border-b border-white/5 relative z-20 shrink-0">
@@ -485,7 +485,7 @@
                             <div class="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full bg-[#27C93F] shadow-inner"></div>
                             
                             <!-- Mock URL Bar + AI Indicator -->
-                            <div class="absolute left-1/2 -translate-x-1/2 w-1/3 max-w-[200px] h-6 bg-[#2A2A2A] rounded-md flex items-center justify-center border border-white/5 gap-2">
+                            <div class="absolute left-1/2 -translate-x-1/2 w-1/3 max-w-[250px] h-6 bg-[#2A2A2A] rounded-md flex items-center justify-center border border-white/5 gap-2">
                                 <span class="relative flex h-2 w-2">
                                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                   <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -494,19 +494,19 @@
                             </div>
                         </div>
 
-                        <!-- Video Player with Poster Image -->
-                        <div class="relative w-full flex-grow bg-black flex justify-center items-center overflow-hidden min-h-[300px]">
+                        <!-- Video Player with Poster Image (Full Width 16:9 Aspect Ratio) -->
+                        <div class="relative w-full aspect-video bg-black flex justify-center items-center overflow-hidden">
                             <!-- The poster attribute prevents black flashes while loading -->
                             <video autoplay loop muted playsinline poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" class="w-full h-full object-cover scale-[1.01] origin-center">
                                 <source src="https://cdn.jumpshare.com/preview/Y3VxUDRjVg6oiX6GaBv2sZAN83FIqsCM5W9mLENa1MLfeg6_gIod89lptTBcU4FAl7WLoO-wHOTLuPG7n06Ygnhf7tufIBd_oBSZ3QUISawZLvyOcVvJtZa9JrSzkYnCRfCB41im_xHmSNOsSStbnm6yjbN-I2pg_cnoHs_AmgI.mp4" type="video/mp4">
                             </video>
-                            <div class="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] pointer-events-none"></div>
+                            <div class="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.8)] pointer-events-none"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SIDE FEATURES (4 columns, stacked vertically to match Mockup height) -->
-                <div class="lg:col-span-4 flex flex-col gap-6 lg:gap-8">
+                <!-- BOTTOM FEATURES (3 columns spread below the massive mockup) -->
+                <div class="w-full grid md:grid-cols-3 gap-6 lg:gap-8 mt-8">
                     
                     <!-- Feature 1 -->
                     <div class="bg-white dark:bg-[#111] p-6 lg:p-8 rounded-3xl border border-borderline-light dark:border-white/5 shadow-sm flex flex-col justify-center flex-grow transition-transform hover:-translate-y-1 hover:border-primary/30 group">
