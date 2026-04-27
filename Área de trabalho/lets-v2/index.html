@@ -470,7 +470,7 @@
                             </div>
                             <span class="text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase">Nova Pergunta</span>
                         </div>
-                        <p class="text-xs lg:text-sm font-medium text-black dark:text-white leading-snug">"VittórIA, quem da equipe faz aniversário esse mês?"</p>
+                        <p class="text-xs lg:text-sm font-medium text-black dark:text-white leading-snug">"VittórIA, crie uma vaga de Desenvolvedor Sênior e divulgue."</p>
                     </div>
 
                     <!-- Computer Frame -->
@@ -684,7 +684,9 @@
                         <!-- Blocos de Texto (Cada um ocupa espaço de rolagem) -->
                         <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 relative" id="step-1">
                             <!-- Dot Indicator -->
-                            <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
+                            <div class="absolute left-[-11px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#111] border-[5px] border-borderline-light dark:border-white/10 hidden md:flex items-center justify-center transition-all duration-500 z-10 indicator-dot shadow-sm">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 transition-colors duration-500 inner-dot"></div>
+                            </div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -705,7 +707,9 @@
 
                         <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 relative" id="step-2">
                             <!-- Dot Indicator -->
-                            <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
+                            <div class="absolute left-[-11px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#111] border-[5px] border-borderline-light dark:border-white/10 hidden md:flex items-center justify-center transition-all duration-500 z-10 indicator-dot shadow-sm">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 transition-colors duration-500 inner-dot"></div>
+                            </div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -726,7 +730,9 @@
                     
                         <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pb-[15vh] relative" id="step-3">
                             <!-- Dot Indicator -->
-                            <div class="absolute left-[-7px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
+                            <div class="absolute left-[-11px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#111] border-[5px] border-borderline-light dark:border-white/10 hidden md:flex items-center justify-center transition-all duration-500 z-10 indicator-dot shadow-sm">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 transition-colors duration-500 inner-dot"></div>
+                            </div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -2171,16 +2177,31 @@
 
             function activateStep(index) {
                 stepTexts.forEach((t, i) => {
-                    const card = t.querySelector('div');
+                    const card = t.querySelector('div.group');
                     const dot = t.querySelector('.indicator-dot');
+                    const innerDot = t.querySelector('.inner-dot');
                     if (i === index) {
-                        card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
-                        card.classList.remove('bg-transparent', 'border-transparent');
-                        if(dot) { dot.classList.add('border-primary', 'bg-primary'); dot.classList.remove('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
+                        if(card) {
+                            card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                            card.classList.remove('bg-transparent', 'border-transparent');
+                        }
+                        if(dot && innerDot) { 
+                            dot.classList.add('border-primary/20', 'scale-125'); 
+                            dot.classList.remove('border-borderline-light', 'dark:border-white/10'); 
+                            innerDot.classList.add('bg-primary', 'scale-150');
+                            innerDot.classList.remove('bg-gray-300', 'dark:bg-gray-600');
+                        }
                     } else {
-                        card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
-                        card.classList.add('bg-transparent', 'border-transparent');
-                        if(dot) { dot.classList.remove('border-primary', 'bg-primary'); dot.classList.add('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
+                        if(card) {
+                            card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
+                            card.classList.add('bg-transparent', 'border-transparent');
+                        }
+                        if(dot && innerDot) { 
+                            dot.classList.remove('border-primary/20', 'scale-125'); 
+                            dot.classList.add('border-borderline-light', 'dark:border-white/10');
+                            innerDot.classList.remove('bg-primary', 'scale-150');
+                            innerDot.classList.add('bg-gray-300', 'dark:bg-gray-600');
+                        }
                     }
                 });
 
