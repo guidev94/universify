@@ -97,20 +97,19 @@
         .marquee-container { overflow: hidden; display: flex; flex-wrap: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; flex-shrink: 0; min-width: max-content; align-items: center; }
         
-        .client-logo { height: 40px; width: auto; object-fit: contain; filter: grayscale(100%); transition: all 0.3s ease; }
-        .client-logo.highlight { height: 40px; filter: grayscale(0%) !important; }
-        
-        @media (min-width: 1024px) { 
-            .client-logo { height: 50px; } 
-            .client-logo.highlight { height: 50px; }
-        }
-        .client-logo:hover { filter: grayscale(0%); transform: scale(1.05); }
-        .client-logo.highlight:hover { transform: scale(1.05) !important; }
-        
-        .dark .client-logo { filter: brightness(0) invert(1); }
-        .dark .client-logo.highlight { filter: brightness(0) invert(1) !important; }
-        .dark .client-logo:hover { filter: brightness(0) invert(1); }
+        .client-logo { height: 40px; width: auto; object-fit: contain; transition: all 0.3s ease; }
+        @media (min-width: 1024px) { .client-logo { height: 50px; } }
+        .client-logo:hover { transform: scale(1.05); }
 
+        /* Light Mode */
+        html:not(.dark) .client-logo { filter: brightness(0) opacity(0.6); }
+        html:not(.dark) .client-logo:hover { filter: brightness(0) opacity(1); }
+        html:not(.dark) .client-logo.highlight { filter: brightness(0) opacity(1) !important; }
+
+        /* Dark Mode */
+        .dark .client-logo { filter: brightness(0) invert(1) opacity(0.6); }
+        .dark .client-logo:hover { filter: brightness(0) invert(1) opacity(1); }
+        .dark .client-logo.highlight { filter: brightness(0) invert(1) opacity(1) !important; }
         /* 3D Depoimentos Marquee */
         .testimonial-container {
             perspective: 1500px;
