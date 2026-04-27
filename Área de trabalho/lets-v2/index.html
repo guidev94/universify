@@ -463,7 +463,7 @@
                     <div class="absolute -inset-2 bg-primary/20 blur-[60px] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     
                     <!-- Floating Bubble 1 (Left) -->
-                    <div class="absolute -left-4 lg:-left-10 top-16 lg:top-24 z-30 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 p-3 lg:p-4 rounded-2xl rounded-tl-sm shadow-[0_10px_40px_rgba(0,0,0,0.15)] max-w-[180px] lg:max-w-[220px] animate-[float_4s_ease-in-out_infinite] hidden md:block pointer-events-none transition-transform hover:scale-105">
+                    <div class="absolute -left-4 lg:-left-10 top-[35%] lg:top-[40%] z-30 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 p-3 lg:p-4 rounded-2xl rounded-bl-sm shadow-[0_10px_40px_rgba(0,0,0,0.15)] max-w-[180px] lg:max-w-[220px] animate-[float_4s_ease-in-out_infinite] hidden md:block pointer-events-none transition-transform hover:scale-105">
                         <div class="flex items-center gap-2 mb-2">
                             <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                                 <i data-lucide="message-square" class="w-4 h-4 text-primary"></i>
@@ -493,12 +493,19 @@
                         </div>
 
                         <!-- Video Player with Poster Image -->
-                        <div class="relative w-full flex-grow bg-black flex justify-center items-center overflow-hidden min-h-[300px]">
+                        <div class="relative w-full flex-grow bg-black flex justify-center items-center overflow-hidden min-h-[300px] group/video">
                             <!-- The poster attribute prevents black flashes while loading -->
                             <video autoplay loop muted playsinline poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" class="w-full h-full object-cover scale-[1.01] origin-center">
                                 <source src="https://cdn.jumpshare.com/preview/Y3VxUDRjVg6oiX6GaBv2sZAN83FIqsCM5W9mLENa1MLfeg6_gIod89lptTBcU4FAl7WLoO-wHOTLuPG7n06Ygnhf7tufIBd_oBSZ3QUISawZLvyOcVvJtZa9JrSzkYnCRfCB41im_xHmSNOsSStbnm6yjbN-I2pg_cnoHs_AmgI.mp4" type="video/mp4">
                             </video>
                             <div class="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] pointer-events-none"></div>
+                            
+                            <!-- Fullscreen Overlay Button -->
+                            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover/video:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer" onclick="document.querySelector('#vittoria-section video').requestFullscreen().catch(err => { console.log('Fullscreen error:', err) })">
+                                <div class="bg-white/10 dark:bg-black/30 border border-white/20 p-4 rounded-full text-white backdrop-blur-md transform scale-90 group-hover/video:scale-100 transition-transform duration-300">
+                                    <i data-lucide="maximize" class="w-8 h-8 drop-shadow-md"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
