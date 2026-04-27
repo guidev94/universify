@@ -663,7 +663,13 @@
                 
                 <!-- Esquerda (Textos Rolando Naturalmente) -->
                 <div class="w-full lg:w-1/2 relative z-10">
-                    <div class="pt-12 lg:pt-16 pb-8 lg:pb-12">
+                    
+                    <!-- Fio Condutor (Timeline Vertical) -->
+                    <div class="absolute left-10 lg:left-6 top-[20%] bottom-[20%] w-[2px] bg-borderline-light dark:bg-white/5 hidden md:block z-0 rounded-full">
+                        <div class="w-full bg-gradient-to-b from-primary via-rose-500 to-primary rounded-full shadow-[0_0_10px_rgba(255,45,45,0.6)]" id="timeline-progress" style="height: 0%;"></div>
+                    </div>
+
+                    <div class="pt-12 lg:pt-16 pb-8 lg:pb-12 ml-0 md:ml-12 lg:ml-16">
                         <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Ecossistema Inteligente
                         </div>
@@ -675,7 +681,9 @@
                     </div>
 
                     <!-- Blocos de Texto (Cada um ocupa espaço de rolagem) -->
-                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10" id="step-1">
+                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pl-0 md:pl-12 lg:pl-16 relative" id="step-1">
+                        <!-- Dot Indicator -->
+                        <div class="absolute left-[-20px] lg:left-[-24px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -694,7 +702,9 @@
                         </div>
                     </div>
 
-                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10" id="step-2">
+                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pl-0 md:pl-12 lg:pl-16 relative" id="step-2">
+                        <!-- Dot Indicator -->
+                        <div class="absolute left-[-20px] lg:left-[-24px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -713,7 +723,9 @@
                         </div>
                     </div>
                     
-                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pb-[20vh]" id="step-3">
+                    <div class="step-text min-h-screen flex flex-col justify-center pr-4 lg:pr-10 pb-[20vh] pl-0 md:pl-12 lg:pl-16 relative" id="step-3">
+                        <!-- Dot Indicator -->
+                        <div class="absolute left-[-20px] lg:left-[-24px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-[#111] border-4 border-gray-300 dark:border-gray-700 hidden md:block transition-colors duration-500 z-10 indicator-dot"></div>
                         <div class="p-8 md:p-10 rounded-3xl bg-transparent border border-transparent opacity-100 lg:opacity-40 transition-all duration-500 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 opacity-100 lg:opacity-0 lg:group-[.active]:opacity-100 transition-opacity"></div>
                             <div class="flex items-center gap-4 mb-6">
@@ -832,7 +844,7 @@
                                         <span class="text-primary font-display">9.2 / 10</span>
                                     </div>
                                     <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                                        <div class="bg-gradient-to-r from-primary to-rose-500 h-full rounded-full relative" style="width: 92%">
+                                        <div class="bg-gradient-to-r from-primary to-rose-500 h-full rounded-full relative" data-width="92%" style="width: 0%">
                                             <div class="absolute inset-0 bg-white/20 w-full h-full custom-shimmer"></div>
                                         </div>
                                     </div>
@@ -843,7 +855,7 @@
                                         <span class="text-green-500 font-display">8.8 / 10</span>
                                     </div>
                                     <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                                        <div class="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full" style="width: 88%"></div>
+                                        <div class="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full" data-width="88%" style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <div>
@@ -852,7 +864,7 @@
                                         <span class="text-amber-500 font-display">6.5 / 10</span>
                                     </div>
                                     <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                                        <div class="bg-gradient-to-r from-amber-400 to-amber-600 h-full rounded-full" style="width: 65%"></div>
+                                        <div class="bg-gradient-to-r from-amber-400 to-amber-600 h-full rounded-full" data-width="65%" style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <div class="mt-6 pt-5 border-t border-borderline-light dark:border-borderline-dark bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/20">
@@ -2134,6 +2146,16 @@
             const stepTexts = gsap.utils.toArray('.step-text');
             const visuals = gsap.utils.toArray('.feature-visual');
 
+            // Linha do tempo de progresso vertical
+            ScrollTrigger.create({
+                trigger: "#solucoes",
+                start: "top 50%",
+                end: "bottom 50%",
+                onUpdate: (self) => {
+                    gsap.to("#timeline-progress", { height: `${self.progress * 100}%`, duration: 0.1, ease: "none" });
+                }
+            });
+
             stepTexts.forEach((text, i) => {
                 const innerCard = text.querySelector('div');
                 ScrollTrigger.create({
@@ -2148,12 +2170,15 @@
             function activateStep(index) {
                 stepTexts.forEach((t, i) => {
                     const card = t.querySelector('div');
+                    const dot = t.querySelector('.indicator-dot');
                     if (i === index) {
                         card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
                         card.classList.remove('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                        if(dot) { dot.classList.add('border-primary', 'bg-primary'); dot.classList.remove('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
                     } else {
                         card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft', 'active');
                         card.classList.add('bg-transparent', 'border-transparent', 'lg:opacity-40');
+                        if(dot) { dot.classList.remove('border-primary', 'bg-primary'); dot.classList.add('border-gray-300', 'dark:border-gray-700', 'bg-white', 'dark:bg-[#111]'); }
                     }
                 });
 
@@ -2162,14 +2187,35 @@
                         vis.style.opacity = "1";
                         vis.style.transform = "translateY(0) scale(1)";
                         vis.style.zIndex = "10";
+                        vis.style.filter = "blur(0px)";
+                        
+                        // Micro-animações baseadas no ID do visual ativo
+                        if (index === 0) {
+                            gsap.fromTo(vis.querySelector('.text-2xl.font-display'), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, delay: 0.2, ease: "back.out(1.5)" });
+                        }
+                        if (index === 1) {
+                            gsap.fromTo(vis.querySelectorAll('.grid > div'), 
+                                { y: 20, opacity: 0 }, 
+                                { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, delay: 0.2, ease: "power2.out" }
+                            );
+                        }
+                        if (index === 2) {
+                            gsap.fromTo(vis.querySelectorAll('.h-full.rounded-full[style]'), 
+                                { width: "0%" }, 
+                                { width: (i, el) => el.getAttribute('data-width'), duration: 1, delay: 0.3, ease: "power3.out", stagger: 0.1 }
+                            );
+                        }
+                        
                     } else if (i < index) {
                         vis.style.opacity = "0";
-                        vis.style.transform = "translateY(-40px) scale(0.95)";
+                        vis.style.transform = "translateY(-60px) scale(0.85)";
                         vis.style.zIndex = "1";
+                        vis.style.filter = "blur(10px)";
                     } else {
                         vis.style.opacity = "0";
-                        vis.style.transform = "translateY(40px) scale(0.95)";
+                        vis.style.transform = "translateY(60px) scale(1.15)";
                         vis.style.zIndex = "1";
+                        vis.style.filter = "blur(10px)";
                     }
                 });
             }
