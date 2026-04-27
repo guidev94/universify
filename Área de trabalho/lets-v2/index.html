@@ -493,12 +493,20 @@
                             </div>
                         </div>
 
-                        <!-- Video Player with iframe embed from ScreenPal -->
-                        <div class="relative w-full flex-grow bg-black flex justify-center items-center overflow-hidden min-h-[300px]">
-                            <!-- ScreenPal iframe taking up the full mockup width/height without borders -->
-                            <iframe style="border:0;" scrolling="no" src="https://go.screenpal.com/player/cOftY4nOEQP?controls=0&ff=false&share=0&download=0&embed=1&cl=0&width=1280&height=720&overlays=0&autoplay=1&loop=1&muted=1" allow="autoplay; fullscreen" allowfullscreen="true" class="absolute inset-0 w-full h-full scale-[1.02] origin-center pointer-events-none"></iframe>
-                            
+                        <!-- Video Player with MP4 Source -->
+                        <div class="relative w-full flex-grow bg-black flex justify-center items-center overflow-hidden min-h-[300px] group/video">
+                            <!-- The poster attribute prevents black flashes while loading -->
+                            <video autoplay loop muted playsinline poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" class="w-full h-full object-cover scale-[1.01] origin-center">
+                                <source src="preview.mp4" type="video/mp4">
+                            </video>
                             <div class="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] pointer-events-none"></div>
+                            
+                            <!-- Fullscreen Overlay Button -->
+                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/video:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer" onclick="document.querySelector('#vittoria-section video').requestFullscreen().catch(err => { console.log('Fullscreen error:', err) })">
+                                <div class="bg-white/10 dark:bg-black/30 border border-white/20 p-4 rounded-full text-white backdrop-blur-md transform scale-90 group-hover/video:scale-100 transition-transform duration-300">
+                                    <i data-lucide="maximize" class="w-8 h-8 drop-shadow-md"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
