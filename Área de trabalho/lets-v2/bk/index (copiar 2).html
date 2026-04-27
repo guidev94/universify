@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Work | A Evolução do RH Estratégico</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Plus Jakarta Sans para aquele visual "Linear/Vercel", Inter para dados -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF2D2D',
+                        dark: '#000000', /* Preto absoluto para contraste OLED */
+                        surface: { dark: '#0A0A0A', light: '#FFFFFF' },
+                        subtle: { dark: '#A1A1AA', light: '#475569' },
+                        borderline: { dark: 'rgba(255,255,255,0.08)', light: 'rgba(0,0,0,0.08)' }
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(0,0,0,0.05)',
+                        'glow': '0 0 30px rgba(255,45,45,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base & Reset Technical */
+        body {
+            background-color: #FFFFFF;
+            color: #0F172A;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease;
+        }
+        .dark body { background-color: #000000; color: #FFFFFF; }
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+
+        /* Minimalist Grid Background */
+        .tech-grid {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image: 
+                linear-gradient(to right, var(--border-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at 50% 0%, black 10%, transparent 80%);
+        }
+        body { --border-color: rgba(0,0,0,0.03); }
+        .dark body { --border-color: rgba(255,255,255,0.03); }
+
+        /* Typography Mastery */
+        .text-huge {
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(180deg, #000 0%, #666 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .dark .gradient-text {
+            background: linear-gradient(180deg, #FFF 0%, #888 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Solid Cards instead of Glass (Modern SaaS Look) */
+        .solid-card {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .dark .solid-card { background: #0A0A0A; }
+        .solid-card:hover { border-color: #FF2D2D; }
+
+        /* Marquee Custom */
+        .marquee-container { overflow: hidden; display: flex; white-space: nowrap; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: flex; animation: marquee 40s linear infinite; }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .client-logo { height: 2.5rem; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s; }
+        @media (min-width: 1024px) { .client-logo { height: 3rem; } }
+        .client-logo:hover { filter: grayscale(0%) opacity(1); transform: scale(1.05); }
+        .dark .client-logo { filter: brightness(0) invert(1) opacity(0.5); }
+        .dark .client-logo:hover { filter: brightness(1) invert(0) opacity(1); }
+
+        /* 3D Depoimentos Marquee */
+        .testimonial-container {
+            perspective: 1500px;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            padding: 40px 0;
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+        .testimonial-track {
+            display: flex;
+            gap: 2rem;
+            width: max-content;
+            animation: scroll-3d 50s linear infinite;
+            transform-style: preserve-3d;
+            transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg); /* Efeito 3D Deitado Elegante */
+        }
+        .testimonial-track:hover { animation-play-state: paused; }
+        @keyframes scroll-3d {
+            0% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(0); }
+            100% { transform: rotateX(10deg) rotateY(-5deg) rotateZ(2deg) translateX(-50%); }
+        }
+
+        /* GSAP Pinned Section Utilities */
+        .pin-spacer { margin: 0 !important; padding: 0 !important; }
+        
+        /* Custom Button */
+        .btn-primary {
+            background: #FF2D2D; color: white; border: 1px solid #FF2D2D;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+        .btn-primary:hover {
+            background: transparent; color: #FF2D2D; box-shadow: inset 0 0 0 1px #FF2D2D; transform: scale(1.02);
+        }
+        .btn-primary:focus-visible {
+            box-shadow: 0 0 0 2px rgba(255,45,45,0.5);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+    </style>
+</head>
+<body class="selection:bg-primary selection:text-white">
+    <div class="tech-grid"></div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 transition-all duration-300 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-borderline-light dark:border-borderline-dark" id="navbar">
+        <div class="max-w-[1400px] mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 md:h-12 lg:h-14 object-contain dark:brightness-0 dark:invert transition-all">
+            </div>
+            
+            <div class="hidden lg:flex gap-8 text-sm font-semibold text-subtle-light dark:text-subtle-dark">
+                <a href="https://www.letswork.com.br/transformando-o-controle-de-ponto-com-inteligencia-artificial/" class="hover:text-black dark:hover:text-white transition-colors">IA no RH</a>
+                <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/" class="hover:text-black dark:hover:text-white transition-colors">Conheça</a>
+                
+                <!-- Dropdown Soluções -->
+                <div class="relative group">
+                    <button class="hover:text-black dark:hover:text-white transition-colors flex items-center gap-1">
+                        Soluções <i data-lucide="chevron-down" class="w-4 h-4 opacity-50"></i>
+                    </button>
+                    <div class="absolute left-0 top-full pt-4 opacity-0 translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-300">
+                        <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark rounded-xl shadow-xl w-56 overflow-hidden flex flex-col py-2">
+                            <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Controle de Ponto</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Projetos</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Escalas</a>
+                            <a href="https://www.letswork.com.br/rastreamento/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Rastreamento de Rotas</a>
+                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Documentos</a>
+                            <a href="https://www.letswork.com.br/comunicacao-de-equipe/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Comunicação da Equipe</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-ferias/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Férias</a>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-vagas/" class="px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">Gestão de Vagas</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="https://www.letswork.com.br/downloads/" class="hover:text-black dark:hover:text-white transition-colors">Download App</a>
+                <a href="#planos" class="hover:text-black dark:hover:text-white transition-colors text-primary font-bold">Planos</a>
+            </div>
+            
+            <div class="hidden lg:flex gap-6 items-center">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-subtle-light dark:text-subtle-dark">
+                    <i data-lucide="sun" id="theme-toggle-light-icon" class="w-4 h-4 hidden"></i>
+                    <i data-lucide="moon" id="theme-toggle-dark-icon" class="w-4 h-4 hidden"></i>
+                </button>
+                <a href="https://app.letswork.com.br" class="text-sm font-bold hover:text-primary transition-colors">Login</a>
+                <button class="btn-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-glow">
+                    Falar com Vendas
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 1. HERO SECTION (Asymmetrical & Compact - Startup Level) -->
+    <section class="relative pt-32 lg:pt-40 pb-24 lg:pb-32 border-b border-borderline-light dark:border-borderline-dark overflow-hidden">
+        <div class="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-20">
+            
+            <!-- Left Column: Copy & CTA -->
+            <div class="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left">
+                <div class="hero-reveal flex items-center gap-2 px-3 py-1.5 rounded-full border border-borderline-light dark:border-borderline-dark bg-white dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    Portaria 671 & REP-P ABNT
+                </div>
+                
+                <h1 class="hero-reveal text-5xl md:text-6xl xl:text-[4.5rem] font-display font-black tracking-tighter leading-[1.05] mb-6 text-black dark:text-white">
+                    Seu RH no controle <br/>
+                    <span class="gradient-text">absoluto.</span>
+                </h1>
+                
+                <p class="hero-reveal text-lg md:text-xl text-subtle-light dark:text-subtle-dark max-w-xl mb-10 leading-relaxed">
+                    Ponto via reconhecimento facial, biometria por WhatsApp, rotas e recrutamento com IA. A infraestrutura completa para empresas que não podem errar na gestão de pessoas.
+                </p>
+                
+            <div class="hero-reveal flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <button class="bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-bold text-base md:text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.1)] group">
+                    Começar Teste Grátis
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                <button class="bg-white dark:bg-[#111] text-black dark:text-white border border-borderline-light dark:border-borderline-dark px-8 py-4 rounded-full font-bold text-base md:text-lg hover:border-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
+                    Falar com Especialista
+                </button>
+            </div>
+
+            <!-- Human Social Proof / Avatares -->
+            <div class="hero-reveal mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm font-medium">
+                <div class="flex -space-x-3">
+                    <img src="https://i.pravatar.cc/100?img=47" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=32" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=12" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                    <img src="https://i.pravatar.cc/100?img=60" alt="RH Manager" class="w-10 h-10 rounded-full border-2 border-white dark:border-black shadow-sm object-cover">
+                </div>
+                <div class="flex flex-col items-center sm:items-start">
+                    <div class="flex items-center gap-1 text-amber-500 mb-1">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <span class="text-xs text-subtle-light dark:text-subtle-dark font-bold tracking-wide uppercase">Aprovado por +500 Gestores de RH</span>
+                </div>
+            </div>
+            </div>
+
+            <!-- Right Column: Interactive Cluster -->
+            <div class="lg:col-span-6 relative h-[450px] md:h-[550px] w-full hidden lg:block perspective-2000 mt-10 lg:mt-0">
+                <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full"></div>
+                
+                <!-- Background: Dashboard -->
+                <div class="hero-dash absolute right-0 top-0 w-[85%] rounded-2xl overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] bg-white dark:bg-[#0A0A0A] will-change-transform">
+                    <div class="h-10 bg-gray-50 dark:bg-[#111] border-b border-borderline-light dark:border-borderline-dark flex items-center px-4 gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                    </div>
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/frame.webp" alt="Dashboard Let's Work" class="w-full object-cover opacity-90">
+                </div>
+
+                    <!-- Foreground: Mobile App Mockup UI CSS (iPhone Style) -->
+                    <div class="hero-mobile absolute left-[5%] bottom-5 w-[260px] h-[550px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#0A0A0A] shadow-[0_30px_60px_rgba(0,0,0,0.8)] z-30 will-change-transform flex flex-col relative overflow-hidden">
+                        <!-- Dynamic Island / Notch -->
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#18181B] rounded-b-2xl z-40"></div>
+                        
+                        <div class="w-full h-full relative z-20">
+                            <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/WhatsApp-Image-2022-04-13-at-11.23.21-4.avif" alt="Ponto via WhatsApp" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                <!-- Floating Widget: Live Status -->
+                <div class="hero-widget absolute right-[5%] bottom-20 bg-white dark:bg-[#151515] border border-borderline-light dark:border-borderline-dark p-4 rounded-2xl shadow-xl flex items-center gap-4 z-30 will-change-transform">
+                    <div class="relative flex items-center justify-center w-10 h-10 bg-green-500/10 rounded-full">
+                        <span class="absolute w-4 h-4 bg-green-500 rounded-full animate-ping opacity-75"></span>
+                        <span class="relative w-3 h-3 bg-green-500 rounded-full"></span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-black dark:text-white">142 Em Jornada</div>
+                        <div class="text-xs text-subtle-light dark:text-subtle-dark">Painel Sincronizado</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Image Fallback -->
+            <div class="lg:hidden w-full mt-10 relative">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/04/frame.webp" alt="Dashboard" class="w-full rounded-xl border border-borderline-light dark:border-borderline-dark shadow-xl">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 2. CLIENTES (Stark Marquee) -->
+    <section class="py-10 border-b border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-dark overflow-hidden">
+        <div class="marquee-container w-full">
+            <div class="marquee-content gap-24 items-center px-8">
+                <!-- Marcas originais exclusivas (sem repetição no mesmo bloco) -->
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
+                <!-- Duplicate for Loop Infinito Perfeito -->
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/1.png" alt="O Boticário" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/zarpng.png" alt="Zarpo" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/giupng.png" alt="Giuliana Flores" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2022/07/5.png" alt="Los Los" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/sebrae.png" alt="Sebrae" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/confirp.png" alt="Confirp" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/zap-contabil.png" alt="Zap Contábil" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/organica.avif" alt="Organica" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/inova.avif" alt="Inova" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/Unifique.avif" alt="Unifique" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/rajaVentures.png" alt="Raja Ventures" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/08/bossa.png" alt="Bossa" class="client-logo">
+                <img src="https://www.letswork.com.br/wp-content/uploads/2025/10/BRDE.avif" alt="BRDE" class="client-logo">
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. VITTORIA CHATBOT HIGHLIGHT -->
+    <section id="vittoria-section" class="py-24 lg:py-32 relative border-b border-borderline-light dark:border-borderline-dark overflow-hidden bg-white dark:bg-[#050505]">
+        <div class="max-w-[1200px] mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                
+                <div class="section-reveal order-2 lg:order-1">
+                    <h2 class="text-4xl md:text-5xl lg:text-[3.5rem] font-display font-black tracking-tighter mb-6 leading-[1.05]">
+                        E se uma IA resolvesse<br/>
+                        <span class="text-primary">85% dos chamados</span> do seu RH?
+                    </h2>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-10">
+                        A <strong>VittórIA</strong> é a assistente de IA da Let's Work que atende colaboradores 24/7, responde dúvidas de férias, folha e benefícios — e libera seu time de RH pra focar no que importa.
+                    </p>
+                    <ul class="space-y-6 mb-10">
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="rocket" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Tempo médio de resposta: 3 segundos</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Contra 4h+ de espera em empresas sem automação</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="link" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Integra com qualquer ERP e Folha</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Sistema homologado pela ABNT — plug and play</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <i data-lucide="message-square" class="w-6 h-6 text-primary shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="block text-black dark:text-white">Funciona no WhatsApp</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Onde as pessoas já estão, sem app novo</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="https://mkt.letswork.com.br/calculadora-rh" class="btn-primary inline-flex px-8 py-4 rounded-full font-bold shadow-glow transition-all items-center gap-2">
+                        Quero a VittórIA na minha empresa
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <div class="relative flex justify-center w-full max-w-[380px] mx-auto lg:ml-auto h-[650px] rounded-[3rem] border-[8px] border-[#18181B] bg-[#E5DDD5] dark:bg-[#0B141A] shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden chat-phone perspective-1000 order-1 lg:order-2">
+                    
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-[#18181B] rounded-b-2xl z-30"></div>
+
+                    <div class="h-20 bg-[#1F2C34] flex items-end pb-3 px-4 gap-3 text-white z-20 w-full absolute top-0 shadow-md">
+                        <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-white"></i></div>
+                        <div class="flex-1">
+                            <div class="font-bold text-base leading-tight text-white">VittórIA • Assistente de RH</div>
+                            <div class="text-xs text-green-400 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Respondendo agora...</div>
+                        </div>
+                        <i data-lucide="more-vertical" class="w-5 h-5 text-white/80 mb-1"></i>
+                    </div>
+
+                    <div class="w-full h-full pt-24 pb-20 px-4 flex flex-col gap-3 overflow-y-auto hide-scroll relative" id="chat-messages-container">
+                        <div class="absolute inset-0 opacity-[0.05]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E');"></div>
+                        
+                        <div class="text-center w-full z-10"><span class="bg-[#D9DDF0] dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[11px] px-3 py-1 rounded-lg font-medium shadow-sm">Hoje, 08:47</span></div>
+
+                        <div class="chat-msg-user-1 opacity-0 translate-y-4 bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10">
+                            Preciso do relatório de banco de horas do time comercial pra reunião das 10h ⏰
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47 ✓✓</div>
+                        </div>
+
+                        <div class="chat-typing-1 opacity-0 translate-y-4 bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                        </div>
+
+                        <div class="chat-msg-bot-1 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-4 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
+                            Pronto! 📊 Resumo do <strong>time comercial</strong> (mar/26):<br><br>
+                            <div class="bg-gray-50 dark:bg-[#1A2328] p-3 rounded-lg space-y-1">
+                                👥 <strong>12 colaboradores</strong><br>
+                                ✅ 8 com saldo positivo (+14h)<br>
+                                ⚠️ 3 com saldo negativo (-6h)<br>
+                                🔴 1 excedente crítico: <strong>+42h</strong>
+                            </div>
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
+                        </div>
+
+                        <div class="chat-msg-bot-2 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 border border-gray-100 dark:border-none">
+                            ⚡ <strong>Alerta:</strong> Carlos Silva tem 42h acumuladas — prazo legal vence em 8 dias. Notifico ele?
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:47</div>
+                        </div>
+
+                        <div class="chat-msg-user-2 hidden bg-[#D9FDD3] dark:bg-[#005C4B] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tr-sm text-[13.5px] shadow-sm self-end max-w-[85%] relative z-10 mt-2">
+                            Sim! Notifica e me manda o PDF completo 👍
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:48 ✓✓</div>
+                        </div>
+
+                        <div class="chat-typing-2 hidden bg-white dark:bg-[#202C33] p-3 rounded-2xl rounded-tl-sm shadow-sm self-start flex gap-1 items-center relative z-10 w-fit h-[38px] mt-1 border border-gray-100 dark:border-none">
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full typing-dot"></div>
+                        </div>
+
+                        <div class="chat-msg-bot-3 hidden bg-white dark:bg-[#202C33] text-[#111B21] dark:text-[#E9EDEF] p-3 rounded-2xl rounded-tl-sm text-[13.5px] shadow-sm self-start max-w-[90%] relative z-10 mt-1 border border-gray-100 dark:border-none">
+                            Feito! ✅ Carlos notificado por WhatsApp e PDF enviado no seu e-mail. Bom dia, gestora! ☕
+                            <div class="text-[10px] text-right mt-1 opacity-60">08:48</div>
+                        </div>
+
+                        <div class="chat-system-msg hidden text-center w-full z-10 mt-4">
+                            <span class="bg-white border border-gray-200 shadow-sm dark:border-none dark:bg-[#182229] text-[#54656F] dark:text-[#8696A0] text-[10px] px-3 py-1.5 rounded-full font-bold flex items-center justify-center gap-1 w-fit mx-auto">
+                                <i data-lucide="zap" class="w-3 h-3 text-primary"></i> Resolvido em 12s • Sem abrir nenhuma planilha
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-0 w-full h-16 bg-[#F0F2F5] dark:bg-[#1F2C34] px-3 flex items-center gap-2 z-20">
+                        <i data-lucide="smile" class="w-6 h-6 text-[#54656F] dark:text-[#8696A0]"></i>
+                        <div class="flex-1 h-10 bg-white dark:bg-[#2A3942] rounded-full px-4 flex items-center text-sm text-subtle-light dark:text-subtle-dark border border-gray-200 dark:border-transparent">Digite uma mensagem...</div>
+                        <i data-lucide="mic" class="w-5 h-5 text-[#54656F] dark:text-[#8696A0]"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- 3. SCROLL STORYTELLING (Bug-free via CSS Sticky + CSS Mockups Exclusivos) -->
+    <section id="solucoes" class="relative bg-surface-light dark:bg-dark border-b border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[1400px] mx-auto px-6 relative">
+            <div class="flex flex-col lg:flex-row relative">
+                
+                <!-- Esquerda (Textos Rolando Naturalmente) -->
+                <div class="w-full lg:w-1/2 relative z-10">
+                    <div class="pt-24 lg:pt-32 pb-12 lg:pb-16">
+                        <h2 class="text-4xl md:text-5xl font-display font-black tracking-tight text-gradient mb-4">
+                            Uma plataforma.<br/>Zero atrito.
+                        </h2>
+                        <p class="text-subtle-light dark:text-subtle-dark text-lg max-w-md">Desenhado para ser invisível no dia a dia do colaborador, mas implacável e robusto na visão do gestor.</p>
+                    </div>
+
+                    <!-- Blocos de Texto (Cada um ocupa espaço de rolagem) -->
+                    <div class="step-text min-h-[70vh] flex flex-col justify-center pr-10" id="step-1">
+                        <div class="p-8 rounded-[2rem] bg-white dark:bg-[#0A0A0A] border border-borderline-light dark:border-borderline-dark shadow-soft transition-all duration-500">
+                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
+                                <i data-lucide="smartphone" class="w-6 h-6 text-primary"></i>
+                                Ponto Eletrônico c/ Reconhecimento Facial
+                            </h3>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                                Abandone os relógios físicos caros e com manutenção. O colaborador bate ponto de qualquer lugar via <strong>WhatsApp</strong> ou App nativo, com reconhecimento facial antifraude (Liveness Detection) e validação ativa por GPS.
+                            </p>
+                            <a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
+                                Conhecer módulo
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="step-text min-h-[70vh] flex flex-col justify-center pr-10" id="step-2">
+                        <div class="p-8 rounded-[2rem] bg-transparent border border-transparent opacity-50 transition-all duration-500">
+                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
+                                <i data-lucide="calendar-days" class="w-6 h-6 text-primary"></i>
+                                Gestão de Escalas
+                            </h3>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                                Crie horários, gerencie folgas e evite horas extras indesejadas com antecedência. O sistema alerta automaticamente o RH e o Gestor sobre conflitos ou furos na escala da equipe.
+                            </p>
+                            <a href="https://www.letswork.com.br/gerenciamento-de-escalas/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
+                                Conhecer módulo
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="step-text min-h-[70vh] flex flex-col justify-center pr-10 pb-32" id="step-3">
+                        <div class="p-8 rounded-[2rem] bg-transparent border border-transparent opacity-50 transition-all duration-500">
+                            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3 text-black dark:text-white">
+                                <i data-lucide="folder-open" class="w-6 h-6 text-primary"></i>
+                                Documentos, Férias & Comunicação
+                            </h3>
+                            <p class="text-subtle-light dark:text-subtle-dark text-lg leading-relaxed mb-6">
+                                Todos os atestados e holerites em um cofre digital. Além disso, centralize os pedidos de férias e a comunicação da equipe em um só lugar. O RH aprova com um clique, mantendo o histórico auditável.
+                            </p>
+                            <a href="https://www.letswork.com.br/gestao-de-documentos/" class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-black dark:hover:text-white transition-colors group">
+                                Conhecer módulos
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direita Fixa (Mockups em CSS puro) -->
+                <div class="hidden lg:flex w-1/2 h-screen sticky top-0 items-center justify-center">
+                    
+                    <!-- Mockup 1: Ponto (Phone UI iPhone Style) -->
+                    <div class="absolute feature-visual w-[280px] h-[580px] transition-all duration-700 opacity-100 scale-100 translate-y-0" id="vis-1">
+                        <div class="w-full h-full bg-[#0A0A0A] rounded-[3rem] border-[8px] border-[#18181B] shadow-2xl relative overflow-hidden flex flex-col items-center">
+                            <div class="absolute top-0 w-32 h-6 bg-[#18181B] rounded-b-2xl z-10"></div>
+                            
+                            <div class="mt-16 w-24 h-24 rounded-full border-2 border-dashed border-primary flex items-center justify-center relative">
+                                <div class="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse"></div>
+                                <i data-lucide="scan-face" class="w-10 h-10 text-primary"></i>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <div class="text-white font-bold text-xl">14:02</div>
+                                <div class="text-subtle-dark text-xs mt-1">R. Funchal, 418 - SP</div>
+                            </div>
+                            
+                            <div class="mt-auto w-full p-6">
+                                <div class="w-full bg-primary text-white py-4 rounded-full flex justify-center items-center gap-2 font-bold shadow-glow">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Ponto Registrado
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mockup 2: Escalas -->
+                    <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-2">
+                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="font-bold text-black dark:text-white">Escala Semanal</div>
+                                <div class="flex gap-2">
+                                    <span class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded text-[10px] font-bold">1 Conflito</span>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex gap-3 items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400">AM</div>
+                                    <div class="flex-1 grid grid-cols-5 gap-2">
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 items-center">
+                                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-600 dark:text-orange-400">JS</div>
+                                    <div class="flex-1 grid grid-cols-5 gap-2">
+                                        <div class="h-8 bg-gray-100 dark:bg-[#151515] rounded-xl"></div>
+                                        <div class="h-8 bg-primary/20 rounded-xl border border-primary/50 relative overflow-hidden">
+                                            <div class="absolute inset-0 bg-primary/10 animate-pulse"></div>
+                                        </div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                        <div class="h-8 bg-green-500/20 rounded-xl border border-green-500/30"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mockup 3: Documentos -->
+                    <div class="absolute feature-visual w-full max-w-[500px] transition-all duration-700 opacity-0 scale-95 translate-y-12" id="vis-3">
+                        <div class="bg-white dark:bg-[#0A0A0A] rounded-2xl border border-borderline-light dark:border-borderline-dark shadow-2xl p-6">
+                            <div class="flex items-center justify-between border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                                <span class="font-bold text-black dark:text-white">Atestados Pendentes</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 rounded text-xs font-bold">Auditado</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-borderline-light dark:border-borderline-dark hover:border-primary/50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-500">
+                                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-black dark:text-white">Atestado_Medico_2dias.pdf</div>
+                                            <div class="text-xs text-subtle-light dark:text-subtle-dark">João Silva - Há 2 horas</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="w-8 h-8 rounded bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                        <button class="w-8 h-8 rounded bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center hover:scale-110 transition-transform"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. VAGAS COM IA (Technical / Editor UI) -->
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#050505] relative border-b border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[1200px] mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                
+                <div class="w-full lg:w-1/2 section-reveal">
+                    <div class="inline-flex px-3 py-1 bg-primary text-white rounded text-xs font-bold mb-6 tracking-widest uppercase">Módulo Exclusivo</div>
+                    <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">Recrutamento guiado por IA.</h2>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-8">
+                        Não perca horas lendo currículos. A Inteligência Artificial da Let's Work analisa todos os candidatos inscritos, faz a triagem técnica e devolve um <strong>Match Score</strong> preciso. Você só foca na entrevista.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 font-medium"><i data-lucide="check-circle-2" class="w-5 h-5 text-primary"></i> Criação de descrições automáticas</li>
+                        <li class="flex items-center gap-3 font-medium"><i data-lucide="check-circle-2" class="w-5 h-5 text-primary"></i> Leitura de PDF e extração de dados</li>
+                        <li class="flex items-center gap-3 font-medium"><i data-lucide="check-circle-2" class="w-5 h-5 text-primary"></i> Ranking dos melhores candidatos</li>
+                    </ul>
+                    <a href="https://www.letswork.com.br/gerenciamento-de-vagas/" class="font-bold text-primary flex items-center gap-2 group w-fit">
+                        Conhecer módulo de vagas <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <div class="w-full lg:w-1/2 section-reveal">
+                    <!-- Technical UI Mockup -->
+                    <div class="solid-card rounded-2xl p-6 shadow-xl relative overflow-hidden font-mono text-sm">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-borderline-light dark:border-borderline-dark">
+                            <span class="text-xs font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest">Pipeline: Coordenador de RH</span>
+                            <span class="flex items-center gap-2 text-primary text-xs"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> IA Processing</span>
+                        </div>
+
+                        <div class="space-y-3 relative z-10">
+                            <!-- Item 1 -->
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-bold font-sans">Juliana Costa</span>
+                                    <span class="text-xs text-subtle-light dark:text-subtle-dark">"Sólida experiência em DP e implantação de ponto."</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-green-500 font-bold block mb-1">98% Match</span>
+                                    <div class="w-20 h-1 bg-borderline-light dark:bg-borderline-dark rounded overflow-hidden"><div class="w-[98%] h-full bg-green-500"></div></div>
+                                </div>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-bold font-sans">Rafael Souza</span>
+                                    <span class="text-xs text-subtle-light dark:text-subtle-dark">"Conhecimento em folha de pagamento e benefícios."</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-amber-500 font-bold block mb-1">65% Match</span>
+                                    <div class="w-20 h-1 bg-borderline-light dark:bg-borderline-dark rounded overflow-hidden"><div class="w-[65%] h-full bg-amber-500"></div></div>
+                                </div>
+                            </div>
+                            <!-- Item 3 (Grayscale) -->
+                            <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between opacity-50 grayscale">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-bold font-sans">Carlos Mendes</span>
+                                    <span class="text-xs text-subtle-light dark:text-subtle-dark">"Analista de Marketing Pleno"</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-red-500 font-bold block mb-1">12% Match</span>
+                                    <div class="w-20 h-1 bg-borderline-light dark:bg-borderline-dark rounded overflow-hidden"><div class="w-[12%] h-full bg-red-500"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scanner Line Effect -->
+                        <div class="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-primary/10 to-transparent border-t border-primary animate-[scan_3s_ease-in-out_infinite] z-20 pointer-events-none"></div>
+                        <style>@keyframes scan { 0% { transform: translateY(0); } 50% { transform: translateY(200px); } 100% { transform: translateY(0); } }</style>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. GESTÃO DE FÉRIAS E PROCESSOS (Refatoração da Seção) -->
+    <section id="experiencias" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC]/50 dark:bg-[#0A0A0A]/50">
+        <div class="max-w-[1400px] mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <!-- Direita UI Customizada (Calendário / Férias) -->
+                <div class="order-2 lg:order-1 flex justify-center tilt-wrapper section-reveal">
+                    <div class="tilt-element w-full max-w-[550px] solid-card rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-end mb-8 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                                <div>
+                                    <h4 class="font-bold text-lg flex items-center gap-2"><i data-lucide="plane" class="w-5 h-5 text-blue-500"></i> Agendamento de Férias</h4>
+                                    <p class="text-xs text-subtle-light dark:text-subtle-dark">Visão Geral da Empresa</p>
+                                </div>
+                                <span class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full animate-pulse border border-primary/20">Atenção Necessária</span>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <!-- Colaborador 1 (Aprovado) -->
+                                <div class="bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-3 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500"></div>
+                                        <div>
+                                            <div class="text-sm font-bold">Roberto Alves</div>
+                                            <div class="text-xs text-subtle-light dark:text-subtle-dark">15 Nov - 30 Nov</div>
+                                        </div>
+                                    </div>
+                                    <div class="px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold rounded flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Aprovado</div>
+                                </div>
+                                
+                                <!-- Colaborador 2 (Conflito Simulado) -->
+                                <div class="bg-white dark:bg-[#111] border border-primary/40 shadow-[0_0_15px_rgba(255,45,45,0.1)] p-3 rounded-xl flex flex-col gap-3 relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-primary/5 animate-pulse"></div>
+                                    <div class="flex items-center justify-between relative z-10">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500"></div>
+                                            <div>
+                                                <div class="text-sm font-bold">Camila Souza</div>
+                                                <div class="text-xs text-primary font-bold">12 Nov - 02 Dez</div>
+                                            </div>
+                                        </div>
+                                        <div class="px-2 py-1 bg-red-500/10 text-primary text-xs font-bold rounded">Revisão</div>
+                                    </div>
+                                    <div class="text-xs bg-red-500/10 text-primary p-2 rounded relative z-10 flex gap-2">
+                                        <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+                                        <span>Conflito detectado: 3 pessoas do mesmo departamento em férias neste período.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 pt-4 border-t border-borderline-light dark:border-borderline-dark flex items-center justify-between text-xs text-subtle-light dark:text-subtle-dark">
+                                <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3 text-green-500"></i> Conformidade CLT mantida</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Textos e Benefícios -->
+                <div class="order-1 lg:order-2 section-reveal">
+                    <div class="inline-flex px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
+                        <i data-lucide="calendar-check" class="w-4 h-4"></i> Gestão de Férias e Folgas
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">Controle total, sem choques na operação.</h2>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark leading-relaxed mb-8">
+                        Na plataforma da Let's Work, você tem visibilidade global sobre o cronograma de descanso de todos os colaboradores. Nossa tecnologia alerta você antes de aprovar períodos que desfalcam um mesmo departamento.
+                    </p>
+                    
+                    <ul class="space-y-5 mb-8">
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 mt-1">
+                                <i data-lucide="bell-ring" class="w-4 h-4 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-black dark:text-white">Prevenção de Furos (Anti-Conflito)</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">O sistema acusa sobreposição de datas críticas entre profissionais essenciais.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center shrink-0 mt-1">
+                                <i data-lucide="calendar" class="w-4 h-4 text-blue-500"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-black dark:text-white">Aprovação em 1 Clique</strong>
+                                <span class="text-sm text-subtle-light dark:text-subtle-dark">Agende, valide ou recuse pedidos de folga que já atualizam o espelho de ponto instantaneamente.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. COMPLIANCE LEGAL E RESULTADOS -->
+    <section id="compliance" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark bg-[#F8FAFC] dark:bg-[#050505]">
+        <div class="max-w-[1200px] mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center mb-24">
+                <div class="section-reveal">
+                    <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-8">O RH 100% dentro da Lei.</h2>
+                    <p class="text-lg text-subtle-light dark:text-subtle-dark mb-8 leading-relaxed">Não assuma riscos com softwares paralelos. A Let's Work atende integralmente à legislação trabalhista e de proteção de dados brasileira.</p>
+                    
+                    <ul class="space-y-6">
+                        <li class="flex gap-4">
+                            <div class="mt-1"><i data-lucide="gavel" class="w-5 h-5 text-primary"></i></div>
+                            <div>
+                                <h4 class="font-bold text-lg">Portaria 671 MTP</h4>
+                                <p class="text-sm text-subtle-light dark:text-subtle-dark">Adequado para controle de ponto eletrônico válido judicialmente.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="mt-1"><i data-lucide="file-badge-2" class="w-5 h-5 text-primary"></i></div>
+                            <div>
+                                <h4 class="font-bold text-lg">Certificado ABNT (REP-P)</h4>
+                                <p class="text-sm text-subtle-light dark:text-subtle-dark">Software homologado. Registro Eletrônico de Ponto por Programa.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="mt-1"><i data-lucide="shield-check" class="w-5 h-5 text-primary"></i></div>
+                            <div>
+                                <h4 class="font-bold text-lg">Criptografia e LGPD</h4>
+                                <p class="text-sm text-subtle-light dark:text-subtle-dark">Dados sensíveis e biometria blindados na nuvem.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="section-reveal">
+                    <img src="https://www.letswork.com.br/wp-content/uploads/2023/06/header447.001_23-Certificado-01_08_25-Certificacao.jpg" alt="Certificado ABNT Let's Work" class="w-full rounded-2xl shadow-soft dark:shadow-[0_20px_40px_rgba(255,255,255,0.05)] border border-borderline-light dark:border-borderline-dark">
+                </div>
+            </div>
+
+            <!-- Dados de Impacto (Brutalist Grid) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-borderline-light dark:border-borderline-dark section-reveal">
+                <div class="border-r border-b border-borderline-light dark:border-borderline-dark p-8 text-center">
+                    <div class="text-4xl md:text-5xl font-display font-black text-primary mb-2">-25%</div>
+                    <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Processos Trabalhistas</div>
+                </div>
+                <div class="border-r border-b border-borderline-light dark:border-borderline-dark p-8 text-center">
+                    <div class="text-4xl md:text-5xl font-display font-black mb-2">+25%</div>
+                    <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Produtividade RH</div>
+                </div>
+                <div class="border-r border-b border-borderline-light dark:border-borderline-dark p-8 text-center">
+                    <div class="text-4xl md:text-5xl font-display font-black text-primary mb-2">-45%</div>
+                    <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Erros Horas Extras</div>
+                </div>
+                <div class="border-r border-b border-borderline-light dark:border-borderline-dark p-8 text-center">
+                    <div class="text-4xl md:text-5xl font-display font-black mb-2">98%</div>
+                    <div class="text-xs font-bold tracking-widest uppercase text-subtle-light dark:text-subtle-dark">Aprovação Sistema</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6.5. DEPOIMENTOS (Marquee 3D) -->
+    <section class="py-24 lg:py-32 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark overflow-hidden relative">
+        <div class="max-w-[1400px] mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 section-reveal">
+                <div class="inline-flex px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold mb-6 tracking-widest uppercase items-center gap-2">
+                    <i data-lucide="star" class="w-3 h-3 fill-current"></i> O que dizem sobre nós
+                </div>
+                <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Parcerias de longo prazo.</h2>
+                <p class="text-lg text-subtle-light dark:text-subtle-dark max-w-2xl mx-auto">Não vendemos apenas software. Entregamos tranquilidade operacional e atendimento incomparável.</p>
+            </div>
+        </div>
+
+        <div class="testimonial-container">
+            <div class="testimonial-track">
+                <!-- Group 1 -->
+                <div class="flex gap-8 px-4">
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa, facilitando as marcações de ponto que nos proporcionou um controle muito mais eficaz e efetivo da jornada."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">L</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Luciene</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente. Por termos várias lojas, a flexibilidade é essencial e o app funciona em todos os formatos com extrema segurança."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">K</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Kaue</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte de vocês nunca deixa a empresa sem resposta. Começamos a comparar com outros softwares e o nível da Let's Work é top."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">D</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Dani (CEAL)</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 2 (Duplicate for Infinite Loop) -->
+                <div class="flex gap-8 px-4" aria-hidden="true">
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Recomendo a todos. A Let's Work é um sistema claro e objetivo. Impactou positivamente na nossa empresa, facilitando as marcações de ponto que nos proporcionou um controle muito mais eficaz e efetivo da jornada."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">L</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Luciene</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Liderança de Gestão</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Estou há 2 anos com a Let's Work e só tenho elogios! É um sistema simples, didático e muito eficiente. Por termos várias lojas, a flexibilidade é essencial e o app funciona em todos os formatos com extrema segurança."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">K</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Kaue</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão de Múltiplas Unidades</p></div>
+                        </div>
+                    </div>
+
+                    <div class="solid-card p-10 rounded-[2rem] w-[450px] shrink-0 flex flex-col shadow-soft hover:border-primary transition-colors">
+                        <div class="flex items-center gap-1 text-amber-500 mb-6"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                        <p class="text-black dark:text-white text-lg font-medium leading-relaxed mb-8 flex-1 italic">"Agradeçam ao Jean da Implantação, ele tem sido um parceiro incrível para nós! O suporte de vocês nunca deixa a empresa sem resposta. Começamos a comparar com outros softwares e o nível da Let's Work é top."</p>
+                        <div class="flex items-center gap-4 pt-6 border-t border-borderline-light dark:border-borderline-dark">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary text-lg">D</div>
+                            <div><h4 class="font-bold text-black dark:text-white">Dani (CEAL)</h4><p class="text-sm text-subtle-light dark:text-subtle-dark">Gestão e Suporte Operacional</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. PLANOS (Clean Pricing) -->
+    <section id="planos" class="py-24 lg:py-32 bg-white dark:bg-[#000] border-b border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[1200px] mx-auto px-6">
+            <div class="text-center mb-16 section-reveal">
+                <h2 class="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">Investimento escalável.</h2>
+                <p class="text-lg text-subtle-light dark:text-subtle-dark mb-8">Planos claros. Sem taxas de setup ocultas.</p>
+                
+                <!-- Toggle Mensal/Anual Funcional -->
+                <div class="inline-flex items-center gap-1 bg-gray-100 dark:bg-[#111] border border-borderline-light dark:border-borderline-dark p-1.5 rounded-full shadow-inner relative">
+                    <div id="pricing-toggle-bg" class="absolute w-[100px] h-[36px] bg-black dark:bg-white rounded-full shadow-md transition-transform duration-300 left-1.5"></div>
+                    
+                    <button id="btn-mensal" class="w-[100px] py-2 text-sm font-bold transition-colors relative z-10 text-white dark:text-black">Mensal</button>
+                    <button id="btn-anual" class="w-[140px] py-2 text-sm font-bold transition-colors relative z-10 text-subtle-light dark:text-subtle-dark flex items-center justify-center gap-1">
+                        Anual 
+                        <span class="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-black">20% Off</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 items-stretch">
+                <!-- Plano 1 -->
+                <div class="solid-card p-8 rounded-2xl flex flex-col section-reveal">
+                    <h3 class="text-xl font-bold mb-1">Time Ágil 10</h3>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Até 10 Vidas</p>
+                    <div class="mb-8 flex items-baseline gap-1">
+                        <span class="text-4xl font-display font-black price-val" data-mensal="R$89" data-anual="R$71">R$89</span>
+                        <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
+                    </div>
+                    <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Testar Grátis</button>
+                    <ul class="space-y-4 text-sm font-medium flex-1">
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Reconhecimento Facial</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Ponto Offline</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Geolocalização GPS</li>
+                    </ul>
+                </div>
+
+                <!-- Plano 2 (Destaque) -->
+                <div class="solid-card p-8 rounded-2xl border-primary relative flex flex-col section-reveal md:-translate-y-4 shadow-soft">
+                    <div class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-widest">Mais Adotado</div>
+                    <h3 class="text-2xl font-bold mb-1">Equipe Dinâmica 50</h3>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Até 50 Vidas</p>
+                    <div class="mb-8 flex items-baseline gap-1">
+                        <span class="text-5xl font-display font-black price-val" data-mensal="R$299" data-anual="R$239">R$299</span>
+                        <span class="text-subtle-light dark:text-subtle-dark font-medium">,90/mês</span>
+                    </div>
+                    <button class="btn-primary w-full py-3 rounded-full text-sm font-bold mb-8">Assinar Agora</button>
+                    <ul class="space-y-4 text-sm font-bold flex-1">
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Ponto via WhatsApp</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Gestão de Escalas Completa</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Relatórios para Contabilidade</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-primary"></i> Suporte Humanizado e Dedicado</li>
+                    </ul>
+                </div>
+
+                <!-- Plano 3 -->
+                <div class="solid-card p-8 rounded-2xl flex flex-col section-reveal">
+                    <h3 class="text-xl font-bold mb-1">Enterprise Scale</h3>
+                    <p class="text-xs text-subtle-light dark:text-subtle-dark uppercase tracking-widest mb-6">Acima de 50 Vidas</p>
+                    <div class="mb-8 flex items-baseline gap-1">
+                        <span class="text-4xl font-display font-black">Custom</span>
+                    </div>
+                    <button class="w-full py-3 rounded-full text-sm font-bold border border-borderline-light dark:border-borderline-dark hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-8">Falar com Vendas</button>
+                    <ul class="space-y-4 text-sm font-medium flex-1">
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Módulos Ilimitados</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Gestão de Vagas com IA</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Automação VittorIA (Chat)</li>
+                        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Implantação Assistida</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7.5 FAQ SECTION (Quebra de Objeções) -->
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] border-b border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[800px] mx-auto px-6">
+            <div class="text-center mb-16 section-reveal">
+                <h2 class="text-3xl md:text-5xl font-display font-bold tracking-tight mb-4">Perguntas Frequentes.</h2>
+                <p class="text-subtle-light dark:text-subtle-dark text-lg">Dúvidas comuns de quem já migrou para a Let's Work.</p>
+            </div>
+            
+            <div class="space-y-4 section-reveal">
+                <!-- FAQ Item 1 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        O aplicativo funciona sem internet (offline)?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        Sim! O colaborador pode bater o ponto normalmente mesmo se estiver em áreas sem cobertura (como em construções isoladas). O app armazena a batida com geolocalização e criptografia e sincroniza com o painel assim que detectar rede.
+                    </div>
+                </details>
+                
+                <!-- FAQ Item 2 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        É realmente aceito pelo Ministério do Trabalho?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        100%. A Let's Work atende integralmente à Portaria 671 (MTP) e atua sob o modelo REP-P. Além disso, o software possui a rigorosa certificação da ABNT que atesta a inviolabilidade dos registros.
+                    </div>
+                </details>
+                
+                <!-- FAQ Item 3 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        Como funciona o Suporte se eu tiver dúvidas?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        Ao contrário de muitos concorrentes, nós temos suporte humanizado multicanal e uma implantação assistida passo a passo. Você pode acionar nossa equipe diretamente via WhatsApp para resolver qualquer configuração ou dúvida da contabilidade.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 4 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        E se o funcionário bater ponto pelo celular de outro?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        O aplicativo possui mecanismos antifraude avançados, como reconhecimento facial e vinculação do registro ao identificador único do aparelho. Dessa forma, bloqueamos e alertamos sobre qualquer tentativa de registro em dispositivos não autorizados.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 5 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        A implantação é demorada?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        De forma alguma. O sistema é 100% em nuvem e nossa equipe de Implantação Assistida guia você passo a passo. A maior parte dos nossos clientes já começa a operar o controle de ponto no mesmo dia da contratação.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 6 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        O sistema integra com a minha folha de pagamento / contabilidade?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        Sim! Exportamos arquivos nos padrões AFD e AFDT exigidos por lei, e geramos relatórios prontos que se integram facilmente com os principais sistemas de folha de pagamento e escritórios de contabilidade do mercado.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 7 -->
+                <details class="group glass p-6 rounded-2xl cursor-pointer marker:content-['']">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none">
+                        Os funcionários terão dificuldade para usar?
+                        <span class="transition group-open:rotate-180">
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </span>
+                    </summary>
+                    <div class="text-subtle-light dark:text-subtle-dark mt-4 leading-relaxed font-medium">
+                        O aplicativo foi desenhado com foco absoluto em usabilidade. O registro é feito com um único toque na tela. Para perfis com menos familiaridade com tecnologia, oferecemos tutoriais simples e a opção de bater ponto em um tablet fixo (totem) na empresa.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. CTA FINAL (Brutalist Banner) -->
+    <section class="py-24 lg:py-32 bg-[#F8FAFC] dark:bg-[#0A0A0A] text-center border-b border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[800px] mx-auto px-6 section-reveal">
+            <h2 class="text-5xl md:text-7xl font-display font-black tracking-tighter mb-8">
+                Sua empresa merece <br/> um RH moderno.
+            </h2>
+            <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark mb-10">
+                Ponto geolocalizado, escalas arrastáveis e segurança jurídica em um só clique.
+            </p>
+            <button class="bg-black dark:bg-white text-white dark:text-black px-12 py-5 rounded-full font-bold text-lg hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-300 shadow-soft">
+                Agendar Demonstração Gratuita
+            </button>
+            <p class="text-xs text-subtle-light dark:text-subtle-dark mt-6 font-bold tracking-widest uppercase"><i data-lucide="shield-check" class="inline w-3 h-3 mr-1 mb-0.5"></i> Suporte Humanizado Garantido</p>
+        </div>
+    </section>
+
+    <!-- 9. FOOTER -->
+    <footer class="pt-20 pb-10 bg-white dark:bg-[#000] border-t border-borderline-light dark:border-borderline-dark">
+        <div class="max-w-[1400px] mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
+                <!-- 1) Logo & About & Social -->
+                <div class="flex flex-col gap-6">
+                    <img src="https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp" alt="Let's Work Logo" class="h-10 object-contain dark:brightness-0 dark:invert transition-all self-start">
+                    <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed max-w-sm">
+                        A solução definitiva para controle de jornada, produtividade e gestão de equipe em um só lugar.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="https://www.instagram.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="instagram" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.linkedin.com/company/letsworkapp/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="linkedin" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.facebook.com/letsworkbr/" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="facebook" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                        <a href="https://www.youtube.com/channel/UCPfqYcFei0THbnNWfHjyIug" target="_blank" class="w-10 h-10 rounded-full border border-borderline-light dark:border-borderline-dark flex items-center justify-center text-black dark:text-white hover:bg-primary hover:text-white hover:border-primary transition-all group"><i data-lucide="youtube" class="w-4 h-4 group-hover:scale-110 transition-transform"></i></a>
+                    </div>
+                </div>
+
+                <!-- 2) Soluções -->
+                <div>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Soluções</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/caracteristicas-do-aplicativo-de-ponto/como-funciona/" class="hover:text-primary transition-colors">Ponto Eletrônico</a></li>
+                        <li><a href="https://www.letswork.com.br/rastreamento/" class="hover:text-primary transition-colors">Rastreamento de Rotas</a></li>
+                        <li><a href="https://www.letswork.com.br/gestao-de-documentos/" class="hover:text-primary transition-colors">Gestão de Documentos</a></li>
+                        <li><a href="https://www.letswork.com.br/comunicacao-de-equipe/" class="hover:text-primary transition-colors">Comunicação de Equipe</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-ferias/" class="hover:text-primary transition-colors">Gerenciamento de Férias</a></li>
+                        <li><a href="https://www.letswork.com.br/gerenciamento-de-projetos/" class="hover:text-primary transition-colors">Gestão de Processos</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 3) Segmentos -->
+                <div>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Segmentos</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/hospitais-clinicas-e-laboratorios/" class="hover:text-primary transition-colors">Hospitais & Clínicas</a></li>
+                        <li><a href="https://www.letswork.com.br/logistica-e-transporte/" class="hover:text-primary transition-colors">Logística & Entregas</a></li>
+                        <li><a href="https://www.letswork.com.br/empresas-de-seguranca/" class="hover:text-primary transition-colors">Empresas de Segurança</a></li>
+                        <li><a href="https://www.letswork.com.br/equipe-de-limpeza-e-manutencao/" class="hover:text-primary transition-colors">Equipes de Limpeza</a></li>
+                        <li><a href="https://www.letswork.com.br/varejo-e-restaurantes/" class="hover:text-primary transition-colors">Lojas de Varejo</a></li>
+                        <li><a href="https://www.letswork.com.br/construcao-civil/" class="hover:text-primary transition-colors">Obras & Construção</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 4) A Empresa -->
+                <div>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">A Empresa</h4>
+                    <ul class="space-y-4 text-sm text-subtle-light dark:text-subtle-dark font-medium">
+                        <li><a href="https://www.letswork.com.br/sobre-o-letswork/" class="hover:text-primary transition-colors">Sobre a Let's Work</a></li>
+                        <li><a href="https://www.letswork.com.br/seja-nosso-parceiro/" class="hover:text-primary transition-colors">Parceiros</a></li>
+                        <li><a href="#planos" class="hover:text-primary transition-colors">Planos e Preços</a></li>
+                        <li><a href="https://www.letswork.com.br/downloads/" class="hover:text-primary transition-colors">Downloads App</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 5) Contato -->
+                <div>
+                    <h4 class="font-bold mb-6 text-black dark:text-white uppercase tracking-widest text-xs">Contato Rápido</h4>
+                    <ul class="space-y-5 text-sm text-subtle-light dark:text-subtle-dark">
+                        <li>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="phone" class="w-3 h-3 text-primary"></i> Comercial</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511934670924" target="_blank" class="hover:text-primary transition-colors block font-medium">11 93467-0924</a>
+                        </li>
+                        <li>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="wrench" class="w-3 h-3 text-primary"></i> Suporte Técnico</span>
+                            <a href="https://web.whatsapp.com/send?phone=5511971163576" target="_blank" class="hover:text-primary transition-colors block font-medium">11 97116-3576</a>
+                        </li>
+                        <li>
+                            <span class="flex items-center gap-2 font-bold text-black dark:text-white text-xs mb-1 uppercase tracking-wider"><i data-lucide="rocket" class="w-3 h-3 text-primary"></i> Implantação</span>
+                            <a href="https://api.whatsapp.com/send?phone=5511998514728" target="_blank" class="hover:text-primary transition-colors block font-medium">11 99851-4728</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Line -->
+            <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-borderline-light dark:border-borderline-dark text-xs text-subtle-light dark:text-subtle-dark font-medium">
+                <p>&copy; 2026 LET'S WORK TECNOLOGIA LTDA. CNPJ: 45.992.151/0001-01. Todos os direitos reservados.</p>
+                <div class="flex gap-6 mt-4 md:mt-0">
+                    <a href="https://www.letswork.com.br/politica-de-privacidade/" class="hover:text-primary transition-colors">Política de Privacidade</a>
+                    <a href="https://www.letswork.com.br/termos-de-uso/" class="hover:text-primary transition-colors">Termos de Uso</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS CORE: GSAP & Interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+    <script>
+        lucide.createIcons();
+
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcon() {
+            if (document.documentElement.classList.contains('dark')) {
+                darkIcon.classList.remove('hidden'); lightIcon.classList.add('hidden');
+            } else {
+                lightIcon.classList.remove('hidden'); darkIcon.classList.add('hidden');
+            }
+        }
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcon();
+        }
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        updateIcon();
+
+        // --- NAVBAR SCROLL ---
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-sm');
+                nav.classList.replace('border-transparent', 'border-borderline-light');
+                if(document.documentElement.classList.contains('dark')){
+                    nav.classList.replace('border-borderline-light', 'border-borderline-dark');
+                }
+            } else {
+                nav.classList.remove('shadow-sm', 'border-borderline-light', 'border-borderline-dark');
+                nav.classList.add('border-transparent');
+            }
+        }, { passive: true });
+
+        // PRICING TOGGLE LOGIC
+        const pricingToggle = document.getElementById('pricing-toggle');
+        const btnMensal = document.getElementById('btn-mensal');
+        const btnAnual = document.getElementById('btn-anual');
+        const pricingBg = document.getElementById('pricing-bg');
+        const priceVals = document.querySelectorAll('.price-val');
+        let isAnnual = false;
+
+        if(pricingToggle) {
+            pricingToggle.addEventListener('click', () => {
+                isAnnual = !isAnnual;
+                if(isAnnual) {
+                    pricingBg.style.transform = "translateX(100px)";
+                    pricingBg.style.width = "140px";
+                    btnMensal.classList.remove("text-white", "dark:text-black");
+                    btnMensal.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                    btnAnual.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                    btnAnual.classList.add("text-white", "dark:text-black");
+                    priceVals.forEach(el => {
+                        el.innerText = el.getAttribute("data-annual");
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    });
+                } else {
+                    pricingBg.style.transform = "translateX(0)";
+                    pricingBg.style.width = "100px";
+                    btnAnual.classList.remove("text-white", "dark:text-black");
+                    btnAnual.classList.add("text-subtle-light", "dark:text-subtle-dark");
+                    btnMensal.classList.remove("text-subtle-light", "dark:text-subtle-dark");
+                    btnMensal.classList.add("text-white", "dark:text-black");
+                    priceVals.forEach(el => {
+                        el.innerText = el.getAttribute("data-monthly");
+                        gsap.fromTo(el, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.3});
+                    });
+                }
+            });
+        }
+
+        // --- GSAP ANIMATIONS & INTERACTIONS ---
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+        let mm = gsap.matchMedia();
+
+        gsap.utils.toArray('.section-reveal').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                y: 30, opacity: 0, duration: 0.8, ease: "power3.out"
+            });
+        });
+
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            gsap.to(counter, {
+                scrollTrigger: { trigger: counter, start: "top 85%", once: true },
+                innerHTML: counter.getAttribute('data-val'),
+                duration: 2, snap: { innerHTML: 1 }, ease: "power2.out"
+            });
+        });
+
+        mm.add("(min-width: 1024px)", () => {
+            // Hero
+            const heroTl = gsap.timeline();
+            heroTl.from(".hero-reveal", { y: 20, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out", delay: 0.1 })
+                  .from(".hero-dash", { x: 50, opacity: 0, duration: 1.5, ease: "power3.out" }, "-=0.8")
+                  .from(".hero-mobile", { y: 50, x: -30, opacity: 0, duration: 1.5, ease: "back.out(1.2)" }, "-=1.2");
+
+            // Scroll Storytelling Animado via GSAP nativo
+            const stepTexts = gsap.utils.toArray('.step-text');
+            const visuals = gsap.utils.toArray('.feature-visual');
+
+            ScrollTrigger.create({
+                trigger: "#solucoes",
+                start: "top top",
+                end: "bottom bottom",
+                pin: ".lg\\:flex.w-1\\/2.h-screen.sticky",
+                pinSpacing: false
+            });
+
+            stepTexts.forEach((text, i) => {
+                const innerCard = text.querySelector('div');
+                ScrollTrigger.create({
+                    trigger: text,
+                    start: "top center",
+                    end: "bottom center",
+                    onEnter: () => activateStep(i),
+                    onEnterBack: () => activateStep(i),
+                });
+            });
+
+            function activateStep(index) {
+                stepTexts.forEach((t, i) => {
+                    const card = t.querySelector('div');
+                    if (i === index) {
+                        card.classList.add('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft');
+                        card.classList.remove('bg-transparent', 'border-transparent', 'opacity-50');
+                    } else {
+                        card.classList.remove('bg-white', 'dark:bg-[#0A0A0A]', 'shadow-soft');
+                        card.classList.add('bg-transparent', 'border-transparent', 'opacity-50');
+                    }
+                });
+
+                visuals.forEach((vis, i) => {
+                    if (i === index) {
+                        vis.style.opacity = "1";
+                        vis.style.transform = "translateY(0) scale(1)";
+                        vis.style.zIndex = "10";
+                    } else if (i < index) {
+                        vis.style.opacity = "0";
+                        vis.style.transform = "translateY(-40px) scale(0.95)";
+                        vis.style.zIndex = "1";
+                    } else {
+                        vis.style.opacity = "0";
+                        vis.style.transform = "translateY(40px) scale(0.95)";
+                        vis.style.zIndex = "1";
+                    }
+                });
+            }
+
+            // VittorIA Chat Sequence
+            if(document.querySelector(".chat-phone")) {
+                const chatTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: ".chat-phone",
+                        start: "top 60%",
+                        once: true
+                    }
+                });
+
+                chatTl.to(".chat-msg-user-1", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" })
+                      .to(".chat-typing-1", { opacity: 1, y: 0, duration: 0.3 }, "+=0.5")
+                      .to(".chat-typing-1", { display: "none", duration: 0 }, "+=1.5")
+                      .set(".chat-msg-bot-1", { display: "block" })
+                      .fromTo(".chat-msg-bot-1", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
+                      .set(".chat-msg-bot-2", { display: "block" }, "+=0.8")
+                      .fromTo(".chat-msg-bot-2", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
+                      .set(".chat-msg-user-2", { display: "block" }, "+=1.2")
+                      .fromTo(".chat-msg-user-2", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" })
+                      .set(".chat-typing-2", { display: "flex" }, "+=0.5")
+                      .fromTo(".chat-typing-2", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3 })
+                      .to(".chat-typing-2", { display: "none", duration: 0 }, "+=1.5")
+                      .set(".chat-msg-bot-3", { display: "block" })
+                      .fromTo(".chat-msg-bot-3", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" })
+                      .set(".chat-system-msg", { display: "block" }, "+=0.5")
+                      .fromTo(".chat-system-msg", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.5)" })
+                      .to("#chat-messages-container", { scrollTo: "max", duration: 0.5, ease: "power2.out" });
+            }
+        });
+    </script>
+</body>
+</html>
