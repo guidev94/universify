@@ -1140,51 +1140,18 @@
         </div>
     </section>
 
-    <!-- 5. GESTÃO DE FÉRIAS E PROCESSOS (Refatoração da Seção) -->
-    <section id="experiencias" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden">
+    <!-- 5. GESTÃO DE FÉRIAS E PROCESSOS (Refatoração da Seção - Layout Alternado Direita para Esquerda) -->
+    <section id="experiencias" class="py-24 lg:py-32 border-b border-borderline-light dark:border-borderline-dark relative overflow-hidden bg-[#FAFAFA] dark:bg-[#050505]">
         <!-- Glow effects -->
-        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+        <div class="absolute top-1/2 left-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none -translate-y-1/2 -translate-x-1/3"></div>
 
         <div class="max-w-[1400px] mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row gap-20 items-center">
-                <!-- Text Content - Asymmetric Left -->
-                <div class="w-full lg:w-[45%] section-reveal">
-                    <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-surface-light dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Gestão de Férias e Folgas
-                    </div>
-                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter mb-8 leading-[1.05] text-black dark:text-white">
-                        Controle total, sem <span class="text-primary relative inline-block">choques<div class="absolute bottom-1 md:bottom-2 left-0 w-full h-[8px] md:h-[12px] bg-primary/20 -z-10"></div></span> na operação.
-                    </h2>
-                    <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark leading-relaxed mb-10 font-medium">
-                        Na plataforma da Let's Work, você tem visibilidade global sobre o cronograma de descanso de todos os colaboradores. Nossa tecnologia alerta você antes de aprovar períodos que desfalcam um mesmo departamento.
-                    </p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex items-start gap-4 p-4 rounded-sm bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark shadow-[4px_4px_0px_rgba(0,0,0,0.05)] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.05)]">
-                            <div class="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-sm flex items-center justify-center shrink-0">
-                                <i data-lucide="shield-alert" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Prevenção de Furos (Anti-Conflito)</h4>
-                                <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">O sistema acusa sobreposição de datas críticas entre profissionais essenciais.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-4 p-4 rounded-sm bg-surface-light dark:bg-[#111] border border-borderline-light dark:border-borderline-dark shadow-[4px_4px_0px_rgba(0,0,0,0.05)] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.05)]">
-                            <div class="w-12 h-12 bg-primary/10 text-primary rounded-sm flex items-center justify-center shrink-0">
-                                <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Aprovação em 1 Clique</h4>
-                                <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">Agende, valide ou recuse pedidos de folga que já atualizam o espelho de ponto instantaneamente.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Custom UI Dashboard - Minimalist Table View -->
-                <div class="w-full lg:w-[55%] section-reveal flex justify-center lg:justify-end">
-                    <div class="w-full max-w-[700px] bg-transparent rounded-2xl relative overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-soft">
+            <!-- INVERTED LAYOUT: Mockup Left, Text Right -->
+            <div class="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
+                
+                <!-- Custom UI Dashboard - Minimalist Table View (Now on LEFT) -->
+                <div class="w-full lg:w-1/2 section-reveal order-2 lg:order-1">
+                    <div class="w-full max-w-[700px] bg-white dark:bg-[#0A0A0A] rounded-2xl relative overflow-hidden border border-borderline-light dark:border-borderline-dark shadow-[0_30px_60px_rgba(0,0,0,0.1)] transition-transform hover:-translate-y-2 duration-500">
                         
                         <!-- Top Navigation Mock -->
                         <div class="bg-transparent px-6 py-5 border-b border-borderline-light dark:border-borderline-dark flex justify-between items-center">
@@ -1228,38 +1195,69 @@
                             <!-- Row 2 (Conflict) -->
                             <div class="grid grid-cols-12 gap-4 items-start py-3 mt-2 border-t border-borderline-light dark:border-borderline-dark pt-5">
                                 <div class="col-span-5 flex items-center gap-3 mt-1">
-                                    <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs">CS</div>
+                                    <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#111] border border-borderline-light dark:border-borderline-dark flex items-center justify-center font-bold text-xs text-black dark:text-white">CS</div>
                                     <div class="font-bold text-sm text-black dark:text-white">Camila Souza</div>
                                 </div>
-                                <div class="col-span-4 mt-1">
-                                    <div class="text-sm font-bold text-primary">12 Nov — 02 Dez</div>
-                                </div>
+                                <div class="col-span-4 text-sm font-medium text-subtle-light dark:text-subtle-dark mt-1">12 Nov — 02 Dez</div>
                                 <div class="col-span-3 flex justify-end mt-1">
-                                    <div class="px-2 py-1 bg-red-100 text-primary dark:bg-primary/20 dark:text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-red-200 dark:border-primary/30">
+                                    <div class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-amber-200 dark:border-amber-800">
                                         Revisão
                                     </div>
                                 </div>
-                                <!-- Error Dropdown -->
-                                <div class="col-span-12 mt-3">
-                                    <div class="bg-primary/5 dark:bg-primary/10 border border-primary/20 p-4 flex items-start gap-3 rounded-xl">
-                                        <i data-lucide="alert-triangle" class="w-5 h-5 text-primary shrink-0 mt-0.5"></i>
-                                        <p class="text-sm text-black/80 dark:text-white/80 leading-relaxed font-medium">
-                                            <strong class="text-primary uppercase tracking-wider text-[10px] block mb-1">Risco Operacional</strong>
-                                            Limitação atingida: 3 pessoas do departamento <em>"Vendas Internas"</em> estarão em férias neste mesmo período.
-                                        </p>
+                                
+                                <!-- Alert Banner within Row -->
+                                <div class="col-span-12 mt-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/50 p-4 rounded-xl flex gap-3 items-start relative overflow-hidden">
+                                    <div class="w-1 bg-amber-400 absolute left-0 top-0 bottom-0"></div>
+                                    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <span class="text-xs font-bold text-amber-800 dark:text-amber-400 block mb-1 uppercase tracking-widest">Risco Operacional</span>
+                                        <span class="text-sm font-medium text-amber-700 dark:text-amber-500">Limitação atingida: 3 pessoas do departamento "Vendas Internas" estarão em férias neste mesmo período.</span>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
-
-                        <!-- Footer Actions -->
-                        <div class="bg-transparent px-6 py-4 border-t border-borderline-light dark:border-borderline-dark flex justify-between items-center">
-                            <span class="flex items-center gap-2 text-[10px] font-bold text-subtle-light dark:text-subtle-dark uppercase tracking-widest"><i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i> Conformidade Legal Mantida</span>
-                            <button class="px-5 py-2 bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-primary dark:hover:bg-primary dark:hover:text-white hover:text-white transition-colors">Gerenciar</button>
-                        </div>
                     </div>
                 </div>
+
+                <!-- Text Content - Asymmetric Right (Now on RIGHT) -->
+                <div class="w-full lg:w-1/2 section-reveal order-1 lg:order-2 pl-0 lg:pl-10">
+                    <div class="inline-flex px-3 py-1.5 rounded-sm border border-borderline-light dark:border-borderline-dark bg-white dark:bg-[#111] text-xs font-bold mb-6 uppercase tracking-widest text-subtle-light dark:text-subtle-dark shadow-[2px_2px_0px_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)] items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span> Gestão de Férias e Folgas
+                    </div>
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tighter mb-8 leading-[1.05] text-black dark:text-white">
+                        Controle total, sem <span class="text-primary relative inline-block">choques<div class="absolute bottom-1 md:bottom-2 left-0 w-full h-[8px] md:h-[12px] bg-primary/20 -z-10"></div></span> na operação.
+                    </h2>
+                    <p class="text-lg md:text-xl text-subtle-light dark:text-subtle-dark leading-relaxed mb-10 font-medium">
+                        Na plataforma da Let's Work, você tem visibilidade global sobre o cronograma de descanso de todos os colaboradores. Nossa tecnologia alerta você antes de aprovar períodos que desfalcam um mesmo departamento.
+                    </p>
+                    
+                    <div class="space-y-6 mb-10">
+                        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark shadow-sm">
+                            <div class="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-xl flex items-center justify-center shrink-0">
+                                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Prevenção de Furos (Anti-Conflito)</h4>
+                                <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">O sistema acusa sobreposição de datas críticas entre profissionais essenciais.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-[#111] border border-borderline-light dark:border-borderline-dark shadow-sm">
+                            <div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
+                                <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Aprovação em 1 Clique</h4>
+                                <p class="text-subtle-light dark:text-subtle-dark text-sm leading-relaxed">Agende, valide ou recuse pedidos de folga que já atualizam o espelho de ponto instantaneamente.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="gerenciamento-de-ferias.html" class="font-bold text-primary flex items-center gap-2 group w-fit">
+                        Conhecer módulo de férias <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
             </div>
         </div>
     </section>
