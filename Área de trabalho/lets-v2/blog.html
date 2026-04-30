@@ -678,17 +678,17 @@
 
         gsap.utils.toArray('.section-reveal').forEach(elem => {
             gsap.from(elem, {
-                scrollTrigger: { trigger: elem, start: "top 85%" },
-                y: 30, opacity: 0, duration: 0.8, ease: "power3.out"
+                scrollTrigger: { trigger: elem, start: "top 95%", once: true },
+                y: 18, opacity: 0, duration: 0.45, ease: "power2.out"
             });
         });
 
         const counters = document.querySelectorAll('.counter');
         counters.forEach(counter => {
             gsap.to(counter, {
-                scrollTrigger: { trigger: counter, start: "top 85%", once: true },
+                scrollTrigger: { trigger: counter, start: "top 95%", once: true },
                 innerHTML: counter.getAttribute('data-val'),
-                duration: 2, snap: { innerHTML: 1 }, ease: "power2.out"
+                duration: 1.2, snap: { innerHTML: 1 }, ease: "power2.out"
             });
         });
 
