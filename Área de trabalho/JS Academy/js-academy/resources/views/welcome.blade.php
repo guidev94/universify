@@ -86,7 +86,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         <div class="grid grid-cols-2 sm:flex gap-4 w-full md:w-auto">
              <div class="stat-card bento-card p-4 min-w-[140px] border-emerald-500/20 shadow-lg shadow-emerald-500/5 group hover:border-emerald-500/40 transition-all opacity-100">
                 <div class="flex justify-between items-start">
-                    <span class="text-2xl">🎯</span>
+                    <span class="w-6 h-6 text-emerald-500"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
                     <span class="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest">+10% XP</span>
                 </div>
                 <div class="mt-4">
@@ -97,7 +97,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
              <div class="stat-card bento-card p-4 min-w-[140px] border-orange-500/20 shadow-lg shadow-orange-500/5 group hover:border-orange-500/40 transition-all opacity-100">
                 <div class="flex justify-between items-start">
-                    <span class="streak-fire text-2xl">🔥</span>
+                    <span class="streak-fire w-6 h-6 text-orange-500"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M13.5 2c0 0 1.5 3 1.5 5.5 0 1.5-.5 2.5-1.5 3 .5-2-1-3-1-3-1 2-2 4.5-2 6.5 0 2 1 3.5 2.5 4.5-.5-1-.5-2 0-3 1 1.5 2 2.5 2 4 0 2-1.5 3.5-3.5 3.5S8 21.5 8 19.5c0-3 1.5-5.5 4-7 0 1.5.5 2.5 1.5 3C12 14 12 12.5 12 10.5c0-3 1.5-8.5 1.5-8.5z"/></svg></span>
                 </div>
                 <div class="mt-4">
                     <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Ofensiva</span>
@@ -340,7 +340,8 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
                 <!-- Botão de Validação -->
                 <button id="validate-btn" class="w-full py-5 bg-white text-zinc-950 rounded-2xl font-black text-base uppercase tracking-widest hover:bg-yellow-400 transition-all active:scale-95 shadow-2xl shadow-white/5 border-b-4 border-zinc-300 hover:border-yellow-600">
-                    Validar Código 🚀
+                    Validar Código
+                    <svg class="w-4 h-4 ml-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </button>
             </div>
         </div>
@@ -422,7 +423,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 <div id="share-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-md">
     <div class="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-[3rem] p-10 text-center shadow-2xl">
         <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-4xl text-green-500">🎉</span>
+            <svg class="w-10 h-10 text-green-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <h3 class="text-3xl font-black text-white uppercase italic tracking-tighter">Parabéns!</h3>
         <p class="text-zinc-400 mt-4 leading-relaxed text-sm">Você concluiu <br><span id="share-lesson-text" class="text-white font-bold text-lg"></span> <br>e faturou <span id="share-xp-text" class="text-yellow-500 font-bold"></span> XP!</p>

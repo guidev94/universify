@@ -97,7 +97,7 @@
                                     {{ mb_substr($rankedUser->name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <p class="text-sm font-black text-white">{{ $rankedUser->name }} @if($isCurrentUser)<span class="text-[8px] text-yellow-500 font-bold ml-1 uppercase tracking-widest">você</span>@endif</p>
+                                    <a href="{{ route('user.profile', $rankedUser->id) }}" class="text-sm font-black text-white hover:text-yellow-400 transition-colors">{{ $rankedUser->name }}</a> @if($isCurrentUser)<span class="text-[8px] text-yellow-500 font-bold ml-1 uppercase tracking-widest">você</span>@endif
                                     <p class="text-[10px] text-zinc-600 font-mono">Nível {{ $rankedUser->level ?? 1 }}</p>
                                 </div>
                             </div>

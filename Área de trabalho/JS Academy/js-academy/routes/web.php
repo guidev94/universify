@@ -54,4 +54,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/user/{id}', function ($id) {
+    $profileUser = \App\Models\User::findOrFail($id);
+    $completedCount = $profileUser->progress()->where('status', 'completed')->count();
+    $totalLessons = \App\Models\Lesson::count();
+    $percent = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
+    $rankingPosition = \App\Models\User::where('xp', '>', $profileUser->xp)->count() + 1;
+    $badges = $profileUser->badges()->with('track')->get();
+    return view('user.profile', compact('profileUser', 'completedCount', 'totalLessons', 'percent', 'rankingPosition', 'badges'));
+})->name('user.profile');
+
 require __DIR__.'/auth.php';
