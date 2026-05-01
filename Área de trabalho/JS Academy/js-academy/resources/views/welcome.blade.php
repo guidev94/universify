@@ -1,21 +1,90 @@
 @extends('layouts.app')
 
+@section('head')
+<script>
+// Registrar ScrollTrigger do GSAP — importado no bundle via app.js
+if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+}
+</script>
+@endsection
+
 @section('content')
+
+{{-- INTRO: Lógica de Programação (aparece apenas na primeira visita) --}}
+<div id="intro-overlay" class="hidden fixed inset-0 z-[300] flex items-center justify-center p-4" style="background: rgba(9,9,11,0.97); backdrop-filter: blur(20px);">
+    <div class="w-full max-w-2xl">
+        {{-- Progress steps --}}
+        <div class="flex gap-2 mb-10" id="intro-steps">
+            <div class="h-1 flex-1 rounded-full bg-yellow-400 intro-step-bar" style="transition: width 8s linear"></div>
+            <div class="h-1 w-8 rounded-full bg-zinc-800"></div>
+            <div class="h-1 w-8 rounded-full bg-zinc-800"></div>
+        </div>
+
+        {{-- Content --}}
+        <div id="intro-content">
+            <span class="text-[10px] font-mono text-yellow-500 uppercase tracking-[0.4em] font-bold">Antes de começar</span>
+            <h2 class="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mt-4 leading-[0.9]">
+                O que é<br><span class="text-yellow-400">Lógica de<br>Programação?</span>
+            </h2>
+            <p class="text-zinc-400 mt-6 leading-relaxed text-base max-w-lg">
+                Antes de qualquer sintaxe, existe o <strong class="text-white">pensamento estruturado</strong>. Lógica de programação é a habilidade de quebrar um problema em passos sequenciais que um computador possa executar.
+            </p>
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <div class="text-2xl mb-2">📥</div>
+                    <p class="text-[11px] font-black text-white uppercase tracking-wider">Entrada</p>
+                    <p class="text-[11px] text-zinc-500 mt-1">Dados que o programa recebe</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <div class="text-2xl mb-2">⚙️</div>
+                    <p class="text-[11px] font-black text-white uppercase tracking-wider">Processamento</p>
+                    <p class="text-[11px] text-zinc-500 mt-1">Transformação dos dados</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                    <div class="text-2xl mb-2">📤</div>
+                    <p class="text-[11px] font-black text-white uppercase tracking-wider">Saída</p>
+                    <p class="text-[11px] text-zinc-500 mt-1">Resultado gerado</p>
+                </div>
+            </div>
+            <div class="mt-8 p-5 rounded-2xl bg-yellow-400/5 border border-yellow-400/20">
+                <p class="text-[11px] font-mono text-zinc-500 mb-2">// Exemplo: receita de café como algoritmo</p>
+                <pre class="text-xs font-mono text-yellow-300 leading-relaxed">1. <span class="text-zinc-400">INÍCIO</span>
+2. Aquecer água a 90°C   <span class="text-zinc-600">// processamento</span>
+3. Adicionar 2 colheres de café  <span class="text-zinc-600">// processamento</span>
+4. Servir na xícara      <span class="text-zinc-600">// saída</span>
+5. <span class="text-zinc-400">FIM</span></pre>
+            </div>
+        </div>
+
+        {{-- Actions --}}
+        <div class="flex flex-col sm:flex-row gap-4 mt-10">
+            <button id="intro-start-btn" class="flex-1 py-4 bg-yellow-400 text-zinc-950 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-yellow-300 transition-all active:scale-95 shadow-xl shadow-yellow-400/20">
+                Entendido — Começar Agora 🚀
+            </button>
+            <button id="intro-skip-btn" class="px-8 py-4 text-zinc-500 rounded-2xl font-bold text-xs uppercase tracking-widest hover:text-white transition-colors">
+                Pular introdução
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-zinc-700 mt-4 font-mono">Esta introdução aparece apenas uma vez</p>
+    </div>
+</div>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Cabeçalho Principal -->
     <header class="mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
         <div class="max-w-3xl">
-            <h1 class="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter light:text-zinc-950">
+            <h1 class="hero-headline text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter light:text-zinc-950">
                 Evolua seu <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent italic">Javascript</span> <br>ao próximo nível.
             </h1>
-            <p class="mt-6 text-xl text-zinc-500 max-w-xl leading-relaxed light:text-zinc-600">
+            <p class="hero-subtitle mt-6 text-xl text-zinc-500 max-w-xl leading-relaxed light:text-zinc-600">
                 Plataforma profissional de aprendizado gamificado. Lógica de programação, padrões de projeto e maestria técnica.
             </p>
         </div>
         
         <!-- Estatísticas Rápidas -->
         <div class="grid grid-cols-2 sm:flex gap-4 w-full md:w-auto">
-             <div class="bento-card p-4 min-w-[140px] border-emerald-500/20 shadow-lg shadow-emerald-500/5 group hover:border-emerald-500/40 transition-all opacity-100">
+             <div class="stat-card bento-card p-4 min-w-[140px] border-emerald-500/20 shadow-lg shadow-emerald-500/5 group hover:border-emerald-500/40 transition-all opacity-100">
                 <div class="flex justify-between items-start">
                     <span class="text-2xl">🎯</span>
                     <span class="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest">+10% XP</span>
@@ -26,13 +95,13 @@
                 </div>
             </div>
 
-             <div class="bento-card p-4 min-w-[140px] border-orange-500/20 shadow-lg shadow-orange-500/5 group hover:border-orange-500/40 transition-all opacity-100">
+             <div class="stat-card bento-card p-4 min-w-[140px] border-orange-500/20 shadow-lg shadow-orange-500/5 group hover:border-orange-500/40 transition-all opacity-100">
                 <div class="flex justify-between items-start">
-                    <span class="text-2xl animate-bounce">🔥</span>
+                    <span class="streak-fire text-2xl">🔥</span>
                 </div>
                 <div class="mt-4">
                     <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Ofensiva</span>
-                    <p class="text-2xl font-black text-white light:text-zinc-900">{{ $user->streak ?? 0 }} Dias</p>
+                    <p class="text-2xl font-black text-white light:text-zinc-900"><span class="streak-count">{{ $user->streak ?? 0 }}</span> Dias</p>
                 </div>
             </div>
         </div>
@@ -103,7 +172,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- O Caminho (Trilhas) -->
         <div id="o-caminho" class="lg:col-span-6 order-2 lg:order-1">
-            <h2 class="text-3xl font-black text-white mb-10 flex items-center gap-4">
+            <h2 class="section-title text-3xl font-black text-white mb-10 flex items-center gap-4">
                 <div class="w-10 h-10 bg-yellow-400/10 border border-yellow-400/20 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-yellow-400/5">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -118,7 +187,7 @@
                     $isCompleted = $user ? $user->badges->contains('track_id', $track->id) : false;
                     $isLocked = ($index > 0 && ($user ? !$user->badges->contains('track_id', $tracks[$index-1]->id) : true));
                 @endphp
-                <div class="relative group">
+                <div class="track-card relative group">
                     <div class="absolute -left-[51px] top-0 w-6 h-6 rounded-full {{ $isCompleted ? 'bg-green-500' : ($isLocked ? 'bg-zinc-800' : 'bg-yellow-400') }} border-[6px] border-zinc-950 light:border-white z-10 transition-transform group-hover:scale-125 shadow-xl"></div>
                     
                     <div class="bento-card p-6 bg-zinc-900/40 light:bg-white hover:bg-zinc-900/60 transition-all relative overflow-hidden group opacity-100">
@@ -374,4 +443,113 @@
         </button>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === INTRO ANIMATION SEQUENCE ===
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!prefersReduced) {
+        // Headline stagger
+        gsap.from('.hero-headline', {
+            y: 80, opacity: 0, duration: 1.1, ease: 'power3.out', delay: 0.1
+        });
+        gsap.from('.hero-subtitle', {
+            y: 40, opacity: 0, duration: 0.9, ease: 'power3.out', delay: 0.35
+        });
+        // Stats cards stagger
+        gsap.from('.stat-card', {
+            y: 50, opacity: 0, stagger: 0.1, duration: 0.7, ease: 'power2.out', delay: 0.5
+        });
+        // Section title
+        gsap.from('.section-title', {
+            x: -30, opacity: 0, duration: 0.8, ease: 'power2.out', delay: 0.8
+        });
+        // Track cards scroll reveal
+        gsap.from('.track-card', {
+            scrollTrigger: { trigger: '.track-card', start: 'top 85%', toggleActions: 'play none none none' },
+            y: 60, opacity: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out'
+        });
+        // Editor panel slide in
+        gsap.from('#editor-section', {
+            scrollTrigger: { trigger: '#editor-section', start: 'top 90%' },
+            x: 40, opacity: 0, duration: 0.9, ease: 'power3.out'
+        });
+        // Progress bar fill animation
+        gsap.to('.progress-bar-fill', {
+            scrollTrigger: { trigger: '.progress-bar-fill', start: 'top 85%' },
+            scaleX: 1, duration: 1.2, ease: 'power2.out', transformOrigin: 'left'
+        });
+        // Lesson buttons hover pulse
+        document.querySelectorAll('.lesson-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                if (!btn.disabled) gsap.to(btn, { scale: 1.02, duration: 0.2, ease: 'power1.out' });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { scale: 1, duration: 0.2, ease: 'power1.out' });
+            });
+        });
+    }
+
+    // === INTRO SKIP LOGIC ===
+    const introOverlay = document.getElementById('intro-overlay');
+    if (introOverlay) {
+        const hasSeenIntro = localStorage.getItem('jsacademy_intro_seen');
+        if (hasSeenIntro) {
+            introOverlay.remove();
+        } else {
+            introOverlay.classList.remove('hidden');
+            // Auto-dismiss after 8s
+            const autoDismiss = setTimeout(() => dismissIntro(), 8000);
+            document.getElementById('intro-skip-btn')?.addEventListener('click', () => {
+                clearTimeout(autoDismiss);
+                dismissIntro();
+            });
+            document.getElementById('intro-start-btn')?.addEventListener('click', () => {
+                clearTimeout(autoDismiss);
+                dismissIntro();
+                document.getElementById('o-caminho')?.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+    }
+
+    function dismissIntro() {
+        const overlay = document.getElementById('intro-overlay');
+        if (!overlay) return;
+        localStorage.setItem('jsacademy_intro_seen', '1');
+        gsap.to(overlay, {
+            opacity: 0, y: -30, duration: 0.6, ease: 'power2.in',
+            onComplete: () => overlay.remove()
+        });
+    }
+
+    // === VALIDATE BTN microinteraction ===
+    const validateBtn = document.getElementById('validate-btn');
+    if (validateBtn) {
+        validateBtn.addEventListener('mouseenter', () => gsap.to(validateBtn, { scale: 1.02, duration: 0.15 }));
+        validateBtn.addEventListener('mouseleave', () => gsap.to(validateBtn, { scale: 1, duration: 0.15 }));
+        validateBtn.addEventListener('mousedown', () => gsap.to(validateBtn, { scale: 0.97, duration: 0.1 }));
+        validateBtn.addEventListener('mouseup', () => gsap.to(validateBtn, { scale: 1, duration: 0.1 }));
+    }
+
+    // === XP COUNTER animation ===
+    window.animateXP = function(targetXp) {
+        const xpEl = document.getElementById('xp-display');
+        if (!xpEl) return;
+        const start = parseInt(xpEl.textContent) || 0;
+        gsap.to({ val: start }, {
+            val: targetXp, duration: 1.2, ease: 'power2.out',
+            onUpdate: function() { xpEl.textContent = Math.round(this.targets()[0].val); }
+        });
+    };
+
+    // === STREAK NUMBER animation ===
+    const streakEl = document.querySelector('.streak-count');
+    if (streakEl && !prefersReduced) {
+        gsap.from(streakEl, { textContent: 0, duration: 1.5, ease: 'power2.out', snap: { textContent: 1 }, scrollTrigger: { trigger: streakEl, start: 'top 90%' }});
+    }
+});
+</script>
 @endsection

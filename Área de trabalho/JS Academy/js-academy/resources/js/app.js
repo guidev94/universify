@@ -2,6 +2,8 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 import * as monaco from 'monaco-editor';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
 
 window.Alpine = Alpine;
 
@@ -9,6 +11,9 @@ window.Alpine = Alpine;
 Alpine.store('auth', {
     guest: document.body.hasAttribute('data-guest')
 });
+
+// Store global para Tema (inicializado antes do Alpine.start())
+Alpine.store('theme', { light: false });
 
 Alpine.start();
 
@@ -203,16 +208,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // Animações GSAP (Entrada suave dos cards)
     const cards = document.querySelectorAll('.bento-card');
     if (cards.length > 0) {
-        gsap.fromTo(cards, 
-            { opacity: 0, y: 30 }, 
-            { 
-                opacity: 1, 
-                y: 0, 
-                stagger: 0.1, 
-                duration: 0.8, 
+        gsap.fromTo(cards,
+            { opacity: 0, y: 30 },
+            {
+                opacity: 1,
+                y: 0,
+                stagger: 0.1,
+                duration: 0.8,
                 ease: "power3.out",
                 clearProps: "all"
             }
         );
+    }
+
+    // === THEME TOGGLE ===
+    const themeToggle = document.getElementById('theme-toggle');
+    const iconDark = document.querySelector('.theme-icon-dark');
+    const iconLight = document.querySelector('.theme-icon-light');
+
+    const applyTheme = (isLight) => {
+        document.body.classList.toggle('light-mode', isLight);
+
+        // Update Alpine store
+        if (window.Alpine && Alpine.store('theme')) {
+            Alpine.store('theme').light = isLight;
+        }
+
+        // Sync icons
+        if (iconDark) iconDark.classList.toggle('hidden', isLight);
+        if (iconLight) iconLight.classList.toggle('hidden', !isLight);
+
+        // Sync Monaco theme
+        const monacoTheme = isLight ? 'light' : 'dark';
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: monacoTheme } }));
+    };
+
+    const initTheme = () => {
+        const saved = localStorage.getItem('jsacademy_theme') || 'dark';
+        applyTheme(saved === 'light');
+    };
+
+    // Call after Alpine initializes
+    document.addEventListener('alpine:initialized', initTheme);
+    // Fallback: also call directly in case Alpine already initialized
+    setTimeout(initTheme, 50);
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const isCurrentlyLight = document.body.classList.contains('light-mode');
+            const newTheme = isCurrentlyLight ? 'dark' : 'light';
+
+            // Save preference
+            localStorage.setItem('jsacademy_theme', newTheme);
+
+            applyTheme(!isCurrentlyLight);
+
+            // Button press animation via GSAP
+            gsap.fromTo(themeToggle,
+                { scale: 0.85, rotate: -15 },
+                { scale: 1, rotate: 0, duration: 0.4, ease: 'back.out(2)' }
+            );
+        });
     }
 });

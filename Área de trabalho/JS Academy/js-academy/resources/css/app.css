@@ -70,24 +70,112 @@
     }
 }
 
-/* Light Mode Overrides */
+/* ============================================
+   LIGHT MODE — Complete Override System
+   ============================================ */
 .light-mode {
-    --color-zinc-950: #f8fafc;
-    --color-zinc-900: #ffffff;
-    --color-zinc-800: #f1f5f9;
-}
-
-.light-mode .bento-card {
-    @apply border-zinc-200 bg-white shadow-xl shadow-zinc-200/50;
+    color-scheme: light;
 }
 
 .light-mode body {
-    @apply text-zinc-950;
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
 }
 
-.light-mode .text-zinc-500, .light-mode .text-zinc-400 {
-    @apply text-zinc-500;
+.light-mode .bg-zinc-950,
+.light-mode [class*="bg-zinc-950"] {
+    background-color: #f8fafc !important;
 }
+
+.light-mode .bg-zinc-900,
+.light-mode [class*="bg-zinc-900"] {
+    background-color: #ffffff !important;
+}
+
+.light-mode .bg-zinc-800,
+.light-mode [class*="bg-zinc-800"] {
+    background-color: #f1f5f9 !important;
+}
+
+.light-mode .text-white {
+    color: #0f172a !important;
+}
+
+.light-mode .text-zinc-500,
+.light-mode .text-zinc-400,
+.light-mode .text-zinc-600 {
+    color: #64748b !important;
+}
+
+.light-mode .bento-card {
+    background: rgba(255,255,255,0.9) !important;
+    border-color: rgba(15,23,42,0.08) !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
+}
+
+.light-mode nav {
+    background: rgba(248,250,252,0.9) !important;
+    border-color: rgba(15,23,42,0.08) !important;
+}
+
+.light-mode .border-white\/5,
+.light-mode .border-white\/10 {
+    border-color: rgba(15,23,42,0.08) !important;
+}
+
+.light-mode .border-zinc-800,
+.light-mode .border-zinc-900 {
+    border-color: #e2e8f0 !important;
+}
+
+/* Monaco editor container light mode */
+.light-mode #monaco-editor,
+.light-mode #arena-editor {
+    filter: none;
+}
+
+/* Console output light mode */
+.light-mode #console-output,
+.light-mode #arena-console {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+}
+
+.light-mode .text-zinc-500 { color: #64748b !important; }
+.light-mode .bg-zinc-950\/40 { background: rgba(248,250,252,0.8) !important; }
+.light-mode .bg-zinc-950\/50 { background: rgba(248,250,252,0.9) !important; }
+
+/* Tab bar light mode */
+.light-mode .tab-btn { color: #64748b !important; }
+.light-mode .tab-btn.active { color: #0f172a !important; background: rgba(247,223,30,0.08) !important; }
+
+/* Gradient texts — preserve in light mode */
+.light-mode .bg-gradient-to-r.bg-clip-text { -webkit-background-clip: text !important; }
+
+/* Input fields light mode */
+.light-mode .input-field {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+/* Ranking table light */
+.light-mode tr:hover td { background: rgba(247,223,30,0.04) !important; }
+
+/* Theme toggle button adapts */
+.light-mode #theme-toggle {
+    background: rgba(15,23,42,0.05) !important;
+    border-color: rgba(15,23,42,0.1) !important;
+    color: #64748b !important;
+}
+
+/* Streak/badge icons adapt */
+.light-mode .border-zinc-900 { border-color: #e2e8f0 !important; }
+
+/* Intro overlay light mode */
+.light-mode #intro-overlay { background: rgba(248,250,252,0.98) !important; }
+.light-mode #intro-overlay .text-white { color: #0f172a !important; }
+.light-mode #intro-overlay pre { background: rgba(15,23,42,0.04) !important; }
 
 /* Animations */
 .text-glow {
@@ -97,3 +185,73 @@
 .text-glow-pink {
     text-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
 }
+
+/* Track card entrance microinteraction */
+.track-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.track-card:hover .bento-card {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* Lesson btn microinteraction */
+.lesson-btn:not(:disabled) {
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.lesson-btn:not(:disabled):hover {
+    border-color: rgba(247,223,30,0.4) !important;
+    background: rgba(247,223,30,0.03) !important;
+}
+
+/* Tab button indicator */
+.tab-btn { position: relative; }
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 80%;
+    height: 2px;
+    background: #F7DF1E;
+    border-radius: 2px 2px 0 0;
+    transition: transform 0.2s ease;
+}
+.tab-btn.active::after { transform: translateX(-50%) scaleX(1); }
+.tab-btn:hover:not(.active)::after { transform: translateX(-50%) scaleX(0.5); }
+
+/* Validate btn shimmer */
+#validate-btn {
+    position: relative;
+    overflow: hidden;
+}
+#validate-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+#validate-btn:hover::before { left: 150%; }
+
+/* XP toast animation */
+@keyframes xp-float {
+    0% { opacity: 0; transform: translateY(0) scale(0.8); }
+    20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+    80% { opacity: 1; transform: translateY(-20px) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+}
+.xp-toast {
+    animation: xp-float 2s ease forwards;
+}
+
+/* Streak bounce */
+@keyframes streak-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15) rotate(-3deg); }
+}
+.streak-fire { animation: streak-pulse 2s ease infinite; }

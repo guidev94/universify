@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="arenaHandler()">
-    <header class="mb-16 text-center lg:text-left">
+    <header class="mb-16 text-center lg:text-left page-header">
         <h1 class="heading-huge text-white">
             Arena de <span class="bg-gradient-to-r from-accent-cyan to-blue-500 bg-clip-text text-transparent italic">Lógica</span> 🥊
         </h1>
@@ -14,11 +14,11 @@
     <!-- Grid de Cards de Desafios -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="!currentChallenge" x-transition>
         @foreach($challenges as $challenge)
-        <div class="bento-card bento-card-hover p-8 flex flex-col justify-between min-h-[350px]">
+        <div class="bento-card bento-card-hover challenge-card p-8 flex flex-col justify-between min-h-[350px]">
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <span class="text-[10px] font-mono text-accent-cyan uppercase font-black tracking-[0.2em]">{{ $challenge->category }}</span>
-                    <span class="px-3 py-1 rounded-full bg-zinc-800 text-[9px] font-black text-zinc-400 uppercase tracking-tighter border border-white/5">{{ $challenge->difficulty }}</span>
+                    <span class="difficulty-badge px-3 py-1 rounded-full bg-zinc-800 text-[9px] font-black text-zinc-400 uppercase tracking-tighter border border-white/5">{{ $challenge->difficulty }}</span>
                 </div>
                 <h3 class="text-3xl font-black text-white mb-4 group-hover:text-js-yellow transition-colors tracking-tighter">{{ $challenge->title }}</h3>
                 <p class="text-zinc-500 text-sm leading-relaxed mb-8 line-clamp-3">{{ $challenge->description }}</p>
@@ -29,7 +29,7 @@
                     <span class="flex items-center gap-2"><span class="text-lg">⚡</span> +{{ $challenge->xp_reward }} XP</span>
                     <span class="flex items-center gap-2"><span class="text-lg">💎</span> {{ $challenge->diamond_reward }}</span>
                 </div>
-                <button @click="selectChallenge({{ $challenge }})" class="btn-primary w-full">
+                <button @click="selectChallenge({{ $challenge }}, $event)" class="btn-primary w-full">
                     Iniciar Desafio
                 </button>
             </div>
@@ -118,7 +118,13 @@
                 alert('🛡️ JS ACADEMY: Digite seu próprio código para aprender de verdade!');
             },
 
-            selectChallenge(challenge) {
+            selectChallenge(challenge, event) {
+                // Microinteraction: highlight selected card
+                document.querySelectorAll('.challenge-card').forEach(c => c.classList.remove('active'));
+                if (event && event.currentTarget) {
+                    event.currentTarget.closest('.challenge-card')?.classList.add('active');
+                }
+
                 this.currentChallenge = challenge;
                 this.timer = 0;
                 this.startTimer();
@@ -193,8 +199,47 @@
 
 <style>
     [x-cloak] { display: none !important; }
-    .bento-card {
-        user-select: none !important;
+
+    /* Remove user-select: none do bento-card (conflita com light mode) */
+    .bento-card { user-select: auto !important; }
+
+    /* Challenge card hover */
+    .challenge-card {
+        transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s ease;
     }
+    .challenge-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(247,223,30,0.3) !important;
+    }
+    .challenge-card.active {
+        border-color: rgba(247,223,30,0.5) !important;
+        background: rgba(247,223,30,0.03) !important;
+    }
+
+    /* Difficulty badge microinteraction */
+    .difficulty-badge {
+        transition: transform 0.2s ease;
+        display: inline-block;
+    }
+    .challenge-card:hover .difficulty-badge { transform: scale(1.05); }
+
+    /* Arena editor fade-in */
+    #arena-panel { transition: opacity 0.3s ease; }
+    #arena-panel.loading { opacity: 0.6; }
 </style>
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    gsap.from('.page-header', { y: 60, opacity: 0, duration: 1, ease: 'power3.out' });
+    gsap.from('.challenge-card', {
+        scrollTrigger: { trigger: '.challenge-card', start: 'top 85%' },
+        y: 40, opacity: 0, stagger: 0.08, duration: 0.6, ease: 'power2.out', delay: 0.3
+    });
+});
+</script>
+@endsection
 @endsection
