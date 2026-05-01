@@ -30,6 +30,12 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('streak')->numeric()->default(0),
                 Forms\Components\TextInput::make('diamonds')->numeric()->default(0),
                 Forms\Components\TextInput::make('league')->default('Bronze I'),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->minLength(8)
+                    ->dehydrateStateUsing(fn ($state) => !empty($state) ? bcrypt($state) : null)
+                    ->dehydrated(fn ($state) => !empty($state))
+                    ->label('Nova Senha (deixe vazio para manter)'),
             ]);
     }
 
@@ -43,6 +49,11 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('level')->sortable(),
                 Tables\Columns\TextColumn::make('streak'),
                 Tables\Columns\TextColumn::make('league'),
+                Tables\Columns\TextColumn::make('diamonds')->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

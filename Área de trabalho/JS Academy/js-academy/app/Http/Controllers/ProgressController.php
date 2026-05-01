@@ -20,7 +20,7 @@ class ProgressController extends Controller
     public function completeLesson(Request $request, $lessonId)
     {
         // Prioriza o usuário logado, caso contrário usa o primeiro (fallback para testes)
-        $user = auth()->user() ?: User::find(1);
+        $user = auth()->user() ?: User::first();
         $lesson = Lesson::findOrFail($lessonId);
 
         // Registra ou recupera o progresso da lição para este usuário
@@ -103,7 +103,7 @@ class ProgressController extends Controller
      */
     public function updateXP(Request $request)
     {
-        $user = auth()->user() ?: User::find(1);
+        $user = auth()->user() ?: User::first();
         if (! $user) {
             return response()->json(['success' => false, 'message' => 'Usuário não encontrado'], 404);
         }
@@ -142,7 +142,7 @@ class ProgressController extends Controller
      */
     public function skipTrack($trackId)
     {
-        $user = auth()->user() ?: User::find(1);
+        $user = auth()->user() ?: User::first();
         $cost = 200; // Custo para pular módulo
 
         if ($user->diamonds < $cost) {
@@ -159,10 +159,6 @@ class ProgressController extends Controller
         if ($badge && !$user->badges()->where('badge_id', $badge->id)->exists()) {
             $user->badges()->attach($badge->id);
         }
-
-        return response()->json(['success' => true]);
-    }
-
 
         return response()->json(['success' => true]);
     }

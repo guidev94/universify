@@ -29,6 +29,13 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'xp' => 0,
+            'level' => 1,
+            'streak' => 0,
+            'streak_last_completed_at' => null,
+            'streak_freeze_count' => 0,
+            'diamonds' => 0,
+            'league' => 'Bronze',
         ];
     }
 

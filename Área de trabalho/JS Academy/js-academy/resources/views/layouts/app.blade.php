@@ -1,3 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Plataforma profissional de aprendizado JavaScript gamificado. Aprenda lógica, ES6+, DOM, Async e Design Patterns com desafios reais.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{{ config('app.name') }} - Aprenda JavaScript como um Dev de Elite">
+    <meta property="og:description" content="Trilhas de aprendizado gamificadas, desafios técnicos e ranking global. Evolua seu JavaScript ao próximo nível.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <title>@yield('title', config('app.name', 'JS Academy'))</title>
+
+    <!-- Estilos do Tailwind 4 (Vite) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @yield('head')
+</head>
+<body
+    class="font-sans antialiased bg-zinc-950 text-white min-h-screen"
+    x-data="{ loginModal: false, registerModal: false }"
+    :class="{ 'light-mode': $store?.theme?.light }"
+>
+
 <nav class="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-white/5 py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <!-- Logo e Título -->
@@ -50,3 +76,14 @@
         </div>
     </div>
 </nav>
+
+<main>
+    @yield('content')
+</main>
+
+@yield('modals')
+
+@yield('scripts')
+
+</body>
+</html>

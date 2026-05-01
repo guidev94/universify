@@ -46,5 +46,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(TrackSeeder::class);
+        $this->call(ChallengeSeeder::class);
     }
 }

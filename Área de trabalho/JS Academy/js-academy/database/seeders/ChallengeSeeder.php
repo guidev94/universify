@@ -78,6 +78,75 @@ class ChallengeSeeder extends Seeder
             ],
         ];
 
+        $challenges = array_merge($challenges, [
+            [
+                'title' => 'Two Sum',
+                'slug' => 'two-sum',
+                'category' => 'Arrays',
+                'description' => 'Clássico de entrevistas técnicas do Google/Meta.',
+                'task' => 'Dado um array de números e um alvo, encontre dois índices cujos valores somam o alvo. Ex: twoSum([2, 7, 11, 15], 9) → [0, 1].',
+                'starter_code' => "function twoSum(nums, target) {\n  // Use um Map para O(n)\n}",
+                'xp_reward' => 200,
+                'diamond_reward' => 30,
+                'difficulty' => 'Médio',
+            ],
+            [
+                'title' => 'Debounce Function',
+                'slug' => 'debounce',
+                'category' => 'Padrões',
+                'description' => 'Padrão essencial para otimização de performance.',
+                'task' => 'Implemente uma função debounce(fn, delay) que atrasa a execução de fn até delay ms após a última chamada.',
+                'starter_code' => "function debounce(fn, delay) {\n  let timer;\n  return function(...args) {\n    // Sua implementação\n  };\n}",
+                'xp_reward' => 250,
+                'diamond_reward' => 40,
+                'difficulty' => 'Difícil',
+            ],
+            [
+                'title' => 'Deep Clone',
+                'slug' => 'deep-clone',
+                'category' => 'Objetos',
+                'description' => 'Clonagem profunda sem JSON.parse hack.',
+                'task' => 'Implemente deepClone(obj) que cria uma cópia profunda de qualquer objeto/array sem usar JSON.parse/JSON.stringify.',
+                'starter_code' => "function deepClone(obj) {\n  // Sua implementação recursiva\n}",
+                'xp_reward' => 300,
+                'diamond_reward' => 50,
+                'difficulty' => 'Difícil',
+            ],
+            [
+                'title' => 'Flatten Array',
+                'slug' => 'flatten-array',
+                'category' => 'Arrays',
+                'description' => 'Transforme um array multidimensional em linear.',
+                'task' => 'Crie uma função flatten([[1,2],[3,[4,5]],6]) que retorna [1,2,3,4,5,6] sem usar Array.flat().',
+                'starter_code' => "function flatten(arr) {\n  // Use recursão\n}",
+                'xp_reward' => 200,
+                'diamond_reward' => 30,
+                'difficulty' => 'Médio',
+            ],
+            [
+                'title' => 'Memoize',
+                'slug' => 'memoize',
+                'category' => 'Padrões',
+                'description' => 'Otimização com cache de resultados.',
+                'task' => 'Implemente memoize(fn) que cacheia os resultados de fn para os mesmos argumentos.',
+                'starter_code' => "function memoize(fn) {\n  const cache = new Map();\n  return function(...args) {\n    // Verifique o cache\n  };\n}",
+                'xp_reward' => 250,
+                'diamond_reward' => 40,
+                'difficulty' => 'Difícil',
+            ],
+            [
+                'title' => 'Anagramas',
+                'slug' => 'anagramas',
+                'category' => 'Strings',
+                'description' => 'Verificação de anagramas eficiente.',
+                'task' => 'Crie isAnagram(str1, str2) que retorna true se as strings são anagramas. "listen" e "silent" são anagramas.',
+                'starter_code' => "function isAnagram(str1, str2) {\n  // Normalize e compare\n}",
+                'xp_reward' => 150,
+                'diamond_reward' => 20,
+                'difficulty' => 'Fácil',
+            ],
+        ]);
+
         foreach ($challenges as $c) {
             LogicChallenge::updateOrCreate(['slug' => $c['slug']], $c);
         }
