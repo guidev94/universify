@@ -77,107 +77,147 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Cabeçalho Principal -->
-    <header class="mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-        <div class="max-w-3xl">
-            <h1 class="hero-headline text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter">
-                Domine<br>
-                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent italic">JavaScript</span><br>
-                de verdade.
-            </h1>
-            <p class="hero-subtitle mt-6 text-xl text-zinc-400 max-w-xl leading-relaxed">
-                Da lógica básica ao TypeScript avançado — com exemplos reais do <span class="text-white font-bold">Stripe</span>, <span class="text-white font-bold">Netflix</span> e <span class="text-white font-bold">Vercel</span>.<br>
-                <span class="text-zinc-500 text-base">38 lições · 12 desafios técnicos · 100% gratuito para começar.</span>
-            </p>
-        </div>
-        
-        <!-- Estatísticas Rápidas -->
-        <div class="grid grid-cols-2 sm:flex gap-4 w-full md:w-auto">
-             <div class="stat-card bento-card p-4 min-w-[140px] border-emerald-500/20 shadow-lg shadow-emerald-500/5 group hover:border-emerald-500/40 transition-all opacity-100">
-                <div class="flex justify-between items-start">
-                    <span class="w-6 h-6 text-emerald-500"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
-                    <span class="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest">+10% XP</span>
+    {{-- ===== HERO ===== --}}
+    <header class="hero-headline mb-10 relative">
+        {{-- Glow decorativo --}}
+        <div class="absolute -top-40 left-0 w-[500px] h-[300px] bg-yellow-400/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+        <div class="flex flex-col lg:flex-row gap-10 lg:items-center justify-between">
+            <div class="max-w-2xl">
+                {{-- Badge de plataforma --}}
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.25em]">100% Gratuito</span>
                 </div>
-                <div class="mt-4">
-                    <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Meta Diária</span>
-                    <p class="text-2xl font-black text-white light:text-zinc-900">0/2</p>
+
+                <h1 class="text-5xl md:text-[4.5rem] font-black text-white leading-[0.88] tracking-tighter">
+                    Domine<br>
+                    <span class="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 bg-clip-text text-transparent italic">JavaScript</span><br>
+                    <span class="text-zinc-500 text-4xl md:text-5xl">de verdade.</span>
+                </h1>
+
+                <p class="hero-subtitle mt-5 text-base text-zinc-400 max-w-lg leading-relaxed">
+                    38 lições com exemplos reais do <span class="text-white font-semibold">Stripe</span>, <span class="text-white font-semibold">Netflix</span> e <span class="text-white font-semibold">Vercel</span>. Do zero ao TypeScript.
+                </p>
+
+                {{-- Stats --}}
+                <div class="flex items-center gap-5 mt-7 pt-6 border-t border-white/5 flex-wrap">
+                    @php
+                        $totalLessons = \App\Models\Lesson::count();
+                        $completedCount = $user ? $user->progress()->where('status', 'completed')->count() : 0;
+                        $percent = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
+                    @endphp
+                    <div class="text-center">
+                        <p class="text-xl font-black text-white">{{ \App\Models\User::count() }}+</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Devs</p>
+                    </div>
+                    <div class="w-px h-6 bg-white/8"></div>
+                    <div class="text-center">
+                        <p class="text-xl font-black text-white">{{ $totalLessons }}</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Lições</p>
+                    </div>
+                    <div class="w-px h-6 bg-white/8"></div>
+                    <div class="text-center">
+                        <p class="text-xl font-black text-white">8</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Módulos</p>
+                    </div>
+                    <div class="w-px h-6 bg-white/8"></div>
+                    <div class="text-center">
+                        <p class="text-xl font-black text-white">12</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Desafios</p>
+                    </div>
                 </div>
             </div>
 
-             <div class="stat-card bento-card p-4 min-w-[140px] border-orange-500/20 shadow-lg shadow-orange-500/5 group hover:border-orange-500/40 transition-all opacity-100">
-                <div class="flex justify-between items-start">
-                    <span class="streak-fire w-6 h-6 text-orange-500"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M13.5 2c0 0 1.5 3 1.5 5.5 0 1.5-.5 2.5-1.5 3 .5-2-1-3-1-3-1 2-2 4.5-2 6.5 0 2 1 3.5 2.5 4.5-.5-1-.5-2 0-3 1 1.5 2 2.5 2 4 0 2-1.5 3.5-3.5 3.5S8 21.5 8 19.5c0-3 1.5-5.5 4-7 0 1.5.5 2.5 1.5 3C12 14 12 12.5 12 10.5c0-3 1.5-8.5 1.5-8.5z"/></svg></span>
+            {{-- Cards compactos de gamificação --}}
+            <div class="flex flex-row lg:flex-col gap-3 flex-wrap lg:min-w-[210px]">
+                {{-- Progresso --}}
+                <div class="stat-card flex-1 lg:flex-none rounded-2xl border border-white/8 bg-zinc-900/50 p-4 flex items-center gap-3 min-w-[150px]">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider">Progresso</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-grow h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full" style="width: {{ $percent }}%"></div>
+                            </div>
+                            <span class="text-xs font-black text-white flex-shrink-0">{{ $percent }}%</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Ofensiva</span>
-                    <p class="text-2xl font-black text-white light:text-zinc-900"><span class="streak-count">{{ $user->streak ?? 0 }}</span> Dias</p>
+
+                {{-- Streak --}}
+                <div class="stat-card flex-1 lg:flex-none rounded-2xl border border-white/8 bg-zinc-900/50 p-4 flex items-center gap-3 min-w-[130px]">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-orange-400 streak-fire" fill="currentColor" viewBox="0 0 24 24"><path d="M13.5 2c0 0 1.5 3 1.5 5.5 0 1.5-.5 2.5-1.5 3 .5-2-1-3-1-3-1 2-2 4.5-2 6.5 0 2 1 3.5 2.5 4.5-.5-1-.5-2 0-3 1 1.5 2 2.5 2 4 0 2-1.5 3.5-3.5 3.5S8 21.5 8 19.5c0-3 1.5-5.5 4-7 0 1.5.5 2.5 1.5 3C12 14 12 12.5 12 10.5c0-3 1.5-8.5 1.5-8.5z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider">Streak</p>
+                        <p class="text-lg font-black text-white leading-tight"><span class="streak-count">{{ $user->streak ?? 0 }}</span> <span class="text-zinc-500 text-xs font-normal">dias</span></p>
+                    </div>
+                </div>
+
+                {{-- XP --}}
+                <div class="stat-card flex-1 lg:flex-none rounded-2xl border border-white/8 bg-zinc-900/50 p-4 flex items-center gap-3 min-w-[130px]">
+                    <div class="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-violet-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-wider">XP Total</p>
+                        <p class="text-lg font-black text-white leading-tight">{{ number_format($user->xp ?? 0) }}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Dashboard do Aluno -->
-    <section class="mb-16 grid grid-cols-1 md:grid-cols-12 gap-6">
-        <!-- Progresso Geral -->
-        <div class="md:col-span-4 bento-card p-8 bg-gradient-to-br from-yellow-400/5 to-transparent border-yellow-400/10 hover:border-yellow-400/30 transition-all group opacity-100">
-            <span class="text-[10px] font-mono text-yellow-500 uppercase font-bold tracking-[0.3em]">Seu Progresso Total</span>
-            <div class="mt-6 flex items-end justify-between">
-                @php
-                    $totalLessons = \App\Models\Lesson::count();
-                    $completedCount = $user ? $user->progress()->where('status', 'completed')->count() : 0;
-                    $percent = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
-                @endphp
-                <div>
-                    <p class="text-6xl font-black text-white light:text-zinc-900 group-hover:scale-110 transition-transform origin-left">{{ $percent }}%</p>
-                    <p class="text-[10px] text-zinc-500 mt-2 uppercase tracking-widest">{{ $completedCount }} de {{ $totalLessons }} aulas concluídas</p>
-                </div>
-                <div class="w-20 h-20 rounded-full border-[6px] border-zinc-900 light:border-zinc-100 border-t-yellow-400 flex items-center justify-center shadow-xl shadow-yellow-400/10">
-                    <span class="text-xs font-bold text-zinc-400">XP</span>
-                </div>
+    {{-- ===== BARRA DE AÇÃO RÁPIDA (Próxima Aula + Ranking) ===== --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        {{-- Continuar --}}
+        <div class="rounded-2xl border border-cyan-500/15 bg-cyan-500/5 hover:border-cyan-500/25 transition-all p-4 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-        </div>
-
-        <!-- Próxima Aula -->
-        <div class="md:col-span-5 bento-card p-8 bg-gradient-to-br from-cyan-400/5 to-transparent border-cyan-400/10 hover:border-cyan-400/30 transition-all group opacity-100">
-            <span class="text-[10px] font-mono text-cyan-400 uppercase font-bold tracking-[0.3em]">Continue de onde parou</span>
-            <div class="mt-6">
+            <div class="flex-grow min-w-0">
+                <p class="text-[9px] text-cyan-400 uppercase tracking-widest font-bold">Continue de onde parou</p>
                 @if($nextLesson)
-                <h3 class="text-3xl font-black text-white light:text-zinc-900 group-hover:text-cyan-400 transition-colors">{{ $nextLesson->title }}</h3>
-                <p class="text-xs text-zinc-500 mt-2">Módulo: {{ $nextLesson->track->name }}</p>
-                <div class="mt-8">
-                    <button 
-                        data-lesson-id="{{ $nextLesson->id }}"
-                        data-lesson-title="{{ $nextLesson->title }}"
-                        data-lesson-content="{{ $nextLesson->content }}"
-                        data-lesson-task="{{ $nextLesson->task }}"
-                        data-lesson-starter="{{ $nextLesson->starter_code }}"
-                        data-lesson-tips="{{ $nextLesson->tips }}"
-                        data-lesson-examples="{{ $nextLesson->examples }}"
-                        data-lesson-case="{{ $nextLesson->real_world_case }}"
-                        data-lesson-docs="{{ $nextLesson->docs_link }}"
-                        class="lesson-btn inline-flex px-8 py-3 bg-cyan-400 text-zinc-950 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-cyan-300 transition-all active:scale-95 shadow-xl shadow-cyan-400/20">
-                        Continuar Agora
-                    </button>
-                </div>
+                <p class="text-sm font-bold text-white truncate mt-0.5">{{ $nextLesson->title }}</p>
+                <p class="text-[10px] text-zinc-600">{{ $nextLesson->track->name }}</p>
                 @else
-                <h3 class="text-3xl font-black text-white light:text-zinc-900">Todas as trilhas concluídas! 🎉</h3>
-                <p class="text-xs text-zinc-500 mt-2 italic">Você atingiu a maestria total no momento.</p>
+                <p class="text-sm font-bold text-white mt-0.5">Todas concluídas!</p>
                 @endif
             </div>
+            @if($nextLesson)
+            <button
+                data-lesson-id="{{ $nextLesson->id }}"
+                data-lesson-title="{{ $nextLesson->title }}"
+                data-lesson-content="{{ $nextLesson->content }}"
+                data-lesson-task="{{ $nextLesson->task }}"
+                data-lesson-starter="{{ $nextLesson->starter_code }}"
+                data-lesson-tips="{{ $nextLesson->tips }}"
+                data-lesson-examples="{{ $nextLesson->examples }}"
+                data-lesson-case="{{ $nextLesson->real_world_case }}"
+                data-lesson-docs="{{ $nextLesson->docs_link }}"
+                data-lesson-xp="{{ $nextLesson->xp_reward }}"
+                class="lesson-btn flex-shrink-0 px-4 py-2 bg-cyan-400 text-zinc-950 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-300 transition-all active:scale-95">
+                Continuar
+            </button>
+            @endif
         </div>
 
-        <!-- Ranking -->
-        <div class="md:col-span-3 bento-card p-8 bg-gradient-to-br from-orange-400/5 to-transparent border-orange-400/10 opacity-100">
-            <span class="text-[10px] font-mono text-orange-400 uppercase font-bold tracking-[0.3em]">Ranking Global</span>
-            <div class="mt-6 text-center">
-                <p class="text-7xl font-black text-white light:text-zinc-900 italic">#{{ $rankingPosition }}</p>
-                <div class="mt-4 inline-block px-4 py-1.5 bg-orange-400/10 rounded-full border border-orange-400/20">
-                    <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest">{{ $user->league ?? 'Bronze' }} · {{ number_format($user->xp ?? 0) }} XP</span>
-                </div>
-                <p class="text-[9px] text-zinc-600 mt-3 font-mono">entre {{ \App\Models\User::count() }} devs cadastrados</p>
+        {{-- Ranking --}}
+        <a href="{{ route('ranking') }}" class="rounded-2xl border border-orange-500/15 bg-orange-500/5 hover:border-orange-500/25 transition-all p-4 flex items-center gap-4 group">
+            <div class="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             </div>
-        </div>
-    </section>
+            <div class="flex-grow">
+                <p class="text-[9px] text-orange-400 uppercase tracking-widest font-bold">Ranking Global</p>
+                <p class="text-sm font-black text-white mt-0.5">#{{ $rankingPosition }} <span class="text-zinc-500 text-xs font-normal">entre {{ \App\Models\User::count() }} devs</span></p>
+            </div>
+            <svg class="w-4 h-4 text-zinc-600 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- O Caminho — Trilhas estilo Duolingo -->

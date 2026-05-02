@@ -248,11 +248,22 @@
                 }
 
                 if (outputs.length === 0) {
-                    consoleUI.innerHTML = '<div class="text-zinc-500 font-mono text-xs p-2">Nenhuma saída no console. Use console.log() para ver resultados.</div>';
+                    consoleUI.innerHTML = '<div class="text-zinc-500 font-mono text-xs p-2 flex items-center gap-2"><svg class="w-4 h-4 text-yellow-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"/></svg>Nenhuma saída. Use console.log() para exibir o resultado da sua solução.</div>';
+                    if (window.SoundEngine) SoundEngine.error();
                     return;
                 }
 
-                // Sucesso — código executou com saídas
+                // Validação por test cases embutidos (por slug do desafio)
+                const slug = this.currentChallenge.slug;
+                const validationResult = this._runTestCases(slug, code, outputs);
+
+                if (!validationResult.passed) {
+                    consoleUI.innerHTML += `<div class="mt-2 p-2 bg-red-500/10 rounded-lg text-xs text-red-400 flex items-start gap-2"><svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${validationResult.message}</span></div>`;
+                    if (window.SoundEngine) SoundEngine.error();
+                    return;
+                }
+
+                // Sucesso — passou nos testes
                 this.solved = true;
                 clearInterval(this.interval);
 
@@ -294,6 +305,139 @@
 
                 if (typeof gsap !== 'undefined') {
                     gsap.fromTo('#challenge-success-modal > div', { scale: 0.8, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.7)' });
+                }
+            },
+
+            // Valida por test cases específicos de cada desafio
+            _runTestCases(slug, code, outputs) {
+                try {
+                    // Cria um ambiente de execução isolado
+                    const run = (fn, ...args) => {
+                        try { return { ok: true, val: fn(...args) }; }
+                        catch(e) { return { ok: false, err: e.message }; }
+                    };
+
+                    const testCases = {
+                        'fizzbuzz-elite': () => {
+                            const fn = new Function(code + '; return fizzBuzz;')();
+                            if (!fn) return { passed: false, message: 'Função fizzBuzz não encontrada. Defina: function fizzBuzz(n) { ... }' };
+                            const t = [run(fn,3), run(fn,5), run(fn,15), run(fn,1)];
+                            if (!t.every(r=>r.ok)) return { passed: false, message: 'Erro ao executar fizzBuzz. Verifique se retorna um valor.' };
+                            if (t[0].val !== 'Fizz') return { passed: false, message: `fizzBuzz(3) deveria retornar "Fizz", mas retornou "${t[0].val}"` };
+                            if (t[1].val !== 'Buzz') return { passed: false, message: `fizzBuzz(5) deveria retornar "Buzz", mas retornou "${t[1].val}"` };
+                            if (t[2].val !== 'FizzBuzz') return { passed: false, message: `fizzBuzz(15) deveria retornar "FizzBuzz", mas retornou "${t[2].val}"` };
+                            if (t[3].val !== '1' && t[3].val !== 1) return { passed: false, message: `fizzBuzz(1) deveria retornar "1" ou 1, mas retornou "${t[3].val}"` };
+                            return { passed: true };
+                        },
+                        'string-reverse': () => {
+                            const logs = outputs.map(o => String(o.msg).trim());
+                            const expected = 'tpircSavaJ';
+                            if (!logs.some(l => l === expected || l.includes(expected))) {
+                                return { passed: false, message: `O resultado deveria ser "${expected}". Você obteve: "${logs[0] || '(vazio)'}"` };
+                            }
+                            return { passed: true };
+                        },
+                        'max-number': () => {
+                            const logs = outputs.map(o => String(o.msg).trim());
+                            if (!logs.some(l => l === '20')) {
+                                return { passed: false, message: `O maior número é 20. Você obteve: "${logs[0] || '(vazio)'}"` };
+                            }
+                            return { passed: true };
+                        },
+                        'vowel-count': () => {
+                            const logs = outputs.map(o => String(o.msg).trim());
+                            if (!logs.some(l => l === '10')) {
+                                return { passed: false, message: `A frase "Eu amo programar em JavaScript" tem 10 vogais. Você obteve: "${logs[0] || '(vazio)'}"` };
+                            }
+                            return { passed: true };
+                        },
+                        'palindrome-check': () => {
+                            const logs = outputs.map(o => String(o.msg).toLowerCase());
+                            if (!logs.some(l => l === 'true')) {
+                                return { passed: false, message: `"arara" é um palíndromo — o resultado deve ser true. Você obteve: "${logs[0] || '(vazio)'}"` };
+                            }
+                            return { passed: true };
+                        },
+                        'recursive-factorial': () => {
+                            const fn = new Function(code + '; return fatorial;')();
+                            if (!fn) return { passed: false, message: 'Função fatorial não encontrada. Defina: function fatorial(n) { ... }' };
+                            const r = run(fn, 5);
+                            if (!r.ok) return { passed: false, message: `Erro ao executar fatorial(5): ${r.err}` };
+                            if (r.val !== 120) return { passed: false, message: `fatorial(5) deveria ser 120, mas retornou ${r.val}` };
+                            return { passed: true };
+                        },
+                        'two-sum': () => {
+                            const fn = new Function(code + '; return twoSum;')();
+                            if (!fn) return { passed: false, message: 'Função twoSum não encontrada. Defina: function twoSum(nums, target) { ... }' };
+                            const r = run(fn, [2,7,11,15], 9);
+                            if (!r.ok) return { passed: false, message: `Erro: ${r.err}` };
+                            const v = r.val;
+                            if (!Array.isArray(v) || !((v[0]===0&&v[1]===1)||(v[0]===1&&v[1]===0))) {
+                                return { passed: false, message: `twoSum([2,7,11,15], 9) deveria retornar [0,1], mas retornou ${JSON.stringify(v)}` };
+                            }
+                            return { passed: true };
+                        },
+                        'debounce': () => {
+                            const fn = new Function(code + '; return debounce;')();
+                            if (!fn) return { passed: false, message: 'Função debounce não encontrada.' };
+                            if (typeof fn !== 'function') return { passed: false, message: 'debounce deve ser uma função.' };
+                            const r = run(fn, () => {}, 300);
+                            if (!r.ok || typeof r.val !== 'function') return { passed: false, message: 'debounce deve retornar uma função.' };
+                            return { passed: true };
+                        },
+                        'deep-clone': () => {
+                            const fn = new Function(code + '; return deepClone;')();
+                            if (!fn) return { passed: false, message: 'Função deepClone não encontrada.' };
+                            const obj = { a: 1, b: { c: 2 } };
+                            const r = run(fn, obj);
+                            if (!r.ok) return { passed: false, message: `Erro: ${r.err}` };
+                            if (r.val === obj) return { passed: false, message: 'deepClone deve retornar um novo objeto, não a mesma referência.' };
+                            if (r.val.b === obj.b) return { passed: false, message: 'deepClone deve copiar objetos aninhados (cópia profunda).' };
+                            if (r.val.a !== 1 || r.val.b.c !== 2) return { passed: false, message: 'Os valores do clone estão incorretos.' };
+                            return { passed: true };
+                        },
+                        'flatten-array': () => {
+                            const fn = new Function(code + '; return flatten;')();
+                            if (!fn) return { passed: false, message: 'Função flatten não encontrada.' };
+                            const r = run(fn, [[1,2],[3,[4,5]],6]);
+                            if (!r.ok) return { passed: false, message: `Erro: ${r.err}` };
+                            if (JSON.stringify(r.val) !== '[1,2,3,4,5,6]') {
+                                return { passed: false, message: `flatten([[1,2],[3,[4,5]],6]) deveria ser [1,2,3,4,5,6], mas retornou ${JSON.stringify(r.val)}` };
+                            }
+                            return { passed: true };
+                        },
+                        'memoize': () => {
+                            const fn = new Function(code + '; return memoize;')();
+                            if (!fn) return { passed: false, message: 'Função memoize não encontrada.' };
+                            let calls = 0;
+                            const heavy = (n) => { calls++; return n * 2; };
+                            const r = run(fn, heavy);
+                            if (!r.ok || typeof r.val !== 'function') return { passed: false, message: 'memoize deve retornar uma função.' };
+                            r.val(5); r.val(5); r.val(5);
+                            if (calls !== 1) return { passed: false, message: `memoize deveria chamar a função original apenas 1x para o mesmo input. Chamou ${calls}x.` };
+                            return { passed: true };
+                        },
+                        'anagramas': () => {
+                            const fn = new Function(code + '; return isAnagram;')();
+                            if (!fn) return { passed: false, message: 'Função isAnagram não encontrada.' };
+                            const r1 = run(fn, 'listen', 'silent');
+                            const r2 = run(fn, 'hello', 'world');
+                            if (!r1.ok) return { passed: false, message: `Erro: ${r1.err}` };
+                            if (r1.val !== true) return { passed: false, message: '"listen" e "silent" são anagramas — deveria retornar true.' };
+                            if (r2.val === true) return { passed: false, message: '"hello" e "world" não são anagramas — deveria retornar false.' };
+                            return { passed: true };
+                        },
+                    };
+
+                    const testFn = testCases[slug];
+                    if (!testFn) {
+                        // Sem teste específico: aceita se houve output
+                        return outputs.length > 0 ? { passed: true } : { passed: false, message: 'Use console.log() para mostrar o resultado.' };
+                    }
+
+                    return testFn();
+                } catch(e) {
+                    return { passed: false, message: `Erro ao validar: ${e.message}` };
                 }
             },
 
