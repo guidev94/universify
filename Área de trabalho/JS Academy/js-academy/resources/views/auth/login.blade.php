@@ -1,4 +1,5 @@
 <x-guest-layout>
+<x-slot name="title">Entrar — JS Academy</x-slot>
     <!-- Logo removido daqui pois já está no layout global de guest -->
     
     <div class="text-center mb-8">

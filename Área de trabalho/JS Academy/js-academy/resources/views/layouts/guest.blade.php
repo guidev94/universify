@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'JS Academy') }}</title>
+    <title>{{ $title ?? config('app.name', 'JS Academy') }}</title>
 
     <!-- Estilos do Tailwind 4 (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -27,7 +27,8 @@
 
         <!-- Card de Autenticação (Bento Design) -->
         <div class="bento-card p-8 bg-zinc-900/40 border border-white/5 shadow-2xl backdrop-blur-xl">
-            {{ $slot }}
+            {{ $slot ?? '' }}
+            @yield('content')
         </div>
         
         <div class="text-center">

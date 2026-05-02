@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@section('title', 'Desafios de Lógica JavaScript — JS Academy')
+
+@section('head')
+<meta name="description" content="12 desafios técnicos de JavaScript: FizzBuzz, Two Sum, Debounce, Deep Clone e mais. Teste sua lógica e ganhe XP.">
+@endsection
+
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="arenaHandler()">
     <header class="mb-16 text-center lg:text-left page-header">
@@ -9,6 +15,16 @@
         <p class="mt-4 text-xl text-zinc-500 max-w-2xl mx-auto lg:mx-0">
             Encare desafios de algoritmos e prove sua maestria. Resolva rápido para ganhar bônus de XP! 🚫 Proibido colar.
         </p>
+        <p class="text-zinc-500 text-base max-w-lg mx-auto lg:mx-0 mt-4 leading-relaxed">
+            Desafios reais usados em entrevistas técnicas. Resolva no editor, ganhe XP e prove que sabe programar de verdade.
+        </p>
+        <div class="flex items-center justify-center lg:justify-start gap-6 mt-6 text-xs font-mono text-zinc-600">
+            <span>{{ \App\Models\LogicChallenge::count() }} desafios disponíveis</span>
+            <span>·</span>
+            <span>Fácil · Médio · Difícil</span>
+            <span>·</span>
+            <span>XP + Diamantes ao completar</span>
+        </div>
     </header>
 
     <!-- Grid de Cards de Desafios -->

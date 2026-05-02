@@ -1,4 +1,5 @@
 <x-guest-layout>
+<x-slot name="title">Criar conta grátis — JS Academy</x-slot>
     <div class="text-center mb-8">
         <h3 class="text-xl font-bold text-white">Criar sua conta</h3>
         <p class="text-sm text-zinc-500 mt-1">Torne-se um mestre em JavaScript.</p>

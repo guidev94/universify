@@ -23,7 +23,7 @@ Route::get('/', function () {
         ->orderBy('order')
         ->first();
 
-    return view('welcome', compact('tracks', 'user', 'rankingPosition', 'nextLesson'));
+    return view('welcome', compact('tracks', 'user', 'rankingPosition', 'nextLesson', 'completedLessonIds'));
 });
 
 Route::post('/progress/update-xp', [ProgressController::class, 'updateXP']);

@@ -37,10 +37,6 @@ class ProgressController extends Controller
             // Atualiza o XP do usuário
             $this->updateXPLogic($user, $lesson->xp_reward);
 
-            // Atualiza os Diamantes do usuário
-            $user->diamonds += $lesson->diamond_reward;
-            $user->save();
-
             // Verifica se a trilha (Track) foi finalizada para dar a Badge
             $track = $lesson->track;
             $totalLessons = $track->lessons()->count();

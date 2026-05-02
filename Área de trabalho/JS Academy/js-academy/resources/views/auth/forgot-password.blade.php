@@ -1,4 +1,5 @@
 <x-guest-layout>
+<x-slot name="title">Recuperar senha — JS Academy</x-slot>
     <div class="mb-8">
         <h1 class="text-2xl font-black text-white tracking-tight">Recuperar senha</h1>
         <p class="text-zinc-500 text-sm mt-1">Informe seu e-mail e enviaremos um link de redefinicao.</p>

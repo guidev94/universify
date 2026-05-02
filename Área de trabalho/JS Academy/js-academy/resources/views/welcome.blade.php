@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
+@section('title', 'JS Academy — Aprenda JavaScript como um Dev de Elite')
+
 @section('head')
+<meta name="description" content="8 trilhas estruturadas, 38 lições com exemplos reais do mercado. Do zero ao TypeScript. Aprenda JavaScript como os devs do Stripe, Netflix e Vercel. Grátis.">
+<meta property="og:title" content="JS Academy — Aprenda JavaScript como um Dev de Elite">
+<meta property="og:description" content="8 trilhas, 38 lições, 12 desafios técnicos. Do zero ao TypeScript. Aprenda com exemplos reais do mercado.">
+<meta property="og:url" content="{{ url('/') }}">
 <script>
 // Registrar ScrollTrigger do GSAP — importado no bundle via app.js
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -80,8 +86,8 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                 de verdade.
             </h1>
             <p class="hero-subtitle mt-6 text-xl text-zinc-400 max-w-xl leading-relaxed">
-                8 trilhas estruturadas, 38 lições com exemplos reais e desafios técnicos.
-                Do zero ao mercado de trabalho — aprenda como os devs do Netflix, Stripe e Vercel.
+                Da lógica básica ao TypeScript avançado — com exemplos reais do <span class="text-white font-bold">Stripe</span>, <span class="text-white font-bold">Netflix</span> e <span class="text-white font-bold">Vercel</span>.<br>
+                <span class="text-zinc-500 text-base">38 lições · 12 desafios técnicos · 100% gratuito para começar.</span>
             </p>
         </div>
         
@@ -185,20 +191,29 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                 </div>
                 Trilhas de Aprendizado
             </h2>
-            <p class="text-xs text-zinc-600 mb-10 ml-[3.5rem] font-mono">{{ $totalTrilhas }} módulos · {{ $totalLicoes }} aulas · Da lógica ao TypeScript</p>
+            <p class="text-xs text-zinc-600 mb-2 ml-[3.5rem] font-mono">{{ $totalTrilhas }} módulos · {{ $totalLicoes }} aulas · Da lógica ao TypeScript</p>
+            <p class="text-sm text-zinc-500 mb-10 ml-[3.5rem] leading-relaxed max-w-md">Cada módulo desbloqueado coloca você <span class="text-yellow-500 font-bold">um nível acima dos 90%</span> dos devs que nunca saíram do "Olá Mundo".</p>
             
             <div class="space-y-12 pl-10 border-l-2 border-zinc-900 light:border-zinc-200 ml-4 relative">
                 @foreach($tracks as $index => $track)
                 @php
                     $isCompleted = $user ? $user->badges->contains('track_id', $track->id) : false;
                     $isLocked = ($index > 0 && ($user ? !$user->badges->contains('track_id', $tracks[$index-1]->id) : true));
+                    $trackLessonCount = $track->lessons->count();
+                    $trackXP = $track->lessons->sum('xp_reward');
+                    $trackCompletedCount = collect($track->lessons)->filter(fn($l) => in_array($l->id, $completedLessonIds ?? []))->count();
+                    // Abrir por padrão: módulo desbloqueado e não concluído (o atual)
+                    $isOpen = !$isLocked && !$isCompleted;
                 @endphp
-                <div class="track-card relative group">
-                    <div class="absolute -left-[51px] top-0 w-6 h-6 rounded-full {{ $isCompleted ? 'bg-green-500' : ($isLocked ? 'bg-zinc-800' : 'bg-yellow-400') }} border-[6px] border-zinc-950 light:border-white z-10 transition-transform group-hover:scale-125 shadow-xl"></div>
-                    
-                    <div class="bento-card p-6 bg-zinc-900/40 light:bg-white hover:bg-zinc-900/60 transition-all relative overflow-hidden group opacity-100">
+                <div class="track-card relative group" x-data="{ open: {{ $isOpen ? 'true' : 'false' }} }">
+                    {{-- Dot da timeline --}}
+                    <div class="absolute -left-[51px] top-5 w-6 h-6 rounded-full {{ $isCompleted ? 'bg-green-500' : ($isLocked ? 'bg-zinc-800' : 'bg-yellow-400') }} border-[6px] border-zinc-950 z-10 transition-all group-hover:scale-110 shadow-xl"></div>
+
+                    <div class="bento-card bg-zinc-900/40 transition-all relative overflow-hidden opacity-100 {{ $isCompleted ? 'border-green-500/20' : '' }}">
+
+                        {{-- Overlay de bloqueado --}}
                         @if($isLocked)
-                        <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-[3px] flex flex-col items-center justify-center z-20 gap-3">
+                        <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-[3px] flex flex-col items-center justify-center z-20 gap-3 rounded-[2rem]">
                             @if(!auth()->check())
                             <div class="text-center px-4">
                                 <svg class="w-8 h-8 text-zinc-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
@@ -209,65 +224,94 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                             </div>
                             @else
                             <div class="bg-zinc-900/90 border border-white/10 px-5 py-3 rounded-2xl shadow-2xl text-center">
-                                <svg class="w-5 h-5 text-zinc-500 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                <svg class="w-5 h-5 text-zinc-500 mx-auto mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
                                 <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Conclua o módulo anterior</p>
                             </div>
                             @endif
                         </div>
                         @endif
 
-                        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
-                            <div class="flex-grow">
-                                <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
-                                <h3 class="text-2xl font-black text-white mt-1 group-hover:text-yellow-400 transition-colors light:text-zinc-900">{{ $track->name }}</h3>
+                        {{-- Header clicável do accordion --}}
+                        <button
+                            @click="!{{ $isLocked ? 'true' : 'false' }} && (open = !open)"
+                            class="w-full p-6 text-left flex items-start justify-between gap-4 {{ $isLocked ? 'cursor-not-allowed' : 'cursor-pointer' }}"
+                        >
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Módulo {{ $index + 1 }}</span>
+                                    @if($isCompleted)
+                                    <span class="text-[8px] font-black text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">Concluído</span>
+                                    @endif
+                                </div>
+                                <h3 class="text-xl font-black text-white leading-tight group-hover:text-yellow-400 transition-colors">{{ $track->name }}</h3>
+                                <p class="text-[11px] text-zinc-500 mt-1 leading-relaxed line-clamp-2">{{ $track->description }}</p>
+                                {{-- Stats --}}
+                                <div class="flex items-center gap-4 mt-3">
+                                    <span class="text-[10px] font-mono text-zinc-600">
+                                        <span class="{{ $trackCompletedCount === $trackLessonCount && $trackLessonCount > 0 ? 'text-green-500' : 'text-zinc-500' }}">{{ $trackCompletedCount }}</span>/{{ $trackLessonCount }} aulas
+                                    </span>
+                                    <span class="text-[10px] font-mono text-yellow-600">+{{ number_format($trackXP) }} XP</span>
+                                    @if($track->badge)
+                                    <span class="text-[10px] font-mono text-zinc-600">{{ $track->badge->icon }} {{ $track->badge->name }}</span>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="flex items-center gap-3">
+                            {{-- Ações + Chevron --}}
+                            <div class="flex items-center gap-3 flex-shrink-0">
                                 @if(!$isLocked && !$isCompleted)
-                                <button onclick="skipTrack({{ $track->id }})" class="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-white/5 text-[9px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-700 transition-all uppercase tracking-widest">Pular Módulo</button>
+                                <button
+                                    onclick="skipTrack({{ $track->id }}); event.stopPropagation();"
+                                    class="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-white/5 text-[9px] font-bold text-zinc-500 hover:text-white hover:bg-zinc-700 transition-all uppercase tracking-widest"
+                                >Pular</button>
                                 @endif
-                                @if($track->badge)
-                                <div class="w-12 h-12 rounded-xl bg-zinc-800/50 border border-white/5 flex items-center justify-center text-2xl shadow-inner" title="{{ $track->badge->name }}">
-                                    {{ $track->badge->icon }}
+                                @if(!$isLocked)
+                                <div :class="open ? 'rotate-180' : ''" class="transition-transform duration-300 text-zinc-500">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
                                 </div>
                                 @endif
+                            </div>
+                        </button>
+
+                        {{-- Lista de lições colapsável --}}
+                        <div x-show="open" x-collapse class="px-6 pb-6">
+                            <div class="space-y-2 pt-2 border-t border-white/5">
+                                @foreach($track->lessons->sortBy('order') as $lesson)
+                                @php
+                                    $lessonCompleted = in_array($lesson->id, $completedLessonIds ?? []);
+                                    $requiresAuth = !auth()->check() && $index > 0;
+                                @endphp
+                                <button
+                                    data-lesson-id="{{ $lesson->id }}"
+                                    data-lesson-title="{{ $lesson->title }}"
+                                    data-lesson-content="{{ $lesson->content }}"
+                                    data-lesson-task="{{ $lesson->task }}"
+                                    data-lesson-starter="{{ $lesson->starter_code }}"
+                                    data-lesson-tips="{{ $lesson->tips }}"
+                                    data-lesson-examples="{{ $lesson->examples }}"
+                                    data-lesson-case="{{ $lesson->real_world_case }}"
+                                    data-lesson-docs="{{ $lesson->docs_link }}"
+                                    data-lesson-xp="{{ $lesson->xp_reward }}"
+                                    {{ $requiresAuth ? 'data-requires-auth=true' : '' }}
+                                    class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 border border-white/5 hover:border-yellow-400/30 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }} {{ $lessonCompleted ? 'border-green-500/30 bg-green-500/5' : '' }}"
+                                    {{ $isLocked ? 'disabled' : '' }}>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-7 h-7 rounded-lg border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400 shadow-lg shadow-green-500/20' : 'bg-zinc-800 border-white/5' }}">
+                                            @if($lessonCompleted)
+                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                            @else
+                                            <span class="text-[10px] font-black text-zinc-500">{{ $lesson->order }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs font-bold text-white">{{ $lesson->title }}</span>
+                                    </div>
+                                    <span class="text-[9px] font-mono {{ $lessonCompleted ? 'text-green-500' : 'text-zinc-600' }} flex-shrink-0">+{{ $lesson->xp_reward }} XP</span>
+                                </button>
+                                @endforeach
                             </div>
                         </div>
 
-                        <!-- Lista de Lições Slim -->
-                        <div class="mt-6 space-y-2">
-                            @foreach($track->lessons as $lesson)
-                            @php
-                                $lessonCompleted = $user ? $user->progress()->where('lesson_id', $lesson->id)->where('status', 'completed')->exists() : false;
-                                $requiresAuth = !auth()->check() && $index > 0;
-                            @endphp
-                            <button
-                                data-lesson-id="{{ $lesson->id }}"
-                                data-lesson-title="{{ $lesson->title }}"
-                                data-lesson-content="{{ $lesson->content }}"
-                                data-lesson-task="{{ $lesson->task }}"
-                                data-lesson-starter="{{ $lesson->starter_code }}"
-                                data-lesson-tips="{{ $lesson->tips }}"
-                                data-lesson-examples="{{ $lesson->examples }}"
-                                data-lesson-case="{{ $lesson->real_world_case }}"
-                                data-lesson-docs="{{ $lesson->docs_link }}"
-                                {{ $requiresAuth ? 'data-requires-auth=true' : '' }}
-                                class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }} {{ $lessonCompleted ? 'border-green-500/50 bg-green-500/5' : '' }}"
-                                {{ $isLocked ? 'disabled' : '' }}>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-7 h-7 rounded-lg border flex-shrink-0 flex items-center justify-center {{ $lessonCompleted ? 'bg-green-500 border-green-400 shadow-lg shadow-green-500/20' : 'bg-zinc-800 border-white/5' }}">
-                                        <span class="text-[10px] font-black {{ $lessonCompleted ? 'text-white' : 'text-zinc-500' }}">{{ $lesson->order }}</span>
-                                    </div>
-                                    <span class="text-xs font-bold text-white light:text-zinc-900">{{ $lesson->title }}</span>
-                                </div>
-                                @if($lessonCompleted)
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-[8px] font-black text-green-500 uppercase tracking-widest">Concluído</span>
-                                    <svg class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                </div>
-                                @endif
-                            </button>
-                            @endforeach
-                        </div>
                     </div>
                 </div>
                 @endforeach
@@ -358,9 +402,11 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                 </div>
 
                 <!-- Botão de Validação -->
-                <button id="validate-btn" class="w-full py-5 bg-white text-zinc-950 rounded-2xl font-black text-base uppercase tracking-widest hover:bg-yellow-400 transition-all active:scale-95 shadow-2xl shadow-white/5 border-b-4 border-zinc-300 hover:border-yellow-600">
-                    Validar Código
-                    <svg class="w-4 h-4 ml-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <button id="validate-btn" class="w-full py-5 bg-white text-zinc-950 rounded-2xl font-black text-base uppercase tracking-widest hover:bg-yellow-400 transition-all active:scale-95 shadow-2xl shadow-white/5 border-b-4 border-zinc-300 hover:border-yellow-600 flex items-center justify-center gap-3">
+                    <span id="validate-btn-text">Selecione uma lição</span>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </button>
             </div>
         </div>

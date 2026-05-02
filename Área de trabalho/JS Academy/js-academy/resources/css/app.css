@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+[x-cloak] { display: none !important; }
+
 @theme {
     --color-js-yellow: #F7DF1E;
     --color-accent-pink: #EC4899;
@@ -71,111 +73,180 @@
 }
 
 /* ============================================
-   LIGHT MODE — Complete Override System
+   LIGHT MODE — robusto e persistente
+   Seletores duplos (html.light-mode e .light-mode)
+   para cobrir tanto body quanto html com a classe
    ============================================ */
+
+html.light-mode,
 .light-mode {
     color-scheme: light;
 }
 
+/* Background e cor base */
+html.light-mode body,
+.light-mode,
 .light-mode body {
     background-color: #f8fafc !important;
     color: #0f172a !important;
 }
 
-.light-mode .bg-zinc-950,
-.light-mode [class*="bg-zinc-950"] {
-    background-color: #f8fafc !important;
-}
-
-.light-mode .bg-zinc-900,
-.light-mode [class*="bg-zinc-900"] {
-    background-color: #ffffff !important;
-}
-
-.light-mode .bg-zinc-800,
-.light-mode [class*="bg-zinc-800"] {
+/* Zinc backgrounds */
+html.light-mode .bg-zinc-950,
+.light-mode .bg-zinc-950 {
     background-color: #f1f5f9 !important;
 }
 
+html.light-mode .bg-zinc-900,
+.light-mode .bg-zinc-900 {
+    background-color: #ffffff !important;
+}
+
+html.light-mode .bg-zinc-800,
+.light-mode .bg-zinc-800 {
+    background-color: #e2e8f0 !important;
+}
+
+/* Nav */
+html.light-mode nav,
+.light-mode nav {
+    background: rgba(255,255,255,0.95) !important;
+    border-color: rgba(15,23,42,0.08) !important;
+}
+
+/* Textos */
+html.light-mode .text-white,
 .light-mode .text-white {
     color: #0f172a !important;
 }
 
-.light-mode .text-zinc-500,
+html.light-mode .text-zinc-400,
+html.light-mode .text-zinc-500,
+html.light-mode .text-zinc-600,
 .light-mode .text-zinc-400,
+.light-mode .text-zinc-500,
 .light-mode .text-zinc-600 {
     color: #64748b !important;
 }
 
+/* Bento cards */
+html.light-mode .bento-card,
 .light-mode .bento-card {
-    background: rgba(255,255,255,0.9) !important;
-    border-color: rgba(15,23,42,0.08) !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
+    background: rgba(255,255,255,0.95) !important;
+    border-color: rgba(15,23,42,0.06) !important;
+    box-shadow: 0 2px 16px rgba(15,23,42,0.06), 0 1px 4px rgba(15,23,42,0.04) !important;
 }
 
-.light-mode nav {
-    background: rgba(248,250,252,0.9) !important;
-    border-color: rgba(15,23,42,0.08) !important;
-}
-
-.light-mode .border-white\/5,
-.light-mode .border-white\/10 {
+/* Bordas brancas */
+html.light-mode [class*="border-white"],
+.light-mode [class*="border-white"] {
     border-color: rgba(15,23,42,0.08) !important;
 }
 
-.light-mode .border-zinc-800,
+/* Bordas zinc-8xx e zinc-9xx */
+html.light-mode [class*="border-zinc-8"],
+html.light-mode [class*="border-zinc-9"],
+.light-mode [class*="border-zinc-8"],
+.light-mode [class*="border-zinc-9"] {
+    border-color: #e2e8f0 !important;
+}
+
+/* Timeline border (trilhas) */
+html.light-mode .border-zinc-900,
 .light-mode .border-zinc-900 {
     border-color: #e2e8f0 !important;
 }
 
-/* Monaco editor container light mode */
-.light-mode #monaco-editor,
-.light-mode #arena-editor {
-    filter: none;
+/* Track card dot ring */
+html.light-mode .border-zinc-950,
+.light-mode .border-zinc-950 {
+    border-color: #f1f5f9 !important;
 }
 
-/* Console output light mode */
-.light-mode #console-output,
-.light-mode #arena-console {
-    background: #f8fafc !important;
-    color: #1e293b !important;
-}
-
-.light-mode .text-zinc-500 { color: #64748b !important; }
-.light-mode .bg-zinc-950\/40 { background: rgba(248,250,252,0.8) !important; }
-.light-mode .bg-zinc-950\/50 { background: rgba(248,250,252,0.9) !important; }
-
-/* Tab bar light mode */
-.light-mode .tab-btn { color: #64748b !important; }
-.light-mode .tab-btn.active { color: #0f172a !important; background: rgba(247,223,30,0.08) !important; }
-
-/* Gradient texts — preserve in light mode */
-.light-mode .bg-gradient-to-r.bg-clip-text { -webkit-background-clip: text !important; }
-
-/* Input fields light mode */
+/* Input fields */
+html.light-mode .input-field,
 .light-mode .input-field {
     background: #ffffff !important;
     border-color: #e2e8f0 !important;
     color: #0f172a !important;
 }
 
-/* Ranking table light */
-.light-mode tr:hover td { background: rgba(247,223,30,0.04) !important; }
+/* Tabs */
+html.light-mode .tab-btn,
+.light-mode .tab-btn {
+    color: #64748b !important;
+}
+html.light-mode .tab-btn.active,
+.light-mode .tab-btn.active {
+    color: #0f172a !important;
+    background: rgba(247,223,30,0.08) !important;
+}
 
-/* Theme toggle button adapts */
+/* Monaco editor */
+html.light-mode #monaco-editor,
+html.light-mode #arena-editor,
+.light-mode #monaco-editor,
+.light-mode #arena-editor {
+    filter: none !important;
+}
+
+/* Console output */
+html.light-mode #console-output,
+html.light-mode #arena-console,
+.light-mode #console-output,
+.light-mode #arena-console {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* Theme toggle */
+html.light-mode #theme-toggle,
 .light-mode #theme-toggle {
     background: rgba(15,23,42,0.05) !important;
     border-color: rgba(15,23,42,0.1) !important;
-    color: #64748b !important;
+    color: #475569 !important;
 }
 
-/* Streak/badge icons adapt */
-.light-mode .border-zinc-900 { border-color: #e2e8f0 !important; }
+/* Fundos com opacidade */
+html.light-mode .bg-zinc-950\/40,
+html.light-mode .bg-zinc-950\/50,
+.light-mode .bg-zinc-950\/40,
+.light-mode .bg-zinc-950\/50 {
+    background: rgba(255,255,255,0.8) !important;
+}
 
-/* Intro overlay light mode */
-.light-mode #intro-overlay { background: rgba(248,250,252,0.98) !important; }
-.light-mode #intro-overlay .text-white { color: #0f172a !important; }
-.light-mode #intro-overlay pre { background: rgba(15,23,42,0.04) !important; }
+/* Auth pages full-screen */
+html.light-mode .min-h-screen.bg-zinc-950,
+.light-mode .min-h-screen.bg-zinc-950 {
+    background-color: #f8fafc !important;
+}
+
+/* Ranking table */
+html.light-mode tr:hover td,
+.light-mode tr:hover td {
+    background: rgba(247,223,30,0.04) !important;
+}
+
+/* Gradient texts — preserve clip */
+html.light-mode .bg-gradient-to-r.bg-clip-text,
+.light-mode .bg-gradient-to-r.bg-clip-text {
+    -webkit-background-clip: text !important;
+}
+
+/* Intro overlay */
+html.light-mode #intro-overlay,
+.light-mode #intro-overlay {
+    background: rgba(248,250,252,0.98) !important;
+}
+html.light-mode #intro-overlay .text-white,
+.light-mode #intro-overlay .text-white {
+    color: #0f172a !important;
+}
+html.light-mode #intro-overlay pre,
+.light-mode #intro-overlay pre {
+    background: rgba(15,23,42,0.04) !important;
+}
 
 /* Animations */
 .text-glow {
@@ -253,5 +324,13 @@
 @keyframes streak-pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.15) rotate(-3deg); }
+}
+
+/* Accordion track card */
+.track-card .bento-card {
+    transition: border-color 0.3s ease;
+}
+.track-card [x-collapse] {
+    overflow: hidden;
 }
 .streak-fire { animation: streak-pulse 2s ease infinite; }
