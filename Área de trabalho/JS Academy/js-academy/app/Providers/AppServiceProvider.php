@@ -19,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Força HTTPS em produção
+        if ($this->app->isProduction()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
+        // Previne exposição da versão do PHP
+        if (function_exists('header_remove')) {
+            header_remove('X-Powered-By');
+        }
     }
 }
