@@ -74,11 +74,14 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     <!-- Cabeçalho Principal -->
     <header class="mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
         <div class="max-w-3xl">
-            <h1 class="hero-headline text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter light:text-zinc-950">
-                Evolua seu <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent italic">Javascript</span> <br>ao próximo nível.
+            <h1 class="hero-headline text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter">
+                Domine<br>
+                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent italic">JavaScript</span><br>
+                de verdade.
             </h1>
-            <p class="hero-subtitle mt-6 text-xl text-zinc-500 max-w-xl leading-relaxed light:text-zinc-600">
-                Plataforma profissional de aprendizado gamificado. Lógica de programação, padrões de projeto e maestria técnica.
+            <p class="hero-subtitle mt-6 text-xl text-zinc-400 max-w-xl leading-relaxed">
+                8 trilhas estruturadas, 38 lições com exemplos reais e desafios técnicos.
+                Do zero ao mercado de trabalho — aprenda como os devs do Netflix, Stripe e Vercel.
             </p>
         </div>
         
@@ -130,7 +133,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
         <!-- Próxima Aula -->
         <div class="md:col-span-5 bento-card p-8 bg-gradient-to-br from-cyan-400/5 to-transparent border-cyan-400/10 hover:border-cyan-400/30 transition-all group opacity-100">
-            <span class="text-[10px] font-mono text-cyan-400 uppercase font-bold tracking-[0.3em]">Retomar de onde parou</span>
+            <span class="text-[10px] font-mono text-cyan-400 uppercase font-bold tracking-[0.3em]">Continue de onde parou</span>
             <div class="mt-6">
                 @if($nextLesson)
                 <h3 class="text-3xl font-black text-white light:text-zinc-900 group-hover:text-cyan-400 transition-colors">{{ $nextLesson->title }}</h3>
@@ -163,8 +166,9 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
             <div class="mt-6 text-center">
                 <p class="text-7xl font-black text-white light:text-zinc-900 italic">#{{ $rankingPosition }}</p>
                 <div class="mt-4 inline-block px-4 py-1.5 bg-orange-400/10 rounded-full border border-orange-400/20">
-                    <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest">{{ $user->league ?? 'Bronze' }} League</span>
+                    <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest">{{ $user->league ?? 'Bronze' }} · {{ number_format($user->xp ?? 0) }} XP</span>
                 </div>
+                <p class="text-[9px] text-zinc-600 mt-3 font-mono">entre {{ \App\Models\User::count() }} devs cadastrados</p>
             </div>
         </div>
     </section>
@@ -172,7 +176,8 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- O Caminho (Trilhas) -->
         <div id="o-caminho" class="lg:col-span-6 order-2 lg:order-1">
-            <h2 class="section-title text-3xl font-black text-white mb-10 flex items-center gap-4">
+            @php $totalLicoes = \App\Models\Lesson::count(); $totalTrilhas = $tracks->count(); @endphp
+            <h2 class="section-title text-3xl font-black text-white mb-2 flex items-center gap-4">
                 <div class="w-10 h-10 bg-yellow-400/10 border border-yellow-400/20 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-yellow-400/5">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -180,6 +185,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                 </div>
                 Trilhas de Aprendizado
             </h2>
+            <p class="text-xs text-zinc-600 mb-10 ml-[3.5rem] font-mono">{{ $totalTrilhas }} módulos · {{ $totalLicoes }} aulas · Da lógica ao TypeScript</p>
             
             <div class="space-y-12 pl-10 border-l-2 border-zinc-900 light:border-zinc-200 ml-4 relative">
                 @foreach($tracks as $index => $track)
@@ -192,10 +198,21 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                     
                     <div class="bento-card p-6 bg-zinc-900/40 light:bg-white hover:bg-zinc-900/60 transition-all relative overflow-hidden group opacity-100">
                         @if($isLocked)
-                        <div class="absolute inset-0 bg-zinc-950/40 backdrop-blur-[2px] flex items-center justify-center z-20">
-                            <span class="bg-zinc-800 border border-white/10 px-4 py-2 rounded-2xl text-xs font-bold text-zinc-500 uppercase tracking-widest shadow-2xl flex items-center gap-2 light:bg-white light:text-zinc-400">
-                                🔒 Bloqueado
-                            </span>
+                        <div class="absolute inset-0 bg-zinc-950/60 backdrop-blur-[3px] flex flex-col items-center justify-center z-20 gap-3">
+                            @if(!auth()->check())
+                            <div class="text-center px-4">
+                                <svg class="w-8 h-8 text-zinc-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                <p class="text-xs font-bold text-zinc-400 mb-3">Complete o Módulo 1 gratuitamente.<br>Crie sua conta para continuar.</p>
+                                <button onclick="document.querySelector('[x-data]').__x.$data.registerModal=true" class="px-5 py-2 bg-yellow-400 text-zinc-950 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-300 transition-all">
+                                    Criar Conta Grátis
+                                </button>
+                            </div>
+                            @else
+                            <div class="bg-zinc-900/90 border border-white/10 px-5 py-3 rounded-2xl shadow-2xl text-center">
+                                <svg class="w-5 h-5 text-zinc-500 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Conclua o módulo anterior</p>
+                            </div>
+                            @endif
                         </div>
                         @endif
 
@@ -221,8 +238,9 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                             @foreach($track->lessons as $lesson)
                             @php
                                 $lessonCompleted = $user ? $user->progress()->where('lesson_id', $lesson->id)->where('status', 'completed')->exists() : false;
+                                $requiresAuth = !auth()->check() && $index > 0;
                             @endphp
-                            <button 
+                            <button
                                 data-lesson-id="{{ $lesson->id }}"
                                 data-lesson-title="{{ $lesson->title }}"
                                 data-lesson-content="{{ $lesson->content }}"
@@ -232,6 +250,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
                                 data-lesson-examples="{{ $lesson->examples }}"
                                 data-lesson-case="{{ $lesson->real_world_case }}"
                                 data-lesson-docs="{{ $lesson->docs_link }}"
+                                {{ $requiresAuth ? 'data-requires-auth=true' : '' }}
                                 class="lesson-btn w-full flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 light:bg-zinc-50 border border-white/5 hover:border-yellow-400/40 transition-all text-left {{ $isLocked ? 'cursor-not-allowed' : '' }} {{ $lessonCompleted ? 'border-green-500/50 bg-green-500/5' : '' }}"
                                 {{ $isLocked ? 'disabled' : '' }}>
                                 <div class="flex items-center gap-3">
@@ -388,17 +407,88 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         event.currentTarget.classList.add('active');
     }
 
+    let _skipTrackId = null;
+
     function skipTrack(trackId) {
-        if(confirm('Deseja pular este módulo? Você não ganhará os pontos das lições não concluídas.')) {
-            fetch(`/progress/skip-track/${trackId}`, {
+        _skipTrackId = trackId;
+        const modal = document.getElementById('skip-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        // Mostrar saldo de diamantes
+        const balanceEl = document.getElementById('skip-diamond-balance');
+        const diamondDisplay = document.querySelector('[data-diamonds]');
+        if (diamondDisplay) {
+            balanceEl.textContent = `Seu saldo atual: ${diamondDisplay.dataset.diamonds} diamantes`;
+        } else {
+            balanceEl.textContent = 'Custo: 200 diamantes';
+        }
+
+        // Animação de entrada
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('#skip-modal-inner', { scale: 0.85, opacity: 0, y: 20 }, { scale: 1, opacity: 1, y: 0, duration: 0.35, ease: 'back.out(1.5)' });
+        }
+
+        document.getElementById('skip-confirm-btn').onclick = confirmarSkip;
+    }
+
+    function fecharSkipModal() {
+        const modal = document.getElementById('skip-modal');
+        if (typeof gsap !== 'undefined') {
+            gsap.to('#skip-modal-inner', { scale: 0.9, opacity: 0, y: 10, duration: 0.2, ease: 'power2.in',
+                onComplete: () => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            });
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    async function confirmarSkip() {
+        const btn = document.getElementById('skip-confirm-btn');
+        btn.textContent = 'Pulando...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`/progress/skip-track/${_skipTrackId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
-            }).then(res => res.json()).then(data => {
-                if(data.success) window.location.reload();
             });
+            const data = await res.json();
+
+            if (data.success) {
+                fecharSkipModal();
+                mostrarToast('Módulo pulado! Badge desbloqueada.', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                mostrarToast(data.message || 'Diamantes insuficientes.', 'error');
+                fecharSkipModal();
+            }
+        } catch (e) {
+            mostrarToast('Erro ao processar. Tente novamente.', 'error');
+            fecharSkipModal();
+        }
+    }
+
+    function mostrarToast(mensagem, tipo = 'success') {
+        const toast = document.createElement('div');
+        const cores = {
+            success: 'bg-green-500/10 border-green-500/30 text-green-400',
+            error: 'bg-red-500/10 border-red-500/30 text-red-400',
+            info: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+        };
+        toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] px-6 py-3 rounded-2xl border font-bold text-sm ${cores[tipo]} backdrop-blur-xl shadow-2xl`;
+        toast.textContent = mensagem;
+        document.body.appendChild(toast);
+
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo(toast, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+            gsap.to(toast, { y: 20, opacity: 0, duration: 0.3, delay: 2.5, ease: 'power2.in', onComplete: () => toast.remove() });
+        } else {
+            setTimeout(() => toast.remove(), 3000);
         }
     }
 
@@ -418,6 +508,28 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         modal.classList.add('flex');
     }
 </script>
+
+{{-- Modal: Pular Módulo --}}
+<div id="skip-modal" class="fixed inset-0 z-[250] hidden items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-md">
+    <div class="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-[2rem] p-8 text-center shadow-2xl" id="skip-modal-inner">
+        <div class="w-16 h-16 bg-orange-400/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-orange-400/20">
+            <svg class="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-black text-white uppercase tracking-tight mb-2">Pular este módulo?</h3>
+        <p class="text-zinc-500 text-sm leading-relaxed mb-2">Você usará <span class="text-orange-400 font-bold">200 diamantes</span> para pular e receber o badge sem completar as aulas.</p>
+        <p id="skip-diamond-balance" class="text-xs text-zinc-600 mb-6">Seu saldo: carregando...</p>
+        <div class="flex gap-3">
+            <button onclick="fecharSkipModal()" class="flex-1 py-3 bg-zinc-800 text-zinc-400 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-zinc-700 transition-all border border-white/5">
+                Cancelar
+            </button>
+            <button id="skip-confirm-btn" class="flex-1 py-3 bg-orange-400 text-zinc-950 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-300 transition-all">
+                Pular Módulo
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal de Compartilhamento -->
 <div id="share-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-md">

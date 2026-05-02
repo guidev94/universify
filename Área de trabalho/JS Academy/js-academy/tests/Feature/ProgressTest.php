@@ -53,7 +53,7 @@ class ProgressTest extends TestCase
         Track::create(['name' => 'Trilha 1', 'slug' => 'trilha-1', 'description' => 'desc']);
         User::factory()->create();
 
-        $this->get('/')->assertStatus(200)->assertSee('Javascript');
+        $this->get('/')->assertStatus(200)->assertSee('JS Academy');
     }
 
     public function test_ranking_page_loads(): void
