@@ -290,7 +290,6 @@ html.light-mode #intro-overlay pre,
     transition: transform 0.2s ease;
 }
 .tab-btn.active::after { transform: translateX(-50%) scaleX(1); }
-.tab-btn:hover:not(.active)::after { transform: translateX(-50%) scaleX(0.5); }
 
 /* Validate btn shimmer */
 #validate-btn {
