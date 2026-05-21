@@ -1,17 +1,21 @@
-{# ===== RESUMO DO PERÍODO ===== #}
-<div class="lwa-section-label">Resumo do Período</div>
+{# ===== MÉTRICAS DE SUCESSO (PRD Seção 18) ===== #}
+<div class="lwa-section-label">Métricas de Sucesso</div>
 <div class="lwa-kpi-row">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Leads Centralizados', value: kpis.prospeccao + kpis.engajados + kpis.reunioes + kpis.propostas + kpis.ganhos,
-        icon: 'ri-team-line', kpi_id: 'prospeccao', description: 'Base total ativa no período'
+        title: 'Leads Centralizados', value: kpis.total_leads,
+        icon: 'ri-team-line', kpi_id: 'prospeccao', description: 'Novos leads no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Reuniões Geradas', value: kpis.reunioes,
-        icon: 'ri-calendar-check-line', kpi_id: 'reunioes', description: 'Agendadas ou realizadas'
+        title: 'Frios → Mornos', value: kpis.frio_to_morno,
+        icon: 'ri-temp-hot-line', kpi_id: 'engajados', description: 'Leads que engajaram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Propostas', value: kpis.propostas,
-        icon: 'ri-file-text-line', kpi_id: 'propostas', description: 'Em negociação ativa'
+        title: 'Mornos → Reunião', value: kpis.morno_to_reuniao,
+        icon: 'ri-calendar-check-line', kpi_id: 'reunioes', description: 'Convertidos em reunião'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Reuniões LinkedIn', value: kpis.reunioes_linkedin,
+        icon: 'ri-linkedin-box-line', description: 'Geradas via LinkedIn/Roboze'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Clientes Ganhos', value: kpis.ganhos,
@@ -19,70 +23,82 @@
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Sem Follow-up', value: kpis.hot_no_followup,
-        icon: 'ri-alarm-warning-line', kpi_id: 'hot_no_followup', description: 'Leads quentes aguardando ação'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Leads Incompletos', value: kpis.leads_incompletos,
-        icon: 'ri-error-warning-line', kpi_id: 'leads_incompletos', description: 'Falta e-mail ou telefone'
+        icon: 'ri-alarm-warning-line', kpi_id: 'hot_no_followup', description: 'Quentes aguardando ação'
     } %}
 </div>
 
-{# ===== TEMPERATURA DOS LEADS (PRD Seção 11) ===== #}
-<div class="lwa-section-label">Temperatura dos Leads</div>
+{# ===== TEMPERATURA + SCORE (PRD Seção 11) ===== #}
+<div class="lwa-section-label">Temperatura dos Leads (Score de Interesse)</div>
 <div class="lwa-grid-2">
+    {# Tabela com contagem por temperatura #}
     <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Distribuição Atual</h4></div>
         <div class="lwa-card-body">
-            <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ charts.temperature|json_encode }}" style="height:260px;width:100%;"></canvas>
-        </div>
-    </div>
-    <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Classificação por Score</h4></div>
-        <div class="lwa-card-body">
-            <table class="lwa-table lwa-table--compact">
-                <thead><tr><th>Score</th><th>Temperatura</th><th>Ação Esperada</th></tr></thead>
+            <table class="lwa-table lwa-table--temp">
+                <thead><tr><th>Score</th><th>Temperatura</th><th>Leads Ativos</th><th>Ação</th></tr></thead>
                 <tbody>
-                    <tr><td>0 – 20</td><td><span class="lwa-badge lwa-badge--frio">Frio</span></td><td>Nutrição leve</td></tr>
-                    <tr><td>21 – 60</td><td><span class="lwa-badge lwa-badge--morno">Morno</span></td><td>Conteúdo + abordagem consultiva</td></tr>
-                    <tr><td>61 – 100</td><td><span class="lwa-badge lwa-badge--quente">Quente</span></td><td>Comercial deve agir</td></tr>
-                    <tr><td>100+</td><td><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></td><td>Follow-up imediato</td></tr>
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_frio', 'Leads Frios (Score 0-20)')">
+                        <td>0 – 20</td>
+                        <td><span class="lwa-badge lwa-badge--frio">Frio</span></td>
+                        <td><strong>{{ temperatura_counts.frio }}</strong></td>
+                        <td>Nutrição leve</td>
+                    </tr>
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_morno', 'Leads Mornos (Score 21-60)')">
+                        <td>21 – 60</td>
+                        <td><span class="lwa-badge lwa-badge--morno">Morno</span></td>
+                        <td><strong>{{ temperatura_counts.morno }}</strong></td>
+                        <td>Conteúdo + abordagem consultiva</td>
+                    </tr>
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_quente', 'Leads Quentes (Score 61-100)')">
+                        <td>61 – 100</td>
+                        <td><span class="lwa-badge lwa-badge--quente">Quente</span></td>
+                        <td><strong>{{ temperatura_counts.quente }}</strong></td>
+                        <td>Comercial deve agir</td>
+                    </tr>
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_prioritario', 'Leads Prioritários (Score 100+)')">
+                        <td>100+</td>
+                        <td><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></td>
+                        <td><strong>{{ temperatura_counts.prioritario }}</strong></td>
+                        <td>Follow-up imediato</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-</div>
-
-{# ===== LINKEDIN + E-MAIL ===== #}
-<div class="lwa-section-label">Canais de Aquisição</div>
-<div class="lwa-kpi-row lwa-kpi-row--compact">
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'LinkedIn Ativos', value: kpis.linkedin_ativos, icon: 'ri-linkedin-box-line',
-        description: 'Leads com interação no LinkedIn'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'E-mails Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line',
-        kpi_id: 'emails_enviados', description: 'Campanhas disparadas'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'E-mails Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line',
-        kpi_id: 'emails_abertos', description: 'Leads engajados'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Taxa de Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line',
-        suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho de e-mail'
-    } %}
-</div>
-
-{# ===== EVOLUÇÃO DE LEADS ===== #}
-<div class="lwa-section-label">Evolução</div>
-<div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-header"><h4>Entrada de Leads no Período</h4></div>
-    <div class="lwa-card-body">
-        <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ charts.leads_time|json_encode }}" style="height:220px;width:100%;"></canvas>
+    {# Gráfico de distribuição #}
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Distribuição Visual</h4></div>
+        <div class="lwa-card-body">
+            <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ charts.temperature|json_encode }}" style="height:240px;width:100%;"></canvas>
+        </div>
     </div>
 </div>
 
-{# ===== LEADS QUENTES (PRD Seção 18) ===== #}
+{# ===== E-MAIL MARKETING ===== #}
+<div class="lwa-section-label">E-mail Marketing</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line',
+        kpi_id: 'emails_enviados', description: 'Campanhas disparadas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line',
+        kpi_id: 'emails_abertos', description: 'Leads que abriram'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Taxa de Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line',
+        suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho das campanhas'
+    } %}
+</div>
+
+{# ===== EVOLUÇÃO ===== #}
+<div class="lwa-section-label">Entrada de Leads</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ charts.leads_time|json_encode }}" style="height:200px;width:100%;"></canvas>
+    </div>
+</div>
+
+{# ===== LEADS QUENTES ===== #}
 <div class="lwa-section-label">
     <span>Leads Quentes — Ação Necessária</span>
     {% if kpis.hot_no_followup > 0 %}<span class="lwa-section-badge">{{ kpis.hot_no_followup }}</span>{% endif %}
@@ -92,7 +108,7 @@
         {% if tables.hot_leads is empty %}
             <div class="lwa-empty-state"><i class="ri-checkbox-circle-line"></i><p>Nenhum lead quente sem follow-up.</p></div>
         {% else %}
-            <table class="lwa-table" id="lwa-hot-table">
+            <table class="lwa-table">
                 <thead><tr><th>Lead</th><th>Cargo</th><th>Temperatura</th><th>Score</th><th>Última Interação</th></tr></thead>
                 <tbody>
                     {% for row in tables.hot_leads %}
@@ -107,15 +123,33 @@
                 </tbody>
             </table>
             {% if tables.hot_leads|length > 5 %}
-                <div class="lwa-table-footer">
-                    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaShowKpiDetail('hot_no_followup', 'Leads Quentes sem Follow-up')">
-                        <i class="ri-list-check"></i> Ver todos ({{ tables.hot_leads|length }})
-                    </button>
-                </div>
+            <div class="lwa-table-footer">
+                <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaShowKpiDetail('hot_no_followup', 'Leads Quentes sem Follow-up')">
+                    Ver todos ({{ tables.hot_leads|length }})
+                </button>
+            </div>
             {% endif %}
         {% endif %}
     </div>
 </div>
+
+{# ===== LEADS INCOMPLETOS ===== #}
+{% if kpis.leads_incompletos > 0 %}
+<div class="lwa-section-label">
+    <span>Fila de Enriquecimento</span>
+    <span class="lwa-section-badge">{{ kpis.leads_incompletos }}</span>
+</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body" style="padding:14px 18px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:14px;color:var(--lwa-gray-600)">{{ kpis.leads_incompletos }} leads sem e-mail ou telefone aguardando revisão</span>
+            <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaShowKpiDetail('leads_incompletos', 'Leads Incompletos')">
+                Ver leads
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {# ===== MODAIS ===== #}
 <div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">

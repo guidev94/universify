@@ -18,18 +18,20 @@ class AnalyticsModel
     {
         return [
             'kpis' => [
-                'prospeccao'        => $this->getCountByStatus($dateRange, 'prospeccao'),
-                'engajados'         => $this->getCountByStatus($dateRange, 'engajado'),
+                'total_leads'       => $this->getTotalLeads($dateRange),
+                'frio_to_morno'     => $this->getFrioToMorno($dateRange),
+                'morno_to_reuniao'  => $this->getMornoToReuniao($dateRange),
+                'reunioes_linkedin' => $this->getReunioesLinkedin($dateRange),
                 'reunioes'          => $this->getReunioesCount($dateRange),
-                'propostas'         => $this->getCountByStatus($dateRange, 'proposta_enviada'),
+                'propostas'         => $this->getCountByStatus($dateRange, 'proposta_enviada') + $this->getCountByStatus($dateRange, 'negociacao'),
                 'ganhos'            => $this->getCountByStatus($dateRange, 'ganho'),
                 'hot_no_followup'   => $this->getHotWithoutFollowup(),
                 'leads_incompletos' => $this->getLeadsIncompletos(),
-                'linkedin_ativos'   => $this->getLinkedinAtivos(),
                 'emails_enviados'   => $this->getEmailsSent($dateRange),
                 'emails_abertos'    => $this->getEmailsOpened($dateRange),
                 'taxa_abertura'     => $this->getEmailOpenRate($dateRange),
             ],
+            'temperatura_counts' => $this->getTemperatureCounts(),
             'charts' => [
                 'temperature' => $this->getTemperatureDistribution(),
                 'leads_time'  => $this->getLeadsOverTime($dateRange),
@@ -110,6 +112,22 @@ class AnalyticsModel
                 $where = "lead_incompleto = 'sim'";
                 $params = [];
                 break;
+            case 'temp_frio':
+                $where = "temperatura = 'frio' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
+                $params = [];
+                break;
+            case 'temp_morno':
+                $where = "temperatura = 'morno' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
+                $params = [];
+                break;
+            case 'temp_quente':
+                $where = "temperatura = 'quente' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
+                $params = [];
+                break;
+            case 'temp_prioritario':
+                $where = "temperatura = 'prioritario' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
+                $params = [];
+                break;
             case 'emails_enviados':
                 return $this->getEmailCampaigns($dateRange);
             case 'emails_abertos':
@@ -159,6 +177,50 @@ class AnalyticsModel
         }
         $sql = "SELECT COUNT(*) FROM leads WHERE temperatura IN ('quente','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
         return (int) $this->connection->fetchOne($sql);
+    }
+
+    private function getTotalLeads(array $dateRange): int
+    {
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added BETWEEN :dateFrom AND :dateTo", [
+            'dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59',
+        ]);
+    }
+
+    private function getFrioToMorno(array $dateRange): int
+    {
+        if (!$this->columnExists('leads', 'temperatura')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE temperatura = 'morno' AND date_modified BETWEEN :dateFrom AND :dateTo", [
+            'dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59',
+        ]);
+    }
+
+    private function getMornoToReuniao(array $dateRange): int
+    {
+        if (!$this->columnExists('leads', 'status_comercial')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE status_comercial IN ('reuniao_agendada','reuniao_realizada') AND date_modified BETWEEN :dateFrom AND :dateTo", [
+            'dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59',
+        ]);
+    }
+
+    private function getReunioesLinkedin(array $dateRange): int
+    {
+        if (!$this->columnExists('leads', 'origem_principal') || !$this->columnExists('leads', 'status_comercial')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE origem_principal = 'linkedin_roboze' AND status_comercial IN ('reuniao_agendada','reuniao_realizada') AND date_modified BETWEEN :dateFrom AND :dateTo", [
+            'dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59',
+        ]);
+    }
+
+    private function getTemperatureCounts(): array
+    {
+        if (!$this->columnExists('leads', 'temperatura')) return ['frio' => 0, 'morno' => 0, 'quente' => 0, 'prioritario' => 0];
+        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido')) GROUP BY temperatura";
+        $rows = $this->connection->fetchAllAssociative($sql);
+        $result = ['frio' => 0, 'morno' => 0, 'quente' => 0, 'prioritario' => 0];
+        foreach ($rows as $row) {
+            $key = strtolower(trim($row['temperatura']));
+            if (isset($result[$key])) $result[$key] = (int)$row['total'];
+        }
+        return $result;
     }
 
     private function getLeadsIncompletos(): int

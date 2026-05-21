@@ -227,6 +227,9 @@
 
 .lwa-table-footer { padding: 12px 18px; border-top: 1px solid var(--lwa-gray-100); text-align: center; }
 
+.lwa-table--temp td { font-size: 14px; }
+.lwa-table--temp td:nth-child(3) { font-size: 18px; }
+
 /* Lead Cell */
 .lwa-lead-cell { display: flex; align-items: center; gap: 10px; }
 
