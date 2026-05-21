@@ -382,6 +382,29 @@ Mautic.lwaCloseKpiDetail = function() {
     mQuery('#lwa-kpi-detail').hide();
 };
 
+Mautic.lwaShowModuloLeads = function(modulo) {
+    var $panel = mQuery('#lwa-kpi-detail');
+    Mautic.lwaKpiPage = 1;
+    mQuery('#lwa-kpi-detail-title').text('Leads — ' + modulo);
+    mQuery('#lwa-kpi-detail-body').html('<div class="lwa-panel-loading"><div class="lwa-spinner"></div><span>Carregando...</span></div>');
+    mQuery('#lwa-kpi-pagination').html('');
+    $panel.show();
+
+    mQuery.ajax({
+        url: '/s/analytics/kpi-detail/modulo',
+        data: { modulo: modulo },
+        dataType: 'json',
+        success: function(response) {
+            if (response.leads && response.leads.length > 0) {
+                Mautic.lwaKpiLeads = response.leads;
+                Mautic.lwaRenderKpiPage();
+            } else {
+                mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum lead encontrado</p></div>');
+            }
+        }
+    });
+};
+
 /**
  * Lead Modal — Full detail + Actions
  */

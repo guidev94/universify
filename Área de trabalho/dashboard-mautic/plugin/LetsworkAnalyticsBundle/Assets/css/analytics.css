@@ -284,6 +284,7 @@
 /* Modal */
 .lwa-modal { position: fixed; inset: 0; z-index: 1060; display: flex; align-items: center; justify-content: center; }
 .lwa-modal-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); animation: lwa-fadeIn 0.15s ease; }
+.lwa-modal-content { position: relative; }
 
 @keyframes lwa-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 

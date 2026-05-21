@@ -129,6 +129,12 @@ class AnalyticsModel
                 $where = "temperatura = 'prioritario' AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
                 $params = [];
                 break;
+            case 'modulo':
+                $modulo = $dateRange['modulo'] ?? '';
+                if (!$modulo || !$this->columnExists('leads', 'modulo_interesse')) return [];
+                $sql = "SELECT id, firstname, lastname, email, company, temperatura, interesse_score, status_comercial, origem_principal, cargo
+                        FROM leads WHERE modulo_interesse = :modulo ORDER BY interesse_score DESC LIMIT 50";
+                return $this->connection->fetchAllAssociative($sql, ['modulo' => $modulo]);
             case 'emails_enviados':
                 return $this->getEmailCampaigns($dateRange);
             case 'emails_abertos':

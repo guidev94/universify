@@ -115,7 +115,9 @@
             <table class="lwa-table lwa-table--compact">
                 <tbody>
                     {% for m in top_modulos %}
-                        <tr><td>{{ m.modulo_interesse }}</td><td><strong>{{ m.total }}</strong></td></tr>
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowModuloLeads('{{ m.modulo_interesse|e('js') }}')">
+                            <td>{{ m.modulo_interesse }}</td><td><strong>{{ m.total }}</strong></td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>

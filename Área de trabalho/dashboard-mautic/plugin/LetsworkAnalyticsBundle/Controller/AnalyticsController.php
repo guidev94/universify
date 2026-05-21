@@ -94,7 +94,8 @@ class AnalyticsController extends CommonController
 
         $dateFrom = $request->get('dateFrom', date('Y-m-d', strtotime('-90 days')));
         $dateTo = $request->get('dateTo', date('Y-m-d'));
-        $result = $this->analyticsModel->getLeadsByKpi($kpi, ['from' => $dateFrom, 'to' => $dateTo]);
+        $modulo = $request->get('modulo', '');
+        $result = $this->analyticsModel->getLeadsByKpi($kpi, ['from' => $dateFrom, 'to' => $dateTo, 'modulo' => $modulo]);
 
         if (is_array($result) && isset($result['type'])) {
             return new JsonResponse($result);
