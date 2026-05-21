@@ -1,0 +1,20 @@
+<div class="lwa-kpi-card lwa-card lwa-card--{{ color|default('primary') }}{% if kpi_id is defined %} lwa-kpi-clickable{% endif %}"
+     {% if kpi_id is defined %}data-kpi-id="{{ kpi_id }}" onclick="Mautic.lwaShowKpiDetail('{{ kpi_id }}', '{{ title }}')"{% endif %}
+     role="{% if kpi_id is defined %}button{% else %}status{% endif %}">
+    <div class="lwa-kpi-icon">
+        <i class="{{ icon }}"></i>
+    </div>
+    <div class="lwa-kpi-content">
+        <span class="lwa-kpi-value" data-target="{{ value }}">{{ value }}</span>
+        <span class="lwa-kpi-title">{{ title }}</span>
+        {% if description is defined and description %}
+            <span class="lwa-kpi-desc">{{ description }}</span>
+        {% endif %}
+    </div>
+    {% if suffix is defined and suffix %}
+        <span class="lwa-kpi-suffix">{{ suffix }}</span>
+    {% endif %}
+    {% if kpi_id is defined %}
+        <i class="ri-arrow-right-s-line lwa-kpi-arrow"></i>
+    {% endif %}
+</div>

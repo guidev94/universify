@@ -1,0 +1,32 @@
+<div class="lwa-table-section lwa-card">
+    <div class="lwa-card-header">
+        <h4>{{ title }}</h4>
+    </div>
+    <div class="lwa-card-body">
+        {% if rows is empty %}
+            <div class="lwa-empty-state">
+                <i class="ri-inbox-line"></i>
+                <p>Nenhum dado disponível para o período selecionado.</p>
+            </div>
+        {% else %}
+            <table class="lwa-table">
+                <thead>
+                    <tr>
+                        {% for header in headers %}
+                            <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            {% for cell in row %}
+                                <td>{{ cell|raw }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>

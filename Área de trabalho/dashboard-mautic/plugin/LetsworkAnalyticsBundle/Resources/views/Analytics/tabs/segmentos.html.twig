@@ -1,0 +1,23 @@
+{# Segment Ranking Chart #}
+<div class="lwa-charts-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Ranking de Segmentos (Taxa de Conversão %)',
+        type: 'bar',
+        data: ranking,
+        wide: true,
+        height: 320
+    } %}
+</div>
+
+{# Segment Performance Table #}
+{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
+    title: 'Desempenho por Segmento',
+    headers: ['Segmento', 'Total Leads', 'Quentes', 'Ganhos', 'Taxa'],
+    rows: performance|default([])|map(r => [
+        r.segmento,
+        r.total,
+        r.quentes|default(0),
+        r.ganhos|default(0),
+        r.total > 0 ? ((r.ganhos / r.total * 100)|round(1) ~ '%') : '0%'
+    ])
+} %}

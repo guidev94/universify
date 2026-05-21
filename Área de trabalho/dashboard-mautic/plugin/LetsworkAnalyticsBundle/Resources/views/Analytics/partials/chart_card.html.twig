@@ -1,0 +1,8 @@
+<div class="lwa-chart-card lwa-card" {% if wide is defined and wide %}style="flex: 2;"{% endif %}>
+    <div class="lwa-card-header">
+        <h4>{{ title }}</h4>
+    </div>
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="{{ type|default('line') }}" data-chart-data="{{ data|json_encode }}" style="height: {{ height|default(280) }}px; width: 100%;"></canvas>
+    </div>
+</div>

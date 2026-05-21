@@ -1,0 +1,52 @@
+services:
+  mautic_db:
+    image: mysql:8.0
+    container_name: mautic_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MAUTIC_DB_NAME}
+      MYSQL_USER: ${MAUTIC_DB_USER}
+      MYSQL_PASSWORD: ${MAUTIC_DB_PASSWORD}
+    volumes:
+      - mautic_db_data:/var/lib/mysql
+    networks:
+      - mautic_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mautic:
+    image: mautic/mautic:5-apache
+    container_name: mautic
+    restart: unless-stopped
+    depends_on:
+      mautic_db:
+        condition: service_healthy
+    ports:
+      - "6001:80"
+    environment:
+      MAUTIC_DB_HOST: ${MAUTIC_DB_HOST}
+      MAUTIC_DB_PORT: ${MAUTIC_DB_PORT}
+      MAUTIC_DB_NAME: ${MAUTIC_DB_NAME}
+      MAUTIC_DB_USER: ${MAUTIC_DB_USER}
+      MAUTIC_DB_PASSWORD: ${MAUTIC_DB_PASSWORD}
+      MAUTIC_RUN_CRON_JOBS: "true"
+      MAUTIC_ADMIN_USERNAME: ${MAUTIC_ADMIN_USERNAME}
+      MAUTIC_ADMIN_PASSWORD: ${MAUTIC_ADMIN_PASSWORD}
+      MAUTIC_ADMIN_EMAIL: ${MAUTIC_ADMIN_EMAIL}
+      MAUTIC_LOCALE: pt_BR
+    volumes:
+      - mautic_data:/var/www/html
+    networks:
+      - mautic_net
+
+volumes:
+  mautic_db_data:
+  mautic_data:
+
+networks:
+  mautic_net:
+    driver: bridge

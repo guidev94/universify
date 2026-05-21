@@ -1,0 +1,28 @@
+{# Conversion Funnel #}
+<div class="lwa-charts-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Funil de Conversão',
+        type: 'bar',
+        data: funnel,
+        wide: true,
+        height: 320
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Taxa de Ganho por Origem',
+        type: 'bar',
+        data: win_rate,
+        height: 320
+    } %}
+</div>
+
+{# Conversion Table by Origin #}
+{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
+    title: 'Conversão por Origem',
+    headers: ['Origem', 'Total Leads', 'Ganhos', 'Taxa'],
+    rows: by_origin|default([])|map(r => [
+        r.origem_principal,
+        r.total,
+        r.ganhos,
+        r.total > 0 ? ((r.ganhos / r.total * 100)|round(1) ~ '%') : '0%'
+    ])
+} %}

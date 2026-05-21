@@ -1,0 +1,34 @@
+{# KPI Time Metrics #}
+<div class="lwa-kpi-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Tempo Médio até Reunião',
+        value: avg_to_meeting,
+        icon: 'ri-time-line',
+        color: 'primary',
+        suffix: 'dias'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Tempo Médio até Proposta',
+        value: avg_to_proposal,
+        icon: 'ri-file-text-line',
+        color: 'success',
+        suffix: 'dias'
+    } %}
+</div>
+
+{# Charts #}
+<div class="lwa-charts-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Distribuição por Temperatura',
+        type: 'doughnut',
+        data: temperature,
+        height: 300
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Progressão Média de Score',
+        type: 'line',
+        data: score_progress,
+        wide: true,
+        height: 300
+    } %}
+</div>

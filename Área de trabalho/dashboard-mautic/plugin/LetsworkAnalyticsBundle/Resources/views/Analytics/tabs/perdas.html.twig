@@ -1,0 +1,30 @@
+{# Loss Charts #}
+<div class="lwa-charts-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Motivos de Perda',
+        type: 'doughnut',
+        data: reasons,
+        height: 300
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Tendência de Perdas',
+        type: 'line',
+        data: trend,
+        wide: true,
+        height: 300
+    } %}
+</div>
+
+{# Loss by Origin Table #}
+{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
+    title: 'Perdas por Origem',
+    headers: ['Origem', 'Total Perdas'],
+    rows: by_origin|default([])|map(r => [r.origem_principal, r.total])
+} %}
+
+{# Loss by Segment Table #}
+{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
+    title: 'Perdas por Segmento',
+    headers: ['Segmento', 'Total Perdas'],
+    rows: by_segment|default([])|map(r => [r.segmento, r.total])
+} %}

@@ -1,0 +1,60 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block headerTitle %}{{ 'letswork.analytics.header'|trans }}{% endblock %}
+{% block mauticContent %}letsworkAnalytics{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/css/analytics.css') }}">
+<div class="lwa-analytics-page">
+    <div class="lwa-toolbar">
+        <div class="lwa-date-filter">
+            <form method="get" action="{{ path('letswork_analytics_index', {tab: activeTab}) }}" class="d-flex ai-center gap-sm">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><i class="ri-calendar-line"></i></span>
+                    <input type="date" name="dateFrom" value="{{ dateFrom }}" class="form-control">
+                </div>
+                <span class="lwa-date-separator">até</span>
+                <div class="input-group input-group-sm">
+                    <input type="date" name="dateTo" value="{{ dateTo }}" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary btn-nospin">
+                    <i class="ri-filter-line"></i> Filtrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="lwa-tabs">
+        <a href="{{ path('letswork_analytics_index', {tab: 'overview', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'overview' %}active{% endif %}">
+            <i class="ri-dashboard-line"></i>
+            <span>{{ 'letswork.analytics.tab.overview'|trans }}</span>
+        </a>
+        <a href="{{ path('letswork_analytics_index', {tab: 'conversao', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'conversao' %}active{% endif %}">
+            <i class="ri-exchange-funds-line"></i>
+            <span>{{ 'letswork.analytics.tab.conversao'|trans }}</span>
+        </a>
+        <a href="{{ path('letswork_analytics_index', {tab: 'segmentos', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'segmentos' %}active{% endif %}">
+            <i class="ri-pie-chart-line"></i>
+            <span>{{ 'letswork.analytics.tab.segmentos'|trans }}</span>
+        </a>
+        <a href="{{ path('letswork_analytics_index', {tab: 'pipeline', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'pipeline' %}active{% endif %}">
+            <i class="ri-flow-chart"></i>
+            <span>{{ 'letswork.analytics.tab.pipeline'|trans }}</span>
+        </a>
+        <a href="{{ path('letswork_analytics_index', {tab: 'perdas', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'perdas' %}active{% endif %}">
+            <i class="ri-close-circle-line"></i>
+            <span>{{ 'letswork.analytics.tab.perdas'|trans }}</span>
+        </a>
+    </div>
+
+    <div class="lwa-content">
+        {% include '@LetsworkAnalytics/Analytics/tabs/' ~ activeTab ~ '.html.twig' %}
+    </div>
+</div>
+<script src="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/js/analytics.js') }}"></script>
+{% endblock %}
