@@ -105,11 +105,11 @@ class AnalyticsModel
                 $params = [];
                 break;
             case 'emails_enviados':
-                return $this->getEmailLeads($dateRange, false);
+                return $this->getEmailCampaigns($dateRange);
             case 'emails_abertos':
                 return $this->getEmailLeads($dateRange, true);
             case 'emails_taxa':
-                return $this->getEmailLeads($dateRange, false);
+                return $this->getEmailCampaigns($dateRange);
             default:
                 return [];
         }
@@ -441,6 +441,18 @@ class AnalyticsModel
     }
 
     // --- Email Leads ---
+
+    private function getEmailCampaigns(array $dateRange): array
+    {
+        $sql = "SELECT e.id, e.name, e.subject, e.sent_count, e.read_count, e.date_added,
+                    CASE WHEN e.sent_count > 0 THEN ROUND((e.read_count / e.sent_count) * 100, 1) ELSE 0 END as taxa_abertura
+                FROM emails e
+                WHERE e.is_published = 1
+                ORDER BY e.date_added DESC
+                LIMIT 20";
+        $campaigns = $this->connection->fetchAllAssociative($sql);
+        return ['type' => 'campaigns', 'data' => $campaigns];
+    }
 
     private function getEmailLeads(array $dateRange, bool $onlyOpened): array
     {

@@ -191,22 +191,22 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
     var dateFrom = mQuery('input[name="dateFrom"]').val() || '';
     var dateTo = mQuery('input[name="dateTo"]').val() || '';
 
-    var isEmailKpi = (kpiId.indexOf('emails') === 0);
-
     mQuery.ajax({
         url: '/s/analytics/kpi-detail/' + kpiId,
         data: { dateFrom: dateFrom, dateTo: dateTo },
         dataType: 'json',
         success: function(response) {
-            if (response.leads && response.leads.length > 0) {
+            if (response.type === 'campaigns') {
+                Mautic.lwaRenderCampaignsModal(response.data);
+            } else if (response.leads && response.leads.length > 0) {
                 Mautic.lwaKpiLeads = response.leads;
-                if (isEmailKpi) {
+                if (response.leads[0] && response.leads[0].email_aberto !== undefined) {
                     Mautic.lwaRenderEmailKpiPage();
                 } else {
                     Mautic.lwaRenderKpiPage();
                 }
             } else {
-                mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum lead encontrado neste período</p></div>');
+                mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum dado encontrado neste periodo</p></div>');
             }
         },
         error: function() {
@@ -280,6 +280,50 @@ Mautic.lwaKpiGoPage = function(page) {
     Mautic.lwaKpiPage = page;
     Mautic.lwaRenderKpiPage();
     mQuery('#lwa-kpi-detail-body').scrollTop(0);
+};
+
+Mautic.lwaRenderCampaignsModal = function(campaigns) {
+    if (!campaigns || campaigns.length === 0) {
+        mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-mail-line"></i><p>Nenhuma campanha encontrada</p></div>');
+        return;
+    }
+
+    var totalSent = 0, totalRead = 0;
+    campaigns.forEach(function(c) { totalSent += parseInt(c.sent_count || 0); totalRead += parseInt(c.read_count || 0); });
+    var avgRate = totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0;
+
+    var html = '<div class="lwa-kd-header-bar">';
+    html += '  <span class="lwa-kd-count"><strong>' + campaigns.length + '</strong> campanhas de e-mail</span>';
+    html += '  <span class="lwa-kd-page">' + totalSent + ' envios · ' + totalRead + ' aberturas · ' + avgRate + '% taxa</span>';
+    html += '</div>';
+
+    html += '<div class="lwa-campaigns-list">';
+    campaigns.forEach(function(c, idx) {
+        var rate = c.sent_count > 0 ? Math.round((c.read_count / c.sent_count) * 100) : 0;
+        var date = c.date_added ? new Date(c.date_added).toLocaleDateString('pt-BR') : '-';
+        var rateColor = rate >= 50 ? '#10b981' : (rate >= 30 ? '#f59e0b' : '#dc2626');
+
+        html += '<div class="lwa-campaign-card" style="animation-delay:' + (idx * 0.05) + 's">';
+        html += '  <div class="lwa-campaign-icon"><i class="ri-mail-send-line"></i></div>';
+        html += '  <div class="lwa-campaign-info">';
+        html += '    <div class="lwa-campaign-name">' + (c.name || 'Sem nome') + '</div>';
+        html += '    <div class="lwa-campaign-subject">' + (c.subject || '') + '</div>';
+        html += '    <div class="lwa-campaign-meta">';
+        html += '      <span><i class="ri-send-plane-line"></i> ' + c.sent_count + ' enviados</span>';
+        html += '      <span><i class="ri-mail-open-line"></i> ' + c.read_count + ' abertos</span>';
+        html += '      <span><i class="ri-calendar-line"></i> ' + date + '</span>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '  <div class="lwa-campaign-rate" style="color:' + rateColor + '">';
+        html += '    <span class="lwa-campaign-rate-value">' + rate + '%</span>';
+        html += '    <span class="lwa-campaign-rate-label">abertura</span>';
+        html += '  </div>';
+        html += '</div>';
+    });
+    html += '</div>';
+
+    mQuery('#lwa-kpi-detail-body').html(html);
+    mQuery('#lwa-kpi-pagination').html('');
 };
 
 Mautic.lwaRenderEmailKpiPage = function() {

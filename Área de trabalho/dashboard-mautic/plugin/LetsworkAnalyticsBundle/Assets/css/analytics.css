@@ -640,6 +640,104 @@
     padding: 2px 7px;
 }
 
+/* Campaign Cards */
+.lwa-campaigns-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.lwa-campaign-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--layer-01);
+    border: 1px solid var(--border-subtle-01);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    animation: lwa-fadeInUp 0.3s ease both;
+}
+
+.lwa-campaign-card:hover {
+    border-color: rgba(220, 38, 38, 0.3);
+    background: var(--layer-02);
+}
+
+.lwa-campaign-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.lwa-campaign-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.lwa-campaign-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.lwa-campaign-subject {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+}
+
+.lwa-campaign-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.lwa-campaign-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.lwa-campaign-meta i {
+    font-size: 12px;
+}
+
+.lwa-campaign-rate {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.lwa-campaign-rate-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.lwa-campaign-rate-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
 /* Hot Leads Grid */
 .lwa-hot-grid {
     display: grid;
