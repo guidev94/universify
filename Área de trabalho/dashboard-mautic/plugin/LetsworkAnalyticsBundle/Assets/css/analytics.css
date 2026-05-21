@@ -171,9 +171,9 @@
 }
 
 .lwa-kpi-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lwa-kpi-value { font-size: 26px; font-weight: 700; color: var(--lwa-gray-900); line-height: 1.1; }
-.lwa-kpi-title { font-size: 14px; font-weight: 500; color: var(--lwa-gray-500); }
-.lwa-kpi-desc { font-size: 12px; color: var(--lwa-gray-400); margin-top: 1px; }
+.lwa-kpi-value { font-size: 28px; font-weight: 700; color: var(--lwa-gray-900); line-height: 1.1; }
+.lwa-kpi-title { font-size: 14px; font-weight: 600; color: var(--lwa-gray-600); }
+.lwa-kpi-desc { font-size: 12px; color: var(--lwa-gray-400); margin-top: 2px; }
 .lwa-kpi-suffix { font-size: 12px; color: var(--lwa-gray-400); margin-left: auto; align-self: flex-end; }
 
 /* Remove colored top bars — clean look */
@@ -224,6 +224,8 @@
 
 .lwa-table-row-interactive { cursor: pointer; transition: background 0.1s ease; }
 .lwa-table-row-interactive:hover td { background: var(--lwa-gray-50); }
+
+.lwa-table-footer { padding: 12px 18px; border-top: 1px solid var(--lwa-gray-100); text-align: center; }
 
 /* Lead Cell */
 .lwa-lead-cell { display: flex; align-items: center; gap: 10px; }

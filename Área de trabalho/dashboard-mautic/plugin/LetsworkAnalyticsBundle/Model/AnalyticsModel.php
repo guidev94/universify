@@ -24,6 +24,8 @@ class AnalyticsModel
                 'propostas'         => $this->getCountByStatus($dateRange, 'proposta_enviada'),
                 'ganhos'            => $this->getCountByStatus($dateRange, 'ganho'),
                 'hot_no_followup'   => $this->getHotWithoutFollowup(),
+                'leads_incompletos' => $this->getLeadsIncompletos(),
+                'linkedin_ativos'   => $this->getLinkedinAtivos(),
                 'emails_enviados'   => $this->getEmailsSent($dateRange),
                 'emails_abertos'    => $this->getEmailsOpened($dateRange),
                 'taxa_abertura'     => $this->getEmailOpenRate($dateRange),
@@ -104,6 +106,10 @@ class AnalyticsModel
                 $where = "temperatura IN ('quente','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
                 $params = [];
                 break;
+            case 'leads_incompletos':
+                $where = "lead_incompleto = 'sim'";
+                $params = [];
+                break;
             case 'emails_enviados':
                 return $this->getEmailCampaigns($dateRange);
             case 'emails_abertos':
@@ -153,6 +159,18 @@ class AnalyticsModel
         }
         $sql = "SELECT COUNT(*) FROM leads WHERE temperatura IN ('quente','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
         return (int) $this->connection->fetchOne($sql);
+    }
+
+    private function getLeadsIncompletos(): int
+    {
+        if (!$this->columnExists('leads', 'lead_incompleto')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE lead_incompleto = 'sim'");
+    }
+
+    private function getLinkedinAtivos(): int
+    {
+        if (!$this->columnExists('leads', 'linkedin_status')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE linkedin_status IS NOT NULL AND linkedin_status != ''");
     }
 
     private function getEmailsSent(array $dateRange): int
