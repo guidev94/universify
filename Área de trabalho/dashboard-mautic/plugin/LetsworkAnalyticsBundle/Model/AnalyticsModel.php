@@ -445,12 +445,12 @@ class AnalyticsModel
     private function getEmailLeads(array $dateRange, bool $onlyOpened): array
     {
         $readCondition = $onlyOpened ? 'AND es.is_read = 1' : '';
-        $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo, MAX(es.date_sent) as last_sent
+        $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
+                    es.date_sent, es.is_read as email_aberto, es.source as email_source
                 FROM email_stats es
                 JOIN leads l ON l.id = es.lead_id
                 WHERE es.date_sent BETWEEN :dateFrom AND :dateTo $readCondition
-                GROUP BY l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo
-                ORDER BY last_sent DESC
+                ORDER BY es.date_sent DESC
                 LIMIT 50";
         return $this->connection->fetchAllAssociative($sql, [
             'dateFrom' => $dateRange['from'],
@@ -498,7 +498,7 @@ class AnalyticsModel
         $this->connection->insert('notifications', [
             'user_id' => 1,
             'type' => 'info',
-            'header' => 'Follow-up amanhã',
+            'header' => 'Follow-up amanha',
             'message' => "Lembrete: Follow-up com $leadName agendado para " . date('d/m/Y', strtotime($date)) . ($note ? ". Nota: $note" : ''),
             'date_added' => $notificationDate,
             'icon_class' => 'ri-calendar-check-line',
@@ -567,27 +567,39 @@ class AnalyticsModel
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
 
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
-        $prompt = "Você é um assistente comercial de uma empresa de software de RH (ponto eletrônico, banco de horas, férias, escalas, timesheet, ATS, avaliações). Analise este lead e sugira a melhor próxima ação comercial, uma mensagem personalizada de follow-up e classifique a intenção.
+        $status = str_replace('_', ' ', $lead['status_comercial'] ?? '');
+        $prompt = "Voce e o assistente comercial da LetsWork, plataforma de gestao de pessoas para RH e DP. Nossos modulos: Ponto Eletronico, Banco de Horas, Escalas e Turnos, Ferias, Documentos e Holerites, Recrutamento (ATS), Avaliacoes de Desempenho, OKRs, Timesheet e Projetos.
 
-Dados do lead:
+Nosso ICP sao empresas dos segmentos Servicos, Engenharia, Comercio, Alimentacao e Saude, com cargos de RH, DP, Inovacao.
+
+Analise este lead e gere uma recomendacao comercial estrategica:
+
+LEAD:
 - Nome: $name
 - Empresa: {$lead['company']}
 - Cargo: {$lead['cargo']}
 - Segmento: {$lead['segmento']}
-- Módulo de interesse: {$lead['modulo_interesse']}
+- Modulo de interesse: {$lead['modulo_interesse']}
 - Dor principal: {$lead['dor_principal']}
 - Temperatura: {$lead['temperatura']}
-- Score: {$lead['interesse_score']}
-- Status: {$lead['status_comercial']}
+- Score de interesse: {$lead['interesse_score']}
+- Status comercial: $status
 - Origem: {$lead['origem_principal']}
 
-Responda em JSON com este formato exato:
+REGRAS:
+- Mensagem deve ser consultiva e profissional, nunca generica
+- Citar a dor especifica do lead na abordagem
+- Sugerir proximo passo concreto com prazo
+- Tom corporativo mas humano, primeira pessoa do singular
+- Maximo 3 linhas na mensagem
+
+Responda APENAS em JSON valido:
 {
-  \"proxima_acao\": \"string curta (ex: Agendar reunião, Enviar case, Reativar)\",
-  \"mensagem_followup\": \"mensagem personalizada de 2-3 linhas\",
-  \"intencao\": \"Sem interesse | Curioso | Dor identificada | Pronto para reunião\",
-  \"probabilidade_conversao\": \"Alta | Média | Baixa\",
-  \"dica_comercial\": \"uma dica rápida para o vendedor\"
+  \"proxima_acao\": \"acao concreta com prazo (ex: Agendar diagnostico esta semana)\",
+  \"mensagem_followup\": \"mensagem de 2-3 linhas consultiva citando a dor do lead\",
+  \"intencao\": \"Sem interesse | Curioso | Dor identificada | Pronto para reuniao | Negociando\",
+  \"probabilidade_conversao\": \"Alta | Media | Baixa\",
+  \"dica_comercial\": \"insight estrategico para o vendedor sobre como abordar\"
 }";
 
         $payload = json_encode([

@@ -191,6 +191,8 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
     var dateFrom = mQuery('input[name="dateFrom"]').val() || '';
     var dateTo = mQuery('input[name="dateTo"]').val() || '';
 
+    var isEmailKpi = (kpiId.indexOf('emails') === 0);
+
     mQuery.ajax({
         url: '/s/analytics/kpi-detail/' + kpiId,
         data: { dateFrom: dateFrom, dateTo: dateTo },
@@ -198,7 +200,11 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
         success: function(response) {
             if (response.leads && response.leads.length > 0) {
                 Mautic.lwaKpiLeads = response.leads;
-                Mautic.lwaRenderKpiPage();
+                if (isEmailKpi) {
+                    Mautic.lwaRenderEmailKpiPage();
+                } else {
+                    Mautic.lwaRenderKpiPage();
+                }
             } else {
                 mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum lead encontrado neste período</p></div>');
             }
@@ -274,6 +280,58 @@ Mautic.lwaKpiGoPage = function(page) {
     Mautic.lwaKpiPage = page;
     Mautic.lwaRenderKpiPage();
     mQuery('#lwa-kpi-detail-body').scrollTop(0);
+};
+
+Mautic.lwaRenderEmailKpiPage = function() {
+    var leads = Mautic.lwaKpiLeads;
+    var page = Mautic.lwaKpiPage;
+    var perPage = Mautic.lwaKpiPerPage;
+    var totalPages = Math.ceil(leads.length / perPage);
+    var start = (page - 1) * perPage;
+    var pageLeads = leads.slice(start, start + perPage);
+
+    var opened = leads.filter(function(l) { return l.email_aberto == 1; }).length;
+    var rate = leads.length > 0 ? Math.round((opened / leads.length) * 100) : 0;
+
+    var html = '<div class="lwa-kd-header-bar">';
+    html += '  <span class="lwa-kd-count"><strong>' + leads.length + '</strong> e-mails disparados</span>';
+    html += '  <span class="lwa-kd-page">' + opened + ' abertos (' + rate + '%)</span>';
+    html += '</div>';
+
+    html += '<table class="lwa-table" style="margin:0">';
+    html += '<thead><tr><th>Lead</th><th>E-mail</th><th>Enviado em</th><th>Status</th></tr></thead>';
+    html += '<tbody>';
+
+    pageLeads.forEach(function(lead) {
+        var name = ((lead.firstname || '') + ' ' + (lead.lastname || '')).trim() || lead.company || 'Sem nome';
+        var date = lead.date_sent ? new Date(lead.date_sent).toLocaleDateString('pt-BR') : '-';
+        var statusHtml = lead.email_aberto == 1
+            ? '<span class="lwa-badge lwa-badge--morno" style="font-size:11px"><i class="ri-mail-open-line"></i> Aberto</span>'
+            : '<span class="lwa-badge lwa-badge--frio" style="font-size:11px"><i class="ri-mail-line"></i> Enviado</span>';
+
+        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')">';
+        html += '  <td><strong>' + name + '</strong><br><small style="color:var(--text-secondary)">' + (lead.company || '') + '</small></td>';
+        html += '  <td style="font-size:12px">' + (lead.email || '-') + '</td>';
+        html += '  <td>' + date + '</td>';
+        html += '  <td>' + statusHtml + '</td>';
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    mQuery('#lwa-kpi-detail-body').html(html);
+
+    if (totalPages > 1) {
+        var pag = '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page <= 1 ? 'disabled' : 'onclick="Mautic.lwaKpiPage=' + (page-1) + ';Mautic.lwaRenderEmailKpiPage()"') + '><i class="ri-arrow-left-s-line"></i></button>';
+        var startP = Math.max(1, page - 2);
+        var endP = Math.min(totalPages, startP + 4);
+        for (var i = startP; i <= endP; i++) {
+            pag += '<button class="lwa-pagination-btn ' + (i === page ? 'active' : '') + '" onclick="Mautic.lwaKpiPage=' + i + ';Mautic.lwaRenderEmailKpiPage()">' + i + '</button>';
+        }
+        pag += '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page >= totalPages ? 'disabled' : 'onclick="Mautic.lwaKpiPage=' + (page+1) + ';Mautic.lwaRenderEmailKpiPage()"') + '><i class="ri-arrow-right-s-line"></i></button>';
+        mQuery('#lwa-kpi-pagination').html(pag);
+    } else {
+        mQuery('#lwa-kpi-pagination').html('');
+    }
 };
 
 Mautic.lwaCloseKpiDetail = function() {
