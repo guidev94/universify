@@ -1,91 +1,68 @@
-{# Métricas de Velocidade #}
+{# Velocidade do Pipeline (PRD Seção 18) #}
 <div class="lwa-section-label">Velocidade do Pipeline</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Tempo até Reunião',
-        value: avg_to_meeting,
-        icon: 'ri-time-line',
-        color: 'primary',
-        suffix: 'dias',
-        description: 'Média entre entrada do lead e primeira reunião'
+        title: 'Tempo até Reunião', value: avg_to_meeting, icon: 'ri-time-line', suffix: 'dias',
+        description: 'Média entre entrada e primeira reunião'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Tempo até Proposta',
-        value: avg_to_proposal,
-        icon: 'ri-file-text-line',
-        color: 'success',
-        suffix: 'dias',
-        description: 'Média entre entrada do lead e envio de proposta'
+        title: 'Tempo até Proposta', value: avg_to_proposal, icon: 'ri-file-text-line', suffix: 'dias',
+        description: 'Média entre entrada e envio de proposta'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Valor em Negociação',
-        value: valor_pipeline|number_format(0, ',', '.'),
-        icon: 'ri-money-dollar-circle-line',
-        color: 'purple',
-        suffix: 'R$',
-        description: 'Soma das oportunidades ativas no pipeline'
+        title: 'Valor em Negociação', value: valor_pipeline|number_format(0, ',', '.'), icon: 'ri-money-dollar-circle-line', suffix: 'R$',
+        description: 'Soma das oportunidades ativas'
     } %}
 </div>
 
-{# Distribuição + Módulos #}
-<div class="lwa-section-label">Distribuição de Leads</div>
-<div class="lwa-charts-row">
-    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Por Temperatura',
-        type: 'doughnut',
-        data: temperature,
-        height: 300
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Interesse por Módulo LetsWork',
-        type: 'bar',
-        data: by_module,
-        wide: true,
-        height: 300
-    } %}
+{# Distribuição por Temperatura + Módulos de Interesse (PRD Seção 6) #}
+<div class="lwa-section-label">Distribuição</div>
+<div class="lwa-grid-2">
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Por Temperatura</h4></div>
+        <div class="lwa-card-body">
+            <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ temperature|json_encode }}" style="height:260px;width:100%;"></canvas>
+        </div>
+    </div>
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Por Módulo de Interesse</h4></div>
+        <div class="lwa-card-body">
+            <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ by_module|json_encode }}" style="height:260px;width:100%;"></canvas>
+        </div>
+    </div>
 </div>
 
-{# Progressão de Score #}
+{# Score ao Longo do Tempo #}
 <div class="lwa-section-label">Evolução do Score Médio</div>
-<div class="lwa-charts-row">
-    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Score médio dos leads ao longo do tempo',
-        type: 'line',
-        data: score_progress,
-        wide: true,
-        height: 240
-    } %}
+<div class="lwa-card">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ score_progress|json_encode }}" style="height:200px;width:100%;"></canvas>
+    </div>
 </div>
 
-{# Tabela de Etapas do Pipeline #}
+{# Etapas do Pipeline (PRD Seção 9) #}
 <div class="lwa-section-label">Etapas do Pipeline Comercial</div>
 <div class="lwa-table-section lwa-card">
-    <div class="lwa-card-body">
+    <div class="lwa-card-body lwa-card-body--tight">
         {% if by_status is empty %}
-            <div class="lwa-empty-state"><i class="ri-flow-chart"></i><p>Sem dados de pipeline no período</p></div>
+            <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
         {% else %}
+            {% set status_labels = {
+                'prospeccao': 'Prospecção',
+                'engajado': 'Engajado',
+                'reuniao_agendada': 'Reunião Agendada',
+                'reuniao_realizada': 'Reunião Realizada',
+                'proposta_enviada': 'Proposta Enviada',
+                'negociacao': 'Negociação',
+                'ganho': 'Cliente Ganho',
+                'perdido': 'Perdido'
+            } %}
             <table class="lwa-table">
-                <thead>
-                    <tr>
-                        <th>Etapa</th>
-                        <th>Quantidade de Leads</th>
-                        <th>Valor Potencial</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Etapa</th><th>Leads</th><th>Valor Potencial</th></tr></thead>
                 <tbody>
-                    {% set status_labels = {
-                        'prospeccao': 'Prospecção',
-                        'engajado': 'Engajado',
-                        'reuniao_agendada': 'Reunião Agendada',
-                        'reuniao_realizada': 'Reunião Realizada',
-                        'proposta_enviada': 'Proposta Enviada',
-                        'negociacao': 'Negociação',
-                        'ganho': 'Cliente Ganho',
-                        'perdido': 'Perdido'
-                    } %}
                     {% for r in by_status %}
                         <tr>
-                            <td><span class="lwa-tag">{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_': ' '})|capitalize) }}</span></td>
+                            <td>{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_': ' '})|title) }}</td>
                             <td><strong>{{ r.total }}</strong></td>
                             <td>R$ {{ r.valor|number_format(0, ',', '.') }}</td>
                         </tr>

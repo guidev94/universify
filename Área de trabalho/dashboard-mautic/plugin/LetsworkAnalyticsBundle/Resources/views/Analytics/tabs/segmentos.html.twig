@@ -1,32 +1,20 @@
-{# Ranking de Conversão por Segmento #}
-<div class="lwa-section-label">Ranking de Conversão</div>
-<div class="lwa-charts-row">
-    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Taxa de Conversão por Segmento (%)',
-        type: 'bar',
-        data: ranking,
-        wide: true,
-        height: 320
-    } %}
+{# Taxa de Conversão por Segmento (PRD Seção 18) #}
+<div class="lwa-section-label">Taxa de Conversão por Segmento</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ ranking|json_encode }}" style="height:280px;width:100%;"></canvas>
+    </div>
 </div>
 
-{# Tabela de Performance #}
+{# Performance Detalhada (PRD Seção 6 — ICP) #}
 <div class="lwa-section-label">Performance por Segmento</div>
 <div class="lwa-table-section lwa-card">
-    <div class="lwa-card-body">
+    <div class="lwa-card-body lwa-card-body--tight">
         {% if performance is empty %}
-            <div class="lwa-empty-state"><i class="ri-pie-chart-line"></i><p>Sem dados de segmento no período</p></div>
+            <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
         {% else %}
             <table class="lwa-table">
-                <thead>
-                    <tr>
-                        <th>Segmento</th>
-                        <th>Total de Leads</th>
-                        <th>Leads Quentes</th>
-                        <th>Clientes Ganhos</th>
-                        <th>Taxa de Conversão</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Segmento</th><th>Total</th><th>Quentes</th><th>Ganhos</th><th>Taxa</th></tr></thead>
                 <tbody>
                     {% for r in performance %}
                         <tr>

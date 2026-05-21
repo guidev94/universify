@@ -187,6 +187,11 @@
     color: var(--lwa-gray-600);
 }
 
+/* Grid Layouts */
+.lwa-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.lwa-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+@media (max-width: 768px) { .lwa-grid-2, .lwa-grid-3 { grid-template-columns: 1fr; } }
+
 /* Charts */
 .lwa-charts-row { display: flex; gap: 12px; margin-bottom: 24px; }
 .lwa-charts-row .lwa-card { flex: 1; min-width: 0; }
@@ -212,6 +217,10 @@
 }
 
 .lwa-table tr:last-child td { border-bottom: none; }
+.lwa-table--compact th, .lwa-table--compact td { padding: 8px 12px; font-size: 12px; }
+.lwa-card-body--tight { padding: 0; }
+.lwa-card-body--tight .lwa-table th:first-child, .lwa-card-body--tight .lwa-table td:first-child { padding-left: 18px; }
+.lwa-card-body--tight .lwa-table th:last-child, .lwa-card-body--tight .lwa-table td:last-child { padding-right: 18px; }
 
 .lwa-table-row-interactive { cursor: pointer; transition: background 0.1s ease; }
 .lwa-table-row-interactive:hover td { background: var(--lwa-gray-50); }
