@@ -628,6 +628,7 @@ Mautic.lwaSendEmail = function(leadId) {
         url: '/s/analytics/action/send-email',
         method: 'POST',
         data: { lead_id: leadId, subject: subject, body: body },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
         dataType: 'json',
         success: function(res) {
             if (res.success) {
@@ -690,6 +691,7 @@ Mautic.lwaConfirmFollowup = function(leadId) {
         url: '/s/analytics/action/followup',
         method: 'POST',
         data: { lead_id: leadId, date: date, note: note },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
         dataType: 'json',
         success: function(res) {
             if (res.success) {
@@ -745,12 +747,15 @@ Mautic.lwaUpdateLead = function(leadId, field, value) {
     mQuery.ajax({
         url: '/s/analytics/action/update-lead',
         method: 'POST',
-        data: { lead_id: leadId, field: field, value: value },
+        data: { lead_id: leadId, field: field, value: value, mauticform: {formCsrf: mauticAjaxCsrf} },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
         dataType: 'json',
         success: function(res) {
             if (res.success) {
                 Mautic.lwaToast(res.message);
                 Mautic.lwaOpenLeadModal(leadId);
+            } else if (res.flashes) {
+                Mautic.lwaToast('Erro de sessão. Recarregue a página.');
             } else {
                 Mautic.lwaToast(res.error || 'Erro');
             }
