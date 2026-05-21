@@ -74,8 +74,8 @@
         kpi_id: 'emails_enviados', description: 'Campanhas ativas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Disparos', value: kpis.disparos, icon: 'ri-send-plane-line',
-        kpi_id: 'emails_enviados', description: 'E-mails enviados'
+        title: 'E-mails', value: kpis.disparos, icon: 'ri-send-plane-line',
+        kpi_id: 'emails_enviados', description: 'Enviados nas campanhas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Taxa de Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line',
@@ -199,12 +199,16 @@
 </div>
 
 {# ===== FUNIL DE VENDAS ===== #}
-<div class="lwa-section-label">Funil de Vendas</div>
+<div class="lwa-section-label">
+    <span>Funil de Vendas</span>
+    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaAiTab('conversao','lwa-ai-tab-result-funnel')" style="font-size:11px;padding:4px 10px"><i class="ri-sparkling-line"></i> Melhorar Conversão</button>
+</div>
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body">
         <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ funnel|json_encode }}" style="height:260px;width:100%;"></canvas>
     </div>
 </div>
+<div id="lwa-ai-tab-result-funnel" style="display:none;margin-bottom:24px"></div>
 
 {# ===== MODAIS ===== #}
 <div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">

@@ -396,8 +396,8 @@ Mautic.lwaCloseKpiDetail = function() {
     mQuery('#lwa-kpi-detail').hide();
 };
 
-Mautic.lwaAiTab = function(tab) {
-    var $container = mQuery('#lwa-ai-tab-result');
+Mautic.lwaAiTab = function(tab, containerId) {
+    var $container = mQuery('#' + (containerId || 'lwa-ai-tab-result'));
     $container.html('<div style="text-align:center;padding:20px;color:var(--lwa-gray-400)"><div class="lwa-spinner" style="margin:0 auto 8px"></div>Analisando com IA...</div>');
     $container.show();
 
