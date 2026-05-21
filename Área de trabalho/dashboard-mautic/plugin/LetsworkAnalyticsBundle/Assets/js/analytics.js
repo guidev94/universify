@@ -52,23 +52,20 @@ Mautic.lwaGetChartConfig = function(type, data) {
             data: data.data,
             backgroundColor: colors.slice(0, data.data.length),
             borderWidth: 3,
-            borderColor: 'rgba(255,255,255,0.9)',
+            borderColor: 'rgba(255,255,255,0.95)',
             hoverBorderWidth: 4,
-            hoverOffset: 8
+            hoverOffset: 10,
+            cutout: '65%'
         }];
     } else if (type === 'bar') {
+        var barColors = data.data.map(function(_, i) { return colors[i % colors.length]; });
         datasets = [{
             data: data.data,
-            backgroundColor: function(ctx) {
-                var gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-                gradient.addColorStop(0, colors[0]);
-                gradient.addColorStop(1, Mautic.lwaHexToRgba(colors[0], 0.6));
-                return gradient;
-            },
-            borderRadius: 8,
+            backgroundColor: barColors,
+            borderRadius: 6,
             borderSkipped: false,
-            maxBarThickness: 44,
-            hoverBackgroundColor: colors[0]
+            maxBarThickness: 48,
+            hoverBackgroundColor: barColors.map(function(c) { return c; })
         }];
     } else {
         datasets = [{

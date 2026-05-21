@@ -1,5 +1,5 @@
-{# Pipeline KPIs #}
-<div class="lwa-section-label">Métricas do Pipeline</div>
+{# Métricas de Velocidade #}
+<div class="lwa-section-label">Velocidade do Pipeline</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Tempo até Reunião',
@@ -7,7 +7,7 @@
         icon: 'ri-time-line',
         color: 'primary',
         suffix: 'dias',
-        description: 'Média lead → 1ª reunião'
+        description: 'Média entre entrada do lead e primeira reunião'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Tempo até Proposta',
@@ -15,23 +15,23 @@
         icon: 'ri-file-text-line',
         color: 'success',
         suffix: 'dias',
-        description: 'Média lead → proposta enviada'
+        description: 'Média entre entrada do lead e envio de proposta'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Valor no Pipeline',
+        title: 'Valor em Negociação',
         value: valor_pipeline|number_format(0, ',', '.'),
         icon: 'ri-money-dollar-circle-line',
         color: 'purple',
         suffix: 'R$',
-        description: 'Oportunidades ativas'
+        description: 'Soma das oportunidades ativas no pipeline'
     } %}
 </div>
 
-{# Charts #}
-<div class="lwa-section-label">Distribuição e Progressão</div>
+{# Distribuição + Módulos #}
+<div class="lwa-section-label">Distribuição de Leads</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Distribuição por Temperatura',
+        title: 'Por Temperatura',
         type: 'doughnut',
         data: temperature,
         height: 300
@@ -45,37 +45,47 @@
     } %}
 </div>
 
-{# Score Progression #}
-<div class="lwa-section-label">Score Médio ao Longo do Tempo</div>
+{# Progressão de Score #}
+<div class="lwa-section-label">Evolução do Score Médio</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Progressão de Score',
+        title: 'Score médio dos leads ao longo do tempo',
         type: 'line',
         data: score_progress,
         wide: true,
-        height: 260
+        height: 240
     } %}
 </div>
 
-{# Status Pipeline Table #}
-<div class="lwa-section-label">Detalhamento por Etapa</div>
+{# Tabela de Etapas do Pipeline #}
+<div class="lwa-section-label">Etapas do Pipeline Comercial</div>
 <div class="lwa-table-section lwa-card">
     <div class="lwa-card-body">
         {% if by_status is empty %}
-            <div class="lwa-empty-state"><i class="ri-flow-chart"></i><p>Sem dados de pipeline</p></div>
+            <div class="lwa-empty-state"><i class="ri-flow-chart"></i><p>Sem dados de pipeline no período</p></div>
         {% else %}
             <table class="lwa-table">
                 <thead>
                     <tr>
                         <th>Etapa</th>
-                        <th>Leads</th>
+                        <th>Quantidade de Leads</th>
                         <th>Valor Potencial</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% set status_labels = {
+                        'prospeccao': 'Prospecção',
+                        'engajado': 'Engajado',
+                        'reuniao_agendada': 'Reunião Agendada',
+                        'reuniao_realizada': 'Reunião Realizada',
+                        'proposta_enviada': 'Proposta Enviada',
+                        'negociacao': 'Negociação',
+                        'ganho': 'Cliente Ganho',
+                        'perdido': 'Perdido'
+                    } %}
                     {% for r in by_status %}
                         <tr>
-                            <td><span class="lwa-tag">{{ r.status_comercial|replace({'_': ' '}) }}</span></td>
+                            <td><span class="lwa-tag">{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_': ' '})|capitalize) }}</span></td>
                             <td><strong>{{ r.total }}</strong></td>
                             <td>R$ {{ r.valor|number_format(0, ',', '.') }}</td>
                         </tr>

@@ -86,37 +86,49 @@
     } %}
 </div>
 
-{# Hot Leads — Card Grid #}
+{# Hot Leads — Table #}
 <div class="lwa-section-label">
     <span><i class="ri-fire-line"></i> Leads Quentes — Ação Necessária</span>
     <span class="lwa-section-badge">{{ kpis.hot_no_followup }} pendentes</span>
 </div>
-
-{% if tables.hot_leads is empty %}
-    <div class="lwa-card"><div class="lwa-card-body"><div class="lwa-empty-state">
-        <i class="ri-checkbox-circle-line"></i>
-        <p>Todos os leads quentes estão com follow-up em dia!</p>
-    </div></div></div>
-{% else %}
-    <div class="lwa-hot-grid">
-        {% for row in tables.hot_leads %}
-            <div class="lwa-kd-card" onclick="Mautic.lwaOpenLeadModal({{ row[6] }})">
-                <div class="lwa-kd-card-top">
-                    <div class="lwa-kd-avatar" style="background:{% if 'prioritario' in row[2] %}#9333ea{% else %}#dc2626{% endif %}">{{ row[0]|first|upper }}</div>
-                    <div class="lwa-kd-info">
-                        <div class="lwa-kd-name">{{ row[0] }}</div>
-                        <div class="lwa-kd-role">{{ row[1] }}</div>
-                    </div>
-                    {{ row[2]|raw }}
-                </div>
-                <div class="lwa-kd-card-bottom">
-                    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> Score: {{ row[3] }}</span>
-                    <span class="lwa-kd-tag"><i class="ri-time-line"></i> {{ row[4] }}</span>
-                </div>
+<div class="lwa-table-section lwa-card">
+    <div class="lwa-card-body">
+        {% if tables.hot_leads is empty %}
+            <div class="lwa-empty-state">
+                <i class="ri-checkbox-circle-line"></i>
+                <p>Todos os leads quentes estão com follow-up em dia!</p>
             </div>
-        {% endfor %}
+        {% else %}
+            <table class="lwa-table">
+                <thead>
+                    <tr>
+                        <th>Lead</th>
+                        <th>Cargo</th>
+                        <th>Temperatura</th>
+                        <th>Score</th>
+                        <th>Última Interação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in tables.hot_leads %}
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal({{ row[6] }})">
+                            <td>
+                                <div class="lwa-lead-cell">
+                                    <div class="lwa-lead-avatar lwa-lead-avatar--{% if 'prioritario' in row[2] %}prioritario{% else %}quente{% endif %}">{{ row[0]|first|upper }}</div>
+                                    <span class="lwa-lead-name">{{ row[0] }}</span>
+                                </div>
+                            </td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2]|raw }}</td>
+                            <td><span class="lwa-score-pill">{{ row[3] }}</span></td>
+                            <td>{{ row[4] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     </div>
-{% endif %}
+</div>
 
 {# KPI Detail Modal (full width) #}
 <div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">

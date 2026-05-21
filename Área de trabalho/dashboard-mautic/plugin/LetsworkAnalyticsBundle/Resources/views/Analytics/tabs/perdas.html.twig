@@ -1,14 +1,14 @@
-{# Loss KPIs #}
-<div class="lwa-section-label">Análise de Perdas</div>
+{# Análise de Perdas #}
+<div class="lwa-section-label">Análise de Motivos de Perda</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Motivos de Perda (Top 8)',
+        title: 'Principais Motivos de Perda',
         type: 'doughnut',
         data: reasons,
         height: 300
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Tendência de Perdas no Período',
+        title: 'Evolução de Perdas no Período',
         type: 'line',
         data: trend,
         wide: true,
@@ -16,21 +16,21 @@
     } %}
 </div>
 
-{# Loss Tables #}
-<div class="lwa-section-label">Detalhamento</div>
+{# Tabelas lado a lado #}
+<div class="lwa-section-label">Detalhamento das Perdas</div>
 <div class="lwa-charts-row" style="margin-bottom: 0;">
     <div class="lwa-table-section lwa-card" style="flex:1;">
         <div class="lwa-card-header"><h4>Perdas por Origem</h4></div>
         <div class="lwa-card-body">
             {% if by_origin is empty %}
-                <div class="lwa-empty-state"><p>Sem dados</p></div>
+                <div class="lwa-empty-state"><p>Sem dados no período</p></div>
             {% else %}
                 <table class="lwa-table">
-                    <thead><tr><th>Origem</th><th>Perdas</th></tr></thead>
+                    <thead><tr><th>Origem</th><th>Total de Perdas</th></tr></thead>
                     <tbody>
                         {% for r in by_origin %}
                             <tr>
-                                <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '}) }}</span></td>
+                                <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '})|capitalize }}</span></td>
                                 <td><strong>{{ r.total }}</strong></td>
                             </tr>
                         {% endfor %}
@@ -43,15 +43,15 @@
         <div class="lwa-card-header"><h4>Perdas por Segmento</h4></div>
         <div class="lwa-card-body">
             {% if by_segment is empty %}
-                <div class="lwa-empty-state"><p>Sem dados</p></div>
+                <div class="lwa-empty-state"><p>Sem dados no período</p></div>
             {% else %}
                 <table class="lwa-table">
-                    <thead><tr><th>Segmento</th><th>Perdas</th></tr></thead>
+                    <thead><tr><th>Segmento</th><th>Total de Perdas</th></tr></thead>
                     <tbody>
                         {% for r in by_segment %}
                             <tr>
-                                <td>{{ r.segmento }}</td>
-                                <td><strong>{{ r.total }}</strong></td>
+                                <td><strong>{{ r.segmento }}</strong></td>
+                                <td>{{ r.total }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

@@ -1,8 +1,8 @@
-{# Conversion KPIs #}
+{# Funil de Conversão #}
 <div class="lwa-section-label">Funil de Conversão</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Funil: Lead → Engajado → Reunião → Proposta → Ganho',
+        title: 'Lead → Engajado → Reunião → Proposta → Ganho',
         type: 'bar',
         data: funnel,
         wide: true,
@@ -16,8 +16,8 @@
     } %}
 </div>
 
-{# Conversion Table #}
-<div class="lwa-section-label">Detalhamento por Origem</div>
+{# Tabela de Conversão por Origem #}
+<div class="lwa-section-label">Conversão Detalhada por Origem</div>
 <div class="lwa-table-section lwa-card">
     <div class="lwa-card-body">
         {% if by_origin is empty %}
@@ -27,18 +27,18 @@
                 <thead>
                     <tr>
                         <th>Origem</th>
-                        <th>Total Leads</th>
-                        <th>Ganhos</th>
-                        <th>Taxa Conversão</th>
+                        <th>Total de Leads</th>
+                        <th>Clientes Ganhos</th>
+                        <th>Taxa de Conversão</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for r in by_origin %}
                         <tr>
-                            <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '}) }}</span></td>
+                            <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '})|capitalize }}</span></td>
                             <td><strong>{{ r.total }}</strong></td>
-                            <td><span class="lwa-badge lwa-badge--quente">{{ r.ganhos }}</span></td>
-                            <td>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</td>
+                            <td>{{ r.ganhos }}</td>
+                            <td><strong>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</strong></td>
                         </tr>
                     {% endfor %}
                 </tbody>

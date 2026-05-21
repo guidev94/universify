@@ -196,7 +196,7 @@ class AnalyticsModel
         return [
             'labels' => ['Frio', 'Morno', 'Quente', 'Prioritário'],
             'data'   => array_values($map),
-            'colors' => ['#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'],
+            'colors' => ['#3b82f6', '#f59e0b', '#dc2626', '#9333ea'],
         ];
     }
 
