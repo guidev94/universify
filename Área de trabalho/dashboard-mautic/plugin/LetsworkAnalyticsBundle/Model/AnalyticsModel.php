@@ -444,13 +444,21 @@ class AnalyticsModel
 
     private function getEmailCampaigns(array $dateRange): array
     {
-        $sql = "SELECT e.id, e.name, e.subject, e.sent_count, e.read_count, e.date_added,
-                    CASE WHEN e.sent_count > 0 THEN ROUND((e.read_count / e.sent_count) * 100, 1) ELSE 0 END as taxa_abertura
+        $sql = "SELECT e.id, e.name, e.subject, e.date_added,
+                    COUNT(es.id) as sent_count,
+                    SUM(es.is_read) as read_count,
+                    CASE WHEN COUNT(es.id) > 0 THEN ROUND((SUM(es.is_read) / COUNT(es.id)) * 100, 1) ELSE 0 END as taxa_abertura
                 FROM emails e
+                LEFT JOIN email_stats es ON es.email_id = e.id AND es.date_sent BETWEEN :dateFrom AND :dateTo
                 WHERE e.is_published = 1
+                GROUP BY e.id, e.name, e.subject, e.date_added
+                HAVING COUNT(es.id) > 0
                 ORDER BY e.date_added DESC
                 LIMIT 20";
-        $campaigns = $this->connection->fetchAllAssociative($sql);
+        $campaigns = $this->connection->fetchAllAssociative($sql, [
+            'dateFrom' => $dateRange['from'],
+            'dateTo'   => $dateRange['to'] . ' 23:59:59',
+        ]);
         return ['type' => 'campaigns', 'data' => $campaigns];
     }
 
