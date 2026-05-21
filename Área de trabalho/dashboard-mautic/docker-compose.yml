@@ -37,6 +37,7 @@ services:
       MAUTIC_ADMIN_USERNAME: ${MAUTIC_ADMIN_USERNAME}
       MAUTIC_ADMIN_PASSWORD: ${MAUTIC_ADMIN_PASSWORD}
       MAUTIC_ADMIN_EMAIL: ${MAUTIC_ADMIN_EMAIL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
       MAUTIC_LOCALE: pt_BR
     volumes:
       - mautic_data:/var/www/html

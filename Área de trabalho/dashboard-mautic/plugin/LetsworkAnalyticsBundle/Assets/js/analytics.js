@@ -250,10 +250,24 @@ Mautic.lwaRenderKpiPage = function() {
         html += '    </div>';
         html += '    <span class="lwa-badge lwa-badge--' + temp + '">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
         html += '  </div>';
+        var statusIcons = {
+            'reuniao agendada': {icon: 'ri-calendar-todo-line', color: '#3b82f6', label: 'Agendada'},
+            'reuniao realizada': {icon: 'ri-calendar-check-line', color: '#10b981', label: 'Realizada'},
+            'reuniao fechamento': {icon: 'ri-handshake-line', color: '#059669', label: 'Fechamento'},
+            'proposta enviada': {icon: 'ri-file-text-line', color: '#8b5cf6', label: 'Proposta'},
+            'negociacao': {icon: 'ri-exchange-line', color: '#7c3aed', label: 'Negociação'},
+            'prospeccao': {icon: 'ri-user-search-line', color: '#94a3b8', label: 'Prospecção'},
+            'engajado': {icon: 'ri-chat-check-line', color: '#f59e0b', label: 'Engajado'},
+            'ganho': {icon: 'ri-trophy-line', color: '#10b981', label: 'Ganho'},
+            'perdido': {icon: 'ri-close-circle-line', color: '#dc2626', label: 'Perdido'}
+        };
+        var statusInfo = statusIcons[status] || {icon: 'ri-flag-line', color: '#94a3b8', label: status};
+        var lastDate = lead.data_ultima_interacao ? new Date(lead.data_ultima_interacao).toLocaleDateString('pt-BR') : '';
+
         html += '  <div class="lwa-kd-card-bottom">';
         html += '    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> ' + score + '</span>';
-        if (origin) html += '    <span class="lwa-kd-tag"><i class="ri-global-line"></i> ' + origin + '</span>';
-        if (status) html += '    <span class="lwa-kd-tag"><i class="ri-flag-line"></i> ' + status + '</span>';
+        if (status) html += '    <span class="lwa-kd-tag" style="color:' + statusInfo.color + ';border-color:' + statusInfo.color + '30"><i class="' + statusInfo.icon + '"></i> ' + statusInfo.label + '</span>';
+        if (lastDate) html += '    <span class="lwa-kd-tag"><i class="ri-calendar-line"></i> ' + lastDate + '</span>';
         html += '  </div>';
         html += '</div>';
     });

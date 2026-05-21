@@ -149,7 +149,7 @@ class AnalyticsModel
                 return [];
         }
 
-        $sql = "SELECT id, firstname, lastname, email, company, temperatura, interesse_score, status_comercial, origem_principal, data_ultima_interacao, cargo
+        $sql = "SELECT id, firstname, lastname, email, company, temperatura, interesse_score, status_comercial, origem_principal, data_ultima_interacao, data_proximo_followup, cargo
                 FROM leads WHERE $where ORDER BY interesse_score DESC LIMIT 50";
         return $this->connection->fetchAllAssociative($sql, $params);
     }
@@ -816,7 +816,7 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
 
     private function callGemini(string $prompt): array
     {
-        $apiKey = 'REMOVED_KEY';
+        $apiKey = getenv('GEMINI_API_KEY') ?: 'REMOVED_KEY';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
 
         $payload = json_encode([
@@ -856,7 +856,7 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
             'taxa_email' => $this->getEmailOpenRate($dateRange),
         ];
 
-        $apiKey = 'REMOVED_KEY';
+        $apiKey = getenv('GEMINI_API_KEY') ?: 'REMOVED_KEY';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
 
         $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
@@ -909,7 +909,7 @@ Responda APENAS em JSON:
 
     public function getAiSuggestion(array $lead): array
     {
-        $apiKey = 'REMOVED_KEY';
+        $apiKey = getenv('GEMINI_API_KEY') ?: 'REMOVED_KEY';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
 
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
