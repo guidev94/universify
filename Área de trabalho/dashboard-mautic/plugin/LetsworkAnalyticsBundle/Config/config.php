@@ -43,6 +43,11 @@ return [
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::sendEmailAction',
                 'method'     => 'POST',
             ],
+            'letswork_analytics_update_lead' => [
+                'path'       => '/analytics/action/update-lead',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::updateLeadAction',
+                'method'     => 'POST',
+            ],
         ],
     ],
 

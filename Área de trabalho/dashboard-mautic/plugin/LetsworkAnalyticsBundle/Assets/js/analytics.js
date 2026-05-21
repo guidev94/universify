@@ -556,8 +556,22 @@ Mautic.lwaOpenLeadModal = function(leadId) {
                 html += '</div>';
             }
 
+            // Status update
+            html += '<div class="lwa-modal-section"><label>Etapa do Pipeline</label></div>';
+            html += '<div class="lwa-modal-status-bar">';
+            var statuses = [
+                {v:'prospeccao',l:'Prospecção'},{v:'engajado',l:'Engajado'},{v:'reuniao_agendada',l:'R. Agendada'},
+                {v:'reuniao_realizada',l:'R. Realizada'},{v:'reuniao_fechamento',l:'R. Fechamento'},
+                {v:'proposta_enviada',l:'Proposta'},{v:'negociacao',l:'Negociação'},{v:'ganho',l:'Ganho'},{v:'perdido',l:'Perdido'}
+            ];
+            statuses.forEach(function(s) {
+                var active = (l.status_comercial === s.v) ? ' lwa-status-btn--active' : '';
+                html += '<button class="lwa-status-btn' + active + '" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'status_comercial\',\'' + s.v + '\')">' + s.l + '</button>';
+            });
+            html += '</div>';
+
             // Actions
-            html += '<div class="lwa-modal-section"><label>Ações Rápidas</label></div>';
+            html += '<div class="lwa-modal-section"><label>Ações</label></div>';
             html += '<div class="lwa-modal-actions">';
             html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaEmailLead(' + l.id + ',\'' + (l.email||'').replace(/'/g,"\\'") + '\',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-send-line"></i> Enviar E-mail</button>';
             html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaScheduleFollowup(' + l.id + ',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i> Agendar Follow-up</button>';
@@ -724,6 +738,23 @@ Mautic.lwaCopyText = function(btn) {
     var text = mQuery(btn).data('text');
     navigator.clipboard.writeText(text).then(function() {
         Mautic.lwaToast('Mensagem copiada!');
+    });
+};
+
+Mautic.lwaUpdateLead = function(leadId, field, value) {
+    mQuery.ajax({
+        url: '/s/analytics/action/update-lead',
+        method: 'POST',
+        data: { lead_id: leadId, field: field, value: value },
+        dataType: 'json',
+        success: function(res) {
+            if (res.success) {
+                Mautic.lwaToast(res.message);
+                Mautic.lwaOpenLeadModal(leadId);
+            } else {
+                Mautic.lwaToast(res.error || 'Erro');
+            }
+        }
     });
 };
 

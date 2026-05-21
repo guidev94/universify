@@ -612,6 +612,36 @@ class AnalyticsModel
         ]);
     }
 
+    // --- Update Lead ---
+
+    public function updateLeadField(int $leadId, string $field, string $value): array
+    {
+        $allowedFields = ['status_comercial', 'temperatura', 'valor_potencial', 'modulo_interesse', 'dor_principal', 'proxima_acao'];
+        if (!in_array($field, $allowedFields)) {
+            return ['error' => 'Campo não permitido'];
+        }
+
+        $lead = $this->connection->fetchAssociative("SELECT firstname, lastname FROM leads WHERE id = :id", ['id' => $leadId]);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $now = date('Y-m-d H:i:s');
+        $this->connection->executeStatement("UPDATE leads SET $field = :value, date_modified = :now WHERE id = :id", [
+            'value' => $value, 'now' => $now, 'id' => $leadId
+        ]);
+
+        $leadName = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
+        $fieldLabels = ['status_comercial' => 'Status', 'temperatura' => 'Temperatura', 'valor_potencial' => 'Valor', 'modulo_interesse' => 'Módulo', 'dor_principal' => 'Dor', 'proxima_acao' => 'Próxima ação'];
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => ($fieldLabels[$field] ?? $field) . " atualizado para: $value",
+            'type' => 'general', 'date_time' => $now,
+        ]);
+
+        return ['success' => true, 'message' => ($fieldLabels[$field] ?? $field) . ' atualizado'];
+    }
+
     // --- Actions ---
 
     public function scheduleFollowup(int $leadId, string $date, string $note): array

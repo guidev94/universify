@@ -463,6 +463,17 @@
 .lwa-insight-title { font-size: 13px; font-weight: 700; color: var(--lwa-gray-800); margin-bottom: 4px; }
 .lwa-insight-desc { font-size: 12px; color: var(--lwa-gray-500); line-height: 1.5; }
 
+/* Status Bar (Lead Modal) */
+.lwa-modal-status-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+.lwa-status-btn {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--lwa-gray-200);
+    background: transparent; color: var(--lwa-gray-500); font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s ease;
+}
+.lwa-status-btn:hover { border-color: var(--lwa-gray-300); color: var(--lwa-gray-700); background: var(--lwa-gray-50); }
+.lwa-status-btn--active { background: #dc2626; color: white; border-color: #dc2626; font-weight: 600; }
+.lwa-status-btn--active:hover { background: #b91c1c; border-color: #b91c1c; color: white; }
+
 /* AI Tab Analysis */
 .lwa-ai-tab-card { padding: 18px; background: var(--lwa-gray-50); border-radius: 12px; border-left: 3px solid #7c3aed; }
 .lwa-ai-tab-header { font-size: 15px; font-weight: 700; color: #7c3aed; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }

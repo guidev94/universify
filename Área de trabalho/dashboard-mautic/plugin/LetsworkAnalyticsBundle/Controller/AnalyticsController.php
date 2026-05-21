@@ -110,6 +110,24 @@ class AnalyticsController extends CommonController
         return new JsonResponse($result);
     }
 
+    public function updateLeadAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $leadId = (int) $request->request->get('lead_id');
+        $field = $request->request->get('field', '');
+        $value = $request->request->get('value', '');
+
+        if (!$leadId || !$field) {
+            return new JsonResponse(['error' => 'lead_id e field obrigatórios'], 400);
+        }
+
+        $result = $this->analyticsModel->updateLeadField($leadId, $field, $value);
+        return new JsonResponse($result);
+    }
+
     public function kpiDetailAction(Request $request, string $kpi): JsonResponse
     {
         if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
