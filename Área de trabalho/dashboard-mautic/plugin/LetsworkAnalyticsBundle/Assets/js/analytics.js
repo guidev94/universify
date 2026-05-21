@@ -44,7 +44,7 @@ Mautic.lwaRenderCharts = function() {
 };
 
 Mautic.lwaGetChartConfig = function(type, data) {
-    var colors = data.colors || ['#dc2626', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+    var colors = data.colors || ['#dc2626', '#334155', '#64748b', '#94a3b8', '#cbd5e1', '#475569', '#1e293b', '#f59e0b'];
 
     var datasets;
     if (type === 'doughnut' || type === 'pie') {

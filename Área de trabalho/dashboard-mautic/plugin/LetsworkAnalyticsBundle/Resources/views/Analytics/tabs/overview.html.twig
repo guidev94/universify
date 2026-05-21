@@ -60,24 +60,24 @@
         icon: 'ri-mail-send-line',
         color: 'primary',
         kpi_id: 'emails_enviados',
-        description: 'Total de e-mails disparados no período'
+        description: 'Campanhas de e-mail disparadas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'E-mails Abertos',
+        title: 'Abertos',
         value: kpis.emails_abertos,
         icon: 'ri-mail-open-line',
-        color: 'success',
+        color: 'primary',
         kpi_id: 'emails_abertos',
-        description: 'Leads que abriram os e-mails'
+        description: 'Leads que abriram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Taxa de Abertura',
         value: kpis.taxa_abertura,
         icon: 'ri-percent-line',
-        color: 'warning',
+        color: 'primary',
         suffix: '%',
-        kpi_id: 'emails_taxa',
-        description: 'Performance geral de engajamento'
+        kpi_id: 'emails_enviados',
+        description: 'Desempenho geral'
     } %}
 </div>
 
