@@ -36,6 +36,7 @@ class AnalyticsModel
             'top_dores' => $this->getTopDores(),
             'top_modulos' => $this->getTopModulos(),
             'funnel' => $this->getConversionFunnel($dateRange),
+            'page_hits' => $this->getPageHitsData($dateRange),
             'charts' => [
                 'temperature' => $this->getTemperatureDistribution(),
                 'leads_time'  => $this->getLeadsOverTime($dateRange),
@@ -241,6 +242,22 @@ class AnalyticsModel
             if (isset($result[$key])) $result[$key] = (int)$row['total'];
         }
         return $result;
+    }
+
+    private function getPageHitsData(array $dateRange): array
+    {
+        $total = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM page_hits WHERE date_hit BETWEEN :from AND :to", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+        $visitorsCount = (int) $this->connection->fetchOne("SELECT COUNT(DISTINCT lead_id) FROM page_hits WHERE lead_id IS NOT NULL AND date_hit BETWEEN :from AND :to", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+        $pricingVisits = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM page_hits WHERE url LIKE '%planos%' AND date_hit BETWEEN :from AND :to", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+
+        $topPages = $this->connection->fetchAllAssociative("SELECT url_title, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :from AND :to AND url_title IS NOT NULL AND url_title != '' GROUP BY url_title ORDER BY views DESC LIMIT 5", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+
+        return [
+            'total' => $total,
+            'visitors' => $visitorsCount,
+            'pricing_visits' => $pricingVisits,
+            'top_pages' => $topPages,
+        ];
     }
 
     private function getTopDores(): array
@@ -706,6 +723,7 @@ class AnalyticsModel
             'pipeline' => $this->buildPipelinePrompt($dateRange),
             'perdas' => $this->buildPerdasPrompt($dateRange),
             'email' => $this->buildEmailPrompt($dateRange),
+            'site' => $this->buildSitePrompt($dateRange),
         ];
 
         $prompt = $prompts[$tab] ?? '';
@@ -779,6 +797,21 @@ DADOS:
 Sugira 3 ideias de campanha de email marketing com assuntos que geram alta abertura.
 
 Responda em JSON: {\"titulo\": \"titulo\", \"taxa_analise\": \"analise da taxa atual\", \"campanhas\": [{\"assunto\": \"assunto do email\", \"objetivo\": \"o que espera\", \"publico\": \"para quem\"}, ...]}";
+    }
+
+    private function buildSitePrompt(array $dateRange): string
+    {
+        $pageData = $this->getPageHitsData($dateRange);
+        $pages = implode(', ', array_map(function($p) { return $p['url_title'] . " ({$p['views']}x)"; }, $pageData['top_pages']));
+        return "Voce e analista de marketing digital da LetsWork (software RH). Analise o comportamento dos leads no site e sugira como converter mais visitantes.
+
+DADOS:
+- Total page views: {$pageData['total']}
+- Visitantes identificados: {$pageData['visitors']}
+- Visitaram pagina de precos: {$pageData['pricing_visits']}
+- Paginas mais visitadas: $pages
+
+Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"acao_principal\": \"o que fazer com leads que viram precos\", \"campanha_sugerida\": \"campanha para quem visitou o site\"}";
     }
 
     private function callGemini(string $prompt): array
