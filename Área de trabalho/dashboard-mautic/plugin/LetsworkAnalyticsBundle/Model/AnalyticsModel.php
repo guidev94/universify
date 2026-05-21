@@ -18,17 +18,19 @@ class AnalyticsModel
     {
         return [
             'kpis' => [
-                'prospeccao'        => $this->getProspeccao(),
-                'frio_to_morno'     => $this->getFrioToMorno($dateRange),
-                'morno_to_reuniao'  => $this->getMornoToReuniao($dateRange),
-                'propostas'         => $this->getCountByStatus($dateRange, 'proposta_enviada') + $this->getCountByStatus($dateRange, 'negociacao'),
-                'ganhos'            => $this->getCountByStatus($dateRange, 'ganho'),
-                'hot_no_followup'   => $this->getHotWithoutFollowup(),
-                'leads_incompletos' => $this->getLeadsIncompletos(),
-                'campanhas'         => $this->getCampaignCount(),
-                'disparos'          => $this->getEmailsSent($dateRange),
-                'emails_abertos'    => $this->getEmailsOpened($dateRange),
-                'taxa_abertura'     => $this->getEmailOpenRate($dateRange),
+                'prospeccao'          => $this->getProspeccao(),
+                'frio_to_morno'       => $this->getFrioToMorno($dateRange),
+                'reunioes_agendadas'  => $this->getCountByStatusAll('reuniao_agendada'),
+                'reunioes_realizadas' => $this->getCountByStatusAll('reuniao_realizada'),
+                'reunioes_fechamento' => $this->getCountByStatusAll('reuniao_fechamento'),
+                'propostas'           => $this->getCountByStatusAll('proposta_enviada') + $this->getCountByStatusAll('negociacao'),
+                'ganhos'              => $this->getCountByStatus($dateRange, 'ganho'),
+                'hot_no_followup'     => $this->getHotWithoutFollowup(),
+                'leads_incompletos'   => $this->getLeadsIncompletos(),
+                'campanhas'           => $this->getCampaignCount(),
+                'disparos'            => $this->getTotalDisparos(),
+                'emails_abertos'      => $this->getEmailsOpened($dateRange),
+                'taxa_abertura'       => $this->getEmailOpenRate($dateRange),
             ],
             'temperatura_counts' => $this->getTemperatureCounts(),
             'top_dores' => $this->getTopDores(),
@@ -185,6 +187,17 @@ class AnalyticsModel
         }
         $sql = "SELECT COUNT(*) FROM leads WHERE temperatura IN ('quente','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
         return (int) $this->connection->fetchOne($sql);
+    }
+
+    private function getCountByStatusAll(string $status): int
+    {
+        if (!$this->columnExists('leads', 'status_comercial')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE status_comercial = :status", ['status' => $status]);
+    }
+
+    private function getTotalDisparos(): int
+    {
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM email_stats");
     }
 
     private function getProspeccao(): int

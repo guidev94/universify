@@ -22,8 +22,8 @@
         {% if by_status is empty %}
             <div class="lwa-empty-state"><p>Sem dados.</p></div>
         {% else %}
-            {% set status_labels = {'prospeccao':'Prospecção','engajado':'Engajado','reuniao_agendada':'Reunião Agendada','reuniao_realizada':'Reunião Realizada','proposta_enviada':'Proposta Enviada','negociacao':'Negociação','ganho':'Cliente Ganho','perdido':'Perdido'} %}
-            {% set status_colors = {'prospeccao':'#94a3b8','engajado':'#f59e0b','reuniao_agendada':'#3b82f6','reuniao_realizada':'#2563eb','proposta_enviada':'#8b5cf6','negociacao':'#7c3aed','ganho':'#10b981','perdido':'#dc2626'} %}
+            {% set status_labels = {'prospeccao':'Prospecção','engajado':'Engajado','reuniao_agendada':'Reunião Agendada','reuniao_realizada':'Reunião Realizada','reuniao_fechamento':'Reunião de Fechamento','proposta_enviada':'Proposta Enviada','negociacao':'Negociação','ganho':'Cliente Ganho','perdido':'Perdido'} %}
+            {% set status_colors = {'prospeccao':'#94a3b8','engajado':'#f59e0b','reuniao_agendada':'#3b82f6','reuniao_realizada':'#2563eb','reuniao_fechamento':'#059669','proposta_enviada':'#8b5cf6','negociacao':'#7c3aed','ganho':'#10b981','perdido':'#dc2626'} %}
             <table class="lwa-table">
                 <thead><tr><th>Etapa</th><th>Leads</th><th>Valor Potencial</th><th></th></tr></thead>
                 <tbody>

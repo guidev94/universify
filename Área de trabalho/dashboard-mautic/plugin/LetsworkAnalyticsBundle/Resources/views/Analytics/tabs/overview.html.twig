@@ -10,8 +10,16 @@
         kpi_id: 'engajados', description: 'Leads que engajaram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Reuniões', value: kpis.morno_to_reuniao, icon: 'ri-calendar-check-line', color: 'primary',
-        kpi_id: 'reunioes', description: 'Agendadas ou realizadas'
+        title: 'Agendadas', value: kpis.reunioes_agendadas, icon: 'ri-calendar-todo-line', color: 'info',
+        kpi_id: 'reunioes', description: 'Reuniões marcadas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Realizadas', value: kpis.reunioes_realizadas, icon: 'ri-calendar-check-line', color: 'primary',
+        kpi_id: 'reunioes', description: 'Reuniões feitas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Fechamento', value: kpis.reunioes_fechamento, icon: 'ri-handshake-line', color: 'success',
+        description: 'Reuniões de fechamento'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Propostas', value: kpis.propostas, icon: 'ri-file-text-line', color: 'purple',
