@@ -25,6 +25,10 @@ return [
                 'path'       => '/analytics/ai/suggest/{leadId}',
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::aiSuggestAction',
             ],
+            'letswork_analytics_ai_insights' => [
+                'path'       => '/analytics/ai/insights',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::aiInsightsAction',
+            ],
             'letswork_analytics_followup' => [
                 'path'       => '/analytics/action/followup',
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::scheduleFollowupAction',

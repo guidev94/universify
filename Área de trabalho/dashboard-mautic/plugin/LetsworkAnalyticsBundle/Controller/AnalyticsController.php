@@ -21,6 +21,18 @@ class AnalyticsController extends CommonController
         $this->analyticsModel = $analyticsModel;
     }
 
+    public function aiInsightsAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $dateFrom = $request->get('dateFrom', date('Y-m-d', strtotime('-90 days')));
+        $dateTo = $request->get('dateTo', date('Y-m-d'));
+        $insights = $this->analyticsModel->getAiInsights(['from' => $dateFrom, 'to' => $dateTo]);
+        return new JsonResponse(['insights' => $insights]);
+    }
+
     public function leadDetailAction(Request $request, int $leadId): JsonResponse
     {
         if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {

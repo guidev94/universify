@@ -382,6 +382,43 @@ Mautic.lwaCloseKpiDetail = function() {
     mQuery('#lwa-kpi-detail').hide();
 };
 
+Mautic.lwaLoadInsights = function() {
+    var $container = mQuery('#lwa-insights .lwa-card-body');
+    $container.html('<div style="text-align:center;padding:24px;color:var(--lwa-gray-400)"><div class="lwa-spinner" style="margin:0 auto 10px"></div>Analisando métricas com IA...</div>');
+
+    var dateFrom = mQuery('input[name="dateFrom"]').val() || '';
+    var dateTo = mQuery('input[name="dateTo"]').val() || '';
+
+    mQuery.ajax({
+        url: '/s/analytics/ai/insights',
+        data: { dateFrom: dateFrom, dateTo: dateTo },
+        dataType: 'json',
+        success: function(res) {
+            var insights = res.insights || [];
+            if (!insights.length) { $container.html('<p style="text-align:center;color:var(--lwa-gray-400)">Sem insights disponíveis.</p>'); return; }
+
+            var icons = { alerta: 'ri-error-warning-line', oportunidade: 'ri-lightbulb-line', melhoria: 'ri-arrow-up-circle-line', sucesso: 'ri-checkbox-circle-line' };
+            var colors = { alerta: '#dc2626', oportunidade: '#f59e0b', melhoria: '#3b82f6', sucesso: '#10b981' };
+
+            var html = '<div class="lwa-insights-grid">';
+            insights.forEach(function(i) {
+                var icon = icons[i.tipo] || 'ri-information-line';
+                var color = colors[i.tipo] || '#64748b';
+                html += '<div class="lwa-insight-card">';
+                html += '  <div class="lwa-insight-icon" style="color:' + color + '"><i class="' + icon + '"></i></div>';
+                html += '  <div class="lwa-insight-content">';
+                html += '    <div class="lwa-insight-title">' + (i.titulo || '') + '</div>';
+                html += '    <div class="lwa-insight-desc">' + (i.descricao || '') + '</div>';
+                html += '  </div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            $container.html(html);
+        },
+        error: function() { $container.html('<p style="text-align:center;color:#dc2626">Erro ao consultar IA.</p>'); }
+    });
+};
+
 Mautic.lwaShowModuloLeads = function(modulo) {
     var $panel = mQuery('#lwa-kpi-detail');
     Mautic.lwaKpiPage = 1;

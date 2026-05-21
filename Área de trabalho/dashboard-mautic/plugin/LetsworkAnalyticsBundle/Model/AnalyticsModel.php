@@ -33,6 +33,7 @@ class AnalyticsModel
             'temperatura_counts' => $this->getTemperatureCounts(),
             'top_dores' => $this->getTopDores(),
             'top_modulos' => $this->getTopModulos(),
+            'funnel' => $this->getConversionFunnel($dateRange),
             'charts' => [
                 'temperature' => $this->getTemperatureDistribution(),
                 'leads_time'  => $this->getLeadsOverTime($dateRange),
@@ -680,6 +681,71 @@ class AnalyticsModel
         }
 
         return ['success' => true, 'message' => "E-mail enviado para $to"];
+    }
+
+    // --- AI Insights (Dashboard) ---
+
+    public function getAiInsights(array $dateRange): array
+    {
+        $data = [
+            'prospeccao' => $this->getProspeccao(),
+            'frio_to_morno' => $this->getFrioToMorno($dateRange),
+            'reunioes' => $this->getReunioesCount($dateRange),
+            'ganhos' => $this->getCountByStatus($dateRange, 'ganho'),
+            'perdidos' => $this->getCountByStatus($dateRange, 'perdido'),
+            'hot_no_followup' => $this->getHotWithoutFollowup(),
+            'top_motivos_perda' => $this->getLossReasons($dateRange),
+            'top_modulos' => $this->getTopModulos(),
+            'taxa_email' => $this->getEmailOpenRate($dateRange),
+        ];
+
+        $apiKey = 'REMOVED_KEY';
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+
+        $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
+
+METRICAS:
+- Leads em prospeccao (sem contato): {$data['prospeccao']}
+- Leads frios convertidos em mornos: {$data['frio_to_morno']}
+- Reunioes no periodo: {$data['reunioes']}
+- Clientes ganhos: {$data['ganhos']}
+- Leads perdidos: {$data['perdidos']}
+- Leads quentes sem follow-up: {$data['hot_no_followup']}
+- Taxa de abertura email: {$data['taxa_email']}%
+- Top motivos de perda: " . implode(', ', array_column($data['top_motivos_perda']['labels'] ?? [], 0) ?: ['sem dados']) . "
+- Modulos mais procurados: " . implode(', ', array_column($data['top_modulos'], 'modulo_interesse')) . "
+
+REGRAS:
+- Cada insight deve ter no maximo 2 linhas
+- Foque em: onde estamos perdendo, onde estamos ganhando, o que pode melhorar
+- Sugira acoes concretas
+- Tom direto e objetivo
+
+Responda APENAS em JSON:
+[
+  {\"tipo\": \"alerta|oportunidade|melhoria|sucesso\", \"titulo\": \"titulo curto\", \"descricao\": \"descricao de 1-2 linhas com acao\"},
+  ...
+]";
+
+        $payload = json_encode([
+            'contents' => [['parts' => [['text' => $prompt]]]],
+            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 600],
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => ['Content-Type: application/json'], CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $responseData = json_decode($response, true);
+        $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        if (preg_match('/\[.*\]/s', $text, $matches)) {
+            $parsed = json_decode($matches[0], true);
+            if ($parsed) return $parsed;
+        }
+
+        return [['tipo' => 'melhoria', 'titulo' => 'Dados insuficientes', 'descricao' => 'Adicione mais leads para gerar insights automaticos.']];
     }
 
     // --- AI (Gemini) ---

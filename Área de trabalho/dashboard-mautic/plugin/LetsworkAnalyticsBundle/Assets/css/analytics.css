@@ -447,6 +447,15 @@
 .lwa-empty-state i { font-size: 32px; margin-bottom: 8px; opacity: 0.5; }
 .lwa-empty-state p { font-size: 13px; margin: 0; }
 
+/* AI Insights */
+.lwa-insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lwa-insight-card { display: flex; gap: 12px; padding: 12px 14px; background: var(--lwa-gray-50); border-radius: 10px; }
+.lwa-insight-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.lwa-insight-content { flex: 1; }
+.lwa-insight-title { font-size: 13px; font-weight: 600; color: var(--lwa-gray-800); margin-bottom: 2px; }
+.lwa-insight-desc { font-size: 12px; color: var(--lwa-gray-500); line-height: 1.4; }
+@media (max-width: 768px) { .lwa-insights-grid { grid-template-columns: 1fr; } }
+
 /* Animation */
 @keyframes lwa-fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
