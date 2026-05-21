@@ -104,6 +104,12 @@ class AnalyticsModel
                 $where = "temperatura IN ('quente','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR status_comercial NOT IN ('ganho','perdido'))";
                 $params = [];
                 break;
+            case 'emails_enviados':
+                return $this->getEmailLeads($dateRange, false);
+            case 'emails_abertos':
+                return $this->getEmailLeads($dateRange, true);
+            case 'emails_taxa':
+                return $this->getEmailLeads($dateRange, false);
             default:
                 return [];
         }
@@ -432,6 +438,24 @@ class AnalyticsModel
                 FROM leads WHERE id = :id";
         $lead = $this->connection->fetchAssociative($sql, ['id' => $leadId]);
         return $lead ?: null;
+    }
+
+    // --- Email Leads ---
+
+    private function getEmailLeads(array $dateRange, bool $onlyOpened): array
+    {
+        $readCondition = $onlyOpened ? 'AND es.is_read = 1' : '';
+        $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo, MAX(es.date_sent) as last_sent
+                FROM email_stats es
+                JOIN leads l ON l.id = es.lead_id
+                WHERE es.date_sent BETWEEN :dateFrom AND :dateTo $readCondition
+                GROUP BY l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo
+                ORDER BY last_sent DESC
+                LIMIT 50";
+        return $this->connection->fetchAllAssociative($sql, [
+            'dateFrom' => $dateRange['from'],
+            'dateTo'   => $dateRange['to'] . ' 23:59:59',
+        ]);
     }
 
     // --- Actions ---

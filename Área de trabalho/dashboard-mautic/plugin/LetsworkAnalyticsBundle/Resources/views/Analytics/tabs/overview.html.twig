@@ -56,15 +56,18 @@
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line', color: 'primary',
-        description: 'Total de e-mails disparados'
+        description: 'Total de e-mails disparados',
+        kpi_id: 'emails_enviados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line', color: 'success',
-        description: 'Leads que abriram'
+        description: 'Leads que abriram',
+        kpi_id: 'emails_abertos'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Taxa Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line', color: 'warning', suffix: '%',
-        description: 'Performance de engajamento'
+        description: 'Performance de engajamento',
+        kpi_id: 'emails_taxa'
     } %}
 </div>
 
