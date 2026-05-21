@@ -1,53 +1,38 @@
-{# KPIs de Velocidade #}
+{# KPIs Velocidade #}
 <div class="lwa-section-label">Velocidade do Pipeline</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Tempo até Reunião', value: avg_to_meeting, icon: 'ri-time-line', suffix: 'dias',
-        description: 'Média da entrada até a primeira reunião'
+        description: 'Da entrada até primeira reunião'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Tempo até Proposta', value: avg_to_proposal, icon: 'ri-file-text-line', suffix: 'dias',
-        description: 'Média da entrada até envio de proposta'
+        description: 'Da entrada até proposta enviada'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Valor em Negociação', value: valor_pipeline|number_format(0, ',', '.'), icon: 'ri-money-dollar-circle-line', suffix: 'R$',
-        description: 'Soma das oportunidades ativas'
+        description: 'Oportunidades ativas'
     } %}
 </div>
 
-{# Módulos de Interesse #}
-<div class="lwa-section-label">Interesse por Módulo LetsWork</div>
-<div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-body">
-        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ by_module|json_encode }}" style="height:240px;width:100%;"></canvas>
-    </div>
-</div>
-
 {# Etapas do Pipeline #}
-<div class="lwa-section-label">Etapas do Pipeline</div>
-<div class="lwa-card">
+<div class="lwa-section-label">Etapas do Pipeline Comercial</div>
+<div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         {% if by_status is empty %}
-            <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
+            <div class="lwa-empty-state"><p>Sem dados.</p></div>
         {% else %}
-            {% set status_labels = {
-                'prospeccao': 'Prospecção',
-                'engajado': 'Engajado',
-                'reuniao_agendada': 'Reunião Agendada',
-                'reuniao_realizada': 'Reunião Realizada',
-                'proposta_enviada': 'Proposta Enviada',
-                'negociacao': 'Negociação',
-                'ganho': 'Cliente Ganho',
-                'perdido': 'Perdido'
-            } %}
+            {% set status_labels = {'prospeccao':'Prospecção','engajado':'Engajado','reuniao_agendada':'Reunião Agendada','reuniao_realizada':'Reunião Realizada','proposta_enviada':'Proposta Enviada','negociacao':'Negociação','ganho':'Cliente Ganho','perdido':'Perdido'} %}
+            {% set status_colors = {'prospeccao':'#94a3b8','engajado':'#f59e0b','reuniao_agendada':'#3b82f6','reuniao_realizada':'#2563eb','proposta_enviada':'#8b5cf6','negociacao':'#7c3aed','ganho':'#10b981','perdido':'#dc2626'} %}
             <table class="lwa-table">
-                <thead><tr><th>Etapa</th><th>Leads</th><th>Valor</th></tr></thead>
+                <thead><tr><th>Etapa</th><th>Leads</th><th>Valor Potencial</th><th></th></tr></thead>
                 <tbody>
                     {% for r in by_status %}
                         <tr>
-                            <td>{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_': ' '})|title) }}</td>
+                            <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ status_colors[r.status_comercial]|default('#94a3b8') }};margin-right:8px"></span>{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_':' '})|title) }}</td>
                             <td><strong>{{ r.total }}</strong></td>
                             <td>R$ {{ r.valor|number_format(0, ',', '.') }}</td>
+                            <td style="width:30%"><div style="background:var(--lwa-gray-100);border-radius:4px;height:6px;overflow:hidden"><div style="background:{{ status_colors[r.status_comercial]|default('#94a3b8') }};height:100%;width:{{ (r.total / by_status[0].total * 100)|round }}%;border-radius:4px"></div></div></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -55,3 +40,21 @@
         {% endif %}
     </div>
 </div>
+
+{# Módulos de Interesse #}
+<div class="lwa-section-label">Interesse por Módulo LetsWork</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ by_module|json_encode }}" style="height:220px;width:100%;"></canvas>
+    </div>
+</div>
+
+{# Score #}
+{% if score_progress.labels is not empty %}
+<div class="lwa-section-label">Evolução do Score Médio</div>
+<div class="lwa-card">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ score_progress|json_encode }}" style="height:180px;width:100%;"></canvas>
+    </div>
+</div>
+{% endif %}

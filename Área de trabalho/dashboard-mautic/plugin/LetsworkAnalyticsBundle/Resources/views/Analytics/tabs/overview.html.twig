@@ -58,14 +58,6 @@
     </div>
 </div>
 
-{# ===== FUNIL DE VENDAS ===== #}
-<div class="lwa-section-label">Funil de Vendas</div>
-<div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-body">
-        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ funnel|json_encode }}" style="height:240px;width:100%;"></canvas>
-    </div>
-</div>
-
 {# ===== E-MAIL MARKETING ===== #}
 <div class="lwa-section-label">E-mail Marketing</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
@@ -166,6 +158,14 @@
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body">
         <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ charts.leads_time|json_encode }}" style="height:180px;width:100%;"></canvas>
+    </div>
+</div>
+
+{# ===== FUNIL DE VENDAS ===== #}
+<div class="lwa-section-label">Funil de Vendas</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ funnel|json_encode }}" style="height:260px;width:100%;"></canvas>
     </div>
 </div>
 

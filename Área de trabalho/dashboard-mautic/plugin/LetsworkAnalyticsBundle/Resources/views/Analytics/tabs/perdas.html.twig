@@ -1,30 +1,44 @@
-{# Motivos de Perda #}
-<div class="lwa-section-label">Motivos de Perda</div>
+{# KPIs de Perda #}
+<div class="lwa-section-label">Resumo de Perdas</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact">
+    {% set total_perdas = by_origin|reduce((carry, r) => carry + r.total, 0) %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Total Perdidos', value: total_perdas, icon: 'ri-close-circle-line', color: 'error',
+        description: 'Leads perdidos no período'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Motivos Identificados', value: reasons.labels|length|default(0), icon: 'ri-list-check',
+        description: 'Razões diferentes registradas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Top Motivo', value: reasons.labels[0]|default('—'), icon: 'ri-error-warning-line', color: 'warning',
+        description: 'Mais frequente'
+    } %}
+</div>
+
+{# Gráficos #}
+<div class="lwa-section-label">Análise Visual</div>
 <div class="lwa-grid-2">
     <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Motivos de Perda</h4></div>
         <div class="lwa-card-body">
-            <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ reasons|json_encode }}" style="height:240px;width:100%;"></canvas>
+            <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ reasons|json_encode }}" style="height:220px;width:100%;"></canvas>
         </div>
     </div>
     <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Tendência de Perdas</h4></div>
         <div class="lwa-card-body">
-            <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ trend|json_encode }}" style="height:240px;width:100%;"></canvas>
+            <canvas class="lwa-chart" data-chart-type="line" data-chart-data="{{ trend|json_encode }}" style="height:220px;width:100%;"></canvas>
         </div>
     </div>
 </div>
 
-{# Tabelas #}
+{# Tabelas Detalhadas #}
 <div class="lwa-section-label">Detalhamento</div>
 <div class="lwa-grid-2">
-    {% set origin_labels = {
-        'linkedin_roboze': 'LinkedIn / Roboze',
-        'letswork_site': "Let's Work Site",
-        'apollo': 'Apollo',
-        'lista_importada': 'Lista Importada',
-        'indicação': 'Indicação'
-    } %}
+    {% set origin_labels = {'linkedin_roboze':'LinkedIn / Roboze','letswork_site':"Let's Work Site",'apollo':'Apollo','lista_importada':'Lista Importada','indicação':'Indicação'} %}
     <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Por Origem</h4></div>
+        <div class="lwa-card-header"><h4>Perdas por Origem</h4></div>
         <div class="lwa-card-body lwa-card-body--tight">
             {% if by_origin is empty %}
                 <div class="lwa-empty-state"><p>Sem dados.</p></div>
@@ -32,7 +46,7 @@
                 <table class="lwa-table lwa-table--compact">
                     <tbody>
                         {% for r in by_origin %}
-                            <tr><td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_': ' '})|title) }}</td><td><strong>{{ r.total }}</strong></td></tr>
+                            <tr><td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_':' '})|title) }}</td><td><strong>{{ r.total }}</strong></td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -40,7 +54,7 @@
         </div>
     </div>
     <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Por Segmento</h4></div>
+        <div class="lwa-card-header"><h4>Perdas por Segmento</h4></div>
         <div class="lwa-card-body lwa-card-body--tight">
             {% if by_segment is empty %}
                 <div class="lwa-empty-state"><p>Sem dados.</p></div>
@@ -51,6 +65,29 @@
                     </tbody>
                 </table>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Ações sugeridas #}
+<div class="lwa-section-label">Ações Recomendadas</div>
+<div class="lwa-card">
+    <div class="lwa-card-body">
+        <div class="lwa-insights-grid">
+            <div class="lwa-insight-card" data-tipo="melhoria">
+                <div class="lwa-insight-icon" style="color:#3b82f6"><i class="ri-lightbulb-line"></i></div>
+                <div class="lwa-insight-content">
+                    <div class="lwa-insight-title">Reativar leads perdidos por timing</div>
+                    <div class="lwa-insight-desc">Leads perdidos por "Timing ruim" podem ser reativados após 30-60 dias com nova campanha.</div>
+                </div>
+            </div>
+            <div class="lwa-insight-card" data-tipo="alerta">
+                <div class="lwa-insight-icon" style="color:#dc2626"><i class="ri-error-warning-line"></i></div>
+                <div class="lwa-insight-content">
+                    <div class="lwa-insight-title">Analisar perdas por preço</div>
+                    <div class="lwa-insight-desc">Leads perdidos por preço indicam necessidade de reforçar valor ou ajustar proposta por segmento.</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

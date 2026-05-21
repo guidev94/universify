@@ -1,40 +1,53 @@
-{# Funil de Conversão #}
-<div class="lwa-section-label">Funil de Conversão</div>
+{# KPIs de Conversão #}
+<div class="lwa-section-label">Resumo de Conversão</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact">
+    {% set total_leads = funnel.data[0]|default(0) %}
+    {% set total_ganhos = funnel.data[4]|default(0) %}
+    {% set taxa_geral = total_leads > 0 ? ((total_ganhos / total_leads * 100)|round(1)) : 0 %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Total de Leads', value: total_leads, icon: 'ri-team-line', description: 'Base no período'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Convertidos', value: total_ganhos, icon: 'ri-trophy-line', color: 'success', description: 'Clientes ganhos'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Taxa Geral', value: taxa_geral, icon: 'ri-percent-line', suffix: '%', description: 'Lead → Cliente'
+    } %}
+</div>
+
+{# Funil #}
+<div class="lwa-section-label">Funil Completo</div>
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body">
         <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ funnel|json_encode }}" style="height:280px;width:100%;"></canvas>
     </div>
 </div>
 
-{# Win Rate + Tabela lado a lado #}
-<div class="lwa-section-label">Taxa de Ganho por Origem</div>
+{# Win Rate + Tabela #}
+<div class="lwa-section-label">Conversão por Origem</div>
 <div class="lwa-grid-2">
     <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Taxa de Ganho (%)</h4></div>
         <div class="lwa-card-body">
-            <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ win_rate|json_encode }}" style="height:240px;width:100%;"></canvas>
+            <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ win_rate|json_encode }}" style="height:220px;width:100%;"></canvas>
         </div>
     </div>
     <div class="lwa-card">
+        <div class="lwa-card-header"><h4>Detalhamento</h4></div>
         <div class="lwa-card-body lwa-card-body--tight">
             {% if by_origin is empty %}
-                <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
+                <div class="lwa-empty-state"><p>Sem dados.</p></div>
             {% else %}
-                {% set origin_labels = {
-                    'linkedin_roboze': 'LinkedIn / Roboze',
-                    'letswork_site': "Let's Work Site",
-                    'apollo': 'Apollo',
-                    'lista_importada': 'Lista Importada',
-                    'indicação': 'Indicação'
-                } %}
-                <table class="lwa-table">
+                {% set origin_labels = {'linkedin_roboze':'LinkedIn / Roboze','letswork_site':"Let's Work Site",'apollo':'Apollo','lista_importada':'Lista Importada','indicação':'Indicação'} %}
+                <table class="lwa-table lwa-table--compact">
                     <thead><tr><th>Origem</th><th>Leads</th><th>Ganhos</th><th>Taxa</th></tr></thead>
                     <tbody>
                         {% for r in by_origin %}
                             <tr>
-                                <td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_': ' '})|title) }}</td>
+                                <td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_':' '})|title) }}</td>
                                 <td>{{ r.total }}</td>
-                                <td><strong>{{ r.ganhos }}</strong></td>
-                                <td>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</td>
+                                <td>{{ r.ganhos }}</td>
+                                <td><strong>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</strong></td>
                             </tr>
                         {% endfor %}
                     </tbody>

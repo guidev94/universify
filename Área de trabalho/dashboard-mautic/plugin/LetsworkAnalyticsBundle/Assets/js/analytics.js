@@ -404,7 +404,7 @@ Mautic.lwaLoadInsights = function() {
             insights.forEach(function(i) {
                 var icon = icons[i.tipo] || 'ri-information-line';
                 var color = colors[i.tipo] || '#64748b';
-                html += '<div class="lwa-insight-card">';
+                html += '<div class="lwa-insight-card" data-tipo="' + (i.tipo || '') + '">';
                 html += '  <div class="lwa-insight-icon" style="color:' + color + '"><i class="' + icon + '"></i></div>';
                 html += '  <div class="lwa-insight-content">';
                 html += '    <div class="lwa-insight-title">' + (i.titulo || '') + '</div>';
