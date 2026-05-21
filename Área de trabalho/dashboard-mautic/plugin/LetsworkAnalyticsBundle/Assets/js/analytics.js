@@ -220,36 +220,37 @@ Mautic.lwaRenderKpiPage = function() {
     var start = (page - 1) * perPage;
     var pageLeads = leads.slice(start, start + perPage);
 
-    var html = '<div class="lwa-panel-count">' + leads.length + ' leads · Página ' + page + ' de ' + totalPages + '</div>';
-    html += '<div class="lwa-panel-list">';
+    var html = '<div class="lwa-kd-header-bar">';
+    html += '  <span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads encontrados</span>';
+    html += '  <span class="lwa-kd-page">Página ' + page + '/' + totalPages + '</span>';
+    html += '</div>';
+    html += '<div class="lwa-kd-grid">';
 
     pageLeads.forEach(function(lead, idx) {
         var name = ((lead.firstname || '') + ' ' + (lead.lastname || '')).trim() || lead.company || 'Sem nome';
         var initial = name.charAt(0).toUpperCase();
-        var meta = [lead.cargo, lead.company].filter(Boolean).join(' · ');
+        var company = lead.company || '';
+        var cargo = lead.cargo || '';
         var temp = lead.temperatura || '';
         var score = lead.interesse_score || 0;
-        var origin = lead.origem_principal || '';
+        var origin = (lead.origem_principal || '').replace(/_/g, ' ');
+        var status = (lead.status_comercial || '').replace(/_/g, ' ');
         var avatarColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
         var avatarBg = avatarColors[temp] || '#dc2626';
 
-        html += '<div class="lwa-panel-lead" style="animation-delay:' + (idx * 0.03) + 's">';
-        html += '  <div class="lwa-panel-lead-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
-        html += '  <div class="lwa-panel-lead-content">';
-        html += '    <div class="lwa-panel-lead-top">';
-        html += '      <span class="lwa-panel-lead-name">' + name + '</span>';
-        html += '      <span class="lwa-badge lwa-badge--' + temp + ' lwa-badge--sm">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
+        html += '<div class="lwa-kd-card" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')" style="animation-delay:' + (idx * 0.04) + 's">';
+        html += '  <div class="lwa-kd-card-top">';
+        html += '    <div class="lwa-kd-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
+        html += '    <div class="lwa-kd-info">';
+        html += '      <div class="lwa-kd-name">' + name + '</div>';
+        html += '      <div class="lwa-kd-role">' + cargo + (cargo && company ? ' · ' : '') + company + '</div>';
         html += '    </div>';
-        html += '    <div class="lwa-panel-lead-meta">' + meta + '</div>';
-        html += '    <div class="lwa-panel-lead-tags">';
-        if (origin) html += '<span class="lwa-tag">' + origin.replace(/_/g, ' ') + '</span>';
-        html += '<span class="lwa-tag lwa-tag--score">Score: ' + score + '</span>';
-        html += '    </div>';
+        html += '    <span class="lwa-badge lwa-badge--' + temp + '">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
         html += '  </div>';
-        html += '  <div class="lwa-panel-lead-actions">';
-        html += '    <button class="lwa-action-btn" title="Ver lead" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')"><i class="ri-eye-line"></i></button>';
-        html += '    <button class="lwa-action-btn lwa-action-btn--primary" title="E-mail" onclick="Mautic.lwaEmailLead(' + lead.id + ', \'' + (lead.email||'').replace(/'/g,"\\'") + '\', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-line"></i></button>';
-        html += '    <button class="lwa-action-btn lwa-action-btn--success" title="Follow-up" onclick="Mautic.lwaScheduleFollowup(' + lead.id + ', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i></button>';
+        html += '  <div class="lwa-kd-card-bottom">';
+        html += '    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> ' + score + '</span>';
+        if (origin) html += '    <span class="lwa-kd-tag"><i class="ri-global-line"></i> ' + origin + '</span>';
+        if (status) html += '    <span class="lwa-kd-tag"><i class="ri-flag-line"></i> ' + status + '</span>';
         html += '  </div>';
         html += '</div>';
     });
@@ -257,10 +258,12 @@ Mautic.lwaRenderKpiPage = function() {
     html += '</div>';
     mQuery('#lwa-kpi-detail-body').html(html);
 
-    // Render pagination
+    // Pagination
     if (totalPages > 1) {
         var pag = '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page <= 1 ? 'disabled' : 'onclick="Mautic.lwaKpiGoPage(' + (page-1) + ')"') + '><i class="ri-arrow-left-s-line"></i></button>';
-        for (var i = 1; i <= totalPages; i++) {
+        var startP = Math.max(1, page - 2);
+        var endP = Math.min(totalPages, startP + 4);
+        for (var i = startP; i <= endP; i++) {
             pag += '<button class="lwa-pagination-btn ' + (i === page ? 'active' : '') + '" onclick="Mautic.lwaKpiGoPage(' + i + ')">' + i + '</button>';
         }
         pag += '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page >= totalPages ? 'disabled' : 'onclick="Mautic.lwaKpiGoPage(' + (page+1) + ')"') + '><i class="ri-arrow-right-s-line"></i></button>';
@@ -297,9 +300,10 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             var name = ((l.firstname || '') + ' ' + (l.lastname || '')).trim() || l.company || 'Lead';
             mQuery('#lwa-modal-title').text(name);
 
+            var tempClass = l.temperatura ? ' lwa-lead-avatar--' + l.temperatura : ' lwa-lead-avatar--quente';
             var html = '<div class="lwa-modal-lead">';
             html += '<div class="lwa-modal-lead-header">';
-            html += '  <div class="lwa-lead-avatar lwa-lead-avatar--lg">' + name.charAt(0).toUpperCase() + '</div>';
+            html += '  <div class="lwa-lead-avatar lwa-lead-avatar--lg' + tempClass + '">' + name.charAt(0).toUpperCase() + '</div>';
             html += '  <div class="lwa-modal-lead-info">';
             html += '    <div class="lwa-modal-lead-name">' + name + '</div>';
             html += '    <div class="lwa-modal-lead-role">' + (l.cargo || '') + ' · ' + (l.company || '') + '</div>';

@@ -37,10 +37,51 @@
         height: 300
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Score Médio ao Longo do Tempo',
-        type: 'line',
-        data: score_progress,
+        title: 'Interesse por Módulo LetsWork',
+        type: 'bar',
+        data: by_module,
         wide: true,
         height: 300
     } %}
+</div>
+
+{# Score Progression #}
+<div class="lwa-section-label">Score Médio ao Longo do Tempo</div>
+<div class="lwa-charts-row">
+    {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
+        title: 'Progressão de Score',
+        type: 'line',
+        data: score_progress,
+        wide: true,
+        height: 260
+    } %}
+</div>
+
+{# Status Pipeline Table #}
+<div class="lwa-section-label">Detalhamento por Etapa</div>
+<div class="lwa-table-section lwa-card">
+    <div class="lwa-card-body">
+        {% if by_status is empty %}
+            <div class="lwa-empty-state"><i class="ri-flow-chart"></i><p>Sem dados de pipeline</p></div>
+        {% else %}
+            <table class="lwa-table">
+                <thead>
+                    <tr>
+                        <th>Etapa</th>
+                        <th>Leads</th>
+                        <th>Valor Potencial</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in by_status %}
+                        <tr>
+                            <td><span class="lwa-tag">{{ r.status_comercial|replace({'_': ' '}) }}</span></td>
+                            <td><strong>{{ r.total }}</strong></td>
+                            <td>R$ {{ r.valor|number_format(0, ',', '.') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
 </div>

@@ -64,6 +64,8 @@ class AnalyticsModel
             'avg_to_proposal' => $this->getAvgTimeToProposal($dateRange),
             'score_progress'  => $this->getScoreProgression($dateRange),
             'valor_pipeline'  => $this->getValorPipeline(),
+            'by_module'       => $this->getLeadsByModule($dateRange),
+            'by_status'       => $this->getLeadsByStatus($dateRange),
         ];
     }
 
@@ -346,6 +348,23 @@ class AnalyticsModel
         if (!$this->columnExists('leads', 'valor_potencial') || !$this->columnExists('leads', 'status_comercial')) return 0;
         $sql = "SELECT COALESCE(SUM(valor_potencial), 0) FROM leads WHERE status_comercial IN ('reuniao_agendada','reuniao_realizada','proposta_enviada','negociacao')";
         return (float)$this->connection->fetchOne($sql);
+    }
+
+    private function getLeadsByModule(array $dateRange): array
+    {
+        if (!$this->columnExists('leads', 'modulo_interesse')) return ['labels' => [], 'data' => []];
+        $sql = "SELECT modulo_interesse, COUNT(*) as total FROM leads WHERE modulo_interesse IS NOT NULL AND modulo_interesse != '' AND date_added BETWEEN :dateFrom AND :dateTo GROUP BY modulo_interesse ORDER BY total DESC";
+        $rows = $this->connection->fetchAllAssociative($sql, ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59']);
+        $labels = []; $data = [];
+        foreach ($rows as $row) { $labels[] = $row['modulo_interesse']; $data[] = (int)$row['total']; }
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    private function getLeadsByStatus(array $dateRange): array
+    {
+        if (!$this->columnExists('leads', 'status_comercial')) return [];
+        $sql = "SELECT status_comercial, COUNT(*) as total, COALESCE(SUM(valor_potencial),0) as valor FROM leads WHERE status_comercial IS NOT NULL AND status_comercial != '' AND date_added BETWEEN :dateFrom AND :dateTo GROUP BY status_comercial ORDER BY total DESC";
+        return $this->connection->fetchAllAssociative($sql, ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59']);
     }
 
     // --- Perdas ---
