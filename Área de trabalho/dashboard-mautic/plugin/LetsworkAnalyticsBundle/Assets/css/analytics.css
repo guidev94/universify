@@ -265,6 +265,9 @@
 .lwa-badge--prioritario { background: #ede9fe; color: #7c3aed; }
 .lwa-badge--sm { font-size: 10px; padding: 1px 6px; }
 
+.lwa-kd-status-pill { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+.lwa-kd-status-pill i { font-size: 11px; }
+
 /* Tag */
 .lwa-tag {
     display: inline-flex; padding: 2px 8px; border-radius: 5px;
@@ -366,8 +369,8 @@
 
 .lwa-kd-avatar { width: 32px; height: 32px; border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .lwa-kd-info { flex: 1; min-width: 0; }
-.lwa-kd-name { font-weight: 600; font-size: 14px; color: var(--lwa-gray-800); }
-.lwa-kd-role { font-size: 12px; color: var(--lwa-gray-400); }
+.lwa-kd-name { font-weight: 600; font-size: 13px; color: var(--lwa-gray-800); }
+.lwa-kd-role { font-size: 11px; color: var(--lwa-gray-400); }
 .lwa-kd-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .lwa-kd-card-bottom { display: flex; gap: 4px; flex-wrap: wrap; }
 .lwa-kd-tag { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; background: white; color: var(--lwa-gray-500); }

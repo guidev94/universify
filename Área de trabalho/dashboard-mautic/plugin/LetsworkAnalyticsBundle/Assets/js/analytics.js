@@ -241,15 +241,6 @@ Mautic.lwaRenderKpiPage = function() {
         var avatarColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
         var avatarBg = avatarColors[temp] || '#dc2626';
 
-        html += '<div class="lwa-kd-card" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')" style="animation-delay:' + (idx * 0.04) + 's">';
-        html += '  <div class="lwa-kd-card-top">';
-        html += '    <div class="lwa-kd-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
-        html += '    <div class="lwa-kd-info">';
-        html += '      <div class="lwa-kd-name">' + name + '</div>';
-        html += '      <div class="lwa-kd-role">' + cargo + (cargo && company ? ' · ' : '') + company + '</div>';
-        html += '    </div>';
-        html += '    <span class="lwa-badge lwa-badge--' + temp + '">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
-        html += '  </div>';
         var statusIcons = {
             'reuniao agendada': {icon: 'ri-calendar-todo-line', color: '#3b82f6', label: 'Agendada'},
             'reuniao realizada': {icon: 'ri-calendar-check-line', color: '#10b981', label: 'Realizada'},
@@ -264,10 +255,19 @@ Mautic.lwaRenderKpiPage = function() {
         var statusInfo = statusIcons[status] || {icon: 'ri-flag-line', color: '#94a3b8', label: status};
         var lastDate = lead.data_ultima_interacao ? new Date(lead.data_ultima_interacao).toLocaleDateString('pt-BR') : '';
 
+        html += '<div class="lwa-kd-card" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')" style="animation-delay:' + (idx * 0.04) + 's">';
+        html += '  <div class="lwa-kd-card-top">';
+        html += '    <div class="lwa-kd-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
+        html += '    <div class="lwa-kd-info">';
+        html += '      <div class="lwa-kd-name">' + name + '</div>';
+        html += '      <div class="lwa-kd-role">' + (company || cargo) + '</div>';
+        html += '    </div>';
+        if (status) html += '    <span class="lwa-kd-status-pill" style="background:' + statusInfo.color + '12;color:' + statusInfo.color + ';border:1px solid ' + statusInfo.color + '25"><i class="' + statusInfo.icon + '"></i> ' + statusInfo.label + '</span>';
+        html += '  </div>';
         html += '  <div class="lwa-kd-card-bottom">';
-        html += '    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> ' + score + '</span>';
-        if (status) html += '    <span class="lwa-kd-tag" style="color:' + statusInfo.color + ';border-color:' + statusInfo.color + '30"><i class="' + statusInfo.icon + '"></i> ' + statusInfo.label + '</span>';
         if (lastDate) html += '    <span class="lwa-kd-tag"><i class="ri-calendar-line"></i> ' + lastDate + '</span>';
+        if (company && cargo) html += '    <span class="lwa-kd-tag"><i class="ri-user-line"></i> ' + cargo + '</span>';
+        html += '    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> ' + score + '</span>';
         html += '  </div>';
         html += '</div>';
     });

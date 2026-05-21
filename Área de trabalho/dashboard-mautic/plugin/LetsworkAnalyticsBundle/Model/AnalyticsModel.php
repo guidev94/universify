@@ -198,7 +198,7 @@ class AnalyticsModel
 
     private function getTotalDisparos(): int
     {
-        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM email_stats");
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM email_stats WHERE email_id IS NOT NULL");
     }
 
     private function getProspeccao(): int
