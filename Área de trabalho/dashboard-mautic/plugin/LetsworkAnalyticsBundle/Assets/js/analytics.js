@@ -382,6 +382,51 @@ Mautic.lwaCloseKpiDetail = function() {
     mQuery('#lwa-kpi-detail').hide();
 };
 
+Mautic.lwaAiTab = function(tab) {
+    var $container = mQuery('#lwa-ai-tab-result');
+    $container.html('<div style="text-align:center;padding:20px;color:var(--lwa-gray-400)"><div class="lwa-spinner" style="margin:0 auto 8px"></div>Analisando com IA...</div>');
+    $container.show();
+
+    mQuery.ajax({
+        url: '/s/analytics/ai/tab/' + tab,
+        dataType: 'json',
+        success: function(res) {
+            var a = res.analysis || {};
+            var html = '<div class="lwa-ai-tab-card">';
+            html += '<div class="lwa-ai-tab-header"><i class="ri-sparkling-line"></i> ' + (a.titulo || 'Análise IA') + '</div>';
+
+            if (a.insights && a.insights.length) {
+                html += '<ul class="lwa-ai-tab-list">';
+                a.insights.forEach(function(i) { html += '<li>' + i + '</li>'; });
+                html += '</ul>';
+            }
+
+            if (a.acao_principal) html += '<div class="lwa-ai-tab-action"><strong>Ação principal:</strong> ' + a.acao_principal + '</div>';
+            if (a.priorizacao) html += '<div class="lwa-ai-tab-action"><strong>Priorizar:</strong> ' + a.priorizacao + '</div>';
+            if (a.melhor_segmento) html += '<div class="lwa-ai-tab-action"><strong>Melhor segmento:</strong> ' + a.melhor_segmento + ' — ' + (a.por_que || '') + '</div>';
+            if (a.estrategia_reativacao) html += '<div class="lwa-ai-tab-action"><strong>Reativação:</strong> ' + a.estrategia_reativacao + '</div>';
+            if (a.taxa_analise) html += '<div class="lwa-ai-tab-action"><strong>Taxa:</strong> ' + a.taxa_analise + '</div>';
+
+            if (a.email_sugerido) html += '<div class="lwa-ai-tab-email"><i class="ri-mail-line"></i> Assunto sugerido: <em>"' + a.email_sugerido + '"</em></div>';
+            if (a.email_reativacao) html += '<div class="lwa-ai-tab-email"><i class="ri-mail-line"></i> Email reativação: <em>"' + a.email_reativacao + '"</em></div>';
+            if (a.mensagem_followup) html += '<div class="lwa-ai-tab-email"><i class="ri-chat-1-line"></i> Follow-up: <em>"' + a.mensagem_followup + '"</em></div>';
+            if (a.campanha_sugerida) html += '<div class="lwa-ai-tab-email"><i class="ri-megaphone-line"></i> Campanha: <em>"' + a.campanha_sugerida + '"</em></div>';
+
+            if (a.campanhas && a.campanhas.length) {
+                html += '<div class="lwa-ai-tab-campaigns">';
+                a.campanhas.forEach(function(c) {
+                    html += '<div class="lwa-ai-tab-campaign"><strong>' + c.assunto + '</strong><br><small>' + c.objetivo + ' — ' + c.publico + '</small></div>';
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            $container.html(html);
+        },
+        error: function() { $container.html('<p style="text-align:center;color:#dc2626;padding:16px">Erro ao consultar IA.</p>'); }
+    });
+};
+
 Mautic.lwaLoadInsights = function() {
     var $container = mQuery('#lwa-insights .lwa-card-body');
     $container.html('<div style="text-align:center;padding:24px;color:var(--lwa-gray-400)"><div class="lwa-spinner" style="margin:0 auto 10px"></div>Analisando métricas com IA...</div>');

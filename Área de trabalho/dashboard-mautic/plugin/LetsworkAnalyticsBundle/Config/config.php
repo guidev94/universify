@@ -29,6 +29,10 @@ return [
                 'path'       => '/analytics/ai/insights',
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::aiInsightsAction',
             ],
+            'letswork_analytics_ai_tab' => [
+                'path'       => '/analytics/ai/tab/{tab}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::aiTabAction',
+            ],
             'letswork_analytics_followup' => [
                 'path'       => '/analytics/action/followup',
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::scheduleFollowupAction',

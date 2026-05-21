@@ -683,6 +683,117 @@ class AnalyticsModel
         return ['success' => true, 'message' => "E-mail enviado para $to"];
     }
 
+    // --- AI Tab Analysis ---
+
+    public function getAiTabAnalysis(string $tab, array $dateRange): array
+    {
+        $prompts = [
+            'conversao' => $this->buildConversaoPrompt($dateRange),
+            'segmentos' => $this->buildSegmentosPrompt($dateRange),
+            'pipeline' => $this->buildPipelinePrompt($dateRange),
+            'perdas' => $this->buildPerdasPrompt($dateRange),
+            'email' => $this->buildEmailPrompt($dateRange),
+        ];
+
+        $prompt = $prompts[$tab] ?? '';
+        if (!$prompt) return ['texto' => 'Tab não suportada.'];
+
+        return $this->callGemini($prompt);
+    }
+
+    private function buildConversaoPrompt(array $dateRange): string
+    {
+        $funnel = $this->getConversionFunnel($dateRange);
+        $winRate = $this->getWinRateByOrigin($dateRange);
+        return "Voce e analista comercial da LetsWork (software RH). Analise o funil de conversao e sugira 3 acoes concretas para melhorar a taxa.
+
+FUNIL: " . implode(' → ', array_map(function($l, $d) { return "$l: $d"; }, $funnel['labels'], $funnel['data'])) . "
+WIN RATE POR ORIGEM: " . implode(', ', array_map(function($l, $d) { return "$l: {$d}%"; }, $winRate['labels'], $winRate['data'])) . "
+
+Responda em JSON: {\"titulo\": \"titulo da analise\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"acao_principal\": \"acao mais importante agora\", \"email_sugerido\": \"assunto de email para leads do funil\"}";
+    }
+
+    private function buildSegmentosPrompt(array $dateRange): string
+    {
+        $perf = $this->getSegmentPerformance($dateRange);
+        $data = implode(', ', array_map(function($r) { return $r['segmento'] . ": " . $r['total'] . " leads (" . $r['ganhos'] . " ganhos)"; }, $perf));
+        return "Voce e analista comercial da LetsWork (software RH). Analise a performance por segmento e identifique onde focar esforcos.
+
+SEGMENTOS: $data
+
+Responda em JSON: {\"titulo\": \"titulo\", \"melhor_segmento\": \"nome\", \"por_que\": \"razao\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"campanha_sugerida\": \"ideia de campanha para o melhor segmento\"}";
+    }
+
+    private function buildPipelinePrompt(array $dateRange): string
+    {
+        $avgMeeting = $this->getAvgTimeToMeeting($dateRange);
+        $avgProposal = $this->getAvgTimeToProposal($dateRange);
+        $valor = $this->getValorPipeline();
+        $hot = $this->getHotWithoutFollowup();
+        return "Voce e analista comercial da LetsWork (software RH). Analise a velocidade do pipeline e sugira como acelerar fechamentos.
+
+DADOS:
+- Tempo medio ate reuniao: {$avgMeeting} dias
+- Tempo medio ate proposta: {$avgProposal} dias
+- Valor total em negociacao: R$ " . number_format($valor, 0, ',', '.') . "
+- Leads quentes sem follow-up: $hot
+
+Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"priorizacao\": \"o que fazer primeiro\", \"mensagem_followup\": \"sugestao de mensagem para leads sem follow-up\"}";
+    }
+
+    private function buildPerdasPrompt(array $dateRange): string
+    {
+        $reasons = $this->getLossReasons($dateRange);
+        $data = implode(', ', array_map(function($l, $d) { return "$l ($d)"; }, $reasons['labels'], $reasons['data']));
+        return "Voce e analista comercial da LetsWork (software RH). Analise os motivos de perda e sugira estrategias de recuperacao.
+
+MOTIVOS DE PERDA: $data
+
+Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"estrategia_reativacao\": \"como reativar leads perdidos\", \"email_reativacao\": \"sugestao de assunto de email para reativacao\"}";
+    }
+
+    private function buildEmailPrompt(array $dateRange): string
+    {
+        $taxa = $this->getEmailOpenRate($dateRange);
+        $modulos = $this->getTopModulos();
+        $modulosList = implode(', ', array_column($modulos, 'modulo_interesse'));
+        return "Voce e especialista em email marketing da LetsWork (software RH para ponto eletronico, banco de horas, ferias, escalas, timesheet, ATS).
+
+DADOS:
+- Taxa de abertura atual: {$taxa}%
+- Modulos mais procurados: $modulosList
+
+Sugira 3 ideias de campanha de email marketing com assuntos que geram alta abertura.
+
+Responda em JSON: {\"titulo\": \"titulo\", \"taxa_analise\": \"analise da taxa atual\", \"campanhas\": [{\"assunto\": \"assunto do email\", \"objetivo\": \"o que espera\", \"publico\": \"para quem\"}, ...]}";
+    }
+
+    private function callGemini(string $prompt): array
+    {
+        $apiKey = 'REMOVED_KEY';
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+
+        $payload = json_encode([
+            'contents' => [['parts' => [['text' => $prompt]]]],
+            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 800],
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => ['Content-Type: application/json'], CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+        $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        if (preg_match('/\{.*\}/s', $text, $matches)) {
+            $parsed = json_decode($matches[0], true);
+            if ($parsed) return $parsed;
+        }
+
+        return ['titulo' => 'Análise', 'insights' => [$text ?: 'Sem resposta da IA.']];
+    }
+
     // --- AI Insights (Dashboard) ---
 
     public function getAiInsights(array $dateRange): array

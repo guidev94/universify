@@ -59,7 +59,10 @@
 </div>
 
 {# ===== E-MAIL MARKETING ===== #}
-<div class="lwa-section-label">E-mail Marketing</div>
+<div class="lwa-section-label">
+    <span>E-mail Marketing</span>
+    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaAiTab('email')" style="font-size:11px;padding:4px 10px"><i class="ri-sparkling-line"></i> Sugerir Campanha</button>
+</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Campanhas', value: kpis.campanhas, icon: 'ri-mail-send-line',
@@ -74,6 +77,8 @@
         suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho geral'
     } %}
 </div>
+
+<div id="lwa-ai-tab-result" style="display:none;margin-bottom:24px"></div>
 
 {# ===== LEADS QUENTES ===== #}
 <div class="lwa-section-label">
