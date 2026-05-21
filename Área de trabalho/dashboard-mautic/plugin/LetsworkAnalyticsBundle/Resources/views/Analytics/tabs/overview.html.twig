@@ -1,13 +1,13 @@
-{# Pipeline KPIs - Clicáveis #}
+{# ============ PIPELINE COMERCIAL ============ #}
 <div class="lwa-section-label">Pipeline Comercial</div>
 <div class="lwa-kpi-row">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Prospecção Ativa',
+        title: 'Prospecção',
         value: kpis.prospeccao,
         icon: 'ri-user-search-line',
         color: 'info',
         kpi_id: 'prospeccao',
-        description: 'Leads em fase inicial'
+        description: 'Leads em fase inicial de contato'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Engajados',
@@ -15,7 +15,7 @@
         icon: 'ri-chat-check-line',
         color: 'warning',
         kpi_id: 'engajados',
-        description: 'Responderam ou interagiram'
+        description: 'Responderam ou demonstraram interesse'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Reuniões',
@@ -23,15 +23,15 @@
         icon: 'ri-calendar-check-line',
         color: 'primary',
         kpi_id: 'reunioes',
-        description: 'Agendadas ou realizadas'
+        description: 'Agendadas ou realizadas no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Propostas Enviadas',
+        title: 'Propostas',
         value: kpis.propostas,
         icon: 'ri-file-text-line',
         color: 'purple',
         kpi_id: 'propostas',
-        description: 'Em negociação'
+        description: 'Propostas enviadas ou em negociação'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Clientes Ganhos',
@@ -47,32 +47,42 @@
         icon: 'ri-alarm-warning-line',
         color: 'error',
         kpi_id: 'hot_no_followup',
-        description: 'Quentes aguardando ação'
+        description: 'Leads quentes aguardando ação comercial'
     } %}
 </div>
 
-{# E-mail Marketing KPIs #}
+{# ============ E-MAIL MARKETING ============ #}
 <div class="lwa-section-label">E-mail Marketing</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line', color: 'primary',
-        description: 'Total de e-mails disparados',
-        kpi_id: 'emails_enviados'
+        title: 'Campanhas Enviadas',
+        value: kpis.emails_enviados,
+        icon: 'ri-mail-send-line',
+        color: 'primary',
+        kpi_id: 'emails_enviados',
+        description: 'Total de disparos no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line', color: 'success',
-        description: 'Leads que abriram',
-        kpi_id: 'emails_abertos'
+        title: 'E-mails Abertos',
+        value: kpis.emails_abertos,
+        icon: 'ri-mail-open-line',
+        color: 'success',
+        kpi_id: 'emails_abertos',
+        description: 'Leads que abriram os e-mails'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Taxa Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line', color: 'warning', suffix: '%',
-        description: 'Performance de engajamento',
-        kpi_id: 'emails_taxa'
+        title: 'Taxa de Abertura',
+        value: kpis.taxa_abertura,
+        icon: 'ri-percent-line',
+        color: 'warning',
+        suffix: '%',
+        kpi_id: 'emails_taxa',
+        description: 'Performance geral de engajamento'
     } %}
 </div>
 
-{# Charts #}
-<div class="lwa-section-label">Visão Geral</div>
+{# ============ GRÁFICOS ============ #}
+<div class="lwa-section-label">Indicadores Visuais</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
         title: 'Distribuição por Temperatura',
@@ -81,7 +91,7 @@
         height: 300
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Novos Leads (últimos dias)',
+        title: 'Entrada de Leads no Período',
         type: 'line',
         data: charts.leads_time,
         wide: true,
@@ -89,7 +99,7 @@
     } %}
 </div>
 
-{# Hot Leads — Table #}
+{# ============ LEADS QUENTES ============ #}
 <div class="lwa-section-label">
     <span><i class="ri-fire-line"></i> Leads Quentes — Ação Necessária</span>
     <span class="lwa-section-badge">{{ kpis.hot_no_followup }} pendentes</span>
@@ -99,7 +109,7 @@
         {% if tables.hot_leads is empty %}
             <div class="lwa-empty-state">
                 <i class="ri-checkbox-circle-line"></i>
-                <p>Todos os leads quentes estão com follow-up em dia!</p>
+                <p>Todos os leads quentes estão com follow-up em dia.</p>
             </div>
         {% else %}
             <table class="lwa-table">
@@ -133,12 +143,14 @@
     </div>
 </div>
 
-{# KPI Detail Modal (full width) #}
+{# ============ MODAIS ============ #}
+
+{# Modal KPI Detail #}
 <div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">
     <div class="lwa-modal-overlay" onclick="Mautic.lwaCloseKpiDetail()"></div>
     <div class="lwa-modal-content lwa-modal-content--wide">
         <div class="lwa-modal-header">
-            <button class="lwa-action-btn" onclick="Mautic.lwaCloseKpiDetail()" title="Fechar"><i class="ri-arrow-left-line"></i></button>
+            <button class="lwa-action-btn" onclick="Mautic.lwaCloseKpiDetail()" title="Voltar"><i class="ri-arrow-left-line"></i></button>
             <h3 id="lwa-kpi-detail-title"></h3>
             <button class="lwa-action-btn" onclick="Mautic.lwaCloseKpiDetail()"><i class="ri-close-line"></i></button>
         </div>
@@ -147,13 +159,13 @@
     </div>
 </div>
 
-{# Lead Actions Modal #}
+{# Modal Lead #}
 <div id="lwa-lead-modal" class="lwa-modal" style="display:none;">
     <div class="lwa-modal-overlay" onclick="Mautic.lwaCloseModal()"></div>
     <div class="lwa-modal-content">
         <div class="lwa-modal-header">
             <button class="lwa-action-btn" onclick="Mautic.lwaCloseModal()" title="Voltar"><i class="ri-arrow-left-line"></i></button>
-            <h3 id="lwa-modal-title">Ações do Lead</h3>
+            <h3 id="lwa-modal-title">Detalhes do Lead</h3>
             <button class="lwa-action-btn" onclick="Mautic.lwaCloseModal()"><i class="ri-close-line"></i></button>
         </div>
         <div id="lwa-modal-body" class="lwa-modal-body"></div>

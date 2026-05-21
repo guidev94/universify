@@ -30,7 +30,14 @@
                     <tbody>
                         {% for r in by_origin %}
                             <tr>
-                                <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '})|capitalize }}</span></td>
+                                {% set origin_labels = {
+                                'linkedin_roboze': 'LinkedIn / Roboze',
+                                'letswork_site': "Let's Work Site",
+                                'apollo': 'Apollo',
+                                'lista_importada': 'Lista Importada',
+                                'indicação': 'Indicação'
+                            } %}
+                            <td><span class="lwa-tag">{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_': ' '})|capitalize) }}</span></td>
                                 <td><strong>{{ r.total }}</strong></td>
                             </tr>
                         {% endfor %}

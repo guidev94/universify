@@ -294,7 +294,7 @@ class AnalyticsModel
         $labels = [];
         $data = [];
         foreach ($rows as $row) {
-            $labels[] = $row['origem_principal'];
+            $labels[] = $this->formatOrigin($row['origem_principal']);
             $total = (int)$row['total'];
             $data[] = $total > 0 ? round(((int)$row['ganhos'] / $total) * 100, 1) : 0;
         }
@@ -652,6 +652,19 @@ Responda APENAS em JSON valido:
     }
 
     // --- Helpers ---
+
+    private function formatOrigin(string $origin): string
+    {
+        $map = [
+            'linkedin_roboze' => 'LinkedIn / Roboze',
+            'letswork_site' => "Let's Work Site",
+            'apollo' => 'Apollo',
+            'lista_importada' => 'Lista Importada',
+            'indicação' => 'Indicação',
+            'indicacao' => 'Indicação',
+        ];
+        return $map[$origin] ?? ucfirst(str_replace('_', ' ', $origin));
+    }
 
     private function columnExists(string $table, string $column): bool
     {
