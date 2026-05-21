@@ -33,6 +33,8 @@ class AnalyticsModel
                 'taxa_abertura'     => $this->getEmailOpenRate($dateRange),
             ],
             'temperatura_counts' => $this->getTemperatureCounts(),
+            'top_dores' => $this->getTopDores(),
+            'top_modulos' => $this->getTopModulos(),
             'charts' => [
                 'temperature' => $this->getTemperatureDistribution(),
                 'leads_time'  => $this->getLeadsOverTime($dateRange),
@@ -222,6 +224,18 @@ class AnalyticsModel
             if (isset($result[$key])) $result[$key] = (int)$row['total'];
         }
         return $result;
+    }
+
+    private function getTopDores(): array
+    {
+        if (!$this->columnExists('leads', 'dor_principal')) return [];
+        return $this->connection->fetchAllAssociative("SELECT dor_principal, COUNT(*) as total FROM leads WHERE dor_principal IS NOT NULL AND dor_principal != '' GROUP BY dor_principal ORDER BY total DESC LIMIT 6");
+    }
+
+    private function getTopModulos(): array
+    {
+        if (!$this->columnExists('leads', 'modulo_interesse')) return [];
+        return $this->connection->fetchAllAssociative("SELECT modulo_interesse, COUNT(*) as total FROM leads WHERE modulo_interesse IS NOT NULL AND modulo_interesse != '' GROUP BY modulo_interesse ORDER BY total DESC LIMIT 8");
     }
 
     private function getLeadsIncompletos(): int
