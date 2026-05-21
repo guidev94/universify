@@ -27,7 +27,8 @@ class AnalyticsModel
                 'ganhos'            => $this->getCountByStatus($dateRange, 'ganho'),
                 'hot_no_followup'   => $this->getHotWithoutFollowup(),
                 'leads_incompletos' => $this->getLeadsIncompletos(),
-                'emails_enviados'   => $this->getEmailsSent($dateRange),
+                'campanhas'         => $this->getCampaignCount(),
+                'disparos'          => $this->getEmailsSent($dateRange),
                 'emails_abertos'    => $this->getEmailsOpened($dateRange),
                 'taxa_abertura'     => $this->getEmailOpenRate($dateRange),
             ],
@@ -233,6 +234,11 @@ class AnalyticsModel
     {
         if (!$this->columnExists('leads', 'linkedin_status')) return 0;
         return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE linkedin_status IS NOT NULL AND linkedin_status != ''");
+    }
+
+    private function getCampaignCount(): int
+    {
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM emails WHERE is_published = 1");
     }
 
     private function getEmailsSent(array $dateRange): int

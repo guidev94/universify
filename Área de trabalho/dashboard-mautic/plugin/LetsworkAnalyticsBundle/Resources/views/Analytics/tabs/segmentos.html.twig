@@ -1,14 +1,6 @@
-{# Taxa de Conversão por Segmento (PRD Seção 18) #}
-<div class="lwa-section-label">Taxa de Conversão por Segmento</div>
-<div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-body">
-        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ ranking|json_encode }}" style="height:280px;width:100%;"></canvas>
-    </div>
-</div>
-
-{# Performance Detalhada (PRD Seção 6 — ICP) #}
+{# Performance por Segmento #}
 <div class="lwa-section-label">Performance por Segmento</div>
-<div class="lwa-table-section lwa-card">
+<div class="lwa-card">
     <div class="lwa-card-body lwa-card-body--tight">
         {% if performance is empty %}
             <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
@@ -30,3 +22,12 @@
         {% endif %}
     </div>
 </div>
+
+{% if ranking.labels is not empty %}
+<div class="lwa-section-label" style="margin-top:24px">Ranking de Conversão (%)</div>
+<div class="lwa-card">
+    <div class="lwa-card-body">
+        <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ ranking|json_encode }}" style="height:240px;width:100%;"></canvas>
+    </div>
+</div>
+{% endif %}

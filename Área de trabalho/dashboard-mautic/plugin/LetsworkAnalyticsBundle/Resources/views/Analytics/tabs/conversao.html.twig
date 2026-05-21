@@ -1,23 +1,20 @@
-{# Funil de Conversão (PRD Seção 18) #}
+{# Funil de Conversão #}
 <div class="lwa-section-label">Funil de Conversão</div>
 <div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-header"><h4>Lead → Engajado → Reunião → Proposta → Ganho</h4></div>
     <div class="lwa-card-body">
         <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ funnel|json_encode }}" style="height:280px;width:100%;"></canvas>
     </div>
 </div>
 
-{# Taxa de Ganho por Origem (PRD Seção 18) #}
+{# Win Rate + Tabela lado a lado #}
 <div class="lwa-section-label">Taxa de Ganho por Origem</div>
 <div class="lwa-grid-2">
     <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Win Rate (%)</h4></div>
         <div class="lwa-card-body">
             <canvas class="lwa-chart" data-chart-type="bar" data-chart-data="{{ win_rate|json_encode }}" style="height:240px;width:100%;"></canvas>
         </div>
     </div>
     <div class="lwa-card">
-        <div class="lwa-card-header"><h4>Detalhamento por Origem</h4></div>
         <div class="lwa-card-body lwa-card-body--tight">
             {% if by_origin is empty %}
                 <div class="lwa-empty-state"><p>Sem dados no período.</p></div>
@@ -36,8 +33,8 @@
                             <tr>
                                 <td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_': ' '})|title) }}</td>
                                 <td>{{ r.total }}</td>
-                                <td>{{ r.ganhos }}</td>
-                                <td><strong>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</strong></td>
+                                <td><strong>{{ r.ganhos }}</strong></td>
+                                <td>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</td>
                             </tr>
                         {% endfor %}
                     </tbody>

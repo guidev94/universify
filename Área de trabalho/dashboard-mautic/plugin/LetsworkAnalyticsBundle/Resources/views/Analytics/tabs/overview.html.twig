@@ -77,8 +77,12 @@
 <div class="lwa-section-label">E-mail Marketing</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line',
-        kpi_id: 'emails_enviados', description: 'Campanhas disparadas'
+        title: 'Campanhas', value: kpis.campanhas, icon: 'ri-mail-send-line',
+        kpi_id: 'emails_enviados', description: 'Campanhas ativas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Disparos', value: kpis.disparos, icon: 'ri-send-plane-line',
+        kpi_id: 'emails_abertos', description: 'E-mails individuais enviados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line',
@@ -86,7 +90,7 @@
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Taxa de Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line',
-        suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho das campanhas'
+        suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho geral'
     } %}
 </div>
 
