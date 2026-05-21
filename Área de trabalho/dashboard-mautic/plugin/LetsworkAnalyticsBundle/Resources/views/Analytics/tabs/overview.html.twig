@@ -52,20 +52,21 @@
 </div>
 
 {# E-mail Marketing KPIs #}
-{% if kpis.emails_enviados > 0 %}
 <div class="lwa-section-label">E-mail Marketing</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line', color: 'primary'
+        title: 'Enviados', value: kpis.emails_enviados, icon: 'ri-mail-send-line', color: 'primary',
+        description: 'Total de e-mails disparados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line', color: 'success'
+        title: 'Abertos', value: kpis.emails_abertos, icon: 'ri-mail-open-line', color: 'success',
+        description: 'Leads que abriram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Taxa Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line', color: 'info', suffix: '%'
+        title: 'Taxa Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line', color: 'warning', suffix: '%',
+        description: 'Performance de engajamento'
     } %}
 </div>
-{% endif %}
 
 {# Charts #}
 <div class="lwa-section-label">Visão Geral</div>
@@ -138,15 +139,17 @@
     </div>
 </div>
 
-{# KPI Slide Panel #}
-<div id="lwa-kpi-detail" class="lwa-kpi-detail" style="display:none;">
-    <div class="lwa-kpi-detail-overlay" onclick="Mautic.lwaCloseKpiDetail()"></div>
-    <div class="lwa-kpi-detail-panel">
-        <div class="lwa-kpi-detail-header">
+{# KPI Detail Modal (full width) #}
+<div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">
+    <div class="lwa-modal-overlay" onclick="Mautic.lwaCloseKpiDetail()"></div>
+    <div class="lwa-modal-content lwa-modal-content--wide">
+        <div class="lwa-modal-header">
+            <button class="lwa-action-btn" onclick="Mautic.lwaCloseKpiDetail()" title="Fechar"><i class="ri-arrow-left-line"></i></button>
             <h3 id="lwa-kpi-detail-title"></h3>
             <button class="lwa-action-btn" onclick="Mautic.lwaCloseKpiDetail()"><i class="ri-close-line"></i></button>
         </div>
-        <div id="lwa-kpi-detail-body" class="lwa-kpi-detail-body"></div>
+        <div id="lwa-kpi-detail-body" class="lwa-modal-body"></div>
+        <div id="lwa-kpi-pagination" class="lwa-pagination"></div>
     </div>
 </div>
 
@@ -155,6 +158,7 @@
     <div class="lwa-modal-overlay" onclick="Mautic.lwaCloseModal()"></div>
     <div class="lwa-modal-content">
         <div class="lwa-modal-header">
+            <button class="lwa-action-btn" onclick="Mautic.lwaCloseModal()" title="Voltar"><i class="ri-arrow-left-line"></i></button>
             <h3 id="lwa-modal-title">Ações do Lead</h3>
             <button class="lwa-action-btn" onclick="Mautic.lwaCloseModal()"><i class="ri-close-line"></i></button>
         </div>

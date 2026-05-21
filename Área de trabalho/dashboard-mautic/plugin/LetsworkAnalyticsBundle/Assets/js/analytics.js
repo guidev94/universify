@@ -44,7 +44,7 @@ Mautic.lwaRenderCharts = function() {
 };
 
 Mautic.lwaGetChartConfig = function(type, data) {
-    var colors = data.colors || ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'];
+    var colors = data.colors || ['#dc2626', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
     var datasets;
     if (type === 'doughnut' || type === 'pie') {
@@ -177,10 +177,18 @@ Mautic.lwaAnimateKpis = function() {
 /**
  * KPI Detail Slide Panel
  */
+Mautic.lwaKpiLeads = [];
+Mautic.lwaKpiPage = 1;
+Mautic.lwaKpiPerPage = 10;
+Mautic.lwaCurrentKpi = '';
+
 Mautic.lwaShowKpiDetail = function(kpiId, title) {
     var $panel = mQuery('#lwa-kpi-detail');
+    Mautic.lwaCurrentKpi = kpiId;
+    Mautic.lwaKpiPage = 1;
     mQuery('#lwa-kpi-detail-title').text(title);
     mQuery('#lwa-kpi-detail-body').html('<div class="lwa-panel-loading"><div class="lwa-spinner"></div><span>Carregando leads...</span></div>');
+    mQuery('#lwa-kpi-pagination').html('');
     $panel.show();
 
     var dateFrom = mQuery('input[name="dateFrom"]').val() || '';
@@ -191,51 +199,81 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
         data: { dateFrom: dateFrom, dateTo: dateTo },
         dataType: 'json',
         success: function(response) {
-            var html = '';
             if (response.leads && response.leads.length > 0) {
-                var leads = response.leads;
-                html += '<div class="lwa-panel-count">' + leads.length + ' leads</div>';
-                html += '<div class="lwa-panel-list">';
-                leads.forEach(function(lead, idx) {
-                    var name = ((lead.firstname || '') + ' ' + (lead.lastname || '')).trim() || lead.company || 'Sem nome';
-                    var initial = name.charAt(0).toUpperCase();
-                    var meta = [lead.cargo, lead.company].filter(Boolean).join(' · ');
-                    var temp = lead.temperatura || '';
-                    var score = lead.interesse_score || 0;
-                    var origin = lead.origem_principal || '';
-                    var avatarColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#ef4444','prioritario':'#8b5cf6'};
-                    var avatarBg = avatarColors[temp] || '#6366f1';
-
-                    html += '<div class="lwa-panel-lead" style="animation-delay:' + (idx * 0.03) + 's">';
-                    html += '  <div class="lwa-panel-lead-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
-                    html += '  <div class="lwa-panel-lead-content">';
-                    html += '    <div class="lwa-panel-lead-top">';
-                    html += '      <span class="lwa-panel-lead-name">' + name + '</span>';
-                    html += '      <span class="lwa-badge lwa-badge--' + temp + ' lwa-badge--sm">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
-                    html += '    </div>';
-                    html += '    <div class="lwa-panel-lead-meta">' + meta + '</div>';
-                    html += '    <div class="lwa-panel-lead-tags">';
-                    if (origin) html += '<span class="lwa-tag">' + origin.replace(/_/g, ' ') + '</span>';
-                    html += '<span class="lwa-tag lwa-tag--score">Score: ' + score + '</span>';
-                    html += '    </div>';
-                    html += '  </div>';
-                    html += '  <div class="lwa-panel-lead-actions">';
-                    html += '    <button class="lwa-action-btn" title="Ver lead" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')"><i class="ri-eye-line"></i></button>';
-                    html += '    <button class="lwa-action-btn lwa-action-btn--primary" title="E-mail" onclick="Mautic.lwaEmailLead(' + lead.id + ', \'' + (lead.email||'').replace(/'/g,"\\'") + '\', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-line"></i></button>';
-                    html += '    <button class="lwa-action-btn lwa-action-btn--success" title="Follow-up" onclick="Mautic.lwaScheduleFollowup(' + lead.id + ', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i></button>';
-                    html += '  </div>';
-                    html += '</div>';
-                });
-                html += '</div>';
+                Mautic.lwaKpiLeads = response.leads;
+                Mautic.lwaRenderKpiPage();
             } else {
-                html = '<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum lead encontrado neste período</p></div>';
+                mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum lead encontrado neste período</p></div>');
             }
-            mQuery('#lwa-kpi-detail-body').html(html);
         },
         error: function() {
             mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><p>Erro ao carregar dados</p></div>');
         }
     });
+};
+
+Mautic.lwaRenderKpiPage = function() {
+    var leads = Mautic.lwaKpiLeads;
+    var page = Mautic.lwaKpiPage;
+    var perPage = Mautic.lwaKpiPerPage;
+    var totalPages = Math.ceil(leads.length / perPage);
+    var start = (page - 1) * perPage;
+    var pageLeads = leads.slice(start, start + perPage);
+
+    var html = '<div class="lwa-panel-count">' + leads.length + ' leads · Página ' + page + ' de ' + totalPages + '</div>';
+    html += '<div class="lwa-panel-list">';
+
+    pageLeads.forEach(function(lead, idx) {
+        var name = ((lead.firstname || '') + ' ' + (lead.lastname || '')).trim() || lead.company || 'Sem nome';
+        var initial = name.charAt(0).toUpperCase();
+        var meta = [lead.cargo, lead.company].filter(Boolean).join(' · ');
+        var temp = lead.temperatura || '';
+        var score = lead.interesse_score || 0;
+        var origin = lead.origem_principal || '';
+        var avatarColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
+        var avatarBg = avatarColors[temp] || '#dc2626';
+
+        html += '<div class="lwa-panel-lead" style="animation-delay:' + (idx * 0.03) + 's">';
+        html += '  <div class="lwa-panel-lead-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
+        html += '  <div class="lwa-panel-lead-content">';
+        html += '    <div class="lwa-panel-lead-top">';
+        html += '      <span class="lwa-panel-lead-name">' + name + '</span>';
+        html += '      <span class="lwa-badge lwa-badge--' + temp + ' lwa-badge--sm">' + (temp ? temp.charAt(0).toUpperCase() + temp.slice(1) : '-') + '</span>';
+        html += '    </div>';
+        html += '    <div class="lwa-panel-lead-meta">' + meta + '</div>';
+        html += '    <div class="lwa-panel-lead-tags">';
+        if (origin) html += '<span class="lwa-tag">' + origin.replace(/_/g, ' ') + '</span>';
+        html += '<span class="lwa-tag lwa-tag--score">Score: ' + score + '</span>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '  <div class="lwa-panel-lead-actions">';
+        html += '    <button class="lwa-action-btn" title="Ver lead" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')"><i class="ri-eye-line"></i></button>';
+        html += '    <button class="lwa-action-btn lwa-action-btn--primary" title="E-mail" onclick="Mautic.lwaEmailLead(' + lead.id + ', \'' + (lead.email||'').replace(/'/g,"\\'") + '\', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-line"></i></button>';
+        html += '    <button class="lwa-action-btn lwa-action-btn--success" title="Follow-up" onclick="Mautic.lwaScheduleFollowup(' + lead.id + ', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i></button>';
+        html += '  </div>';
+        html += '</div>';
+    });
+
+    html += '</div>';
+    mQuery('#lwa-kpi-detail-body').html(html);
+
+    // Render pagination
+    if (totalPages > 1) {
+        var pag = '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page <= 1 ? 'disabled' : 'onclick="Mautic.lwaKpiGoPage(' + (page-1) + ')"') + '><i class="ri-arrow-left-s-line"></i></button>';
+        for (var i = 1; i <= totalPages; i++) {
+            pag += '<button class="lwa-pagination-btn ' + (i === page ? 'active' : '') + '" onclick="Mautic.lwaKpiGoPage(' + i + ')">' + i + '</button>';
+        }
+        pag += '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page >= totalPages ? 'disabled' : 'onclick="Mautic.lwaKpiGoPage(' + (page+1) + ')"') + '><i class="ri-arrow-right-s-line"></i></button>';
+        mQuery('#lwa-kpi-pagination').html(pag);
+    } else {
+        mQuery('#lwa-kpi-pagination').html('');
+    }
+};
+
+Mautic.lwaKpiGoPage = function(page) {
+    Mautic.lwaKpiPage = page;
+    Mautic.lwaRenderKpiPage();
+    mQuery('#lwa-kpi-detail-body').scrollTop(0);
 };
 
 Mautic.lwaCloseKpiDetail = function() {

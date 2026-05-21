@@ -1,7 +1,8 @@
 {# Segment Ranking Chart #}
+<div class="lwa-section-label">Ranking de Conversão por Segmento</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Ranking de Segmentos (Taxa de Conversão %)',
+        title: 'Taxa de Conversão por Segmento (%)',
         type: 'bar',
         data: ranking,
         wide: true,
@@ -10,14 +11,34 @@
 </div>
 
 {# Segment Performance Table #}
-{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
-    title: 'Desempenho por Segmento',
-    headers: ['Segmento', 'Total Leads', 'Quentes', 'Ganhos', 'Taxa'],
-    rows: performance|default([])|map(r => [
-        r.segmento,
-        r.total,
-        r.quentes|default(0),
-        r.ganhos|default(0),
-        r.total > 0 ? ((r.ganhos / r.total * 100)|round(1) ~ '%') : '0%'
-    ])
-} %}
+<div class="lwa-section-label">Performance Detalhada</div>
+<div class="lwa-table-section lwa-card">
+    <div class="lwa-card-body">
+        {% if performance is empty %}
+            <div class="lwa-empty-state"><i class="ri-pie-chart-line"></i><p>Sem dados de segmento no período</p></div>
+        {% else %}
+            <table class="lwa-table">
+                <thead>
+                    <tr>
+                        <th>Segmento</th>
+                        <th>Total Leads</th>
+                        <th>Quentes</th>
+                        <th>Ganhos</th>
+                        <th>Taxa Conversão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in performance %}
+                        <tr>
+                            <td><strong>{{ r.segmento }}</strong></td>
+                            <td>{{ r.total }}</td>
+                            <td><span class="lwa-badge lwa-badge--quente">{{ r.quentes|default(0) }}</span></td>
+                            <td><span class="lwa-badge lwa-badge--prioritario">{{ r.ganhos|default(0) }}</span></td>
+                            <td>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>

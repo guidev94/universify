@@ -1,28 +1,48 @@
-{# Conversion Funnel #}
+{# Conversion KPIs #}
+<div class="lwa-section-label">Funil de Conversão</div>
 <div class="lwa-charts-row">
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Funil de Conversão',
+        title: 'Funil: Lead → Engajado → Reunião → Proposta → Ganho',
         type: 'bar',
         data: funnel,
         wide: true,
         height: 320
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/chart_card.html.twig' with {
-        title: 'Taxa de Ganho por Origem',
+        title: 'Taxa de Ganho por Origem (%)',
         type: 'bar',
         data: win_rate,
         height: 320
     } %}
 </div>
 
-{# Conversion Table by Origin #}
-{% include '@LetsworkAnalytics/Analytics/partials/data_table.html.twig' with {
-    title: 'Conversão por Origem',
-    headers: ['Origem', 'Total Leads', 'Ganhos', 'Taxa'],
-    rows: by_origin|default([])|map(r => [
-        r.origem_principal,
-        r.total,
-        r.ganhos,
-        r.total > 0 ? ((r.ganhos / r.total * 100)|round(1) ~ '%') : '0%'
-    ])
-} %}
+{# Conversion Table #}
+<div class="lwa-section-label">Detalhamento por Origem</div>
+<div class="lwa-table-section lwa-card">
+    <div class="lwa-card-body">
+        {% if by_origin is empty %}
+            <div class="lwa-empty-state"><i class="ri-exchange-funds-line"></i><p>Sem dados de conversão no período</p></div>
+        {% else %}
+            <table class="lwa-table">
+                <thead>
+                    <tr>
+                        <th>Origem</th>
+                        <th>Total Leads</th>
+                        <th>Ganhos</th>
+                        <th>Taxa Conversão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in by_origin %}
+                        <tr>
+                            <td><span class="lwa-tag">{{ r.origem_principal|replace({'_': ' '}) }}</span></td>
+                            <td><strong>{{ r.total }}</strong></td>
+                            <td><span class="lwa-badge lwa-badge--quente">{{ r.ganhos }}</span></td>
+                            <td>{{ r.total > 0 ? ((r.ganhos / r.total * 100)|round(1)) : 0 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
