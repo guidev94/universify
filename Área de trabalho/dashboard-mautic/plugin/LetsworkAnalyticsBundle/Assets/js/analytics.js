@@ -386,6 +386,7 @@ Mautic.lwaCloseKpiDetail = function() {
  * Lead Modal — Full detail + Actions
  */
 Mautic.lwaOpenLeadModal = function(leadId) {
+    mQuery('#lwa-kpi-detail').hide();
     var $modal = mQuery('#lwa-lead-modal');
     mQuery('#lwa-modal-title').text('Carregando...');
     mQuery('#lwa-modal-body').html('<div class="lwa-modal-loading"><i class="ri-loader-3-line ri-spin"></i></div>');
@@ -426,22 +427,22 @@ Mautic.lwaOpenLeadModal = function(leadId) {
                 html += '<div class="lwa-modal-section"><label>Dor Principal</label><p>' + l.dor_principal + '</p></div>';
             }
 
-            // Contact actions
-            html += '<div class="lwa-modal-section"><label>Contato Direto</label></div>';
-            html += '<div class="lwa-modal-contact-actions">';
-            if (l.email) html += '  <a href="mailto:' + l.email + '" class="lwa-modal-contact-btn lwa-modal-contact-btn--email"><i class="ri-mail-line"></i> ' + l.email + '</a>';
-            if (l.phone) html += '  <a href="tel:' + l.phone + '" class="lwa-modal-contact-btn lwa-modal-contact-btn--phone"><i class="ri-phone-line"></i> ' + l.phone + '</a>';
-            if (l.phone) html += '  <a href="https://wa.me/55' + (l.phone||'').replace(/\D/g,'') + '" target="_blank" class="lwa-modal-contact-btn lwa-modal-contact-btn--whatsapp"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
-            html += '</div>';
+            // Contact
+            if (l.email || l.phone) {
+                html += '<div class="lwa-modal-section"><label>Contato</label></div>';
+                html += '<div class="lwa-modal-contact-actions">';
+                if (l.email) html += '<a href="mailto:' + l.email + '" class="lwa-modal-contact-btn"><i class="ri-mail-line"></i> ' + l.email + '</a>';
+                if (l.phone) html += '<a href="tel:' + l.phone + '" class="lwa-modal-contact-btn"><i class="ri-phone-line"></i> ' + l.phone + '</a>';
+                if (l.phone) html += '<a href="https://wa.me/55' + (l.phone||'').replace(/\\D/g,'') + '" target="_blank" class="lwa-modal-contact-btn"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
+                html += '</div>';
+            }
 
-            // Main Actions
-            html += '<div class="lwa-modal-section"><label>Ações</label></div>';
+            // Actions
+            html += '<div class="lwa-modal-section"><label>Ações Rápidas</label></div>';
             html += '<div class="lwa-modal-actions">';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaEmailLead(' + l.id + ', \'' + (l.email||'').replace(/'/g,"\\'") + '\', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-send-line"></i> Enviar E-mail</button>';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaScheduleFollowup(' + l.id + ', \'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i> Agendar Follow-up</button>';
-            html += '  <a href="/s/contacts/view/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-user-line"></i> Ver Ficha</a>';
-            html += '  <a href="/s/contacts/edit/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-edit-line"></i> Editar</a>';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaToast(\'' + name.replace(/'/g,"\\'") + ' enviado para CRM LetsWork\')"><i class="ri-send-plane-line"></i> Enviar para CRM</button>';
+            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaEmailLead(' + l.id + ',\'' + (l.email||'').replace(/'/g,"\\'") + '\',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-send-line"></i> Enviar E-mail</button>';
+            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaScheduleFollowup(' + l.id + ',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i> Agendar Follow-up</button>';
+            html += '  <a href="/s/contacts/view/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-user-line"></i> Ficha Completa</a>';
             html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + l.id + ')"><i class="ri-sparkling-line"></i> Sugestão IA</button>';
             html += '</div>';
 
@@ -468,15 +469,16 @@ Mautic.lwaModalField = function(label, value) {
 Mautic.lwaEmailLead = function(leadId, email, name) {
     if (!email) { Mautic.lwaToast('Lead sem e-mail cadastrado'); return; }
 
+    mQuery('#lwa-modal-title').text('Enviar E-mail');
     var html = '<div class="lwa-form-section">';
-    html += '<div class="lwa-form-header"><i class="ri-mail-send-line"></i> Enviar E-mail para ' + name + '</div>';
+    html += '<div class="lwa-form-header"><i class="ri-mail-send-line"></i> ' + name + '</div>';
     html += '<div class="lwa-form-meta"><i class="ri-mail-line"></i> ' + email + '</div>';
     html += '<div class="lwa-form-group"><label>Assunto</label><input type="text" id="lwa-email-subject" class="lwa-input" placeholder="Assunto do e-mail"></div>';
-    html += '<div class="lwa-form-group"><label>Mensagem</label><textarea id="lwa-email-body" class="lwa-textarea" rows="6" placeholder="Escreva sua mensagem..."></textarea></div>';
+    html += '<div class="lwa-form-group"><label>Mensagem</label><textarea id="lwa-email-body" class="lwa-textarea" rows="5" placeholder="Escreva sua mensagem..."></textarea></div>';
     html += '<div class="lwa-form-actions">';
     html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaSendEmail(' + leadId + ')"><i class="ri-send-plane-line"></i> Enviar</button>';
     html += '  <button class="lwa-btn lwa-btn--ai" onclick="Mautic.lwaAiEmailSuggest(' + leadId + ')"><i class="ri-sparkling-line"></i> Gerar com IA</button>';
-    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaCloseModal()">Cancelar</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Voltar</button>';
     html += '</div></div>';
 
     mQuery('#lwa-modal-title').text('Enviar E-mail');
@@ -530,14 +532,15 @@ Mautic.lwaScheduleFollowup = function(leadId, name) {
     tomorrow.setDate(tomorrow.getDate() + 2);
     var defaultDate = tomorrow.toISOString().split('T')[0];
 
+    mQuery('#lwa-modal-title').text('Agendar Follow-up');
     var html = '<div class="lwa-form-section">';
-    html += '<div class="lwa-form-header"><i class="ri-calendar-todo-line"></i> Agendar Follow-up — ' + name + '</div>';
+    html += '<div class="lwa-form-header"><i class="ri-calendar-todo-line"></i> ' + name + '</div>';
     html += '<div class="lwa-form-group"><label>Data do Follow-up</label><input type="date" id="lwa-followup-date" class="lwa-input" value="' + defaultDate + '"></div>';
     html += '<div class="lwa-form-group"><label>Observação (opcional)</label><textarea id="lwa-followup-note" class="lwa-textarea" rows="3" placeholder="Ex: Enviar proposta revisada, ligar para confirmar reunião..."></textarea></div>';
-    html += '<div class="lwa-form-info"><i class="ri-notification-3-line"></i> Você receberá uma notificação 1 dia antes do follow-up.</div>';
+    html += '<div class="lwa-form-info"><i class="ri-notification-3-line"></i> Você receberá uma notificação 1 dia antes.</div>';
     html += '<div class="lwa-form-actions">';
     html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaConfirmFollowup(' + leadId + ')"><i class="ri-check-line"></i> Agendar</button>';
-    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaCloseModal()">Cancelar</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Voltar</button>';
     html += '</div></div>';
 
     mQuery('#lwa-modal-title').text('Agendar Follow-up');
