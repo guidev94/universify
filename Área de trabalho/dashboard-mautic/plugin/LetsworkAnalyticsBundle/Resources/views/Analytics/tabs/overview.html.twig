@@ -10,16 +10,8 @@
         kpi_id: 'engajados', description: 'Leads que engajaram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Agendadas', value: kpis.reunioes_agendadas, icon: 'ri-calendar-todo-line', color: 'info',
-        kpi_id: 'reunioes', description: 'Reuniões marcadas'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Realizadas', value: kpis.reunioes_realizadas, icon: 'ri-calendar-check-line', color: 'primary',
-        kpi_id: 'reunioes', description: 'Reuniões feitas'
-    } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Fechamento', value: kpis.reunioes_fechamento, icon: 'ri-handshake-line', color: 'success',
-        description: 'Reuniões de fechamento'
+        title: 'Reuniões', value: kpis.reunioes_agendadas + kpis.reunioes_realizadas + kpis.reunioes_fechamento, icon: 'ri-calendar-check-line', color: 'primary',
+        kpi_id: 'reunioes', description: 'Agendadas + realizadas + fechamento'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Propostas', value: kpis.propostas, icon: 'ri-file-text-line', color: 'purple',
@@ -55,6 +47,11 @@
                     <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_prioritario', 'Leads Prioritários')">
                         <td>100+</td><td><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></td><td><strong>{{ temperatura_counts.prioritario }}</strong></td><td>Follow-up imediato</td>
                     </tr>
+                    {% if kpis.leads_incompletos > 0 %}
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('leads_incompletos', 'Leads Incompletos')" style="border-top:2px solid var(--lwa-gray-100)">
+                        <td>—</td><td><span class="lwa-tag">Incompleto</span></td><td><strong>{{ kpis.leads_incompletos }}</strong></td><td>Enriquecer dados (sem e-mail ou telefone)</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -155,16 +152,6 @@
 </div>
 {% endif %}
 
-{# ===== LEADS INCOMPLETOS ===== #}
-{% if kpis.leads_incompletos > 0 %}
-<div class="lwa-section-label"><span>Fila de Enriquecimento</span><span class="lwa-section-badge">{{ kpis.leads_incompletos }}</span></div>
-<div class="lwa-card" style="margin-bottom:24px">
-    <div class="lwa-card-body" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:14px;color:var(--lwa-gray-600)">{{ kpis.leads_incompletos }} leads sem e-mail ou telefone</span>
-        <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaShowKpiDetail('leads_incompletos', 'Leads Incompletos')">Ver leads</button>
-    </div>
-</div>
-{% endif %}
 
 {# ===== EVOLUÇÃO ===== #}
 <div class="lwa-section-label">Entrada de Leads</div>
