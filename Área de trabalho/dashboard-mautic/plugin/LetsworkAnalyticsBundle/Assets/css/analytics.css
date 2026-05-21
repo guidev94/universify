@@ -176,16 +176,13 @@
 .lwa-kpi-desc { font-size: 12px; color: var(--lwa-gray-400); margin-top: 2px; }
 .lwa-kpi-suffix { font-size: 12px; color: var(--lwa-gray-400); margin-left: auto; align-self: flex-end; }
 
-/* Remove colored top bars — clean look */
-.lwa-card--primary .lwa-kpi-icon,
-.lwa-card--success .lwa-kpi-icon,
-.lwa-card--warning .lwa-kpi-icon,
-.lwa-card--error .lwa-kpi-icon,
-.lwa-card--info .lwa-kpi-icon,
-.lwa-card--purple .lwa-kpi-icon {
-    background: var(--lwa-gray-50);
-    color: var(--lwa-gray-600);
-}
+/* KPI icon colors — subtle, aligned with temperature system */
+.lwa-card--primary .lwa-kpi-icon { background: rgba(220,38,38,0.06); color: #dc2626; }
+.lwa-card--success .lwa-kpi-icon { background: rgba(16,185,129,0.06); color: #10b981; }
+.lwa-card--warning .lwa-kpi-icon { background: rgba(245,158,11,0.06); color: #d97706; }
+.lwa-card--error .lwa-kpi-icon { background: rgba(239,68,68,0.06); color: #ef4444; }
+.lwa-card--info .lwa-kpi-icon { background: rgba(59,130,246,0.06); color: #3b82f6; }
+.lwa-card--purple .lwa-kpi-icon { background: rgba(124,58,237,0.06); color: #7c3aed; }
 
 /* Grid Layouts */
 .lwa-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
@@ -227,8 +224,13 @@
 
 .lwa-table-footer { padding: 12px 18px; border-top: 1px solid var(--lwa-gray-100); text-align: center; }
 
-.lwa-table--temp td { font-size: 14px; }
-.lwa-table--temp td:nth-child(3) { font-size: 18px; }
+.lwa-table--temp td { font-size: 14px; vertical-align: middle; }
+.lwa-table--temp td:nth-child(3) { font-size: 20px; font-weight: 700; }
+.lwa-table--temp tr { border-left: 3px solid transparent; }
+.lwa-table--temp tr:nth-child(1) { border-left-color: #3b82f6; }
+.lwa-table--temp tr:nth-child(2) { border-left-color: #f59e0b; }
+.lwa-table--temp tr:nth-child(3) { border-left-color: #dc2626; }
+.lwa-table--temp tr:nth-child(4) { border-left-color: #7c3aed; }
 
 /* Lead Cell */
 .lwa-lead-cell { display: flex; align-items: center; gap: 10px; }

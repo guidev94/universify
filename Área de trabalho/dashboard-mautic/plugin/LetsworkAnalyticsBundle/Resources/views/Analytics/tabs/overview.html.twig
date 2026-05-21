@@ -3,27 +3,27 @@
 <div class="lwa-kpi-row">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Leads Centralizados', value: kpis.total_leads,
-        icon: 'ri-team-line', kpi_id: 'prospeccao', description: 'Novos leads no período'
+        icon: 'ri-team-line', color: 'info', kpi_id: 'prospeccao', description: 'Novos leads no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Frios → Mornos', value: kpis.frio_to_morno,
-        icon: 'ri-temp-hot-line', kpi_id: 'engajados', description: 'Leads que engajaram'
+        icon: 'ri-temp-hot-line', color: 'warning', kpi_id: 'engajados', description: 'Leads que engajaram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Mornos → Reunião', value: kpis.morno_to_reuniao,
-        icon: 'ri-calendar-check-line', kpi_id: 'reunioes', description: 'Convertidos em reunião'
+        icon: 'ri-calendar-check-line', color: 'primary', kpi_id: 'reunioes', description: 'Convertidos em reunião'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Reuniões LinkedIn', value: kpis.reunioes_linkedin,
-        icon: 'ri-linkedin-box-line', description: 'Geradas via LinkedIn/Roboze'
+        icon: 'ri-linkedin-box-line', color: 'info', description: 'Geradas via LinkedIn/Roboze'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Clientes Ganhos', value: kpis.ganhos,
-        icon: 'ri-trophy-line', kpi_id: 'ganhos', description: 'Convertidos no período'
+        icon: 'ri-trophy-line', color: 'success', kpi_id: 'ganhos', description: 'Convertidos no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Sem Follow-up', value: kpis.hot_no_followup,
-        icon: 'ri-alarm-warning-line', kpi_id: 'hot_no_followup', description: 'Quentes aguardando ação'
+        icon: 'ri-alarm-warning-line', color: 'error', kpi_id: 'hot_no_followup', description: 'Quentes aguardando ação'
     } %}
 </div>
 
