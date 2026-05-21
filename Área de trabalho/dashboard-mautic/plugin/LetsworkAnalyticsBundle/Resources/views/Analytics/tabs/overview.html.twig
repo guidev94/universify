@@ -1,21 +1,21 @@
-{# ===== MÉTRICAS DE SUCESSO (PRD Seção 18) ===== #}
-<div class="lwa-section-label">Métricas de Sucesso</div>
+{# ===== PIPELINE (PRD Seção 18) ===== #}
+<div class="lwa-section-label">Pipeline Comercial</div>
 <div class="lwa-kpi-row">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Leads Centralizados', value: kpis.total_leads,
-        icon: 'ri-team-line', color: 'info', kpi_id: 'prospeccao', description: 'Novos leads no período'
+        title: 'Prospecção', value: kpis.prospeccao,
+        icon: 'ri-user-search-line', color: 'info', kpi_id: 'prospeccao', description: 'Nunca houve interação'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Frios → Mornos', value: kpis.frio_to_morno,
         icon: 'ri-temp-hot-line', color: 'warning', kpi_id: 'engajados', description: 'Leads que engajaram'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Mornos → Reunião', value: kpis.morno_to_reuniao,
-        icon: 'ri-calendar-check-line', color: 'primary', kpi_id: 'reunioes', description: 'Convertidos em reunião'
+        title: 'Reuniões', value: kpis.morno_to_reuniao,
+        icon: 'ri-calendar-check-line', color: 'primary', kpi_id: 'reunioes', description: 'Agendadas ou realizadas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Reuniões LinkedIn', value: kpis.reunioes_linkedin,
-        icon: 'ri-linkedin-box-line', color: 'info', description: 'Geradas via LinkedIn/Roboze'
+        title: 'Propostas', value: kpis.propostas,
+        icon: 'ri-file-text-line', color: 'purple', kpi_id: 'propostas', description: 'Em negociação ativa'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Clientes Ganhos', value: kpis.ganhos,

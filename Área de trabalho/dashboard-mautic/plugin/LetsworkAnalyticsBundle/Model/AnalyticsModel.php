@@ -18,11 +18,9 @@ class AnalyticsModel
     {
         return [
             'kpis' => [
-                'total_leads'       => $this->getTotalLeads($dateRange),
+                'prospeccao'        => $this->getProspeccao(),
                 'frio_to_morno'     => $this->getFrioToMorno($dateRange),
                 'morno_to_reuniao'  => $this->getMornoToReuniao($dateRange),
-                'reunioes_linkedin' => $this->getReunioesLinkedin($dateRange),
-                'reunioes'          => $this->getReunioesCount($dateRange),
                 'propostas'         => $this->getCountByStatus($dateRange, 'proposta_enviada') + $this->getCountByStatus($dateRange, 'negociacao'),
                 'ganhos'            => $this->getCountByStatus($dateRange, 'ganho'),
                 'hot_no_followup'   => $this->getHotWithoutFollowup(),
@@ -182,11 +180,10 @@ class AnalyticsModel
         return (int) $this->connection->fetchOne($sql);
     }
 
-    private function getTotalLeads(array $dateRange): int
+    private function getProspeccao(): int
     {
-        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added BETWEEN :dateFrom AND :dateTo", [
-            'dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59',
-        ]);
+        if (!$this->columnExists('leads', 'status_comercial')) return 0;
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE status_comercial = 'prospeccao'");
     }
 
     private function getFrioToMorno(array $dateRange): int
