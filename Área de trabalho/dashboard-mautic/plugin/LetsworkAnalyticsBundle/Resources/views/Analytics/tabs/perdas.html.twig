@@ -2,17 +2,17 @@
 <div class="lwa-section-label">Resumo de Perdas</div>
 {% set total_perdas = by_origin|reduce((carry, r) => carry + r.total, 0) %}
 <div class="lwa-kpi-row lwa-kpi-row--compact">
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
         title: 'Leads Perdidos', value: total_perdas, icon: 'ri-close-circle-line', color: 'error',
-        description: 'No período selecionado'
+        kpi_id: 'leads_perdidos', description: 'No período selecionado'
     } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Motivos Registrados', value: reasons.labels|length|default(0), icon: 'ri-list-check',
-        description: 'Razões identificadas'
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
+        title: 'Motivos Registrados', value: reasons.labels|length|default(0), icon: 'ri-list-check', color: 'warning',
+        kpi_id: 'motivos_perda', description: 'Razões identificadas'
     } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Origens Afetadas', value: by_origin|length|default(0), icon: 'ri-global-line',
-        description: 'Canais com perdas'
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
+        title: 'Origens Afetadas', value: by_origin|length|default(0), icon: 'ri-global-line', color: 'info',
+        kpi_id: 'origens_afetadas', description: 'Canais com perdas'
     } %}
 </div>
 
@@ -55,7 +55,6 @@
 {# Detalhamento por Origem e Segmento #}
 <div class="lwa-section-label">Detalhamento</div>
 <div class="lwa-grid-2">
-    {% set origin_labels = {'linkedin_roboze':'LinkedIn / Roboze','letswork_site':"Let's Work Site",'apollo':'Apollo','lista_importada':'Lista Importada','indicação':'Indicação'} %}
     <div class="lwa-card">
         <div class="lwa-card-header"><h4>Por Origem</h4></div>
         <div class="lwa-card-body lwa-card-body--tight">
@@ -65,7 +64,7 @@
                 <table class="lwa-table lwa-table--compact">
                     <tbody>
                         {% for r in by_origin %}
-                            <tr><td>{{ origin_labels[r.origem_principal]|default(r.origem_principal|replace({'_':' '})|title) }}</td><td><strong>{{ r.total }}</strong></td></tr>
+                            <tr><td>{{ r.origem_principal|replace({'_':' '})|title }}</td><td><strong>{{ r.total }}</strong></td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

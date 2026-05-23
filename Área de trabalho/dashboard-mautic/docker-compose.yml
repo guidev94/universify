@@ -41,6 +41,7 @@ services:
       MAUTIC_LOCALE: pt_BR
     volumes:
       - mautic_data:/var/www/html
+      - ./plugin/LetsworkAnalyticsBundle:/var/www/html/plugins/LetsworkAnalyticsBundle
     networks:
       - mautic_net
 

@@ -13,7 +13,7 @@
                 <tbody>
                     {% for r in performance %}
                         {% set perdidos = r.total - r.quentes|default(0) - r.ganhos|default(0) %}
-                        <tr>
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowSegmentoLeads('{{ r.segmento|e('js') }}')">
                             <td><strong>{{ r.segmento }}</strong></td>
                             <td>{{ r.total }}</td>
                             <td>{{ r.quentes|default(0) }}</td>
@@ -38,20 +38,39 @@
 </div>
 {% endif %}
 
-{# Segmentos do PRD §6 #}
-<div class="lwa-section-label">Segmentos ICP (PRD)</div>
+{# Segmentos Nativos do Mautic (Dinâmico) #}
+{% if mautic_segments is defined and mautic_segments is not empty %}
+<div class="lwa-section-label">Segmentos Mautic (Automáticos)</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body lwa-card-body--tight">
+        <table class="lwa-table lwa-table--compact">
+            <thead><tr><th>Segmento</th><th>Leads Ativos</th></tr></thead>
+            <tbody>
+                {% for s in mautic_segments %}
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('segmento_nativo_{{ s.id }}', '{{ s.name|e('js') }}')">
+                        <td><strong>{{ s.name }}</strong> <span class="lwa-tag" style="margin-left:4px">{{ s.alias }}</span></td>
+                        <td><strong>{{ s.total_leads }}</strong></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{# Segmentos ICP (Campo customizado — dinâmico do banco) #}
+{% if performance is not empty %}
+<div class="lwa-section-label">ICP por Segmento</div>
 <div class="lwa-card">
     <div class="lwa-card-body">
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <span class="lwa-tag" style="padding:6px 12px;font-size:13px">Serviços</span>
-            <span class="lwa-tag" style="padding:6px 12px;font-size:13px">Engenharia</span>
-            <span class="lwa-tag" style="padding:6px 12px;font-size:13px">Comércio</span>
-            <span class="lwa-tag" style="padding:6px 12px;font-size:13px">Alimentação</span>
-            <span class="lwa-tag" style="padding:6px 12px;font-size:13px">Saúde</span>
+            {% for r in performance %}
+                <span class="lwa-tag" style="padding:6px 12px;font-size:13px;cursor:pointer" onclick="Mautic.lwaShowSegmentoLeads('{{ r.segmento|e('js') }}')">{{ r.segmento }} ({{ r.total }})</span>
+            {% endfor %}
         </div>
-        <p style="font-size:12px;color:var(--lwa-gray-400);margin:12px 0 0">Cargos prioritários: RH, DP, Inovação</p>
     </div>
 </div>
+{% endif %}
 
 {# ===== IA ===== #}
 <div class="lwa-section-label"><span><i class="ri-sparkling-line"></i> Análise IA — Segmentos</span><button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaAiTab('segmentos')" style="font-size:11px;padding:4px 10px">Analisar</button></div>

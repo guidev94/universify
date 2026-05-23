@@ -1,38 +1,38 @@
 {# KPIs Velocidade #}
 <div class="lwa-section-label">Velocidade do Pipeline</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Tempo até Reunião', value: avg_to_meeting, icon: 'ri-time-line', suffix: 'dias',
-        description: 'Da entrada até primeira reunião'
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
+        title: 'Tempo até Reunião', value: avg_to_meeting, icon: 'ri-time-line', color: 'primary',
+        kpi_id: 'tempo_reuniao', suffix: 'dias', description: 'Da entrada até primeira reunião'
     } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Tempo até Proposta', value: avg_to_proposal, icon: 'ri-file-text-line', suffix: 'dias',
-        description: 'Da entrada até proposta enviada'
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
+        title: 'Tempo até Proposta', value: avg_to_proposal, icon: 'ri-file-text-line', color: 'purple',
+        kpi_id: 'tempo_proposta', suffix: 'dias', description: 'Da entrada até proposta enviada'
     } %}
-    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Valor em Negociação', value: valor_pipeline|number_format(0, ',', '.'), icon: 'ri-money-dollar-circle-line', suffix: 'R$',
-        description: 'Oportunidades ativas'
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
+        title: 'Valor em Negociação', value: valor_pipeline|number_format(0, ',', '.'), icon: 'ri-money-dollar-circle-line', color: 'success',
+        kpi_id: 'valor_negociacao', suffix: 'R$', description: 'Oportunidades ativas'
     } %}
 </div>
 
-{# Etapas do Pipeline #}
+{# Etapas do Pipeline — Dinâmico via banco #}
 <div class="lwa-section-label">Etapas do Pipeline Comercial</div>
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         {% if by_status is empty %}
             <div class="lwa-empty-state"><p>Sem dados.</p></div>
         {% else %}
-            {% set status_labels = {'prospeccao':'Prospecção','engajado':'Engajado','reuniao_agendada':'Reunião Agendada','reuniao_realizada':'Reunião Realizada','reuniao_fechamento':'Reunião de Fechamento','proposta_enviada':'Proposta Enviada','negociacao':'Negociação','ganho':'Cliente Ganho','perdido':'Perdido'} %}
-            {% set status_colors = {'prospeccao':'#94a3b8','engajado':'#f59e0b','reuniao_agendada':'#3b82f6','reuniao_realizada':'#2563eb','reuniao_fechamento':'#059669','proposta_enviada':'#8b5cf6','negociacao':'#7c3aed','ganho':'#10b981','perdido':'#dc2626'} %}
+            {% set max_total = by_status[0].total|default(1) %}
             <table class="lwa-table">
                 <thead><tr><th>Etapa</th><th>Leads</th><th>Valor Potencial</th><th></th></tr></thead>
                 <tbody>
                     {% for r in by_status %}
-                        <tr>
-                            <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ status_colors[r.status_comercial]|default('#94a3b8') }};margin-right:8px"></span>{{ status_labels[r.status_comercial]|default(r.status_comercial|replace({'_':' '})|title) }}</td>
+                        {% set pct = max_total > 0 ? (r.total / max_total * 100)|round : 0 %}
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('{{ r.status_comercial }}', '{{ r.status_comercial|replace({'_':' '})|title }}')">
+                            <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lwa-primary);margin-right:8px"></span>{{ r.status_comercial|replace({'_':' '})|title }}</td>
                             <td><strong>{{ r.total }}</strong></td>
                             <td>R$ {{ r.valor|number_format(0, ',', '.') }}</td>
-                            <td style="width:30%"><div style="background:var(--lwa-gray-100);border-radius:4px;height:6px;overflow:hidden"><div style="background:{{ status_colors[r.status_comercial]|default('#94a3b8') }};height:100%;width:{{ (r.total / by_status[0].total * 100)|round }}%;border-radius:4px"></div></div></td>
+                            <td style="width:30%"><div style="background:var(--lwa-gray-100);border-radius:4px;height:6px;overflow:hidden"><div style="background:var(--lwa-primary);height:100%;width:{{ pct }}%;border-radius:4px;opacity:{{ 0.4 + (pct / 100 * 0.6) }}"></div></div></td>
                         </tr>
                     {% endfor %}
                 </tbody>

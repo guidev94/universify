@@ -3,15 +3,54 @@
 return [
     'name'        => 'Letswork CRM Analytics',
     'description' => 'Dashboard analytics premium para leads, conversao e pipeline.',
-    'version'     => '1.0.0',
+    'version'     => '2.0.0',
     'author'      => 'Letswork',
 
     'routes' => [
         'main' => [
-            'letswork_analytics_index' => [
-                'path'       => '/analytics/{tab}',
-                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::indexAction',
-                'defaults'   => ['tab' => 'overview'],
+            'letswork_analytics_incomplete_queue' => [
+                'path'       => '/analytics/leads/incomplete',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::incompleteQueueAction',
+            ],
+            'letswork_analytics_enrich_lead' => [
+                'path'       => '/analytics/action/enrich-lead',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::enrichLeadAction',
+                'method'     => 'POST',
+            ],
+            'letswork_analytics_playbook' => [
+                'path'       => '/analytics/ai/playbook/{leadId}/{tipo}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::playbookAction',
+            ],
+            'letswork_analytics_webhook' => [
+                'path'       => '/analytics/webhook/event',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::webhookEventAction',
+                'method'     => 'POST',
+            ],
+            'letswork_analytics_score_event' => [
+                'path'       => '/analytics/action/score-event',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::scoreEventAction',
+                'method'     => 'POST',
+            ],
+            'letswork_analytics_lead_timeline' => [
+                'path'       => '/analytics/lead/{leadId}/timeline',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::leadTimelineAction',
+            ],
+            'letswork_analytics_classify_linkedin' => [
+                'path'       => '/analytics/ai/classify-linkedin',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::classifyLinkedinAction',
+                'method'     => 'POST',
+            ],
+            'letswork_analytics_lead_summary' => [
+                'path'       => '/analytics/ai/summary/{leadId}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::leadSummaryAction',
+            ],
+            'letswork_analytics_stage_detail' => [
+                'path'       => '/analytics/stage-detail/{stageId}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::stageDetailAction',
+            ],
+            'letswork_analytics_segmento_detail' => [
+                'path'       => '/analytics/segmento-detail/{segmento}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::segmentoDetailAction',
             ],
             'letswork_analytics_kpi_detail' => [
                 'path'       => '/analytics/kpi-detail/{kpi}',
@@ -47,6 +86,11 @@ return [
                 'path'       => '/analytics/action/update-lead',
                 'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::updateLeadAction',
                 'method'     => 'POST',
+            ],
+            'letswork_analytics_index' => [
+                'path'       => '/analytics/{tab}',
+                'controller' => 'MauticPlugin\LetsworkAnalyticsBundle\Controller\AnalyticsController::indexAction',
+                'defaults'   => ['tab' => 'overview'],
             ],
         ],
     ],

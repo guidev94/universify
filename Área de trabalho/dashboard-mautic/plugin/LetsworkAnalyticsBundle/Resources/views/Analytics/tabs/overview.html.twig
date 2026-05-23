@@ -1,17 +1,25 @@
 {# ===== PIPELINE COMERCIAL ===== #}
 <div class="lwa-section-label">Pipeline Comercial</div>
-<div class="lwa-kpi-row">
+<div class="lwa-kpi-row lwa-kpi-row--full">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Prospecção', value: kpis.prospeccao, icon: 'ri-user-search-line', color: 'info',
-        kpi_id: 'prospeccao', description: 'Nunca houve interação'
+        kpi_id: 'prospeccao', description: 'Sem interação'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Frios → Mornos', value: kpis.frio_to_morno, icon: 'ri-temp-hot-line', color: 'warning',
-        kpi_id: 'engajados', description: 'Leads que engajaram'
+        title: 'Frio', value: temperatura_counts.frio|default(0), icon: 'ri-temp-cold-line', color: 'info',
+        kpi_id: 'temp_frio', description: 'Score 0–20'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Morno', value: temperatura_counts.morno|default(0), icon: 'ri-temp-hot-line', color: 'warning',
+        kpi_id: 'temp_morno', description: 'Score 21–60'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Quente', value: temperatura_counts.quente|default(0), icon: 'ri-fire-line', color: 'error',
+        kpi_id: 'temp_quente', description: 'Score 61–100'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Reuniões', value: kpis.reunioes_agendadas + kpis.reunioes_realizadas + kpis.reunioes_fechamento, icon: 'ri-calendar-check-line', color: 'primary',
-        kpi_id: 'reunioes', description: 'Agendadas + realizadas + fechamento'
+        kpi_id: 'reunioes', description: 'Agendadas + realizadas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Propostas', value: kpis.propostas, icon: 'ri-file-text-line', color: 'purple',
@@ -23,7 +31,7 @@
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Sem Follow-up', value: kpis.hot_no_followup, icon: 'ri-alarm-warning-line', color: 'error',
-        kpi_id: 'hot_no_followup', description: 'Quentes aguardando ação'
+        kpi_id: 'hot_no_followup', description: 'Quentes sem ação'
     } %}
 </div>
 
@@ -35,18 +43,16 @@
             <table class="lwa-table lwa-table--temp">
                 <thead><tr><th>Score</th><th>Temperatura</th><th>Leads Ativos</th><th>Ação</th></tr></thead>
                 <tbody>
-                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_frio', 'Leads Frios')">
-                        <td>0 – 20</td><td><span class="lwa-badge lwa-badge--frio">Frio</span></td><td><strong>{{ temperatura_counts.frio }}</strong></td><td>Iniciar primeiro contato</td>
-                    </tr>
-                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_morno', 'Leads Mornos')">
-                        <td>21 – 60</td><td><span class="lwa-badge lwa-badge--morno">Morno</span></td><td><strong>{{ temperatura_counts.morno }}</strong></td><td>Conteúdo + abordagem consultiva</td>
-                    </tr>
-                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_quente', 'Leads Quentes')">
-                        <td>61 – 100</td><td><span class="lwa-badge lwa-badge--quente">Quente</span></td><td><strong>{{ temperatura_counts.quente }}</strong></td><td>Comercial deve agir</td>
-                    </tr>
-                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_prioritario', 'Leads Prioritários')">
-                        <td>100+</td><td><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></td><td><strong>{{ temperatura_counts.prioritario }}</strong></td><td>Follow-up imediato</td>
-                    </tr>
+                    {% for temp_key, temp_count in temperatura_counts %}
+                        {% set score_range = {'frio':'0 – 20','morno':'21 – 60','quente':'61 – 100','prioritario':'100+'} %}
+                        {% set actions = {'frio':'Iniciar primeiro contato','morno':'Conteúdo + abordagem consultiva','quente':'Comercial deve agir','prioritario':'Follow-up imediato'} %}
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_{{ temp_key }}', 'Leads {{ temp_key|capitalize }}')">
+                            <td>{{ score_range[temp_key]|default('—') }}</td>
+                            <td><span class="lwa-badge lwa-badge--{{ temp_key }}">{{ temp_key|capitalize }}</span></td>
+                            <td><strong>{{ temp_count }}</strong></td>
+                            <td>{{ actions[temp_key]|default('') }}</td>
+                        </tr>
+                    {% endfor %}
                     {% if kpis.leads_incompletos > 0 %}
                     <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('leads_incompletos', 'Leads Incompletos')" style="border-top:2px solid var(--lwa-gray-100)">
                         <td>—</td><td><span class="lwa-tag">Incompleto</span></td><td><strong>{{ kpis.leads_incompletos }}</strong></td><td>Enriquecer dados (sem e-mail ou telefone)</td>
@@ -84,6 +90,41 @@
 </div>
 
 <div id="lwa-ai-tab-result" style="display:none;margin-bottom:24px"></div>
+
+{# ===== ENGAJAMENTO ===== #}
+{% if engagement is defined %}
+<div class="lwa-section-label">Engajamento & Qualidade</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Formulários', value: engagement.form_fills, icon: 'ri-file-edit-line', color: 'success', description: 'Preenchidos no período'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Downloads', value: engagement.downloads, icon: 'ri-download-2-line', color: 'info', description: 'Materiais baixados'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Em Campanhas', value: engagement.in_campaigns, icon: 'ri-megaphone-line', description: 'Leads ativos em campanhas'
+    } %}
+    {% if engagement.duplicates > 0 %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Duplicados', value: engagement.duplicates, icon: 'ri-file-copy-line', color: 'warning', description: 'E-mails duplicados'
+    } %}
+    {% endif %}
+</div>
+{% endif %}
+
+{# ===== LEADS INCOMPLETOS ===== #}
+{% if kpis.leads_incompletos > 0 %}
+<div class="lwa-section-label">
+    <span>Fila de Enriquecimento</span>
+    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaShowIncompleteQueue()" style="font-size:11px;padding:4px 10px"><i class="ri-user-add-line"></i> Gerenciar</button>
+</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact" style="margin-bottom:24px">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Leads Incompletos', value: kpis.leads_incompletos, icon: 'ri-user-unfollow-line', color: 'warning',
+        kpi_id: 'leads_incompletos', description: 'Sem e-mail ou telefone — aguardando enriquecimento'
+    } %}
+</div>
+{% endif %}
 
 {# ===== COMPORTAMENTO NO SITE ===== #}
 {% if page_hits.total > 0 %}
