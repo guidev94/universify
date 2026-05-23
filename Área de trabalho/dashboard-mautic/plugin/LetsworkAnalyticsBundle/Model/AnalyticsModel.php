@@ -364,7 +364,7 @@ class AnalyticsModel
         if (!$this->columnExists('leads', 'temperatura')) {
             return ['labels' => [], 'data' => []];
         }
-        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' GROUP BY temperatura ORDER BY FIELD(temperatura, 'frio', 'morno', 'quente', 'prioritario'), total DESC";
+        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' GROUP BY temperatura ORDER BY FIELD(LOWER(temperatura), 'frio', 'morno', 'quente', 'prioritario', 'prioritário'), total DESC";
         $rows = $this->connection->fetchAllAssociative($sql);
 
         $labels = [];

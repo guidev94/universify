@@ -47,9 +47,9 @@ Mautic.lwaInitClickableCards = function() {
         'Origens Afetadas': 'origens_afetadas'
     };
 
-    // Não sobrescrever cards da Overview (verificar se está na aba overview)
-    var isOverview = window.location.href.indexOf('/overview') > -1 || window.location.href.indexOf('/analytics') === window.location.href.lastIndexOf('/');
-    if (isOverview) return;
+    // Na overview, não sobrescrever (cards já têm onclick do Twig)
+    var isOverview = window.location.href.indexOf('/overview') > -1;
+    if (isOverview && window.location.href.indexOf('/conversao') === -1 && window.location.href.indexOf('/pipeline') === -1 && window.location.href.indexOf('/perdas') === -1 && window.location.href.indexOf('/segmentos') === -1) return;
 
     mQuery('.lwa-kpi-card').each(function() {
         var $card = mQuery(this);

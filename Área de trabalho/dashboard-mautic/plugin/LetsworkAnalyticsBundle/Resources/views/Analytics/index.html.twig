@@ -4,7 +4,7 @@
 {% block mauticContent %}letsworkAnalytics{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/css/analytics.css') }}?v=3.0.0">
+<link rel="stylesheet" href="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/css/analytics.css') }}?v=3.1.0">
 <div class="lwa-analytics-page">
     <div class="lwa-toolbar">
         <div class="lwa-date-filter">
@@ -58,7 +58,6 @@
 </div>
 
 {# Modais globais (disponíveis em todas as abas) #}
-{% if activeTab != 'overview' %}
 <div id="lwa-kpi-detail" class="lwa-modal" style="display:none;">
     <div class="lwa-modal-overlay" onclick="Mautic.lwaCloseKpiDetail()"></div>
     <div class="lwa-modal-content lwa-modal-content--wide">
@@ -83,7 +82,6 @@
         <div id="lwa-modal-body" class="lwa-modal-body"></div>
     </div>
 </div>
-{% endif %}
 
-<script src="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/js/analytics.js') }}?v=3.0.0"></script>
+<script src="{{ asset('plugins/LetsworkAnalyticsBundle/Assets/js/analytics.js') }}?v=3.1.0"></script>
 {% endblock %}
