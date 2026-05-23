@@ -361,7 +361,7 @@ body.dark-theme .lwa-btn--ghost:hover {
 .lwa-tab i { font-size: 15px; }
 
 /* Content */
-.lwa-content { padding: 24px; max-width: 1200px; }
+.lwa-content { padding: 24px; max-width: 100%; }
 
 /* Section Label */
 .lwa-section-label {
@@ -421,6 +421,7 @@ body.dark-theme .lwa-btn--ghost:hover {
     margin-bottom: 24px;
 }
 .lwa-kpi-row--full { grid-template-columns: repeat(8, 1fr); }
+.lwa-kpi-row--full .lwa-kpi-card { min-height: 110px; padding: 16px 12px; }
 
 .lwa-kpi-row--compact { grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .lwa-kpi-row--compact .lwa-kpi-card { padding: 20px 24px; }
@@ -801,6 +802,34 @@ body.dark-theme .lwa-btn--ghost:hover {
 .lwa-kpi-row .lwa-kpi-card:nth-child(4) { animation-delay: 0.12s; }
 .lwa-kpi-row .lwa-kpi-card:nth-child(5) { animation-delay: 0.15s; }
 .lwa-kpi-row .lwa-kpi-card:nth-child(6) { animation-delay: 0.18s; }
+
+/* Modal Contextual Metrics */
+.lwa-modal-metrics { display: grid; gap: 12px; margin-bottom: 20px; }
+.lwa-modal-metrics--3 { grid-template-columns: repeat(3, 1fr); }
+.lwa-modal-metrics--2 { grid-template-columns: repeat(2, 1fr); }
+.lwa-metric-card {
+    text-align: center; padding: 18px 12px; border-radius: 12px;
+    background: var(--lwa-gray-50); border: 1px solid var(--lwa-gray-100);
+}
+.lwa-metric-card--green { background: #f0fdf4; border-color: #bbf7d0; }
+.lwa-metric-card--blue { background: #eff6ff; border-color: #bfdbfe; }
+.lwa-metric-card--purple { background: #faf5ff; border-color: #e9d5ff; }
+.lwa-metric-card--red { background: #fef2f2; border-color: #fecaca; }
+.lwa-metric-value { font-size: 26px; font-weight: 700; line-height: 1.2; }
+.lwa-metric-label { font-size: 11px; color: var(--lwa-gray-500); margin-top: 4px; font-weight: 500; }
+.lwa-modal-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--lwa-gray-400); margin: 16px 0 8px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--lwa-gray-100);
+}
+.lwa-modal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lwa-bar-cell { display: flex; align-items: center; gap: 8px; }
+.lwa-bar { height: 6px; border-radius: 3px; background: var(--lwa-gray-100); flex: 1; overflow: hidden; }
+.lwa-bar-fill { height: 100%; border-radius: 3px; }
+.lwa-bar-fill--blue { background: #3b82f6; }
+.lwa-bar-fill--green { background: #10b981; }
+.lwa-bar-fill--red { background: #dc2626; }
+.lwa-bar-fill--purple { background: #7c3aed; }
 
 /* Timeline */
 .lwa-timeline { padding: 8px 0; }
