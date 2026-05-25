@@ -69,7 +69,6 @@ Mautic.lwaInitClickableCards = function() {
         if (!$card.find('.lwa-kpi-arrow').length) {
             $card.append('<i class="ri-arrow-right-s-line lwa-kpi-arrow"></i>');
         }
-        }
     });
 };
 
