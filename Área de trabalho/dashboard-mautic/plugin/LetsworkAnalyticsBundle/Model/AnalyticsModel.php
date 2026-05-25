@@ -112,11 +112,11 @@ class AnalyticsModel
 
         $byTerm = $this->connection->fetchAllAssociative("SELECT utm_term, COUNT(DISTINCT lead_id) as leads FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_term IS NOT NULL AND utm_term != '' GROUP BY utm_term ORDER BY leads DESC LIMIT 10", $params);
 
-        $recent = $this->connection->fetchAllAssociative("SELECT u.lead_id, l.firstname, l.lastname, l.email, l.company, u.utm_source, u.utm_medium, u.utm_campaign, u.date_added FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) ORDER BY u.date_added DESC LIMIT 20", $params);
+        $recent = $this->connection->fetchAllAssociative("SELECT u.lead_id, l.firstname, l.lastname, l.email, l.company, GROUP_CONCAT(DISTINCT u.utm_source SEPARATOR ', ') as utm_source, GROUP_CONCAT(DISTINCT u.utm_medium SEPARATOR ', ') as utm_medium, GROUP_CONCAT(DISTINCT u.utm_campaign SEPARATOR ', ') as utm_campaign, MAX(u.date_added) as date_added FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.lead_id, l.firstname, l.lastname, l.email, l.company ORDER BY date_added DESC LIMIT 20", $params);
 
-        $pipeline = $this->connection->fetchAllAssociative("SELECT u.utm_source, l.temperatura, COUNT(DISTINCT u.lead_id) as leads FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_source, l.temperatura ORDER BY u.utm_source, leads DESC", $params);
+        $pipeline = $this->connection->fetchAllAssociative("SELECT u.utm_source, l.temperatura, COUNT(DISTINCT u.lead_id) as leads, SUM(CASE WHEN LOWER(l.status_comercial) = 'perdido' THEN 1 ELSE 0 END) as perdidos FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_source, l.temperatura ORDER BY u.utm_source, leads DESC", $params);
 
-        $campaignPipeline = $this->connection->fetchAllAssociative("SELECT u.utm_campaign, l.temperatura, COUNT(DISTINCT u.lead_id) as leads FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND u.utm_campaign IS NOT NULL AND u.utm_campaign != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_campaign, l.temperatura ORDER BY u.utm_campaign, leads DESC", $params);
+        $campaignPipeline = $this->connection->fetchAllAssociative("SELECT u.utm_campaign, l.temperatura, COUNT(DISTINCT u.lead_id) as leads, SUM(CASE WHEN LOWER(l.status_comercial) = 'perdido' THEN 1 ELSE 0 END) as perdidos FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND u.utm_campaign IS NOT NULL AND u.utm_campaign != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_campaign, l.temperatura ORDER BY u.utm_campaign, leads DESC", $params);
 
         // Pipeline KPIs (leads UTM por temperatura)
         $utmPipeline = $this->connection->fetchAssociative(
@@ -128,7 +128,8 @@ class AnalyticsModel
                 COUNT(DISTINCT CASE WHEN LOWER(l.temperatura) IN ('prioritario','prioritário') THEN u.lead_id END) as prioritario,
                 COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) LIKE '%reuni%' THEN u.lead_id END) as reunioes,
                 COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) IN ('proposta_enviada','proposta','negociacao','negociação') THEN u.lead_id END) as propostas,
-                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) = 'ganho' THEN u.lead_id END) as ganhos
+                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) = 'ganho' THEN u.lead_id END) as ganhos,
+                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) = 'perdido' THEN u.lead_id END) as perdidos
             FROM lead_utmtags u
             JOIN leads l ON l.id = u.lead_id
             WHERE u.date_added BETWEEN :dateFrom AND :dateTo

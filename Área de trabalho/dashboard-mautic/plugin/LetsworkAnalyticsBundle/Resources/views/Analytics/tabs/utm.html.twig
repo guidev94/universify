@@ -35,6 +35,10 @@
         title: 'Ganhos', value: utm_pipeline.ganhos|default(0), icon: 'ri-trophy-line', color: 'success',
         kpi_id: 'utm_leads', description: 'Convertidos via UTM'
     } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Perdidos', value: utm_pipeline.perdidos|default(0), icon: 'ri-close-circle-line', color: 'error',
+        kpi_id: 'utm_leads', description: 'Não converteram'
+    } %}
 </div>
 
 {# Resumo #}
@@ -60,25 +64,26 @@
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         <table class="lwa-table">
-            <thead><tr><th>Source</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th></tr></thead>
+            <thead><tr><th>Source</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th><th style="color:#dc2626">Perdidos</th></tr></thead>
             <tbody>
                 {% for r in by_source %}
                     <tr>
                         <td><strong>{{ r.utm_source }}</strong></td>
-                        {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}
+                        {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}{% set perdidos = 0 %}
                         {% for p in pipeline %}
                             {% if p.utm_source == r.utm_source %}
                                 {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
                                 {% if ptk == 'frio' %}{% set frio = p.leads %}{% endif %}
                                 {% if ptk == 'morno' %}{% set morno = p.leads %}{% endif %}
                                 {% if ptk == 'quente' %}{% set quente = p.leads %}{% endif %}
-                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}
+                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}{% set perdidos = perdidos + (p.perdidos|default(0)) %}
                             {% endif %}
                         {% endfor %}
                         <td>{{ frio }}</td>
                         <td>{{ morno }}</td>
                         <td>{{ quente }}</td>
                         <td>{{ prio }}</td>
+                        <td style="color:#dc2626">{{ perdidos|default(0) }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -93,25 +98,26 @@
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         <table class="lwa-table">
-            <thead><tr><th>Campaign</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th></tr></thead>
+            <thead><tr><th>Campaign</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th><th style="color:#dc2626">Perdidos</th></tr></thead>
             <tbody>
                 {% for r in by_campaign %}
                     <tr>
                         <td><strong>{{ r.utm_campaign }}</strong></td>
-                        {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}
+                        {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}{% set perdidos = 0 %}
                         {% for p in campaign_pipeline %}
                             {% if p.utm_campaign == r.utm_campaign %}
                                 {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
                                 {% if ptk == 'frio' %}{% set frio = p.leads %}{% endif %}
                                 {% if ptk == 'morno' %}{% set morno = p.leads %}{% endif %}
                                 {% if ptk == 'quente' %}{% set quente = p.leads %}{% endif %}
-                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}
+                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}{% set perdidos = perdidos + (p.perdidos|default(0)) %}
                             {% endif %}
                         {% endfor %}
                         <td>{{ frio }}</td>
                         <td>{{ morno }}</td>
                         <td>{{ quente }}</td>
                         <td>{{ prio }}</td>
+                        <td style="color:#dc2626">{{ perdidos|default(0) }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
