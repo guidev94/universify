@@ -30,7 +30,11 @@
         kpi_id: 'ganhos', description: 'Convertidos'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Sem Follow-up', value: kpis.hot_no_followup, icon: 'ri-alarm-warning-line', color: 'error',
+        title: 'Perdidos', value: kpis.perdidos, icon: 'ri-close-circle-line', color: 'error',
+        kpi_id: 'ganhos', description: 'Não converteram'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Sem Follow-up', value: kpis.hot_no_followup, icon: 'ri-alarm-warning-line', color: 'warning',
         kpi_id: 'hot_no_followup', description: 'Quentes sem ação'
     } %}
 </div>

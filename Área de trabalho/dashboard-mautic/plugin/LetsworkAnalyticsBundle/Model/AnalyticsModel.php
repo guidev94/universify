@@ -32,6 +32,7 @@ class AnalyticsModel
                 'reunioes_linkedin'   => $this->getReunioesLinkedin($dateRange),
                 'propostas'           => $this->getCountByStatusAll('proposta_enviada') + $this->getCountByStatusAll('negociacao'),
                 'ganhos'              => $this->getCountByStatus($dateRange, 'ganho'),
+                'perdidos'            => $this->getCountByStatus($dateRange, 'perdido'),
                 'hot_no_followup'     => $this->getHotWithoutFollowup(),
                 'leads_incompletos'   => $this->getLeadsIncompletos(),
                 'campanhas'           => $this->getCampaignCount(),
