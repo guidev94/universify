@@ -161,7 +161,7 @@
             <table class="lwa-table lwa-table--compact">
                 <tbody>
                     {% for p in page_hits.top_pages %}
-                        <tr><td>{{ p.url_title }}</td><td><strong>{{ p.views }}</strong></td></tr>
+                        <tr><td>{{ p.url_title|replace({"&#39;": "'", "&amp;": "&"})|e }}</td><td><strong>{{ p.views }}</strong></td></tr>
                     {% endfor %}
                 </tbody>
             </table>
