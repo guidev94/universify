@@ -114,6 +114,10 @@ class AnalyticsModel
 
         $recent = $this->connection->fetchAllAssociative("SELECT u.lead_id, l.firstname, l.lastname, l.email, l.company, u.utm_source, u.utm_medium, u.utm_campaign, u.date_added FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) ORDER BY u.date_added DESC LIMIT 20", $params);
 
+        $pipeline = $this->connection->fetchAllAssociative("SELECT u.utm_source, l.temperatura, COUNT(DISTINCT u.lead_id) as leads FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_source, l.temperatura ORDER BY u.utm_source, leads DESC", $params);
+
+        $campaignPipeline = $this->connection->fetchAllAssociative("SELECT u.utm_campaign, l.temperatura, COUNT(DISTINCT u.lead_id) as leads FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND u.utm_campaign IS NOT NULL AND u.utm_campaign != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_campaign, l.temperatura ORDER BY u.utm_campaign, leads DESC", $params);
+
         return [
             'total' => $total,
             'by_source' => $bySource,
@@ -122,6 +126,8 @@ class AnalyticsModel
             'by_content' => $byContent,
             'by_term' => $byTerm,
             'recent' => $recent,
+            'pipeline' => $pipeline,
+            'campaign_pipeline' => $campaignPipeline,
         ];
     }
 
