@@ -293,7 +293,11 @@ class AnalyticsModel
     private function getPageHitsLeads(string $kpi, array $dateRange): array
     {
         $urlFilter = '';
-        if ($kpi === 'site_precos') $urlFilter = "AND ph.url LIKE '%planos%'";
+        $urlFilterSimple = '';
+        if ($kpi === 'site_precos') {
+            $urlFilter = "AND ph.url LIKE '%planos%'";
+            $urlFilterSimple = "AND url LIKE '%planos%'";
+        }
 
         $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
                     COUNT(ph.id) as page_views, MAX(ph.date_hit) as ultima_visita,
@@ -310,7 +314,7 @@ class AnalyticsModel
         ]);
 
         $topPages = $this->connection->fetchAllAssociative(
-            "SELECT url_title, url, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :dateFrom AND :dateTo AND url_title IS NOT NULL AND url_title != '' $urlFilter GROUP BY url_title, url ORDER BY views DESC LIMIT 10",
+            "SELECT url_title, url, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :dateFrom AND :dateTo AND url_title IS NOT NULL AND url_title != '' $urlFilterSimple GROUP BY url_title, url ORDER BY views DESC LIMIT 10",
             ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59']
         );
 
