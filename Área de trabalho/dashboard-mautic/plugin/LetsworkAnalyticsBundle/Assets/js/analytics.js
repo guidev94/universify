@@ -45,9 +45,9 @@ Mautic.lwaInitClickableCards = function() {
         'Leads Perdidos': 'leads_perdidos',
         'Motivos Registrados': 'motivos_perda',
         'Origens Afetadas': 'origens_afetadas',
-        'Leads por UTM': 'utm_leads',
+        'Total Leads UTM': 'utm_leads',
         'Sources': 'utm_sources',
-        'Campanhas': 'utm_campaigns'
+        'Campanhas UTM': 'utm_campaigns'
     };
 
     // kpiMappings só tem cards de Conversão/Pipeline/Perdas
