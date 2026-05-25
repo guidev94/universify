@@ -1337,13 +1337,15 @@ Mautic.lwaGeneratePlaybook = function(leadId, tipo) {
         url: '/s/analytics/ai/tab/playbook_' + tipo + '_' + leadId,
         dataType: 'json',
         success: function(res) {
-            if (res.error) { $result.html('<div class="lwa-ai-error">' + res.error + '</div>'); return; }
+            var data = res.analysis || res;
+            if (data.error) { $result.html('<div class="lwa-ai-error">' + data.error + '</div>'); return; }
 
+            var msg = data.message || '';
             var html = '<div class="lwa-ai-card">';
-            html += '<div class="lwa-ai-header"><i class="ri-file-text-line"></i> Playbook: ' + res.tipo + '</div>';
-            html += '<div class="lwa-ai-message"><p style="white-space:pre-line">' + res.message + '</p></div>';
+            html += '<div class="lwa-ai-header"><i class="ri-file-text-line"></i> Playbook: ' + (data.tipo || tipo) + '</div>';
+            html += '<div class="lwa-ai-message"><p style="white-space:pre-line">' + msg + '</p></div>';
             html += '<div style="display:flex;gap:6px;margin-top:10px">';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + res.message.replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
+            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + msg.replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
             html += '</div>';
             html += '</div>';
             $result.html(html);
@@ -1401,7 +1403,7 @@ Mautic.lwaLeadSummary = function(leadId) {
         url: '/s/analytics/ai/tab/summary_' + leadId,
         dataType: 'json',
         success: function(res) {
-            var s = res.summary || {};
+            var s = res.analysis || res.summary || {};
             if (s.error) { $result.html('<div class="lwa-ai-error">' + s.error + '</div>'); return; }
 
             var html = '<div class="lwa-ai-card">';
