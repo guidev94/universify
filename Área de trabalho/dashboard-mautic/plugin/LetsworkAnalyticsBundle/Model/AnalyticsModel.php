@@ -118,6 +118,24 @@ class AnalyticsModel
 
         $campaignPipeline = $this->connection->fetchAllAssociative("SELECT u.utm_campaign, l.temperatura, COUNT(DISTINCT u.lead_id) as leads FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND l.temperatura IS NOT NULL AND l.temperatura != '' AND u.utm_campaign IS NOT NULL AND u.utm_campaign != '' AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) GROUP BY u.utm_campaign, l.temperatura ORDER BY u.utm_campaign, leads DESC", $params);
 
+        // Pipeline KPIs (leads UTM por temperatura)
+        $utmPipeline = $this->connection->fetchAssociative(
+            "SELECT
+                COUNT(DISTINCT CASE WHEN (l.status_comercial IS NULL OR l.status_comercial = '' OR LOWER(l.status_comercial) IN ('prospeccao','novo')) THEN u.lead_id END) as prospeccao,
+                COUNT(DISTINCT CASE WHEN LOWER(l.temperatura) = 'frio' THEN u.lead_id END) as frio,
+                COUNT(DISTINCT CASE WHEN LOWER(l.temperatura) = 'morno' THEN u.lead_id END) as morno,
+                COUNT(DISTINCT CASE WHEN LOWER(l.temperatura) IN ('quente') THEN u.lead_id END) as quente,
+                COUNT(DISTINCT CASE WHEN LOWER(l.temperatura) IN ('prioritario','prioritário') THEN u.lead_id END) as prioritario,
+                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) LIKE '%reuni%' THEN u.lead_id END) as reunioes,
+                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) IN ('proposta_enviada','proposta','negociacao','negociação') THEN u.lead_id END) as propostas,
+                COUNT(DISTINCT CASE WHEN LOWER(l.status_comercial) = 'ganho' THEN u.lead_id END) as ganhos
+            FROM lead_utmtags u
+            JOIN leads l ON l.id = u.lead_id
+            WHERE u.date_added BETWEEN :dateFrom AND :dateTo
+            AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != ''))",
+            $params
+        );
+
         return [
             'total' => $total,
             'by_source' => $bySource,
@@ -128,6 +146,7 @@ class AnalyticsModel
             'recent' => $recent,
             'pipeline' => $pipeline,
             'campaign_pipeline' => $campaignPipeline,
+            'utm_pipeline' => $utmPipeline ?: [],
         ];
     }
 

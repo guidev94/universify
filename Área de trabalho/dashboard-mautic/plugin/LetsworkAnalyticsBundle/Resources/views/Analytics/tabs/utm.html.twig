@@ -1,9 +1,48 @@
 {# ===== UTM TRACKING ===== #}
-<div class="lwa-section-label">Resumo UTM</div>
+
+{# Pipeline UTM — Cards de Temperatura #}
+<div class="lwa-section-label">Pipeline UTM — Leads por Etapa</div>
+<div class="lwa-kpi-row lwa-kpi-row--full">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Prospecção', value: utm_pipeline.prospeccao|default(0), icon: 'ri-user-search-line', color: 'info',
+        kpi_id: 'utm_leads', description: 'Sem interação'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Frio', value: utm_pipeline.frio|default(0), icon: 'ri-temp-cold-line', color: 'info',
+        kpi_id: 'utm_leads', description: 'Score 0–20'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Morno', value: utm_pipeline.morno|default(0), icon: 'ri-temp-hot-line', color: 'warning',
+        kpi_id: 'utm_leads', description: 'Score 21–60'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Quente', value: utm_pipeline.quente|default(0), icon: 'ri-fire-line', color: 'error',
+        kpi_id: 'utm_leads', description: 'Score 61–100'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Prioritário', value: utm_pipeline.prioritario|default(0), icon: 'ri-vip-crown-line', color: 'purple',
+        kpi_id: 'utm_leads', description: 'Score 100+'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Reuniões', value: utm_pipeline.reunioes|default(0), icon: 'ri-calendar-check-line', color: 'primary',
+        kpi_id: 'utm_leads', description: 'Agendadas + realizadas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Propostas', value: utm_pipeline.propostas|default(0), icon: 'ri-file-text-line', color: 'purple',
+        kpi_id: 'utm_leads', description: 'Em negociação'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Ganhos', value: utm_pipeline.ganhos|default(0), icon: 'ri-trophy-line', color: 'success',
+        kpi_id: 'utm_leads', description: 'Convertidos via UTM'
+    } %}
+</div>
+
+{# Resumo #}
+<div class="lwa-section-label">Resumo de Canais</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Leads por UTM', value: total, icon: 'ri-link', color: 'primary',
-        kpi_id: 'utm_leads', description: 'Leads com UTM no período'
+        title: 'Total Leads UTM', value: total, icon: 'ri-link', color: 'primary',
+        kpi_id: 'utm_leads', description: 'Leads rastreados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Sources', value: by_source|length, icon: 'ri-global-line', color: 'info',
@@ -199,5 +238,5 @@
 {% endif %}
 
 {# ===== IA ===== #}
-<div class="lwa-section-label" style="margin-top:24px"><span><i class="ri-sparkling-line"></i> Análise IA — UTM</span><button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaAiTab('site')" style="font-size:11px;padding:4px 10px">Analisar</button></div>
+<div class="lwa-section-label" style="margin-top:24px"><span><i class="ri-sparkling-line"></i> Análise IA — Performance UTM</span><button class="lwa-btn lwa-btn--ai" onclick="Mautic.lwaAiTab('site')" style="font-size:11px;padding:4px 10px"><i class="ri-sparkling-line"></i> Analisar Campanhas</button></div>
 <div id="lwa-ai-tab-result" style="display:none;margin-bottom:24px"></div>
