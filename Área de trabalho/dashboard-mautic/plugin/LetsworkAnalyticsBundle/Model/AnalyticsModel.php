@@ -119,6 +119,8 @@ class AnalyticsModel
             $where = "LOWER(status_comercial) IN ('proposta_enviada','proposta','negociacao','negociação') AND date_modified BETWEEN :dateFrom AND :dateTo";
         } elseif ($kpi === 'site_visitas' || $kpi === 'site_visitantes' || $kpi === 'site_precos') {
             return $this->getPageHitsLeads($kpi, $dateRange);
+        } elseif ($kpi === 'engaj_forms' || $kpi === 'engaj_downloads' || $kpi === 'engaj_campanhas') {
+            return [];
         } elseif ($kpi === 'leads_perdidos') {
             $where = "LOWER(status_comercial) = 'perdido' AND date_modified BETWEEN :dateFrom AND :dateTo";
         } elseif ($kpi === 'motivos_perda') {

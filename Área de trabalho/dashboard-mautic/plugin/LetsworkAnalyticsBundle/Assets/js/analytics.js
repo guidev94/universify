@@ -309,7 +309,10 @@ Mautic.lwaRenderContextualModal = function(kpiId, leads) {
         'leads_perdidos': Mautic.lwaRenderLeadsPerdidos,
         'site_visitas': Mautic.lwaRenderSiteVisitas,
         'site_visitantes': Mautic.lwaRenderSiteVisitas,
-        'site_precos': Mautic.lwaRenderSiteVisitas
+        'site_precos': Mautic.lwaRenderSiteVisitas,
+        'engaj_forms': Mautic.lwaRenderEngajamento,
+        'engaj_downloads': Mautic.lwaRenderEngajamento,
+        'engaj_campanhas': Mautic.lwaRenderEngajamento
     };
     if (renderers[kpiId]) {
         renderers[kpiId](leads);
@@ -555,6 +558,30 @@ Mautic.lwaRenderLeadsPerdidos = function(leads) {
     });
     html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);
+    mQuery('#lwa-kpi-pagination').html('');
+};
+
+Mautic.lwaRenderEngajamento = function(leads) {
+    var kpi = Mautic.lwaCurrentKpi;
+    var titles = {'engaj_forms':'Formulários Preenchidos','engaj_downloads':'Downloads de Materiais','engaj_campanhas':'Leads em Campanhas'};
+    var icons = {'engaj_forms':'ri-file-edit-line','engaj_downloads':'ri-download-2-line','engaj_campanhas':'ri-megaphone-line'};
+    var descs = {'engaj_forms':'Leads que preencheram formulários no período. Dados vêm da tabela form_submissions do Mautic.','engaj_downloads':'Leads que baixaram materiais (PDFs, guias, checklists). Dados vêm da tabela asset_downloads do Mautic.','engaj_campanhas':'Leads atualmente ativos em campanhas de automação do Mautic.'};
+    var title = titles[kpi] || 'Engajamento';
+    var icon = icons[kpi] || 'ri-bar-chart-line';
+    var desc = descs[kpi] || '';
+
+    if (!leads || leads.length === 0) {
+        var html = '<div style="text-align:center;padding:40px 20px">';
+        html += '<i class="'+icon+'" style="font-size:48px;color:var(--lwa-gray-300);margin-bottom:16px;display:block"></i>';
+        html += '<div style="font-size:16px;font-weight:600;color:var(--lwa-gray-700);margin-bottom:8px">'+title+'</div>';
+        html += '<div style="font-size:13px;color:var(--lwa-gray-400);max-width:320px;margin:0 auto;line-height:1.5">'+desc+'</div>';
+        html += '<div style="margin-top:16px;padding:12px;background:var(--lwa-gray-50);border-radius:8px;font-size:12px;color:var(--lwa-gray-500)"><i class="ri-information-line"></i> Nenhum dado encontrado no período. Esses dados são preenchidos automaticamente pelo Mautic quando leads interagem com formulários, materiais ou campanhas.</div>';
+        html += '</div>';
+        mQuery('#lwa-kpi-detail-body').html(html);
+    } else {
+        Mautic.lwaKpiLeads = leads;
+        Mautic.lwaRenderKpiPage();
+    }
     mQuery('#lwa-kpi-pagination').html('');
 };
 

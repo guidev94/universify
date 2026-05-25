@@ -97,15 +97,15 @@
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Formulários', value: engagement.form_fills, icon: 'ri-file-edit-line', color: 'success',
-        kpi_id: 'prospeccao', description: 'Preenchidos no período'
+        kpi_id: 'engaj_forms', description: 'Preenchidos no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Downloads', value: engagement.downloads, icon: 'ri-download-2-line', color: 'info',
-        kpi_id: 'prospeccao', description: 'Materiais baixados'
+        kpi_id: 'engaj_downloads', description: 'Materiais baixados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Em Campanhas', value: engagement.in_campaigns, icon: 'ri-megaphone-line',
-        kpi_id: 'prospeccao', description: 'Leads ativos em campanhas'
+        kpi_id: 'engaj_campanhas', description: 'Leads ativos em campanhas'
     } %}
     {% if engagement.duplicates > 0 %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
