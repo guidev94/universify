@@ -96,13 +96,16 @@
 <div class="lwa-section-label">Engajamento & Qualidade</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Formulários', value: engagement.form_fills, icon: 'ri-file-edit-line', color: 'success', description: 'Preenchidos no período'
+        title: 'Formulários', value: engagement.form_fills, icon: 'ri-file-edit-line', color: 'success',
+        kpi_id: 'prospeccao', description: 'Preenchidos no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Downloads', value: engagement.downloads, icon: 'ri-download-2-line', color: 'info', description: 'Materiais baixados'
+        title: 'Downloads', value: engagement.downloads, icon: 'ri-download-2-line', color: 'info',
+        kpi_id: 'prospeccao', description: 'Materiais baixados'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-        title: 'Em Campanhas', value: engagement.in_campaigns, icon: 'ri-megaphone-line', description: 'Leads ativos em campanhas'
+        title: 'Em Campanhas', value: engagement.in_campaigns, icon: 'ri-megaphone-line',
+        kpi_id: 'prospeccao', description: 'Leads ativos em campanhas'
     } %}
     {% if engagement.duplicates > 0 %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
