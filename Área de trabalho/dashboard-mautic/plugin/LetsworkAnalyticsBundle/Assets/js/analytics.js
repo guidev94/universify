@@ -269,6 +269,8 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
         success: function(response) {
             if (response.type === 'campaigns') {
                 Mautic.lwaRenderCampaignsModal(response.data);
+            } else if (response.type === 'site_hits') {
+                Mautic.lwaRenderContextualModal(kpiId, response);
             } else if (response.leads && response.leads.length > 0) {
                 Mautic.lwaKpiLeads = response.leads;
                 Mautic.lwaKpiContext = contextInfo[kpiId] || null;
@@ -281,7 +283,12 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
                     Mautic.lwaRenderKpiPage();
                 }
             } else {
-                mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum dado encontrado neste periodo</p></div>');
+                // Try contextual renderer even when empty (for engajamento cards)
+                if (Mautic.lwaRenderContextualModal(kpiId, [])) {
+                    // rendered contextual empty state
+                } else {
+                    mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-inbox-line"></i><p>Nenhum dado encontrado neste periodo</p></div>');
+                }
             }
         },
         error: function() {
@@ -585,23 +592,37 @@ Mautic.lwaRenderEngajamento = function(leads) {
     mQuery('#lwa-kpi-pagination').html('');
 };
 
-Mautic.lwaRenderSiteVisitas = function(leads) {
+Mautic.lwaRenderSiteVisitas = function(data) {
+    // data pode ser array de leads OU {type:'site_hits', leads:[], top_pages:[]}
+    var leads = Array.isArray(data) ? data : (data.leads || []);
+    var topPages = Array.isArray(data) ? [] : (data.top_pages || []);
     var totalViews = leads.reduce(function(s,l){return s+parseInt(l.page_views||0);},0);
+
     var html = '<div class="lwa-modal-metrics lwa-modal-metrics--3">';
     html += '<div class="lwa-metric-card lwa-metric-card--blue"><div class="lwa-metric-value" style="color:#3b82f6">' + totalViews + '</div><div class="lwa-metric-label">Page views</div></div>';
     html += '<div class="lwa-metric-card"><div class="lwa-metric-value">' + leads.length + '</div><div class="lwa-metric-label">Visitantes identificados</div></div>';
     html += '<div class="lwa-metric-card lwa-metric-card--green"><div class="lwa-metric-value" style="color:#10b981">' + Math.round(totalViews/(leads.length||1)) + '</div><div class="lwa-metric-label">Média por lead</div></div>';
     html += '</div>';
-    html += '<div class="lwa-modal-section-title">Leads que visitaram o site</div>';
-    html += '<table class="lwa-table lwa-table--compact" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Views</th><th>Última visita</th><th>Temperatura</th></tr></thead><tbody>';
-    leads.slice(0, 15).forEach(function(l) {
-        var name = ((l.firstname||'')+ ' '+(l.lastname||'')).trim()||l.company||'Anônimo';
-        var date = l.ultima_visita ? new Date(l.ultima_visita).toLocaleDateString('pt-BR') : '-';
-        var temp = (l.temperatura||'').toLowerCase();
-        var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
-        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')"><td><strong>'+name+'</strong></td><td>'+( l.company||'-')+'</td><td><strong>'+l.page_views+'</strong></td><td>'+date+'</td><td><span style="color:'+(tempColors[temp]||'#64748b')+';font-weight:600">'+(temp?temp.charAt(0).toUpperCase()+temp.slice(1):'-')+'</span></td></tr>';
-    });
-    html += '</tbody></table>';
+
+    if (topPages.length > 0) {
+        html += '<div class="lwa-modal-section-title">Páginas mais visitadas (origem)</div>';
+        html += '<table class="lwa-table lwa-table--compact" style="margin:0"><thead><tr><th>Página</th><th>URL</th><th>Views</th></tr></thead><tbody>';
+        topPages.forEach(function(p) {
+            html += '<tr><td><strong>'+(p.url_title||'-')+'</strong></td><td style="font-size:11px;color:var(--lwa-gray-400)">'+( p.url||'')+'</td><td><strong>'+p.views+'</strong></td></tr>';
+        });
+        html += '</tbody></table>';
+    }
+
+    if (leads.length > 0) {
+        html += '<div class="lwa-modal-section-title" style="margin-top:16px">Leads que visitaram</div>';
+        html += '<table class="lwa-table lwa-table--compact" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Views</th><th>Páginas</th></tr></thead><tbody>';
+        leads.slice(0, 12).forEach(function(l) {
+            var name = ((l.firstname||'')+' '+(l.lastname||'')).trim()||l.company||'Anônimo';
+            html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')"><td><strong>'+name+'</strong></td><td>'+(l.company||'-')+'</td><td><strong>'+l.page_views+'</strong></td><td style="font-size:11px;color:var(--lwa-gray-500)">'+(l.paginas_visitadas||'-')+'</td></tr>';
+        });
+        html += '</tbody></table>';
+    }
+
     mQuery('#lwa-kpi-detail-body').html(html);
     mQuery('#lwa-kpi-pagination').html('');
 };

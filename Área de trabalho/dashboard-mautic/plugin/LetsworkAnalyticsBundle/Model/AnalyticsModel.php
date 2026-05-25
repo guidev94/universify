@@ -295,18 +295,26 @@ class AnalyticsModel
         $urlFilter = '';
         if ($kpi === 'site_precos') $urlFilter = "AND ph.url LIKE '%planos%'";
 
-        $sql = "SELECT DISTINCT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
-                    COUNT(ph.id) as page_views, MAX(ph.date_hit) as ultima_visita
+        $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
+                    COUNT(ph.id) as page_views, MAX(ph.date_hit) as ultima_visita,
+                    GROUP_CONCAT(DISTINCT ph.url_title SEPARATOR ', ') as paginas_visitadas
                 FROM page_hits ph
                 JOIN leads l ON l.id = ph.lead_id
                 WHERE ph.lead_id IS NOT NULL AND ph.date_hit BETWEEN :dateFrom AND :dateTo $urlFilter
                 GROUP BY l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo
                 ORDER BY page_views DESC
                 LIMIT 50";
-        return $this->connection->fetchAllAssociative($sql, [
+        $leads = $this->connection->fetchAllAssociative($sql, [
             'dateFrom' => $dateRange['from'],
             'dateTo' => $dateRange['to'] . ' 23:59:59',
         ]);
+
+        $topPages = $this->connection->fetchAllAssociative(
+            "SELECT url_title, url, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :dateFrom AND :dateTo AND url_title IS NOT NULL AND url_title != '' $urlFilter GROUP BY url_title, url ORDER BY views DESC LIMIT 10",
+            ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59']
+        );
+
+        return ['type' => 'site_hits', 'leads' => $leads, 'top_pages' => $topPages];
     }
 
     private function getPageHitsData(array $dateRange): array
