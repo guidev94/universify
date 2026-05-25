@@ -16,35 +16,31 @@
 </div>
 
 {# Pipeline Temperatura por Source #}
-{% if pipeline is not empty %}
+{% if pipeline is defined and pipeline is not empty %}
 <div class="lwa-section-label">Pipeline por Temperatura (UTM Source → Conversão)</div>
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         <table class="lwa-table">
             <thead><tr><th>Source</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th></tr></thead>
             <tbody>
-                {% set sources_done = [] %}
-                {% for r in pipeline %}
-                    {% set tk = r.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
-                    {% if r.utm_source not in sources_done %}
-                        {% set sources_done = sources_done|merge([r.utm_source]) %}
+                {% for r in by_source %}
+                    <tr>
+                        <td><strong>{{ r.utm_source }}</strong></td>
                         {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}
-                        {% for p in pipeline if p.utm_source == r.utm_source %}
-                            {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
-                            {% if ptk == 'frio' %}{% set frio = p.leads %}
-                            {% elseif ptk == 'morno' %}{% set morno = p.leads %}
-                            {% elseif ptk == 'quente' %}{% set quente = p.leads %}
-                            {% elseif ptk == 'prioritario' %}{% set prio = p.leads %}
+                        {% for p in pipeline %}
+                            {% if p.utm_source == r.utm_source %}
+                                {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
+                                {% if ptk == 'frio' %}{% set frio = p.leads %}{% endif %}
+                                {% if ptk == 'morno' %}{% set morno = p.leads %}{% endif %}
+                                {% if ptk == 'quente' %}{% set quente = p.leads %}{% endif %}
+                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}
                             {% endif %}
                         {% endfor %}
-                        <tr>
-                            <td><strong>{{ r.utm_source }}</strong></td>
-                            <td>{{ frio }}</td>
-                            <td>{{ morno }}</td>
-                            <td>{{ quente }}</td>
-                            <td>{{ prio }}</td>
-                        </tr>
-                    {% endif %}
+                        <td>{{ frio }}</td>
+                        <td>{{ morno }}</td>
+                        <td>{{ quente }}</td>
+                        <td>{{ prio }}</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -53,34 +49,31 @@
 {% endif %}
 
 {# Pipeline Temperatura por Campaign #}
-{% if campaign_pipeline is not empty %}
+{% if campaign_pipeline is defined and campaign_pipeline is not empty %}
 <div class="lwa-section-label">Campanhas → Conversão por Temperatura</div>
 <div class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body lwa-card-body--tight">
         <table class="lwa-table">
             <thead><tr><th>Campaign</th><th><span class="lwa-badge lwa-badge--frio">Frio</span></th><th><span class="lwa-badge lwa-badge--morno">Morno</span></th><th><span class="lwa-badge lwa-badge--quente">Quente</span></th><th><span class="lwa-badge lwa-badge--prioritario">Prioritário</span></th></tr></thead>
             <tbody>
-                {% set camps_done = [] %}
-                {% for r in campaign_pipeline %}
-                    {% if r.utm_campaign not in camps_done %}
-                        {% set camps_done = camps_done|merge([r.utm_campaign]) %}
+                {% for r in by_campaign %}
+                    <tr>
+                        <td><strong>{{ r.utm_campaign }}</strong></td>
                         {% set frio = 0 %}{% set morno = 0 %}{% set quente = 0 %}{% set prio = 0 %}
-                        {% for p in campaign_pipeline if p.utm_campaign == r.utm_campaign %}
-                            {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
-                            {% if ptk == 'frio' %}{% set frio = p.leads %}
-                            {% elseif ptk == 'morno' %}{% set morno = p.leads %}
-                            {% elseif ptk == 'quente' %}{% set quente = p.leads %}
-                            {% elseif ptk == 'prioritario' %}{% set prio = p.leads %}
+                        {% for p in campaign_pipeline %}
+                            {% if p.utm_campaign == r.utm_campaign %}
+                                {% set ptk = p.temperatura|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
+                                {% if ptk == 'frio' %}{% set frio = p.leads %}{% endif %}
+                                {% if ptk == 'morno' %}{% set morno = p.leads %}{% endif %}
+                                {% if ptk == 'quente' %}{% set quente = p.leads %}{% endif %}
+                                {% if ptk == 'prioritario' %}{% set prio = p.leads %}{% endif %}
                             {% endif %}
                         {% endfor %}
-                        <tr>
-                            <td><strong>{{ r.utm_campaign }}</strong></td>
-                            <td>{{ frio }}</td>
-                            <td>{{ morno }}</td>
-                            <td>{{ quente }}</td>
-                            <td>{{ prio }}</td>
-                        </tr>
-                    {% endif %}
+                        <td>{{ frio }}</td>
+                        <td>{{ morno }}</td>
+                        <td>{{ quente }}</td>
+                        <td>{{ prio }}</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
