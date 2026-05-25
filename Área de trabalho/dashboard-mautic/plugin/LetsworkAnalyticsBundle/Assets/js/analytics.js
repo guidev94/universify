@@ -324,8 +324,8 @@ Mautic.lwaRenderContextualModal = function(kpiId, leads) {
         'engaj_downloads': Mautic.lwaRenderEngajamento,
         'engaj_campanhas': Mautic.lwaRenderEngajamento,
         'utm_leads': Mautic.lwaRenderUtm,
-        'utm_sources': Mautic.lwaRenderUtm,
-        'utm_campaigns': Mautic.lwaRenderUtm
+        'utm_sources': Mautic.lwaRenderUtmSources,
+        'utm_campaigns': Mautic.lwaRenderUtmCampaigns
     };
     if (renderers[kpiId]) {
         renderers[kpiId](leads);
@@ -622,6 +622,69 @@ Mautic.lwaRenderUtm = function(data) {
     });
     html += '</tbody></table></div></div>';
 
+    mQuery('#lwa-kpi-detail-body').html(html);
+    mQuery('#lwa-kpi-pagination').html('');
+};
+
+Mautic.lwaRenderUtmSources = function(data) {
+    var leads = Array.isArray(data) ? data : (data.leads || []);
+    if (!leads.length) { mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-global-line"></i><p>Nenhum lead com UTM Source no período</p></div>'); mQuery('#lwa-kpi-pagination').html(''); return; }
+    var porSource = {};
+    var porSourceTemp = {};
+    leads.forEach(function(l) {
+        var s = l.utm_source || 'direto';
+        var t = (l.temperatura || 'sem').toLowerCase();
+        porSource[s] = (porSource[s]||0) + 1;
+        if (!porSourceTemp[s]) porSourceTemp[s] = {};
+        porSourceTemp[s][t] = (porSourceTemp[s][t]||0) + 1;
+    });
+    var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
+    var html = '<div class="lwa-modal-metrics lwa-modal-metrics--2">';
+    html += '<div class="lwa-metric-card lwa-metric-card--blue"><div class="lwa-metric-value" style="color:#3b82f6">' + Object.keys(porSource).length + '</div><div class="lwa-metric-label">Sources identificadas</div></div>';
+    html += '<div class="lwa-metric-card"><div class="lwa-metric-value">' + leads.length + '</div><div class="lwa-metric-label">Total leads rastreados</div></div>';
+    html += '</div>';
+    html += '<div class="lwa-modal-section-title">Performance por Source</div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Source</th><th>Leads</th><th>Frio</th><th>Morno</th><th>Quente</th><th>Prioritário</th></tr></thead><tbody>';
+    Object.keys(porSource).sort(function(a,b){return porSource[b]-porSource[a];}).forEach(function(s) {
+        var temps = porSourceTemp[s] || {};
+        html += '<tr><td><strong>'+s+'</strong></td><td>'+porSource[s]+'</td>';
+        html += '<td style="color:#3b82f6">'+(temps['frio']||0)+'</td>';
+        html += '<td style="color:#f59e0b">'+(temps['morno']||0)+'</td>';
+        html += '<td style="color:#dc2626">'+(temps['quente']||0)+'</td>';
+        html += '<td style="color:#9333ea">'+(temps['prioritario']||temps['prioritário']||0)+'</td></tr>';
+    });
+    html += '</tbody></table>';
+    mQuery('#lwa-kpi-detail-body').html(html);
+    mQuery('#lwa-kpi-pagination').html('');
+};
+
+Mautic.lwaRenderUtmCampaigns = function(data) {
+    var leads = Array.isArray(data) ? data : (data.leads || []);
+    if (!leads.length) { mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><i class="ri-megaphone-line"></i><p>Nenhum lead com UTM Campaign no período</p></div>'); mQuery('#lwa-kpi-pagination').html(''); return; }
+    var porCampaign = {};
+    var porCampTemp = {};
+    leads.forEach(function(l) {
+        var c = l.utm_campaign || 'sem campanha';
+        var t = (l.temperatura || 'sem').toLowerCase();
+        porCampaign[c] = (porCampaign[c]||0) + 1;
+        if (!porCampTemp[c]) porCampTemp[c] = {};
+        porCampTemp[c][t] = (porCampTemp[c][t]||0) + 1;
+    });
+    var html = '<div class="lwa-modal-metrics lwa-modal-metrics--2">';
+    html += '<div class="lwa-metric-card lwa-metric-card--purple"><div class="lwa-metric-value" style="color:#7c3aed">' + Object.keys(porCampaign).length + '</div><div class="lwa-metric-label">Campanhas ativas</div></div>';
+    html += '<div class="lwa-metric-card"><div class="lwa-metric-value">' + leads.length + '</div><div class="lwa-metric-label">Leads em campanhas</div></div>';
+    html += '</div>';
+    html += '<div class="lwa-modal-section-title">Campanhas × Temperatura (conversão)</div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Campaign</th><th>Leads</th><th>Frio</th><th>Morno</th><th>Quente</th><th>Prioritário</th></tr></thead><tbody>';
+    Object.keys(porCampaign).sort(function(a,b){return porCampaign[b]-porCampaign[a];}).forEach(function(c) {
+        var temps = porCampTemp[c] || {};
+        html += '<tr><td><strong>'+c+'</strong></td><td>'+porCampaign[c]+'</td>';
+        html += '<td style="color:#3b82f6">'+(temps['frio']||0)+'</td>';
+        html += '<td style="color:#f59e0b">'+(temps['morno']||0)+'</td>';
+        html += '<td style="color:#dc2626">'+(temps['quente']||0)+'</td>';
+        html += '<td style="color:#9333ea">'+(temps['prioritario']||temps['prioritário']||0)+'</td></tr>';
+    });
+    html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);
     mQuery('#lwa-kpi-pagination').html('');
 };
