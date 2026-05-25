@@ -354,12 +354,15 @@ class AnalyticsModel
         if (!$this->tableExists('lead_utmtags')) return [];
         $params = ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59'];
         $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
-                    u.utm_source, u.utm_medium, u.utm_campaign
+                    GROUP_CONCAT(DISTINCT u.utm_source SEPARATOR ', ') as utm_source,
+                    GROUP_CONCAT(DISTINCT u.utm_medium SEPARATOR ', ') as utm_medium,
+                    GROUP_CONCAT(DISTINCT u.utm_campaign SEPARATOR ', ') as utm_campaign
                 FROM lead_utmtags u
                 JOIN leads l ON l.id = u.lead_id
                 WHERE u.date_added BETWEEN :dateFrom AND :dateTo
                 AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != ''))
-                ORDER BY u.date_added DESC LIMIT 50";
+                GROUP BY l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo
+                ORDER BY l.interesse_score DESC LIMIT 50";
         $leads = $this->connection->fetchAllAssociative($sql, $params);
         return ['type' => 'utm_data', 'leads' => $leads];
     }
@@ -1293,6 +1296,7 @@ Responda APENAS em JSON:
             'perdas' => $this->buildPerdasPrompt($dateRange),
             'email' => $this->buildEmailPrompt($dateRange),
             'site' => $this->buildSitePrompt($dateRange),
+            'utm' => $this->buildUtmPrompt($dateRange),
         ];
 
         $prompt = $prompts[$tab] ?? '';
@@ -1366,6 +1370,21 @@ DADOS:
 Sugira 3 ideias de campanha de email marketing com assuntos que geram alta abertura.
 
 Responda em JSON: {\"titulo\": \"titulo\", \"taxa_analise\": \"analise da taxa atual\", \"campanhas\": [{\"assunto\": \"assunto do email\", \"objetivo\": \"o que espera\", \"publico\": \"para quem\"}, ...]}";
+    }
+
+    private function buildUtmPrompt(array $dateRange): string
+    {
+        $utmData = $this->getUtmData($dateRange);
+        $sources = implode(', ', array_map(function($s) { return $s['utm_source'] . " ({$s['leads']} leads)"; }, $utmData['by_source']));
+        $campaigns = implode(', ', array_map(function($c) { return $c['utm_campaign'] . " ({$c['leads']} leads)"; }, $utmData['by_campaign']));
+        return "Voce e analista de marketing digital da LetsWork (software RH). Analise a performance das campanhas UTM e sugira otimizacoes.
+
+DADOS UTM:
+- Total leads rastreados: {$utmData['total']}
+- Sources: $sources
+- Campanhas: $campaigns
+
+Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"melhor_source\": \"source com mais conversao\", \"acao_principal\": \"o que fazer para melhorar ROI das campanhas\", \"campanha_sugerida\": \"ideia de nova campanha baseada nos dados\"}";
     }
 
     private function buildSitePrompt(array $dateRange): string
