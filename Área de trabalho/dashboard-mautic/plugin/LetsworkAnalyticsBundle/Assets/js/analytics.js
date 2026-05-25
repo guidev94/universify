@@ -47,9 +47,8 @@ Mautic.lwaInitClickableCards = function() {
         'Origens Afetadas': 'origens_afetadas'
     };
 
-    // Na overview, não sobrescrever (cards já têm onclick do Twig)
-    var isOverview = window.location.href.indexOf('/overview') > -1;
-    if (isOverview && window.location.href.indexOf('/conversao') === -1 && window.location.href.indexOf('/pipeline') === -1 && window.location.href.indexOf('/perdas') === -1 && window.location.href.indexOf('/segmentos') === -1) return;
+    // kpiMappings só tem cards de Conversão/Pipeline/Perdas
+    // Cards da Overview (Prospecção, Frio, etc) NÃO estão no map, então não são afetados
 
     mQuery('.lwa-kpi-card').each(function() {
         var $card = mQuery(this);
