@@ -306,7 +306,10 @@ Mautic.lwaRenderContextualModal = function(kpiId, leads) {
         'ganhos': Mautic.lwaRenderConvertidos,
         'motivos_perda': Mautic.lwaRenderMotivosPerda,
         'origens_afetadas': Mautic.lwaRenderOrigensAfetadas,
-        'leads_perdidos': Mautic.lwaRenderLeadsPerdidos
+        'leads_perdidos': Mautic.lwaRenderLeadsPerdidos,
+        'site_visitas': Mautic.lwaRenderSiteVisitas,
+        'site_visitantes': Mautic.lwaRenderSiteVisitas,
+        'site_precos': Mautic.lwaRenderSiteVisitas
     };
     if (renderers[kpiId]) {
         renderers[kpiId](leads);
@@ -549,6 +552,27 @@ Mautic.lwaRenderLeadsPerdidos = function(leads) {
         html += '<td style="color:#dc2626">' + (l.motivo_perda||'Não informado') + '</td>';
         html += '<td>' + (l.origem_principal||'').replace(/_/g,' ') + '</td>';
         html += '<td>' + valor + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    mQuery('#lwa-kpi-detail-body').html(html);
+    mQuery('#lwa-kpi-pagination').html('');
+};
+
+Mautic.lwaRenderSiteVisitas = function(leads) {
+    var totalViews = leads.reduce(function(s,l){return s+parseInt(l.page_views||0);},0);
+    var html = '<div class="lwa-modal-metrics lwa-modal-metrics--3">';
+    html += '<div class="lwa-metric-card lwa-metric-card--blue"><div class="lwa-metric-value" style="color:#3b82f6">' + totalViews + '</div><div class="lwa-metric-label">Page views</div></div>';
+    html += '<div class="lwa-metric-card"><div class="lwa-metric-value">' + leads.length + '</div><div class="lwa-metric-label">Visitantes identificados</div></div>';
+    html += '<div class="lwa-metric-card lwa-metric-card--green"><div class="lwa-metric-value" style="color:#10b981">' + Math.round(totalViews/(leads.length||1)) + '</div><div class="lwa-metric-label">Média por lead</div></div>';
+    html += '</div>';
+    html += '<div class="lwa-modal-section-title">Leads que visitaram o site</div>';
+    html += '<table class="lwa-table lwa-table--compact" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Views</th><th>Última visita</th><th>Temperatura</th></tr></thead><tbody>';
+    leads.slice(0, 15).forEach(function(l) {
+        var name = ((l.firstname||'')+ ' '+(l.lastname||'')).trim()||l.company||'Anônimo';
+        var date = l.ultima_visita ? new Date(l.ultima_visita).toLocaleDateString('pt-BR') : '-';
+        var temp = (l.temperatura||'').toLowerCase();
+        var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
+        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')"><td><strong>'+name+'</strong></td><td>'+( l.company||'-')+'</td><td><strong>'+l.page_views+'</strong></td><td>'+date+'</td><td><span style="color:'+(tempColors[temp]||'#64748b')+';font-weight:600">'+(temp?temp.charAt(0).toUpperCase()+temp.slice(1):'-')+'</span></td></tr>';
     });
     html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);

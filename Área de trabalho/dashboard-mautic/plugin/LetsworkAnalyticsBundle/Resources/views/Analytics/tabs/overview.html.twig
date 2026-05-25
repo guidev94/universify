@@ -140,13 +140,16 @@
         <div class="lwa-card-body">
             <div class="lwa-kpi-row" style="margin:0">
                 {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-                    title: 'Visitas', value: page_hits.total, icon: 'ri-eye-line', description: 'Page views no período'
+                    title: 'Visitas', value: page_hits.total, icon: 'ri-eye-line',
+                    kpi_id: 'site_visitas', description: 'Page views no período'
                 } %}
                 {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-                    title: 'Visitantes', value: page_hits.visitors, icon: 'ri-user-line', description: 'Leads identificados'
+                    title: 'Visitantes', value: page_hits.visitors, icon: 'ri-user-line',
+                    kpi_id: 'site_visitantes', description: 'Leads identificados'
                 } %}
                 {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
-                    title: 'Viram Preços', value: page_hits.pricing_visits, icon: 'ri-price-tag-3-line', color: 'success', description: 'Visitaram página de planos'
+                    title: 'Viram Preços', value: page_hits.pricing_visits, icon: 'ri-price-tag-3-line', color: 'success',
+                    kpi_id: 'site_precos', description: 'Visitaram página de planos'
                 } %}
             </div>
         </div>

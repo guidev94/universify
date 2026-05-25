@@ -117,6 +117,8 @@ class AnalyticsModel
             $where = "LOWER(status_comercial) LIKE '%reuni%' AND date_modified BETWEEN :dateFrom AND :dateTo";
         } elseif ($kpi === 'tempo_proposta' || $kpi === 'valor_negociacao') {
             $where = "LOWER(status_comercial) IN ('proposta_enviada','proposta','negociacao','negociação') AND date_modified BETWEEN :dateFrom AND :dateTo";
+        } elseif ($kpi === 'site_visitas' || $kpi === 'site_visitantes' || $kpi === 'site_precos') {
+            return $this->getPageHitsLeads($kpi, $dateRange);
         } elseif ($kpi === 'leads_perdidos') {
             $where = "LOWER(status_comercial) = 'perdido' AND date_modified BETWEEN :dateFrom AND :dateTo";
         } elseif ($kpi === 'motivos_perda') {
@@ -284,6 +286,25 @@ class AnalyticsModel
             if ($key) $result[$key] = (int)$row['total'];
         }
         return $result;
+    }
+
+    private function getPageHitsLeads(string $kpi, array $dateRange): array
+    {
+        $urlFilter = '';
+        if ($kpi === 'site_precos') $urlFilter = "AND ph.url LIKE '%planos%'";
+
+        $sql = "SELECT DISTINCT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
+                    COUNT(ph.id) as page_views, MAX(ph.date_hit) as ultima_visita
+                FROM page_hits ph
+                JOIN leads l ON l.id = ph.lead_id
+                WHERE ph.lead_id IS NOT NULL AND ph.date_hit BETWEEN :dateFrom AND :dateTo $urlFilter
+                GROUP BY l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo
+                ORDER BY page_views DESC
+                LIMIT 50";
+        return $this->connection->fetchAllAssociative($sql, [
+            'dateFrom' => $dateRange['from'],
+            'dateTo' => $dateRange['to'] . ' 23:59:59',
+        ]);
     }
 
     private function getPageHitsData(array $dateRange): array
