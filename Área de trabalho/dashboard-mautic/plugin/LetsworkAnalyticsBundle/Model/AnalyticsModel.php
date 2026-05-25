@@ -317,6 +317,7 @@ class AnalyticsModel
             "SELECT url_title, url, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :dateFrom AND :dateTo AND url_title IS NOT NULL AND url_title != '' $urlFilterSimple GROUP BY url_title, url ORDER BY views DESC LIMIT 10",
             ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59']
         );
+        foreach ($topPages as &$p) { $p['url_title'] = html_entity_decode($p['url_title'] ?? '', ENT_QUOTES, 'UTF-8'); }
 
         return ['type' => 'site_hits', 'leads' => $leads, 'top_pages' => $topPages];
     }
@@ -328,6 +329,7 @@ class AnalyticsModel
         $pricingVisits = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM page_hits WHERE url LIKE '%planos%' AND date_hit BETWEEN :from AND :to", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
 
         $topPages = $this->connection->fetchAllAssociative("SELECT url_title, COUNT(*) as views FROM page_hits WHERE date_hit BETWEEN :from AND :to AND url_title IS NOT NULL AND url_title != '' GROUP BY url_title ORDER BY views DESC LIMIT 5", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+        foreach ($topPages as &$p) { $p['url_title'] = html_entity_decode($p['url_title'], ENT_QUOTES, 'UTF-8'); }
 
         return [
             'total' => $total,
