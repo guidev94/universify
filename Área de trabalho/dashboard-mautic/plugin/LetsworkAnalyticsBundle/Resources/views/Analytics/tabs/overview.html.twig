@@ -81,11 +81,11 @@
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'E-mails', value: kpis.disparos, icon: 'ri-send-plane-line',
-        kpi_id: 'emails_enviados', description: 'Enviados nas campanhas'
+        kpi_id: 'emails_abertos', description: 'Enviados nas campanhas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Taxa de Abertura', value: kpis.taxa_abertura, icon: 'ri-percent-line',
-        suffix: '%', kpi_id: 'emails_enviados', description: 'Desempenho geral'
+        suffix: '%', kpi_id: 'emails_taxa', description: 'Desempenho geral'
     } %}
 </div>
 
