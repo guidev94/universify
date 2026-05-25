@@ -195,7 +195,7 @@ class AnalyticsModel
 
         if (empty($where)) return [];
         $sql = "SELECT id, firstname, lastname, email, company, temperatura, interesse_score, status_comercial, origem_principal, data_ultima_interacao, data_proximo_followup, cargo, motivo_perda, valor_potencial, modulo_interesse, dor_principal, segmento
-                FROM leads WHERE $where ORDER BY interesse_score DESC LIMIT 50";
+                FROM leads WHERE $where AND (firstname IS NOT NULL AND firstname != '' OR email IS NOT NULL AND email != '') ORDER BY interesse_score DESC LIMIT 50";
         return $this->connection->fetchAllAssociative($sql, $params);
     }
 
@@ -280,7 +280,7 @@ class AnalyticsModel
     private function getTemperatureCounts(): array
     {
         if (!$this->columnExists('leads', 'temperatura')) return [];
-        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) GROUP BY temperatura ORDER BY total DESC";
+        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) AND (firstname IS NOT NULL AND firstname != '' OR email IS NOT NULL AND email != '') GROUP BY temperatura ORDER BY total DESC";
         $rows = $this->connection->fetchAllAssociative($sql);
         $result = [];
         foreach ($rows as $row) {
@@ -711,6 +711,7 @@ class AnalyticsModel
         if (!$this->columnExists('leads', 'temperatura')) return [];
         $sql = "SELECT id, firstname, lastname, company, temperatura, COALESCE(interesse_score, points) as score, data_ultima_interacao, cargo
                 FROM leads WHERE LOWER(temperatura) IN ('quente','prioritário','prioritario') AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))
+                AND (firstname IS NOT NULL AND firstname != '' OR email IS NOT NULL AND email != '')
                 ORDER BY COALESCE(interesse_score, points) DESC LIMIT 10";
         $rows = $this->connection->fetchAllAssociative($sql);
         $result = [];
