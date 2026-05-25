@@ -98,6 +98,15 @@ Mautic.lwaRenderCharts = function() {
             return;
         }
 
+        // Sanitize: remove undefined/null from labels and data
+        chartData.labels = chartData.labels.map(function(l) { return l || ''; });
+        if (chartData.data) chartData.data = chartData.data.map(function(d) { return d || 0; });
+        if (chartData.datasets) {
+            chartData.datasets.forEach(function(ds) {
+                if (ds.data) ds.data = ds.data.map(function(d) { return d || 0; });
+            });
+        }
+
         var ctx = this.getContext('2d');
         var config = Mautic.lwaGetChartConfig(chartType, chartData);
         var chart = new Chart(ctx, config);
@@ -106,7 +115,7 @@ Mautic.lwaRenderCharts = function() {
 };
 
 Mautic.lwaGetChartConfig = function(type, data) {
-    var colors = data.colors || ['#dc2626', '#334155', '#64748b', '#94a3b8', '#cbd5e1', '#475569', '#1e293b', '#f59e0b'];
+    var colors = data.colors || ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#dc2626', '#64748b'];
 
     var datasets;
     if (type === 'doughnut' || type === 'pie') {
@@ -116,18 +125,21 @@ Mautic.lwaGetChartConfig = function(type, data) {
             borderWidth: 3,
             borderColor: 'rgba(255,255,255,0.95)',
             hoverBorderWidth: 4,
-            hoverOffset: 10,
-            cutout: '65%'
+            hoverOffset: 12,
+            cutout: '70%',
+            spacing: 2
         }];
     } else if (type === 'bar') {
         var barColors = data.data.map(function(_, i) { return colors[i % colors.length]; });
         datasets = [{
             data: data.data,
-            backgroundColor: barColors,
-            borderRadius: 6,
+            backgroundColor: barColors.map(function(c) { return c + '90'; }),
+            borderColor: barColors,
+            borderWidth: 2,
+            borderRadius: 8,
             borderSkipped: false,
-            maxBarThickness: 48,
-            hoverBackgroundColor: barColors.map(function(c) { return c; })
+            maxBarThickness: 44,
+            hoverBackgroundColor: barColors
         }];
     } else {
         datasets = [{

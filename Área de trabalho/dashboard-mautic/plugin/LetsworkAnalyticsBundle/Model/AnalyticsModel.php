@@ -339,7 +339,7 @@ class AnalyticsModel
     private function getTemperatureCounts(): array
     {
         if (!$this->columnExists('leads', 'temperatura')) return [];
-        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != '')) GROUP BY temperatura ORDER BY total DESC";
+        $sql = "SELECT temperatura, COUNT(*) as total FROM leads WHERE temperatura IS NOT NULL AND temperatura != '' AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != '')) GROUP BY temperatura ORDER BY FIELD(LOWER(temperatura), 'frio', 'morno', 'quente', 'prioritario', 'prioritário')";
         $rows = $this->connection->fetchAllAssociative($sql);
         $result = [];
         foreach ($rows as $row) {
