@@ -159,6 +159,8 @@ class AnalyticsModel
             return $this->getPageHitsLeads($kpi, $dateRange);
         } elseif ($kpi === 'engaj_forms' || $kpi === 'engaj_downloads' || $kpi === 'engaj_campanhas') {
             return [];
+        } elseif (strpos($kpi, 'utm_') === 0) {
+            return $this->getUtmLeads($kpi, $dateRange);
         } elseif ($kpi === 'leads_perdidos') {
             $where = "LOWER(status_comercial) = 'perdido' AND date_modified BETWEEN :dateFrom AND :dateTo";
         } elseif ($kpi === 'motivos_perda') {
@@ -326,6 +328,21 @@ class AnalyticsModel
             if ($key) $result[$key] = (int)$row['total'];
         }
         return $result;
+    }
+
+    private function getUtmLeads(string $kpi, array $dateRange): array
+    {
+        if (!$this->tableExists('lead_utmtags')) return [];
+        $params = ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59'];
+        $sql = "SELECT l.id, l.firstname, l.lastname, l.email, l.company, l.temperatura, l.interesse_score, l.status_comercial, l.origem_principal, l.cargo,
+                    u.utm_source, u.utm_medium, u.utm_campaign
+                FROM lead_utmtags u
+                JOIN leads l ON l.id = u.lead_id
+                WHERE u.date_added BETWEEN :dateFrom AND :dateTo
+                AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != ''))
+                ORDER BY u.date_added DESC LIMIT 50";
+        $leads = $this->connection->fetchAllAssociative($sql, $params);
+        return ['type' => 'utm_data', 'leads' => $leads];
     }
 
     private function getPageHitsLeads(string $kpi, array $dateRange): array

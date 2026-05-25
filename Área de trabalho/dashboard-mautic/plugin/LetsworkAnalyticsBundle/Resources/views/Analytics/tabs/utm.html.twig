@@ -3,15 +3,15 @@
 <div class="lwa-kpi-row lwa-kpi-row--compact">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Leads por UTM', value: total, icon: 'ri-link', color: 'primary',
-        kpi_id: 'prospeccao', description: 'Leads com UTM no período'
+        kpi_id: 'utm_leads', description: 'Leads com UTM no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Sources', value: by_source|length, icon: 'ri-global-line', color: 'info',
-        kpi_id: 'prospeccao', description: 'Origens distintas'
+        kpi_id: 'utm_sources', description: 'Origens distintas'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Campanhas', value: by_campaign|length, icon: 'ri-megaphone-line', color: 'purple',
-        kpi_id: 'prospeccao', description: 'Campanhas UTM ativas'
+        kpi_id: 'utm_campaigns', description: 'Campanhas UTM ativas'
     } %}
 </div>
 
