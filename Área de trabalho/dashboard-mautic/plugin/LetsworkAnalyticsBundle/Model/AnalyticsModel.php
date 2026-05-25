@@ -142,7 +142,7 @@ class AnalyticsModel
         } else {
             switch ($kpi) {
                 case 'prospeccao':
-                    $where = "LOWER(status_comercial) IN ('prospeccao','novo') AND date_added BETWEEN :dateFrom AND :dateTo";
+                    $where = "(status_comercial IS NULL OR status_comercial = '' OR LOWER(status_comercial) IN ('prospeccao','novo')) AND date_added BETWEEN :dateFrom AND :dateTo";
                     break;
                 case 'engajados':
                     $where = "LOWER(status_comercial) IN ('engajado','em contato') AND date_modified BETWEEN :dateFrom AND :dateTo";
@@ -250,7 +250,7 @@ class AnalyticsModel
     private function getProspeccao(): int
     {
         if (!$this->columnExists('leads', 'status_comercial')) return 0;
-        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE LOWER(status_comercial) IN ('prospeccao','novo')");
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE (status_comercial IS NULL OR status_comercial = '' OR LOWER(status_comercial) IN ('prospeccao','novo')) AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))");
     }
 
     private function getFrioToMorno(array $dateRange): int
