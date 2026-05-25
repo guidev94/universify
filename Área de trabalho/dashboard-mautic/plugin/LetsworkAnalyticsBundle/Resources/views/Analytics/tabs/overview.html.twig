@@ -44,13 +44,14 @@
                 <thead><tr><th>Score</th><th>Temperatura</th><th>Leads Ativos</th><th>Ação</th></tr></thead>
                 <tbody>
                     {% for temp_key, temp_count in temperatura_counts %}
+                        {% set tk = temp_key|lower|replace({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ã':'a'}) %}
                         {% set score_range = {'frio':'0 – 20','morno':'21 – 60','quente':'61 – 100','prioritario':'100+'} %}
                         {% set actions = {'frio':'Iniciar primeiro contato','morno':'Conteúdo + abordagem consultiva','quente':'Comercial deve agir','prioritario':'Follow-up imediato'} %}
-                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_{{ temp_key }}', 'Leads {{ temp_key|capitalize }}')">
-                            <td>{{ score_range[temp_key]|default('—') }}</td>
-                            <td><span class="lwa-badge lwa-badge--{{ temp_key }}">{{ temp_key|capitalize }}</span></td>
+                        <tr class="lwa-table-row-interactive" onclick="Mautic.lwaShowKpiDetail('temp_{{ tk }}', 'Leads {{ temp_key|capitalize }}')">
+                            <td>{{ score_range[tk]|default('100+') }}</td>
+                            <td><span class="lwa-badge lwa-badge--{{ tk }}">{{ temp_key|capitalize }}</span></td>
                             <td><strong>{{ temp_count }}</strong></td>
-                            <td>{{ actions[temp_key]|default('') }}</td>
+                            <td>{{ actions[tk]|default('Follow-up imediato') }}</td>
                         </tr>
                     {% endfor %}
                     {% if kpis.leads_incompletos > 0 %}
