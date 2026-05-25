@@ -11,7 +11,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class AnalyticsController extends CommonController
 {
-    private const VALID_TABS = ['overview', 'conversao', 'segmentos', 'pipeline', 'perdas'];
+    private const VALID_TABS = ['overview', 'conversao', 'segmentos', 'pipeline', 'perdas', 'utm'];
 
     private AnalyticsModel $analyticsModel;
 
@@ -344,6 +344,7 @@ class AnalyticsController extends CommonController
             'segmentos' => $this->analyticsModel->getSegmentosData($dateRange),
             'pipeline' => $this->analyticsModel->getPipelineData($dateRange),
             'perdas' => $this->analyticsModel->getPerdasData($dateRange),
+            'utm' => $this->analyticsModel->getUtmData($dateRange),
             default => $this->analyticsModel->getOverviewData($dateRange),
         };
 

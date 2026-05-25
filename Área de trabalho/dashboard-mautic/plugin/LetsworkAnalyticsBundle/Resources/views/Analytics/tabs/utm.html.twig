@@ -1,0 +1,137 @@
+{# ===== UTM TRACKING ===== #}
+<div class="lwa-section-label">Resumo UTM</div>
+<div class="lwa-kpi-row lwa-kpi-row--compact">
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Leads por UTM', value: total, icon: 'ri-link', color: 'primary',
+        kpi_id: 'prospeccao', description: 'Leads com UTM no período'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Sources', value: by_source|length, icon: 'ri-global-line', color: 'info',
+        kpi_id: 'prospeccao', description: 'Origens distintas'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Campanhas', value: by_campaign|length, icon: 'ri-megaphone-line', color: 'purple',
+        kpi_id: 'prospeccao', description: 'Campanhas UTM ativas'
+    } %}
+</div>
+
+{# UTM Source #}
+<div class="lwa-section-label">UTM Source (Origem do tráfego)</div>
+<div class="lwa-card" style="margin-bottom:24px">
+    <div class="lwa-card-body lwa-card-body--tight">
+        {% if by_source is empty %}
+            <div class="lwa-empty-state"><p>Nenhum UTM Source registrado no período.</p></div>
+        {% else %}
+            <table class="lwa-table">
+                <thead><tr><th>Source</th><th>Leads</th><th>Hits</th></tr></thead>
+                <tbody>
+                    {% for r in by_source %}
+                        <tr><td><strong>{{ r.utm_source }}</strong></td><td>{{ r.leads }}</td><td>{{ r.hits }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+
+{# UTM Medium + Campaign lado a lado #}
+<div class="lwa-grid-2">
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>UTM Medium</h4></div>
+        <div class="lwa-card-body lwa-card-body--tight">
+            {% if by_medium is empty %}
+                <div class="lwa-empty-state"><p>Sem dados.</p></div>
+            {% else %}
+                <table class="lwa-table lwa-table--compact">
+                    <thead><tr><th>Medium</th><th>Leads</th></tr></thead>
+                    <tbody>
+                        {% for r in by_medium %}
+                            <tr><td><strong>{{ r.utm_medium }}</strong></td><td>{{ r.leads }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>UTM Campaign</h4></div>
+        <div class="lwa-card-body lwa-card-body--tight">
+            {% if by_campaign is empty %}
+                <div class="lwa-empty-state"><p>Sem dados.</p></div>
+            {% else %}
+                <table class="lwa-table lwa-table--compact">
+                    <thead><tr><th>Campaign</th><th>Leads</th><th>Hits</th></tr></thead>
+                    <tbody>
+                        {% for r in by_campaign %}
+                            <tr><td><strong>{{ r.utm_campaign }}</strong></td><td>{{ r.leads }}</td><td>{{ r.hits }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# UTM Content + Term #}
+<div class="lwa-grid-2" style="margin-top:24px">
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>UTM Content</h4></div>
+        <div class="lwa-card-body lwa-card-body--tight">
+            {% if by_content is empty %}
+                <div class="lwa-empty-state"><p>Sem dados.</p></div>
+            {% else %}
+                <table class="lwa-table lwa-table--compact">
+                    <tbody>
+                        {% for r in by_content %}
+                            <tr><td><strong>{{ r.utm_content }}</strong></td><td>{{ r.leads }} leads</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+    <div class="lwa-card">
+        <div class="lwa-card-header"><h4>UTM Term (Keywords)</h4></div>
+        <div class="lwa-card-body lwa-card-body--tight">
+            {% if by_term is empty %}
+                <div class="lwa-empty-state"><p>Sem dados.</p></div>
+            {% else %}
+                <table class="lwa-table lwa-table--compact">
+                    <tbody>
+                        {% for r in by_term %}
+                            <tr><td><strong>{{ r.utm_term }}</strong></td><td>{{ r.leads }} leads</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Leads recentes com UTM #}
+{% if recent is not empty %}
+<div class="lwa-section-label" style="margin-top:24px">Leads Recentes com UTM</div>
+<div class="lwa-card">
+    <div class="lwa-card-body lwa-card-body--tight">
+        <table class="lwa-table lwa-table--compact">
+            <thead><tr><th>Lead</th><th>Empresa</th><th>Source</th><th>Medium</th><th>Campaign</th><th>Data</th></tr></thead>
+            <tbody>
+                {% for r in recent %}
+                    <tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal({{ r.lead_id }})">
+                        <td><strong>{{ r.firstname }} {{ r.lastname }}</strong></td>
+                        <td>{{ r.company|default('-') }}</td>
+                        <td>{{ r.utm_source|default('-') }}</td>
+                        <td>{{ r.utm_medium|default('-') }}</td>
+                        <td>{{ r.utm_campaign|default('-') }}</td>
+                        <td>{{ r.date_added|date('d/m/Y') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{# ===== IA ===== #}
+<div class="lwa-section-label" style="margin-top:24px"><span><i class="ri-sparkling-line"></i> Análise IA — UTM</span><button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaAiTab('site')" style="font-size:11px;padding:4px 10px">Analisar</button></div>
+<div id="lwa-ai-tab-result" style="display:none;margin-bottom:24px"></div>

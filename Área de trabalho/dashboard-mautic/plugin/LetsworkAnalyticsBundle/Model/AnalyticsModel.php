@@ -93,6 +93,38 @@ class AnalyticsModel
         ];
     }
 
+    public function getUtmData(array $dateRange): array
+    {
+        if (!$this->tableExists('lead_utmtags')) {
+            return ['total' => 0, 'by_source' => [], 'by_medium' => [], 'by_campaign' => [], 'by_content' => [], 'by_term' => [], 'recent' => []];
+        }
+        $params = ['dateFrom' => $dateRange['from'], 'dateTo' => $dateRange['to'] . ' 23:59:59'];
+
+        $total = (int) $this->connection->fetchOne("SELECT COUNT(DISTINCT lead_id) FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo", $params);
+
+        $bySource = $this->connection->fetchAllAssociative("SELECT utm_source, COUNT(DISTINCT lead_id) as leads, COUNT(*) as hits FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_source IS NOT NULL AND utm_source != '' GROUP BY utm_source ORDER BY leads DESC LIMIT 10", $params);
+
+        $byMedium = $this->connection->fetchAllAssociative("SELECT utm_medium, COUNT(DISTINCT lead_id) as leads FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_medium IS NOT NULL AND utm_medium != '' GROUP BY utm_medium ORDER BY leads DESC LIMIT 10", $params);
+
+        $byCampaign = $this->connection->fetchAllAssociative("SELECT utm_campaign, COUNT(DISTINCT lead_id) as leads, COUNT(*) as hits FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_campaign IS NOT NULL AND utm_campaign != '' GROUP BY utm_campaign ORDER BY leads DESC LIMIT 15", $params);
+
+        $byContent = $this->connection->fetchAllAssociative("SELECT utm_content, COUNT(DISTINCT lead_id) as leads FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_content IS NOT NULL AND utm_content != '' GROUP BY utm_content ORDER BY leads DESC LIMIT 10", $params);
+
+        $byTerm = $this->connection->fetchAllAssociative("SELECT utm_term, COUNT(DISTINCT lead_id) as leads FROM lead_utmtags WHERE date_added BETWEEN :dateFrom AND :dateTo AND utm_term IS NOT NULL AND utm_term != '' GROUP BY utm_term ORDER BY leads DESC LIMIT 10", $params);
+
+        $recent = $this->connection->fetchAllAssociative("SELECT u.lead_id, l.firstname, l.lastname, l.email, l.company, u.utm_source, u.utm_medium, u.utm_campaign, u.date_added FROM lead_utmtags u JOIN leads l ON l.id = u.lead_id WHERE u.date_added BETWEEN :dateFrom AND :dateTo AND ((l.email IS NOT NULL AND l.email != '') OR (l.firstname IS NOT NULL AND l.firstname != '')) ORDER BY u.date_added DESC LIMIT 20", $params);
+
+        return [
+            'total' => $total,
+            'by_source' => $bySource,
+            'by_medium' => $byMedium,
+            'by_campaign' => $byCampaign,
+            'by_content' => $byContent,
+            'by_term' => $byTerm,
+            'recent' => $recent,
+        ];
+    }
+
     public function getPerdasData(array $dateRange): array
     {
         return [

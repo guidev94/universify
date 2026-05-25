@@ -50,6 +50,11 @@
             <i class="ri-close-circle-line"></i>
             <span>{{ 'letswork.analytics.tab.perdas'|trans }}</span>
         </a>
+        <a href="{{ path('letswork_analytics_index', {tab: 'utm', dateFrom: dateFrom, dateTo: dateTo}) }}"
+           class="lwa-tab {% if activeTab == 'utm' %}active{% endif %}">
+            <i class="ri-link"></i>
+            <span>UTM</span>
+        </a>
     </div>
 
     <div class="lwa-content">
