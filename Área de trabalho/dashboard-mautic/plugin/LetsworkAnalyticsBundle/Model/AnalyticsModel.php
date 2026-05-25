@@ -169,7 +169,7 @@ class AnalyticsModel
                     break;
                 case 'leads_incompletos':
                 case 'incomplete':
-                    $where = "lead_incompleto = 'sim' OR lead_incompleto = 1";
+                    $where = "(email IS NULL OR email = '') OR (firstname IS NULL OR firstname = '')";
                     $params = [];
                     break;
                 case 'modulo':
@@ -351,8 +351,7 @@ class AnalyticsModel
 
     private function getLeadsIncompletos(): int
     {
-        if (!$this->columnExists('leads', 'lead_incompleto')) return 0;
-        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE lead_incompleto = 'sim'");
+        return (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE (email IS NULL OR email = '') OR (firstname IS NULL OR firstname = '')");
     }
 
     private function getLinkedinAtivos(): int
@@ -1565,9 +1564,12 @@ Responda APENAS em JSON valido:
 
     public function getIncompleteQueue(): array
     {
-        if (!$this->columnExists('leads', 'lead_incompleto')) return [];
-        $sql = "SELECT id, firstname, lastname, company, cargo, segmento, origem_principal, linkedin_status, motivo_lead_incompleto, date_added
-                FROM leads WHERE lead_incompleto = 'sim'
+        $sql = "SELECT id, firstname, lastname, email, company, cargo, segmento, origem_principal, date_added,
+                    CASE WHEN (email IS NULL OR email = '') AND (firstname IS NULL OR firstname = '') THEN 'Sem nome e sem e-mail'
+                         WHEN (email IS NULL OR email = '') THEN 'Sem e-mail'
+                         WHEN (firstname IS NULL OR firstname = '') THEN 'Sem nome'
+                    END as motivo_lead_incompleto
+                FROM leads WHERE (email IS NULL OR email = '') OR (firstname IS NULL OR firstname = '')
                 ORDER BY date_added DESC LIMIT 50";
         return $this->connection->fetchAllAssociative($sql);
     }
