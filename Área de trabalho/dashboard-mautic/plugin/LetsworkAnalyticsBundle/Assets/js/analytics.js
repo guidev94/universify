@@ -1127,109 +1127,73 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             var name = ((l.firstname || '') + ' ' + (l.lastname || '')).trim() || l.company || 'Lead';
             mQuery('#lwa-modal-title').text(name);
 
-            var tempClass = l.temperatura ? ' lwa-lead-avatar--' + l.temperatura : ' lwa-lead-avatar--quente';
-            var html = '<div class="lwa-modal-lead">';
-            html += '<div class="lwa-modal-lead-header">';
-            html += '  <div class="lwa-lead-avatar lwa-lead-avatar--lg' + tempClass + '">' + name.charAt(0).toUpperCase() + '</div>';
-            html += '  <div class="lwa-modal-lead-info">';
-            html += '    <div class="lwa-modal-lead-name">' + name + '</div>';
-            html += '    <div class="lwa-modal-lead-role">' + (l.cargo || '') + ' · ' + (l.company || '') + '</div>';
-            if (l.email) html += '    <div class="lwa-modal-lead-contact"><i class="ri-mail-line"></i> ' + l.email + '</div>';
-            if (l.phone) html += '    <div class="lwa-modal-lead-contact"><i class="ri-phone-line"></i> ' + l.phone + '</div>';
-            html += '  </div>';
-            if (l.temperatura) html += '  <span class="lwa-badge lwa-badge--' + l.temperatura + '">' + l.temperatura.charAt(0).toUpperCase() + l.temperatura.slice(1) + '</span>';
-            html += '</div>';
-
-            // Score visual bar
+            var temp = (l.temperatura || '').toLowerCase().replace('á','a');
+            var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
+            var tempColor = tempColors[temp] || '#64748b';
             var score = parseInt(l.interesse_score) || 0;
-            var scoreMax = 200;
-            var scorePct = Math.min(100, Math.round((score / scoreMax) * 100));
-            var scoreColor = score > 100 ? '#9333ea' : score > 60 ? '#dc2626' : score > 20 ? '#f59e0b' : '#3b82f6';
-            html += '<div style="margin-bottom:16px">';
-            html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;font-weight:600;color:var(--lwa-gray-400)">SCORE DE INTERESSE</span><span style="font-size:14px;font-weight:700;color:'+scoreColor+'">'+score+' pts</span></div>';
-            html += '  <div style="background:var(--lwa-gray-100);border-radius:6px;height:8px;overflow:hidden"><div style="background:'+scoreColor+';height:100%;width:'+scorePct+'%;border-radius:6px;transition:width 0.5s ease"></div></div>';
-            html += '  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--lwa-gray-400)"><span>Frio</span><span>Morno</span><span>Quente</span><span>Prioritário</span></div>';
+            var scorePct = Math.min(100, Math.round((score / 200) * 100));
+
+            var html = '<div style="padding:4px 0">';
+
+            // === HEADER ===
+            html += '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
+            html += '  <div style="width:56px;height:56px;border-radius:14px;background:'+tempColor+';color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0">'+name.charAt(0).toUpperCase()+'</div>';
+            html += '  <div style="flex:1">';
+            html += '    <div style="font-size:20px;font-weight:700;color:var(--lwa-gray-900)">'+name+'</div>';
+            html += '    <div style="font-size:14px;color:var(--lwa-gray-500);margin-top:2px">'+(l.cargo||'')+(l.cargo&&l.company?' · ':'')+(l.company||'')+'</div>';
+            if (l.email) html += '    <div style="font-size:13px;color:var(--lwa-gray-400);margin-top:4px"><i class="ri-mail-line" style="margin-right:4px"></i>'+l.email+'</div>';
+            html += '  </div>';
+            html += '  <span class="lwa-badge lwa-badge--'+temp+'" style="font-size:13px;padding:5px 12px">'+(l.temperatura||'—')+'</span>';
             html += '</div>';
 
-            // Info grid
-            html += '<div class="lwa-modal-grid">';
-            html += Mautic.lwaModalField('Origem', l.origem_principal);
-            html += Mautic.lwaModalField('Segmento', l.segmento);
-            html += Mautic.lwaModalField('Módulo', l.modulo_interesse);
-            html += Mautic.lwaModalField('Score', l.interesse_score);
-            html += Mautic.lwaModalField('Status', (l.status_comercial || '').replace(/_/g, ' '));
-            html += Mautic.lwaModalField('Valor', l.valor_potencial ? 'R$ ' + parseFloat(l.valor_potencial).toLocaleString('pt-BR') : '-');
+            // === SCORE BAR ===
+            html += '<div style="margin-bottom:20px">';
+            html += '  <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600;color:var(--lwa-gray-600)">Score de Interesse</span><span style="font-size:16px;font-weight:700;color:'+tempColor+'">'+score+' pts</span></div>';
+            html += '  <div style="background:var(--lwa-gray-100);border-radius:8px;height:10px;overflow:hidden"><div style="background:'+tempColor+';height:100%;width:'+scorePct+'%;border-radius:8px"></div></div>';
+            html += '</div>';
+
+            // === INFO CARDS ===
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">';
+            html += '<div style="padding:12px;background:var(--lwa-gray-50);border-radius:10px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Origem</div><div style="font-size:14px;font-weight:600;margin-top:4px">'+(l.origem_principal||'-').replace(/_/g,' ')+'</div></div>';
+            html += '<div style="padding:12px;background:var(--lwa-gray-50);border-radius:10px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Módulo</div><div style="font-size:14px;font-weight:600;margin-top:4px">'+(l.modulo_interesse||'-')+'</div></div>';
+            html += '<div style="padding:12px;background:var(--lwa-gray-50);border-radius:10px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Valor</div><div style="font-size:14px;font-weight:600;margin-top:4px;color:#10b981">'+(l.valor_potencial?'R$ '+parseFloat(l.valor_potencial).toLocaleString('pt-BR'):'-')+'</div></div>';
             html += '</div>';
 
             if (l.dor_principal) {
-                html += '<div class="lwa-modal-section"><label>Dor Principal</label><p>' + l.dor_principal + '</p></div>';
+                html += '<div style="padding:12px;background:#fef2f2;border-radius:10px;margin-bottom:16px;border-left:3px solid #dc2626"><div style="font-size:10px;font-weight:600;color:#dc2626;text-transform:uppercase;margin-bottom:4px">Dor Principal</div><div style="font-size:14px;color:var(--lwa-gray-700)">'+l.dor_principal+'</div></div>';
             }
 
-            // Ações rápidas
-            html += '<div class="lwa-modal-section"><label>Ações Rápidas</label></div>';
-            html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
-            if (l.phone) html += '<a href="https://wa.me/55' + (l.phone||'').replace(/[^0-9]/g,'') + '" target="_blank" class="lwa-modal-action-btn" style="background:#dcfce7;border-color:#bbf7d0;color:#16a34a"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
-            if (l.email) html += '<button class="lwa-modal-action-btn" onclick="navigator.clipboard.writeText(\'' + l.email + '\');Mautic.lwaToast(\'Email copiado!\')"><i class="ri-file-copy-line"></i> Copiar Email</button>';
-            html += '<button class="lwa-modal-action-btn" style="background:#fef3c7;border-color:#fde68a;color:#d97706" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'temperatura\',\'Quente\')"><i class="ri-fire-line"></i> Marcar Quente</button>';
-            html += '<button class="lwa-modal-action-btn" style="background:#ede9fe;border-color:#ddd6fe;color:#7c3aed" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'temperatura\',\'Prioritário\')"><i class="ri-vip-crown-line"></i> Prioritário</button>';
+            // === AÇÕES RÁPIDAS ===
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
+            if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
+            html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
+            html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
+            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Quente\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#fef3c7;color:#d97706;font-size:13px;font-weight:600;border:1px solid #fde68a;cursor:pointer"><i class="ri-fire-line"></i> Quente</button>';
+            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Prioritário\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#ede9fe;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-vip-crown-line"></i> Prioritário</button>';
             html += '</div>';
 
-            // Contact
-            if (l.email || l.phone) {
-                html += '<div class="lwa-modal-section"><label>Contato</label></div>';
-                html += '<div class="lwa-modal-contact-actions">';
-                if (l.email) html += '<a href="mailto:' + l.email + '" class="lwa-modal-contact-btn"><i class="ri-mail-line"></i> ' + l.email + '</a>';
-                if (l.phone) html += '<a href="tel:' + l.phone + '" class="lwa-modal-contact-btn"><i class="ri-phone-line"></i> ' + l.phone + '</a>';
-                if (l.phone) html += '<a href="https://wa.me/55' + (l.phone||'').replace(/\\D/g,'') + '" target="_blank" class="lwa-modal-contact-btn"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
-                html += '</div>';
-            }
-
-            // Status update
-            html += '<div class="lwa-modal-section"><label>Etapa do Pipeline</label></div>';
+            // === PIPELINE ===
+            html += '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:var(--lwa-gray-400);margin-bottom:8px">ETAPA DO PIPELINE</div>';
             html += '<div class="lwa-modal-status-bar">';
-            var statuses = [
-                {v:'prospeccao',l:'Prospecção'},{v:'engajado',l:'Engajado'},{v:'reuniao_agendada',l:'R. Agendada'},
-                {v:'reuniao_realizada',l:'R. Realizada'},{v:'reuniao_fechamento',l:'R. Fechamento'},
-                {v:'proposta_enviada',l:'Proposta'},{v:'negociacao',l:'Negociação'},{v:'ganho',l:'Ganho'},{v:'perdido',l:'Perdido'}
-            ];
+            var statuses = [{v:'prospeccao',l:'Prospecção'},{v:'engajado',l:'Engajado'},{v:'reuniao_agendada',l:'Reunião'},{v:'proposta_enviada',l:'Proposta'},{v:'negociacao',l:'Negociação'},{v:'ganho',l:'Ganho'},{v:'perdido',l:'Perdido'}];
             statuses.forEach(function(s) {
-                var active = (l.status_comercial === s.v) ? ' lwa-status-btn--active' : '';
-                html += '<button class="lwa-status-btn' + active + '" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'status_comercial\',\'' + s.v + '\')">' + s.l + '</button>';
+                var active = (l.status_comercial === s.v || (l.status_comercial||'').toLowerCase().replace(/ /g,'_').indexOf(s.v) > -1) ? ' lwa-status-btn--active' : '';
+                html += '<button class="lwa-status-btn'+active+'" onclick="Mautic.lwaUpdateLead('+l.id+',\'status_comercial\',\''+s.v+'\')">'+s.l+'</button>';
             });
-            html += '</div>';
+            html += '</div></div>';
 
-            // Actions
-            html += '<div class="lwa-modal-section"><label>Ações</label></div>';
-            html += '<div class="lwa-modal-actions">';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaEmailLead(' + l.id + ',\'' + (l.email||'').replace(/'/g,"\\'") + '\',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-mail-send-line"></i> Enviar E-mail</button>';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--highlight" onclick="Mautic.lwaScheduleFollowup(' + l.id + ',\'' + name.replace(/'/g,"\\'") + '\')"><i class="ri-calendar-todo-line"></i> Agendar Follow-up</button>';
-            html += '  <a href="/s/contacts/view/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-user-line"></i> Ficha Completa</a>';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + l.id + ')"><i class="ri-sparkling-line"></i> Sugestão IA</button>';
-            html += '</div>';
-
-            // Mensagens & IA (PRD §14 — playbooks por contexto do lead)
-            html += '<div class="lwa-modal-section"><label>Mensagens & Abordagem</label></div>';
-            html += '<div class="lwa-modal-actions">';
+            // === IA & MENSAGENS ===
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+            html += '<button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest('+l.id+')"><i class="ri-sparkling-line"></i> IA: Próxima Ação</button>';
+            html += '<button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaLeadSummary('+l.id+')"><i class="ri-file-list-3-line"></i> Resumo IA</button>';
             if (!l.status_comercial || l.status_comercial === 'prospeccao' || l.status_comercial === 'Novo') {
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'inicial_linkedin\')"><i class="ri-linkedin-box-line"></i> Abordagem LinkedIn</button>';
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'checklist\')"><i class="ri-checkbox-line"></i> Oferecer Checklist</button>';
-            } else if (l.status_comercial === 'engajado' || l.status_comercial === 'Em contato') {
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Convite Diagnóstico</button>';
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'checklist\')"><i class="ri-checkbox-line"></i> Enviar Case</button>';
+                html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook('+l.id+',\'inicial_linkedin\')"><i class="ri-linkedin-box-line"></i> Msg LinkedIn</button>';
             } else if (l.status_comercial === 'perdido' || l.status_comercial === 'Perdido') {
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'reativacao\')"><i class="ri-refresh-line"></i> Reativar Lead</button>';
+                html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook('+l.id+',\'reativacao\')"><i class="ri-refresh-line"></i> Reativar</button>';
             } else {
-                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Follow-up Consultivo</button>';
+                html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook('+l.id+',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Follow-up</button>';
             }
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + l.id + ')"><i class="ri-sparkling-line"></i> IA: Próxima Ação</button>';
-            html += '</div>';
-
-            // Análise & Histórico
-            html += '<div class="lwa-modal-section"><label>Análise & Histórico</label></div>';
-            html += '<div class="lwa-modal-actions">';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaLeadSummary(' + l.id + ')"><i class="ri-file-list-3-line"></i> Resumo IA</button>';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaShowTimeline(' + l.id + ')"><i class="ri-time-line"></i> Timeline</button>';
-            html += '  <a href="/s/contacts/view/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-user-line"></i> Ficha Mautic</a>';
+            html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaShowTimeline('+l.id+')"><i class="ri-time-line"></i> Timeline</button>';
             html += '</div>';
 
             // AI suggestion placeholder
