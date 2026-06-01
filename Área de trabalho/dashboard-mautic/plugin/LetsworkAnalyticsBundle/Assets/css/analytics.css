@@ -709,7 +709,7 @@ body.dark-theme .lwa-btn--ghost:hover {
     font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.1s ease;
 }
 .lwa-pagination-btn:hover { background: var(--lwa-gray-100); color: var(--lwa-gray-800); }
-.lwa-pagination-btn.active { background: var(--lwa-primary); color: white; }
+.lwa-pagination-btn.active { background: #3b82f6; color: white; }
 .lwa-pagination-btn--nav { font-size: 14px; }
 
 /* Forms */
