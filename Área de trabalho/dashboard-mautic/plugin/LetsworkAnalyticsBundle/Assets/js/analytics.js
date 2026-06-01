@@ -1207,19 +1207,29 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + l.id + ')"><i class="ri-sparkling-line"></i> Sugestão IA</button>';
             html += '</div>';
 
-            // Playbook actions
-            html += '<div class="lwa-modal-section"><label>Playbooks</label></div>';
+            // Mensagens & IA (PRD §14 — playbooks por contexto do lead)
+            html += '<div class="lwa-modal-section"><label>Mensagens & Abordagem</label></div>';
             html += '<div class="lwa-modal-actions">';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'inicial_linkedin\')"><i class="ri-linkedin-box-line"></i> LinkedIn Inicial</button>';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'checklist\')"><i class="ri-checkbox-line"></i> Checklist</button>';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Diagnóstico</button>';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'reativacao\')"><i class="ri-refresh-line"></i> Reativação</button>';
+            if (!l.status_comercial || l.status_comercial === 'prospeccao' || l.status_comercial === 'Novo') {
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'inicial_linkedin\')"><i class="ri-linkedin-box-line"></i> Abordagem LinkedIn</button>';
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'checklist\')"><i class="ri-checkbox-line"></i> Oferecer Checklist</button>';
+            } else if (l.status_comercial === 'engajado' || l.status_comercial === 'Em contato') {
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Convite Diagnóstico</button>';
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'checklist\')"><i class="ri-checkbox-line"></i> Enviar Case</button>';
+            } else if (l.status_comercial === 'perdido' || l.status_comercial === 'Perdido') {
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'reativacao\')"><i class="ri-refresh-line"></i> Reativar Lead</button>';
+            } else {
+                html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook(' + l.id + ',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Follow-up Consultivo</button>';
+            }
+            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + l.id + ')"><i class="ri-sparkling-line"></i> IA: Próxima Ação</button>';
             html += '</div>';
 
-            // Actions extras
-            html += '<div class="lwa-modal-actions" style="margin-top:8px">';
-            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaLeadSummary(' + l.id + ')"><i class="ri-file-list-3-line"></i> Resumo Completo IA</button>';
+            // Análise & Histórico
+            html += '<div class="lwa-modal-section"><label>Análise & Histórico</label></div>';
+            html += '<div class="lwa-modal-actions">';
+            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaLeadSummary(' + l.id + ')"><i class="ri-file-list-3-line"></i> Resumo IA</button>';
             html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaShowTimeline(' + l.id + ')"><i class="ri-time-line"></i> Timeline</button>';
+            html += '  <a href="/s/contacts/view/' + l.id + '" class="lwa-modal-action-btn"><i class="ri-user-line"></i> Ficha Mautic</a>';
             html += '</div>';
 
             // AI suggestion placeholder
