@@ -394,7 +394,8 @@ Mautic.lwaRenderTempoReuniao = function(leads) {
         html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')">';
         html += '<td><strong>'+name+'</strong></td>';
         html += '<td>'+(l.company||'-')+'</td>';
-        html += '<td><span class="lwa-badge lwa-badge--quente" style="font-size:11px">'+status+'</span></td>';
+        var tempClass = (l.temperatura||'').toLowerCase().replace('á','a');
+        html += '<td><span class="lwa-badge lwa-badge--'+tempClass+'" style="font-size:11px">'+status+'</span></td>';
         html += '<td style="color:#10b981;font-weight:600">'+valor+'</td>';
         html += '<td>'+date+'</td></tr>';
     });
