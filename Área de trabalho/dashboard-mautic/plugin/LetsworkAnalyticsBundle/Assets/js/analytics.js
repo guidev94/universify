@@ -1140,6 +1140,17 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             if (l.temperatura) html += '  <span class="lwa-badge lwa-badge--' + l.temperatura + '">' + l.temperatura.charAt(0).toUpperCase() + l.temperatura.slice(1) + '</span>';
             html += '</div>';
 
+            // Score visual bar
+            var score = parseInt(l.interesse_score) || 0;
+            var scoreMax = 200;
+            var scorePct = Math.min(100, Math.round((score / scoreMax) * 100));
+            var scoreColor = score > 100 ? '#9333ea' : score > 60 ? '#dc2626' : score > 20 ? '#f59e0b' : '#3b82f6';
+            html += '<div style="margin-bottom:16px">';
+            html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;font-weight:600;color:var(--lwa-gray-400)">SCORE DE INTERESSE</span><span style="font-size:14px;font-weight:700;color:'+scoreColor+'">'+score+' pts</span></div>';
+            html += '  <div style="background:var(--lwa-gray-100);border-radius:6px;height:8px;overflow:hidden"><div style="background:'+scoreColor+';height:100%;width:'+scorePct+'%;border-radius:6px;transition:width 0.5s ease"></div></div>';
+            html += '  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--lwa-gray-400)"><span>Frio</span><span>Morno</span><span>Quente</span><span>Prioritário</span></div>';
+            html += '</div>';
+
             // Info grid
             html += '<div class="lwa-modal-grid">';
             html += Mautic.lwaModalField('Origem', l.origem_principal);
@@ -1153,6 +1164,15 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             if (l.dor_principal) {
                 html += '<div class="lwa-modal-section"><label>Dor Principal</label><p>' + l.dor_principal + '</p></div>';
             }
+
+            // Ações rápidas
+            html += '<div class="lwa-modal-section"><label>Ações Rápidas</label></div>';
+            html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
+            if (l.phone) html += '<a href="https://wa.me/55' + (l.phone||'').replace(/[^0-9]/g,'') + '" target="_blank" class="lwa-modal-action-btn" style="background:#dcfce7;border-color:#bbf7d0;color:#16a34a"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
+            if (l.email) html += '<button class="lwa-modal-action-btn" onclick="navigator.clipboard.writeText(\'' + l.email + '\');Mautic.lwaToast(\'Email copiado!\')"><i class="ri-file-copy-line"></i> Copiar Email</button>';
+            html += '<button class="lwa-modal-action-btn" style="background:#fef3c7;border-color:#fde68a;color:#d97706" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'temperatura\',\'Quente\')"><i class="ri-fire-line"></i> Marcar Quente</button>';
+            html += '<button class="lwa-modal-action-btn" style="background:#ede9fe;border-color:#ddd6fe;color:#7c3aed" onclick="Mautic.lwaUpdateLead(' + l.id + ',\'temperatura\',\'Prioritário\')"><i class="ri-vip-crown-line"></i> Prioritário</button>';
+            html += '</div>';
 
             // Contact
             if (l.email || l.phone) {
