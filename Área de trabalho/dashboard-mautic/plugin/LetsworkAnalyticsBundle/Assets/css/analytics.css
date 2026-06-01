@@ -420,8 +420,9 @@ body.dark-theme .lwa-btn--ghost:hover {
     gap: 12px;
     margin-bottom: 24px;
 }
-.lwa-kpi-row--full { grid-template-columns: repeat(8, 1fr); }
-.lwa-kpi-row--full .lwa-kpi-card { min-height: 110px; padding: 16px 12px; }
+.lwa-kpi-row--full { grid-template-columns: repeat(5, 1fr); }
+.lwa-kpi-row--full .lwa-kpi-card { min-height: 120px; padding: 20px 16px; }
+.lwa-kpi-row--full .lwa-kpi-value { font-size: 30px; }
 
 .lwa-kpi-row--compact { grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .lwa-kpi-row--compact .lwa-kpi-card { padding: 20px 24px; }
