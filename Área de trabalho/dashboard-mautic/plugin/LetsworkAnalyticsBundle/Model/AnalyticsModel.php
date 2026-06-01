@@ -1438,7 +1438,16 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
         $data = json_decode($response, true);
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-        if (preg_match('/\{.*\}/s', $text, $matches)) {
+        // Strip markdown code blocks
+        $text = preg_replace('/```json\s*/i', '', $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
+
+        if (preg_match('/\{[\s\S]*\}/s', $text, $matches)) {
+            $parsed = json_decode($matches[0], true);
+            if ($parsed) return $parsed;
+        }
+        if (preg_match('/\[[\s\S]*\]/s', $text, $matches)) {
             $parsed = json_decode($matches[0], true);
             if ($parsed) return $parsed;
         }
@@ -1503,8 +1512,11 @@ Responda APENAS em JSON:
 
         $responseData = json_decode($response, true);
         $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        $text = preg_replace('/```json\s*/i', '', $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
 
-        if (preg_match('/\[.*\]/s', $text, $matches)) {
+        if (preg_match('/\[[\s\S]*\]/s', $text, $matches)) {
             $parsed = json_decode($matches[0], true);
             if ($parsed) return $parsed;
         }
@@ -1586,12 +1598,16 @@ Responda APENAS em JSON valido:
         $data = json_decode($response, true);
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-        $jsonStr = $text;
-        if (preg_match('/\{[^{}]*\}/s', $text, $matches)) {
-            $jsonStr = $matches[0];
+        // Strip markdown code blocks
+        $text = preg_replace('/```json\s*/i', '', $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
+
+        $parsed = null;
+        if (preg_match('/\{[\s\S]*\}/s', $text, $matches)) {
+            $parsed = json_decode($matches[0], true);
         }
 
-        $parsed = json_decode($jsonStr, true);
         if (!$parsed) {
             return ['proxima_acao' => 'Analisar manualmente', 'mensagem_followup' => $text, 'intencao' => '-', 'probabilidade_conversao' => '-', 'dica_comercial' => '-'];
         }
