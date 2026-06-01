@@ -1,15 +1,15 @@
 {# KPIs de Conversão #}
 <div class="lwa-section-label">Resumo de Conversão</div>
 <div class="lwa-kpi-row lwa-kpi-row--compact">
-    {% set total_leads = funnel.data[0]|default(0) %}
-    {% set total_ganhos = funnel.data[4]|default(0) %}
-    {% set taxa_geral = total_leads > 0 ? ((total_ganhos / total_leads * 100)|round(1)) : 0 %}
+    {% set tl = total_leads|default(0) %}
+    {% set tg = total_ganhos|default(0) %}
+    {% set taxa_geral = tl > 0 ? ((tg / tl * 100)|round(1)) : 0 %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
-        title: 'Total de Leads', value: total_leads, icon: 'ri-team-line', color: 'primary',
+        title: 'Total de Leads', value: tl, icon: 'ri-team-line', color: 'primary',
         kpi_id: 'conv_total_leads', description: 'Base no período'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {
-        title: 'Convertidos', value: total_ganhos, icon: 'ri-trophy-line', color: 'success',
+        title: 'Convertidos', value: tg, icon: 'ri-trophy-line', color: 'success',
         kpi_id: 'conv_ganhos', description: 'Clientes ganhos'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card_v2.html.twig' with {

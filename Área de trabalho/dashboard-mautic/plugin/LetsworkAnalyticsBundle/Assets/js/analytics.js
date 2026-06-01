@@ -118,6 +118,34 @@ Mautic.lwaGetChartConfig = function(type, data) {
     var colors = data.colors || ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#dc2626', '#64748b'];
 
     var datasets;
+
+    // If data already has datasets (multi-series like emails), use them directly
+    if (data.datasets && data.datasets.length > 0) {
+        datasets = data.datasets.map(function(ds, i) {
+            ds.label = ds.label || '';
+            ds.borderColor = ds.borderColor || colors[i % colors.length];
+            ds.backgroundColor = ds.backgroundColor || (Mautic.lwaHexToRgba(colors[i % colors.length], 0.1));
+            ds.borderWidth = ds.borderWidth || 2;
+            ds.tension = ds.tension || 0.4;
+            ds.fill = ds.fill !== undefined ? ds.fill : true;
+            ds.pointRadius = ds.pointRadius || 3;
+            ds.pointHoverRadius = ds.pointHoverRadius || 6;
+            return ds;
+        });
+        var hasLabels = datasets.some(function(ds) { return ds.label && ds.label !== ''; });
+        return {
+            type: type === 'bar' ? 'bar' : 'line',
+            data: { labels: data.labels, datasets: datasets },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: { legend: { display: hasLabels, position: 'top', labels: { usePointStyle: true, font: { size: 11 } } }, tooltip: { backgroundColor: 'rgba(15,23,42,0.92)', padding: { x: 14, y: 10 }, cornerRadius: 10 } },
+                scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 45 } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { font: { size: 10 }, color: '#94a3b8' } } },
+                animation: { duration: 800, easing: 'easeOutQuart' }
+            }
+        };
+    }
+
     if (type === 'doughnut' || type === 'pie') {
         datasets = [{
             data: data.data,

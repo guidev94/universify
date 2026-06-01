@@ -64,11 +64,16 @@ class AnalyticsModel
 
     public function getConversaoData(array $dateRange): array
     {
+        $totalLeads = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added BETWEEN :from AND :to AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+        $totalGanhos = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE LOWER(status_comercial) = 'ganho' AND date_modified BETWEEN :from AND :to AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+
         return [
-            'funnel'    => $this->getConversionFunnel($dateRange),
-            'by_origin' => $this->getConversionByOrigin($dateRange),
-            'win_rate'  => $this->getWinRateByOrigin($dateRange),
-            'stages'    => $this->getStagesList(),
+            'funnel'       => $this->getConversionFunnel($dateRange),
+            'by_origin'    => $this->getConversionByOrigin($dateRange),
+            'win_rate'     => $this->getWinRateByOrigin($dateRange),
+            'stages'       => $this->getStagesList(),
+            'total_leads'  => $totalLeads,
+            'total_ganhos' => $totalGanhos,
         ];
     }
 
