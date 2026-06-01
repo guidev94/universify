@@ -859,9 +859,15 @@ body.dark-theme .lwa-btn--ghost:hover {
 /* Responsive */
 @media (max-width: 768px) {
     .lwa-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .lwa-kpi-row--full { grid-template-columns: repeat(3, 1fr); }
     .lwa-kpi-row--compact { grid-template-columns: 1fr; }
     .lwa-charts-row { flex-direction: column; }
-    .lwa-content { padding: 16px; }
+    .lwa-content { padding: 12px; }
     .lwa-modal-grid { grid-template-columns: repeat(2, 1fr); }
     .lwa-modal-actions { grid-template-columns: 1fr; }
+    .lwa-modal-content { max-width: 100vw; max-height: 100vh; border-radius: 0; }
+    .lwa-modal-content--wide { width: 100%; }
+    .lwa-modal-metrics--3 { grid-template-columns: 1fr 1fr; }
+    .lwa-modal-grid-2 { grid-template-columns: 1fr; }
+    .lwa-table { font-size: 13px; }
 }

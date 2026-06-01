@@ -788,72 +788,37 @@ Mautic.lwaRenderKpiPage = function() {
     var totalPages = Math.ceil(leads.length / perPage);
     var start = (page - 1) * perPage;
     var pageLeads = leads.slice(start, start + perPage);
-    var ctx = Mautic.lwaKpiContext || {};
+    var kpi = Mautic.lwaCurrentKpi || '';
+    var isPerdidos = kpi.indexOf('perdid') > -1 || kpi === 'leads_perdidos';
 
-    var html = '<div class="lwa-kd-header-bar">';
-    html += '  <span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads encontrados</span>';
-    html += '  <span class="lwa-kd-page">Página ' + page + '/' + totalPages + '</span>';
-    html += '</div>';
-    if (ctx.subtitle) {
-        html += '<div style="font-size:12px;color:var(--lwa-gray-400);margin-bottom:12px;display:flex;align-items:center;gap:6px"><i class="' + (ctx.icon || 'ri-information-line') + '"></i> ' + ctx.subtitle + '</div>';
-    }
-    html += '<div class="lwa-kd-grid">';
+    var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea','prioritário':'#9333ea'};
 
-    pageLeads.forEach(function(lead, idx) {
-        var name = ((lead.firstname || '') + ' ' + (lead.lastname || '')).trim() || lead.company || 'Sem nome';
-        var initial = name.charAt(0).toUpperCase();
-        var company = lead.company || '';
-        var cargo = lead.cargo || '';
-        var temp = lead.temperatura || '';
+    var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Temperatura</th><th>Score</th><th>Origem</th>';
+    if (isPerdidos) html += '<th>Motivo</th>';
+    html += '</tr></thead><tbody>';
+
+    pageLeads.forEach(function(lead) {
+        var name = ((lead.firstname||'')+' '+(lead.lastname||'')).trim() || lead.company || 'Sem nome';
+        var temp = (lead.temperatura||'').toLowerCase().replace('á','a');
+        var tempLabel = lead.temperatura || '-';
+        var tColor = tempColors[temp] || '#64748b';
         var score = lead.interesse_score || 0;
-        var origin = (lead.origem_principal || '').replace(/_/g, ' ');
-        var status = (lead.status_comercial || '').replace(/_/g, ' ');
-        var avatarColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea'};
-        var avatarBg = avatarColors[temp] || '#dc2626';
+        var origin = (lead.origem_principal||'').replace(/_/g,' ');
 
-        var statusIcons = {
-            'reuniao agendada': {icon: 'ri-calendar-todo-line', color: '#3b82f6', label: 'Agendada'},
-            'reuniao realizada': {icon: 'ri-calendar-check-line', color: '#10b981', label: 'Realizada'},
-            'reuniao fechamento': {icon: 'ri-handshake-line', color: '#059669', label: 'Fechamento'},
-            'proposta enviada': {icon: 'ri-file-text-line', color: '#8b5cf6', label: 'Proposta'},
-            'negociacao': {icon: 'ri-exchange-line', color: '#7c3aed', label: 'Negociação'},
-            'prospeccao': {icon: 'ri-user-search-line', color: '#94a3b8', label: 'Prospecção'},
-            'engajado': {icon: 'ri-chat-check-line', color: '#f59e0b', label: 'Engajado'},
-            'ganho': {icon: 'ri-trophy-line', color: '#10b981', label: 'Ganho'},
-            'perdido': {icon: 'ri-close-circle-line', color: '#dc2626', label: 'Perdido'}
-        };
-        var statusInfo = statusIcons[status] || {icon: 'ri-flag-line', color: '#94a3b8', label: status};
-        var lastDate = lead.data_ultima_interacao ? new Date(lead.data_ultima_interacao).toLocaleDateString('pt-BR') : '';
-
-        html += '<div class="lwa-kd-card" onclick="Mautic.lwaOpenLeadModal(' + lead.id + ')" style="animation-delay:' + (idx * 0.04) + 's">';
-        html += '  <div class="lwa-kd-card-top">';
-        html += '    <div class="lwa-kd-avatar" style="background:' + avatarBg + '">' + initial + '</div>';
-        html += '    <div class="lwa-kd-info">';
-        html += '      <div class="lwa-kd-name">' + name + '</div>';
-        html += '      <div class="lwa-kd-role">' + (company || cargo) + '</div>';
-        html += '    </div>';
-        if (status) html += '    <span class="lwa-kd-status-pill" style="background:' + statusInfo.color + '12;color:' + statusInfo.color + ';border:1px solid ' + statusInfo.color + '25"><i class="' + statusInfo.icon + '"></i> ' + statusInfo.label + '</span>';
-        html += '  </div>';
-        html += '  <div class="lwa-kd-card-bottom">';
-        // Contextual highlight field
-        if (ctx.highlight === 'motivo_perda' && lead.motivo_perda) {
-            html += '    <span class="lwa-kd-tag" style="background:#fef2f2;color:#dc2626"><i class="ri-alert-line"></i> ' + lead.motivo_perda + '</span>';
-        } else if (ctx.highlight === 'valor_potencial' && lead.valor_potencial) {
-            html += '    <span class="lwa-kd-tag" style="background:#f0fdf4;color:#10b981"><i class="ri-money-dollar-circle-line"></i> R$ ' + parseFloat(lead.valor_potencial).toLocaleString('pt-BR') + '</span>';
-        } else if (ctx.highlight === 'origem_principal' && lead.origem_principal) {
-            html += '    <span class="lwa-kd-tag" style="background:#eff6ff;color:#3b82f6"><i class="ri-global-line"></i> ' + (lead.origem_principal || '').replace(/_/g, ' ') + '</span>';
-        }
-        if (lastDate) html += '    <span class="lwa-kd-tag"><i class="ri-calendar-line"></i> ' + lastDate + '</span>';
-        if (company && cargo) html += '    <span class="lwa-kd-tag"><i class="ri-user-line"></i> ' + cargo + '</span>';
-        html += '    <span class="lwa-kd-tag"><i class="ri-bar-chart-fill"></i> ' + score + '</span>';
-        html += '  </div>';
-        html += '</div>';
+        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+lead.id+')">';
+        html += '<td><div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:'+tColor+';color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">'+name.charAt(0).toUpperCase()+'</div><div><div style="font-size:15px;font-weight:700">'+name+'</div><div style="font-size:12px;color:var(--lwa-gray-400)">'+(lead.cargo||'')+'</div></div></div></td>';
+        html += '<td style="font-size:14px">'+(lead.company||'-')+'</td>';
+        html += '<td><span class="lwa-badge lwa-badge--'+temp+'" style="font-size:12px">'+tempLabel+'</span></td>';
+        html += '<td style="font-weight:700;color:'+tColor+'">'+score+'</td>';
+        html += '<td style="font-size:13px">'+origin+'</td>';
+        if (isPerdidos) html += '<td style="color:#dc2626;font-size:13px">'+(lead.motivo_perda||'-')+'</td>';
+        html += '</tr>';
     });
 
-    html += '</div>';
+    html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);
 
-    // Pagination
     if (totalPages > 1) {
         var pag = '<button class="lwa-pagination-btn lwa-pagination-btn--nav" ' + (page <= 1 ? 'disabled' : 'onclick="Mautic.lwaKpiGoPage(' + (page-1) + ')"') + '><i class="ri-arrow-left-s-line"></i></button>';
         var startP = Math.max(1, page - 2);
