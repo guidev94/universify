@@ -377,35 +377,28 @@ Mautic.lwaRenderTotalLeads = function(leads) {
 
 Mautic.lwaRenderTempoReuniao = function(leads) {
     var total = leads.length;
-    var porOrigem = {};
-    var porStatus = {};
-    leads.forEach(function(l) {
-        var o = (l.origem_principal||'outros').replace(/_/g,' ');
-        var s = (l.status_comercial||'').replace(/_/g,' ');
-        porOrigem[o] = (porOrigem[o]||0) + 1;
-        porStatus[s] = (porStatus[s]||0) + 1;
-    });
     var totalValor = leads.reduce(function(s,l){return s+parseFloat(l.valor_potencial||0);},0);
 
     var html = '<div class="lwa-modal-metrics lwa-modal-metrics--3">';
     html += '<div class="lwa-metric-card lwa-metric-card--blue"><div class="lwa-metric-value" style="color:#3b82f6">' + total + '</div><div class="lwa-metric-label">Total Reuniões</div></div>';
     html += '<div class="lwa-metric-card lwa-metric-card--green"><div class="lwa-metric-value" style="color:#10b981">R$ ' + (totalValor/1000).toFixed(0) + 'k</div><div class="lwa-metric-label">Valor em pipeline</div></div>';
-    html += '<div class="lwa-metric-card lwa-metric-card--purple"><div class="lwa-metric-value" style="color:#7c3aed">' + Object.keys(porOrigem).length + '</div><div class="lwa-metric-label">Origens ativas</div></div>';
+    html += '<div class="lwa-metric-card lwa-metric-card--purple"><div class="lwa-metric-value" style="color:#7c3aed">' + (total > 0 ? 'R$ ' + (totalValor/total/1000).toFixed(1) + 'k' : '0') + '</div><div class="lwa-metric-label">Ticket médio</div></div>';
     html += '</div>';
-    html += '<div class="lwa-modal-grid-2">';
-    html += '<div><div class="lwa-modal-section-title">Reuniões por Origem</div>';
-    html += '<table class="lwa-table lwa-table--compact" style="margin:0"><tbody>';
-    Object.keys(porOrigem).sort(function(a,b){return porOrigem[b]-porOrigem[a];}).forEach(function(o) {
-        var pct = Math.round((porOrigem[o]/total)*100);
-        html += '<tr><td><strong>'+o+'</strong></td><td>'+porOrigem[o]+'</td><td><div class="lwa-bar"><div class="lwa-bar-fill lwa-bar-fill--blue" style="width:'+pct+'%"></div></div></td><td>'+pct+'%</td></tr>';
+    html += '<div class="lwa-modal-section-title">Reuniões Agendadas / Realizadas</div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Status</th><th>Valor</th><th>Última interação</th></tr></thead><tbody>';
+    leads.forEach(function(l) {
+        var name = ((l.firstname||'')+' '+(l.lastname||'')).trim() || 'Sem nome';
+        var status = (l.status_comercial||'').replace(/_/g, ' ');
+        var valor = l.valor_potencial ? 'R$ ' + parseFloat(l.valor_potencial).toLocaleString('pt-BR') : '-';
+        var date = l.data_ultima_interacao ? new Date(l.data_ultima_interacao).toLocaleDateString('pt-BR') : '-';
+        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')">';
+        html += '<td><strong>'+name+'</strong></td>';
+        html += '<td>'+(l.company||'-')+'</td>';
+        html += '<td><span class="lwa-badge lwa-badge--quente" style="font-size:11px">'+status+'</span></td>';
+        html += '<td style="color:#10b981;font-weight:600">'+valor+'</td>';
+        html += '<td>'+date+'</td></tr>';
     });
-    html += '</tbody></table></div>';
-    html += '<div><div class="lwa-modal-section-title">Por Etapa</div>';
-    html += '<table class="lwa-table lwa-table--compact" style="margin:0"><tbody>';
-    Object.keys(porStatus).sort(function(a,b){return porStatus[b]-porStatus[a];}).forEach(function(s) {
-        html += '<tr><td>'+s+'</td><td><strong>'+porStatus[s]+'</strong></td></tr>';
-    });
-    html += '</tbody></table></div></div>';
+    html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);
     mQuery('#lwa-kpi-pagination').html('');
 };
