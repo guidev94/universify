@@ -1128,7 +1128,7 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             }
 
             // === AÇÕES RÁPIDAS ===
-            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
+            html += '<div style="display:flex;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
             if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
             html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
             html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
@@ -1146,6 +1146,9 @@ Mautic.lwaOpenLeadModal = function(leadId) {
                 html += '<button class="lwa-status-btn'+active+'" onclick="Mautic.lwaUpdateLead('+l.id+',\'status_comercial\',\''+s.v+'\')">'+s.l+'</button>';
             });
             html += '</div></div>';
+
+            // === CAMPANHAS (carrega async) ===
+            html += '<div id="lwa-lead-campaigns" style="margin-bottom:16px"></div>';
 
             // === IA & MENSAGENS ===
             html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
@@ -1169,6 +1172,25 @@ Mautic.lwaOpenLeadModal = function(leadId) {
 
             html += '</div>';
             mQuery('#lwa-modal-body').html(html);
+
+            // Load campaigns async
+            mQuery.ajax({
+                url: '/s/analytics/lead/' + leadId + '?include=campaigns',
+                dataType: 'json',
+                success: function(cRes) {
+                    var camps = cRes.campaigns || [];
+                    if (camps.length > 0) {
+                        var ch = '<div style="font-size:12px;font-weight:700;color:var(--lwa-gray-400);margin-bottom:6px">CAMPANHAS MAUTIC</div>';
+                        ch += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+                        camps.forEach(function(c) {
+                            var color = c.manually_removed ? '#94a3b8' : '#10b981';
+                            ch += '<span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;background:'+color+'12;color:'+color+';border:1px solid '+color+'25">'+c.name+'</span>';
+                        });
+                        ch += '</div>';
+                        mQuery('#lwa-lead-campaigns').html(ch);
+                    }
+                }
+            });
         },
         error: function() {
             mQuery('#lwa-modal-body').html('<div class="lwa-empty-state"><p>Erro ao carregar lead</p></div>');

@@ -58,6 +58,7 @@ class AnalyticsModel
                 'downloads'    => $this->getDownloadsCount($dateRange),
                 'in_campaigns' => $this->getLeadsInCampaigns(),
                 'duplicates'   => $this->getDuplicatesCount(),
+                'decay_risk'   => $this->getDecayRiskCount(),
             ],
         ];
     }
@@ -1011,6 +1012,29 @@ class AnalyticsModel
             $timeline[] = ['type' => 'page', 'text' => "Visitou: " . ($p['url_title'] ?: 'Página'), 'date' => $p['date_hit'], 'user' => 'lead'];
         }
 
+        // Score event log (CRM Bundle table)
+        if ($this->tableExists('letswork_score_event_log')) {
+            $scoreEvents = $this->connection->fetchAllAssociative(
+                "SELECT event_key, delta, created_at FROM letswork_score_event_log WHERE lead_id = :id ORDER BY created_at DESC LIMIT 10",
+                ['id' => $leadId]
+            );
+            foreach ($scoreEvents as $se) {
+                $sign = (int)$se['delta'] >= 0 ? '+' : '';
+                $timeline[] = ['type' => 'score', 'text' => $se['event_key'] . " ({$sign}{$se['delta']} pts)", 'date' => $se['created_at'], 'user' => 'system'];
+            }
+        }
+
+        // Push log (CRM Bundle table)
+        if ($this->tableExists('letswork_push_log')) {
+            $pushes = $this->connection->fetchAllAssociative(
+                "SELECT status, created_at FROM letswork_push_log WHERE lead_id = :id ORDER BY created_at DESC LIMIT 5",
+                ['id' => $leadId]
+            );
+            foreach ($pushes as $p) {
+                $timeline[] = ['type' => 'push', 'text' => "Enviado para CRM ({$p['status']})", 'date' => $p['created_at'], 'user' => 'system'];
+            }
+        }
+
         if ($this->tableExists('form_submissions')) {
             $forms = $this->connection->fetchAllAssociative(
                 "SELECT fs.date_submitted, f.name as form_name FROM form_submissions fs LEFT JOIN forms f ON fs.form_id = f.id WHERE fs.lead_id = :id ORDER BY fs.date_submitted DESC LIMIT 5",
@@ -1678,6 +1702,13 @@ Responda APENAS em JSON valido:
         if (!$this->tableExists('campaign_leads')) return 0;
         return (int) $this->connection->fetchOne(
             "SELECT COUNT(DISTINCT lead_id) FROM campaign_leads WHERE manually_removed = 0"
+        );
+    }
+
+    private function getDecayRiskCount(): int
+    {
+        return (int) $this->connection->fetchOne(
+            "SELECT COUNT(*) FROM leads WHERE date_modified < DATE_SUB(NOW(), INTERVAL 30 DAY) AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != '')) AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) AND interesse_score > 0"
         );
     }
 

@@ -112,6 +112,12 @@
         title: 'Em Campanhas', value: engagement.in_campaigns, icon: 'ri-megaphone-line',
         kpi_id: 'engaj_campanhas', description: 'Leads ativos em campanhas'
     } %}
+    {% if engagement.decay_risk > 0 %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Risco Decay', value: engagement.decay_risk, icon: 'ri-timer-line', color: 'warning',
+        kpi_id: 'hot_no_followup', description: '+30 dias sem interação'
+    } %}
+    {% endif %}
     {% if engagement.duplicates > 0 %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Duplicados', value: engagement.duplicates, icon: 'ri-file-copy-line', color: 'warning', description: 'E-mails duplicados'

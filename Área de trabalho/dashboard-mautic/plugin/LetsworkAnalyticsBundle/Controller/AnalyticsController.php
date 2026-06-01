@@ -75,6 +75,9 @@ class AnalyticsController extends CommonController
         if ($include === 'timeline') {
             return new JsonResponse(['timeline' => $this->analyticsModel->getLeadTimeline($leadId)]);
         }
+        if ($include === 'campaigns') {
+            return new JsonResponse(['campaigns' => $this->analyticsModel->getLeadCampaigns($leadId)]);
+        }
 
         $lead = $this->analyticsModel->getLeadDetail($leadId);
         if (!$lead) {
