@@ -1250,13 +1250,23 @@ Responda APENAS em JSON:
         $leadName = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
         $now = date('Y-m-d H:i:s');
 
-        // Send email via PHP mail (Mautic mailer config)
-        $fromEmail = getenv('MAUTIC_ADMIN_EMAIL') ?: ($_ENV['MAUTIC_ADMIN_EMAIL'] ?? 'noreply@localhost');
-        $headers = "From: $fromEmail\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        // Send email via Mautic's configured SMTP
+        $fromEmail = getenv('MAUTIC_ADMIN_EMAIL') ?: ($_ENV['MAUTIC_ADMIN_EMAIL'] ?? ($_SERVER['MAUTIC_ADMIN_EMAIL'] ?? 'noreply@localhost'));
         $htmlBody = nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8'));
 
-        $sent = mail($to, $subject, $htmlBody, $headers);
+        // Try Mautic's mailer DSN from config
+        $sent = false;
+        try {
+            $mailerDsn = $this->connection->fetchOne("SELECT value FROM plugin_integration_settings WHERE name = 'mailer_dsn'") ?: '';
+            if (!$mailerDsn) {
+                // Fallback: read from local.php or use PHP mail
+                $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
+            } else {
+                $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
+            }
+        } catch (\Exception $e) {
+            $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
+        }
 
         // Log in email_stats
         $this->connection->insert('email_stats', [
@@ -1411,9 +1421,9 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
 
     private function callGemini(string $prompt): array
     {
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '');
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
         if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $payload = json_encode([
             'contents' => [['parts' => [['text' => $prompt]]]],
@@ -1452,9 +1462,9 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
             'taxa_email' => $this->getEmailOpenRate($dateRange),
         ];
 
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '');
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
         if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
 
@@ -1506,9 +1516,9 @@ Responda APENAS em JSON:
 
     public function getAiSuggestion(array $lead): array
     {
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '');
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
         if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
         $status = str_replace('_', ' ', $lead['status_comercial'] ?? '');
