@@ -227,6 +227,35 @@ class AnalyticsController extends CommonController
         return new JsonResponse($result);
     }
 
+    public function pushToCrmAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+        $leadId = (int) $request->request->get('lead_id');
+        $responsavel = $request->request->get('responsavel', '');
+        if (!$leadId || !$responsavel) return new JsonResponse(['error' => 'lead_id e responsavel obrigatórios'], 400);
+        return new JsonResponse($this->analyticsModel->pushLeadToCrm($leadId, $responsavel));
+    }
+
+    public function forecastAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+        $dateFrom = $request->get('dateFrom', date('Y-m-d', strtotime('-90 days')));
+        $dateTo = $request->get('dateTo', date('Y-m-d'));
+        return new JsonResponse($this->analyticsModel->getForecast(['from' => $dateFrom, 'to' => $dateTo]));
+    }
+
+    public function duplicatesAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+        return new JsonResponse(['duplicates' => $this->analyticsModel->getDuplicateLeads()]);
+    }
+
     public function scoreEventAction(Request $request): JsonResponse
     {
         if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {

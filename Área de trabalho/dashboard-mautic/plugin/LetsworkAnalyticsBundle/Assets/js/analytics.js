@@ -793,7 +793,7 @@ Mautic.lwaRenderKpiPage = function() {
 
     var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea','prioritário':'#9333ea'};
 
-    var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div>';
+    var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><div style="display:flex;gap:8px;align-items:center"><button onclick="Mautic.lwaExportCSV(\'#lwa-kpi-detail-body .lwa-table\',\'leads\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--lwa-gray-200);background:white;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ri-download-2-line"></i> CSV</button><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div></div>';
     html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Temperatura</th><th>Score</th><th>Origem</th>';
     if (isPerdidos) html += '<th>Motivo</th>';
     html += '</tr></thead><tbody>';
@@ -1132,6 +1132,7 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
             html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
             html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
+            html += '<button onclick="Mautic.lwaPushToCrm('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#f0f9ff;color:#0369a1;font-size:13px;font-weight:600;border:1px solid #bae6fd;cursor:pointer"><i class="ri-send-plane-line"></i> Enviar CRM</button>';
             html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Quente\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#fef3c7;color:#d97706;font-size:13px;font-weight:600;border:1px solid #fde68a;cursor:pointer"><i class="ri-fire-line"></i> Quente</button>';
             html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Prioritário\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#ede9fe;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-vip-crown-line"></i> Prioritário</button>';
             html += '</div>';
@@ -1564,6 +1565,47 @@ Mautic.lwaAddScoreEvent = function(leadId, event, description) {
             }
         }
     });
+};
+
+/**
+ * Push Lead to CRM
+ */
+Mautic.lwaPushToCrm = function(leadId, leadName) {
+    var responsavel = prompt('Responsável comercial que receberá o lead:', '');
+    if (!responsavel) return;
+    mQuery.ajax({
+        url: '/s/analytics/action/update-lead',
+        method: 'POST',
+        data: { lead_id: leadId, field: 'webhook_event', source: 'analytics', event: 'letswork.meeting.scheduled', responsavel_comercial: responsavel },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
+        dataType: 'json',
+        success: function(res) {
+            Mautic.lwaToast(res.success ? 'Lead enviado para ' + responsavel : (res.error || 'Erro'));
+            if (res.success) Mautic.lwaOpenLeadModal(leadId);
+        }
+    });
+};
+
+/**
+ * Export CSV
+ */
+Mautic.lwaExportCSV = function(tableSelector, filename) {
+    var table = document.querySelector(tableSelector || '.lwa-table');
+    if (!table) { Mautic.lwaToast('Nenhuma tabela para exportar'); return; }
+    var csv = [];
+    var rows = table.querySelectorAll('tr');
+    rows.forEach(function(row) {
+        var cols = row.querySelectorAll('td, th');
+        var rowData = [];
+        cols.forEach(function(col) { rowData.push('"' + col.textContent.trim().replace(/"/g, '""') + '"'); });
+        csv.push(rowData.join(','));
+    });
+    var blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = (filename || 'leads_export') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+    link.click();
+    Mautic.lwaToast('CSV exportado!');
 };
 
 /**

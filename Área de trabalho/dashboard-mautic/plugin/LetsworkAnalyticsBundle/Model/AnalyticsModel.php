@@ -1838,6 +1838,82 @@ Responda APENAS em JSON valido:
         return ['success' => true, 'event' => $event, 'source' => $source, 'score' => $scoreResult];
     }
 
+    // --- Push to CRM ---
+
+    public function pushLeadToCrm(int $leadId, string $responsavel): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $now = date('Y-m-d H:i:s');
+        if ($this->columnExists('leads', 'responsavel_comercial')) {
+            $this->connection->executeStatement("UPDATE leads SET responsavel_comercial = :resp, date_modified = :now WHERE id = :id", ['resp' => $responsavel, 'now' => $now, 'id' => $leadId]);
+        }
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => "Lead enviado para CRM — Responsável: $responsavel",
+            'type' => 'general', 'date_time' => $now,
+        ]);
+
+        return ['success' => true, 'message' => "Lead enviado para $responsavel"];
+    }
+
+    // --- Forecast IA ---
+
+    public function getForecast(array $dateRange): array
+    {
+        $pipeline = $this->connection->fetchAllAssociative(
+            "SELECT id, firstname, lastname, company, valor_potencial, status_comercial, temperatura, date_added, date_modified
+             FROM leads WHERE LOWER(status_comercial) IN ('proposta_enviada','proposta','negociacao','negociação','reuniao_agendada','reuniao_realizada')
+             AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))
+             ORDER BY valor_potencial DESC LIMIT 20"
+        );
+
+        $totalValor = array_sum(array_column($pipeline, 'valor_potencial'));
+        $avgCycle = 0;
+        if (count($pipeline) > 0) {
+            $days = array_map(function($l) { return max(1, (strtotime($l['date_modified']) - strtotime($l['date_added'])) / 86400); }, $pipeline);
+            $avgCycle = round(array_sum($days) / count($days));
+        }
+
+        return ['pipeline' => $pipeline, 'total_valor' => $totalValor, 'avg_cycle_days' => $avgCycle, 'deals_count' => count($pipeline)];
+    }
+
+    // --- Deduplicação ---
+
+    public function getDuplicateLeads(): array
+    {
+        $sql = "SELECT email, COUNT(*) as qty, GROUP_CONCAT(id SEPARATOR ',') as ids, GROUP_CONCAT(DISTINCT CONCAT(COALESCE(firstname,''),' ',COALESCE(lastname,'')) SEPARATOR ' | ') as names
+                FROM leads WHERE email IS NOT NULL AND email != ''
+                GROUP BY email HAVING qty > 1 ORDER BY qty DESC LIMIT 20";
+        return $this->connection->fetchAllAssociative($sql);
+    }
+
+    public function mergeLeads(int $keepId, int $removeId): array
+    {
+        $keep = $this->connection->fetchAssociative("SELECT id FROM leads WHERE id = :id", ['id' => $keepId]);
+        if (!$keep) return ['error' => 'Lead principal não encontrado'];
+
+        $this->connection->executeStatement("UPDATE lead_notes SET lead_id = :keep WHERE lead_id = :remove", ['keep' => $keepId, 'remove' => $removeId]);
+        $this->connection->executeStatement("UPDATE email_stats SET lead_id = :keep WHERE lead_id = :remove", ['keep' => $keepId, 'remove' => $removeId]);
+        $this->connection->executeStatement("DELETE FROM leads WHERE id = :id", ['id' => $removeId]);
+
+        return ['success' => true, 'message' => "Lead #$removeId mergeado em #$keepId"];
+    }
+
+    // --- Campanhas do Lead ---
+
+    public function getLeadCampaigns(int $leadId): array
+    {
+        if (!$this->tableExists('campaign_leads') || !$this->tableExists('campaigns')) return [];
+        return $this->connection->fetchAllAssociative(
+            "SELECT c.name, cl.date_added, cl.manually_removed FROM campaign_leads cl JOIN campaigns c ON c.id = cl.campaign_id WHERE cl.lead_id = :id ORDER BY cl.date_added DESC",
+            ['id' => $leadId]
+        );
+    }
+
     // --- Helpers ---
 
     private function tableExists(string $table): bool
