@@ -598,7 +598,7 @@ body.dark-theme .lwa-btn--ghost:hover {
 @keyframes lwa-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .lwa-modal-content {
-    position: relative; width: 620px; max-width: 94vw; max-height: 88vh;
+    position: relative; width: 720px; max-width: 96vw; max-height: 90vh;
     background: var(--layer-02, white); border-radius: 16px;
     box-shadow: var(--lwa-shadow-lg); display: flex; flex-direction: column;
     animation: lwa-scaleIn 0.2s ease; overflow: hidden;
@@ -831,6 +831,35 @@ body.dark-theme .lwa-btn--ghost:hover {
 .lwa-bar-fill--green { background: #10b981; }
 .lwa-bar-fill--red { background: #dc2626; }
 .lwa-bar-fill--purple { background: #7c3aed; }
+
+/* Skeleton Loading */
+.lwa-skeleton { background: linear-gradient(90deg, var(--lwa-gray-100) 25%, var(--lwa-gray-50) 50%, var(--lwa-gray-100) 75%); background-size: 200% 100%; animation: lwa-shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes lwa-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.lwa-skeleton-card { height: 80px; margin-bottom: 12px; }
+.lwa-skeleton-line { height: 14px; margin-bottom: 8px; width: 80%; }
+.lwa-skeleton-line--short { width: 40%; }
+
+/* Tooltip */
+.lwa-tooltip { position: relative; cursor: help; }
+.lwa-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding: 6px 12px; background: var(--lwa-gray-900); color: white; font-size: 11px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+.lwa-tooltip:hover::after { opacity: 1; }
+
+/* Stagger animation */
+.lwa-stagger > * { animation: lwa-fadeInUp 0.3s ease both; }
+.lwa-stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.lwa-stagger > *:nth-child(2) { animation-delay: 0.04s; }
+.lwa-stagger > *:nth-child(3) { animation-delay: 0.06s; }
+.lwa-stagger > *:nth-child(4) { animation-delay: 0.08s; }
+.lwa-stagger > *:nth-child(5) { animation-delay: 0.10s; }
+.lwa-stagger > *:nth-child(6) { animation-delay: 0.12s; }
+.lwa-stagger > *:nth-child(7) { animation-delay: 0.14s; }
+.lwa-stagger > *:nth-child(8) { animation-delay: 0.16s; }
+.lwa-stagger > *:nth-child(9) { animation-delay: 0.18s; }
+
+/* Search */
+.lwa-search { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--lwa-gray-200); background: var(--lwa-gray-50); margin-bottom: 16px; }
+.lwa-search input { border: none; background: none; outline: none; font-size: 14px; flex: 1; color: var(--lwa-gray-800); }
+.lwa-search i { color: var(--lwa-gray-400); }
 
 /* Timeline */
 .lwa-timeline { padding: 8px 0; }

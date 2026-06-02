@@ -1445,8 +1445,20 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
 
     private function callGemini(string $prompt): array
     {
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
+        if (!$apiKey) {
+            $envFile = __DIR__ . '/../.env.example';
+            if (file_exists($envFile)) {
+                $lines = file($envFile);
+                foreach ($lines as $line) {
+                    if (strpos($line, 'GEMINI_API_KEY=') === 0) {
+                        $apiKey = trim(substr($line, 15));
+                        break;
+                    }
+                }
+            }
+        }
+        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $payload = json_encode([
@@ -1495,8 +1507,20 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
             'taxa_email' => $this->getEmailOpenRate($dateRange),
         ];
 
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
+        if (!$apiKey) {
+            $envFile = __DIR__ . '/../.env.example';
+            if (file_exists($envFile)) {
+                $lines = file($envFile);
+                foreach ($lines as $line) {
+                    if (strpos($line, 'GEMINI_API_KEY=') === 0) {
+                        $apiKey = trim(substr($line, 15));
+                        break;
+                    }
+                }
+            }
+        }
+        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
@@ -1552,8 +1576,20 @@ Responda APENAS em JSON:
 
     public function getAiSuggestion(array $lead): array
     {
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ''));
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente.'];
+        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
+        if (!$apiKey) {
+            $envFile = __DIR__ . '/../.env.example';
+            if (file_exists($envFile)) {
+                $lines = file($envFile);
+                foreach ($lines as $line) {
+                    if (strpos($line, 'GEMINI_API_KEY=') === 0) {
+                        $apiKey = trim(substr($line, 15));
+                        break;
+                    }
+                }
+            }
+        }
+        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));

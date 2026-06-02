@@ -286,7 +286,7 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
     Mautic.lwaCurrentKpi = kpiId;
     Mautic.lwaKpiPage = 1;
     mQuery('#lwa-kpi-detail-title').text(title);
-    mQuery('#lwa-kpi-detail-body').html('<div class="lwa-panel-loading"><div class="lwa-spinner"></div><span>Carregando...</span></div>');
+    mQuery('#lwa-kpi-detail-body').html('<div style="padding:16px"><div class="lwa-skeleton lwa-skeleton-card"></div><div class="lwa-skeleton lwa-skeleton-line"></div><div class="lwa-skeleton lwa-skeleton-line lwa-skeleton-line--short"></div><div class="lwa-skeleton lwa-skeleton-card"></div></div>');
     mQuery('#lwa-kpi-pagination').html('');
     $panel.show();
 
@@ -836,6 +836,7 @@ Mautic.lwaRenderKpiPage = function() {
     var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea','prioritário':'#9333ea'};
 
     var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><div style="display:flex;gap:8px;align-items:center"><button onclick="Mautic.lwaExportCSV(\'#lwa-kpi-detail-body .lwa-table\',\'leads\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--lwa-gray-200);background:white;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ri-download-2-line"></i> CSV</button><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div></div>';
+    html += '<div class="lwa-search"><i class="ri-search-line"></i><input type="text" placeholder="Buscar lead..." onkeyup="Mautic.lwaFilterLeads(this.value)"></div>';
     html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Temperatura</th><th>Score</th><th>Origem</th>';
     if (isPerdidos) html += '<th>Motivo</th>';
     html += '</tr></thead><tbody>';
@@ -1171,12 +1172,12 @@ Mautic.lwaOpenLeadModal = function(leadId) {
 
             // === AÇÕES RÁPIDAS ===
             html += '<div style="display:flex;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
-            if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
-            html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
-            html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
-            html += '<button onclick="Mautic.lwaPushToCrm('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#f0f9ff;color:#0369a1;font-size:13px;font-weight:600;border:1px solid #bae6fd;cursor:pointer"><i class="ri-send-plane-line"></i> Enviar CRM</button>';
-            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Quente\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#fef3c7;color:#d97706;font-size:13px;font-weight:600;border:1px solid #fde68a;cursor:pointer"><i class="ri-fire-line"></i> Quente</button>';
-            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Prioritário\')" style="display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:#ede9fe;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-vip-crown-line"></i> Prioritário</button>';
+            if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
+            html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
+            html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
+            html += '<button onclick="Mautic.lwaPushToCrm('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#f0f9ff;color:#0369a1;font-size:13px;font-weight:600;border:1px solid #bae6fd;cursor:pointer"><i class="ri-send-plane-line"></i> Enviar CRM</button>';
+            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Quente\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#fef3c7;color:#d97706;font-size:13px;font-weight:600;border:1px solid #fde68a;cursor:pointer"><i class="ri-fire-line"></i> Quente</button>';
+            html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Prioritário\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#ede9fe;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-vip-crown-line"></i> Prioritário</button>';
             html += '</div>';
 
             // === PIPELINE ===
@@ -1628,6 +1629,17 @@ Mautic.lwaAddScoreEvent = function(leadId, event, description) {
                 Mautic.lwaToast(res.error || 'Erro');
             }
         }
+    });
+};
+
+/**
+ * Filter leads in table
+ */
+Mautic.lwaFilterLeads = function(query) {
+    var q = query.toLowerCase();
+    mQuery('#lwa-kpi-detail-body .lwa-table tbody tr').each(function() {
+        var text = mQuery(this).text().toLowerCase();
+        mQuery(this).toggle(text.indexOf(q) > -1);
     });
 };
 
