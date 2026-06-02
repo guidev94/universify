@@ -500,6 +500,14 @@ Mautic.lwaRenderConvertidos = function(leads) {
     Object.keys(porModulo).sort(function(a,b){return porModulo[b]-porModulo[a];}).forEach(function(m){
         html += '<tr class="lwa-table-row-interactive"><td><strong>'+m+'</strong></td><td>'+porModulo[m]+' clientes</td><td>R$ '+(leads.filter(function(l){return (l.modulo_interesse||'Não definido')===m;}).reduce(function(s,l){return s+parseFloat(l.valor_potencial||0);},0)/1000).toFixed(0)+'k</td></tr>';
     });
+    html += '</tbody></table>';
+    html += '<div class="lwa-modal-section-title" style="margin-top:16px">Clientes Ganhos</div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Cliente</th><th>Empresa</th><th>Módulo</th><th>Valor</th></tr></thead><tbody>';
+    leads.sort(function(a,b){return parseFloat(b.valor_potencial||0)-parseFloat(a.valor_potencial||0);});
+    leads.forEach(function(l){
+        var name=((l.firstname||'')+' '+(l.lastname||'')).trim()||'Sem nome';
+        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal('+l.id+')"><td><strong>'+name+'</strong></td><td>'+(l.company||'-')+'</td><td>'+(l.modulo_interesse||'-')+'</td><td style="color:#10b981;font-weight:700">R$ '+(parseFloat(l.valor_potencial||0)/1000).toFixed(0)+'k</td></tr>';
+    });
     html += '</tbody></table></div>';
     mQuery('#lwa-kpi-detail-body').html(html);
     mQuery('#lwa-kpi-pagination').html('');
@@ -591,16 +599,35 @@ Mautic.lwaRenderOrigensAfetadas = function(leads) {
 };
 
 Mautic.lwaRenderLeadsPerdidos = function(leads) {
-    var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><i class="ri-close-circle-line"></i> <strong>' + leads.length + '</strong> leads perdidos</span></div>';
-    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Motivo</th><th>Origem</th><th>Valor perdido</th></tr></thead><tbody>';
+    var totalValor = leads.reduce(function(s,l){return s+parseFloat(l.valor_potencial||0);},0);
+    var porMotivo = {};
+    leads.forEach(function(l){ var m=l.motivo_perda||'Não informado'; porMotivo[m]=(porMotivo[m]||0)+1; });
+
+    var html = '<div class="lwa-modal-metrics lwa-modal-metrics--3">';
+    html += '<div class="lwa-metric-card lwa-metric-card--red"><div class="lwa-metric-value" style="color:#dc2626">' + leads.length + '</div><div class="lwa-metric-label">Leads perdidos</div></div>';
+    html += '<div class="lwa-metric-card"><div class="lwa-metric-value">R$ ' + (totalValor/1000).toFixed(0) + 'k</div><div class="lwa-metric-label">Valor perdido</div></div>';
+    html += '<div class="lwa-metric-card"><div class="lwa-metric-value">' + Object.keys(porMotivo).length + '</div><div class="lwa-metric-label">Motivos distintos</div></div>';
+    html += '</div>';
+
+    html += '<div class="lwa-modal-section-title">Motivos de Perda</div>';
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+    Object.keys(porMotivo).sort(function(a,b){return porMotivo[b]-porMotivo[a];}).forEach(function(m){
+        html += '<span style="padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:1px solid #fecaca">'+m+' ('+porMotivo[m]+')</span>';
+    });
+    html += '</div>';
+
+    html += '<div class="lwa-modal-section-title">Leads Perdidos</div>';
+    html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Motivo</th><th>Valor</th><th>Ação</th></tr></thead><tbody>';
     leads.forEach(function(l) {
-        var name = ((l.firstname||'') + ' ' + (l.lastname||'')).trim() || 'Sem nome';
-        var valor = l.valor_potencial ? 'R$ ' + parseFloat(l.valor_potencial).toLocaleString('pt-BR') : '-';
-        html += '<tr class="lwa-table-row-interactive" onclick="Mautic.lwaOpenLeadModal(' + l.id + ')">';
-        html += '<td><strong>' + name + '</strong></td><td>' + (l.company||'-') + '</td>';
-        html += '<td style="color:#dc2626">' + (l.motivo_perda||'Não informado') + '</td>';
-        html += '<td>' + (l.origem_principal||'').replace(/_/g,' ') + '</td>';
-        html += '<td>' + valor + '</td></tr>';
+        var name = ((l.firstname||'')+' '+(l.lastname||'')).trim()||'Sem nome';
+        var valor = l.valor_potencial ? 'R$ '+(parseFloat(l.valor_potencial)/1000).toFixed(0)+'k' : '-';
+        html += '<tr>';
+        html += '<td style="cursor:pointer" onclick="Mautic.lwaOpenLeadModal('+l.id+')"><strong>'+name+'</strong></td>';
+        html += '<td>'+(l.company||'-')+'</td>';
+        html += '<td style="color:#dc2626;font-size:12px">'+(l.motivo_perda||'Não informado')+'</td>';
+        html += '<td>'+valor+'</td>';
+        html += '<td><button onclick="Mautic.lwaGeneratePlaybook('+l.id+',\'reativacao\')" style="padding:4px 10px;border-radius:6px;border:1px solid #bbf7d0;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;cursor:pointer"><i class="ri-refresh-line"></i> Reativar</button></td>';
+        html += '</tr>';
     });
     html += '</tbody></table>';
     mQuery('#lwa-kpi-detail-body').html(html);
