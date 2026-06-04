@@ -76,17 +76,18 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location):
             CrawlJob.update_progress(job_uuid, count)
 
         crawl_sources = {}
+        fetch_qty = quantity * 2
 
         if source in ("website", "both"):
-            crawl_sources["duckduckgo"] = lambda: DuckDuckGoCrawler().crawl(query, quantity)
-            crawl_sources["website"] = lambda: WebsiteCrawler().crawl(query, quantity, on_progress=on_progress)
+            crawl_sources["duckduckgo"] = lambda: DuckDuckGoCrawler().crawl(query, fetch_qty)
+            crawl_sources["website"] = lambda: WebsiteCrawler().crawl(query, fetch_qty, on_progress=on_progress)
 
         if source in ("maps", "both"):
-            crawl_sources["maps"] = lambda: MapsCrawler().crawl(query, location, quantity, on_progress=on_progress)
+            crawl_sources["maps"] = lambda: MapsCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
 
-        crawl_sources["bing"] = lambda: BingCrawler().crawl(query, quantity // 2, on_progress=on_progress)
-        crawl_sources["directory"] = lambda: DirectoryCrawler().crawl(query, location, quantity // 2, on_progress=on_progress)
-        crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, quantity // 2, on_progress=on_progress)
+        crawl_sources["bing"] = lambda: BingCrawler().crawl(query, fetch_qty, on_progress=on_progress)
+        crawl_sources["directory"] = lambda: DirectoryCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
+        crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
