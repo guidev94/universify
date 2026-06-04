@@ -6,10 +6,27 @@
 {% block page_subtitle %}Performance e métricas em tempo real{% endblock %}
 
 {% block content %}
+<!-- Scheduler Status Strip -->
+<div class="glass-card-static p-3 mb-5 fade-up">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-emerald-400 glow-dot" id="schedulerDot"></div>
+            <span class="text-[11px] font-semibold text-zinc-300" id="schedulerLabel">Auto-Crawl Ativo</span>
+        </div>
+        <div class="flex items-center gap-4 text-[10px] text-zinc-500">
+            <span id="schedulerNext">Calculando...</span>
+            <span class="hidden sm:inline">|</span>
+            <span class="hidden sm:inline" id="schedulerRate">Taxa: —</span>
+            <span class="hidden sm:inline">|</span>
+            <span class="hidden sm:inline" id="schedulerUpdated">Atualizado agora</span>
+        </div>
+    </div>
+</div>
+
 <!-- Hero Stats -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
     <!-- Total Leads -->
-    <div class="glass-card stat-card p-6 fade-up">
+    <div class="glass-card stat-card p-6 fade-up cursor-pointer" onclick="openTierModal('all')">
         <div class="flex items-start justify-between">
             <div class="icon-box bg-zinc-800/80">
                 <i data-lucide="users" class="w-[20px] h-[20px] text-zinc-300 stroke-[1.5]"></i>
@@ -21,57 +38,57 @@
     </div>
 
     <!-- Hot Leads -->
-    <div class="glass-card stat-card p-6 fade-up fade-up-delay-1">
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-1 cursor-pointer" onclick="openTierModal('hot')">
         <div class="flex items-start justify-between">
             <div class="icon-box bg-blue-500/10">
                 <i data-lucide="flame" class="w-[20px] h-[20px] text-blue-400 stroke-[1.5]"></i>
             </div>
-            <span class="badge badge-hot">Hot</span>
+            <span class="badge badge-hot">Quente</span>
         </div>
         <p class="stat-number accent mt-5" id="statHot">0</p>
         <p class="text-[11px] text-zinc-500 mt-2 font-medium">Prontos para conversão</p>
     </div>
 
     <!-- Warm Leads -->
-    <div class="glass-card stat-card p-6 fade-up fade-up-delay-2">
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-2 cursor-pointer" onclick="openTierModal('warm')">
         <div class="flex items-start justify-between">
             <div class="icon-box bg-orange-500/10">
                 <i data-lucide="trending-up" class="w-[20px] h-[20px] text-orange-400 stroke-[1.5]"></i>
             </div>
-            <span class="badge badge-warm">Warm</span>
+            <span class="badge badge-warm">Morno</span>
         </div>
         <p class="stat-number mt-5" id="statWarm">0</p>
         <p class="text-[11px] text-zinc-500 mt-2 font-medium">Leads promissores</p>
     </div>
 
     <!-- Cold Leads -->
-    <div class="glass-card stat-card p-6 fade-up fade-up-delay-3">
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-3 cursor-pointer" onclick="openTierModal('cold')">
         <div class="flex items-start justify-between">
             <div class="icon-box bg-zinc-700/50">
                 <i data-lucide="snowflake" class="w-[20px] h-[20px] text-zinc-500 stroke-[1.5]"></i>
             </div>
-            <span class="badge badge-cold">Cold</span>
+            <span class="badge badge-cold">Frio</span>
         </div>
         <p class="stat-number mt-5" id="statCold">0</p>
         <p class="text-[11px] text-zinc-500 mt-2 font-medium">Precisam mais dados</p>
     </div>
 </div>
 
-<!-- Revenue & Pipeline Strip -->
+<!-- Receita e Pipeline -->
 <div class="glass-card-static p-4 mb-5 fade-up fade-up-delay-4">
     <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-zinc-800/50">
         <div class="px-4 flex items-center gap-3">
             <i data-lucide="wallet" class="w-4 h-4 text-emerald-400 stroke-[1.5]"></i>
             <div>
                 <p class="text-lg font-bold text-emerald-400" id="statRevenue">R$ 0</p>
-                <p class="text-[10px] text-zinc-600 font-medium">Revenue Total</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Receita Total</p>
             </div>
         </div>
         <div class="px-4 flex items-center gap-3">
             <i data-lucide="handshake" class="w-4 h-4 text-green-400 stroke-[1.5]"></i>
             <div>
                 <p class="text-lg font-bold text-green-400" id="statDeals">0</p>
-                <p class="text-[10px] text-zinc-600 font-medium">Deals Fechados</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Negócios Fechados</p>
             </div>
         </div>
         <div class="px-4 flex items-center gap-3">
@@ -127,7 +144,6 @@
 
 <!-- Charts Row -->
 <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-8">
-    <!-- Area Chart -->
     <div class="glass-card p-6 lg:col-span-3">
         <div class="flex items-center justify-between mb-5">
             <div>
@@ -144,7 +160,6 @@
         </div>
     </div>
 
-    <!-- Doughnut Chart -->
     <div class="glass-card p-6 lg:col-span-2">
         <div class="flex items-center justify-between mb-5">
             <div>
@@ -185,15 +200,31 @@
                     <th>Leads</th>
                     <th>Status</th>
                     <th>Data</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="recentJobsTable">
-                <tr><td colspan="6" class="text-center text-zinc-700 py-10">
+                <tr><td colspan="7" class="text-center text-zinc-700 py-10">
                     <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-zinc-700 stroke-[1]"></i>
                     <p class="text-xs">Nenhuma extração ainda</p>
                 </td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Tier Modal -->
+<div id="tierModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeTierModal()"></div>
+    <div class="relative w-full max-w-lg max-h-[80vh] glass-card p-6 overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-[15px] font-semibold text-zinc-100" id="tierModalTitle">Leads</h3>
+            <button onclick="closeTierModal()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto space-y-1" id="tierModalBody">
+        </div>
     </div>
 </div>
 {% endblock %}

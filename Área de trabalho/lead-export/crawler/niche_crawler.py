@@ -1,10 +1,21 @@
 import re
 import time
+import logging
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from urllib.parse import urlparse
 import os
+from crawler.search_engine import SearchEngine
+from crawler.utils import (
+    safe_request,
+    extract_emails_from_text,
+    extract_phones_from_text,
+    extract_whatsapp_from_html,
+    extract_business_name,
+)
+
+logger = logging.getLogger("leadhunter.niche")
 
 
 class NicheCrawler:
@@ -12,129 +23,86 @@ class NicheCrawler:
         self.ua = UserAgent()
         self.delay = int(os.getenv("REQUEST_DELAY_MS", "1500")) / 1000
         self.session = requests.Session()
+        self.search_engine = SearchEngine()
 
     def crawl(self, query, location, quantity, on_progress=None):
         leads = []
 
-        niche_urls = self._get_niche_search_urls(query, location)
+        search_queries = self._build_niche_queries(query, location)
 
-        for search_url in niche_urls:
+        for search_query in search_queries:
             if len(leads) >= quantity:
                 break
             try:
-                results = self._scrape_results(search_url, query, quantity - len(leads))
-                leads.extend(results)
-                if on_progress:
-                    on_progress(len(leads))
-                time.sleep(self.delay)
-            except Exception:
+                urls = self.search_engine.search(search_query, quantity * 2)
+                for url in urls:
+                    if len(leads) >= quantity:
+                        break
+                    lead = self._extract_from_listing(url, query)
+                    if lead:
+                        leads.append(lead)
+                        if on_progress:
+                            on_progress(len(leads))
+                        time.sleep(self.delay * 0.5)
+            except Exception as e:
+                logger.warning(f"[niche] erro buscando '{search_query[:40]}': {e}")
                 continue
 
+        logger.info(f"[niche] '{query}' — {len(leads)} leads extraídos")
         return leads[:quantity]
 
-    def _get_niche_search_urls(self, query, location):
+    def _build_niche_queries(self, query, location):
         query_lower = query.lower()
         loc = location or "brasil"
-        urls = []
-
-        urls.append(f"https://www.google.com/search?q={query}+{loc}+%22telefone%22+%22email%22+site&num=20&hl=pt-BR")
-        urls.append(f"https://www.google.com/search?q={query}+{loc}+contato+whatsapp&num=20&hl=pt-BR")
+        queries = [
+            f"{query} {loc} telefone email contato",
+            f"{query} {loc} whatsapp contato",
+        ]
 
         if any(w in query_lower for w in ["dentista", "odonto", "dental"]):
-            urls.append(f"https://www.google.com/search?q=site:doctoralia.com.br+{query}+{loc}&num=10")
+            queries.append(f"doctoralia.com.br {query} {loc}")
         elif any(w in query_lower for w in ["advogado", "escritório", "jurídico"]):
-            urls.append(f"https://www.google.com/search?q=site:jusbrasil.com.br+{query}+{loc}&num=10")
+            queries.append(f"jusbrasil.com.br {query} {loc}")
         elif any(w in query_lower for w in ["restaurante", "pizzaria", "lanchonete", "comida"]):
-            urls.append(f"https://www.google.com/search?q=site:tripadvisor.com.br+{query}+{loc}&num=10")
+            queries.append(f"tripadvisor.com.br {query} {loc}")
         elif any(w in query_lower for w in ["médico", "clínica", "hospital"]):
-            urls.append(f"https://www.google.com/search?q=site:doctoralia.com.br+{query}+{loc}&num=10")
+            queries.append(f"doctoralia.com.br {query} {loc}")
+        elif any(w in query_lower for w in ["hotel", "pousada", "hospedagem"]):
+            queries.append(f"booking.com {query} {loc}")
+        elif any(w in query_lower for w in ["academia", "personal", "fitness"]):
+            queries.append(f"{query} {loc} instagram contato")
 
-        return urls
-
-    def _scrape_results(self, url, category, limit):
-        leads = []
-        self.session.headers["User-Agent"] = self.ua.random
-
-        try:
-            response = self.session.get(url, timeout=15)
-            if response.status_code != 200:
-                return leads
-
-            soup = BeautifulSoup(response.text, "lxml")
-
-            for link_el in soup.select("a[href]"):
-                href = link_el.get("href", "")
-                if "/url?q=" in href:
-                    real_url = href.split("/url?q=")[1].split("&")[0]
-                    if self._is_valid_url(real_url):
-                        lead = self._extract_from_listing(real_url, category)
-                        if lead:
-                            leads.append(lead)
-                            if len(leads) >= limit:
-                                break
-                            time.sleep(self.delay * 0.5)
-        except Exception:
-            pass
-
-        return leads
+        return queries
 
     def _extract_from_listing(self, url, category):
-        try:
-            self.session.headers["User-Agent"] = self.ua.random
-            response = self.session.get(url, timeout=10, allow_redirects=True)
+        self.session.headers["User-Agent"] = self.ua.random
 
-            if response.status_code != 200:
-                return None
-            if "text/html" not in response.headers.get("Content-Type", ""):
-                return None
-
-            soup = BeautifulSoup(response.text, "lxml")
-            text = soup.get_text(separator=" ")
-            domain = urlparse(url).netloc
-
-            emails = re.findall(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}", text)
-            emails = [e.lower() for e in emails if not e.lower().startswith(("noreply", "no-reply"))][:2]
-
-            phones = []
-            for m in re.findall(r"\(?\d{2}\)?\s*\d{4,5}[\-\s]?\d{4}", text):
-                digits = re.sub(r"\D", "", m)
-                if 10 <= len(digits) <= 13:
-                    phones.append(m.strip())
-            phones = phones[:2]
-
-            whatsapp = ""
-            wa_match = re.search(r"wa\.me/(\d+)", response.text)
-            if wa_match:
-                whatsapp = wa_match.group(1)
-
-            name = ""
-            og = soup.find("meta", property="og:site_name")
-            if og and og.get("content"):
-                name = og["content"].strip()
-            elif soup.find("title") and soup.find("title").string:
-                name = soup.find("title").string.strip().split(" | ")[0].split(" - ")[0]
-            else:
-                name = domain.replace("www.", "").split(".")[0].title()
-
-            if not emails and not phones:
-                return None
-
-            return {
-                "name": name,
-                "email": emails[0] if emails else "",
-                "phone": phones[0] if phones else "",
-                "whatsapp": whatsapp or (phones[0] if phones else ""),
-                "website": url,
-                "source": "niche_directory",
-                "category": category,
-            }
-        except Exception:
+        response = safe_request(self.session, url, timeout=10)
+        if not response or response.status_code != 200:
             return None
 
-    def _is_valid_url(self, url):
-        excluded = {"google.com", "youtube.com", "facebook.com", "instagram.com", "twitter.com", "wikipedia.org"}
-        try:
-            domain = urlparse(url).netloc.lower()
-            return domain and not any(ex in domain for ex in excluded)
-        except Exception:
-            return False
+        content_type = response.headers.get("Content-Type", "")
+        if "text/html" not in content_type:
+            return None
+
+        soup = BeautifulSoup(response.text, "lxml")
+        text = soup.get_text(separator=" ")
+        domain = urlparse(url).netloc
+
+        emails = extract_emails_from_text(text, response.text)
+        phones = extract_phones_from_text(text)
+        whatsapp = extract_whatsapp_from_html(response.text)
+        name = extract_business_name(soup, domain)
+
+        if not emails and not phones:
+            return None
+
+        return {
+            "name": name,
+            "email": emails[0] if emails else "",
+            "phone": phones[0] if phones else "",
+            "whatsapp": whatsapp or (phones[0] if phones else ""),
+            "website": url,
+            "source": "niche_directory",
+            "category": category,
+        }

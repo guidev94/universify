@@ -1,22 +1,60 @@
 let leadsChart = null;
 let tierChart = null;
+let statValues = {};
+let isFirstLoad = true;
+
+function animateValue(el, start, end, duration) {
+    if (start === end) return;
+    const range = end - start;
+    const startTime = performance.now();
+
+    function step(timestamp) {
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + range * eased);
+        el.textContent = current.toLocaleString('pt-BR');
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
 
 async function loadStats() {
     try {
         const data = await api('/api/dashboard/stats');
-        document.getElementById('statTotal').textContent = data.total.toLocaleString('pt-BR');
-        document.getElementById('statHot').textContent = data.hot.toLocaleString('pt-BR');
-        document.getElementById('statWarm').textContent = data.warm.toLocaleString('pt-BR');
-        document.getElementById('statCold').textContent = data.cold.toLocaleString('pt-BR');
-        document.getElementById('statEmail').textContent = data.with_email.toLocaleString('pt-BR');
-        document.getElementById('statPhone').textContent = data.with_phone.toLocaleString('pt-BR');
-        document.getElementById('statWhatsapp').textContent = data.with_whatsapp.toLocaleString('pt-BR');
-        document.getElementById('statAvgScore').textContent = data.avg_score;
 
+        const fields = [
+            { id: 'statTotal', key: 'total' },
+            { id: 'statHot', key: 'hot' },
+            { id: 'statWarm', key: 'warm' },
+            { id: 'statCold', key: 'cold' },
+            { id: 'statEmail', key: 'with_email' },
+            { id: 'statPhone', key: 'with_phone' },
+            { id: 'statWhatsapp', key: 'with_whatsapp' },
+        ];
+
+        for (const { id, key } of fields) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+
+            const newVal = data[key] || 0;
+            const oldVal = statValues[key] || 0;
+
+            if (isFirstLoad) {
+                animateValue(el, 0, newVal, 800);
+            } else if (newVal !== oldVal) {
+                el.textContent = newVal.toLocaleString('pt-BR');
+            }
+
+            statValues[key] = newVal;
+        }
+
+        document.getElementById('statAvgScore').textContent = data.avg_score;
         document.getElementById('statRevenue').textContent = `R$ ${data.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 0})}`;
         document.getElementById('statDeals').textContent = data.deals_closed.toLocaleString('pt-BR');
         document.getElementById('statConversion').textContent = `${data.conversion_rate}%`;
         document.getElementById('statNegotiating').textContent = data.negotiating.toLocaleString('pt-BR');
+
+        isFirstLoad = false;
     } catch (e) {
         console.error('Erro ao carregar stats:', e);
     }
@@ -73,7 +111,7 @@ async function loadCharts() {
         tierChart = new Chart(ctxDoughnut, {
             type: 'doughnut',
             data: {
-                labels: ['Hot', 'Warm', 'Cold'],
+                labels: ['Quente', 'Morno', 'Frio'],
                 datasets: [{
                     data: [tiers.hot || 0, tiers.warm || 0, tiers.cold || 0],
                     backgroundColor: ['#f59e0b', '#f97316', '#475569'],
@@ -104,12 +142,16 @@ async function loadRecentJobs() {
         const tbody = document.getElementById('recentJobsTable');
 
         if (!data.jobs || data.jobs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-zinc-600 py-8">Nenhuma extração realizada ainda</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-zinc-600 py-8">Nenhuma extração realizada ainda</td></tr>';
             return;
         }
 
+        const sourceLabels = { both: 'Todas', maps: 'Mapa', website: 'Site' };
+        const statusLabels = { completed: 'concluído', running: 'rodando', error: 'erro', pending: 'pendente' };
+
         tbody.innerHTML = data.jobs.map(job => {
-            const sourceLabel = job.source === 'both' ? 'Ambos' : job.source === 'maps' ? 'Maps' : 'Web';
+            const sourceLabel = sourceLabels[job.source] || job.source;
+            const statusLabel = statusLabels[job.status] || job.status;
             const statusColors = {
                 completed: 'text-emerald-400 bg-emerald-500/10',
                 running: 'text-blue-400 bg-blue-500/10',
@@ -123,8 +165,9 @@ async function loadRecentJobs() {
                     <td>${escapeHtml(job.location) || '—'}</td>
                     <td><span class="text-xs px-2 py-0.5 rounded bg-white/5">${sourceLabel}</span></td>
                     <td class="font-semibold">${job.quantity_found}</td>
-                    <td><span class="text-xs px-2 py-0.5 rounded ${statusColor}">${job.status}</span></td>
+                    <td><span class="text-xs px-2 py-0.5 rounded ${statusColor}">${statusLabel}</span></td>
                     <td class="text-zinc-500">${formatDate(job.started_at)}</td>
+                    <td><button onclick="deleteJob(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Excluir"><svg class="w-3.5 h-3.5 text-red-400/60 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
                 </tr>
             `;
         }).join('');
@@ -133,6 +176,106 @@ async function loadRecentJobs() {
     }
 }
 
+async function loadSchedulerStatus() {
+    try {
+        const data = await api('/api/system/health');
+        const dot = document.getElementById('schedulerDot');
+        const label = document.getElementById('schedulerLabel');
+        const next = document.getElementById('schedulerNext');
+        const rate = document.getElementById('schedulerRate');
+        const updated = document.getElementById('schedulerUpdated');
+
+        if (data.running) {
+            dot.className = 'w-2 h-2 rounded-full bg-emerald-400 glow-dot';
+            label.textContent = 'Auto-Crawl Ativo';
+        } else {
+            dot.className = 'w-2 h-2 rounded-full bg-red-400';
+            label.textContent = 'Auto-Crawl Parado';
+        }
+
+        const mins = Math.floor(data.next_crawl_in / 60);
+        const hours = Math.floor(mins / 60);
+        const remainMins = mins % 60;
+        next.textContent = hours > 0
+            ? `Próximo crawl em ${hours}h ${remainMins}min`
+            : `Próximo crawl em ${mins}min`;
+
+        rate.textContent = `Taxa: ${data.success_rate}%`;
+        updated.textContent = `Atualizado agora`;
+    } catch (e) {
+        const label = document.getElementById('schedulerLabel');
+        if (label) label.textContent = 'Status indisponível';
+    }
+}
+
+async function deleteJob(id) {
+    if (!confirm('Excluir esta extração?')) return;
+    try {
+        await api(`/api/crawl/jobs/${id}`, { method: 'DELETE' });
+        showToast('Extração excluída', 'success');
+        loadRecentJobs();
+        loadStats();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function openTierModal(tier) {
+    const modal = document.getElementById('tierModal');
+    const title = document.getElementById('tierModalTitle');
+    const body = document.getElementById('tierModalBody');
+
+    const titles = { hot: 'Leads Quentes', warm: 'Leads Mornos', cold: 'Leads Frios', all: 'Todos os Leads' };
+    title.textContent = titles[tier] || 'Leads';
+
+    body.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
+    modal.classList.remove('hidden');
+
+    try {
+        const params = tier === 'all' ? 'per_page=20&sort=score&order=desc' : `tier=${tier}&per_page=20&sort=score&order=desc`;
+        const data = await api(`/api/leads?${params}`);
+
+        if (!data.leads || data.leads.length === 0) {
+            body.innerHTML = '<p class="text-center text-zinc-500 py-8">Nenhum lead nesta categoria</p>';
+            return;
+        }
+
+        body.innerHTML = data.leads.map(lead => {
+            const phone = lead.whatsapp || lead.phone || '';
+            const whatsappUrl = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
+            const emailUrl = lead.email ? `mailto:${lead.email}` : '';
+
+            return `
+                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[13px] font-medium text-zinc-100 truncate">${escapeHtml(lead.name)}</p>
+                        <p class="text-[11px] text-zinc-500 truncate mt-0.5">${lead.email || lead.phone || lead.website || '—'}</p>
+                    </div>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-[11px] font-bold ${lead.tier === 'hot' ? 'text-amber-400' : lead.tier === 'warm' ? 'text-orange-400' : 'text-zinc-500'}">${lead.score}</span>
+                        ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="p-1.5 rounded-lg hover:bg-green-500/10"><svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>` : ''}
+                        ${emailUrl ? `<a href="${emailUrl}" class="p-1.5 rounded-lg hover:bg-blue-500/10"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></a>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        body.innerHTML = '<p class="text-center text-red-400 py-8">Erro ao carregar leads</p>';
+    }
+}
+
+function closeTierModal() {
+    document.getElementById('tierModal').classList.add('hidden');
+}
+
 loadStats();
 loadCharts();
 loadRecentJobs();
+loadSchedulerStatus();
+
+setInterval(() => {
+    loadStats();
+    loadRecentJobs();
+}, 60000);
+
+setInterval(loadSchedulerStatus, 30000);

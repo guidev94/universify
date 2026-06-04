@@ -54,7 +54,7 @@ function formatDate(dateStr) {
 
 function tierBadge(tier) {
     const map = { hot: 'badge-hot', warm: 'badge-warm', cold: 'badge-cold' };
-    const labels = { hot: 'Hot', warm: 'Warm', cold: 'Cold' };
+    const labels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };
     return `<span class="badge ${map[tier] || 'badge-cold'}">${labels[tier] || tier}</span>`;
 }
 

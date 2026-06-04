@@ -225,12 +225,22 @@ class Lead:
     def _generate_hash(data):
         email = (data.get("email") or "").strip().lower()
         phone = (data.get("phone") or "").strip()
-        if email or phone:
-            raw = f"{email}|{phone}"
+        website = (data.get("website") or "").strip().lower()
+
+        if website:
+            from urllib.parse import urlparse
+            domain = urlparse(website).netloc.lower().replace("www.", "")
+            if domain:
+                raw = f"site:{domain}"
+                return hashlib.sha256(raw.encode()).hexdigest()
+
+        if email:
+            raw = f"email:{email}"
+        elif phone:
+            raw = f"phone:{phone}"
         else:
             name = (data.get("name") or "").strip().lower()
-            website = (data.get("website") or "").strip().lower()
-            raw = f"{name}|{website}"
+            raw = f"name:{name}"
         return hashlib.sha256(raw.encode()).hexdigest()
 
 

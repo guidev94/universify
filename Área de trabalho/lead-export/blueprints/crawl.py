@@ -1,5 +1,7 @@
 import uuid
+import logging
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from flask import Blueprint, render_template, request, jsonify
 from models import Lead, CrawlJob, Keyword
 from crawler.website_crawler import WebsiteCrawler
@@ -7,10 +9,13 @@ from crawler.maps_crawler import MapsCrawler
 from crawler.bing_crawler import BingCrawler
 from crawler.directory_crawler import DirectoryCrawler
 from crawler.niche_crawler import NicheCrawler
+from crawler.duckduckgo_crawler import DuckDuckGoCrawler
 from crawler.validator import validate_lead
 from crawler.lead_scorer import calculate_score
 from crawler.site_verifier import SiteVerifier
 from config import Config
+
+logger = logging.getLogger("leadhunter.crawl")
 
 bp = Blueprint("crawl", __name__)
 
@@ -41,7 +46,12 @@ def start_crawl():
     job_uuid = str(uuid.uuid4())
     job_id = CrawlJob.create(job_uuid, query, location, source, quantity)
 
-    active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": quantity}
+    active_jobs[job_uuid] = {
+        "status": "running",
+        "progress": 0,
+        "total": quantity,
+        "sources": {},
+    }
 
     thread = threading.Thread(
         target=run_crawl,
@@ -54,44 +64,43 @@ def start_crawl():
 
 
 def run_crawl(job_uuid, job_id, source, query, quantity, location):
+    saved_ids = []
     try:
         CrawlJob.set_running(job_uuid)
         leads = []
+        progress_lock = threading.Lock()
 
         def on_progress(count):
-            active_jobs[job_uuid]["progress"] = count
+            with progress_lock:
+                active_jobs[job_uuid]["progress"] = count
             CrawlJob.update_progress(job_uuid, count)
 
+        crawl_sources = {}
+
         if source in ("website", "both"):
-            crawler = WebsiteCrawler()
-            site_leads = crawler.crawl(query, quantity, on_progress=on_progress)
-            leads.extend(site_leads)
+            crawl_sources["duckduckgo"] = lambda: DuckDuckGoCrawler().crawl(query, quantity)
+            crawl_sources["website"] = lambda: WebsiteCrawler().crawl(query, quantity, on_progress=on_progress)
 
         if source in ("maps", "both"):
-            maps_crawler = MapsCrawler()
-            maps_leads = maps_crawler.crawl(query, location, quantity, on_progress=on_progress)
-            leads.extend(maps_leads)
+            crawl_sources["maps"] = lambda: MapsCrawler().crawl(query, location, quantity, on_progress=on_progress)
 
-        try:
-            bing = BingCrawler()
-            bing_leads = bing.crawl(query, quantity // 2, on_progress=on_progress)
-            leads.extend(bing_leads)
-        except Exception:
-            pass
+        crawl_sources["bing"] = lambda: BingCrawler().crawl(query, quantity // 2, on_progress=on_progress)
+        crawl_sources["directory"] = lambda: DirectoryCrawler().crawl(query, location, quantity // 2, on_progress=on_progress)
+        crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, quantity // 2, on_progress=on_progress)
 
-        try:
-            directory = DirectoryCrawler()
-            dir_leads = directory.crawl(query, location, quantity // 2, on_progress=on_progress)
-            leads.extend(dir_leads)
-        except Exception:
-            pass
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
 
-        try:
-            niche = NicheCrawler()
-            niche_leads = niche.crawl(query, location, quantity // 2, on_progress=on_progress)
-            leads.extend(niche_leads)
-        except Exception:
-            pass
+            for future in as_completed(futures, timeout=180):
+                name = futures[future]
+                try:
+                    results = future.result(timeout=90)
+                    leads.extend(results)
+                    active_jobs[job_uuid]["sources"][name] = len(results)
+                    logger.info(f"[crawl] {name}: {len(results)} leads para '{query}'")
+                except Exception as e:
+                    active_jobs[job_uuid]["sources"][name] = 0
+                    logger.warning(f"[crawl] {name} falhou para '{query}': {e}")
 
         saved_count = 0
         saved_ids = []
@@ -125,13 +134,19 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location):
         active_jobs[job_uuid]["status"] = "completed"
         active_jobs[job_uuid]["progress"] = saved_count
 
-        if saved_ids:
-            verifier = SiteVerifier(max_workers=Config.MAX_CONCURRENT_REQUESTS)
-            verifier.verify_leads(saved_ids)
+        logger.info(f"[crawl] '{query}' concluído — {saved_count} leads salvos de {len(leads)} brutos")
 
     except Exception as e:
         CrawlJob.fail(job_uuid, str(e))
         active_jobs[job_uuid]["status"] = "error"
+        logger.error(f"[crawl] erro fatal para '{query}': {e}")
+
+    try:
+        if saved_ids:
+            verifier = SiteVerifier(max_workers=Config.MAX_CONCURRENT_REQUESTS)
+            verifier.verify_leads(saved_ids)
+    except Exception as e:
+        logger.warning(f"[crawl] verificação de sites falhou para '{query}': {e}")
 
 
 @bp.route("/api/crawl/status/<job_uuid>")
@@ -142,6 +157,7 @@ def crawl_status(job_uuid):
             "status": info["status"],
             "progress": info["progress"],
             "total": info["total"],
+            "sources": info.get("sources", {}),
         })
 
     job = CrawlJob.get_by_uuid(job_uuid)
