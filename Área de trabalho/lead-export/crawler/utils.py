@@ -146,3 +146,22 @@ def extract_business_name(soup, domain):
 
     domain_name = domain.replace("www.", "").split(".")[0]
     return domain_name.title()
+
+
+def extract_social_from_html(html):
+    import re
+    social = {"instagram": "", "facebook": ""}
+
+    ig_match = re.search(r'instagram\.com/([a-zA-Z0-9_.]+)', html)
+    if ig_match:
+        handle = ig_match.group(1)
+        if handle not in ("p", "explore", "reel", "stories", "accounts"):
+            social["instagram"] = f"@{handle}"
+
+    fb_match = re.search(r'facebook\.com/([a-zA-Z0-9.]+)', html)
+    if fb_match:
+        handle = fb_match.group(1)
+        if handle not in ("sharer", "share", "dialog", "plugins", "tr"):
+            social["facebook"] = handle
+
+    return social

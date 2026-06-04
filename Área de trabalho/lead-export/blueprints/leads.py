@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from urllib.parse import quote
-from models import Lead
+from models import Lead, Activity
+from database import get_connection
 
 bp = Blueprint("leads", __name__)
 
@@ -125,3 +126,78 @@ def email_action(lead_id):
 
     Lead.update_status(lead_id, "contacted")
     return jsonify({"url": url})
+
+
+@bp.route("/api/leads/<int:lead_id>/notes", methods=["PATCH"])
+def update_notes(lead_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Dados obrigatórios"}), 400
+    notes = str(data.get("notes", ""))[:2000]
+    conn = get_connection()
+    conn.execute("UPDATE leads SET notes = ?, updated_at = datetime('now', 'localtime') WHERE id = ?", (notes, lead_id))
+    conn.commit()
+    conn.close()
+    Activity.log(lead_id, "note_added", "Nota atualizada")
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/leads/<int:lead_id>/tags", methods=["PATCH"])
+def update_tags(lead_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Dados obrigatórios"}), 400
+    tags = str(data.get("tags", ""))[:500]
+    conn = get_connection()
+    conn.execute("UPDATE leads SET tags = ?, updated_at = datetime('now', 'localtime') WHERE id = ?", (tags, lead_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/leads/<int:lead_id>/activities")
+def lead_activities(lead_id):
+    activities = Activity.get_for_lead(lead_id)
+    return jsonify({"activities": activities})
+
+
+@bp.route("/api/leads/bulk-contact", methods=["POST"])
+def bulk_contact():
+    data = request.get_json() or {}
+    tier = data.get("tier", "hot")
+    limit = min(int(data.get("limit", 10)), 50)
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT id, name, whatsapp, phone, email FROM leads WHERE tier = ? AND status = 'new' ORDER BY score DESC LIMIT ?",
+        (tier, limit),
+    ).fetchall()
+    conn.close()
+    contacted = []
+    for row in rows:
+        lead = dict(row)
+        phone = lead.get("whatsapp") or lead.get("phone") or ""
+        if phone:
+            Lead.update_status(lead["id"], "contacted")
+            Activity.log(lead["id"], "bulk_contact", "Marcado como contatado em lote")
+            contacted.append({"id": lead["id"], "name": lead["name"], "phone": phone})
+    return jsonify({"contacted": len(contacted), "leads": contacted})
+
+
+@bp.route("/api/leads/pipeline")
+def pipeline_stats():
+    conn = get_connection()
+    stages = ["new", "contacted", "negotiating", "closed_won", "closed_lost"]
+    pipeline = {}
+    for stage in stages:
+        pipeline[stage] = conn.execute("SELECT COUNT(*) as c FROM leads WHERE status = ?", (stage,)).fetchone()["c"]
+    total = sum(pipeline.values())
+    conn.close()
+    return jsonify({"pipeline": pipeline, "total": total})
+
+
+@bp.route("/api/leads/today")
+def leads_today():
+    conn = get_connection()
+    count = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
+    conn.close()
+    return jsonify({"today": count})

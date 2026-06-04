@@ -82,8 +82,46 @@ def _migrate(cursor):
         ("deal_notes", "ALTER TABLE leads ADD COLUMN deal_notes TEXT DEFAULT ''"),
         ("contacted_at", "ALTER TABLE leads ADD COLUMN contacted_at TEXT"),
         ("closed_at", "ALTER TABLE leads ADD COLUMN closed_at TEXT"),
+        ("notes", "ALTER TABLE leads ADD COLUMN notes TEXT DEFAULT ''"),
+        ("tags", "ALTER TABLE leads ADD COLUMN tags TEXT DEFAULT ''"),
+        ("campaign", "ALTER TABLE leads ADD COLUMN campaign TEXT DEFAULT ''"),
+        ("next_action", "ALTER TABLE leads ADD COLUMN next_action TEXT DEFAULT ''"),
+        ("next_action_at", "ALTER TABLE leads ADD COLUMN next_action_at TEXT"),
+        ("instagram", "ALTER TABLE leads ADD COLUMN instagram TEXT DEFAULT ''"),
+        ("facebook", "ALTER TABLE leads ADD COLUMN facebook TEXT DEFAULT ''"),
     ]
 
     for col, sql in migrations:
         if col not in columns:
             cursor.execute(sql)
+
+    cursor.executescript("""
+        CREATE TABLE IF NOT EXISTS lead_activities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+            action TEXT NOT NULL,
+            details TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_activities_lead ON lead_activities(lead_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS message_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            channel TEXT NOT NULL DEFAULT 'whatsapp',
+            subject TEXT DEFAULT '',
+            body TEXT NOT NULL,
+            variables TEXT DEFAULT '[]',
+            created_at TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+
+        CREATE TABLE IF NOT EXISTS campaigns (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            keyword TEXT DEFAULT '',
+            location TEXT DEFAULT '',
+            goal INTEGER DEFAULT 100,
+            status TEXT DEFAULT 'active',
+            created_at TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+    """)

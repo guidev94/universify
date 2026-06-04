@@ -489,3 +489,93 @@ class Keyword:
         ).fetchall()
         conn.close()
         return [dict(r) for r in rows]
+
+
+class Activity:
+    @staticmethod
+    def log(lead_id, action, details=""):
+        conn = get_connection()
+        conn.execute(
+            "INSERT INTO lead_activities (lead_id, action, details) VALUES (?, ?, ?)",
+            (lead_id, action, details),
+        )
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def get_for_lead(lead_id, limit=20):
+        conn = get_connection()
+        rows = conn.execute(
+            "SELECT * FROM lead_activities WHERE lead_id = ? ORDER BY created_at DESC LIMIT ?",
+            (lead_id, limit),
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+
+class Campaign:
+    @staticmethod
+    def create(name, keyword="", location="", goal=100):
+        conn = get_connection()
+        conn.execute(
+            "INSERT INTO campaigns (name, keyword, location, goal) VALUES (?, ?, ?, ?)",
+            (name, keyword, location, goal),
+        )
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def get_all():
+        conn = get_connection()
+        rows = conn.execute("SELECT * FROM campaigns ORDER BY created_at DESC").fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    @staticmethod
+    def get_stats(campaign_name):
+        conn = get_connection()
+        total = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (campaign_name,)).fetchone()["c"]
+        contacted = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ? AND status = 'contacted'", (campaign_name,)).fetchone()["c"]
+        won = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ? AND status = 'closed_won'", (campaign_name,)).fetchone()["c"]
+        conn.close()
+        return {"total": total, "contacted": contacted, "won": won}
+
+
+class MessageTemplate:
+    @staticmethod
+    def create(name, channel, body, subject=""):
+        conn = get_connection()
+        conn.execute(
+            "INSERT INTO message_templates (name, channel, body, subject) VALUES (?, ?, ?, ?)",
+            (name, channel, body, subject),
+        )
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def get_all():
+        conn = get_connection()
+        rows = conn.execute("SELECT * FROM message_templates ORDER BY created_at DESC").fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    @staticmethod
+    def get_by_id(template_id):
+        conn = get_connection()
+        row = conn.execute("SELECT * FROM message_templates WHERE id = ?", (template_id,)).fetchone()
+        conn.close()
+        return dict(row) if row else None
+
+    @staticmethod
+    def render(template_body, lead):
+        return template_body.replace(
+            "{nome}", lead.get("name", "")
+        ).replace(
+            "{email}", lead.get("email", "").split(";")[0]
+        ).replace(
+            "{empresa}", lead.get("name", "")
+        ).replace(
+            "{segmento}", lead.get("category", "")
+        ).replace(
+            "{site}", lead.get("website", "")
+        )
