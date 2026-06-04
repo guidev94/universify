@@ -52,6 +52,12 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
 
+function formatDateTime(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 function tierBadge(tier) {
     const map = { hot: 'badge-hot', warm: 'badge-warm', cold: 'badge-cold' };
     const labels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };

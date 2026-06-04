@@ -73,6 +73,7 @@ function renderTable(leads) {
                 <td>${siteLink}</td>
                 <td>${scoreBadge(lead.score)}</td>
                 <td>${statusBadge(lead.status)}</td>
+                <td class="text-[11px] text-zinc-500 whitespace-nowrap">${formatDateTime(lead.created_at)}</td>
                 <td>
                     <div class="flex items-center gap-0.5">
                         <button onclick="sendWhatsApp(${lead.id})" title="WhatsApp" class="p-1.5 rounded-lg hover:bg-green-500/10 transition-colors">
