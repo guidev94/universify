@@ -263,96 +263,124 @@ async function openLeadDetail(id) {
     const body = document.getElementById('leadDetailBody');
 
     modal.classList.remove('hidden');
-    body.innerHTML = '<div class="flex justify-center py-6"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
+    body.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
+    title.textContent = '';
 
     try {
         const lead = await api(`/api/leads/${id}`);
         title.textContent = lead.name;
-        window._currentLeadId = id;
 
-        const tierColors = { hot: 'text-amber-400 bg-amber-500/10', warm: 'text-orange-400 bg-orange-500/10', cold: 'text-zinc-400 bg-zinc-500/10' };
+        const tierGradients = { hot: 'from-amber-500/20 to-orange-600/5', warm: 'from-orange-500/15 to-amber-500/5', cold: 'from-zinc-500/15 to-zinc-700/5' };
         const tierLabels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };
+        const tierColors = { hot: 'text-amber-400', warm: 'text-orange-400', cold: 'text-zinc-400' };
         const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
 
         const emails = (lead.email || '').split(';').filter(e => e.trim());
         const phones = (lead.phone || '').split(';').filter(p => p.trim());
-        const phone = lead.whatsapp || (phones[0] || '');
-        const whatsappUrl = phone ? `https://wa.me/${phone.replace(/\D/g, '')}` : '';
+        const mainPhone = lead.whatsapp || (phones[0] || '');
+        const whatsappUrl = mainPhone ? `https://wa.me/${mainPhone.replace(/\D/g, '')}` : '';
+        const domain = lead.website ? lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0] : '';
+
+        const scorePercent = Math.min(lead.score, 100);
+        const scoreColor = lead.score >= 80 ? '#f59e0b' : lead.score >= 50 ? '#f97316' : '#64748b';
 
         body.innerHTML = `
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold ${tierColors[lead.tier] || tierColors.cold}">${tierLabels[lead.tier] || lead.tier}</span>
-                    <span class="text-[13px] font-bold text-zinc-200">Score: ${lead.score}</span>
-                    ${lead.site_verified ? '<span class="text-[10px] text-emerald-400">&#10003; Verificado</span>' : ''}
+            <div class="rounded-2xl bg-gradient-to-br ${tierGradients[lead.tier] || tierGradients.cold} p-5 mb-4 border border-white/5">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-[11px] font-bold uppercase tracking-wider ${tierColors[lead.tier] || tierColors.cold}">${tierLabels[lead.tier] || '—'}</span>
+                            ${lead.site_verified ? '<span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">&#10003; Verificado</span>' : ''}
+                        </div>
+                        <p class="text-[11px] text-zinc-500">${lead.source || 'Fonte desconhecida'} &middot; ${lead.category || 'Sem categoria'}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="relative w-14 h-14">
+                            <svg class="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
+                                <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>
+                                <circle cx="28" cy="28" r="24" fill="none" stroke="${scoreColor}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${scorePercent * 1.508} 200"/>
+                            </svg>
+                            <span class="absolute inset-0 flex items-center justify-center text-[14px] font-bold text-zinc-100">${lead.score}</span>
+                        </div>
+                    </div>
                 </div>
-                <select onchange="changeLeadStatus(${lead.id}, this.value)" class="select-glass !py-1 !px-2 !text-[11px]">
+            </div>
+
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Contatos</p>
+                <select onchange="changeLeadStatus(${lead.id}, this.value)" class="select-glass !py-1 !px-2 !text-[11px] !rounded-lg">
                     ${['new','contacted','negotiating','closed_won','closed_lost'].map(s =>
                         `<option value="${s}" ${lead.status === s ? 'selected' : ''}>${statusLabels[s]}</option>`
                     ).join('')}
                 </select>
             </div>
 
-            <div class="space-y-2">
-                ${emails.length ? emails.map(email => `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group">
+            <div class="space-y-1.5">
+                ${emails.map(email => `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-blue-500/20 transition-colors">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <a href="mailto:${escapeHtml(email.trim())}" class="text-[12px] text-zinc-200 hover:text-blue-400 truncate">${escapeHtml(email.trim())}</a>
+                            <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <a href="mailto:${escapeHtml(email.trim())}" class="text-[12px] text-zinc-200 hover:text-blue-400 truncate transition-colors">${escapeHtml(email.trim())}</a>
                         </div>
-                        <button onclick="navigator.clipboard.writeText('${email.trim()}'); showToast('Copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/5 transition-all" title="Copiar">
-                            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <button onclick="navigator.clipboard.writeText('${email.trim()}'); showToast('Email copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/5 transition-all">
+                            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         </button>
                     </div>
-                `).join('') : ''}
+                `).join('')}
 
-                ${phones.length ? phones.map(p => `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group">
+                ${phones.map(p => `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-emerald-500/20 transition-colors">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            </div>
                             <span class="text-[12px] text-zinc-200">${escapeHtml(p.trim())}</span>
                         </div>
-                        <button onclick="navigator.clipboard.writeText('${p.trim()}'); showToast('Copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/5 transition-all" title="Copiar">
-                            <svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <button onclick="navigator.clipboard.writeText('${p.trim()}'); showToast('Telefone copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/5 transition-all">
+                            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         </button>
                     </div>
-                `).join('') : ''}
+                `).join('')}
 
                 ${lead.website ? `
-                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                        <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                        <a href="${escapeHtml(lead.website)}" target="_blank" class="text-[12px] text-blue-400 hover:text-blue-300 truncate">${escapeHtml(lead.website.replace(/https?:\/\/(www\.)?/, ''))}</a>
+                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/20 transition-colors">
+                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                            <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=16" alt="" class="w-4 h-4 rounded-sm" onerror="this.style.display='none'">
+                        </div>
+                        <a href="${escapeHtml(lead.website)}" target="_blank" class="text-[12px] text-blue-400 hover:text-blue-300 truncate transition-colors">${escapeHtml(domain)}</a>
                     </div>
                 ` : ''}
             </div>
 
-            <div class="grid grid-cols-4 gap-2 mt-4">
-                <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                    <p class="text-[9px] text-zinc-600">Fonte</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-0.5">${lead.source || '—'}</p>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Criado em</p>
+                    <p class="text-[12px] text-zinc-300 font-medium mt-1">${formatDate(lead.created_at)}</p>
                 </div>
-                <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                    <p class="text-[9px] text-zinc-600">Categoria</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-0.5">${lead.category || '—'}</p>
-                </div>
-                <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                    <p class="text-[9px] text-zinc-600">Criado</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-0.5">${formatDate(lead.created_at)}</p>
-                </div>
-                <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                    <p class="text-[9px] text-zinc-600">Contatado</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-0.5">${lead.contacted_at ? formatDate(lead.contacted_at) : '—'}</p>
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Contatado em</p>
+                    <p class="text-[12px] text-zinc-300 font-medium mt-1">${lead.contacted_at ? formatDate(lead.contacted_at) : 'Ainda não'}</p>
                 </div>
             </div>
 
-            <div class="flex gap-2 mt-5">
-                ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="btn-ghost flex-1 text-center !text-green-400 !border-green-500/20 hover:!bg-green-500/10 text-[12px]">WhatsApp</a>` : ''}
-                ${emails[0] ? `<a href="mailto:${emails[0]}" class="btn-ghost flex-1 text-center !text-blue-400 !border-blue-500/20 hover:!bg-blue-500/10 text-[12px]">Email</a>` : ''}
-                <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" class="btn-accent flex-1 text-[12px]">Fechar Negócio</button>
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-500/[0.05] border border-green-500/15 hover:bg-green-500/10 transition-colors">
+                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                    <span class="text-[10px] font-semibold text-green-400">WhatsApp</span>
+                </a>` : '<div></div>'}
+                ${emails[0] ? `<a href="mailto:${emails[0]}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/15 hover:bg-blue-500/10 transition-colors">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span class="text-[10px] font-semibold text-blue-400">Email</span>
+                </a>` : '<div></div>'}
+                <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/15 hover:bg-emerald-500/10 transition-colors">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="text-[10px] font-semibold text-emerald-400">Fechar</span>
+                </button>
             </div>
-            <div class="flex gap-2 mt-2">
-                <button onclick="deleteLeadFromModal(${lead.id})" class="btn-ghost flex-1 text-center !text-red-400 !border-red-500/20 hover:!bg-red-500/10 text-[11px]">Excluir Lead</button>
-            </div>
+
+            <button onclick="deleteLeadFromModal(${lead.id})" class="w-full mt-3 p-2 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/15 transition-all text-center">Excluir este lead</button>
         `;
     } catch (e) {
         body.innerHTML = '<p class="text-center text-red-400 py-6">Erro ao carregar lead</p>';

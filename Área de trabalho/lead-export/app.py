@@ -1,8 +1,14 @@
 import os
-import secrets
+import logging
 from flask import Flask, session, request, g
 from config import Config
 from database import init_db
+
+sentry_dsn = os.getenv("SENTRY_DSN", "")
+if sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+    sentry_sdk.init(dsn=sentry_dsn, integrations=[FlaskIntegration()], traces_sample_rate=0.3)
 
 
 def create_app():

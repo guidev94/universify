@@ -111,7 +111,7 @@ class Scheduler:
         logger.info("[scheduler] verificação concluída")
 
     def _auto_crawl(self):
-        keywords = Keyword.get_for_autocrawl(limit=5)
+        keywords = Keyword.get_for_autocrawl(limit=7)
         if not keywords:
             logger.info("[scheduler] nenhuma keyword para auto-crawl")
             return
@@ -142,7 +142,7 @@ class Scheduler:
 
     def _run_multi_source_crawl(self, keyword, location):
         job_uuid = str(uuid.uuid4())
-        quantity = 15
+        quantity = 30
         job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
         CrawlJob.set_running(job_uuid)
 
