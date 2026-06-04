@@ -52,6 +52,14 @@
                 </div>
             </div>
 
+            <!-- Keyword/Category Filter -->
+            <div>
+                <label class="block text-[11px] font-semibold text-zinc-400 mb-2 uppercase tracking-wide">Palavra-chave / Nicho</label>
+                <select id="exportKeyword" class="select-glass w-full">
+                    <option value="">Todas as categorias</option>
+                </select>
+            </div>
+
             <!-- Status -->
             <div>
                 <label class="block text-[11px] font-semibold text-zinc-400 mb-2 uppercase tracking-wide">Status</label>
@@ -59,7 +67,9 @@
                     <option value="">Todos os status</option>
                     <option value="new">Novo</option>
                     <option value="contacted">Contatado</option>
-                    <option value="converted">Convertido</option>
+                    <option value="negotiating">Negociando</option>
+                    <option value="closed_won">Fechado (ganho)</option>
+                    <option value="closed_lost">Fechado (perdido)</option>
                 </select>
             </div>
 
@@ -81,6 +91,11 @@
                 <span class="text-[11px] text-zinc-400 font-medium">Leads disponíveis</span>
             </div>
             <span id="previewCount" class="text-xl font-bold text-blue-400">—</span>
+        </div>
+
+        <!-- Preview List -->
+        <div id="previewList" class="mt-4 space-y-1 hidden">
+            <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wide mb-2">Prévia</p>
         </div>
     </div>
 

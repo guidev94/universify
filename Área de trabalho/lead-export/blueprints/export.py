@@ -20,11 +20,12 @@ def export_leads():
     tier = data.get("tier", "").strip() or None
     status = data.get("status", "").strip() or None
     quantity = data.get("quantity")
+    keyword = data.get("keyword", "").strip() or None
 
     if fmt not in ("csv", "xlsx"):
         return jsonify({"error": "Formato inválido"}), 400
 
-    leads = Lead.get_for_export(tier=tier, status=status, quantity=quantity)
+    leads = Lead.get_for_export(tier=tier, status=status, quantity=quantity, keyword=keyword)
 
     if not leads:
         return jsonify({"error": "Nenhum lead encontrado com esses filtros"}), 404
@@ -48,6 +49,8 @@ def export_preview():
     data = request.get_json() or {}
     tier = data.get("tier", "").strip() or None
     status = data.get("status", "").strip() or None
+    keyword = data.get("keyword", "").strip() or None
 
-    leads = Lead.get_for_export(tier=tier, status=status)
-    return jsonify({"count": len(leads)})
+    leads = Lead.get_for_export(tier=tier, status=status, keyword=keyword)
+    preview = [{"name": l["name"], "email": l["email"], "phone": l["phone"], "score": l["score"], "tier": l["tier"]} for l in leads[:5]]
+    return jsonify({"count": len(leads), "preview": preview})

@@ -11,11 +11,41 @@ class Lead:
         dedup_hash = Lead._generate_hash(data)
 
         try:
+            existing = conn.execute("SELECT id, email, phone, whatsapp, score FROM leads WHERE dedup_hash = ?", (dedup_hash,)).fetchone()
+
+            if existing:
+                existing = dict(existing)
+                new_email = data.get("email", "")
+                new_phone = data.get("phone", "")
+                new_whatsapp = data.get("whatsapp", "")
+                new_score = data.get("score", 0)
+
+                merged_email = existing["email"]
+                if new_email and new_email not in (merged_email or ""):
+                    merged_email = f"{merged_email};{new_email}" if merged_email else new_email
+
+                merged_phone = existing["phone"]
+                if new_phone and new_phone not in (merged_phone or ""):
+                    merged_phone = f"{merged_phone};{new_phone}" if merged_phone else new_phone
+
+                merged_whatsapp = existing["whatsapp"]
+                if new_whatsapp and new_whatsapp not in (merged_whatsapp or ""):
+                    merged_whatsapp = new_whatsapp if not merged_whatsapp else merged_whatsapp
+
+                best_score = max(new_score, existing["score"] or 0)
+
+                conn.execute(
+                    """UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?,
+                       updated_at = datetime('now', 'localtime') WHERE id = ?""",
+                    (merged_email, merged_phone, merged_whatsapp, best_score, existing["id"]),
+                )
+                conn.commit()
+                return existing["id"]
+
             conn.execute(
                 """INSERT INTO leads (name, email, phone, whatsapp, website, category, source,
                    score, tier, site_verified, ssl_valid, crawl_job_id, dedup_hash)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                   ON CONFLICT(dedup_hash) DO UPDATE SET updated_at = datetime('now', 'localtime')""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     data["name"], data.get("email", ""), data.get("phone", ""),
                     data.get("whatsapp", ""), data.get("website", ""),
@@ -30,6 +60,77 @@ class Lead:
             return lead_id["id"] if lead_id else None
         finally:
             conn.close()
+
+    @staticmethod
+    def deduplicate_existing():
+        from urllib.parse import urlparse
+        conn = get_connection()
+
+        rows = conn.execute("""
+            SELECT website, GROUP_CONCAT(id) as ids, COUNT(*) as cnt
+            FROM leads WHERE website != ''
+            GROUP BY website HAVING cnt > 1
+        """).fetchall()
+
+        removed = 0
+        for row in rows:
+            ids = [int(x) for x in dict(row)["ids"].split(",")]
+            leads = conn.execute(
+                f"SELECT id, email, phone, whatsapp, score FROM leads WHERE id IN ({','.join('?' * len(ids))})",
+                ids,
+            ).fetchall()
+            leads = [dict(l) for l in leads]
+
+            best = max(leads, key=lambda x: x["score"] or 0)
+
+            all_emails = set()
+            all_phones = set()
+            for l in leads:
+                if l["email"]:
+                    for e in l["email"].split(";"):
+                        if e.strip():
+                            all_emails.add(e.strip())
+                if l["phone"]:
+                    for p in l["phone"].split(";"):
+                        if p.strip():
+                            all_phones.add(p.strip())
+
+            merged_email = ";".join(sorted(all_emails)[:5])
+            merged_phone = ";".join(sorted(all_phones)[:3])
+
+            conn.execute(
+                "UPDATE leads SET email = ?, phone = ? WHERE id = ?",
+                (merged_email, merged_phone, best["id"]),
+            )
+
+            to_delete = [l["id"] for l in leads if l["id"] != best["id"]]
+            if to_delete:
+                conn.execute(
+                    f"DELETE FROM leads WHERE id IN ({','.join('?' * len(to_delete))})",
+                    to_delete,
+                )
+                removed += len(to_delete)
+
+        if removed > 0:
+            conn.execute("UPDATE leads SET dedup_hash = NULL")
+            all_leads = conn.execute("SELECT id, email, phone, website, name FROM leads").fetchall()
+            seen_hashes = set()
+            extra_remove = []
+            for lead in all_leads:
+                lead = dict(lead)
+                new_hash = Lead._generate_hash(lead)
+                if new_hash in seen_hashes:
+                    extra_remove.append(lead["id"])
+                else:
+                    seen_hashes.add(new_hash)
+                    conn.execute("UPDATE leads SET dedup_hash = ? WHERE id = ?", (new_hash, lead["id"]))
+            if extra_remove:
+                conn.execute(f"DELETE FROM leads WHERE id IN ({','.join('?' * len(extra_remove))})", extra_remove)
+                removed += len(extra_remove)
+
+        conn.commit()
+        conn.close()
+        return removed
 
     @staticmethod
     def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False):
@@ -216,7 +317,7 @@ class Lead:
         return chart
 
     @staticmethod
-    def get_for_export(tier=None, status=None, quantity=None):
+    def get_for_export(tier=None, status=None, quantity=None, keyword=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -229,6 +330,9 @@ class Lead:
         if status:
             conditions.append("status = ?")
             params.append(status)
+        if keyword:
+            conditions.append("(category LIKE ? OR name LIKE ?)")
+            params.extend([f"%{keyword}%", f"%{keyword}%"])
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
         limit = f"LIMIT {int(quantity)}" if quantity else ""
