@@ -10,6 +10,7 @@ from crawler.bing_crawler import BingCrawler
 from crawler.directory_crawler import DirectoryCrawler
 from crawler.niche_crawler import NicheCrawler
 from crawler.duckduckgo_crawler import DuckDuckGoCrawler
+from crawler.yellowpages_crawler import YellowPagesCrawler
 from crawler.validator import validate_lead
 from crawler.lead_scorer import calculate_score
 from crawler.site_verifier import SiteVerifier
@@ -88,6 +89,7 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location):
         crawl_sources["bing"] = lambda: BingCrawler().crawl(query, fetch_qty, on_progress=on_progress)
         crawl_sources["directory"] = lambda: DirectoryCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
         crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
+        crawl_sources["yellowpages"] = lambda: YellowPagesCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}

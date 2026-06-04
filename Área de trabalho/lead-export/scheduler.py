@@ -11,6 +11,8 @@ from crawler.bing_crawler import BingCrawler
 from crawler.directory_crawler import DirectoryCrawler
 from crawler.niche_crawler import NicheCrawler
 from crawler.duckduckgo_crawler import DuckDuckGoCrawler
+from crawler.yellowpages_crawler import YellowPagesCrawler
+from crawler.enrichment_crawler import EnrichmentCrawler
 from crawler.validator import validate_lead
 from crawler.lead_scorer import calculate_score
 from models import Lead, Keyword, CrawlJob
@@ -110,6 +112,63 @@ class Scheduler:
         verifier.verify_leads(unverified)
         logger.info("[scheduler] verificação concluída")
 
+        self._enrich_leads()
+
+    def _enrich_leads(self):
+        from database import get_connection
+        conn = get_connection()
+        rows = conn.execute(
+            """SELECT id, name, email, phone, whatsapp, website, instagram, facebook
+               FROM leads WHERE website != '' AND (instagram = '' OR instagram IS NULL)
+               ORDER BY score DESC LIMIT 30""",
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            return
+
+        leads = [dict(r) for r in rows]
+        logger.info(f"[scheduler] enriquecendo {len(leads)} leads")
+
+        enricher = EnrichmentCrawler()
+        enriched_count = 0
+
+        for lead_id, data in enricher.enrich_batch(leads, max_count=30):
+            conn = get_connection()
+            updates = []
+            params = []
+
+            if data.get("instagram"):
+                updates.append("instagram = ?")
+                params.append(data["instagram"])
+            if data.get("facebook"):
+                updates.append("facebook = ?")
+                params.append(data["facebook"])
+            if data.get("whatsapp") or data.get("contact_whatsapp"):
+                updates.append("whatsapp = ?")
+                params.append(data.get("whatsapp") or data.get("contact_whatsapp"))
+
+            new_emails = data.get("new_emails", []) + data.get("contact_emails", [])
+            if new_emails:
+                existing = conn.execute("SELECT email FROM leads WHERE id = ?", (lead_id,)).fetchone()
+                current = (existing["email"] or "") if existing else ""
+                all_emails = set(current.split(";")) | set(new_emails)
+                all_emails.discard("")
+                merged = ";".join(sorted(all_emails)[:5])
+                updates.append("email = ?")
+                params.append(merged)
+
+            if updates:
+                updates.append("updated_at = datetime('now', 'localtime')")
+                params.append(lead_id)
+                conn.execute(f"UPDATE leads SET {', '.join(updates)} WHERE id = ?", params)
+                conn.commit()
+                enriched_count += 1
+
+            conn.close()
+
+        logger.info(f"[scheduler] enriquecimento: {enriched_count} leads atualizados")
+
     def _auto_crawl(self):
         keywords = Keyword.get_for_autocrawl(limit=7)
         if not keywords:
@@ -155,6 +214,7 @@ class Scheduler:
             "maps": lambda: MapsCrawler().crawl(keyword, location, quantity),
             "directory": lambda: DirectoryCrawler().crawl(keyword, location, quantity),
             "niche": lambda: NicheCrawler().crawl(keyword, location, quantity),
+            "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, quantity),
         }
 
         with ThreadPoolExecutor(max_workers=4) as executor:
