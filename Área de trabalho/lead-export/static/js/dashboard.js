@@ -307,5 +307,5 @@ loadCharts();
 loadRecentJobs();
 loadSchedulerStatus();
 
-setInterval(() => { loadStats(); loadRecentJobs(); }, 60000);
-setInterval(loadSchedulerStatus, 30000);
+setInterval(() => { loadStats(); loadRecentJobs(); loadCharts(); }, 30000);
+setInterval(loadSchedulerStatus, 15000);
