@@ -382,7 +382,7 @@ async function openLeadDetail(id) {
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 mt-4">
+            <div class="grid grid-cols-4 gap-2 mt-4">
                 ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-500/[0.05] border border-green-500/15 hover:bg-green-500/10 transition-colors">
                     <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                     <span class="text-[10px] font-semibold text-green-400">WhatsApp</span>
@@ -390,6 +390,10 @@ async function openLeadDetail(id) {
                 ${emails[0] ? `<a href="mailto:${emails[0]}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/15 hover:bg-blue-500/10 transition-colors">
                     <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     <span class="text-[10px] font-semibold text-blue-400">Email</span>
+                </a>` : '<div></div>'}
+                ${lead.website ? `<a href="${escapeHtml(lead.website)}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-violet-500/[0.05] border border-violet-500/15 hover:bg-violet-500/10 transition-colors">
+                    <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span class="text-[10px] font-semibold text-violet-400">Site</span>
                 </a>` : '<div></div>'}
                 <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/15 hover:bg-emerald-500/10 transition-colors">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -425,6 +429,48 @@ async function deleteLeadFromModal(id) {
         showToast('Lead excluído', 'success');
         closeLeadDetail();
         loadLeads(currentPage);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').classList.remove('hidden');
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').classList.add('hidden');
+}
+
+async function doInlineExport() {
+    const tier = document.getElementById('expTier').value;
+    const qty = document.getElementById('expQty').value;
+    const format = document.querySelector('input[name="expFormat"]:checked').value;
+
+    try {
+        const response = await fetch('/api/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCSRFToken() },
+            body: JSON.stringify({ format, tier, quantity: qty ? parseInt(qty) : null }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Erro ao exportar');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads-${new Date().toISOString().split('T')[0]}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        closeExportModal();
+        showToast('Exportação concluída!', 'success');
     } catch (e) {
         showToast(e.message, 'error');
     }

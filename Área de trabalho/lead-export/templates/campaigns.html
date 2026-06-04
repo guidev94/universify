@@ -117,7 +117,7 @@ async function extractCampaign(id) {
 }
 
 async function deleteCampaign(id) {
-    if (!confirm('Excluir esta campanha? Os leads não serão deletados.')) return;
+    if (!await confirmModal('Excluir esta campanha? Os leads não serão deletados.', 'Excluir', true)) return;
     try {
         await api(`/api/campaigns/${id}`, { method: 'DELETE' });
         showToast('Campanha excluída', 'success');
