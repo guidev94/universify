@@ -33,10 +33,47 @@ def recent_jobs():
 @bp.route("/api/crawl/jobs/<int:job_id>", methods=["DELETE"])
 def delete_job(job_id):
     conn = get_connection()
+    conn.execute("UPDATE leads SET crawl_job_id = NULL WHERE crawl_job_id = ?", (job_id,))
     conn.execute("DELETE FROM crawl_jobs WHERE id = ?", (job_id,))
     conn.commit()
     conn.close()
     return jsonify({"ok": True})
+
+
+@bp.route("/logs")
+def logs_page():
+    return render_template("logs.html")
+
+
+@bp.route("/api/logs")
+def api_logs():
+    page = request.args.get("page", 1, type=int)
+    per_page = 20
+    offset = (page - 1) * per_page
+
+    conn = get_connection()
+    total = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs").fetchone()["c"]
+    jobs = conn.execute(
+        "SELECT * FROM crawl_jobs ORDER BY started_at DESC LIMIT ? OFFSET ?",
+        (per_page, offset),
+    ).fetchall()
+
+    total_leads = conn.execute("SELECT COUNT(*) as c FROM leads").fetchone()["c"]
+    today = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
+    campaigns_count = conn.execute("SELECT COUNT(*) as c FROM campaigns WHERE status = 'active'").fetchone()["c"]
+    conn.close()
+
+    return jsonify({
+        "jobs": [dict(r) for r in jobs],
+        "total": total,
+        "page": page,
+        "stats": {
+            "total_leads": total_leads,
+            "total_jobs": total,
+            "today": today,
+            "campaigns": campaigns_count,
+        }
+    })
 
 
 @bp.route("/pipeline")

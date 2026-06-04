@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% set active_page = "logs" %}
+
+{% block title %}Logs — LeadHunter{% endblock %}
+{% block page_title %}Logs{% endblock %}
+{% block page_subtitle %}Histórico de extrações e captação de leads{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <!-- Stats Resumo -->
+    <div class="glass-card-static p-4 fade-up">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="text-center">
+                <p class="text-2xl font-bold text-zinc-100" id="logTotalLeads">0</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Total Captados</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-emerald-400" id="logTotalJobs">0</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Extrações</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-blue-400" id="logToday">0</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Hoje</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-orange-400" id="logCampaigns">0</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Campanhas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log de Extrações -->
+    <div class="glass-card p-6 fade-up">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-[13px] font-semibold text-zinc-200">Histórico de Extrações</h3>
+            <span class="text-[10px] text-zinc-500" id="logCount">Carregando...</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Palavra-chave</th>
+                        <th>Localização</th>
+                        <th>Leads</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="logsTable">
+                    <tr><td colspan="6" class="text-center text-zinc-700 py-8">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex items-center justify-between mt-4" id="logsPagination"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let logsPage = 1;
+
+async function loadLogs(page = 1) {
+    logsPage = page;
+    try {
+        const data = await api(`/api/logs?page=${page}`);
+        document.getElementById('logTotalLeads').textContent = data.stats.total_leads;
+        document.getElementById('logTotalJobs').textContent = data.stats.total_jobs;
+        document.getElementById('logToday').textContent = data.stats.today;
+        document.getElementById('logCampaigns').textContent = data.stats.campaigns;
+        document.getElementById('logCount').textContent = `${data.total} extrações`;
+
+        const statusLabels = { completed: 'concluído', running: 'rodando', error: 'erro', pending: 'pendente' };
+        const statusColors = { completed: 'text-emerald-400 bg-emerald-500/10', running: 'text-blue-400 bg-blue-500/10', error: 'text-red-400 bg-red-500/10', pending: 'text-zinc-400 bg-zinc-500/10' };
+
+        const tbody = document.getElementById('logsTable');
+        if (!data.jobs.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-zinc-600 py-8">Nenhuma extração registrada</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.jobs.map(job => `
+            <tr>
+                <td class="font-medium text-white">${escapeHtml(job.keyword)}</td>
+                <td>${escapeHtml(job.location) || '—'}</td>
+                <td class="font-semibold">${job.quantity_found}</td>
+                <td><span class="text-xs px-2 py-0.5 rounded ${statusColors[job.status] || ''}">${statusLabels[job.status] || job.status}</span></td>
+                <td class="text-zinc-500 text-[11px]">${formatDateTime(job.started_at)}</td>
+                <td><button onclick="deleteLog(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors"><svg class="w-3.5 h-3.5 text-red-400/60 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+            </tr>
+        `).join('');
+
+        const totalPages = Math.ceil(data.total / 20);
+        document.getElementById('logsPagination').innerHTML = totalPages > 1 ? `
+            <span class="text-[11px] text-zinc-500">Página ${page} de ${totalPages}</span>
+            <div class="flex gap-1">
+                <button onclick="loadLogs(${page - 1})" class="btn-ghost !px-2 !py-1 text-[11px] ${page <= 1 ? 'opacity-30 pointer-events-none' : ''}">← Anterior</button>
+                <button onclick="loadLogs(${page + 1})" class="btn-ghost !px-2 !py-1 text-[11px] ${page >= totalPages ? 'opacity-30 pointer-events-none' : ''}">Próximo →</button>
+            </div>
+        ` : '';
+    } catch (e) {
+        document.getElementById('logsTable').innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Erro ao carregar logs</td></tr>';
+    }
+}
+
+async function deleteLog(id) {
+    if (!await confirmModal('Excluir este registro?', 'Excluir', true)) return;
+    try {
+        await api(`/api/crawl/jobs/${id}`, { method: 'DELETE' });
+        showToast('Registro excluído', 'success');
+        loadLogs(logsPage);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+loadLogs();
+lucide.createIcons();
+</script>
+{% endblock %}

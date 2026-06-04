@@ -325,4 +325,4 @@ class Scheduler:
             logger.error(f"[scheduler] erro salvando estado: {e}")
 
 
-scheduler = Scheduler(verify_interval=3600, crawl_interval=10800)
+scheduler = Scheduler(verify_interval=1800, crawl_interval=1800)
