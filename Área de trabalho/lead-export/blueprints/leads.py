@@ -19,7 +19,8 @@ def list_leads():
     status = request.args.get("status", "").strip() or None
     source = request.args.get("source", "").strip() or None
     search = request.args.get("search", "").strip() or None
-    sort = request.args.get("sort", "score")
+    category = request.args.get("category", "").strip() or None
+    sort = request.args.get("sort", "created_at")
     order = request.args.get("order", "desc")
 
     per_page = min(per_page, 100)
@@ -30,6 +31,7 @@ def list_leads():
         page=page, per_page=per_page, tier=tier,
         status=status, source=source, search=search,
         sort=sort, order=order, only_verified=bool(only_verified),
+        category=category,
     )
 
     return jsonify({
@@ -201,3 +203,11 @@ def leads_today():
     count = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
     conn.close()
     return jsonify({"today": count})
+
+
+@bp.route("/api/leads/categories")
+def lead_categories():
+    conn = get_connection()
+    rows = conn.execute("SELECT DISTINCT category FROM leads WHERE category != '' ORDER BY category").fetchall()
+    conn.close()
+    return jsonify({"categories": [dict(r)["category"] for r in rows]})

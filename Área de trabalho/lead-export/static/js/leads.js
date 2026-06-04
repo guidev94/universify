@@ -8,6 +8,7 @@ function getFilters() {
         tier: document.getElementById('filterTier').value,
         status: document.getElementById('filterStatus').value,
         source: document.getElementById('filterSource').value,
+        category: document.getElementById('filterCategory').value,
         sort: document.getElementById('sortBy').value,
         verified: document.getElementById('filterVerified').checked,
     };
@@ -28,6 +29,7 @@ async function loadLeads(page = 1) {
     if (filters.tier) params.set('tier', filters.tier);
     if (filters.status) params.set('status', filters.status);
     if (filters.source) params.set('source', filters.source);
+    if (filters.category) params.set('category', filters.category);
     if (filters.verified) params.set('verified', '1');
     if (filters.sort === 'name') params.set('order', 'asc');
 
@@ -197,9 +199,23 @@ document.getElementById('selectAll').addEventListener('change', function() {
     });
 });
 
-['filterTier', 'filterStatus', 'filterSource', 'sortBy'].forEach(id => {
+['filterTier', 'filterStatus', 'filterSource', 'filterCategory', 'sortBy'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => loadLeads(1));
 });
+
+async function loadCategories() {
+    try {
+        const data = await api('/api/leads/categories');
+        const select = document.getElementById('filterCategory');
+        data.categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            select.appendChild(opt);
+        });
+    } catch (e) {}
+}
+loadCategories();
 
 document.getElementById('filterVerified').addEventListener('change', () => loadLeads(1));
 

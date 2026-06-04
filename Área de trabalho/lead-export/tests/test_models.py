@@ -123,3 +123,25 @@ def test_lead_hash_different_domains():
     hash1 = Lead._generate_hash({"email": "", "phone": "", "website": "https://site-a.com", "name": "A"})
     hash2 = Lead._generate_hash({"email": "", "phone": "", "website": "https://site-b.com", "name": "B"})
     assert hash1 != hash2
+
+
+def test_get_all_filter_category():
+    Lead.create({"name": "Dentista 1", "email": "d1@t.com", "phone": "", "website": "https://dent1.com", "source": "t", "category": "dentista", "score": 80, "tier": "hot"})
+    Lead.create({"name": "Advogado 1", "email": "a1@t.com", "phone": "", "website": "https://adv1.com", "source": "t", "category": "advogado", "score": 70, "tier": "warm"})
+
+    leads, total = Lead.get_all(category="dentista")
+    assert total >= 1
+    assert all("dentista" in (l.get("category") or "") for l in leads)
+
+
+def test_get_all_filter_category_empty():
+    leads, total = Lead.get_all(category="inexistente_xyz")
+    assert total == 0
+
+
+def test_campaign_create():
+    from models import Campaign
+    Campaign.create("Test Campaign", "test_keyword", "São Paulo", 50)
+    campaigns = Campaign.get_all()
+    assert len(campaigns) >= 1
+    assert campaigns[0]["name"] == "Test Campaign"

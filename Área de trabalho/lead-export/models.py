@@ -133,7 +133,7 @@ class Lead:
         return removed
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -147,9 +147,12 @@ class Lead:
         if source:
             conditions.append("source = ?")
             params.append(source)
+        if category:
+            conditions.append("category LIKE ?")
+            params.append(f"%{category}%")
         if search:
-            conditions.append("(name LIKE ? OR email LIKE ?)")
-            params.extend([f"%{search}%", f"%{search}%"])
+            conditions.append("(name LIKE ? OR email LIKE ? OR category LIKE ?)")
+            params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
         if only_verified:
             conditions.append("site_verified = 1 AND website != ''")
 
