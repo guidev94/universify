@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Dashboard — LeadHunter{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Performance e métricas em tempo real{% endblock %}
+
+{% block content %}
+<!-- Hero Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+    <!-- Total Leads -->
+    <div class="glass-card stat-card p-6 fade-up">
+        <div class="flex items-start justify-between">
+            <div class="icon-box bg-zinc-800/80">
+                <i data-lucide="users" class="w-[20px] h-[20px] text-zinc-300 stroke-[1.5]"></i>
+            </div>
+            <span class="badge badge-new">Total</span>
+        </div>
+        <p class="stat-number mt-5" id="statTotal">0</p>
+        <p class="text-[11px] text-zinc-500 mt-2 font-medium">Leads capturados</p>
+    </div>
+
+    <!-- Hot Leads -->
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-1">
+        <div class="flex items-start justify-between">
+            <div class="icon-box bg-blue-500/10">
+                <i data-lucide="flame" class="w-[20px] h-[20px] text-blue-400 stroke-[1.5]"></i>
+            </div>
+            <span class="badge badge-hot">Hot</span>
+        </div>
+        <p class="stat-number accent mt-5" id="statHot">0</p>
+        <p class="text-[11px] text-zinc-500 mt-2 font-medium">Prontos para conversão</p>
+    </div>
+
+    <!-- Warm Leads -->
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-2">
+        <div class="flex items-start justify-between">
+            <div class="icon-box bg-orange-500/10">
+                <i data-lucide="trending-up" class="w-[20px] h-[20px] text-orange-400 stroke-[1.5]"></i>
+            </div>
+            <span class="badge badge-warm">Warm</span>
+        </div>
+        <p class="stat-number mt-5" id="statWarm">0</p>
+        <p class="text-[11px] text-zinc-500 mt-2 font-medium">Leads promissores</p>
+    </div>
+
+    <!-- Cold Leads -->
+    <div class="glass-card stat-card p-6 fade-up fade-up-delay-3">
+        <div class="flex items-start justify-between">
+            <div class="icon-box bg-zinc-700/50">
+                <i data-lucide="snowflake" class="w-[20px] h-[20px] text-zinc-500 stroke-[1.5]"></i>
+            </div>
+            <span class="badge badge-cold">Cold</span>
+        </div>
+        <p class="stat-number mt-5" id="statCold">0</p>
+        <p class="text-[11px] text-zinc-500 mt-2 font-medium">Precisam mais dados</p>
+    </div>
+</div>
+
+<!-- Revenue & Pipeline Strip -->
+<div class="glass-card-static p-4 mb-5 fade-up fade-up-delay-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-zinc-800/50">
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-emerald-400" id="statRevenue">R$ 0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Revenue Total</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="handshake" class="w-4 h-4 text-green-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-green-400" id="statDeals">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Deals Fechados</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="percent" class="w-4 h-4 text-blue-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-blue-400" id="statConversion">0%</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Conversão</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="message-circle" class="w-4 h-4 text-orange-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-orange-400" id="statNegotiating">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Negociando</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Metrics Strip -->
+<div class="glass-card-static p-4 mb-8 fade-up fade-up-delay-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-zinc-800/50">
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="mail" class="w-4 h-4 text-emerald-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-emerald-400" id="statEmail">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Com Email</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="phone" class="w-4 h-4 text-blue-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-blue-400" id="statPhone">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Com Telefone</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="message-circle" class="w-4 h-4 text-green-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-green-400" id="statWhatsapp">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Com WhatsApp</p>
+            </div>
+        </div>
+        <div class="px-4 flex items-center gap-3">
+            <i data-lucide="gauge" class="w-4 h-4 text-blue-400 stroke-[1.5]"></i>
+            <div>
+                <p class="text-lg font-bold text-blue-400" id="statAvgScore">0</p>
+                <p class="text-[10px] text-zinc-600 font-medium">Score Médio</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-8">
+    <!-- Area Chart -->
+    <div class="glass-card p-6 lg:col-span-3">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Leads Extraídos</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Últimos 30 dias</p>
+            </div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/8 border border-blue-500/10">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <span class="text-[10px] text-blue-400/80 font-medium">Atualizado</span>
+            </div>
+        </div>
+        <div class="h-[200px]">
+            <canvas id="leadsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Doughnut Chart -->
+    <div class="glass-card p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Distribuição</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Por qualificação</p>
+            </div>
+        </div>
+        <div class="h-[200px] flex items-center justify-center">
+            <canvas id="tierChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="glass-card p-6">
+    <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+            <div class="icon-box bg-zinc-800/80">
+                <i data-lucide="history" class="w-[18px] h-[18px] text-zinc-400 stroke-[1.5]"></i>
+            </div>
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Extrações Recentes</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Histórico de buscas</p>
+            </div>
+        </div>
+        <a href="/crawl" class="btn-ghost flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2]"></i>
+            Nova
+        </a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Palavra-chave</th>
+                    <th>Localização</th>
+                    <th>Fonte</th>
+                    <th>Leads</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody id="recentJobsTable">
+                <tr><td colspan="6" class="text-center text-zinc-700 py-10">
+                    <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-zinc-700 stroke-[1]"></i>
+                    <p class="text-xs">Nenhuma extração ainda</p>
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+<script>lucide.createIcons();</script>
+{% endblock %}

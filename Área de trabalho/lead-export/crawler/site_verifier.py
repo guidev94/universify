@@ -1,0 +1,81 @@
+import ssl
+import socket
+import threading
+import requests
+from concurrent.futures import ThreadPoolExecutor
+from crawler.lead_scorer import calculate_score
+
+
+class SiteVerifier:
+    def __init__(self, max_workers=5):
+        self.max_workers = max_workers
+
+    def verify_leads(self, leads, on_complete=None):
+        thread = threading.Thread(
+            target=self._run_verification,
+            args=(leads, on_complete),
+            daemon=True,
+        )
+        thread.start()
+
+    def _run_verification(self, leads, on_complete):
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = []
+            for lead in leads:
+                if lead.get("website"):
+                    futures.append(executor.submit(self._verify_single, lead))
+
+            for future in futures:
+                future.result()
+
+        if on_complete:
+            on_complete()
+
+    def _verify_single(self, lead):
+        from models import Lead
+
+        url = lead["website"]
+        site_ok = self._check_http(url)
+        ssl_ok = self._check_ssl(url) if site_ok else False
+
+        lead_data = Lead.get_by_id(lead["id"])
+        if not lead_data:
+            return
+
+        lead_data["site_verified"] = 1 if site_ok else 0
+        lead_data["ssl_valid"] = 1 if ssl_ok else 0
+
+        score, tier = calculate_score(lead_data)
+
+        Lead.update_verification(
+            lead["id"],
+            site_verified=1 if site_ok else 0,
+            ssl_valid=1 if ssl_ok else 0,
+            new_score=score,
+            new_tier=tier,
+        )
+
+    def _check_http(self, url):
+        try:
+            if not url.startswith(("http://", "https://")):
+                url = "https://" + url
+            response = requests.head(url, timeout=10, allow_redirects=True)
+            return response.status_code < 400
+        except Exception:
+            return False
+
+    def _check_ssl(self, url):
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(url if url.startswith("http") else f"https://{url}")
+            hostname = parsed.hostname
+            if not hostname:
+                return False
+
+            context = ssl.create_default_context()
+            with socket.create_connection((hostname, 443), timeout=10) as sock:
+                with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                    cert = ssock.getpeercert()
+                    return cert is not None
+        except Exception:
+            return False
