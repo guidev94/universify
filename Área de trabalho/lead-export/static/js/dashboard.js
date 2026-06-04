@@ -218,7 +218,7 @@ async function loadSchedulerStatus() {
 }
 
 async function deleteJob(id) {
-    if (!confirm('Excluir esta extração?')) return;
+    if (!await confirmModal('Excluir esta extração?', 'Excluir', true)) return;
     try {
         await api(`/api/crawl/jobs/${id}`, { method: 'DELETE' });
         showToast('Extração excluída', 'success');

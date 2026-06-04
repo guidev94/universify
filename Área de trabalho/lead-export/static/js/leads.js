@@ -155,7 +155,7 @@ async function changeStatus(id, status) {
 }
 
 async function deleteLead(id) {
-    if (!confirm('Excluir este lead?')) return;
+    if (!await confirmModal('Excluir este lead?', 'Excluir', true)) return;
     try {
         await api(`/api/leads/${id}`, { method: 'DELETE' });
         showToast('Lead excluído', 'success');
@@ -166,7 +166,7 @@ async function deleteLead(id) {
 }
 
 async function bulkDelete() {
-    if (!confirm(`Excluir ${selectedIds.size} leads?`)) return;
+    if (!await confirmModal(`Excluir ${selectedIds.size} leads?`, 'Excluir Todos', true)) return;
     try {
         await api('/api/leads/bulk-delete', {
             method: 'POST',
@@ -419,7 +419,7 @@ async function changeLeadStatus(id, status) {
 }
 
 async function deleteLeadFromModal(id) {
-    if (!confirm('Excluir este lead permanentemente?')) return;
+    if (!await confirmModal('Excluir este lead permanentemente?', 'Excluir', true)) return;
     try {
         await api(`/api/leads/${id}`, { method: 'DELETE' });
         showToast('Lead excluído', 'success');

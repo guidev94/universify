@@ -82,3 +82,33 @@ function scoreBadge(score) {
     else if (score >= 50) cls = 'score-warm';
     return `<span class="score-pill ${cls}">${score}</span>`;
 }
+
+function confirmModal(message, confirmText = 'Confirmar', danger = false) {
+    return new Promise((resolve) => {
+        const existing = document.getElementById('confirmModal');
+        if (existing) existing.remove();
+
+        const btnClass = danger ? '!bg-red-600 hover:!bg-red-500 !shadow-red-600/30' : '';
+        const modal = document.createElement('div');
+        modal.id = 'confirmModal';
+        modal.className = 'fixed inset-0 z-[200] flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-action="cancel"></div>
+            <div class="relative glass-card p-6 w-full max-w-sm mx-auto">
+                <p class="text-[14px] text-zinc-100 font-medium text-center mb-6">${message}</p>
+                <div class="flex gap-3">
+                    <button class="btn-ghost flex-1" data-action="cancel">Cancelar</button>
+                    <button class="btn-accent flex-1 ${btnClass}" data-action="confirm">${confirmText}</button>
+                </div>
+            </div>
+        `;
+
+        modal.addEventListener('click', (e) => {
+            const action = e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action;
+            if (action === 'confirm') { modal.remove(); resolve(true); }
+            else if (action === 'cancel') { modal.remove(); resolve(false); }
+        });
+
+        document.body.appendChild(modal);
+    });
+}
