@@ -69,6 +69,74 @@ def create_campaign():
     return jsonify({"ok": True})
 
 
+@bp.route("/api/campaigns/<int:camp_id>", methods=["DELETE"])
+def delete_campaign(camp_id):
+    conn = get_connection()
+    camp = conn.execute("SELECT name FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
+    if camp:
+        conn.execute("UPDATE leads SET campaign = '' WHERE campaign = ?", (camp["name"],))
+        conn.execute("DELETE FROM campaigns WHERE id = ?", (camp_id,))
+        conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/campaigns/<int:camp_id>/leads")
+def campaign_leads(camp_id):
+    conn = get_connection()
+    camp = conn.execute("SELECT name FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
+    if not camp:
+        conn.close()
+        return jsonify({"error": "Campanha não encontrada"}), 404
+
+    page = request.args.get("page", 1, type=int)
+    per_page = 20
+    offset = (page - 1) * per_page
+
+    total = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
+    rows = conn.execute(
+        "SELECT * FROM leads WHERE campaign = ? ORDER BY score DESC LIMIT ? OFFSET ?",
+        (camp["name"], per_page, offset),
+    ).fetchall()
+    conn.close()
+
+    return jsonify({"leads": [dict(r) for r in rows], "total": total, "page": page, "pages": (total + per_page - 1) // per_page})
+
+
+@bp.route("/api/campaigns/<int:camp_id>/extract", methods=["POST"])
+def extract_campaign(camp_id):
+    import uuid, threading
+    from blueprints.crawl import run_crawl
+    from models import CrawlJob
+
+    conn = get_connection()
+    camp = conn.execute("SELECT * FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
+    conn.close()
+
+    if not camp:
+        return jsonify({"error": "Campanha não encontrada"}), 404
+
+    camp = dict(camp)
+    keyword = camp["keyword"]
+    location = camp.get("location", "")
+    quantity = min(30, camp["goal"])
+
+    job_uuid = str(uuid.uuid4())
+    from blueprints.crawl import active_jobs
+    job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
+    active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": quantity, "sources": {}}
+
+    thread = threading.Thread(
+        target=run_crawl,
+        args=(job_uuid, job_id, "both", keyword, quantity, location),
+        kwargs={"campaign_name": camp["name"]},
+        daemon=True,
+    )
+    thread.start()
+
+    return jsonify({"job_id": job_uuid, "quantity": quantity})
+
+
 @bp.route("/api/system/health")
 def system_health():
     from scheduler import scheduler

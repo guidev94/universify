@@ -170,6 +170,8 @@ class Scheduler:
         logger.info(f"[scheduler] enriquecimento: {enriched_count} leads atualizados")
 
     def _auto_crawl(self):
+        self._crawl_campaigns()
+
         keywords = Keyword.get_for_autocrawl(limit=7)
         if not keywords:
             logger.info("[scheduler] nenhuma keyword para auto-crawl")
@@ -199,9 +201,42 @@ class Scheduler:
                     else:
                         logger.error(f"[scheduler] '{kw['keyword']}' falhou após {max_retries} tentativas: {e}")
 
-    def _run_multi_source_crawl(self, keyword, location):
+    def _crawl_campaigns(self):
+        from database import get_connection
+        conn = get_connection()
+        campaigns = conn.execute(
+            "SELECT * FROM campaigns WHERE status = 'active'"
+        ).fetchall()
+        conn.close()
+
+        for camp in campaigns:
+            camp = dict(camp)
+            conn = get_connection()
+            current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
+            conn.close()
+
+            if current >= camp["goal"]:
+                continue
+
+            remaining = camp["goal"] - current
+            quantity = min(30, remaining)
+            keyword = camp.get("keyword", "")
+            location = camp.get("location", "")
+
+            if not keyword:
+                continue
+
+            logger.info(f"[scheduler] campanha '{camp['name']}': {current}/{camp['goal']} — extraindo {quantity}")
+
+            try:
+                count = self._run_multi_source_crawl(keyword, location, campaign_name=camp["name"], quantity_override=quantity)
+                logger.info(f"[scheduler] campanha '{camp['name']}': +{count} leads")
+            except Exception as e:
+                logger.warning(f"[scheduler] campanha '{camp['name']}' falhou: {e}")
+
+    def _run_multi_source_crawl(self, keyword, location, campaign_name=None, quantity_override=None):
         job_uuid = str(uuid.uuid4())
-        quantity = 30
+        quantity = quantity_override or 30
         job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
         CrawlJob.set_running(job_uuid)
 
@@ -241,8 +276,16 @@ class Scheduler:
             score, tier = calculate_score(validated)
             validated["score"] = score
             validated["tier"] = tier
+            if campaign_name:
+                validated["campaign"] = campaign_name
 
             lead_id = Lead.create(validated, crawl_job_id=job_id)
+            if lead_id and campaign_name:
+                from database import get_connection as gc
+                c = gc()
+                c.execute("UPDATE leads SET campaign = ? WHERE id = ? AND (campaign = '' OR campaign IS NULL)", (campaign_name, lead_id))
+                c.commit()
+                c.close()
             if lead_id:
                 saved_count += 1
 

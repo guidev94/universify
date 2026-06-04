@@ -72,7 +72,11 @@ async function loadCampaigns() {
                     </div>
                     <div class="flex items-center justify-between mt-2">
                         <span class="text-[10px] text-zinc-500">${progress}% concluído</span>
-                        <button onclick="startCampaignCrawl('${escapeHtml(c.keyword)}', '${escapeHtml(c.location)}')" class="text-[10px] text-blue-400 hover:text-blue-300 font-medium">Extrair mais →</button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="text-[10px] text-zinc-400 hover:text-zinc-200 font-medium">Ver Leads</button>
+                            <button onclick="extractCampaign(${c.id})" class="text-[10px] text-blue-400 hover:text-blue-300 font-medium">Extrair →</button>
+                            <button onclick="deleteCampaign(${c.id})" class="text-[10px] text-red-400/60 hover:text-red-400 font-medium">Excluir</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -102,8 +106,65 @@ async function createCampaign() {
     }
 }
 
-function startCampaignCrawl(keyword, location) {
-    window.location.href = `/crawl?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+async function extractCampaign(id) {
+    try {
+        const data = await api(`/api/campaigns/${id}/extract`, { method: 'POST' });
+        showToast(`Extração iniciada! Buscando ${data.quantity} leads...`, 'success');
+        setTimeout(loadCampaigns, 5000);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function deleteCampaign(id) {
+    if (!confirm('Excluir esta campanha? Os leads não serão deletados.')) return;
+    try {
+        await api(`/api/campaigns/${id}`, { method: 'DELETE' });
+        showToast('Campanha excluída', 'success');
+        loadCampaigns();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function viewCampaignLeads(id, name) {
+    const list = document.getElementById('campaignList');
+    list.innerHTML = `<div class="mb-4 flex items-center justify-between">
+        <h4 class="text-[13px] font-semibold text-zinc-200">Leads: ${escapeHtml(name)}</h4>
+        <button onclick="loadCampaigns()" class="text-[10px] text-zinc-400 hover:text-zinc-200">← Voltar</button>
+    </div><div id="campLeadsList" class="space-y-2"><div class="flex justify-center py-4"><div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div></div>`;
+
+    try {
+        const data = await api(`/api/campaigns/${id}/leads`);
+        const container = document.getElementById('campLeadsList');
+
+        if (!data.leads.length) {
+            container.innerHTML = '<p class="text-center text-zinc-600 py-4 text-[12px]">Nenhum lead nesta campanha ainda. Clique "Extrair" para buscar.</p>';
+            return;
+        }
+
+        container.innerHTML = data.leads.map(l => {
+            const phone = l.whatsapp || l.phone || '';
+            const wa = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
+            return `<div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
+                    <p class="text-[10px] text-zinc-500 truncate">${l.email || l.phone || '—'}</p>
+                </div>
+                <div class="flex items-center gap-2 ml-2">
+                    <span class="text-[11px] font-bold ${l.tier === 'hot' ? 'text-amber-400' : l.tier === 'warm' ? 'text-orange-400' : 'text-zinc-500'}">${l.score}</span>
+                    ${wa ? `<a href="${wa}" target="_blank" class="p-1 rounded hover:bg-green-500/10"><svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>` : ''}
+                    ${l.email ? `<a href="mailto:${l.email.split(';')[0]}" class="p-1 rounded hover:bg-blue-500/10"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></a>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        if (data.total > 20) {
+            container.innerHTML += `<p class="text-center text-[10px] text-zinc-500 mt-3">Mostrando 20 de ${data.total} leads</p>`;
+        }
+    } catch (e) {
+        document.getElementById('campLeadsList').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar</p>';
+    }
 }
 
 loadCampaigns();

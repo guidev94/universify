@@ -64,7 +64,7 @@ def start_crawl():
     return jsonify({"job_id": job_uuid})
 
 
-def run_crawl(job_uuid, job_id, source, query, quantity, location):
+def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name=None):
     saved_ids = []
     try:
         CrawlJob.set_running(job_uuid)
@@ -125,10 +125,18 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location):
             score, tier = calculate_score(validated)
             validated["score"] = score
             validated["tier"] = tier
+            if campaign_name:
+                validated["campaign"] = campaign_name
 
             lead_id = Lead.create(validated, crawl_job_id=job_id)
             if lead_id:
                 saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
+                if campaign_name:
+                    from database import get_connection as gc
+                    conn = gc()
+                    conn.execute("UPDATE leads SET campaign = ? WHERE id = ? AND (campaign = '' OR campaign IS NULL)", (campaign_name, lead_id))
+                    conn.commit()
+                    conn.close()
                 saved_count += 1
 
         CrawlJob.complete(job_uuid, saved_count)
