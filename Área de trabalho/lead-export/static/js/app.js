@@ -41,9 +41,10 @@ function showToast(message, type = 'info') {
     document.querySelectorAll('.toast').forEach(t => t.remove());
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.textContent = message;
+    toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="ml-3 opacity-60 hover:opacity-100">✕</button>`;
+    toast.style.transition = 'all 0.3s ease';
     document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 function formatDate(dateStr) {

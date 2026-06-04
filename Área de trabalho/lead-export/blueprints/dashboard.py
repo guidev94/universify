@@ -132,7 +132,7 @@ def campaign_leads(camp_id):
 
     total = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
     rows = conn.execute(
-        "SELECT * FROM leads WHERE campaign = ? ORDER BY score DESC LIMIT ? OFFSET ?",
+        "SELECT * FROM leads WHERE campaign = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
         (camp["name"], per_page, offset),
     ).fetchall()
     conn.close()

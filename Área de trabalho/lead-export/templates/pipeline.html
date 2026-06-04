@@ -95,7 +95,7 @@ async function loadPipeline() {
 
 async function loadPipelineLeads() {
     const status = document.getElementById('pipeFilter').value;
-    const params = status ? `status=${status}&per_page=20&sort=score&order=desc` : 'per_page=20&sort=created_at&order=desc';
+    const params = status ? `status=${status}&per_page=20&sort=created_at&order=desc` : 'per_page=20&sort=created_at&order=desc';
     const data = await api(`/api/leads?${params}`);
     const list = document.getElementById('pipelineList');
 
