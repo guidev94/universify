@@ -4,6 +4,9 @@ from flask import Blueprint, render_template, request, jsonify
 from models import Lead, CrawlJob, Keyword
 from crawler.website_crawler import WebsiteCrawler
 from crawler.maps_crawler import MapsCrawler
+from crawler.bing_crawler import BingCrawler
+from crawler.directory_crawler import DirectoryCrawler
+from crawler.niche_crawler import NicheCrawler
 from crawler.validator import validate_lead
 from crawler.lead_scorer import calculate_score
 from crawler.site_verifier import SiteVerifier
@@ -68,6 +71,27 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location):
             maps_crawler = MapsCrawler()
             maps_leads = maps_crawler.crawl(query, location, quantity, on_progress=on_progress)
             leads.extend(maps_leads)
+
+        try:
+            bing = BingCrawler()
+            bing_leads = bing.crawl(query, quantity // 2, on_progress=on_progress)
+            leads.extend(bing_leads)
+        except Exception:
+            pass
+
+        try:
+            directory = DirectoryCrawler()
+            dir_leads = directory.crawl(query, location, quantity // 2, on_progress=on_progress)
+            leads.extend(dir_leads)
+        except Exception:
+            pass
+
+        try:
+            niche = NicheCrawler()
+            niche_leads = niche.crawl(query, location, quantity // 2, on_progress=on_progress)
+            leads.extend(niche_leads)
+        except Exception:
+            pass
 
         saved_count = 0
         saved_ids = []
