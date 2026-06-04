@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% set active_page = "pipeline" %}
+
+{% block title %}Pipeline — LeadHunter{% endblock %}
+{% block page_title %}Pipeline{% endblock %}
+{% block page_subtitle %}Funil de conversão dos seus leads{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Funnel Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4" id="pipelineCards">
+        <div class="glass-card p-5 text-center fade-up cursor-pointer" onclick="filterByStatus('new')">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="inbox" class="w-5 h-5 text-blue-400 stroke-[1.5]"></i>
+            </div>
+            <p class="text-2xl font-bold text-zinc-100" id="pipeNew">0</p>
+            <p class="text-[10px] text-zinc-500 mt-1 font-medium">Novos</p>
+        </div>
+        <div class="glass-card p-5 text-center fade-up cursor-pointer" onclick="filterByStatus('contacted')">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="send" class="w-5 h-5 text-cyan-400 stroke-[1.5]"></i>
+            </div>
+            <p class="text-2xl font-bold text-cyan-400" id="pipeContacted">0</p>
+            <p class="text-[10px] text-zinc-500 mt-1 font-medium">Contatados</p>
+        </div>
+        <div class="glass-card p-5 text-center fade-up cursor-pointer" onclick="filterByStatus('negotiating')">
+            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="message-circle" class="w-5 h-5 text-orange-400 stroke-[1.5]"></i>
+            </div>
+            <p class="text-2xl font-bold text-orange-400" id="pipeNegotiating">0</p>
+            <p class="text-[10px] text-zinc-500 mt-1 font-medium">Negociando</p>
+        </div>
+        <div class="glass-card p-5 text-center fade-up cursor-pointer" onclick="filterByStatus('closed_won')">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 stroke-[1.5]"></i>
+            </div>
+            <p class="text-2xl font-bold text-emerald-400" id="pipeWon">0</p>
+            <p class="text-[10px] text-zinc-500 mt-1 font-medium">Fechados</p>
+        </div>
+        <div class="glass-card p-5 text-center fade-up cursor-pointer" onclick="filterByStatus('closed_lost')">
+            <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 stroke-[1.5]"></i>
+            </div>
+            <p class="text-2xl font-bold text-red-400" id="pipeLost">0</p>
+            <p class="text-[10px] text-zinc-500 mt-1 font-medium">Perdidos</p>
+        </div>
+    </div>
+
+    <!-- Conversion Bar -->
+    <div class="glass-card-static p-5 fade-up">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Taxa de Conversão</p>
+            <span class="text-[13px] font-bold text-emerald-400" id="conversionRate">0%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="conversionBar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Pipeline List -->
+    <div class="glass-card p-6 fade-up">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-[13px] font-semibold text-zinc-200">Leads no Pipeline</h3>
+            <select id="pipeFilter" class="select-glass !py-1 !text-[11px]" onchange="loadPipelineLeads()">
+                <option value="">Todos</option>
+                <option value="new">Novos</option>
+                <option value="contacted">Contatados</option>
+                <option value="negotiating">Negociando</option>
+                <option value="closed_won">Fechados</option>
+            </select>
+        </div>
+        <div id="pipelineList" class="space-y-2"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadPipeline() {
+    const data = await api('/api/leads/pipeline');
+    const p = data.pipeline;
+    document.getElementById('pipeNew').textContent = p.new;
+    document.getElementById('pipeContacted').textContent = p.contacted;
+    document.getElementById('pipeNegotiating').textContent = p.negotiating;
+    document.getElementById('pipeWon').textContent = p.closed_won;
+    document.getElementById('pipeLost').textContent = p.closed_lost;
+
+    const total = data.total || 1;
+    const rate = ((p.closed_won / total) * 100).toFixed(1);
+    document.getElementById('conversionRate').textContent = rate + '%';
+    document.getElementById('conversionBar').style.width = rate + '%';
+
+    loadPipelineLeads();
+}
+
+async function loadPipelineLeads() {
+    const status = document.getElementById('pipeFilter').value;
+    const params = status ? `status=${status}&per_page=20&sort=score&order=desc` : 'per_page=20&sort=created_at&order=desc';
+    const data = await api(`/api/leads?${params}`);
+    const list = document.getElementById('pipelineList');
+
+    if (!data.leads.length) {
+        list.innerHTML = '<p class="text-center text-zinc-600 py-6 text-[12px]">Nenhum lead neste estágio</p>';
+        return;
+    }
+
+    const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
+    const statusColors = { new: 'text-blue-400', contacted: 'text-cyan-400', negotiating: 'text-orange-400', closed_won: 'text-emerald-400', closed_lost: 'text-red-400' };
+
+    list.innerHTML = data.leads.map(l => `
+        <div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
+            <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
+                <p class="text-[10px] text-zinc-500 truncate">${l.email || l.phone || '—'}</p>
+            </div>
+            <div class="flex items-center gap-3 ml-3">
+                <span class="text-[10px] font-semibold ${statusColors[l.status] || 'text-zinc-500'}">${statusLabels[l.status] || l.status}</span>
+                <span class="text-[11px] font-bold text-zinc-400">${l.score}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterByStatus(status) {
+    document.getElementById('pipeFilter').value = status;
+    loadPipelineLeads();
+}
+
+loadPipeline();
+lucide.createIcons();
+</script>
+{% endblock %}

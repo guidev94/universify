@@ -1,6 +1,6 @@
 import time
-from flask import Blueprint, render_template, jsonify
-from models import Lead, CrawlJob
+from flask import Blueprint, render_template, jsonify, request
+from models import Lead, CrawlJob, Campaign
 from database import get_connection
 
 bp = Blueprint("dashboard", __name__)
@@ -36,6 +36,36 @@ def delete_job(job_id):
     conn.execute("DELETE FROM crawl_jobs WHERE id = ?", (job_id,))
     conn.commit()
     conn.close()
+    return jsonify({"ok": True})
+
+
+@bp.route("/pipeline")
+def pipeline_page():
+    return render_template("pipeline.html")
+
+
+@bp.route("/campaigns")
+def campaigns_page():
+    return render_template("campaigns.html")
+
+
+@bp.route("/api/campaigns")
+def list_campaigns():
+    campaigns = Campaign.get_all()
+    for c in campaigns:
+        conn = get_connection()
+        c["leads_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ?", (c["name"],)).fetchone()["cnt"]
+        conn.close()
+    return jsonify({"campaigns": campaigns})
+
+
+@bp.route("/api/campaigns", methods=["POST"])
+def create_campaign():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "Nome obrigatório"}), 400
+    Campaign.create(name, data.get("keyword", ""), data.get("location", ""), int(data.get("goal", 100)))
     return jsonify({"ok": True})
 
 

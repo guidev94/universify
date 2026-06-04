@@ -32,9 +32,9 @@
 
             <!-- Brand -->
             <div class="px-5 pt-10 pb-5">
-                <div class="flex items-center justify-center">
-                    <img src="/static/logo.png" alt="LeadHunter" class="h-16 w-auto drop-shadow-[0_0_30px_rgba(37,99,235,0.25)]">
-                </div>
+                <a href="/dashboard" class="flex items-center justify-center">
+                    <img src="/static/logo.png" alt="LeadHunter" class="h-16 w-auto drop-shadow-[0_0_30px_rgba(37,99,235,0.25)] hover:scale-105 transition-transform">
+                </a>
                 <div class="mt-7 h-px bg-gradient-to-r from-transparent via-zinc-700/50 to-transparent"></div>
             </div>
 
@@ -57,6 +57,18 @@
                 <a href="/export" class="sidebar-link {% if active_page == 'export' %}active{% endif %}">
                     <i data-lucide="download" class="w-[18px] h-[18px] stroke-[1.5]"></i>
                     <span>Exportar</span>
+                </a>
+
+                <div class="!mt-6 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+                <p class="px-3 mt-4 mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-600">Gestão</p>
+
+                <a href="/pipeline" class="sidebar-link {% if active_page == 'pipeline' %}active{% endif %}">
+                    <i data-lucide="git-branch" class="w-[18px] h-[18px] stroke-[1.5]"></i>
+                    <span>Pipeline</span>
+                </a>
+                <a href="/campaigns" class="sidebar-link {% if active_page == 'campaigns' %}active{% endif %}">
+                    <i data-lucide="target" class="w-[18px] h-[18px] stroke-[1.5]"></i>
+                    <span>Campanhas</span>
                 </a>
 
                 <div class="!mt-6 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
