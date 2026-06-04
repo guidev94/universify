@@ -2,17 +2,18 @@ let leadsChart = null;
 let tierChart = null;
 let statValues = {};
 let isFirstLoad = true;
+let tierModalPage = 1;
+let tierModalCurrentTier = 'all';
+let tierModalTotal = 0;
 
 function animateValue(el, start, end, duration) {
-    if (start === end) return;
+    if (start === end) { el.textContent = end.toLocaleString('pt-BR'); return; }
     const range = end - start;
     const startTime = performance.now();
-
     function step(timestamp) {
         const progress = Math.min((timestamp - startTime) / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(start + range * eased);
-        el.textContent = current.toLocaleString('pt-BR');
+        el.textContent = Math.round(start + range * eased).toLocaleString('pt-BR');
         if (progress < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
@@ -35,16 +36,13 @@ async function loadStats() {
         for (const { id, key } of fields) {
             const el = document.getElementById(id);
             if (!el) continue;
-
             const newVal = data[key] || 0;
-            const oldVal = statValues[key] || 0;
 
             if (isFirstLoad) {
                 animateValue(el, 0, newVal, 800);
-            } else if (newVal !== oldVal) {
+            } else {
                 el.textContent = newVal.toLocaleString('pt-BR');
             }
-
             statValues[key] = newVal;
         }
 
@@ -78,11 +76,12 @@ async function loadCharts() {
                     label: 'Leads',
                     data: data.values,
                     borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 0,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#2563eb',
                     pointHitRadius: 10,
                 }]
             },
@@ -93,12 +92,12 @@ async function loadCharts() {
                 scales: {
                     x: {
                         grid: { color: 'rgba(255,255,255,0.03)' },
-                        ticks: { color: '#64748b', font: { size: 10 } }
+                        ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 8 }
                     },
                     y: {
                         beginAtZero: true,
                         grid: { color: 'rgba(255,255,255,0.03)' },
-                        ticks: { color: '#64748b', font: { size: 10 } }
+                        ticks: { color: '#64748b', font: { size: 10 }, stepSize: 1 }
                     }
                 }
             }
@@ -131,6 +130,18 @@ async function loadCharts() {
                 }
             }
         });
+
+        // Fontes badges
+        if (data.sources) {
+            const container = document.getElementById('sourceBadges');
+            if (container) {
+                container.innerHTML = Object.entries(data.sources).map(([src, cnt]) =>
+                    `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[10px] text-zinc-400">
+                        <span class="font-semibold text-zinc-200">${cnt}</span> ${src}
+                    </span>`
+                ).join('');
+            }
+        }
     } catch (e) {
         console.error('Erro ao carregar charts:', e);
     }
@@ -183,7 +194,6 @@ async function loadSchedulerStatus() {
         const label = document.getElementById('schedulerLabel');
         const next = document.getElementById('schedulerNext');
         const rate = document.getElementById('schedulerRate');
-        const updated = document.getElementById('schedulerUpdated');
 
         if (data.running) {
             dot.className = 'w-2 h-2 rounded-full bg-emerald-400 glow-dot';
@@ -197,11 +207,10 @@ async function loadSchedulerStatus() {
         const hours = Math.floor(mins / 60);
         const remainMins = mins % 60;
         next.textContent = hours > 0
-            ? `Próximo crawl em ${hours}h ${remainMins}min`
-            : `Próximo crawl em ${mins}min`;
+            ? `Próximo em ${hours}h ${remainMins}min`
+            : `Próximo em ${mins}min`;
 
-        rate.textContent = `Taxa: ${data.success_rate}%`;
-        updated.textContent = `Atualizado agora`;
+        rate.textContent = `Sucesso: ${data.success_rate}%`;
     } catch (e) {
         const label = document.getElementById('schedulerLabel');
         if (label) label.textContent = 'Status indisponível';
@@ -221,22 +230,33 @@ async function deleteJob(id) {
 }
 
 async function openTierModal(tier) {
+    tierModalCurrentTier = tier;
+    tierModalPage = 1;
+    document.getElementById('tierModal').classList.remove('hidden');
+    await loadTierModalPage();
+}
+
+async function loadTierModalPage() {
     const modal = document.getElementById('tierModal');
     const title = document.getElementById('tierModalTitle');
     const body = document.getElementById('tierModalBody');
+    const footer = document.getElementById('tierModalFooter');
 
     const titles = { hot: 'Leads Quentes', warm: 'Leads Mornos', cold: 'Leads Frios', all: 'Todos os Leads' };
-    title.textContent = titles[tier] || 'Leads';
+    title.textContent = titles[tierModalCurrentTier] || 'Leads';
 
     body.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
-    modal.classList.remove('hidden');
 
     try {
-        const params = tier === 'all' ? 'per_page=20&sort=score&order=desc' : `tier=${tier}&per_page=20&sort=score&order=desc`;
+        const params = tierModalCurrentTier === 'all'
+            ? `per_page=15&page=${tierModalPage}&sort=score&order=desc`
+            : `tier=${tierModalCurrentTier}&per_page=15&page=${tierModalPage}&sort=score&order=desc`;
         const data = await api(`/api/leads?${params}`);
+        tierModalTotal = data.total;
 
         if (!data.leads || data.leads.length === 0) {
             body.innerHTML = '<p class="text-center text-zinc-500 py-8">Nenhum lead nesta categoria</p>';
+            footer.innerHTML = '';
             return;
         }
 
@@ -246,7 +266,7 @@ async function openTierModal(tier) {
             const emailUrl = lead.email ? `mailto:${lead.email}` : '';
 
             return `
-                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5">
+                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/5">
                     <div class="flex-1 min-w-0">
                         <p class="text-[13px] font-medium text-zinc-100 truncate">${escapeHtml(lead.name)}</p>
                         <p class="text-[11px] text-zinc-500 truncate mt-0.5">${lead.email || lead.phone || lead.website || '—'}</p>
@@ -259,23 +279,33 @@ async function openTierModal(tier) {
                 </div>
             `;
         }).join('');
+
+        const totalPages = Math.ceil(data.total / 15);
+        const from = (tierModalPage - 1) * 15 + 1;
+        const to = Math.min(tierModalPage * 15, data.total);
+
+        footer.innerHTML = `
+            <div class="flex items-center justify-between pt-3 border-t border-white/5">
+                <span class="text-[11px] text-zinc-500">${from}–${to} de ${data.total}</span>
+                <div class="flex gap-1">
+                    <button onclick="tierModalPrev()" class="btn-ghost !px-2 !py-1 text-[11px] ${tierModalPage <= 1 ? 'opacity-30 pointer-events-none' : ''}">← Anterior</button>
+                    <button onclick="tierModalNext()" class="btn-ghost !px-2 !py-1 text-[11px] ${tierModalPage >= totalPages ? 'opacity-30 pointer-events-none' : ''}">Próximo →</button>
+                </div>
+            </div>
+        `;
     } catch (e) {
         body.innerHTML = '<p class="text-center text-red-400 py-8">Erro ao carregar leads</p>';
     }
 }
 
-function closeTierModal() {
-    document.getElementById('tierModal').classList.add('hidden');
-}
+function tierModalPrev() { if (tierModalPage > 1) { tierModalPage--; loadTierModalPage(); } }
+function tierModalNext() { tierModalPage++; loadTierModalPage(); }
+function closeTierModal() { document.getElementById('tierModal').classList.add('hidden'); }
 
 loadStats();
 loadCharts();
 loadRecentJobs();
 loadSchedulerStatus();
 
-setInterval(() => {
-    loadStats();
-    loadRecentJobs();
-}, 60000);
-
+setInterval(() => { loadStats(); loadRecentJobs(); }, 60000);
 setInterval(loadSchedulerStatus, 30000);

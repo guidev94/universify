@@ -153,10 +153,10 @@ class Lead:
     def get_stats():
         conn = get_connection()
         stats = {}
-        stats["total"] = conn.execute("SELECT COUNT(*) as cnt FROM leads").fetchone()["cnt"]
         stats["hot"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'hot'").fetchone()["cnt"]
         stats["warm"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'warm'").fetchone()["cnt"]
         stats["cold"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'cold'").fetchone()["cnt"]
+        stats["total"] = stats["hot"] + stats["warm"] + stats["cold"]
         stats["with_email"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE email != ''").fetchone()["cnt"]
         stats["with_phone"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE phone != ''").fetchone()["cnt"]
         stats["with_whatsapp"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE whatsapp != ''").fetchone()["cnt"]
@@ -181,18 +181,36 @@ class Lead:
 
     @staticmethod
     def get_chart_data():
+        from datetime import datetime, timedelta
+
         conn = get_connection()
         rows = conn.execute(
             """SELECT date(created_at) as day, COUNT(*) as cnt
                FROM leads WHERE created_at >= date('now', '-30 days')
                GROUP BY date(created_at) ORDER BY day""",
         ).fetchall()
-        chart = {"labels": [r["day"] for r in rows], "values": [r["cnt"] for r in rows]}
+
+        data_map = {r["day"]: r["cnt"] for r in rows}
+        today = datetime.now().date()
+        days_to_show = max(7, len(data_map))
+        labels = []
+        values = []
+        for i in range(days_to_show - 1, -1, -1):
+            day = (today - timedelta(days=i)).isoformat()
+            labels.append(day)
+            values.append(data_map.get(day, 0))
+
+        chart = {"labels": labels, "values": values}
 
         tiers = conn.execute(
-            "SELECT tier, COUNT(*) as cnt FROM leads GROUP BY tier",
+            "SELECT tier, COUNT(*) as cnt FROM leads WHERE tier IN ('hot','warm','cold') GROUP BY tier",
         ).fetchall()
         chart["tiers"] = {r["tier"]: r["cnt"] for r in tiers}
+
+        sources = conn.execute(
+            "SELECT source, COUNT(*) as cnt FROM leads GROUP BY source ORDER BY cnt DESC LIMIT 6",
+        ).fetchall()
+        chart["sources"] = {r["source"]: r["cnt"] for r in sources}
 
         conn.close()
         return chart

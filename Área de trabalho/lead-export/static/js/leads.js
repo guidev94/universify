@@ -67,7 +67,7 @@ function renderTable(leads) {
         return `
             <tr>
                 <td><input type="checkbox" class="lead-checkbox rounded-sm cursor-pointer" data-id="${lead.id}" ${checked} onchange="toggleSelect(${lead.id})"></td>
-                <td class="font-medium text-white">${escapeHtml(lead.name)}</td>
+                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}</td>
                 <td>${escapeHtml(lead.email) || '<span class="text-zinc-700">—</span>'}</td>
                 <td class="text-zinc-300">${escapeHtml(lead.phone) || '<span class="text-zinc-700">—</span>'}</td>
                 <td>${siteLink}</td>
@@ -255,6 +255,84 @@ async function submitClose() {
     } catch (e) {
         showToast(e.message, 'error');
     }
+}
+
+async function openLeadDetail(id) {
+    const modal = document.getElementById('leadDetailModal');
+    const title = document.getElementById('leadDetailName');
+    const body = document.getElementById('leadDetailBody');
+
+    modal.classList.remove('hidden');
+    body.innerHTML = '<div class="flex justify-center py-6"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
+
+    try {
+        const lead = await api(`/api/leads/${id}`);
+        title.textContent = lead.name;
+
+        const tierColors = { hot: 'text-amber-400 bg-amber-500/10', warm: 'text-orange-400 bg-orange-500/10', cold: 'text-zinc-400 bg-zinc-500/10' };
+        const tierLabels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };
+        const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
+
+        const phone = lead.whatsapp || lead.phone || '';
+        const whatsappUrl = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
+
+        body.innerHTML = `
+            <div class="flex items-center gap-3 mb-4">
+                <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold ${tierColors[lead.tier] || tierColors.cold}">${tierLabels[lead.tier] || lead.tier}</span>
+                <span class="text-[13px] font-bold text-zinc-200">Score: ${lead.score}</span>
+                ${lead.site_verified ? '<span class="text-[10px] text-emerald-400">✓ Site verificado</span>' : ''}
+            </div>
+
+            <div class="space-y-3">
+                ${lead.email ? `<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <div class="min-w-0"><p class="text-[10px] text-zinc-500">Email</p><p class="text-[13px] text-zinc-200 truncate">${escapeHtml(lead.email)}</p></div>
+                </div>` : ''}
+
+                ${lead.phone ? `<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    <div class="min-w-0"><p class="text-[10px] text-zinc-500">Telefone</p><p class="text-[13px] text-zinc-200">${escapeHtml(lead.phone)}</p></div>
+                </div>` : ''}
+
+                ${lead.whatsapp ? `<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <svg class="w-4 h-4 text-green-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                    <div class="min-w-0"><p class="text-[10px] text-zinc-500">WhatsApp</p><p class="text-[13px] text-zinc-200">${escapeHtml(lead.whatsapp)}</p></div>
+                </div>` : ''}
+
+                ${lead.website ? `<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    <div class="min-w-0"><p class="text-[10px] text-zinc-500">Website</p><a href="${escapeHtml(lead.website)}" target="_blank" class="text-[13px] text-blue-400 hover:text-blue-300 truncate block">${escapeHtml(lead.website.replace(/https?:\\/\\/(www\\.)?/, ''))}</a></div>
+                </div>` : ''}
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mt-4">
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                    <p class="text-[10px] text-zinc-500">Fonte</p>
+                    <p class="text-[12px] text-zinc-300 font-medium mt-0.5">${lead.source || '—'}</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                    <p class="text-[10px] text-zinc-500">Status</p>
+                    <p class="text-[12px] text-zinc-300 font-medium mt-0.5">${statusLabels[lead.status] || lead.status}</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                    <p class="text-[10px] text-zinc-500">Categoria</p>
+                    <p class="text-[12px] text-zinc-300 font-medium mt-0.5">${lead.category || '—'}</p>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-5">
+                ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="btn-ghost flex-1 text-center !text-green-400 !border-green-500/20 hover:!bg-green-500/10">WhatsApp</a>` : ''}
+                ${lead.email ? `<a href="mailto:${lead.email}" class="btn-ghost flex-1 text-center !text-blue-400 !border-blue-500/20 hover:!bg-blue-500/10">Email</a>` : ''}
+                <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, '${escapeHtml(lead.name)}')" class="btn-accent flex-1">Fechar Negócio</button>
+            </div>
+        `;
+    } catch (e) {
+        body.innerHTML = '<p class="text-center text-red-400 py-6">Erro ao carregar lead</p>';
+    }
+}
+
+function closeLeadDetail() {
+    document.getElementById('leadDetailModal').classList.add('hidden');
 }
 
 loadLeads(1);
