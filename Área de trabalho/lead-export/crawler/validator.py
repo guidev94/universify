@@ -1,6 +1,42 @@
 import re
 import phonenumbers
 from email_validator import validate_email, EmailNotValidError
+from urllib.parse import urlparse
+
+BLOCKED_DOMAINS = {
+    "google.com", "google.com.br", "about.google",
+    "facebook.com", "instagram.com", "youtube.com", "twitter.com", "x.com",
+    "linkedin.com", "tiktok.com", "pinterest.com",
+    "wikipedia.org", "wikimedia.org",
+    "correios.com.br", "sptrans.com.br",
+    "gov.br", "jus.br", "mil.br", "leg.br", "mp.br",
+    "folha.uol.com.br", "globo.com", "uol.com.br", "terra.com.br",
+    "reclameaqui.com.br", "jusbrasil.com.br",
+    "mercadolivre.com.br", "olx.com.br", "amazon.com.br",
+}
+
+BLOCKED_PATTERNS = (".gov.", ".gov/", "prefeitura", "tribunal", "receita.fazenda")
+
+BLOCKED_NAMES = {"prefeitura", "governo", "tribunal", "secretaria", "ministério", "senado", "câmara"}
+
+
+def _is_blocked(website, name):
+    if website:
+        try:
+            domain = urlparse(website).netloc.lower().replace("www.", "")
+        except Exception:
+            domain = website.lower()
+        if domain in BLOCKED_DOMAINS:
+            return True
+        for pattern in BLOCKED_PATTERNS:
+            if pattern in website.lower():
+                return True
+    if name:
+        name_lower = name.lower()
+        for blocked in BLOCKED_NAMES:
+            if blocked in name_lower:
+                return True
+    return False
 
 
 def validate_lead(lead):
@@ -18,6 +54,14 @@ def validate_lead(lead):
     if not name or (not email and not phone):
         return None
 
+    if _is_blocked(website, name):
+        return None
+
+    if email and _is_blocked_email(email):
+        email = ""
+        if not phone:
+            return None
+
     return {
         "name": name,
         "email": email,
@@ -27,6 +71,13 @@ def validate_lead(lead):
         "source": source,
         "category": category,
     }
+
+
+def _is_blocked_email(email):
+    domain = email.split("@")[-1].lower() if "@" in email else ""
+    if any(domain.endswith(b) for b in (".gov.br", ".jus.br", ".mil.br", ".leg.br")):
+        return True
+    return False
 
 
 def clean_name(name):

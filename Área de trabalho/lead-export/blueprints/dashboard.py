@@ -203,10 +203,20 @@ def extract_campaign(camp_id):
     unassigned = conn2.execute("""
         SELECT id FROM leads
         WHERE (campaign = '' OR campaign IS NULL)
-        AND (category LIKE ? OR name LIKE ?)
+        AND (category LIKE ? OR name LIKE ? OR website LIKE ?)
         AND (email != '' OR website != '')
         ORDER BY score DESC LIMIT ?
-    """, (search, search, remaining)).fetchall()
+    """, (search, search, search, remaining)).fetchall()
+
+    if len(unassigned) < remaining:
+        extra = conn2.execute("""
+            SELECT id FROM leads
+            WHERE (campaign = '' OR campaign IS NULL)
+            AND (email != '' AND website != '')
+            AND id NOT IN (SELECT id FROM leads WHERE category LIKE ? OR name LIKE ? OR website LIKE ?)
+            ORDER BY score DESC LIMIT ?
+        """, (search, search, search, remaining - len(unassigned))).fetchall()
+        unassigned = list(unassigned) + list(extra)
 
     assigned = 0
     for row in unassigned:
