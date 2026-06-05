@@ -84,6 +84,8 @@ class Scheduler:
         while self.running:
             now = time.time()
 
+            self._cleanup_stuck_jobs()
+
             if now - self.last_verify >= self.verify_interval:
                 try:
                     self._verify_unverified_sites()
@@ -102,6 +104,17 @@ class Scheduler:
                     self.last_error = str(e)
 
             time.sleep(60)
+
+    def _cleanup_stuck_jobs(self):
+        from database import get_connection
+        conn = get_connection()
+        stuck = conn.execute(
+            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-5 minutes', 'localtime')"
+        )
+        if stuck.rowcount > 0:
+            logger.warning(f"[scheduler] {stuck.rowcount} jobs stuck marcados como erro")
+        conn.commit()
+        conn.close()
 
     def _verify_unverified_sites(self):
         unverified = Lead.get_unverified(limit=100)

@@ -39,6 +39,11 @@ def start_crawl():
     quantity = min(int(data.get("quantity", 25)), Config.MAX_LEADS_PER_CRAWL)
     location = data.get("location", "").strip()
 
+    if '|' in query:
+        query = query.split('|')[0].strip()
+    if '|' in location:
+        location = location.split('|')[0].strip()
+
     if not query:
         return jsonify({"error": "Informe a palavra-chave"}), 400
     if source not in ("website", "maps", "both"):
