@@ -21,13 +21,27 @@
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px]" aria-label="Nome da campanha">
-            <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px]" aria-label="Palavra-chave">
-            <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px]" aria-label="Localização">
+            <div class="relative">
+                <i data-lucide="bookmark" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
+                <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px] !pl-10" aria-label="Nome da campanha">
+            </div>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
+                <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px] !pl-10" aria-label="Palavra-chave">
+            </div>
+            <div class="relative">
+                <i data-lucide="map-pin" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
+                <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px] !pl-10" aria-label="Localização">
+            </div>
         </div>
         <div class="flex items-center gap-3 mt-3">
-            <input type="number" id="campGoal" placeholder="Meta de leads" value="100" min="10" max="5000" class="input-glass !w-32 text-[13px]" aria-label="Meta de leads">
-            <button onclick="createCampaign()" class="btn-accent !py-2.5 !px-5 text-[12px]">Criar Campanha</button>
+            <div class="relative">
+                <i data-lucide="target" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
+                <input type="number" id="campGoal" placeholder="Meta" value="100" min="10" max="5000" class="input-glass !w-36 text-[13px] !pl-10" aria-label="Meta de leads">
+            </div>
+            <button onclick="createCampaign()" class="btn-accent !py-2.5 !px-5 text-[12px]">
+                <i data-lucide="plus" class="w-4 h-4 inline mr-1 stroke-[2]"></i>Criar Campanha
+            </button>
         </div>
     </div>
 

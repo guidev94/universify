@@ -90,11 +90,18 @@
 
             <!-- Footer -->
             <div class="px-4 pb-5">
-                <div class="glass-card-static p-3.5 flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-blue-400 glow-dot"></div>
-                    <div>
-                        <p class="text-[11px] font-semibold text-zinc-300">Crawler Ativo</p>
-                        <p class="text-[9px] text-zinc-600 mt-0.5">Atualiza a cada 1h</p>
+                <div class="glass-card-static p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[9px] font-bold uppercase tracking-wider text-zinc-600">Leads Hoje</p>
+                        <div class="flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 glow-dot"></span>
+                            <span class="text-[8px] text-emerald-400/80 font-medium">Ativo</span>
+                        </div>
+                    </div>
+                    <p class="text-[22px] font-bold text-zinc-100 sidebar-leads-count" id="sidebarLeadsToday">0</p>
+                    <p class="text-[9px] text-zinc-500 mt-1">novos leads capturados</p>
+                    <div class="mt-2 h-1 rounded-full bg-zinc-800 overflow-hidden">
+                        <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-1000" id="sidebarLeadsBar" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -146,6 +153,24 @@
             document.getElementById('sidebarOverlay').classList.toggle('hidden');
         }
         document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
+
+        async function updateSidebarLeads() {
+            try {
+                const data = await api('/api/leads/today');
+                const el = document.getElementById('sidebarLeadsToday');
+                const bar = document.getElementById('sidebarLeadsBar');
+                const current = parseInt(el.textContent) || 0;
+                const target = data.today || 0;
+                if (target !== current) {
+                    gsap.to({ val: current }, { val: target, duration: 1.2, ease: 'power2.out',
+                        onUpdate: function() { el.textContent = Math.round(this.targets()[0].val); }
+                    });
+                }
+                bar.style.width = Math.min(100, (target / 50) * 100) + '%';
+            } catch(e) {}
+        }
+        updateSidebarLeads();
+        setInterval(updateSidebarLeads, 20000);
     </script>
 </body>
 </html>
