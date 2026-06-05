@@ -81,7 +81,7 @@ def start_crawl():
     return jsonify({"job_id": job_uuid})
 
 
-def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name=None):
+def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name=None, require_quality=False):
     saved_ids = []
     try:
         CrawlJob.set_running(job_uuid)
@@ -149,6 +149,12 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
             validated = validate_lead(lead)
             if not validated:
                 continue
+
+            if require_quality:
+                has_email = bool(validated.get("email", "").strip())
+                has_website = bool(validated.get("website", "").strip())
+                if not has_email and not has_website:
+                    continue
 
             key = (validated.get("email", ""), validated.get("phone", ""))
             if key != ("", "") and key in seen:

@@ -81,11 +81,19 @@ class Scheduler:
     def _run_loop(self):
         time.sleep(5)
         last_decay = time.time()
+        last_campaign_fill = 0
 
         while self.running:
             now = time.time()
 
             self._cleanup_stuck_jobs()
+
+            if now - last_campaign_fill >= 300:
+                try:
+                    self._crawl_campaigns()
+                    last_campaign_fill = time.time()
+                except Exception as e:
+                    logger.warning(f"[scheduler] erro no campaign fill: {e}")
 
             if now - self.last_verify >= self.verify_interval:
                 try:
@@ -341,6 +349,12 @@ class Scheduler:
             validated = validate_lead(lead)
             if not validated:
                 continue
+
+            if campaign_name:
+                has_email = bool(validated.get("email", "").strip())
+                has_website = bool(validated.get("website", "").strip())
+                if not has_email and not has_website:
+                    continue
 
             score, tier = calculate_score(validated)
             validated["score"] = score

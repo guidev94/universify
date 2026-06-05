@@ -207,7 +207,7 @@ def extract_campaign(camp_id):
     active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": remaining, "sources": {}, "started_at": _time.time()}
 
     def continuous_extract(first_uuid, first_id, camp_name, camp_goal, kw, loc):
-        run_crawl(first_uuid, first_id, "both", kw, quantity, loc, campaign_name=camp_name)
+        run_crawl(first_uuid, first_id, "both", kw, quantity, loc, campaign_name=camp_name, require_quality=True)
 
         if not continuous:
             return
@@ -231,7 +231,7 @@ def extract_campaign(camp_id):
             batch_uuid = str(uuid.uuid4())
             batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
 
-            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name)
+            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
 
             conn_after = get_connection()
             after_count = conn_after.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
