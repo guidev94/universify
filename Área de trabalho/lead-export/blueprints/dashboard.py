@@ -1,7 +1,10 @@
 import time
+import logging
 from flask import Blueprint, render_template, jsonify, request
 from models import Lead, CrawlJob, Campaign
 from database import get_connection
+
+logger = logging.getLogger("leadhunter.dashboard")
 
 bp = Blueprint("dashboard", __name__)
 
@@ -209,6 +212,7 @@ def extract_campaign(camp_id):
         if not continuous:
             return
 
+        dry_rounds = 0
         max_batches = 15
         for batch in range(max_batches):
             _time.sleep(5)
@@ -222,18 +226,31 @@ def extract_campaign(camp_id):
                 active_jobs[first_uuid]["progress"] = current
                 break
 
+            prev_count = current
             batch_qty = min(30, left)
             batch_uuid = str(uuid.uuid4())
             batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
 
             run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name)
 
-            active_jobs[first_uuid]["progress"] = current + batch_qty
+            conn_after = get_connection()
+            after_count = conn_after.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
+            conn_after.close()
+
+            active_jobs[first_uuid]["progress"] = after_count
+
+            if after_count <= prev_count:
+                dry_rounds += 1
+                if dry_rounds >= 2:
+                    logger.info(f"[campaign] '{camp_name}' — 2 batches sem novos leads, parando extração contínua")
+                    break
+            else:
+                dry_rounds = 0
 
             if first_uuid in active_jobs and active_jobs[first_uuid].get("status") == "cancelled":
                 break
-        else:
-            active_jobs[first_uuid]["status"] = "completed"
+
+        active_jobs[first_uuid]["status"] = "completed"
 
     thread = threading.Thread(
         target=continuous_extract,
