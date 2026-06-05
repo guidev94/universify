@@ -195,20 +195,54 @@ def extract_campaign(camp_id):
         return jsonify({"error": "Meta já atingida!", "leads_count": current_count, "goal": camp["goal"]}), 400
     quantity = min(30, remaining)
 
+    continuous = remaining > 30
+
     job_uuid = str(uuid.uuid4())
     from blueprints.crawl import active_jobs
+    import time as _time
     job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
-    active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": quantity, "sources": {}}
+    active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": remaining, "sources": {}, "started_at": _time.time()}
+
+    def continuous_extract(first_uuid, first_id, camp_name, camp_goal, kw, loc):
+        run_crawl(first_uuid, first_id, "both", kw, quantity, loc, campaign_name=camp_name)
+
+        if not continuous:
+            return
+
+        max_batches = 15
+        for batch in range(max_batches):
+            _time.sleep(5)
+            conn_check = get_connection()
+            current = conn_check.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
+            conn_check.close()
+
+            left = camp_goal - current
+            if left <= 0:
+                active_jobs[first_uuid]["status"] = "completed"
+                active_jobs[first_uuid]["progress"] = current
+                break
+
+            batch_qty = min(30, left)
+            batch_uuid = str(uuid.uuid4())
+            batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
+
+            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name)
+
+            active_jobs[first_uuid]["progress"] = current + batch_qty
+
+            if first_uuid in active_jobs and active_jobs[first_uuid].get("status") == "cancelled":
+                break
+        else:
+            active_jobs[first_uuid]["status"] = "completed"
 
     thread = threading.Thread(
-        target=run_crawl,
-        args=(job_uuid, job_id, "both", keyword, quantity, location),
-        kwargs={"campaign_name": camp["name"]},
+        target=continuous_extract,
+        args=(job_uuid, job_id, camp["name"], camp["goal"], keyword, location),
         daemon=True,
     )
     thread.start()
 
-    return jsonify({"job_id": job_uuid, "quantity": quantity})
+    return jsonify({"job_id": job_uuid, "quantity": quantity, "total_remaining": remaining, "continuous": continuous})
 
 
 @bp.route("/api/system/health")

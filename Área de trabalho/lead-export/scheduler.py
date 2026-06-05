@@ -258,6 +258,19 @@ class Scheduler:
         if '|' in (location or ''):
             location = location.split('|')[0].strip()
 
+        if not keyword:
+            return 0
+
+        from database import get_connection as _gc
+        conn_check = _gc()
+        running = conn_check.execute(
+            "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", (keyword,)
+        ).fetchone()["c"]
+        conn_check.close()
+        if running > 0:
+            logger.info(f"[scheduler] '{keyword}' já tem job running — pulando")
+            return 0
+
         job_uuid = str(uuid.uuid4())
         quantity = quantity_override or 30
         job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
@@ -275,17 +288,23 @@ class Scheduler:
             "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, quantity),
         }
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {executor.submit(fn): name for name, fn in sources.items()}
+        try:
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = {executor.submit(fn): name for name, fn in sources.items()}
 
-            for future in as_completed(futures, timeout=120):
-                name = futures[future]
-                try:
-                    results = future.result(timeout=60)
-                    leads.extend(results)
-                    logger.info(f"[scheduler] {name}: {len(results)} leads brutos")
-                except Exception as e:
-                    logger.warning(f"[scheduler] {name} falhou: {e}")
+                for future in as_completed(futures, timeout=120):
+                    name = futures[future]
+                    try:
+                        results = future.result(timeout=60)
+                        leads.extend(results)
+                        logger.info(f"[scheduler] {name}: {len(results)} leads brutos")
+                    except Exception as e:
+                        logger.warning(f"[scheduler] {name} falhou: {e}")
+
+                for future in futures:
+                    future.cancel()
+        except Exception as e:
+            logger.warning(f"[scheduler] executor timeout para '{keyword}': {e}")
 
         saved_count = 0
         for lead in leads:

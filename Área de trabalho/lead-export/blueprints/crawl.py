@@ -52,6 +52,14 @@ def start_crawl():
     if source not in ("website", "maps", "both"):
         return jsonify({"error": "Fonte inválida"}), 400
 
+    conn_dup = get_connection()
+    already_running = conn_dup.execute(
+        "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", (query,)
+    ).fetchone()["c"]
+    conn_dup.close()
+    if already_running > 0:
+        return jsonify({"error": f"Já existe uma extração rodando para '{query}'"}), 409
+
     job_uuid = str(uuid.uuid4())
     job_id = CrawlJob.create(job_uuid, query, location, source, quantity)
 

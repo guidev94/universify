@@ -215,7 +215,14 @@ async function extractCampaign(id, btn) {
 
     try {
         const data = await api(`/api/campaigns/${id}/extract`, { method: 'POST' });
-        showToast(`Extração iniciada! Buscando ${data.quantity} leads...`, 'info');
+        const isContinuous = data.continuous;
+        const totalRemaining = data.total_remaining;
+
+        if (isContinuous) {
+            showToast(`Extração contínua iniciada! Buscando ${totalRemaining} leads em batches...`, 'info');
+        } else {
+            showToast(`Extração iniciada! Buscando ${data.quantity} leads...`, 'info');
+        }
 
         const jobId = data.job_id;
         let attempts = 0;
@@ -225,18 +232,35 @@ async function extractCampaign(id, btn) {
                 const status = await api(`/api/crawl/status/${jobId}`);
                 if (status.status === 'completed') {
                     clearInterval(poll);
-                    showToast(`Pronto! ${status.progress} leads extraídos para a campanha`, 'success');
+                    showToast(`Concluído! Leads extraídos para a campanha`, 'success');
                     loadCampaigns();
-                } else if (status.status === 'error' || attempts > 60) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50');
+                        btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
+                        lucide.createIcons();
+                    }
+                } else if (status.status === 'error') {
                     clearInterval(poll);
-                    showToast('Extração finalizada com alguns erros', 'error');
+                    showToast('Extração pausada — clique novamente para continuar', 'error');
+                    loadCampaigns();
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50');
+                        btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
+                        lucide.createIcons();
+                    }
+                } else if (attempts > 300) {
+                    clearInterval(poll);
+                    loadCampaigns();
+                } else {
                     loadCampaigns();
                 }
             } catch (e) {
                 clearInterval(poll);
                 loadCampaigns();
             }
-        }, 3000);
+        }, 5000);
     } catch (e) {
         showToast(e.message || 'Erro na extração', 'error');
         if (btn) {
