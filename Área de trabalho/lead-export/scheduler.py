@@ -83,10 +83,11 @@ class Scheduler:
         last_decay = time.time()
         last_campaign_fill = 0
 
+        cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
+        cleanup_thread.start()
+
         while self.running:
             now = time.time()
-
-            self._cleanup_stuck_jobs()
 
             if now - last_campaign_fill >= 300:
                 try:
@@ -140,11 +141,19 @@ class Scheduler:
         conn.commit()
         conn.close()
 
+    def _cleanup_loop(self):
+        while self.running:
+            try:
+                self._cleanup_stuck_jobs()
+            except Exception:
+                pass
+            time.sleep(30)
+
     def _cleanup_stuck_jobs(self):
         from database import get_connection
         conn = get_connection()
         stuck = conn.execute(
-            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-2 minutes', 'localtime')"
+            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-90 seconds', 'localtime')"
         )
         if stuck.rowcount > 0:
             logger.warning(f"[scheduler] {stuck.rowcount} jobs stuck marcados como erro")
@@ -152,7 +161,7 @@ class Scheduler:
         conn.close()
 
         from blueprints.crawl import active_jobs
-        stale = [k for k, v in active_jobs.items() if v.get("started_at") and time.time() - v["started_at"] > 300]
+        stale = [k for k, v in active_jobs.items() if v.get("started_at") and time.time() - v["started_at"] > 120]
         for k in stale:
             del active_jobs[k]
 
@@ -230,8 +239,8 @@ class Scheduler:
             logger.info("[scheduler] nenhuma keyword para auto-crawl")
             return
 
-        expanded = self._expand_keywords(keywords)
-        logger.info(f"[scheduler] auto-crawl iniciado — {len(expanded)} keywords (expandidas de {len(keywords)})")
+        expanded = self._expand_keywords(keywords)[:5]
+        logger.info(f"[scheduler] auto-crawl iniciado — {len(expanded)} keywords")
 
         for kw in expanded:
             self.total_runs += 1

@@ -23,7 +23,7 @@ logger = logging.getLogger("leadhunter.crawl")
 bp = Blueprint("crawl", __name__)
 
 active_jobs = {}
-MAX_JOB_DURATION = 240
+MAX_JOB_DURATION = 180
 
 
 @bp.route("/crawl")
@@ -119,13 +119,13 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
 
             try:
-                for future in as_completed(futures, timeout=120):
+                for future in as_completed(futures, timeout=90):
                     if time.time() - job_start > MAX_JOB_DURATION:
                         logger.warning(f"[crawl] timeout global atingido para '{query}'")
                         break
                     name = futures[future]
                     try:
-                        results = future.result(timeout=60)
+                        results = future.result(timeout=45)
                         leads.extend(results)
                         active_jobs[job_uuid]["sources"][name] = len(results)
                         logger.info(f"[crawl] {name}: {len(results)} leads para '{query}'")
