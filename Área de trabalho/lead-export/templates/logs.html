@@ -33,7 +33,22 @@
     <div class="glass-card p-6 fade-up">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-[13px] font-semibold text-zinc-200">Histórico de Extrações</h3>
-            <span class="text-[10px] text-zinc-500" id="logCount">Carregando...</span>
+            <div class="flex items-center gap-2">
+                <select id="logStatusFilter" class="select-glass !py-1 !text-[10px] !w-auto" onchange="loadLogs(1)" aria-label="Filtrar por status">
+                    <option value="">Todos</option>
+                    <option value="completed">Concluídos</option>
+                    <option value="running">Rodando</option>
+                    <option value="error">Erro</option>
+                    <option value="pending">Pendente</option>
+                </select>
+                <button onclick="cleanupStuck()" class="btn-ghost !py-1 !px-2 text-[10px] !border-orange-500/20 hover:!bg-orange-500/10" title="Limpar jobs travados" aria-label="Limpar jobs travados">
+                    <span class="text-orange-400">Limpar Stuck</span>
+                </button>
+                <button onclick="loadLogs(logsPage)" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Atualizar">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-zinc-500"></i>
+                </button>
+                <span class="text-[10px] text-zinc-500" id="logCount">—</span>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="data-table">
@@ -44,7 +59,7 @@
                         <th>Leads</th>
                         <th>Status</th>
                         <th>Data</th>
-                        <th></th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="logsTable">
@@ -60,9 +75,11 @@
 {% block scripts %}
 <script>
 let logsPage = 1;
+let logsInterval = null;
 
 async function loadLogs(page = 1) {
     logsPage = page;
+    const statusFilter = document.getElementById('logStatusFilter').value;
     try {
         const data = await api(`/api/logs?page=${page}`);
         document.getElementById('logTotalLeads').textContent = data.stats.total_leads;
@@ -71,23 +88,47 @@ async function loadLogs(page = 1) {
         document.getElementById('logCampaigns').textContent = data.stats.campaigns;
         document.getElementById('logCount').textContent = `${data.total} extrações`;
 
-        const statusLabels = { completed: 'concluído', running: 'rodando', error: 'erro', pending: 'pendente' };
-        const statusColors = { completed: 'text-emerald-400 bg-emerald-500/10', running: 'text-blue-400 bg-blue-500/10', error: 'text-red-400 bg-red-500/10', pending: 'text-zinc-400 bg-zinc-500/10' };
+        const statusLabels = { completed: 'concluído', running: 'rodando', error: 'erro', pending: 'pendente', cancelled: 'cancelado' };
+        const statusColors = {
+            completed: 'text-emerald-400 bg-emerald-500/10',
+            running: 'text-blue-400 bg-blue-500/10',
+            error: 'text-red-400 bg-red-500/10',
+            pending: 'text-zinc-400 bg-zinc-500/10',
+            cancelled: 'text-orange-400 bg-orange-500/10'
+        };
+
+        let jobs = data.jobs;
+        if (statusFilter) {
+            jobs = jobs.filter(j => j.status === statusFilter);
+        }
 
         const tbody = document.getElementById('logsTable');
-        if (!data.jobs.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-zinc-600 py-8">Nenhuma extração registrada</td></tr>';
+        if (!jobs.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-zinc-600 py-8">Nenhuma extração encontrada</td></tr>';
             return;
         }
 
-        tbody.innerHTML = data.jobs.map(job => `
+        tbody.innerHTML = jobs.map(job => `
             <tr>
-                <td class="font-medium text-white">${escapeHtml(job.keyword)}</td>
+                <td class="font-medium text-white">${escapeHtml(job.keyword || '—')}</td>
                 <td>${escapeHtml(job.location) || '—'}</td>
-                <td class="font-semibold">${job.quantity_found}</td>
-                <td><span class="text-xs px-2 py-0.5 rounded ${statusColors[job.status] || ''}">${statusLabels[job.status] || job.status}</span></td>
+                <td class="font-semibold">${job.quantity_found}/${job.quantity_requested}</td>
+                <td>
+                    <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded ${statusColors[job.status] || ''}">
+                        ${job.status === 'running' ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>' : ''}
+                        ${statusLabels[job.status] || job.status}
+                    </span>
+                </td>
                 <td class="text-zinc-500 text-[11px]">${formatDateTime(job.started_at)}</td>
-                <td><button onclick="deleteLog(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors"><svg class="w-3.5 h-3.5 text-red-400/60 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+                <td>
+                    <div class="flex items-center gap-1">
+                        ${job.status === 'error' ? `<button onclick="retryJob(${job.id})" class="p-1 rounded hover:bg-blue-500/10 transition-colors" title="Refazer" aria-label="Refazer extração"><i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-blue-400"></i></button>` : ''}
+                        ${job.status === 'running' ? `<button onclick="abortJob('${job.job_uuid}')" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Abortar" aria-label="Abortar extração"><i data-lucide="square" class="w-3.5 h-3.5 text-red-400"></i></button>` : ''}
+                        <button onclick="deleteLog(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Excluir" aria-label="Excluir registro">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400/60 hover:text-red-400"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
 
@@ -99,8 +140,41 @@ async function loadLogs(page = 1) {
                 <button onclick="loadLogs(${page + 1})" class="btn-ghost !px-2 !py-1 text-[11px] ${page >= totalPages ? 'opacity-30 pointer-events-none' : ''}">Próximo →</button>
             </div>
         ` : '';
+
+        lucide.createIcons();
     } catch (e) {
         document.getElementById('logsTable').innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Erro ao carregar logs</td></tr>';
+    }
+}
+
+async function retryJob(id) {
+    try {
+        const data = await api(`/api/crawl/retry/${id}`, { method: 'POST' });
+        showToast('Extração reiniciada!', 'success');
+        loadLogs(logsPage);
+    } catch (e) {
+        showToast(e.message || 'Erro ao refazer', 'error');
+    }
+}
+
+async function abortJob(uuid) {
+    if (!await confirmModal('Abortar esta extração?', 'Abortar', true)) return;
+    try {
+        await api(`/api/crawl/abort/${uuid}`, { method: 'POST' });
+        showToast('Extração abortada', 'success');
+        loadLogs(logsPage);
+    } catch (e) {
+        showToast(e.message || 'Erro', 'error');
+    }
+}
+
+async function cleanupStuck() {
+    try {
+        const data = await api('/api/crawl/cleanup', { method: 'POST' });
+        showToast(`${data.cleaned} jobs limpos!`, 'success');
+        loadLogs(logsPage);
+    } catch (e) {
+        showToast(e.message || 'Erro', 'error');
     }
 }
 
@@ -116,6 +190,7 @@ async function deleteLog(id) {
 }
 
 loadLogs();
+logsInterval = setInterval(() => loadLogs(logsPage), 15000);
 lucide.createIcons();
 </script>
 {% endblock %}

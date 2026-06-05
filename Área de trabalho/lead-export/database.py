@@ -126,3 +126,14 @@ def _migrate(cursor):
             created_at TEXT DEFAULT (datetime('now', 'localtime'))
         );
     """)
+
+    camp_columns = {row[1] for row in cursor.execute("PRAGMA table_info(campaigns)").fetchall()}
+    camp_migrations = [
+        ("updated_at", "ALTER TABLE campaigns ADD COLUMN updated_at TEXT"),
+        ("description", "ALTER TABLE campaigns ADD COLUMN description TEXT DEFAULT ''"),
+        ("last_extracted_at", "ALTER TABLE campaigns ADD COLUMN last_extracted_at TEXT"),
+        ("extraction_status", "ALTER TABLE campaigns ADD COLUMN extraction_status TEXT DEFAULT 'idle'"),
+    ]
+    for col, sql in camp_migrations:
+        if col not in camp_columns:
+            cursor.execute(sql)

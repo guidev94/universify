@@ -26,6 +26,8 @@ class MapsCrawler:
     def _crawl_scrape(self, query, location, quantity, on_progress):
         leads = []
         search_term = f"{query} {location}".strip()
+        crawl_start = time.time()
+        MAPS_TIMEOUT = 90
 
         try:
             from selenium import webdriver
@@ -46,7 +48,8 @@ class MapsCrawler:
 
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
-            driver.set_page_load_timeout(30)
+            driver.set_page_load_timeout(20)
+            driver.set_script_timeout(15)
 
             try:
                 url = f"https://www.google.com/maps/search/{requests.utils.quote(search_term)}"
@@ -57,14 +60,18 @@ class MapsCrawler:
 
                 last_count = 0
                 scroll_attempts = 0
-                max_scrolls = 50
+                max_scrolls = 15
 
                 while len(leads) < quantity and scroll_attempts < max_scrolls:
+                    if time.time() - crawl_start > MAPS_TIMEOUT:
+                        logger.warning(f"[maps] timeout global de {MAPS_TIMEOUT}s atingido")
+                        break
+
                     results = driver.find_elements(By.CSS_SELECTOR, "a[href*='/maps/place/']")
 
                     if len(results) == last_count:
                         scroll_attempts += 1
-                        if scroll_attempts > 5:
+                        if scroll_attempts > 3:
                             break
                     else:
                         scroll_attempts = 0

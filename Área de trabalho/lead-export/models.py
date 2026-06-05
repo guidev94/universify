@@ -543,6 +543,40 @@ class Campaign:
         conn.close()
         return {"total": total, "contacted": contacted, "won": won}
 
+    @staticmethod
+    def get_by_id(campaign_id):
+        conn = get_connection()
+        row = conn.execute("SELECT * FROM campaigns WHERE id = ?", (campaign_id,)).fetchone()
+        conn.close()
+        return dict(row) if row else None
+
+    @staticmethod
+    def update(campaign_id, **kwargs):
+        conn = get_connection()
+        allowed = {"name", "keyword", "location", "goal", "status", "description"}
+        updates = []
+        params = []
+        for key, value in kwargs.items():
+            if key in allowed and value is not None:
+                updates.append(f"{key} = ?")
+                params.append(value)
+        if not updates:
+            conn.close()
+            return False
+        updates.append("updated_at = datetime('now', 'localtime')")
+        params.append(campaign_id)
+        conn.execute(f"UPDATE campaigns SET {', '.join(updates)} WHERE id = ?", params)
+        conn.commit()
+        conn.close()
+        return True
+
+    @staticmethod
+    def get_remaining(campaign_name, goal):
+        conn = get_connection()
+        current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (campaign_name,)).fetchone()["c"]
+        conn.close()
+        return max(0, goal - current)
+
 
 class MessageTemplate:
     @staticmethod

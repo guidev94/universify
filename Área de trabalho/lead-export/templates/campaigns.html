@@ -21,28 +21,79 @@
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px]">
-            <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px]">
-            <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px]">
+            <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px]" aria-label="Nome da campanha">
+            <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px]" aria-label="Palavra-chave">
+            <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px]" aria-label="Localização">
         </div>
         <div class="flex items-center gap-3 mt-3">
-            <input type="number" id="campGoal" placeholder="Meta de leads" value="100" min="10" max="5000" class="input-glass !w-32 text-[13px]">
+            <input type="number" id="campGoal" placeholder="Meta de leads" value="100" min="10" max="5000" class="input-glass !w-32 text-[13px]" aria-label="Meta de leads">
             <button onclick="createCampaign()" class="btn-accent !py-2.5 !px-5 text-[12px]">Criar Campanha</button>
         </div>
     </div>
 
     <!-- Campaign List -->
     <div class="glass-card p-6 fade-up">
-        <h3 class="text-[13px] font-semibold text-zinc-200 mb-4">Campanhas Ativas</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-[13px] font-semibold text-zinc-200">Campanhas Ativas</h3>
+            <button onclick="loadCampaigns()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Atualizar lista">
+                <i data-lucide="refresh-cw" class="w-4 h-4 text-zinc-500"></i>
+            </button>
+        </div>
         <div id="campaignList" class="space-y-3">
             <p class="text-center text-zinc-600 py-6 text-[12px]">Carregando...</p>
         </div>
+    </div>
+</div>
+
+<!-- Edit Campaign Modal -->
+<div id="editCampaignModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditCampaign()"></div>
+    <div class="relative glass-card p-6 w-full max-w-md mx-4">
+        <button onclick="closeEditCampaign()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Fechar">
+            <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
+        </button>
+        <h3 class="text-[14px] font-semibold text-zinc-100 mb-5">Editar Campanha</h3>
+        <div class="space-y-3">
+            <div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Nome</label>
+                <input type="text" id="editCampName" class="input-glass text-[13px] w-full" aria-label="Nome da campanha">
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Palavra-chave</label>
+                <input type="text" id="editCampKeyword" class="input-glass text-[13px] w-full" aria-label="Palavra-chave">
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Localização</label>
+                <input type="text" id="editCampLocation" class="input-glass text-[13px] w-full" aria-label="Localização">
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Meta de leads</label>
+                <input type="number" id="editCampGoal" class="input-glass text-[13px] w-full" min="1" max="10000" aria-label="Meta de leads">
+            </div>
+        </div>
+        <div class="flex gap-2 mt-5">
+            <button onclick="submitEditCampaign()" class="btn-accent flex-1 !py-2.5 text-[12px]">Salvar</button>
+            <button onclick="closeEditCampaign()" class="btn-ghost flex-1 !py-2.5 text-[12px]">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Campaign Leads Modal -->
+<div id="campLeadsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCampLeadsModal()"></div>
+    <div class="relative glass-card p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
+        <button onclick="closeCampLeadsModal()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Fechar">
+            <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
+        </button>
+        <div id="campLeadsContent"></div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+let editingCampaignId = null;
+
 async function loadCampaigns() {
     try {
         const data = await api('/api/campaigns');
@@ -55,38 +106,48 @@ async function loadCampaigns() {
 
         list.innerHTML = data.campaigns.map(c => {
             const progress = c.goal ? Math.min(100, Math.round((c.leads_count / c.goal) * 100)) : 0;
+            const remaining = Math.max(0, c.goal - c.leads_count);
+            const goalReached = c.leads_count >= c.goal;
+
             return `
-                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <div class="p-4 rounded-xl bg-white/[0.02] border ${goalReached ? 'border-emerald-500/20' : 'border-white/5'} hover:border-white/10 transition-colors">
                     <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <p class="text-[13px] font-semibold text-zinc-100">${escapeHtml(c.name)}</p>
-                            <p class="text-[10px] text-zinc-500">${c.keyword || '—'} · ${c.location || 'Brasil'}</p>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <p class="text-[13px] font-semibold text-zinc-100 truncate">${escapeHtml(c.name)}</p>
+                                ${goalReached ? '<span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400">META ATINGIDA</span>' : ''}
+                            </div>
+                            <p class="text-[10px] text-zinc-500 mt-0.5">${c.keyword || '—'} · ${c.location || 'Brasil'}</p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[14px] font-bold text-blue-400">${c.leads_count}</p>
+                        <div class="text-right ml-3">
+                            <p class="text-[14px] font-bold ${goalReached ? 'text-emerald-400' : 'text-blue-400'}">${c.leads_count}</p>
                             <p class="text-[9px] text-zinc-600">de ${c.goal} leads</p>
                         </div>
                     </div>
                     <div class="progress-track mt-2">
-                        <div class="progress-fill" style="width: ${progress}%"></div>
+                        <div class="progress-fill ${goalReached ? '!bg-emerald-500' : ''}" style="width: ${progress}%"></div>
                     </div>
                     <div class="flex items-center justify-between mt-2">
-                        <span class="text-[10px] text-zinc-500">${progress}% concluído</span>
+                        <span class="text-[10px] text-zinc-500">${goalReached ? '100% concluído' : progress + '% · ' + remaining + ' restantes'}</span>
                         <div class="flex items-center gap-1">
-                            <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads">
-                                <svg class="w-4 h-4 text-zinc-400 hover:text-zinc-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads" aria-label="Ver leads da campanha">
+                                <i data-lucide="eye" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
                             </button>
-                            <button onclick="extractCampaign(${c.id}, this)" id="extractBtn-${c.id}" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors" title="Extrair Leads">
-                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <button onclick="openEditCampaign(${c.id}, '${escapeHtml(c.name)}', '${escapeHtml(c.keyword || '')}', '${escapeHtml(c.location || '')}', ${c.goal})" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Editar" aria-label="Editar campanha">
+                                <i data-lucide="pencil" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
                             </button>
-                            <button onclick="deleteCampaign(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Excluir">
-                                <svg class="w-4 h-4 text-red-400/60 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <button onclick="extractCampaign(${c.id}, this)" id="extractBtn-${c.id}" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors ${goalReached ? 'opacity-30 pointer-events-none' : ''}" title="Extrair Leads" aria-label="Extrair leads">
+                                <i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>
+                            </button>
+                            <button onclick="deleteCampaign(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Excluir" aria-label="Excluir campanha">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-red-400/60 hover:text-red-400"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
+        lucide.createIcons();
     } catch (e) {
         document.getElementById('campaignList').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar</p>';
     }
@@ -99,6 +160,7 @@ async function createCampaign() {
     const goal = parseInt(document.getElementById('campGoal').value) || 100;
 
     if (!name) { showToast('Nome obrigatório', 'error'); return; }
+    if (!keyword) { showToast('Palavra-chave obrigatória', 'error'); return; }
 
     try {
         await api('/api/campaigns', { method: 'POST', body: JSON.stringify({ name, keyword, location, goal }) });
@@ -112,9 +174,42 @@ async function createCampaign() {
     }
 }
 
+function openEditCampaign(id, name, keyword, location, goal) {
+    editingCampaignId = id;
+    document.getElementById('editCampName').value = name;
+    document.getElementById('editCampKeyword').value = keyword;
+    document.getElementById('editCampLocation').value = location;
+    document.getElementById('editCampGoal').value = goal;
+    document.getElementById('editCampaignModal').classList.remove('hidden');
+}
+
+function closeEditCampaign() {
+    document.getElementById('editCampaignModal').classList.add('hidden');
+    editingCampaignId = null;
+}
+
+async function submitEditCampaign() {
+    const payload = {
+        name: document.getElementById('editCampName').value.trim(),
+        keyword: document.getElementById('editCampKeyword').value.trim(),
+        location: document.getElementById('editCampLocation').value.trim(),
+        goal: parseInt(document.getElementById('editCampGoal').value) || 100,
+    };
+    if (!payload.name) { showToast('Nome não pode ser vazio', 'error'); return; }
+    try {
+        await api(`/api/campaigns/${editingCampaignId}`, { method: 'PATCH', body: JSON.stringify(payload) });
+        showToast('Campanha atualizada!', 'success');
+        closeEditCampaign();
+        loadCampaigns();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
 async function extractCampaign(id, btn) {
     if (btn) {
         btn.disabled = true;
+        btn.classList.add('opacity-50');
         btn.innerHTML = '<div class="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>';
     }
 
@@ -143,10 +238,12 @@ async function extractCampaign(id, btn) {
             }
         }, 3000);
     } catch (e) {
-        showToast(e.message, 'error');
+        showToast(e.message || 'Erro na extração', 'error');
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
+            btn.classList.remove('opacity-50');
+            btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
+            lucide.createIcons();
         }
     }
 }
@@ -163,43 +260,60 @@ async function deleteCampaign(id) {
 }
 
 async function viewCampaignLeads(id, name) {
-    const list = document.getElementById('campaignList');
-    list.innerHTML = `<div class="mb-4 flex items-center justify-between">
-        <h4 class="text-[13px] font-semibold text-zinc-200">Leads: ${escapeHtml(name)}</h4>
-        <button onclick="loadCampaigns()" class="text-[10px] text-zinc-400 hover:text-zinc-200">← Voltar</button>
-    </div><div id="campLeadsList" class="space-y-2"><div class="flex justify-center py-4"><div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div></div>`;
+    document.getElementById('campLeadsContent').innerHTML = `
+        <h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3>
+        <div class="flex justify-center py-8"><div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>
+    `;
+    document.getElementById('campLeadsModal').classList.remove('hidden');
 
     try {
         const data = await api(`/api/campaigns/${id}/leads`);
-        const container = document.getElementById('campLeadsList');
+        const container = document.getElementById('campLeadsContent');
 
         if (!data.leads.length) {
-            container.innerHTML = '<p class="text-center text-zinc-600 py-4 text-[12px]">Nenhum lead nesta campanha ainda. Clique "Extrair" para buscar.</p>';
+            container.innerHTML = `
+                <h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3>
+                <p class="text-center text-zinc-600 py-6 text-[12px]">Nenhum lead nesta campanha ainda. Clique "Extrair" para buscar.</p>
+            `;
             return;
         }
 
-        container.innerHTML = data.leads.map(l => {
+        let html = `<h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)} <span class="text-[11px] text-zinc-500 font-normal">(${data.total} total)</span></h3>`;
+        html += '<div class="space-y-2">';
+        html += data.leads.map(l => {
             const phone = l.whatsapp || l.phone || '';
             const wa = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
             return `<div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
-                <div class="flex-1 min-w-0">
-                    <p class="text-[12px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
-                    <p class="text-[10px] text-zinc-500 truncate">${l.email || l.phone || '—'}</p>
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-7 h-7 rounded-lg ${l.tier === 'hot' ? 'bg-amber-500/10 text-amber-400' : l.tier === 'warm' ? 'bg-orange-500/10 text-orange-400' : 'bg-zinc-500/10 text-zinc-400'} flex items-center justify-center shrink-0">
+                        <span class="text-[9px] font-bold">${l.score}</span>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[12px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
+                        <p class="text-[10px] text-zinc-500 truncate">${l.email || l.phone || '—'}</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2 ml-2">
-                    <span class="text-[11px] font-bold ${l.tier === 'hot' ? 'text-amber-400' : l.tier === 'warm' ? 'text-orange-400' : 'text-zinc-500'}">${l.score}</span>
-                    ${wa ? `<a href="${wa}" target="_blank" class="p-1 rounded hover:bg-green-500/10"><svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>` : ''}
-                    ${l.email ? `<a href="mailto:${l.email.split(';')[0]}" class="p-1 rounded hover:bg-blue-500/10"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></a>` : ''}
+                    ${wa ? `<a href="${wa}" target="_blank" class="p-1.5 rounded-lg hover:bg-green-500/10" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-3.5 h-3.5 text-green-400"></i></a>` : ''}
+                    ${l.email ? `<a href="mailto:${l.email.split(';')[0]}" class="p-1.5 rounded-lg hover:bg-blue-500/10" aria-label="Email"><i data-lucide="mail" class="w-3.5 h-3.5 text-blue-400"></i></a>` : ''}
                 </div>
             </div>`;
         }).join('');
+        html += '</div>';
 
         if (data.total > 20) {
-            container.innerHTML += `<p class="text-center text-[10px] text-zinc-500 mt-3">Mostrando 20 de ${data.total} leads</p>`;
+            html += `<p class="text-center text-[10px] text-zinc-500 mt-3">Mostrando 20 de ${data.total} leads</p>`;
         }
+
+        container.innerHTML = html;
+        lucide.createIcons();
     } catch (e) {
-        document.getElementById('campLeadsList').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar</p>';
+        document.getElementById('campLeadsContent').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar leads</p>';
     }
+}
+
+function closeCampLeadsModal() {
+    document.getElementById('campLeadsModal').classList.add('hidden');
 }
 
 loadCampaigns();

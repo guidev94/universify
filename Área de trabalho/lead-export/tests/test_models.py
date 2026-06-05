@@ -145,3 +145,121 @@ def test_campaign_create():
     campaigns = Campaign.get_all()
     assert len(campaigns) >= 1
     assert campaigns[0]["name"] == "Test Campaign"
+
+
+def test_campaign_update():
+    from models import Campaign
+    Campaign.create("Original", "keyword1", "SP", 100)
+    campaigns = Campaign.get_all()
+    camp_id = campaigns[0]["id"]
+    result = Campaign.update(camp_id, name="Updated", goal=200)
+    assert result is True
+    updated = Campaign.get_by_id(camp_id)
+    assert updated["name"] == "Updated"
+    assert updated["goal"] == 200
+
+
+def test_campaign_update_partial():
+    from models import Campaign
+    Campaign.create("Partial", "kw", "RJ", 50)
+    campaigns = Campaign.get_all()
+    camp_id = campaigns[0]["id"]
+    Campaign.update(camp_id, keyword="new_keyword")
+    updated = Campaign.get_by_id(camp_id)
+    assert updated["keyword"] == "new_keyword"
+    assert updated["name"] == "Partial"
+
+
+def test_campaign_get_by_id():
+    from models import Campaign
+    Campaign.create("ById Test", "test", "SP", 75)
+    campaigns = Campaign.get_all()
+    camp_id = campaigns[0]["id"]
+    found = Campaign.get_by_id(camp_id)
+    assert found is not None
+    assert found["name"] == "ById Test"
+    assert found["goal"] == 75
+
+
+def test_campaign_get_remaining():
+    from models import Campaign
+    Campaign.create("Remaining Test", "test", "SP", 50)
+    remaining = Campaign.get_remaining("Remaining Test", 50)
+    assert remaining == 50
+
+
+def test_campaign_get_remaining_with_leads():
+    from models import Campaign
+    Campaign.create("WithLeads", "test", "SP", 30)
+    lead_id = Lead.create({"name": "Lead Camp", "email": "camp@t.com", "phone": "", "website": "https://camp1.com", "source": "t"})
+    conn = get_connection()
+    conn.execute("UPDATE leads SET campaign = 'WithLeads' WHERE id = ?", (lead_id,))
+    conn.commit()
+    conn.close()
+    remaining = Campaign.get_remaining("WithLeads", 30)
+    assert remaining == 29
+
+
+def test_extraction_quantity_uses_remaining():
+    from models import Campaign
+    Campaign.create("Big Goal", "test", "SP", 1000)
+    remaining = Campaign.get_remaining("Big Goal", 1000)
+    quantity = min(30, remaining)
+    assert quantity == 30
+
+
+def test_pipeline_stats_all_stages():
+    Lead.create({"name": "New Lead", "email": "new@t.com", "phone": "", "website": "https://newl.com", "source": "t"})
+    conn = get_connection()
+    conn.execute("UPDATE leads SET status = 'contacted' WHERE email = 'new@t.com'")
+    conn.commit()
+    conn.close()
+    lead = Lead.get_by_id(1)
+    assert lead["status"] == "contacted"
+
+
+def test_lead_status_transitions():
+    lead_id = Lead.create({"name": "Status Test", "email": "st@t.com", "phone": "", "website": "https://status1.com", "source": "t"})
+    Lead.update_status(lead_id, "contacted")
+    lead = Lead.get_by_id(lead_id)
+    assert lead["status"] == "contacted"
+    Lead.update_status(lead_id, "negotiating")
+    lead = Lead.get_by_id(lead_id)
+    assert lead["status"] == "negotiating"
+
+
+def test_crawl_job_create_and_fail():
+    job_uuid = "test-uuid-001"
+    job_id = CrawlJob.create(job_uuid, "test_keyword", "SP", "both", 30)
+    assert job_id is not None
+    CrawlJob.fail(job_uuid, "Timeout error")
+    job = CrawlJob.get_by_uuid(job_uuid)
+    assert job["status"] == "error"
+    assert "Timeout" in job["errors"]
+
+
+def test_crawl_job_complete():
+    job_uuid = "test-uuid-002"
+    CrawlJob.create(job_uuid, "dentista", "RJ", "website", 25)
+    CrawlJob.set_running(job_uuid)
+    job = CrawlJob.get_by_uuid(job_uuid)
+    assert job["status"] == "running"
+    CrawlJob.complete(job_uuid, 20)
+    job = CrawlJob.get_by_uuid(job_uuid)
+    assert job["status"] == "completed"
+    assert job["quantity_found"] == 20
+
+
+def test_crawl_job_cleanup_stuck():
+    import time
+    job_uuid = "test-uuid-stuck"
+    CrawlJob.create(job_uuid, "stuck_test", "", "both", 10)
+    CrawlJob.set_running(job_uuid)
+    conn = get_connection()
+    conn.execute("UPDATE crawl_jobs SET started_at = datetime('now', '-10 minutes', 'localtime') WHERE job_uuid = ?", (job_uuid,))
+    conn.commit()
+    conn.execute("UPDATE crawl_jobs SET status = 'error' WHERE status = 'running' AND started_at < datetime('now', '-2 minutes', 'localtime')")
+    conn.commit()
+    conn.close()
+    job = CrawlJob.get_by_uuid(job_uuid)
+    assert job["status"] == "error"

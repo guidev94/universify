@@ -1,7 +1,8 @@
 import uuid
+import time
 import logging
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 from flask import Blueprint, render_template, request, jsonify
 from models import Lead, CrawlJob, Keyword
 from crawler.website_crawler import WebsiteCrawler
@@ -15,12 +16,14 @@ from crawler.validator import validate_lead
 from crawler.lead_scorer import calculate_score
 from crawler.site_verifier import SiteVerifier
 from config import Config
+from database import get_connection
 
 logger = logging.getLogger("leadhunter.crawl")
 
 bp = Blueprint("crawl", __name__)
 
 active_jobs = {}
+MAX_JOB_DURATION = 240
 
 
 @bp.route("/crawl")
@@ -57,6 +60,7 @@ def start_crawl():
         "progress": 0,
         "total": quantity,
         "sources": {},
+        "started_at": time.time(),
     }
 
     thread = threading.Thread(
@@ -101,19 +105,30 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
         crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
         crawl_sources["yellowpages"] = lambda: YellowPagesCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
 
+        job_start = time.time()
+
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
 
-            for future in as_completed(futures, timeout=180):
-                name = futures[future]
-                try:
-                    results = future.result(timeout=90)
-                    leads.extend(results)
-                    active_jobs[job_uuid]["sources"][name] = len(results)
-                    logger.info(f"[crawl] {name}: {len(results)} leads para '{query}'")
-                except Exception as e:
-                    active_jobs[job_uuid]["sources"][name] = 0
-                    logger.warning(f"[crawl] {name} falhou para '{query}': {e}")
+            try:
+                for future in as_completed(futures, timeout=120):
+                    if time.time() - job_start > MAX_JOB_DURATION:
+                        logger.warning(f"[crawl] timeout global atingido para '{query}'")
+                        break
+                    name = futures[future]
+                    try:
+                        results = future.result(timeout=60)
+                        leads.extend(results)
+                        active_jobs[job_uuid]["sources"][name] = len(results)
+                        logger.info(f"[crawl] {name}: {len(results)} leads para '{query}'")
+                    except Exception as e:
+                        active_jobs[job_uuid]["sources"][name] = 0
+                        logger.warning(f"[crawl] {name} falhou para '{query}': {e}")
+            except TimeoutError:
+                logger.warning(f"[crawl] executor timeout para '{query}' — continuando com leads parciais")
+
+            for future in futures:
+                future.cancel()
 
         saved_count = 0
         saved_ids = []
@@ -180,13 +195,16 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
 def crawl_status(job_uuid):
     if job_uuid in active_jobs:
         info = active_jobs[job_uuid]
-        return jsonify({
-            "status": info["status"],
-            "progress": info["progress"],
-            "total": info["total"],
-            "sources": info.get("sources", {}),
-            "total_found": info.get("total_found", 0),
-        })
+        if info.get("started_at") and time.time() - info["started_at"] > 600:
+            del active_jobs[job_uuid]
+        else:
+            return jsonify({
+                "status": info["status"],
+                "progress": info["progress"],
+                "total": info["total"],
+                "sources": info.get("sources", {}),
+                "total_found": info.get("total_found", 0),
+            })
 
     job = CrawlJob.get_by_uuid(job_uuid)
     if not job:
@@ -211,6 +229,62 @@ def cancel_crawl(job_uuid):
     if job_uuid in active_jobs:
         active_jobs[job_uuid]["status"] = "cancelled"
     return jsonify({"ok": True})
+
+
+@bp.route("/api/crawl/abort/<job_uuid>", methods=["POST"])
+def abort_crawl(job_uuid):
+    CrawlJob.fail(job_uuid, "Abortado manualmente")
+    if job_uuid in active_jobs:
+        del active_jobs[job_uuid]
+    return jsonify({"ok": True})
+
+
+@bp.route("/api/crawl/retry/<int:job_id>", methods=["POST"])
+def retry_crawl(job_id):
+    conn = get_connection()
+    job = conn.execute("SELECT * FROM crawl_jobs WHERE id = ?", (job_id,)).fetchone()
+    conn.close()
+    if not job:
+        return jsonify({"error": "Job não encontrado"}), 404
+
+    job = dict(job)
+    new_uuid = str(uuid.uuid4())
+    new_id = CrawlJob.create(new_uuid, job["keyword"], job["location"], job["source"], job["quantity_requested"])
+
+    active_jobs[new_uuid] = {
+        "status": "running",
+        "progress": 0,
+        "total": job["quantity_requested"],
+        "sources": {},
+        "started_at": time.time(),
+    }
+
+    thread = threading.Thread(
+        target=run_crawl,
+        args=(new_uuid, new_id, job["source"], job["keyword"], job["quantity_requested"], job["location"]),
+        daemon=True,
+    )
+    thread.start()
+
+    return jsonify({"job_id": new_uuid, "new_job_id": new_id, "ok": True})
+
+
+@bp.route("/api/crawl/cleanup", methods=["POST"])
+def cleanup_jobs():
+    conn = get_connection()
+    conn.execute(
+        "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') "
+        "WHERE status = 'running' AND started_at < datetime('now', '-2 minutes', 'localtime')"
+    )
+    cleaned = conn.execute("SELECT changes() as c").fetchone()["c"]
+    conn.commit()
+    conn.close()
+
+    stale = [k for k, v in active_jobs.items() if v.get("started_at") and time.time() - v["started_at"] > 300]
+    for k in stale:
+        del active_jobs[k]
+
+    return jsonify({"ok": True, "cleaned": cleaned + len(stale)})
 
 
 @bp.route("/api/keywords/suggestions")

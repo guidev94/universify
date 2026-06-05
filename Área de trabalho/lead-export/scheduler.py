@@ -109,12 +109,17 @@ class Scheduler:
         from database import get_connection
         conn = get_connection()
         stuck = conn.execute(
-            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-5 minutes', 'localtime')"
+            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-2 minutes', 'localtime')"
         )
         if stuck.rowcount > 0:
             logger.warning(f"[scheduler] {stuck.rowcount} jobs stuck marcados como erro")
         conn.commit()
         conn.close()
+
+        from blueprints.crawl import active_jobs
+        stale = [k for k, v in active_jobs.items() if v.get("started_at") and time.time() - v["started_at"] > 300]
+        for k in stale:
+            del active_jobs[k]
 
     def _verify_unverified_sites(self):
         unverified = Lead.get_unverified(limit=100)

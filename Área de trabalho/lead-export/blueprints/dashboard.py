@@ -118,6 +118,34 @@ def delete_campaign(camp_id):
     return jsonify({"ok": True})
 
 
+@bp.route("/api/campaigns/<int:camp_id>", methods=["PATCH"])
+def update_campaign(camp_id):
+    data = request.get_json() or {}
+
+    name = data.get("name", "").strip() if "name" in data else None
+    keyword = data.get("keyword", "").strip() if "keyword" in data else None
+    location = data.get("location", "").strip() if "location" in data else None
+    goal = int(data["goal"]) if "goal" in data and data["goal"] else None
+
+    if name is not None and not name:
+        return jsonify({"error": "Nome não pode ser vazio"}), 400
+    if goal is not None and goal < 1:
+        return jsonify({"error": "Meta deve ser pelo menos 1"}), 400
+
+    if name:
+        conn = get_connection()
+        old = conn.execute("SELECT name FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
+        if old and old["name"] != name:
+            conn.execute("UPDATE leads SET campaign = ? WHERE campaign = ?", (name, old["name"]))
+            conn.commit()
+        conn.close()
+
+    success = Campaign.update(camp_id, name=name, keyword=keyword, location=location, goal=goal)
+    if not success:
+        return jsonify({"error": "Nenhuma alteração"}), 400
+    return jsonify({"ok": True})
+
+
 @bp.route("/api/campaigns/<int:camp_id>/leads")
 def campaign_leads(camp_id):
     conn = get_connection()
@@ -156,7 +184,16 @@ def extract_campaign(camp_id):
     camp = dict(camp)
     keyword = camp["keyword"]
     location = camp.get("location", "")
-    quantity = min(30, camp["goal"])
+
+    conn2 = get_connection()
+    current_count = conn2.execute(
+        "SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)
+    ).fetchone()["c"]
+    conn2.close()
+    remaining = camp["goal"] - current_count
+    if remaining <= 0:
+        return jsonify({"error": "Meta já atingida!", "leads_count": current_count, "goal": camp["goal"]}), 400
+    quantity = min(30, remaining)
 
     job_uuid = str(uuid.uuid4())
     from blueprints.crawl import active_jobs
