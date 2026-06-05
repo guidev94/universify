@@ -8,21 +8,21 @@
 {% block content %}
 <!-- Filter Bar -->
 <div class="glass-card-static p-4 mb-5 fade-up">
-    <div class="flex flex-wrap items-center gap-3">
-        <div class="relative flex-1 min-w-[220px]">
+    <div class="flex flex-wrap items-center gap-2">
+        <div class="relative flex-1 min-w-[180px] max-w-[280px]">
             <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
             <input type="text" id="searchInput" placeholder="Buscar nome, email..."
-                class="input-glass !pl-10 !py-2.5 text-[13px]">
+                class="input-glass !pl-10 !py-2.5 text-[13px] w-full">
         </div>
 
-        <select id="filterTier" class="select-glass">
+        <select id="filterTier" class="select-glass !w-auto !min-w-0">
             <option value="">Qualificação</option>
             <option value="hot">Quente</option>
             <option value="warm">Morno</option>
             <option value="cold">Frio</option>
         </select>
 
-        <select id="filterStatus" class="select-glass">
+        <select id="filterStatus" class="select-glass !w-auto !min-w-0">
             <option value="">Status</option>
             <option value="new">Novo</option>
             <option value="contacted">Contatado</option>
@@ -31,7 +31,7 @@
             <option value="closed_lost">Perdido</option>
         </select>
 
-        <select id="filterSource" class="select-glass">
+        <select id="filterSource" class="select-glass !w-auto !min-w-0">
             <option value="">Fonte</option>
             <option value="website">Website</option>
             <option value="duckduckgo">DuckDuckGo</option>
@@ -40,22 +40,22 @@
             <option value="niche_directory">Nicho</option>
         </select>
 
-        <select id="filterCategory" class="select-glass">
+        <select id="filterCategory" class="select-glass !w-auto !min-w-0 !max-w-[130px]">
             <option value="">Nicho</option>
         </select>
 
-        <select id="sortBy" class="select-glass">
+        <select id="sortBy" class="select-glass !w-auto !min-w-0">
             <option value="created_at">Recente ↓</option>
             <option value="score">Score ↓</option>
             <option value="name">Nome A-Z</option>
         </select>
 
-        <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors">
+        <label class="flex items-center gap-1.5 cursor-pointer px-2.5 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-colors">
             <input type="checkbox" id="filterVerified" class="rounded-sm accent-blue-500 cursor-pointer">
-            <span class="text-[11px] text-zinc-400 font-medium whitespace-nowrap">Só com site</span>
+            <span class="text-[10px] text-zinc-400 font-medium whitespace-nowrap">Verificado</span>
         </label>
 
-        <button onclick="openExportModal()" class="btn-ghost flex items-center gap-1.5 whitespace-nowrap">
+        <button onclick="openExportModal()" class="btn-accent !py-2 !px-3 flex items-center gap-1.5 whitespace-nowrap text-[11px]">
             <i data-lucide="download" class="w-3.5 h-3.5 stroke-[2]"></i>
             Exportar
         </button>

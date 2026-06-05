@@ -263,19 +263,31 @@ async function loadTierModalPage() {
         body.innerHTML = data.leads.map(lead => {
             const phone = lead.whatsapp || lead.phone || '';
             const whatsappUrl = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
-            const emailUrl = lead.email ? `mailto:${lead.email}` : '';
+            const emailUrl = lead.email ? `mailto:${lead.email.split(';')[0]}` : '';
+            const tierColors = { hot: 'text-amber-400 bg-amber-500/10', warm: 'text-orange-400 bg-orange-500/10', cold: 'text-zinc-400 bg-zinc-500/10' };
 
             return `
-                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/5">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[13px] font-medium text-zinc-100 truncate">${escapeHtml(lead.name)}</p>
-                        <p class="text-[11px] text-zinc-500 truncate mt-0.5">${lead.email || lead.phone || lead.website || '—'}</p>
-                    </div>
-                    <div class="flex items-center gap-2 ml-3">
-                        <span class="text-[10px] text-zinc-600">${formatDateTime(lead.created_at)}</span>
-                        <span class="text-[11px] font-bold ${lead.tier === 'hot' ? 'text-amber-400' : lead.tier === 'warm' ? 'text-orange-400' : 'text-zinc-500'}">${lead.score}</span>
-                        ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="p-1.5 rounded-lg hover:bg-green-500/10"><svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>` : ''}
-                        ${emailUrl ? `<a href="${emailUrl}" class="p-1.5 rounded-lg hover:bg-blue-500/10"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></a>` : ''}
+                <div class="p-3 rounded-xl hover:bg-white/[0.03] transition-all border border-transparent hover:border-white/5 cursor-pointer group" onclick="openDashLeadDetail(${lead.id})">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg ${tierColors[lead.tier] || 'bg-zinc-500/10'} flex items-center justify-center shrink-0">
+                            <span class="text-[11px] font-bold">${lead.score}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <p class="text-[13px] font-medium text-zinc-100 truncate">${escapeHtml(lead.name)}</p>
+                                ${lead.category ? `<span class="text-[9px] text-zinc-500 bg-zinc-800/50 px-1.5 py-0.5 rounded shrink-0">${escapeHtml(lead.category)}</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-3 mt-1">
+                                ${lead.email ? `<span class="text-[10px] text-zinc-400 truncate max-w-[160px]">${escapeHtml(lead.email.split(';')[0])}</span>` : ''}
+                                ${phone ? `<span class="text-[10px] text-zinc-500">${escapeHtml(phone)}</span>` : ''}
+                            </div>
+                            ${lead.website ? `<p class="text-[10px] text-blue-400/70 truncate mt-0.5">${escapeHtml(lead.website)}</p>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1.5 ml-2 shrink-0">
+                            ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" onclick="event.stopPropagation()" class="p-1.5 rounded-lg hover:bg-green-500/10"><svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>` : ''}
+                            ${emailUrl ? `<a href="${emailUrl}" onclick="event.stopPropagation()" class="p-1.5 rounded-lg hover:bg-blue-500/10"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></a>` : ''}
+                            <svg class="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
                 </div>
             `;
@@ -302,6 +314,68 @@ async function loadTierModalPage() {
 function tierModalPrev() { if (tierModalPage > 1) { tierModalPage--; loadTierModalPage(); } }
 function tierModalNext() { tierModalPage++; loadTierModalPage(); }
 function closeTierModal() { document.getElementById('tierModal').classList.add('hidden'); }
+function closeDashLeadDetail() { document.getElementById('dashLeadDetailModal').classList.add('hidden'); }
+
+async function openDashLeadDetail(id) {
+    const lead = await api(`/api/leads/${id}`);
+    if (!lead) return;
+
+    const scoreColor = lead.score >= 80 ? '#fde047' : lead.score >= 50 ? '#fb923c' : '#a1a1aa';
+    const circumference = 2 * Math.PI * 36;
+    const offset = circumference - (lead.score / 100) * circumference;
+    const phones = (lead.phone || '').split(';').filter(p => p.trim());
+    const emails = (lead.email || '').split(';').filter(e => e.trim());
+    const wa = lead.whatsapp || phones[0] || '';
+    const tierGrad = { hot: 'from-amber-500/20 to-orange-500/10', warm: 'from-orange-500/15 to-yellow-500/5', cold: 'from-zinc-500/10 to-zinc-600/5' };
+
+    const modal = document.getElementById('dashLeadDetailModal');
+    document.getElementById('dashLeadDetailContent').innerHTML = `
+        <div class="bg-gradient-to-br ${tierGrad[lead.tier] || tierGrad.cold} rounded-xl p-5 mb-5">
+            <div class="flex items-start gap-4">
+                <div class="relative w-20 h-20 shrink-0">
+                    <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
+                        <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                        <circle cx="40" cy="40" r="36" fill="none" stroke="${scoreColor}" stroke-width="6" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-[16px] font-bold text-zinc-100">${lead.score}</span>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-[16px] font-bold text-zinc-100 truncate">${escapeHtml(lead.name)}</h3>
+                    <p class="text-[11px] text-zinc-400 mt-0.5">${lead.category || 'Sem categoria'} · ${lead.source || ''}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${lead.tier === 'hot' ? 'bg-amber-500/20 text-amber-400' : lead.tier === 'warm' ? 'bg-orange-500/20 text-orange-400' : 'bg-zinc-500/20 text-zinc-400'}">${(lead.tier || 'cold').toUpperCase()}</span>
+                        ${lead.site_verified ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Verificado</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-3 mb-5">
+            ${emails.length ? `<div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Email${emails.length > 1 ? 's' : ''}</label>
+                ${emails.map(e => `<div class="flex items-center gap-2 mb-1"><span class="text-[12px] text-zinc-200 truncate flex-1">${escapeHtml(e)}</span><button onclick="navigator.clipboard.writeText('${e}');showToast('Copiado!','success')" class="p-1 rounded hover:bg-white/5 shrink-0"><svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`).join('')}
+            </div>` : '<p class="text-[11px] text-zinc-600">Sem email</p>'}
+            ${phones.length ? `<div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Telefone${phones.length > 1 ? 's' : ''}</label>
+                ${phones.map(p => `<div class="flex items-center gap-2 mb-1"><span class="text-[12px] text-zinc-200">${escapeHtml(p)}</span><button onclick="navigator.clipboard.writeText('${p}');showToast('Copiado!','success')" class="p-1 rounded hover:bg-white/5 shrink-0"><svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`).join('')}
+            </div>` : ''}
+            ${lead.website ? `<div>
+                <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Website</label>
+                <a href="${lead.website}" target="_blank" rel="noopener" class="text-[12px] text-blue-400 hover:underline truncate block">${escapeHtml(lead.website)}</a>
+            </div>` : ''}
+            ${lead.instagram ? `<div class="text-[12px] text-zinc-300">Instagram: <a href="https://instagram.com/${lead.instagram}" target="_blank" class="text-pink-400 hover:underline">@${escapeHtml(lead.instagram)}</a></div>` : ''}
+            ${lead.facebook ? `<div class="text-[12px] text-zinc-300">Facebook: <a href="${lead.facebook}" target="_blank" class="text-blue-400 hover:underline">${escapeHtml(lead.facebook)}</a></div>` : ''}
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            ${wa ? `<a href="https://wa.me/${wa.replace(/\\D/g, '')}" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10"><span class="text-green-400">WhatsApp</span></a>` : '<span></span>'}
+            ${emails[0] ? `<a href="mailto:${emails[0]}" class="btn-ghost !py-2.5 text-[11px] text-center !border-blue-500/20 hover:!bg-blue-500/10"><span class="text-blue-400">Email</span></a>` : '<span></span>'}
+            ${lead.website ? `<a href="${lead.website}" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Website</span></a>` : '<span></span>'}
+            <a href="/leads" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Ver na lista</span></a>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+}
 
 loadStats();
 loadCharts();
