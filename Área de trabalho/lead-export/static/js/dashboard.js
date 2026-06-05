@@ -45,7 +45,8 @@ async function loadStats() {
             statValues[key] = newVal;
         }
 
-        document.getElementById('statAvgScore').textContent = data.avg_score;
+        const avgEl = document.getElementById('statAvgScore');
+        if (avgEl) avgEl.textContent = data.avg_score;
         document.getElementById('statRevenue').textContent = `R$ ${data.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 0})}`;
         document.getElementById('statDeals').textContent = data.deals_closed.toLocaleString('pt-BR');
         document.getElementById('statConversion').textContent = `${data.conversion_rate}%`;
