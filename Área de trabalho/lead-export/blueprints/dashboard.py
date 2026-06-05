@@ -280,7 +280,7 @@ def dashboard_activity():
 
     feed = []
     for l in new_leads:
-        feed.append({"type": "lead", "name": dict(l)["name"], "tier": dict(l)["tier"], "source": dict(l)["source"], "at": dict(l)["created_at"]})
+        feed.append({"type": "lead", "id": dict(l)["id"], "name": dict(l)["name"], "tier": dict(l)["tier"], "source": dict(l)["source"], "at": dict(l)["created_at"]})
     for a in activities:
         a = dict(a)
         feed.append({"type": "activity", "name": a["name"], "action": a["action"], "details": a["details"], "at": a["created_at"]})

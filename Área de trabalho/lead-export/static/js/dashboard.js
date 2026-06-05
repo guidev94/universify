@@ -386,7 +386,7 @@ async function loadActivityFeed() {
             }
 
             const tierDot = { hot: 'bg-amber-400', warm: 'bg-orange-400', cold: 'bg-zinc-500' };
-            return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors cursor-pointer" onclick="openTierModal('${item.tier || 'all'}')">
+            return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors cursor-pointer" onclick="openDashLeadDetail(${item.id})">
                 <span class="w-2 h-2 rounded-full ${tierDot[item.tier] || 'bg-emerald-400'} shrink-0"></span>
                 <div class="flex-1 min-w-0">
                     <p class="text-[11px] text-zinc-300 truncate"><span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
