@@ -93,6 +93,7 @@
 {% block scripts %}
 <script>
 let editingCampaignId = null;
+const extractingCampaigns = new Set();
 
 async function loadCampaigns() {
     try {
@@ -108,27 +109,32 @@ async function loadCampaigns() {
             const progress = c.goal ? Math.min(100, Math.round((c.leads_count / c.goal) * 100)) : 0;
             const remaining = Math.max(0, c.goal - c.leads_count);
             const goalReached = c.leads_count >= c.goal;
+            const isExtracting = extractingCampaigns.has(c.id);
 
             return `
-                <div class="p-4 rounded-xl bg-white/[0.02] border ${goalReached ? 'border-emerald-500/20' : 'border-white/5'} hover:border-white/10 transition-colors">
+                <div class="p-4 rounded-xl bg-white/[0.02] border ${goalReached ? 'border-emerald-500/20' : isExtracting ? 'border-blue-500/20' : 'border-white/5'} hover:border-white/10 transition-colors" id="campCard-${c.id}">
                     <div class="flex items-center justify-between mb-2">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-[13px] font-semibold text-zinc-100 truncate">${escapeHtml(c.name)}</p>
                                 ${goalReached ? '<span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400">META ATINGIDA</span>' : ''}
+                                ${isExtracting ? '<span class="shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>Extraindo</span>' : ''}
                             </div>
                             <p class="text-[10px] text-zinc-500 mt-0.5">${c.keyword || '—'} · ${c.location || 'Brasil'}</p>
                         </div>
                         <div class="text-right ml-3">
-                            <p class="text-[14px] font-bold ${goalReached ? 'text-emerald-400' : 'text-blue-400'}">${c.leads_count}</p>
+                            <p class="text-[18px] font-bold ${goalReached ? 'text-emerald-400' : isExtracting ? 'text-blue-400' : 'text-zinc-100'}" id="campCount-${c.id}">${c.leads_count}</p>
                             <p class="text-[9px] text-zinc-600">de ${c.goal} leads</p>
                         </div>
                     </div>
-                    <div class="progress-track mt-2">
-                        <div class="progress-fill ${goalReached ? '!bg-emerald-500' : ''}" style="width: ${progress}%"></div>
+                    <div class="progress-track mt-2 ${isExtracting ? 'overflow-hidden' : ''}">
+                        <div class="progress-fill ${goalReached ? '!bg-emerald-500' : isExtracting ? 'transition-all duration-1000' : ''}" style="width: ${progress}%" id="campProgress-${c.id}"></div>
+                        ${isExtracting ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-shimmer"></div>' : ''}
                     </div>
                     <div class="flex items-center justify-between mt-2">
-                        <span class="text-[10px] text-zinc-500">${goalReached ? '100% concluído' : progress + '% · ' + remaining + ' restantes'}</span>
+                        <span class="text-[10px] ${isExtracting ? 'text-blue-400' : 'text-zinc-500'}">
+                            ${goalReached ? '100% concluído' : isExtracting ? '⚡ Extraindo... ' + progress + '% · +' + remaining + ' restantes' : progress + '% · ' + remaining + ' restantes'}
+                        </span>
                         <div class="flex items-center gap-1">
                             <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads" aria-label="Ver leads da campanha">
                                 <i data-lucide="eye" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
@@ -136,8 +142,8 @@ async function loadCampaigns() {
                             <button onclick="openEditCampaign(${c.id}, '${escapeHtml(c.name)}', '${escapeHtml(c.keyword || '')}', '${escapeHtml(c.location || '')}', ${c.goal})" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Editar" aria-label="Editar campanha">
                                 <i data-lucide="pencil" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
                             </button>
-                            <button onclick="extractCampaign(${c.id}, this)" id="extractBtn-${c.id}" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors ${goalReached ? 'opacity-30 pointer-events-none' : ''}" title="Extrair Leads" aria-label="Extrair leads">
-                                <i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>
+                            <button onclick="extractCampaign(${c.id}, this)" id="extractBtn-${c.id}" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors ${goalReached || isExtracting ? 'opacity-30 pointer-events-none' : ''}" title="${isExtracting ? 'Extração em andamento' : 'Extrair Leads'}" aria-label="Extrair leads">
+                                ${isExtracting ? '<div class="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>' : '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>'}
                             </button>
                             <button onclick="deleteCampaign(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Excluir" aria-label="Excluir campanha">
                                 <i data-lucide="trash-2" class="w-4 h-4 text-red-400/60 hover:text-red-400"></i>
@@ -207,68 +213,53 @@ async function submitEditCampaign() {
 }
 
 async function extractCampaign(id, btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-50');
-        btn.innerHTML = '<div class="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>';
-    }
+    extractingCampaigns.add(id);
+    loadCampaigns();
 
     try {
         const data = await api(`/api/campaigns/${id}/extract`, { method: 'POST' });
         const isContinuous = data.continuous;
         const totalRemaining = data.total_remaining;
 
-        if (isContinuous) {
-            showToast(`Extração contínua iniciada! Buscando ${totalRemaining} leads em batches...`, 'info');
-        } else {
-            showToast(`Extração iniciada! Buscando ${data.quantity} leads...`, 'info');
-        }
+        showToast(isContinuous
+            ? `Extração contínua iniciada! Buscando ${totalRemaining} leads...`
+            : `Extraindo ${data.quantity} leads...`, 'info');
 
         const jobId = data.job_id;
-        let attempts = 0;
+        let lastCount = 0;
         const poll = setInterval(async () => {
-            attempts++;
             try {
                 const status = await api(`/api/crawl/status/${jobId}`);
+
+                const countEl = document.getElementById(`campCount-${id}`);
+                const progressEl = document.getElementById(`campProgress-${id}`);
+                if (countEl && status.progress > lastCount) {
+                    lastCount = status.progress;
+                }
+
+                loadCampaigns();
+
                 if (status.status === 'completed') {
                     clearInterval(poll);
-                    showToast(`Concluído! Leads extraídos para a campanha`, 'success');
+                    extractingCampaigns.delete(id);
+                    showToast(`Concluído! Leads extraídos com sucesso`, 'success');
                     loadCampaigns();
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.classList.remove('opacity-50');
-                        btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
-                        lucide.createIcons();
-                    }
                 } else if (status.status === 'error') {
                     clearInterval(poll);
+                    extractingCampaigns.delete(id);
                     showToast('Extração pausada — clique novamente para continuar', 'error');
-                    loadCampaigns();
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.classList.remove('opacity-50');
-                        btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
-                        lucide.createIcons();
-                    }
-                } else if (attempts > 300) {
-                    clearInterval(poll);
-                    loadCampaigns();
-                } else {
                     loadCampaigns();
                 }
             } catch (e) {
                 clearInterval(poll);
+                extractingCampaigns.delete(id);
                 loadCampaigns();
             }
-        }, 5000);
+        }, 4000);
     } catch (e) {
+        extractingCampaigns.delete(id);
         showToast(e.message || 'Erro na extração', 'error');
-        if (btn) {
-            btn.disabled = false;
-            btn.classList.remove('opacity-50');
-            btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>';
-            lucide.createIcons();
-        }
+        loadCampaigns();
     }
 }
 
