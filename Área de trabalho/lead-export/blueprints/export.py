@@ -21,11 +21,20 @@ def export_leads():
     status = data.get("status", "").strip() or None
     quantity = data.get("quantity")
     keyword = data.get("keyword", "").strip() or None
+    ids = data.get("ids")
 
     if fmt not in ("csv", "xlsx"):
         return jsonify({"error": "Formato inválido"}), 400
 
-    leads = Lead.get_for_export(tier=tier, status=status, quantity=quantity, keyword=keyword)
+    if ids and isinstance(ids, list) and len(ids) > 0:
+        from database import get_connection
+        conn = get_connection()
+        placeholders = ",".join("?" * len(ids))
+        rows = conn.execute(f"SELECT * FROM leads WHERE id IN ({placeholders}) ORDER BY score DESC", ids).fetchall()
+        conn.close()
+        leads = [dict(r) for r in rows]
+    else:
+        leads = Lead.get_for_export(tier=tier, status=status, quantity=quantity, keyword=keyword)
 
     if not leads:
         return jsonify({"error": "Nenhum lead encontrado com esses filtros"}), 404

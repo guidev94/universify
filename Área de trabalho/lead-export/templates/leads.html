@@ -64,8 +64,18 @@
 
 <!-- Bulk Actions -->
 <div id="bulkActions" class="hidden glass-card-static p-3 mb-4 fade-up">
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 flex-wrap">
         <span class="text-[11px] text-zinc-400 font-medium"><span id="selectedCount">0</span> selecionados</span>
+        <select id="bulkStatusSelect" class="select-glass !py-1 !text-[10px] !w-auto" onchange="bulkChangeStatus(this.value)">
+            <option value="">Mudar status →</option>
+            <option value="contacted">Contatado</option>
+            <option value="negotiating">Negociando</option>
+            <option value="closed_won">Fechado</option>
+            <option value="closed_lost">Perdido</option>
+        </select>
+        <button onclick="bulkExportSelected()" class="btn-ghost !text-blue-400 !border-blue-500/20 hover:!bg-blue-500/5 text-[11px]">
+            <i data-lucide="download" class="w-3 h-3 inline mr-1 stroke-[2]"></i>Exportar selecionados
+        </button>
         <button onclick="bulkDelete()" class="btn-ghost !text-red-400 !border-red-500/20 hover:!bg-red-500/5 text-[11px]">
             <i data-lucide="trash-2" class="w-3 h-3 inline mr-1 stroke-[2]"></i>Excluir
         </button>

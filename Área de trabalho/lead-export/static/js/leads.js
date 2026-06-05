@@ -401,8 +401,38 @@ async function openLeadDetail(id) {
                 </button>
             </div>
 
+            <!-- Tags -->
+            <div class="mt-4">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Tags</p>
+                    <button onclick="document.getElementById('tagInput-${lead.id}').classList.toggle('hidden')" class="text-[10px] text-blue-400 hover:text-blue-300">+ Adicionar</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5" id="leadTags-${lead.id}">
+                    ${(lead.tags || '').split(',').filter(t => t.trim()).map(tag =>
+                        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/15">
+                            ${escapeHtml(tag.trim())}
+                            <button onclick="removeTag(${lead.id}, '${escapeHtml(tag.trim())}')" class="hover:text-red-400 transition-colors">&times;</button>
+                        </span>`
+                    ).join('') || '<span class="text-[10px] text-zinc-600">Sem tags</span>'}
+                </div>
+                <div id="tagInput-${lead.id}" class="hidden mt-2 flex gap-2">
+                    <input type="text" id="newTag-${lead.id}" placeholder="Nova tag..." class="input-glass !py-1.5 !text-[11px] flex-1" onkeydown="if(event.key==='Enter')addTag(${lead.id})">
+                    <button onclick="addTag(${lead.id})" class="btn-accent !py-1.5 !px-3 text-[10px]">Add</button>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="mt-4">
+                <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-2">Atividades</p>
+                <div id="leadActivities-${lead.id}" class="space-y-1.5 max-h-[120px] overflow-y-auto">
+                    <p class="text-[10px] text-zinc-600">Carregando...</p>
+                </div>
+            </div>
+
             <button onclick="deleteLeadFromModal(${lead.id})" class="w-full mt-3 p-2 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/15 transition-all text-center">Excluir este lead</button>
         `;
+
+        loadLeadActivities(lead.id);
     } catch (e) {
         body.innerHTML = '<p class="text-center text-red-400 py-6">Erro ao carregar lead</p>';
     }
@@ -429,6 +459,52 @@ async function deleteLeadFromModal(id) {
         showToast('Lead excluído', 'success');
         closeLeadDetail();
         loadLeads(currentPage);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function bulkChangeStatus(status) {
+    if (!status || selectedIds.size === 0) return;
+    try {
+        const ids = Array.from(selectedIds);
+        await Promise.all(ids.map(id =>
+            api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) })
+        ));
+        showToast(`${ids.length} leads atualizados para "${status}"`, 'success');
+        document.getElementById('bulkStatusSelect').value = '';
+        selectedIds.clear();
+        updateBulkBar();
+        loadLeads(currentPage);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function bulkExportSelected() {
+    if (selectedIds.size === 0) return;
+    try {
+        const response = await fetch('/api/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCSRFToken() },
+            body: JSON.stringify({ format: 'xlsx', ids: Array.from(selectedIds) }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Erro ao exportar');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads-selecionados-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast(`${selectedIds.size} leads exportados!`, 'success');
     } catch (e) {
         showToast(e.message, 'error');
     }
@@ -476,4 +552,54 @@ async function doInlineExport() {
     }
 }
 
+async function addTag(leadId) {
+    const input = document.getElementById(`newTag-${leadId}`);
+    const tag = input.value.trim();
+    if (!tag) return;
+    try {
+        const lead = await api(`/api/leads/${leadId}`);
+        const existing = (lead.tags || '').split(',').filter(t => t.trim());
+        if (!existing.includes(tag)) existing.push(tag);
+        await api(`/api/leads/${leadId}/tags`, { method: 'PATCH', body: JSON.stringify({ tags: existing.join(',') }) });
+        input.value = '';
+        showToast('Tag adicionada!', 'success');
+        openLeadDetail(leadId);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function removeTag(leadId, tagToRemove) {
+    try {
+        const lead = await api(`/api/leads/${leadId}`);
+        const existing = (lead.tags || '').split(',').filter(t => t.trim() && t.trim() !== tagToRemove);
+        await api(`/api/leads/${leadId}/tags`, { method: 'PATCH', body: JSON.stringify({ tags: existing.join(',') }) });
+        showToast('Tag removida', 'success');
+        openLeadDetail(leadId);
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function loadLeadActivities(leadId) {
+    const container = document.getElementById(`leadActivities-${leadId}`);
+    try {
+        const data = await api(`/api/leads/${leadId}/activities`);
+        if (!data.activities || data.activities.length === 0) {
+            container.innerHTML = '<p class="text-[10px] text-zinc-600">Nenhuma atividade registrada</p>';
+            return;
+        }
+        container.innerHTML = data.activities.slice(0, 10).map(a => `
+            <div class="flex items-center gap-2 p-1.5 rounded-lg bg-white/[0.01]">
+                <div class="w-1.5 h-1.5 rounded-full ${a.action === 'status_change' ? 'bg-cyan-400' : a.action === 'contacted' ? 'bg-green-400' : 'bg-zinc-500'} shrink-0"></div>
+                <span class="text-[10px] text-zinc-400 flex-1">${escapeHtml(a.action.replace(/_/g, ' '))}${a.details ? ': ' + escapeHtml(a.details) : ''}</span>
+                <span class="text-[9px] text-zinc-600 shrink-0">${formatDateTime(a.created_at)}</span>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = '<p class="text-[10px] text-zinc-600">—</p>';
+    }
+}
+
 loadLeads(1);
+setInterval(() => { if (selectedIds.size === 0) loadLeads(currentPage); }, 30000);
