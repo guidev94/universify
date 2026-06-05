@@ -312,15 +312,16 @@ class Scheduler:
         CrawlJob.set_running(job_uuid)
 
         leads = []
+        fetch_qty = quantity * 2
 
         sources = {
-            "duckduckgo": lambda: DuckDuckGoCrawler().crawl(keyword, quantity),
-            "website": lambda: WebsiteCrawler().crawl(keyword, quantity),
-            "bing": lambda: BingCrawler().crawl(keyword, quantity),
-            "maps": lambda: MapsCrawler().crawl(keyword, location, quantity),
-            "directory": lambda: DirectoryCrawler().crawl(keyword, location, quantity),
-            "niche": lambda: NicheCrawler().crawl(keyword, location, quantity),
-            "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, quantity),
+            "duckduckgo": lambda: DuckDuckGoCrawler().crawl(keyword, fetch_qty),
+            "website": lambda: WebsiteCrawler().crawl(keyword, fetch_qty),
+            "bing": lambda: BingCrawler().crawl(keyword, fetch_qty),
+            "maps": lambda: MapsCrawler().crawl(keyword, location, fetch_qty),
+            "directory": lambda: DirectoryCrawler().crawl(keyword, location, fetch_qty),
+            "niche": lambda: NicheCrawler().crawl(keyword, location, fetch_qty),
+            "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, fetch_qty),
         }
 
         try:
