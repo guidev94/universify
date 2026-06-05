@@ -272,20 +272,51 @@ class Scheduler:
                 continue
 
             remaining = camp["goal"] - current
-            quantity = min(30, remaining)
             keyword = camp.get("keyword", "")
             location = camp.get("location", "")
 
             if not keyword:
                 continue
 
-            logger.info(f"[scheduler] campanha '{camp['name']}': {current}/{camp['goal']} — extraindo {quantity}")
+            assigned = self._assign_existing_leads(camp["name"], keyword, location, remaining)
+            if assigned >= remaining:
+                logger.info(f"[scheduler] campanha '{camp['name']}': meta atingida com leads existentes (+{assigned})")
+                continue
+
+            remaining -= assigned
+            quantity = min(30, remaining)
+
+            logger.info(f"[scheduler] campanha '{camp['name']}': {current + assigned}/{camp['goal']} — buscando {quantity} novos")
 
             try:
                 count = self._run_multi_source_crawl(keyword, location, campaign_name=camp["name"], quantity_override=quantity)
-                logger.info(f"[scheduler] campanha '{camp['name']}': +{count} leads")
+                logger.info(f"[scheduler] campanha '{camp['name']}': +{count} leads novos")
             except Exception as e:
                 logger.warning(f"[scheduler] campanha '{camp['name']}' falhou: {e}")
+
+    def _assign_existing_leads(self, campaign_name, keyword, location, limit):
+        from database import get_connection
+        conn = get_connection()
+        search = f"%{keyword.split('|')[0].strip()}%"
+        rows = conn.execute("""
+            SELECT id FROM leads
+            WHERE (campaign = '' OR campaign IS NULL)
+            AND (category LIKE ? OR name LIKE ?)
+            AND (email != '' OR website != '')
+            ORDER BY score DESC
+            LIMIT ?
+        """, (search, search, limit)).fetchall()
+
+        count = 0
+        for row in rows:
+            conn.execute("UPDATE leads SET campaign = ? WHERE id = ?", (campaign_name, row["id"]))
+            count += 1
+
+        if count > 0:
+            conn.commit()
+            logger.info(f"[scheduler] campanha '{campaign_name}': {count} leads existentes atribuídos")
+        conn.close()
+        return count
 
     def _run_multi_source_crawl(self, keyword, location, campaign_name=None, quantity_override=None):
         if '|' in keyword:
@@ -364,14 +395,19 @@ class Scheduler:
                 validated["campaign"] = campaign_name
 
             lead_id = Lead.create(validated, crawl_job_id=job_id)
-            if lead_id and campaign_name:
-                from database import get_connection as gc
-                c = gc()
-                c.execute("UPDATE leads SET campaign = ? WHERE id = ? AND (campaign = '' OR campaign IS NULL)", (campaign_name, lead_id))
-                c.commit()
-                c.close()
             if lead_id:
-                saved_count += 1
+                if campaign_name:
+                    from database import get_connection as gc
+                    c = gc()
+                    current_camp = c.execute("SELECT campaign FROM leads WHERE id = ?", (lead_id,)).fetchone()
+                    current_val = current_camp["campaign"] if current_camp else ""
+                    if current_val != campaign_name:
+                        c.execute("UPDATE leads SET campaign = ? WHERE id = ?", (campaign_name, lead_id))
+                        c.commit()
+                        saved_count += 1
+                    c.close()
+                else:
+                    saved_count += 1
 
         CrawlJob.complete(job_uuid, saved_count)
         Keyword.track(keyword, location, saved_count)

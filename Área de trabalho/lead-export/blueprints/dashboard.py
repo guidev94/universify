@@ -192,12 +192,35 @@ def extract_campaign(camp_id):
     current_count = conn2.execute(
         "SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)
     ).fetchone()["c"]
-    conn2.close()
+
     remaining = camp["goal"] - current_count
     if remaining <= 0:
+        conn2.close()
         return jsonify({"error": "Meta já atingida!", "leads_count": current_count, "goal": camp["goal"]}), 400
-    quantity = min(30, remaining)
 
+    search_kw = keyword.split('|')[0].strip() if '|' in keyword else keyword
+    search = f"%{search_kw}%"
+    unassigned = conn2.execute("""
+        SELECT id FROM leads
+        WHERE (campaign = '' OR campaign IS NULL)
+        AND (category LIKE ? OR name LIKE ?)
+        AND (email != '' OR website != '')
+        ORDER BY score DESC LIMIT ?
+    """, (search, search, remaining)).fetchall()
+
+    assigned = 0
+    for row in unassigned:
+        conn2.execute("UPDATE leads SET campaign = ? WHERE id = ?", (camp["name"], row["id"]))
+        assigned += 1
+    if assigned > 0:
+        conn2.commit()
+    conn2.close()
+
+    remaining -= assigned
+    if remaining <= 0:
+        return jsonify({"ok": True, "assigned": assigned, "leads_count": current_count + assigned, "goal": camp["goal"], "message": "Meta atingida com leads existentes!"})
+
+    quantity = min(30, remaining)
     continuous = remaining > 30
 
     job_uuid = str(uuid.uuid4())

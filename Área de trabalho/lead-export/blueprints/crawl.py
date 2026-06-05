@@ -173,10 +173,15 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
                 if campaign_name:
                     from database import get_connection as gc
                     conn = gc()
-                    conn.execute("UPDATE leads SET campaign = ? WHERE id = ? AND (campaign = '' OR campaign IS NULL)", (campaign_name, lead_id))
-                    conn.commit()
+                    current_camp = conn.execute("SELECT campaign FROM leads WHERE id = ?", (lead_id,)).fetchone()
+                    current_val = current_camp["campaign"] if current_camp else ""
+                    if current_val != campaign_name:
+                        conn.execute("UPDATE leads SET campaign = ? WHERE id = ?", (campaign_name, lead_id))
+                        conn.commit()
+                        saved_count += 1
                     conn.close()
-                saved_count += 1
+                else:
+                    saved_count += 1
 
         CrawlJob.complete(job_uuid, saved_count)
         Keyword.track(query, location, saved_count)
