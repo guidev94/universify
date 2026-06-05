@@ -346,8 +346,22 @@ async function openDashLeadDetail(id) {
             ${lead.website ? `<a href="${lead.website}" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Website</span></a>` : '<span></span>'}
             <a href="/leads" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Ver na lista</span></a>
         </div>
+        <button onclick="deleteDashLead(${lead.id})" class="w-full mt-4 p-2.5 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/15 transition-all text-center">Excluir este lead</button>
     `;
     modal.classList.remove('hidden');
+}
+
+async function deleteDashLead(id) {
+    if (!await confirmModal('Excluir este lead permanentemente?', 'Excluir', true)) return;
+    try {
+        await api(`/api/leads/${id}`, { method: 'DELETE' });
+        showToast('Lead excluído', 'success');
+        closeDashLeadDetail();
+        loadStats();
+        loadActivityFeed();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
 }
 
 async function loadActivityFeed() {
