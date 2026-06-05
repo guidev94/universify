@@ -235,6 +235,11 @@ class Scheduler:
                 logger.warning(f"[scheduler] campanha '{camp['name']}' falhou: {e}")
 
     def _run_multi_source_crawl(self, keyword, location, campaign_name=None, quantity_override=None):
+        if '|' in keyword:
+            keyword = keyword.split('|')[0].strip()
+        if '|' in (location or ''):
+            location = location.split('|')[0].strip()
+
         job_uuid = str(uuid.uuid4())
         quantity = quantity_override or 30
         job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)

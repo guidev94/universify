@@ -71,6 +71,11 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
         leads = []
         progress_lock = threading.Lock()
 
+        if '|' in query:
+            query = query.split('|')[0].strip()
+        if '|' in location:
+            location = location.split('|')[0].strip()
+
         def on_progress(count):
             with progress_lock:
                 active_jobs[job_uuid]["progress"] = count
@@ -144,8 +149,14 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
 
         active_jobs[job_uuid]["status"] = "completed"
         active_jobs[job_uuid]["progress"] = saved_count
+        active_jobs[job_uuid]["total_found"] = len(leads)
 
-        logger.info(f"[crawl] '{query}' concluído — {saved_count} leads salvos de {len(leads)} brutos")
+        if saved_count == 0 and len(leads) > 0:
+            logger.info(f"[crawl] '{query}' — {len(leads)} brutos mas 0 novos (todos duplicados)")
+        elif saved_count == 0:
+            logger.warning(f"[crawl] '{query}' — nenhum lead encontrado nas fontes")
+        else:
+            logger.info(f"[crawl] '{query}' concluído — {saved_count} leads salvos de {len(leads)} brutos")
 
     except Exception as e:
         CrawlJob.fail(job_uuid, str(e))
@@ -169,6 +180,7 @@ def crawl_status(job_uuid):
             "progress": info["progress"],
             "total": info["total"],
             "sources": info.get("sources", {}),
+            "total_found": info.get("total_found", 0),
         })
 
     job = CrawlJob.get_by_uuid(job_uuid)
