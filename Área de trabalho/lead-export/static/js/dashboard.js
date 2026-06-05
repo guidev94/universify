@@ -1,5 +1,4 @@
 let leadsChart = null;
-let tierChart = null;
 let statValues = {};
 let isFirstLoad = true;
 let tierModalPage = 1;
@@ -103,33 +102,7 @@ async function loadCharts() {
             }
         });
 
-        const ctxDoughnut = document.getElementById('tierChart').getContext('2d');
-        if (tierChart) tierChart.destroy();
-
-        const tiers = data.tiers || {};
-        tierChart = new Chart(ctxDoughnut, {
-            type: 'doughnut',
-            data: {
-                labels: ['Quente', 'Morno', 'Frio'],
-                datasets: [{
-                    data: [tiers.hot || 0, tiers.warm || 0, tiers.cold || 0],
-                    backgroundColor: ['#f59e0b', '#f97316', '#475569'],
-                    borderWidth: 0,
-                    hoverOffset: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: '#94a3b8', font: { size: 11 }, padding: 16 }
-                    }
-                }
-            }
-        });
+        // Activity feed is loaded separately (no doughnut chart)
 
         // Fontes badges
         if (data.sources) {
@@ -377,10 +350,72 @@ async function openDashLeadDetail(id) {
     modal.classList.remove('hidden');
 }
 
+async function loadActivityFeed() {
+    try {
+        const data = await api('/api/dashboard/activity');
+        const container = document.getElementById('activityFeed');
+        if (!data.feed || data.feed.length === 0) {
+            container.innerHTML = '<p class="text-[11px] text-zinc-600 text-center py-6">Nenhuma atividade ainda</p>';
+            return;
+        }
+
+        container.innerHTML = data.feed.map(item => {
+            const timeAgo = getTimeAgo(item.at);
+
+            if (item.type === 'job') {
+                return `<div class="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/[0.03] border border-amber-500/10">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] text-zinc-200 truncate">Extraindo: <span class="text-amber-400 font-medium">${escapeHtml(item.keyword)}</span></p>
+                        <p class="text-[9px] text-zinc-500">${item.found}/${item.total} leads</p>
+                    </div>
+                    <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
+                </div>`;
+            }
+
+            if (item.type === 'activity') {
+                const actionLabel = (item.action || '').replace(/_/g, ' ');
+                return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] text-zinc-300 truncate">${escapeHtml(actionLabel)}: <span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
+                        ${item.details ? `<p class="text-[9px] text-zinc-500 truncate">${escapeHtml(item.details)}</p>` : ''}
+                    </div>
+                    <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
+                </div>`;
+            }
+
+            const tierDot = { hot: 'bg-amber-400', warm: 'bg-orange-400', cold: 'bg-zinc-500' };
+            return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors cursor-pointer" onclick="openTierModal('${item.tier || 'all'}')">
+                <span class="w-2 h-2 rounded-full ${tierDot[item.tier] || 'bg-emerald-400'} shrink-0"></span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[11px] text-zinc-300 truncate"><span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
+                    <p class="text-[9px] text-zinc-500">${item.source || '—'}</p>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${item.tier === 'hot' ? 'text-amber-400 bg-amber-500/10' : item.tier === 'warm' ? 'text-orange-400 bg-orange-500/10' : 'text-zinc-400 bg-zinc-500/10'}">${(item.tier || '').toUpperCase()}</span>
+                <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
+            </div>`;
+        }).join('');
+    } catch (e) {}
+}
+
+function getTimeAgo(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const date = new Date(dateStr.replace(' ', 'T'));
+    const diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return Math.floor(diff / 60) + 'min';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+    return Math.floor(diff / 86400) + 'd';
+}
+
 loadStats();
 loadCharts();
 loadRecentJobs();
 loadSchedulerStatus();
+loadActivityFeed();
 
 setInterval(() => { loadStats(); loadRecentJobs(); loadCharts(); }, 30000);
 setInterval(loadSchedulerStatus, 15000);
+setInterval(loadActivityFeed, 10000);

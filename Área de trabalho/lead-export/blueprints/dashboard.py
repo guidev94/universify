@@ -262,6 +262,36 @@ def extract_campaign(camp_id):
     return jsonify({"job_id": job_uuid, "quantity": quantity, "total_remaining": remaining, "continuous": continuous})
 
 
+@bp.route("/api/dashboard/activity")
+def dashboard_activity():
+    conn = get_connection()
+    new_leads = conn.execute(
+        "SELECT id, name, tier, source, created_at FROM leads ORDER BY created_at DESC LIMIT 10"
+    ).fetchall()
+    activities = conn.execute(
+        "SELECT l.name, a.action, a.details, a.created_at FROM lead_activities a "
+        "JOIN leads l ON l.id = a.lead_id ORDER BY a.created_at DESC LIMIT 5"
+    ).fetchall()
+    running = conn.execute(
+        "SELECT keyword, quantity_found, quantity_requested, started_at FROM crawl_jobs "
+        "WHERE status = 'running' ORDER BY started_at DESC LIMIT 3"
+    ).fetchall()
+    conn.close()
+
+    feed = []
+    for l in new_leads:
+        feed.append({"type": "lead", "name": dict(l)["name"], "tier": dict(l)["tier"], "source": dict(l)["source"], "at": dict(l)["created_at"]})
+    for a in activities:
+        a = dict(a)
+        feed.append({"type": "activity", "name": a["name"], "action": a["action"], "details": a["details"], "at": a["created_at"]})
+    for j in running:
+        j = dict(j)
+        feed.append({"type": "job", "keyword": j["keyword"], "found": j["quantity_found"], "total": j["quantity_requested"], "at": j["started_at"]})
+
+    feed.sort(key=lambda x: x.get("at") or "", reverse=True)
+    return jsonify({"feed": feed[:15]})
+
+
 @bp.route("/api/system/health")
 def system_health():
     from scheduler import scheduler

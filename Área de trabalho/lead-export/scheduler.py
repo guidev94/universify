@@ -80,6 +80,7 @@ class Scheduler:
 
     def _run_loop(self):
         time.sleep(5)
+        last_decay = time.time()
 
         while self.running:
             now = time.time()
@@ -103,7 +104,33 @@ class Scheduler:
                     logger.error(f"[scheduler] erro no auto-crawl: {e}")
                     self.last_error = str(e)
 
+            if now - last_decay >= 21600:
+                try:
+                    self._decay_scores()
+                    last_decay = time.time()
+                except Exception as e:
+                    logger.warning(f"[scheduler] erro no score decay: {e}")
+
             time.sleep(60)
+
+    def _decay_scores(self):
+        from database import get_connection
+        conn = get_connection()
+        affected = conn.execute("""
+            UPDATE leads SET
+                score = MAX(10, score - 5),
+                tier = CASE
+                    WHEN MAX(10, score - 5) >= 80 THEN 'hot'
+                    WHEN MAX(10, score - 5) >= 50 THEN 'warm'
+                    ELSE 'cold' END
+            WHERE status = 'new'
+            AND created_at < datetime('now', '-30 days', 'localtime')
+            AND contacted_at IS NULL
+        """)
+        if affected.rowcount > 0:
+            logger.info(f"[scheduler] score decay: {affected.rowcount} leads rebaixados")
+        conn.commit()
+        conn.close()
 
     def _cleanup_stuck_jobs(self):
         from database import get_connection
