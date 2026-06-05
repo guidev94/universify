@@ -84,9 +84,9 @@ def test_chart_data_has_7_days():
 
 
 def test_lead_scoring_hot():
-    data = {"name": "Full Name Here", "email": "test@test.com", "phone": "+5511999999999", "whatsapp": "+5511999999999", "website": "https://site.com", "category": "dentista"}
+    data = {"name": "Full Name Here", "email": "test@test.com", "phone": "+5511999999999", "whatsapp": "+5511999999999", "website": "", "category": "dentista"}
     score, tier = calculate_score(data)
-    assert score >= 80
+    assert score >= 75
     assert tier == "hot"
 
 

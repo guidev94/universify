@@ -225,14 +225,15 @@ class Scheduler:
     def _auto_crawl(self):
         self._crawl_campaigns()
 
-        keywords = Keyword.get_for_autocrawl(limit=7)
+        keywords = Keyword.get_for_autocrawl(limit=5)
         if not keywords:
             logger.info("[scheduler] nenhuma keyword para auto-crawl")
             return
 
-        logger.info(f"[scheduler] auto-crawl iniciado — {len(keywords)} keywords")
+        expanded = self._expand_keywords(keywords)
+        logger.info(f"[scheduler] auto-crawl iniciado — {len(expanded)} keywords (expandidas de {len(keywords)})")
 
-        for kw in keywords:
+        for kw in expanded:
             self.total_runs += 1
             retries = 0
             max_retries = 3
@@ -293,6 +294,18 @@ class Scheduler:
                 logger.info(f"[scheduler] campanha '{camp['name']}': +{count} leads novos")
             except Exception as e:
                 logger.warning(f"[scheduler] campanha '{camp['name']}' falhou: {e}")
+
+    def _expand_keywords(self, keywords):
+        bairros = ["centro", "zona norte", "zona sul", "zona leste", "zona oeste"]
+        expanded = []
+        for kw in keywords:
+            expanded.append(kw)
+            base = kw["keyword"].split("|")[0].strip()
+            loc = kw.get("location", "").split("|")[0].strip()
+            if loc:
+                bairro = bairros[len(expanded) % len(bairros)]
+                expanded.append({"keyword": f"{base} {bairro}", "location": loc})
+        return expanded[:10]
 
     def _assign_existing_leads(self, campaign_name, keyword, location, limit):
         from database import get_connection

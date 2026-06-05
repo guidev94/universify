@@ -13,7 +13,12 @@ BLOCKED_DOMAINS = {
     "folha.uol.com.br", "globo.com", "uol.com.br", "terra.com.br",
     "reclameaqui.com.br", "jusbrasil.com.br",
     "mercadolivre.com.br", "olx.com.br", "amazon.com.br",
+    "amazon.com", "ebay.com", "alibaba.com",
+    "yelp.com", "tripadvisor.com", "booking.com",
 }
+
+BR_TLDS = (".com.br", ".org.br", ".net.br", ".ind.br", ".srv.br")
+BR_PHONE_PREFIX = ("+55", "55")
 
 BLOCKED_PATTERNS = (".gov.", ".gov/", "prefeitura", "tribunal", "receita.fazenda")
 
@@ -62,6 +67,9 @@ def validate_lead(lead):
         if not phone:
             return None
 
+    if not _is_brazilian(website, phone, email):
+        return None
+
     return {
         "name": name,
         "email": email,
@@ -77,6 +85,28 @@ def _is_blocked_email(email):
     domain = email.split("@")[-1].lower() if "@" in email else ""
     if any(domain.endswith(b) for b in (".gov.br", ".jus.br", ".mil.br", ".leg.br")):
         return True
+    return False
+
+
+def _is_brazilian(website, phone, email):
+    if phone:
+        digits = re.sub(r"\D", "", phone)
+        if digits.startswith("55") or (10 <= len(digits) <= 11):
+            return True
+
+    if website:
+        site_lower = website.lower()
+        if any(site_lower.endswith(tld) or f"{tld}/" in site_lower for tld in BR_TLDS):
+            return True
+
+    if email:
+        domain = email.split("@")[-1].lower()
+        if any(domain.endswith(tld) for tld in BR_TLDS):
+            return True
+
+    if phone or email:
+        return True
+
     return False
 
 

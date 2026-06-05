@@ -33,10 +33,15 @@ class SiteVerifier:
 
     def _verify_single(self, lead):
         from models import Lead
+        from database import get_connection
 
         url = lead["website"]
         site_ok = self._check_http(url)
         ssl_ok = self._check_ssl(url) if site_ok else False
+        quality = self._check_quality(url) if site_ok else "poor"
+
+        if not site_ok:
+            quality = "poor"
 
         lead_data = Lead.get_by_id(lead["id"])
         if not lead_data:
@@ -54,6 +59,36 @@ class SiteVerifier:
             new_score=score,
             new_tier=tier,
         )
+
+        conn = get_connection()
+        conn.execute("UPDATE leads SET site_quality = ? WHERE id = ?", (quality, lead["id"]))
+        conn.commit()
+        conn.close()
+
+    def _check_quality(self, url):
+        try:
+            if not url.startswith(("http://", "https://")):
+                url = "https://" + url
+            response = requests.get(url, timeout=8, allow_redirects=True)
+            html = response.text[:5000].lower()
+
+            issues = 0
+            if 'viewport' not in html:
+                issues += 1
+            if not response.url.startswith("https"):
+                issues += 1
+            if 'wordpress' in html and ('flavor' in html or 'flavor' in response.headers.get('x-powered-by', '').lower()):
+                issues += 1
+            if response.elapsed.total_seconds() > 4:
+                issues += 1
+            if len(html) < 500:
+                issues += 1
+
+            if issues >= 2:
+                return "poor"
+            return "good"
+        except Exception:
+            return "poor"
 
     def _check_http(self, url):
         try:

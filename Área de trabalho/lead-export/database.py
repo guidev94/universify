@@ -90,6 +90,7 @@ def _migrate(cursor):
         ("next_action_at", "ALTER TABLE leads ADD COLUMN next_action_at TEXT"),
         ("instagram", "ALTER TABLE leads ADD COLUMN instagram TEXT DEFAULT ''"),
         ("facebook", "ALTER TABLE leads ADD COLUMN facebook TEXT DEFAULT ''"),
+        ("site_quality", "ALTER TABLE leads ADD COLUMN site_quality TEXT DEFAULT ''"),
     ]
 
     for col, sql in migrations:

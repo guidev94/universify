@@ -163,7 +163,7 @@ class MapsCrawler:
             if cat_els:
                 category = cat_els[0].text.strip()
 
-            if not name or (not phone and not website):
+            if not name or not phone:
                 return None
 
             email = ""

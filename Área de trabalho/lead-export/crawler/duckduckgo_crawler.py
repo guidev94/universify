@@ -51,7 +51,12 @@ class DuckDuckGoCrawler:
 
     def _search(self, query, num_results):
         urls = []
-        search_query = f"{query} contato email telefone"
+        queries = [
+            f"{query} contato telefone whatsapp",
+            f"{query} endereço telefone",
+            f"{query} instagram whatsapp",
+        ]
+        search_query = queries[hash(query) % len(queries)]
 
         for page in range(min(5, (num_results // 10) + 1)):
             self.session.headers["User-Agent"] = self.ua.random

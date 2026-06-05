@@ -47,7 +47,12 @@ class BingCrawler:
 
     def _search_bing(self, query, num_results):
         urls = []
-        search_query = f"{query} contato email telefone site"
+        queries = [
+            f"{query} contato telefone whatsapp",
+            f"{query} endereço telefone comercial",
+            f"{query} instagram telefone",
+        ]
+        search_query = queries[hash(query) % len(queries)]
         page = 0
 
         while len(urls) < num_results and page < 5:
