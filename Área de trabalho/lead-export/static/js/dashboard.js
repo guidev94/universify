@@ -318,7 +318,7 @@ async function openDashLeadDetail(id) {
                     <h3 class="text-[16px] font-bold text-zinc-100 truncate">${escapeHtml(lead.name)}</h3>
                     <p class="text-[11px] text-zinc-400 mt-0.5">${lead.category || 'Sem categoria'} · ${lead.source || ''}</p>
                     <div class="flex items-center gap-2 mt-2">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${lead.tier === 'hot' ? 'bg-amber-500/20 text-amber-400' : lead.tier === 'warm' ? 'bg-orange-500/20 text-orange-400' : 'bg-zinc-500/20 text-zinc-400'}">${(lead.tier || 'cold').toUpperCase()}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${lead.tier === 'hot' ? 'bg-amber-500/20 text-amber-400' : lead.tier === 'warm' ? 'bg-orange-500/20 text-orange-400' : 'bg-zinc-500/20 text-zinc-400'}">${{hot:'QUENTE',warm:'MORNO',cold:'FRIO'}[lead.tier] || 'FRIO'}</span>
                         ${lead.site_verified ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Verificado</span>' : ''}
                     </div>
                 </div>
@@ -392,7 +392,7 @@ async function loadActivityFeed() {
                     <p class="text-[11px] text-zinc-300 truncate"><span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
                     <p class="text-[9px] text-zinc-500">${item.source || '—'}</p>
                 </div>
-                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${item.tier === 'hot' ? 'text-amber-400 bg-amber-500/10' : item.tier === 'warm' ? 'text-orange-400 bg-orange-500/10' : 'text-zinc-400 bg-zinc-500/10'}">${(item.tier || '').toUpperCase()}</span>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${item.tier === 'hot' ? 'text-amber-400 bg-amber-500/10' : item.tier === 'warm' ? 'text-orange-400 bg-orange-500/10' : 'text-zinc-400 bg-zinc-500/10'}">${{hot:'QUENTE',warm:'MORNO',cold:'FRIO'}[item.tier] || ''}</span>
                 <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
             </div>`;
         }).join('');
