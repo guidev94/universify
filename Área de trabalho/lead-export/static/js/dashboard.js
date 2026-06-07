@@ -378,11 +378,17 @@ async function loadActivityFeed() {
             const timeAgo = getTimeAgo(item.at);
 
             if (item.type === 'job') {
-                return `<div class="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/[0.03] border border-amber-500/10">
+                const pct = item.total > 0 ? Math.round((item.found / item.total) * 100) : 0;
+                return `<div class="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/[0.03] border border-amber-500/10" data-job-uuid="${item.uuid || ''}">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
                     <div class="flex-1 min-w-0">
                         <p class="text-[11px] text-zinc-200 truncate">Extraindo: <span class="text-amber-400 font-medium">${escapeHtml(item.keyword)}</span></p>
-                        <p class="text-[9px] text-zinc-500">${item.found}/${item.total} leads</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <div class="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-700" style="width: ${pct}%"></div>
+                            </div>
+                            <span class="text-[9px] text-zinc-400 font-mono job-progress-text">${item.found}/${item.total}</span>
+                        </div>
                     </div>
                     <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
                 </div>`;
@@ -453,6 +459,20 @@ if (typeof events !== 'undefined') {
         loadActivityFeed();
     });
 
+    events.on('job_progress', (data) => {
+        if (!data || !data.uuid) return;
+        const el = document.querySelector(`[data-job-uuid="${data.uuid}"]`);
+        if (el) {
+            const pct = data.total > 0 ? Math.round((data.progress / data.total) * 100) : 0;
+            const bar = el.querySelector('.h-1 > div');
+            const txt = el.querySelector('.job-progress-text');
+            if (bar) bar.style.width = `${pct}%`;
+            if (txt) txt.textContent = `${data.progress}/${data.total}`;
+        } else {
+            loadActivityFeed();
+        }
+    });
+
     events.on('job_completed', (data) => {
         loadStats();
         loadRecentJobs();
@@ -464,6 +484,7 @@ if (typeof events !== 'undefined') {
 
     events.on('job_error', (data) => {
         loadRecentJobs();
+        loadActivityFeed();
         if (data && data.keyword) {
             showToast(`Erro na extração "${data.keyword}"`, 'error');
         }
@@ -478,7 +499,7 @@ if (typeof events !== 'undefined') {
     events.on('pipeline_enrich', () => loadStats());
 }
 
-// Fallback polling (longer intervals since SSE handles real-time)
+// Fallback polling (SSE handles real-time, these are safety nets)
 setInterval(() => { loadStats(); loadRecentJobs(); loadCharts(); }, 60000);
 setInterval(loadSchedulerStatus, 30000);
-setInterval(loadActivityFeed, 30000);
+setInterval(loadActivityFeed, 15000);

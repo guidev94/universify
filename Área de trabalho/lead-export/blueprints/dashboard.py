@@ -337,6 +337,8 @@ def extract_campaign(camp_id):
 
 @bp.route("/api/dashboard/activity")
 def dashboard_activity():
+    from job_manager import job_manager
+
     conn = get_connection()
     new_leads = conn.execute(
         "SELECT id, name, tier, source, created_at FROM leads ORDER BY created_at DESC LIMIT 10"
@@ -346,8 +348,8 @@ def dashboard_activity():
         "JOIN leads l ON l.id = a.lead_id ORDER BY a.created_at DESC LIMIT 5"
     ).fetchall()
     running = conn.execute(
-        "SELECT keyword, quantity_found, quantity_requested, started_at FROM crawl_jobs "
-        "WHERE status = 'running' ORDER BY started_at DESC LIMIT 3"
+        "SELECT job_uuid, keyword, progress, quantity_found, quantity_requested, started_at FROM crawl_jobs "
+        "WHERE status = 'running' ORDER BY started_at DESC LIMIT 5"
     ).fetchall()
     conn.close()
 
@@ -359,7 +361,9 @@ def dashboard_activity():
         feed.append({"type": "activity", "name": a["name"], "action": a["action"], "details": a["details"], "at": a["created_at"]})
     for j in running:
         j = dict(j)
-        feed.append({"type": "job", "keyword": j["keyword"], "found": j["quantity_found"], "total": j["quantity_requested"], "at": j["started_at"]})
+        state = job_manager.get(j["job_uuid"])
+        found = state.get("progress", 0) if state else (j["progress"] or j["quantity_found"] or 0)
+        feed.append({"type": "job", "keyword": j["keyword"], "found": found, "total": j["quantity_requested"], "at": j["started_at"], "uuid": j["job_uuid"]})
 
     feed.sort(key=lambda x: x.get("at") or "", reverse=True)
     return jsonify({"feed": feed[:15]})
