@@ -1,6 +1,7 @@
 let currentPage = 1;
 let selectedIds = new Set();
 let debounceTimer = null;
+let activePills = { has_email: false, has_phone: false, has_website: false };
 
 function getFilters() {
     return {
@@ -11,8 +12,45 @@ function getFilters() {
         category: document.getElementById('filterCategory').value,
         sort: document.getElementById('sortBy').value,
         verified: document.getElementById('filterVerified').checked,
-        scoreRange: document.getElementById('filterScore') ? document.getElementById('filterScore').value : '',
+        days: document.getElementById('filterDays') ? document.getElementById('filterDays').value : '',
+        has_email: activePills.has_email,
+        has_phone: activePills.has_phone,
+        has_website: activePills.has_website,
     };
+}
+
+function togglePill(btn, key) {
+    activePills[key] = !activePills[key];
+    if (activePills[key]) {
+        btn.classList.add('!border-blue-500/40', '!text-blue-400', '!bg-blue-500/10');
+    } else {
+        btn.classList.remove('!border-blue-500/40', '!text-blue-400', '!bg-blue-500/10');
+    }
+    loadLeads(1);
+}
+
+function applyPreset(preset) {
+    // Reset all filters first
+    document.getElementById('filterTier').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterSource').value = '';
+    document.getElementById('filterDays').value = '';
+    document.getElementById('filterVerified').checked = false;
+    activePills = { has_email: false, has_phone: false, has_website: false };
+    document.querySelectorAll('.filter-pill[data-filter]').forEach(b => b.classList.remove('!border-blue-500/40', '!text-blue-400', '!bg-blue-500/10'));
+
+    if (preset === 'hot_new') {
+        document.getElementById('filterTier').value = 'hot';
+        document.getElementById('filterStatus').value = 'new';
+    } else if (preset === 'this_week') {
+        document.getElementById('filterDays').value = '7';
+    } else if (preset === 'no_contact') {
+        document.getElementById('filterStatus').value = 'new';
+        activePills.has_phone = true;
+        const btn = document.querySelector('[data-filter="has_phone"]');
+        if (btn) btn.classList.add('!border-blue-500/40', '!text-blue-400', '!bg-blue-500/10');
+    }
+    loadLeads(1);
 }
 
 async function loadLeads(page = 1) {
@@ -33,11 +71,10 @@ async function loadLeads(page = 1) {
     if (filters.category) params.set('category', filters.category);
     if (filters.verified) params.set('verified', '1');
     if (filters.sort === 'name') params.set('order', 'asc');
-    if (filters.scoreRange) {
-        const [min, max] = filters.scoreRange.split('-');
-        if (min) params.set('score_min', min);
-        if (max) params.set('score_max', max);
-    }
+    if (filters.days) params.set('created_days', filters.days);
+    if (filters.has_email) params.set('has_email', '1');
+    if (filters.has_phone) params.set('has_phone', '1');
+    if (filters.has_website) params.set('has_website', '1');
 
     try {
         const data = await api(`/api/leads?${params}`);
@@ -208,8 +245,9 @@ document.getElementById('selectAll').addEventListener('change', function() {
     });
 });
 
-['filterTier', 'filterStatus', 'filterSource', 'filterCategory', 'sortBy'].forEach(id => {
-    document.getElementById(id).addEventListener('change', () => loadLeads(1));
+['filterTier', 'filterStatus', 'filterSource', 'filterCategory', 'sortBy', 'filterDays'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => loadLeads(1));
 });
 
 async function loadCategories() {
@@ -633,10 +671,6 @@ async function bulkDeleteByScore() {
     }
 }
 
-// Score filter change listener
-if (document.getElementById('filterScore')) {
-    document.getElementById('filterScore').addEventListener('change', () => loadLeads(1));
-}
 
 // SSE real-time updates
 if (typeof events !== 'undefined') {

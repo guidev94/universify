@@ -24,6 +24,10 @@ def list_leads():
     order = request.args.get("order", "desc")
     score_min = request.args.get("score_min", type=int)
     score_max = request.args.get("score_max", type=int)
+    has_email = bool(request.args.get("has_email", "").strip())
+    has_phone = bool(request.args.get("has_phone", "").strip())
+    has_website = bool(request.args.get("has_website", "").strip())
+    created_days = request.args.get("created_days", type=int)
 
     per_page = min(per_page, 100)
 
@@ -34,6 +38,8 @@ def list_leads():
         status=status, source=source, search=search,
         sort=sort, order=order, only_verified=bool(only_verified),
         category=category, score_min=score_min, score_max=score_max,
+        has_email=has_email, has_phone=has_phone, has_website=has_website,
+        created_days=created_days,
     )
 
     return jsonify({

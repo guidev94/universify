@@ -133,7 +133,7 @@ class Lead:
         return removed
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, created_days=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -151,8 +151,8 @@ class Lead:
             conditions.append("category LIKE ?")
             params.append(f"%{category}%")
         if search:
-            conditions.append("(name LIKE ? OR email LIKE ? OR category LIKE ?)")
-            params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+            conditions.append("(name LIKE ? OR email LIKE ? OR category LIKE ? OR phone LIKE ? OR website LIKE ? OR whatsapp LIKE ? OR notes LIKE ?)")
+            params.extend([f"%{search}%"] * 7)
         if only_verified:
             conditions.append("site_verified = 1 AND website != ''")
         if score_min is not None:
@@ -161,6 +161,15 @@ class Lead:
         if score_max is not None:
             conditions.append("score <= ?")
             params.append(score_max)
+        if has_email:
+            conditions.append("email != ''")
+        if has_phone:
+            conditions.append("phone != ''")
+        if has_website:
+            conditions.append("website != ''")
+        if created_days is not None:
+            conditions.append("created_at >= datetime('now', ? || ' days', 'localtime')")
+            params.append(f"-{int(created_days)}")
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
