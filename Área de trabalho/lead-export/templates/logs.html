@@ -66,6 +66,9 @@
                 <button onclick="cleanupStuck()" class="btn-ghost !py-1 !px-2 text-[10px] !border-orange-500/20 hover:!bg-orange-500/10" title="Limpar jobs travados" aria-label="Limpar jobs travados">
                     <span class="text-orange-400">Limpar Stuck</span>
                 </button>
+                <button onclick="clearAllLogs()" class="btn-ghost !py-1 !px-2 text-[10px] !border-red-500/20 hover:!bg-red-500/10" title="Limpar todos os logs" aria-label="Limpar todos os logs">
+                    <span class="text-red-400">Limpar Todos</span>
+                </button>
                 <button onclick="loadLogs(logsPage)" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Atualizar">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-zinc-500"></i>
                 </button>
@@ -242,6 +245,17 @@ async function deleteLog(id) {
         loadLogs(logsPage);
     } catch (e) {
         showToast(e.message, 'error');
+    }
+}
+
+async function clearAllLogs() {
+    if (!await confirmModal('Limpar TODOS os logs de extração? Esta ação não pode ser desfeita.', 'Limpar Todos', true)) return;
+    try {
+        const data = await api('/api/crawl/jobs/clear-all', { method: 'POST' });
+        showToast(`${data.deleted} logs removidos`, 'success');
+        loadLogs(1);
+    } catch (e) {
+        showToast(e.message || 'Erro ao limpar logs', 'error');
     }
 }
 

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% set active_page = "status" %}
+
+{% block title %}Sistema — LeadHunter{% endblock %}
+{% block page_title %}Sistema{% endblock %}
+{% block page_subtitle %}Status do servidor, crawler e pipeline{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+
+    <!-- Health Overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 fade-up">
+        <div class="glass-card p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <i data-lucide="server" class="w-5 h-5 text-emerald-400 stroke-[1.5]"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-semibold text-zinc-100">Servidor</p>
+                    <p class="text-[10px] text-zinc-500">Flask · Python 3.12</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot"></span>
+                <span class="text-[12px] text-emerald-400 font-semibold">Online</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <i data-lucide="radar" class="w-5 h-5 text-blue-400 stroke-[1.5]"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-semibold text-zinc-100">Scheduler</p>
+                    <p class="text-[10px] text-zinc-500" id="schedulerStatusLabel">Verificando...</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full" id="schedulerDotStatus"></span>
+                <span class="text-[12px] font-semibold" id="schedulerOnOff">—</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                    <i data-lucide="git-branch" class="w-5 h-5 text-violet-400 stroke-[1.5]"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-semibold text-zinc-100">Pipeline</p>
+                    <p class="text-[10px] text-zinc-500" id="pipelineStatusLabel">Verificando...</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full" id="pipelineDotStatus"></span>
+                <span class="text-[12px] font-semibold" id="pipelineOnOff">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 fade-up fade-up-delay-1">
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <p class="text-[9px] text-zinc-600 uppercase tracking-wide font-bold">Leads Total</p>
+            <p class="text-2xl font-bold text-zinc-100 mt-1" id="sysStatTotal">—</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <p class="text-[9px] text-zinc-600 uppercase tracking-wide font-bold">Receita</p>
+            <p class="text-2xl font-bold text-emerald-400 mt-1" id="sysStatRevenue">—</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <p class="text-[9px] text-zinc-600 uppercase tracking-wide font-bold">Taxa Sucesso</p>
+            <p class="text-2xl font-bold text-blue-400 mt-1" id="sysStatRate">—</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <p class="text-[9px] text-zinc-600 uppercase tracking-wide font-bold">Total Execuções</p>
+            <p class="text-2xl font-bold text-zinc-100 mt-1" id="sysStatRuns">—</p>
+        </div>
+    </div>
+
+    <!-- Scheduler Details -->
+    <div class="glass-card p-6 fade-up fade-up-delay-2">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="icon-box bg-zinc-800/80">
+                <i data-lucide="clock" class="w-[18px] h-[18px] text-zinc-400 stroke-[1.5]"></i>
+            </div>
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Agendamentos</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Intervalos e próximas execuções</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-blue-400 stroke-[1.5]"></i>
+                    <p class="text-[11px] text-zinc-300 font-medium">Auto-Crawl</p>
+                </div>
+                <p class="text-[10px] text-zinc-500">Intervalo: <span class="text-zinc-200 font-semibold">3 horas</span></p>
+                <p class="text-[10px] text-zinc-500 mt-1">Próximo: <span class="text-blue-400 font-semibold" id="sysNextCrawl">—</span></p>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400 stroke-[1.5]"></i>
+                    <p class="text-[11px] text-zinc-300 font-medium">Verificação de Sites</p>
+                </div>
+                <p class="text-[10px] text-zinc-500">Intervalo: <span class="text-zinc-200 font-semibold">1 hora</span></p>
+                <p class="text-[10px] text-zinc-500 mt-1">Próximo: <span class="text-emerald-400 font-semibold" id="sysNextVerify">—</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline Status -->
+    <div class="glass-card p-6 fade-up fade-up-delay-3">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="icon-box bg-zinc-800/80">
+                <i data-lucide="workflow" class="w-[18px] h-[18px] text-zinc-400 stroke-[1.5]"></i>
+            </div>
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Pipeline de Enriquecimento</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Verificação e enriquecimento automático</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <p class="text-[10px] text-zinc-500 mb-1">Pendente verificação</p>
+                <p class="text-lg font-bold text-zinc-100" id="sysPipelineVerify">—</p>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <p class="text-[10px] text-zinc-500 mb-1">Pendente enriquecimento</p>
+                <p class="text-lg font-bold text-zinc-100" id="sysPipelineEnrich">—</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sources -->
+    <div class="glass-card p-6 fade-up fade-up-delay-4">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="icon-box bg-zinc-800/80">
+                <i data-lucide="globe" class="w-[18px] h-[18px] text-zinc-400 stroke-[1.5]"></i>
+            </div>
+            <div>
+                <h3 class="text-[13px] font-semibold text-zinc-200">Fontes de Extração</h3>
+                <p class="text-[10px] text-zinc-600 mt-0.5">Crawlers ativos no sistema</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">DuckDuckGo Search</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">Bing Search</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">Google Maps (Selenium)</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">Telelistas + GuiaMais</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">Nicho (Doctoralia, TripAdvisor...)</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-blue-400 glow-dot shrink-0"></span>
+                <span class="text-[12px] text-zinc-300">Google Search (fallback)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last Error -->
+    <div class="glass-card-static p-4 fade-up" id="lastErrorCard" style="display:none">
+        <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 stroke-[1.5]"></i>
+            <p class="text-[11px] text-amber-400 font-semibold">Último Erro</p>
+        </div>
+        <p class="text-[11px] text-zinc-400 font-mono" id="lastErrorText"></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+lucide.createIcons();
+
+async function loadSystemStatus() {
+    try {
+        const [health, stats] = await Promise.all([
+            api('/api/system/health'),
+            api('/api/dashboard/stats')
+        ]);
+
+        // Scheduler status
+        const schedulerDot = document.getElementById('schedulerDotStatus');
+        const schedulerOnOff = document.getElementById('schedulerOnOff');
+        const schedulerLabel = document.getElementById('schedulerStatusLabel');
+        if (health.running) {
+            schedulerDot.className = 'w-2 h-2 rounded-full bg-emerald-400 glow-dot';
+            schedulerOnOff.textContent = 'Ativo';
+            schedulerOnOff.className = 'text-[12px] font-semibold text-emerald-400';
+            schedulerLabel.textContent = `${health.total_runs} execuções`;
+        } else {
+            schedulerDot.className = 'w-2 h-2 rounded-full bg-red-400';
+            schedulerOnOff.textContent = 'Parado';
+            schedulerOnOff.className = 'text-[12px] font-semibold text-red-400';
+            schedulerLabel.textContent = 'Inativo';
+        }
+
+        // Pipeline status
+        const pipelineDot = document.getElementById('pipelineDotStatus');
+        const pipelineOnOff = document.getElementById('pipelineOnOff');
+        const pipelineLabel = document.getElementById('pipelineStatusLabel');
+        if (health.pipeline && health.pipeline.running) {
+            pipelineDot.className = 'w-2 h-2 rounded-full bg-emerald-400 glow-dot';
+            pipelineOnOff.textContent = 'Ativo';
+            pipelineOnOff.className = 'text-[12px] font-semibold text-emerald-400';
+            pipelineLabel.textContent = 'Processando em background';
+        } else {
+            pipelineDot.className = 'w-2 h-2 rounded-full bg-zinc-500';
+            pipelineOnOff.textContent = 'Inativo';
+            pipelineOnOff.className = 'text-[12px] font-semibold text-zinc-400';
+            pipelineLabel.textContent = 'Parado';
+        }
+
+        // Stats
+        document.getElementById('sysStatTotal').textContent = stats.total.toLocaleString('pt-BR');
+        document.getElementById('sysStatRevenue').textContent = `R$ ${stats.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 0})}`;
+        document.getElementById('sysStatRate').textContent = `${health.success_rate}%`;
+        document.getElementById('sysStatRuns').textContent = health.total_runs.toLocaleString('pt-BR');
+
+        // Next timers
+        const fmtTime = (seconds) => {
+            if (seconds <= 0) return 'Agora';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return h > 0 ? `${h}h ${m}min` : `${m}min`;
+        };
+        document.getElementById('sysNextCrawl').textContent = fmtTime(health.next_crawl_in);
+        document.getElementById('sysNextVerify').textContent = fmtTime(health.next_verify_in);
+
+        // Pipeline pending
+        if (health.pipeline) {
+            document.getElementById('sysPipelineVerify').textContent = (health.pipeline.verify_pending || 0).toLocaleString('pt-BR');
+            document.getElementById('sysPipelineEnrich').textContent = (health.pipeline.enrich_pending || 0).toLocaleString('pt-BR');
+        }
+
+        // Last error
+        if (health.last_error) {
+            document.getElementById('lastErrorCard').style.display = 'block';
+            document.getElementById('lastErrorText').textContent = health.last_error;
+        }
+    } catch (e) {
+        console.error('Erro ao carregar status:', e);
+    }
+}
+
+loadSystemStatus();
+setInterval(loadSystemStatus, 15000);
+</script>
+{% endblock %}

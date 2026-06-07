@@ -133,7 +133,7 @@ class Lead:
         return removed
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, created_days=None):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -167,6 +167,8 @@ class Lead:
             conditions.append("phone != ''")
         if has_website:
             conditions.append("website != ''")
+        if has_whatsapp:
+            conditions.append("whatsapp != ''")
         if created_days is not None:
             conditions.append("created_at >= datetime('now', ? || ' days', 'localtime')")
             params.append(f"-{int(created_days)}")
@@ -218,16 +220,26 @@ class Lead:
 
     @staticmethod
     def close_deal(lead_id, value, notes=""):
-        conn = get_connection()
-        conn.execute(
-            """UPDATE leads SET status = 'closed_won', deal_value = ?, deal_notes = ?,
-               closed_at = datetime('now', 'localtime'), updated_at = datetime('now', 'localtime')
-               WHERE id = ?""",
-            (value, notes, lead_id),
-        )
-        conn.commit()
-        conn.close()
-        return True
+        import time
+        for attempt in range(5):
+            conn = get_connection()
+            try:
+                conn.execute(
+                    """UPDATE leads SET status = 'closed_won', deal_value = ?, deal_notes = ?,
+                       closed_at = datetime('now', 'localtime'), updated_at = datetime('now', 'localtime')
+                       WHERE id = ?""",
+                    (value, notes, lead_id),
+                )
+                conn.commit()
+                conn.close()
+                return True
+            except Exception as e:
+                conn.close()
+                if attempt < 4 and "locked" in str(e).lower():
+                    time.sleep(0.3 * (attempt + 1))
+                    continue
+                return False
+        return False
 
     @staticmethod
     def update_verification(lead_id, site_verified, ssl_valid, new_score, new_tier):

@@ -4,6 +4,7 @@ let isFirstLoad = true;
 let tierModalPage = 1;
 let tierModalCurrentTier = 'all';
 let tierModalTotal = 0;
+let tierModalMetricParams = '';
 
 function animateValue(el, start, end, duration) {
     if (start === end) { el.textContent = end.toLocaleString('pt-BR'); return; }
@@ -50,6 +51,7 @@ async function loadStats() {
         document.getElementById('statRevenue').textContent = `R$ ${data.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 0})}`;
         document.getElementById('statDeals').textContent = data.deals_closed.toLocaleString('pt-BR');
         document.getElementById('statConversion').textContent = `${data.conversion_rate}%`;
+        document.getElementById('statContacted').textContent = (data.contacted || 0).toLocaleString('pt-BR');
         document.getElementById('statNegotiating').textContent = data.negotiating.toLocaleString('pt-BR');
 
         isFirstLoad = false;
@@ -203,8 +205,28 @@ async function deleteJob(id) {
     }
 }
 
+function openMetricModal(metric) {
+    const configs = {
+        deals: { title: 'Leads Fechados', params: 'status=closed_won' },
+        contacted: { title: 'Leads Contatados', params: 'status=contacted' },
+        negotiating: { title: 'Leads Negociando', params: 'status=negotiating' },
+        email: { title: 'Leads com Email', params: 'has_email=1' },
+        phone: { title: 'Leads com Telefone', params: 'has_phone=1' },
+        whatsapp: { title: 'Leads com WhatsApp', params: 'has_whatsapp=1' },
+    };
+    const cfg = configs[metric];
+    if (!cfg) return;
+    tierModalCurrentTier = '__metric__';
+    tierModalMetricParams = cfg.params;
+    tierModalPage = 1;
+    document.getElementById('tierModalTitle').textContent = cfg.title;
+    document.getElementById('tierModal').classList.remove('hidden');
+    loadTierModalPage();
+}
+
 async function openTierModal(tier) {
     tierModalCurrentTier = tier;
+    tierModalMetricParams = '';
     tierModalPage = 1;
     document.getElementById('tierModal').classList.remove('hidden');
     await loadTierModalPage();
@@ -216,15 +238,22 @@ async function loadTierModalPage() {
     const body = document.getElementById('tierModalBody');
     const footer = document.getElementById('tierModalFooter');
 
-    const titles = { hot: 'Leads Quentes', warm: 'Leads Mornos', cold: 'Leads Frios', all: 'Todos os Leads' };
-    title.textContent = titles[tierModalCurrentTier] || 'Leads';
+    if (tierModalCurrentTier !== '__metric__') {
+        const titles = { hot: 'Leads Quentes', warm: 'Leads Mornos', cold: 'Leads Frios', all: 'Todos os Leads' };
+        title.textContent = titles[tierModalCurrentTier] || 'Leads';
+    }
 
     body.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
 
     try {
-        const params = tierModalCurrentTier === 'all'
-            ? `per_page=15&page=${tierModalPage}&sort=created_at&order=desc`
-            : `tier=${tierModalCurrentTier}&per_page=15&page=${tierModalPage}&sort=created_at&order=desc`;
+        let params;
+        if (tierModalCurrentTier === '__metric__') {
+            params = `per_page=15&page=${tierModalPage}&sort=created_at&order=desc&${tierModalMetricParams}`;
+        } else if (tierModalCurrentTier === 'all') {
+            params = `per_page=15&page=${tierModalPage}&sort=created_at&order=desc`;
+        } else {
+            params = `tier=${tierModalCurrentTier}&per_page=15&page=${tierModalPage}&sort=created_at&order=desc`;
+        }
         const data = await api(`/api/leads?${params}`);
         tierModalTotal = data.total;
 
@@ -341,13 +370,16 @@ async function openDashLeadDetail(id) {
             ${lead.instagram ? `<div class="text-[12px] text-zinc-300">Instagram: <a href="https://instagram.com/${lead.instagram}" target="_blank" class="text-pink-400 hover:underline">@${escapeHtml(lead.instagram)}</a></div>` : ''}
             ${lead.facebook ? `<div class="text-[12px] text-zinc-300">Facebook: <a href="${lead.facebook}" target="_blank" class="text-blue-400 hover:underline">${escapeHtml(lead.facebook)}</a></div>` : ''}
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            ${wa ? `<a href="https://wa.me/${wa.replace(/\\D/g, '')}" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10"><span class="text-green-400">WhatsApp</span></a>` : '<span></span>'}
-            ${emails[0] ? `<a href="mailto:${emails[0]}" class="btn-ghost !py-2.5 text-[11px] text-center !border-blue-500/20 hover:!bg-blue-500/10"><span class="text-blue-400">Email</span></a>` : '<span></span>'}
-            ${lead.website ? `<a href="${lead.website}" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Website</span></a>` : '<span></span>'}
-            <a href="/leads" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Ver na lista</span></a>
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+            ${wa ? `<a href="https://wa.me/${wa.replace(/\\D/g, '')}" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10 flex-1"><span class="text-green-400">WhatsApp</span></a>` : ''}
+            ${emails[0] ? `<a href="mailto:${emails[0]}" class="btn-ghost !py-2.5 text-[11px] text-center !border-blue-500/20 hover:!bg-blue-500/10 flex-1"><span class="text-blue-400">Email</span></a>` : ''}
+            ${lead.website ? `<a href="${lead.website}" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center flex-1"><span class="text-zinc-300">Website</span></a>` : ''}
+            <a href="/leads" class="btn-ghost !py-2.5 text-[11px] text-center flex-1"><span class="text-zinc-300">Ver na lista</span></a>
         </div>
-        <button onclick="deleteDashLead(${lead.id})" class="w-full mt-4 p-2.5 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/15 transition-all text-center">Excluir este lead</button>
+        <button onclick="deleteDashLead(${lead.id})" class="w-full mt-4 p-2.5 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-red-500/10 hover:border-red-500/20 transition-all flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Excluir este lead
+        </button>
     `;
     modal.classList.remove('hidden');
 }

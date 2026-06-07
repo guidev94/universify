@@ -27,6 +27,7 @@ def list_leads():
     has_email = bool(request.args.get("has_email", "").strip())
     has_phone = bool(request.args.get("has_phone", "").strip())
     has_website = bool(request.args.get("has_website", "").strip())
+    has_whatsapp = bool(request.args.get("has_whatsapp", "").strip())
     created_days = request.args.get("created_days", type=int)
 
     per_page = min(per_page, 100)
@@ -39,7 +40,7 @@ def list_leads():
         sort=sort, order=order, only_verified=bool(only_verified),
         category=category, score_min=score_min, score_max=score_max,
         has_email=has_email, has_phone=has_phone, has_website=has_website,
-        created_days=created_days,
+        has_whatsapp=has_whatsapp, created_days=created_days,
     )
 
     return jsonify({
@@ -80,7 +81,11 @@ def close_lead(lead_id):
     value = float(data.get("deal_value", 0))
     notes = str(data.get("deal_notes", "")).strip()[:500]
 
-    Lead.close_deal(lead_id, value, notes)
+    success = Lead.close_deal(lead_id, value, notes)
+    if not success:
+        return jsonify({"error": "Erro ao salvar. Tente novamente."}), 500
+
+    Activity.log(lead_id, "deal_closed", f"R$ {value:.2f}")
     return jsonify({"ok": True})
 
 

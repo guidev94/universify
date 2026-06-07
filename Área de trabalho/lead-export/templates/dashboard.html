@@ -75,7 +75,7 @@
 </div>
 
 <!-- Bento Grid Metrics -->
-<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-8 fade-up fade-up-delay-4">
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3 mb-12 fade-up fade-up-delay-4">
     <div class="col-span-2 p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-emerald-900/10 border border-emerald-500/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
         <div class="flex items-center gap-2.5 mb-2">
             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
@@ -85,32 +85,37 @@
         </div>
         <p class="text-xl font-bold text-emerald-400" id="statRevenue">R$ 0</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-green-500/30 hover:bg-green-500/[0.03] transition-all" onclick="openMetricModal('deals')">
         <i data-lucide="handshake" class="w-4 h-4 text-green-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-green-400" id="statDeals">0</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">Fechados</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/[0.03] transition-all" onclick="openMetricModal('deals')">
         <i data-lucide="percent" class="w-4 h-4 text-blue-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-blue-400" id="statConversion">0%</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">Conversão</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-        <i data-lucide="message-circle" class="w-4 h-4 text-orange-400 stroke-[1.5] mb-2"></i>
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all" onclick="openMetricModal('contacted')">
+        <i data-lucide="send" class="w-4 h-4 text-cyan-400 stroke-[1.5] mb-2"></i>
+        <p class="text-lg font-bold text-cyan-400" id="statContacted">0</p>
+        <p class="text-[9px] text-zinc-600 mt-0.5">Contatados</p>
+    </div>
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-orange-500/30 hover:bg-orange-500/[0.03] transition-all" onclick="openMetricModal('negotiating')">
+        <i data-lucide="handshake" class="w-4 h-4 text-orange-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-orange-400" id="statNegotiating">0</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">Negociando</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-emerald-500/30 hover:bg-emerald-500/[0.03] transition-all" onclick="openMetricModal('email')">
         <i data-lucide="mail" class="w-4 h-4 text-emerald-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-emerald-400" id="statEmail">0</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">Email</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/[0.03] transition-all" onclick="openMetricModal('phone')">
         <i data-lucide="phone" class="w-4 h-4 text-blue-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-blue-400" id="statPhone">0</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">Telefone</p>
     </div>
-    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+    <div class="col-span-1 p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] cursor-pointer hover:border-green-500/30 hover:bg-green-500/[0.03] transition-all" onclick="openMetricModal('whatsapp')">
         <i data-lucide="message-circle" class="w-4 h-4 text-green-400 stroke-[1.5] mb-2"></i>
         <p class="text-lg font-bold text-green-400" id="statWhatsapp">0</p>
         <p class="text-[9px] text-zinc-600 mt-0.5">WhatsApp</p>

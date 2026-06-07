@@ -328,6 +328,22 @@ def cleanup_jobs():
     return jsonify({"ok": True, "cleaned": cleaned + len(stale)})
 
 
+@bp.route("/api/crawl/jobs/clear-all", methods=["POST"])
+def clear_all_logs():
+    import time as _time
+    conn = get_connection()
+    count = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs WHERE status != 'running'").fetchone()["c"]
+    for attempt in range(5):
+        try:
+            conn.execute("DELETE FROM crawl_jobs WHERE status != 'running'")
+            conn.commit()
+            break
+        except Exception:
+            _time.sleep(0.5)
+    conn.close()
+    return jsonify({"ok": True, "deleted": count})
+
+
 @bp.route("/api/keywords/suggestions")
 def keyword_suggestions():
     suggestions = Keyword.get_suggestions(limit=10)
