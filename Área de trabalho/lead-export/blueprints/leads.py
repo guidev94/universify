@@ -20,7 +20,7 @@ def list_leads():
     source = request.args.get("source", "").strip() or None
     search = request.args.get("search", "").strip() or None
     category = request.args.get("category", "").strip() or None
-    sort = request.args.get("sort", "score")
+    sort = request.args.get("sort", "created_at")
     order = request.args.get("order", "desc")
     score_min = request.args.get("score_min", type=int)
     score_max = request.args.get("score_max", type=int)
