@@ -7,9 +7,23 @@
 
 {% block content %}
 <div class="space-y-5">
+    <!-- Live Extraction Banner -->
+    <div id="liveBanner" class="hidden glass-card p-4 border-l-4 border-blue-500 fade-up">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+            <div class="flex-1">
+                <p class="text-[12px] text-zinc-200 font-medium" id="liveBannerText">Extraindo leads...</p>
+                <div class="mt-2 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" id="liveBannerBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <span class="text-[11px] text-zinc-400 font-mono" id="liveBannerCount">0/0</span>
+        </div>
+    </div>
+
     <!-- Stats Resumo -->
     <div class="glass-card-static p-4 fade-up">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div class="text-center">
                 <p class="text-2xl font-bold text-zinc-100" id="logTotalLeads">0</p>
                 <p class="text-[10px] text-zinc-500 mt-1">Total Captados</p>
@@ -25,6 +39,14 @@
             <div class="text-center">
                 <p class="text-2xl font-bold text-orange-400" id="logCampaigns">0</p>
                 <p class="text-[10px] text-zinc-500 mt-1">Campanhas</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-cyan-400" id="logSuccessRate">0%</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Taxa Sucesso</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-purple-400" id="logPipeline">0</p>
+                <p class="text-[10px] text-zinc-500 mt-1">Na Fila</p>
             </div>
         </div>
     </div>
@@ -57,13 +79,15 @@
                         <th>Palavra-chave</th>
                         <th>Localização</th>
                         <th>Leads</th>
+                        <th>Fontes</th>
+                        <th>Duração</th>
                         <th>Status</th>
                         <th>Data</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="logsTable">
-                    <tr><td colspan="6" class="text-center text-zinc-700 py-8">Carregando...</td></tr>
+                    <tr><td colspan="8" class="text-center text-zinc-700 py-8">Carregando...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -75,17 +99,37 @@
 {% block scripts %}
 <script>
 let logsPage = 1;
-let logsInterval = null;
+
+function formatDuration(seconds) {
+    if (!seconds && seconds !== 0) return '—';
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+}
+
+function renderSourceBadges(sources) {
+    if (!sources || Object.keys(sources).length === 0) return '<span class="text-zinc-600 text-[9px]">—</span>';
+    return Object.entries(sources).filter(([,v]) => v > 0).map(([k, v]) =>
+        `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/5 text-[9px] text-zinc-400"><span class="font-semibold text-zinc-300">${v}</span> ${k}</span>`
+    ).join(' ');
+}
 
 async function loadLogs(page = 1) {
     logsPage = page;
     const statusFilter = document.getElementById('logStatusFilter').value;
     try {
         const data = await api(`/api/logs?page=${page}`);
-        document.getElementById('logTotalLeads').textContent = data.stats.total_leads;
-        document.getElementById('logTotalJobs').textContent = data.stats.total_jobs;
-        document.getElementById('logToday').textContent = data.stats.today;
+        document.getElementById('logTotalLeads').textContent = data.stats.total_leads.toLocaleString('pt-BR');
+        document.getElementById('logTotalJobs').textContent = data.stats.total_jobs.toLocaleString('pt-BR');
+        document.getElementById('logToday').textContent = data.stats.today.toLocaleString('pt-BR');
         document.getElementById('logCampaigns').textContent = data.stats.campaigns;
+        document.getElementById('logSuccessRate').textContent = `${data.stats.success_rate}%`;
+
+        const pipeline = data.stats.pipeline || {};
+        const pipelineTotal = (pipeline.verify_pending || 0) + (pipeline.enrich_pending || 0);
+        document.getElementById('logPipeline').textContent = pipelineTotal;
+
         document.getElementById('logCount').textContent = `${data.total} extrações`;
 
         const statusLabels = { completed: 'concluído', running: 'rodando', error: 'erro', pending: 'pendente', cancelled: 'cancelado' };
@@ -104,15 +148,27 @@ async function loadLogs(page = 1) {
 
         const tbody = document.getElementById('logsTable');
         if (!jobs.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-zinc-600 py-8">Nenhuma extração encontrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-zinc-600 py-8">Nenhuma extração encontrada</td></tr>';
             return;
         }
 
-        tbody.innerHTML = jobs.map(job => `
-            <tr>
+        tbody.innerHTML = jobs.map(job => {
+            const pct = job.quantity_requested > 0 ? Math.round((job.quantity_found / job.quantity_requested) * 100) : 0;
+            const pctColor = pct >= 80 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-red-400';
+
+            return `
+            <tr class="${job.status === 'running' ? 'bg-blue-500/[0.02]' : ''}">
                 <td class="font-medium text-white">${escapeHtml(job.keyword || '—')}</td>
-                <td>${escapeHtml(job.location) || '—'}</td>
-                <td class="font-semibold">${job.quantity_found}/${job.quantity_requested}</td>
+                <td class="text-zinc-400">${escapeHtml(job.location) || '—'}</td>
+                <td>
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold">${job.quantity_found}/${job.quantity_requested}</span>
+                        <span class="text-[9px] font-bold ${pctColor}">${pct}%</span>
+                    </div>
+                    ${job.status === 'running' ? `<div class="mt-1 h-1 rounded-full bg-zinc-800 overflow-hidden w-16"><div class="h-full rounded-full bg-blue-500 animate-pulse" style="width: ${Math.min(100, (job.progress || 0) / (job.quantity_requested || 1) * 100)}%"></div></div>` : ''}
+                </td>
+                <td><div class="flex flex-wrap gap-0.5 max-w-[180px]">${renderSourceBadges(job.sources_detail)}</div></td>
+                <td class="text-zinc-400 text-[11px]">${formatDuration(job.duration_seconds)}</td>
                 <td>
                     <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded ${statusColors[job.status] || ''}">
                         ${job.status === 'running' ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>' : ''}
@@ -122,15 +178,15 @@ async function loadLogs(page = 1) {
                 <td class="text-zinc-500 text-[11px]">${formatDateTime(job.started_at)}</td>
                 <td>
                     <div class="flex items-center gap-1">
-                        ${job.status === 'error' ? `<button onclick="retryJob(${job.id})" class="p-1 rounded hover:bg-blue-500/10 transition-colors" title="Refazer" aria-label="Refazer extração"><i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-blue-400"></i></button>` : ''}
-                        ${job.status === 'running' ? `<button onclick="abortJob('${job.job_uuid}')" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Abortar" aria-label="Abortar extração"><i data-lucide="square" class="w-3.5 h-3.5 text-red-400"></i></button>` : ''}
-                        <button onclick="deleteLog(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Excluir" aria-label="Excluir registro">
+                        ${job.status === 'error' ? `<button onclick="retryJob(${job.id})" class="p-1 rounded hover:bg-blue-500/10 transition-colors" title="Refazer"><i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-blue-400"></i></button>` : ''}
+                        ${job.status === 'running' ? `<button onclick="abortJob('${job.job_uuid}')" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Abortar"><i data-lucide="square" class="w-3.5 h-3.5 text-red-400"></i></button>` : ''}
+                        <button onclick="deleteLog(${job.id})" class="p-1 rounded hover:bg-red-500/10 transition-colors" title="Excluir">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400/60 hover:text-red-400"></i>
                         </button>
                     </div>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
 
         const totalPages = Math.ceil(data.total / 20);
         document.getElementById('logsPagination').innerHTML = totalPages > 1 ? `
@@ -143,13 +199,13 @@ async function loadLogs(page = 1) {
 
         lucide.createIcons();
     } catch (e) {
-        document.getElementById('logsTable').innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Erro ao carregar logs</td></tr>';
+        document.getElementById('logsTable').innerHTML = '<tr><td colspan="8" class="text-center text-red-400 py-8">Erro ao carregar logs</td></tr>';
     }
 }
 
 async function retryJob(id) {
     try {
-        const data = await api(`/api/crawl/retry/${id}`, { method: 'POST' });
+        await api(`/api/crawl/retry/${id}`, { method: 'POST' });
         showToast('Extração reiniciada!', 'success');
         loadLogs(logsPage);
     } catch (e) {
@@ -189,8 +245,34 @@ async function deleteLog(id) {
     }
 }
 
+// SSE real-time updates
+if (typeof events !== 'undefined') {
+    events.on('job_progress', (data) => {
+        const banner = document.getElementById('liveBanner');
+        banner.classList.remove('hidden');
+        document.getElementById('liveBannerText').textContent = `Extraindo leads...`;
+        document.getElementById('liveBannerCount').textContent = `${data.progress}/${data.total}`;
+        const pct = data.total > 0 ? (data.progress / data.total) * 100 : 0;
+        document.getElementById('liveBannerBar').style.width = `${Math.min(100, pct)}%`;
+    });
+
+    events.on('job_completed', (data) => {
+        document.getElementById('liveBanner').classList.add('hidden');
+        loadLogs(logsPage);
+    });
+
+    events.on('job_error', () => {
+        document.getElementById('liveBanner').classList.add('hidden');
+        loadLogs(logsPage);
+    });
+
+    events.on('stats_updated', () => loadLogs(logsPage));
+}
+
+// Fallback polling (long interval)
+setInterval(() => loadLogs(logsPage), 60000);
+
 loadLogs();
-logsInterval = setInterval(() => loadLogs(logsPage), 15000);
 lucide.createIcons();
 </script>
 {% endblock %}

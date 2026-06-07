@@ -50,6 +50,7 @@ def logs_page():
 
 @bp.route("/api/logs")
 def api_logs():
+    import json as _json
     page = request.args.get("page", 1, type=int)
     per_page = 20
     offset = (page - 1) * per_page
@@ -64,10 +65,47 @@ def api_logs():
     total_leads = conn.execute("SELECT COUNT(*) as c FROM leads").fetchone()["c"]
     today = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
     campaigns_count = conn.execute("SELECT COUNT(*) as c FROM campaigns WHERE status = 'active'").fetchone()["c"]
+    completed_jobs = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs WHERE status = 'completed'").fetchone()["c"]
     conn.close()
 
+    enriched_jobs = []
+    for job in jobs:
+        j = dict(job)
+        if j.get("job_state"):
+            try:
+                state = _json.loads(j["job_state"])
+                j["sources_detail"] = state.get("sources", {})
+            except (ValueError, TypeError):
+                j["sources_detail"] = {}
+        else:
+            j["sources_detail"] = {}
+
+        if j.get("started_at") and j.get("completed_at"):
+            from datetime import datetime
+            try:
+                start = datetime.strptime(j["started_at"], "%Y-%m-%d %H:%M:%S")
+                end = datetime.strptime(j["completed_at"], "%Y-%m-%d %H:%M:%S")
+                diff = (end - start).total_seconds()
+                j["duration_seconds"] = int(diff)
+            except (ValueError, TypeError):
+                j["duration_seconds"] = None
+        else:
+            j["duration_seconds"] = None
+
+        if j["quantity_requested"] and j["quantity_requested"] > 0:
+            j["success_pct"] = round((j["quantity_found"] or 0) / j["quantity_requested"] * 100)
+        else:
+            j["success_pct"] = 0
+
+        enriched_jobs.append(j)
+
+    success_rate = round((completed_jobs / max(1, total)) * 100, 1)
+
+    from scheduler import scheduler
+    pipeline_status = scheduler.pipeline.status if scheduler.pipeline else {}
+
     return jsonify({
-        "jobs": [dict(r) for r in jobs],
+        "jobs": enriched_jobs,
         "total": total,
         "page": page,
         "stats": {
@@ -75,6 +113,8 @@ def api_logs():
             "total_jobs": total,
             "today": today,
             "campaigns": campaigns_count,
+            "success_rate": success_rate,
+            "pipeline": pipeline_status,
         }
     })
 
@@ -176,6 +216,7 @@ def extract_campaign(camp_id):
     import uuid, threading
     from blueprints.crawl import run_crawl
     from models import CrawlJob
+    from job_manager import job_manager
 
     conn = get_connection()
     camp = conn.execute("SELECT * FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
@@ -234,10 +275,8 @@ def extract_campaign(camp_id):
     continuous = remaining > 30
 
     job_uuid = str(uuid.uuid4())
-    from blueprints.crawl import active_jobs
-    import time as _time
     job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
-    active_jobs[job_uuid] = {"status": "running", "progress": 0, "total": remaining, "sources": {}, "started_at": _time.time()}
+    job_manager.register(job_uuid, remaining)
 
     def continuous_extract(first_uuid, first_id, camp_name, camp_goal, kw, loc):
         run_crawl(first_uuid, first_id, "both", kw, quantity, loc, campaign_name=camp_name, require_quality=True)
@@ -247,6 +286,7 @@ def extract_campaign(camp_id):
 
         dry_rounds = 0
         max_batches = 15
+        import time as _time
         for batch in range(max_batches):
             _time.sleep(5)
             conn_check = get_connection()
@@ -255,8 +295,7 @@ def extract_campaign(camp_id):
 
             left = camp_goal - current
             if left <= 0:
-                active_jobs[first_uuid]["status"] = "completed"
-                active_jobs[first_uuid]["progress"] = current
+                job_manager.complete(first_uuid, current)
                 break
 
             prev_count = current
@@ -270,20 +309,21 @@ def extract_campaign(camp_id):
             after_count = conn_after.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
             conn_after.close()
 
-            active_jobs[first_uuid]["progress"] = after_count
+            job_manager.update(first_uuid, progress=after_count)
 
             if after_count <= prev_count:
                 dry_rounds += 1
                 if dry_rounds >= 2:
-                    logger.info(f"[campaign] '{camp_name}' — 2 batches sem novos leads, parando extração contínua")
+                    logger.info(f"[campaign] '{camp_name}' — 2 dry batches, stopping continuous extraction")
                     break
             else:
                 dry_rounds = 0
 
-            if first_uuid in active_jobs and active_jobs[first_uuid].get("status") == "cancelled":
+            state = job_manager.get(first_uuid)
+            if state and state.get("status") == "cancelled":
                 break
 
-        active_jobs[first_uuid]["status"] = "completed"
+        job_manager.complete(first_uuid, 0)
 
     thread = threading.Thread(
         target=continuous_extract,

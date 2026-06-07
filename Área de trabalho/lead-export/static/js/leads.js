@@ -11,6 +11,7 @@ function getFilters() {
         category: document.getElementById('filterCategory').value,
         sort: document.getElementById('sortBy').value,
         verified: document.getElementById('filterVerified').checked,
+        scoreRange: document.getElementById('filterScore') ? document.getElementById('filterScore').value : '',
     };
 }
 
@@ -32,6 +33,11 @@ async function loadLeads(page = 1) {
     if (filters.category) params.set('category', filters.category);
     if (filters.verified) params.set('verified', '1');
     if (filters.sort === 'name') params.set('order', 'asc');
+    if (filters.scoreRange) {
+        const [min, max] = filters.scoreRange.split('-');
+        if (min) params.set('score_min', min);
+        if (max) params.set('score_max', max);
+    }
 
     try {
         const data = await api(`/api/leads?${params}`);
@@ -66,10 +72,13 @@ function renderTable(leads) {
             ? `<a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 text-[11px] truncate max-w-[120px] inline-block">${escapeHtml(lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0])}</a>`
             : '<span class="text-zinc-700">—</span>';
 
+        const rowClass = lead.tier === 'hot' ? 'border-l-2 border-l-amber-400/60 bg-amber-500/[0.02]' : lead.tier === 'warm' ? 'border-l-2 border-l-orange-400/40' : '';
+        const qualBadge = lead.score >= 80 ? '<span class="ml-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/15 text-amber-400">QUALIFICADO</span>' : '';
+
         return `
-            <tr>
+            <tr class="${rowClass}">
                 <td><input type="checkbox" class="lead-checkbox rounded-sm cursor-pointer" data-id="${lead.id}" ${checked} onchange="toggleSelect(${lead.id})"></td>
-                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}</td>
+                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}${qualBadge}</td>
                 <td class="group">${lead.email ? `<span class="inline-flex items-center gap-1"><a href="mailto:${escapeHtml(lead.email.split(';')[0])}" class="text-zinc-300 hover:text-blue-400 truncate max-w-[140px] inline-block text-[12px]">${escapeHtml(lead.email.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.email.split(';')[0]}'); showToast('Email copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
                 <td class="group">${lead.phone ? `<span class="inline-flex items-center gap-1"><a href="tel:${lead.phone.split(';')[0]}" class="text-zinc-300 hover:text-emerald-400 text-[12px]">${escapeHtml(lead.phone.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.phone.split(';')[0]}'); showToast('Telefone copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
                 <td>${siteLink}</td>
@@ -601,5 +610,44 @@ async function loadLeadActivities(leadId) {
     }
 }
 
+// Bulk delete by score
+async function bulkDeleteByScore() {
+    try {
+        const preview = await api('/api/leads/bulk-delete-by-score', {
+            method: 'POST',
+            body: JSON.stringify({ max_score: 30, dry_run: true }),
+        });
+        if (preview.count === 0) {
+            showToast('Nenhum lead com pontuação ≤ 30', 'info');
+            return;
+        }
+        if (!await confirmModal(`Excluir ${preview.count} leads com pontuação ≤ 30?`, 'Excluir Fracos', true)) return;
+        const result = await api('/api/leads/bulk-delete-by-score', {
+            method: 'POST',
+            body: JSON.stringify({ max_score: 30 }),
+        });
+        showToast(`${result.deleted} leads fracos excluídos`, 'success');
+        loadLeads(1);
+    } catch (e) {
+        showToast(e.message || 'Erro', 'error');
+    }
+}
+
+// Score filter change listener
+if (document.getElementById('filterScore')) {
+    document.getElementById('filterScore').addEventListener('change', () => loadLeads(1));
+}
+
+// SSE real-time updates
+if (typeof events !== 'undefined') {
+    events.on('lead_new', () => {
+        if (selectedIds.size === 0 && currentPage === 1) loadLeads(1);
+    });
+    events.on('stats_updated', () => {
+        if (selectedIds.size === 0) loadLeads(currentPage);
+    });
+}
+
 loadLeads(1);
-setInterval(() => { if (selectedIds.size === 0) loadLeads(currentPage); }, 30000);
+// Fallback polling (longer since SSE handles real-time)
+setInterval(() => { if (selectedIds.size === 0) loadLeads(currentPage); }, 60000);

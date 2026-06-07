@@ -84,6 +84,50 @@ function scoreBadge(score) {
     return `<span class="score-pill ${cls}">${score}</span>`;
 }
 
+class EventStream {
+    constructor() {
+        this.handlers = {};
+        this.connected = false;
+        this.connect();
+    }
+
+    connect() {
+        this.source = new EventSource('/api/events/stream');
+        this.source.onmessage = (e) => {
+            try {
+                const event = JSON.parse(e.data);
+                this.connected = true;
+                if (this.handlers[event.type]) {
+                    this.handlers[event.type].forEach(fn => fn(event.data));
+                }
+                if (this.handlers['*']) {
+                    this.handlers['*'].forEach(fn => fn(event));
+                }
+            } catch (err) {}
+        };
+        this.source.onerror = () => {
+            this.connected = false;
+            this.source.close();
+            setTimeout(() => this.connect(), 5000);
+        };
+    }
+
+    on(type, handler) {
+        if (!this.handlers[type]) this.handlers[type] = [];
+        this.handlers[type].push(handler);
+        return this;
+    }
+
+    off(type, handler) {
+        if (this.handlers[type]) {
+            this.handlers[type] = this.handlers[type].filter(h => h !== handler);
+        }
+        return this;
+    }
+}
+
+const events = new EventStream();
+
 function confirmModal(message, confirmText = 'Confirmar', danger = false) {
     return new Promise((resolve) => {
         const existing = document.getElementById('confirmModal');

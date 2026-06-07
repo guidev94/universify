@@ -431,6 +431,54 @@ loadRecentJobs();
 loadSchedulerStatus();
 loadActivityFeed();
 
-setInterval(() => { loadStats(); loadRecentJobs(); loadCharts(); }, 30000);
-setInterval(loadSchedulerStatus, 15000);
-setInterval(loadActivityFeed, 10000);
+// SSE real-time updates (with polling fallback)
+if (typeof events !== 'undefined') {
+    events.on('stats_updated', (data) => {
+        const fields = [
+            { id: 'statTotal', key: 'total' },
+            { id: 'statHot', key: 'hot' },
+            { id: 'statWarm', key: 'warm' },
+            { id: 'statCold', key: 'cold' },
+        ];
+        for (const { id, key } of fields) {
+            const el = document.getElementById(id);
+            if (el && data[key] !== undefined) {
+                el.textContent = data[key].toLocaleString('pt-BR');
+            }
+        }
+    });
+
+    events.on('lead_new', () => {
+        loadStats();
+        loadActivityFeed();
+    });
+
+    events.on('job_completed', (data) => {
+        loadStats();
+        loadRecentJobs();
+        loadActivityFeed();
+        if (data && data.keyword) {
+            showToast(`Extração "${data.keyword}": ${data.found} leads`, 'success');
+        }
+    });
+
+    events.on('job_error', (data) => {
+        loadRecentJobs();
+        if (data && data.keyword) {
+            showToast(`Erro na extração "${data.keyword}"`, 'error');
+        }
+    });
+
+    events.on('campaign_progress', () => {
+        loadStats();
+        loadActivityFeed();
+    });
+
+    events.on('pipeline_verify', () => loadStats());
+    events.on('pipeline_enrich', () => loadStats());
+}
+
+// Fallback polling (longer intervals since SSE handles real-time)
+setInterval(() => { loadStats(); loadRecentJobs(); loadCharts(); }, 60000);
+setInterval(loadSchedulerStatus, 30000);
+setInterval(loadActivityFeed, 30000);

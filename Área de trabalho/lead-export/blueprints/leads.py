@@ -20,8 +20,10 @@ def list_leads():
     source = request.args.get("source", "").strip() or None
     search = request.args.get("search", "").strip() or None
     category = request.args.get("category", "").strip() or None
-    sort = request.args.get("sort", "created_at")
+    sort = request.args.get("sort", "score")
     order = request.args.get("order", "desc")
+    score_min = request.args.get("score_min", type=int)
+    score_max = request.args.get("score_max", type=int)
 
     per_page = min(per_page, 100)
 
@@ -31,7 +33,7 @@ def list_leads():
         page=page, per_page=per_page, tier=tier,
         status=status, source=source, search=search,
         sort=sort, order=order, only_verified=bool(only_verified),
-        category=category,
+        category=category, score_min=score_min, score_max=score_max,
     )
 
     return jsonify({
@@ -90,6 +92,29 @@ def bulk_delete():
 
     ids = [int(i) for i in data["ids"] if str(i).isdigit()]
     count = Lead.bulk_delete(ids)
+    return jsonify({"deleted": count})
+
+
+@bp.route("/api/leads/bulk-delete-by-score", methods=["POST"])
+def bulk_delete_by_score():
+    data = request.get_json()
+    if not data or "max_score" not in data:
+        return jsonify({"error": "max_score obrigatório"}), 400
+
+    max_score = int(data["max_score"])
+    if max_score < 0 or max_score > 100:
+        return jsonify({"error": "max_score deve ser entre 0 e 100"}), 400
+
+    conn = get_connection()
+    count = conn.execute("SELECT COUNT(*) as c FROM leads WHERE score <= ?", (max_score,)).fetchone()["c"]
+
+    if data.get("dry_run"):
+        conn.close()
+        return jsonify({"count": count, "dry_run": True})
+
+    conn.execute("DELETE FROM leads WHERE score <= ?", (max_score,))
+    conn.commit()
+    conn.close()
     return jsonify({"deleted": count})
 
 

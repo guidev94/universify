@@ -44,9 +44,17 @@
             <option value="">Nicho</option>
         </select>
 
+        <select id="filterScore" class="select-glass !w-auto !min-w-0">
+            <option value="">Score</option>
+            <option value="80-100">80+ (Hot)</option>
+            <option value="50-79">50–79 (Warm)</option>
+            <option value="30-49">30–49</option>
+            <option value="0-29">< 30 (Fracos)</option>
+        </select>
+
         <select id="sortBy" class="select-glass !w-auto !min-w-0">
+            <option value="score" selected>Pontuação ↓</option>
             <option value="created_at">Recente ↓</option>
-            <option value="score">Pontuação ↓</option>
             <option value="name">Nome A-Z</option>
         </select>
 
@@ -54,6 +62,11 @@
             <input type="checkbox" id="filterVerified" class="rounded-sm accent-blue-500 cursor-pointer">
             <span class="text-[10px] text-zinc-400 font-medium whitespace-nowrap">Verificado</span>
         </label>
+
+        <button onclick="bulkDeleteByScore()" class="btn-ghost !py-2 !px-3 flex items-center gap-1.5 whitespace-nowrap text-[11px] !border-red-500/20 hover:!bg-red-500/10">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 stroke-[2] text-red-400"></i>
+            <span class="text-red-400">Limpar &lt; 30 pts</span>
+        </button>
 
         <button onclick="openExportModal()" class="btn-accent !py-2 !px-3 flex items-center gap-1.5 whitespace-nowrap text-[11px]">
             <i data-lucide="download" class="w-3.5 h-3.5 stroke-[2]"></i>

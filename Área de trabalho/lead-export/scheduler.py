@@ -3,6 +3,7 @@ import json
 import threading
 import time
 import logging
+from logging.handlers import RotatingFileHandler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from crawler.site_verifier import SiteVerifier
 from crawler.website_crawler import WebsiteCrawler
@@ -18,33 +19,55 @@ from crawler.lead_scorer import calculate_score
 from models import Lead, Keyword, CrawlJob
 from config import Config
 
+file_handler = RotatingFileHandler(
+    Config.LOG_FILE if hasattr(Config, "LOG_FILE") else "./data/crawl.log",
+    maxBytes=5 * 1024 * 1024,
+    backupCount=3,
+    encoding="utf-8",
+)
+
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] [%(levelname)s] %(name)s — %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(
-            Config.LOG_FILE if hasattr(Config, "LOG_FILE") else "./data/crawl.log",
-            encoding="utf-8",
-        ),
-    ],
+    handlers=[logging.StreamHandler(), file_handler],
 )
 logger = logging.getLogger("leadhunter.scheduler")
 
 
-class Scheduler:
-    def __init__(self, verify_interval=3600, crawl_interval=10800):
-        self.verify_interval = verify_interval
-        self.crawl_interval = crawl_interval
+class CrawlSemaphore:
+    """Limits total concurrent crawl jobs system-wide."""
+
+    def __init__(self, max_concurrent=3):
+        self._semaphore = threading.Semaphore(max_concurrent)
+
+    def acquire(self, timeout=None):
+        return self._semaphore.acquire(timeout=timeout)
+
+    def release(self):
+        self._semaphore.release()
+
+
+crawl_gate = CrawlSemaphore(max_concurrent=3)
+
+
+class ParallelScheduler:
+    """Independent timer-based scheduler — tasks never block each other."""
+
+    def __init__(self):
+        self.executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="sched")
+        self.timers = {}
         self.running = False
-        self.thread = None
+        self._lock = threading.Lock()
+        self._task_locks = {}
         self.last_crawl = 0
         self.last_verify = 0
         self.status = "stopped"
         self.last_error = None
         self.total_runs = 0
         self.total_successes = 0
+        self.pipeline = None
+        self.event_bus = None
         self._load_state()
 
     def start(self):
@@ -52,19 +75,33 @@ class Scheduler:
             return
         self.running = True
         self.status = "running"
-        self.thread = threading.Thread(target=self._run_loop, daemon=True)
-        self.thread.start()
-        logger.info("[scheduler] iniciado — verificação a cada %ds, crawl a cada %ds", self.verify_interval, self.crawl_interval)
+
+        self._schedule_repeating("cleanup", self._cleanup_stuck_jobs, interval=30, initial_delay=5)
+        self._schedule_repeating("campaign_fill", self._crawl_campaigns, interval=300, initial_delay=15)
+        self._schedule_repeating("verify", self._verify_and_feed_pipeline, interval=Config.SCHEDULER_VERIFY_INTERVAL, initial_delay=20)
+        self._schedule_repeating("auto_crawl", self._auto_crawl, interval=Config.SCHEDULER_CRAWL_INTERVAL, initial_delay=30)
+        self._schedule_repeating("decay", self._decay_scores, interval=21600, initial_delay=60)
+        self._schedule_repeating("enrich", self._feed_enrichment, interval=2700, initial_delay=45)
+
+        logger.info(
+            "[scheduler] ParallelScheduler started — 6 tasks registered "
+            f"(verify={Config.SCHEDULER_VERIFY_INTERVAL}s, crawl={Config.SCHEDULER_CRAWL_INTERVAL}s)"
+        )
 
     def stop(self):
         self.running = False
         self.status = "stopped"
-        logger.info("[scheduler] parado")
+        with self._lock:
+            for timer in self.timers.values():
+                timer.cancel()
+            self.timers.clear()
+        self.executor.shutdown(wait=False)
 
     def get_status(self):
         now = time.time()
-        next_crawl = self.last_crawl + self.crawl_interval - now
-        next_verify = self.last_verify + self.verify_interval - now
+        next_crawl = self.last_crawl + Config.SCHEDULER_CRAWL_INTERVAL - now
+        next_verify = self.last_verify + Config.SCHEDULER_VERIFY_INTERVAL - now
+        pipeline_status = self.pipeline.status if self.pipeline else {}
         return {
             "running": self.running,
             "status": self.status,
@@ -76,51 +113,42 @@ class Scheduler:
             "total_runs": self.total_runs,
             "total_successes": self.total_successes,
             "success_rate": round((self.total_successes / max(1, self.total_runs)) * 100, 1),
+            "pipeline": pipeline_status,
         }
 
-    def _run_loop(self):
-        time.sleep(5)
-        last_decay = time.time()
-        last_campaign_fill = 0
+    def _schedule_repeating(self, name, func, interval, initial_delay=5):
+        self._task_locks[name] = threading.Lock()
 
-        cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
-        cleanup_thread.start()
+        def _run():
+            if not self.running:
+                return
+            self.executor.submit(self._safe_execute, name, func)
+            timer = threading.Timer(interval, _run)
+            timer.daemon = True
+            timer.name = f"timer-{name}"
+            with self._lock:
+                self.timers[name] = timer
+            timer.start()
 
-        while self.running:
-            now = time.time()
+        timer = threading.Timer(initial_delay, _run)
+        timer.daemon = True
+        timer.name = f"timer-{name}-init"
+        with self._lock:
+            self.timers[name] = timer
+        timer.start()
 
-            if now - last_campaign_fill >= 300:
-                try:
-                    self._crawl_campaigns()
-                    last_campaign_fill = time.time()
-                except Exception as e:
-                    logger.warning(f"[scheduler] erro no campaign fill: {e}")
-
-            if now - self.last_verify >= self.verify_interval:
-                try:
-                    self._verify_unverified_sites()
-                    self.last_verify = time.time()
-                except Exception as e:
-                    logger.error(f"[scheduler] erro na verificação de sites: {e}")
-                    self.last_error = str(e)
-
-            if now - self.last_crawl >= self.crawl_interval:
-                try:
-                    self._auto_crawl()
-                    self.last_crawl = time.time()
-                    self._save_state()
-                except Exception as e:
-                    logger.error(f"[scheduler] erro no auto-crawl: {e}")
-                    self.last_error = str(e)
-
-            if now - last_decay >= 21600:
-                try:
-                    self._decay_scores()
-                    last_decay = time.time()
-                except Exception as e:
-                    logger.warning(f"[scheduler] erro no score decay: {e}")
-
-            time.sleep(60)
+    def _safe_execute(self, name, func):
+        lock = self._task_locks.get(name)
+        if lock and not lock.acquire(blocking=False):
+            return
+        try:
+            func()
+        except Exception as e:
+            logger.error(f"[scheduler:{name}] error: {e}")
+            self.last_error = f"{name}: {e}"
+        finally:
+            if lock:
+                lock.release()
 
     def _decay_scores(self):
         from database import get_connection
@@ -137,46 +165,52 @@ class Scheduler:
             AND contacted_at IS NULL
         """)
         if affected.rowcount > 0:
-            logger.info(f"[scheduler] score decay: {affected.rowcount} leads rebaixados")
+            logger.info(f"[scheduler:decay] {affected.rowcount} leads rebaixados")
         conn.commit()
         conn.close()
-
-    def _cleanup_loop(self):
-        while self.running:
-            try:
-                self._cleanup_stuck_jobs()
-            except Exception:
-                pass
-            time.sleep(30)
 
     def _cleanup_stuck_jobs(self):
         from database import get_connection
+        from job_manager import job_manager
+
         conn = get_connection()
         stuck = conn.execute(
-            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') WHERE status = 'running' AND started_at < datetime('now', '-90 seconds', 'localtime')"
+            "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') "
+            "WHERE status = 'running' AND started_at < datetime('now', '-5 minutes', 'localtime')"
         )
         if stuck.rowcount > 0:
-            logger.warning(f"[scheduler] {stuck.rowcount} jobs stuck marcados como erro")
+            logger.warning(f"[scheduler:cleanup] {stuck.rowcount} stuck jobs marked as error")
         conn.commit()
         conn.close()
 
-        from blueprints.crawl import active_jobs
-        stale = [k for k, v in active_jobs.items() if v.get("started_at") and time.time() - v["started_at"] > 120]
-        for k in stale:
-            del active_jobs[k]
+        job_manager.cleanup_stale(max_age=300)
 
-    def _verify_unverified_sites(self):
+    def _verify_and_feed_pipeline(self):
+        self.last_verify = time.time()
+        if self.pipeline:
+            count = self.pipeline.feed_unverified(limit=100)
+            if count > 0:
+                logger.info(f"[scheduler:verify] fed {count} leads to pipeline verify queue")
+        else:
+            self._verify_unverified_sites_legacy()
+
+    def _verify_unverified_sites_legacy(self):
         unverified = Lead.get_unverified(limit=100)
         if not unverified:
             return
-        logger.info(f"[scheduler] verificando {len(unverified)} sites")
+        logger.info(f"[scheduler:verify] verifying {len(unverified)} sites (legacy)")
         verifier = SiteVerifier(max_workers=5)
         verifier.verify_leads(unverified)
-        logger.info("[scheduler] verificação concluída")
 
-        self._enrich_leads()
+    def _feed_enrichment(self):
+        if self.pipeline:
+            count = self.pipeline.feed_unenriched(limit=30)
+            if count > 0:
+                logger.info(f"[scheduler:enrich] fed {count} leads to pipeline enrich queue")
+        else:
+            self._enrich_leads_legacy()
 
-    def _enrich_leads(self):
+    def _enrich_leads_legacy(self):
         from database import get_connection
         conn = get_connection()
         rows = conn.execute(
@@ -190,10 +224,8 @@ class Scheduler:
             return
 
         leads = [dict(r) for r in rows]
-        logger.info(f"[scheduler] enriquecendo {len(leads)} leads")
-
+        logger.info(f"[scheduler:enrich] enriching {len(leads)} leads (legacy)")
         enricher = EnrichmentCrawler()
-        enriched_count = 0
 
         for lead_id, data in enricher.enrich_batch(leads, max_count=30):
             conn = get_connection()
@@ -225,22 +257,16 @@ class Scheduler:
                 params.append(lead_id)
                 conn.execute(f"UPDATE leads SET {', '.join(updates)} WHERE id = ?", params)
                 conn.commit()
-                enriched_count += 1
-
             conn.close()
 
-        logger.info(f"[scheduler] enriquecimento: {enriched_count} leads atualizados")
-
     def _auto_crawl(self):
-        self._crawl_campaigns()
-
         keywords = Keyword.get_for_autocrawl(limit=5)
         if not keywords:
-            logger.info("[scheduler] nenhuma keyword para auto-crawl")
+            logger.info("[scheduler:crawl] no keywords for auto-crawl")
             return
 
         expanded = self._expand_keywords(keywords)[:5]
-        logger.info(f"[scheduler] auto-crawl iniciado — {len(expanded)} keywords")
+        logger.info(f"[scheduler:crawl] auto-crawl started — {len(expanded)} keywords")
 
         for kw in expanded:
             self.total_runs += 1
@@ -249,20 +275,27 @@ class Scheduler:
             delay = 30
 
             while retries < max_retries:
+                if not crawl_gate.acquire(timeout=60):
+                    logger.warning(f"[scheduler:crawl] semaphore timeout for '{kw['keyword']}'")
+                    break
                 try:
                     count = self._run_multi_source_crawl(kw["keyword"], kw["location"])
                     self.total_successes += 1
-                    logger.info(f"[scheduler] '{kw['keyword']}' — {count} leads salvos")
+                    self.last_crawl = time.time()
+                    self._save_state()
+                    logger.info(f"[scheduler:crawl] '{kw['keyword']}' — {count} leads saved")
                     break
                 except Exception as e:
                     retries += 1
                     self.last_error = f"{kw['keyword']}: {e}"
                     if retries < max_retries:
-                        logger.warning(f"[scheduler] retry {retries}/{max_retries} para '{kw['keyword']}' — espera {delay}s")
+                        logger.warning(f"[scheduler:crawl] retry {retries}/{max_retries} for '{kw['keyword']}'")
                         time.sleep(delay)
                         delay *= 2
                     else:
-                        logger.error(f"[scheduler] '{kw['keyword']}' falhou após {max_retries} tentativas: {e}")
+                        logger.error(f"[scheduler:crawl] '{kw['keyword']}' failed after {max_retries} retries: {e}")
+                finally:
+                    crawl_gate.release()
 
     def _crawl_campaigns(self):
         from database import get_connection
@@ -272,37 +305,58 @@ class Scheduler:
         ).fetchall()
         conn.close()
 
+        if not campaigns:
+            return
+
+        futures = []
         for camp in campaigns:
             camp = dict(camp)
-            conn = get_connection()
-            current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
-            conn.close()
+            futures.append(self.executor.submit(self._fill_single_campaign, camp))
 
-            if current >= camp["goal"]:
-                continue
-
-            remaining = camp["goal"] - current
-            keyword = camp.get("keyword", "")
-            location = camp.get("location", "")
-
-            if not keyword:
-                continue
-
-            assigned = self._assign_existing_leads(camp["name"], keyword, location, remaining)
-            if assigned >= remaining:
-                logger.info(f"[scheduler] campanha '{camp['name']}': meta atingida com leads existentes (+{assigned})")
-                continue
-
-            remaining -= assigned
-            quantity = min(30, remaining)
-
-            logger.info(f"[scheduler] campanha '{camp['name']}': {current + assigned}/{camp['goal']} — buscando {quantity} novos")
-
+        for f in as_completed(futures, timeout=300):
             try:
-                count = self._run_multi_source_crawl(keyword, location, campaign_name=camp["name"], quantity_override=quantity)
-                logger.info(f"[scheduler] campanha '{camp['name']}': +{count} leads novos")
+                f.result()
             except Exception as e:
-                logger.warning(f"[scheduler] campanha '{camp['name']}' falhou: {e}")
+                logger.warning(f"[scheduler:campaign] error: {e}")
+
+    def _fill_single_campaign(self, camp):
+        from database import get_connection
+        conn = get_connection()
+        current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
+        conn.close()
+
+        if current >= camp["goal"]:
+            return
+
+        remaining = camp["goal"] - current
+        keyword = camp.get("keyword", "")
+        location = camp.get("location", "")
+
+        if not keyword:
+            return
+
+        assigned = self._assign_existing_leads(camp["name"], keyword, location, remaining)
+        if assigned >= remaining:
+            logger.info(f"[scheduler:campaign] '{camp['name']}': goal reached with existing leads (+{assigned})")
+            return
+
+        remaining -= assigned
+        quantity = min(30, remaining)
+
+        logger.info(f"[scheduler:campaign] '{camp['name']}': {current + assigned}/{camp['goal']} — fetching {quantity} new")
+
+        if not crawl_gate.acquire(timeout=30):
+            logger.warning(f"[scheduler:campaign] '{camp['name']}' — crawl gate busy, skipping")
+            return
+        try:
+            count = self._run_multi_source_crawl(keyword, location, campaign_name=camp["name"], quantity_override=quantity)
+            logger.info(f"[scheduler:campaign] '{camp['name']}': +{count} new leads")
+            if self.event_bus:
+                self.event_bus.publish("campaign_progress", {"name": camp["name"], "added": count, "goal": camp["goal"]})
+        except Exception as e:
+            logger.warning(f"[scheduler:campaign] '{camp['name']}' failed: {e}")
+        finally:
+            crawl_gate.release()
 
     def _expand_keywords(self, keywords):
         bairros = ["centro", "zona norte", "zona sul", "zona leste", "zona oeste"]
@@ -336,7 +390,6 @@ class Scheduler:
 
         if count > 0:
             conn.commit()
-            logger.info(f"[scheduler] campanha '{campaign_name}': {count} leads existentes atribuídos")
         conn.close()
         return count
 
@@ -356,13 +409,16 @@ class Scheduler:
         ).fetchone()["c"]
         conn_check.close()
         if running > 0:
-            logger.info(f"[scheduler] '{keyword}' já tem job running — pulando")
+            logger.info(f"[scheduler:crawl] '{keyword}' already has a running job — skipping")
             return 0
 
         job_uuid = str(uuid.uuid4())
         quantity = quantity_override or 30
         job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
         CrawlJob.set_running(job_uuid)
+
+        from job_manager import job_manager
+        job_manager.register(job_uuid, quantity)
 
         leads = []
         fetch_qty = quantity * 2
@@ -386,16 +442,17 @@ class Scheduler:
                     try:
                         results = future.result(timeout=60)
                         leads.extend(results)
-                        logger.info(f"[scheduler] {name}: {len(results)} leads brutos")
+                        job_manager.update(job_uuid, sources={**job_manager.get(job_uuid).get("sources", {}), name: len(results)})
                     except Exception as e:
-                        logger.warning(f"[scheduler] {name} falhou: {e}")
+                        logger.warning(f"[scheduler:crawl] {name} failed: {e}")
 
                 for future in futures:
                     future.cancel()
         except Exception as e:
-            logger.warning(f"[scheduler] executor timeout para '{keyword}': {e}")
+            logger.warning(f"[scheduler:crawl] executor timeout for '{keyword}': {e}")
 
         saved_count = 0
+        saved_ids = []
         for lead in leads:
             if saved_count >= quantity:
                 break
@@ -418,6 +475,7 @@ class Scheduler:
 
             lead_id = Lead.create(validated, crawl_job_id=job_id)
             if lead_id:
+                saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
                 if campaign_name:
                     from database import get_connection as gc
                     c = gc()
@@ -432,7 +490,14 @@ class Scheduler:
                     saved_count += 1
 
         CrawlJob.complete(job_uuid, saved_count)
+        job_manager.complete(job_uuid, saved_count)
         Keyword.track(keyword, location, saved_count)
+
+        if self.pipeline and saved_ids:
+            self.pipeline.submit_for_verification(saved_ids)
+
+        if self.event_bus and saved_count > 0:
+            self.event_bus.publish("job_completed", {"uuid": job_uuid, "keyword": keyword, "found": saved_count})
 
         return saved_count
 
@@ -447,7 +512,7 @@ class Scheduler:
                     self.last_verify = state.get("last_verify", 0)
                     self.total_runs = state.get("total_runs", 0)
                     self.total_successes = state.get("total_successes", 0)
-                    logger.info("[scheduler] estado restaurado do disco")
+                    logger.info("[scheduler] state restored from disk")
         except Exception:
             pass
 
@@ -464,7 +529,7 @@ class Scheduler:
                     "total_successes": self.total_successes,
                 }, f)
         except Exception as e:
-            logger.error(f"[scheduler] erro salvando estado: {e}")
+            logger.error(f"[scheduler] error saving state: {e}")
 
 
-scheduler = Scheduler(verify_interval=1800, crawl_interval=1800)
+scheduler = ParallelScheduler()

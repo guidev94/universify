@@ -120,7 +120,12 @@
                     <p class="text-[11px] text-zinc-500 mt-0.5 font-medium">{% block page_subtitle %}Visão geral{% endblock %}</p>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <!-- Live extraction indicator -->
+                    <div id="topbarExtraction" class="hidden sm:hidden items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/[0.08] border border-amber-500/20">
+                        <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></div>
+                        <span class="text-[10px] text-amber-400/90 font-semibold" id="topbarExtractionText">Extraindo...</span>
+                    </div>
                     <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-subtle border border-blue-500/10">
                         <div class="w-1.5 h-1.5 rounded-full bg-blue-400 glow-dot"></div>
                         <span class="text-[11px] text-blue-400/90 font-semibold">Online</span>
@@ -154,23 +159,83 @@
         }
         document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
 
+        // Sidebar leads counter — SSE-powered
         async function updateSidebarLeads() {
             try {
                 const data = await api('/api/leads/today');
-                const el = document.getElementById('sidebarLeadsToday');
-                const bar = document.getElementById('sidebarLeadsBar');
-                const current = parseInt(el.textContent) || 0;
-                const target = data.today || 0;
-                if (target !== current) {
-                    gsap.to({ val: current }, { val: target, duration: 1.2, ease: 'power2.out',
-                        onUpdate: function() { el.textContent = Math.round(this.targets()[0].val); }
-                    });
-                }
-                bar.style.width = Math.min(100, (target / 50) * 100) + '%';
+                _setSidebarCount(data.today || 0);
             } catch(e) {}
         }
+
+        function _setSidebarCount(target) {
+            const el = document.getElementById('sidebarLeadsToday');
+            const bar = document.getElementById('sidebarLeadsBar');
+            const current = parseInt(el.textContent) || 0;
+            if (target !== current) {
+                gsap.to({ val: current }, { val: target, duration: 0.6, ease: 'power2.out',
+                    onUpdate: function() { el.textContent = Math.round(this.targets()[0].val); }
+                });
+                if (target > current) {
+                    gsap.fromTo(el, { scale: 1.2, color: '#34d399' }, { scale: 1, color: '#f4f4f5', duration: 0.8, ease: 'power2.out' });
+                }
+            }
+            bar.style.width = Math.min(100, (target / 50) * 100) + '%';
+        }
+
         updateSidebarLeads();
-        setInterval(updateSidebarLeads, 20000);
+
+        // SSE real-time: instant sidebar + topbar + toasts
+        if (typeof events !== 'undefined') {
+            events.on('lead_new', (data) => {
+                const el = document.getElementById('sidebarLeadsToday');
+                const current = parseInt(el.textContent) || 0;
+                _setSidebarCount(current + 1);
+            });
+
+            events.on('stats_updated', (data) => {
+                if (data && data.today !== undefined) {
+                    _setSidebarCount(data.today);
+                }
+            });
+
+            // Topbar extraction indicator
+            events.on('job_progress', (data) => {
+                const box = document.getElementById('topbarExtraction');
+                const txt = document.getElementById('topbarExtractionText');
+                box.classList.remove('hidden');
+                box.classList.add('flex');
+                txt.textContent = `Extraindo... ${data.progress}/${data.total}`;
+            });
+
+            events.on('job_completed', (data) => {
+                const box = document.getElementById('topbarExtraction');
+                box.classList.add('hidden');
+                box.classList.remove('flex');
+                if (data && data.found > 0) {
+                    showToast(`Extração concluída: ${data.found} leads de "${data.keyword}"`, 'success');
+                }
+            });
+
+            events.on('job_error', (data) => {
+                const box = document.getElementById('topbarExtraction');
+                box.classList.add('hidden');
+                box.classList.remove('flex');
+                if (data && data.keyword) {
+                    showToast(`Erro na extração "${data.keyword}"`, 'error');
+                }
+            });
+
+            events.on('pipeline_verify', (data) => {
+                if (data && data.count > 0) showToast(`${data.count} sites verificados`, 'info');
+            });
+
+            events.on('pipeline_enrich', (data) => {
+                if (data && data.count > 0) showToast(`${data.count} leads enriquecidos`, 'info');
+            });
+        }
+
+        // Fallback polling (long interval since SSE handles real-time)
+        setInterval(updateSidebarLeads, 60000);
     </script>
 </body>
 </html>

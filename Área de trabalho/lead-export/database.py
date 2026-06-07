@@ -138,3 +138,7 @@ def _migrate(cursor):
     for col, sql in camp_migrations:
         if col not in camp_columns:
             cursor.execute(sql)
+
+    job_columns = {row[1] for row in cursor.execute("PRAGMA table_info(crawl_jobs)").fetchall()}
+    if "job_state" not in job_columns:
+        cursor.execute("ALTER TABLE crawl_jobs ADD COLUMN job_state TEXT DEFAULT '{}'")

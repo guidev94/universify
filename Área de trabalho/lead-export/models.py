@@ -133,7 +133,7 @@ class Lead:
         return removed
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -155,6 +155,12 @@ class Lead:
             params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
         if only_verified:
             conditions.append("site_verified = 1 AND website != ''")
+        if score_min is not None:
+            conditions.append("score >= ?")
+            params.append(score_min)
+        if score_max is not None:
+            conditions.append("score <= ?")
+            params.append(score_max)
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
