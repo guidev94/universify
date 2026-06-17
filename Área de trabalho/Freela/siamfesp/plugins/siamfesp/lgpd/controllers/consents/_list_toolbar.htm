@@ -1,0 +1,17 @@
+<div data-control="toolbar">
+    <button
+        type="button"
+        class="btn btn-danger oc-icon-trash-o"
+        disabled="disabled"
+        data-request="onDelete"
+        data-request-confirm="Tem certeza que deseja excluir os consentimentos selecionados?"
+        data-request-data="checked: $('.control-list').listWidget('getChecked')"
+        data-request-success="$('.control-list').listWidget('uncheckAll')"
+        data-request-flash
+        data-trigger-action="enable"
+        data-trigger=".control-list input[type=checkbox]"
+        data-trigger-condition="checked"
+        data-stripe-load-indicator>
+        Excluir selecionados
+    </button>
+</div>
