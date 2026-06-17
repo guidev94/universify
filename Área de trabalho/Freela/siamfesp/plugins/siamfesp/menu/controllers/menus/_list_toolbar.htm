@@ -12,7 +12,7 @@
         disabled="disabled"
         data-request="onDelete"
         data-request-confirm="Tem certeza que deseja excluir os itens selecionados?"
-        data-request-data="checked: $('.control-list').listWidget('getChecked')"
+        data-request-before-send="context.options.data = {checked: $('.control-list').listWidget('getChecked')}"
         data-request-success="$('.control-list').listWidget('uncheckAll')"
         data-request-flash
         data-trigger-action="enable"
