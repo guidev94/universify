@@ -10,7 +10,7 @@
         type="button"
         class="btn btn-danger oc-icon-trash-o"
         disabled="disabled"
-        onclick="var btn=this; oc.confirmPromise('Tem certeza que deseja excluir os vídeos selecionados?').then(function(){ $(btn).request('onDelete', { data: { checked: $('.control-list').listWidget('getChecked') }, flash: true, success: function(data){ this.success(data); $('.control-list').listWidget('uncheckAll'); } }); }); return false;"
+        onclick="var checked=$('.control-list').listWidget('getChecked'); if(!checked||!checked.length) return false; oc.vueComponentHelpers.modalUtils.showConfirm('Confirmação', 'Tem certeza que deseja excluir os vídeos selecionados?', {buttonText:'Sim, excluir', isDanger:true}).then(function(){ $.request('onDelete', {data:{checked:checked}}); }); return false;"
         data-trigger-action="enable"
         data-trigger=".control-list input[type=checkbox]"
         data-trigger-condition="checked"
