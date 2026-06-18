@@ -76,9 +76,18 @@ def start_crawl():
         queries_to_run = list(dict.fromkeys(queries_to_run + metro_queries))
 
     # Safety limit for total parallel jobs from a single request
-    queries_to_run = queries_to_run[:15] 
+    # Reduced from 15 to 8 to avoid total search engine block
+    queries_to_run = queries_to_run[:8] 
 
     job_uuids = []
+    
+    # Check if there are already too many jobs running globally
+    conn_global = get_connection()
+    running_total = conn_global.execute("SELECT COUNT(*) as c FROM crawl_jobs WHERE status = 'running'").fetchone()["c"]
+    conn_global.close()
+    
+    if running_total > 20:
+        return jsonify({"error": "Muitas extrações rodando no servidor. Aguarde alguns minutos."}), 429
     
     for q in queries_to_run:
         q_clean = q

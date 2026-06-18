@@ -106,6 +106,22 @@ def bulk_delete():
     return jsonify({"deleted": count})
 
 
+@bp.route("/api/leads/stats-by-score")
+def leads_stats_by_score():
+    conn = get_connection()
+    # Total counts by every 10 points
+    rows = conn.execute("""
+        SELECT (score / 10) * 10 as range_start, count(*) as count 
+        FROM leads 
+        GROUP BY range_start 
+        ORDER BY range_start ASC
+    """).fetchall()
+    stats = {row["range_start"]: row["count"] for row in rows}
+    
+    total = conn.execute("SELECT count(*) as c FROM leads").fetchone()["c"]
+    conn.close()
+    return jsonify({"stats": stats, "total": total})
+
 @bp.route("/api/leads/bulk-delete-by-score", methods=["POST"])
 def bulk_delete_by_score():
     data = request.get_json()

@@ -655,11 +655,18 @@ async function loadLeadActivities(leadId) {
 }
 
 // Bulk delete by score
-function bulkDeleteByScore() {
+async function bulkDeleteByScore() {
     document.getElementById('cleanupModal').classList.remove('hidden');
-    // Ensure initial state is clean
     document.getElementById('cleanupTotal').textContent = '...';
     document.getElementById('cleanupTierDetails').innerHTML = '';
+    
+    // Load distribution chart or info
+    try {
+        const stats = await api('/api/leads/stats-by-score');
+        const summary = document.getElementById('cleanupTierDetails');
+        summary.innerHTML = `<p class="text-[10px] text-zinc-500 w-full mb-1">Distribuição total: ${stats.total} leads</p>`;
+    } catch(e) {}
+    
     updateCleanupPreview();
 }
 

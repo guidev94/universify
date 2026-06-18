@@ -389,7 +389,9 @@ class Lead:
         email = (data.get("email") or "").strip().lower()
         phone = (data.get("phone") or "").strip()
         website = (data.get("website") or "").strip().lower()
+        name = (data.get("name") or "").strip().lower()
 
+        # If has website, use domain for dedup (Strongest)
         if website:
             from urllib.parse import urlparse
             domain = urlparse(website).netloc.lower().replace("www.", "")
@@ -397,12 +399,17 @@ class Lead:
                 raw = f"site:{domain}"
                 return hashlib.sha256(raw.encode()).hexdigest()
 
+        # If has name AND (email OR phone), combine them
+        if name and (email or phone):
+            raw = f"n:{name}|e:{email}|p:{phone}"
+            return hashlib.sha256(raw.encode()).hexdigest()
+
+        # Fallbacks
         if email:
             raw = f"email:{email}"
         elif phone:
             raw = f"phone:{phone}"
         else:
-            name = (data.get("name") or "").strip().lower()
             raw = f"name:{name}"
         return hashlib.sha256(raw.encode()).hexdigest()
 
