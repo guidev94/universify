@@ -654,6 +654,9 @@ async function loadLeadActivities(leadId) {
 // Bulk delete by score
 function bulkDeleteByScore() {
     document.getElementById('cleanupModal').classList.remove('hidden');
+    // Ensure initial state is clean
+    document.getElementById('cleanupTotal').textContent = '...';
+    document.getElementById('cleanupTierDetails').innerHTML = '';
     updateCleanupPreview();
 }
 
@@ -663,8 +666,18 @@ function hideCleanupModal() {
 
 let cleanupTimeout = null;
 async function updateCleanupPreview() {
-    const score = document.getElementById('cleanupScoreRange').value;
-    document.getElementById('cleanupScoreValue').textContent = score;
+    const scoreEl = document.getElementById('cleanupScoreRange');
+    const valueEl = document.getElementById('cleanupScoreValue');
+    const totalEl = document.getElementById('cleanupTotal');
+    const detailsEl = document.getElementById('cleanupTierDetails');
+    const confirmBtn = document.getElementById('confirmCleanupBtn');
+
+    if (!scoreEl) return;
+    
+    const score = scoreEl.value;
+    valueEl.textContent = score;
+    
+    totalEl.textContent = '...';
     
     // Debounce preview request
     clearTimeout(cleanupTimeout);
@@ -675,30 +688,33 @@ async function updateCleanupPreview() {
                 body: JSON.stringify({ max_score: parseInt(score), dry_run: true }),
             });
             
-            document.getElementById('cleanupTotal').textContent = data.count;
-            const details = document.getElementById('cleanupTierDetails');
+            totalEl.textContent = data.count;
             
             if (data.count === 0) {
-                details.innerHTML = '<span class="text-[10px] text-zinc-600 italic">Nenhum lead nesta faixa</span>';
-                document.getElementById('confirmCleanupBtn').disabled = true;
-                document.getElementById('confirmCleanupBtn').style.opacity = 0.5;
+                detailsEl.innerHTML = '<span class="text-[10px] text-zinc-600 italic">Nenhum lead nesta faixa</span>';
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = 0.5;
             } else {
-                document.getElementById('confirmCleanupBtn').disabled = false;
-                document.getElementById('confirmCleanupBtn').style.opacity = 1;
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = 1;
                 
                 let html = '';
                 const colors = { hot: 'text-amber-400', warm: 'text-orange-400', cold: 'text-zinc-500' };
                 const labels = { hot: 'Quentes', warm: 'Mornos', cold: 'Frios' };
                 
-                for (const [tier, count] of Object.entries(data.details)) {
-                    if (count > 0) {
-                        html += `<span class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/5 ${colors[tier]}">${count} ${labels[tier]}</span>`;
+                if (data.details) {
+                    for (const [tier, count] of Object.entries(data.details)) {
+                        if (count > 0) {
+                            html += `<span class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/5 ${colors[tier] || 'text-zinc-400'}">${count} ${labels[tier] || tier}</span>`;
+                        }
                     }
                 }
-                details.innerHTML = html;
+                detailsEl.innerHTML = html || '<span class="text-[10px] text-zinc-500">Pronto para excluir</span>';
             }
         } catch (e) {
-            console.error(e);
+            console.error('Preview error:', e);
+            totalEl.textContent = '0';
+            detailsEl.innerHTML = '<span class="text-[10px] text-red-400">Erro ao carregar prévia</span>';
         }
     }, 300);
 }

@@ -160,12 +160,6 @@ class SiteVerifier:
         except Exception:
             return {"quality": "poor", "score": 0, "cms": "Unknown", "has_pixel": 0, "has_analytics": 0}
 
-            elif tech_score < 75:
-                return "regular"
-            return "good"
-        except Exception:
-            return "poor"
-
     def _check_http(self, url):
         try:
             if not url.startswith(("http://", "https://")):
