@@ -267,6 +267,22 @@ def leads_today():
     return jsonify({"today": count})
 
 
+@bp.route("/api/leads/<int:lead_id>/ai-copy")
+def lead_ai_copy(lead_id):
+    lead = Lead.get_by_id(lead_id)
+    if not lead:
+        return jsonify({"error": "Lead não encontrado"}), 404
+    
+    from crawler.ai_copywriter import AICopywriter
+    writer = AICopywriter()
+    message = writer.generate_message(lead)
+    subject = writer.generate_email_subject(lead)
+    
+    return jsonify({
+        "message": message,
+        "subject": subject
+    })
+
 @bp.route("/api/leads/categories")
 def lead_categories():
     conn = get_connection()

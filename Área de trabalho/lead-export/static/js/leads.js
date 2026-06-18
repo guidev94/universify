@@ -432,24 +432,33 @@ async function openLeadDetail(id) {
                 </div>
             </div>
 
+            <!-- Actions -->
             <div class="flex items-center justify-center gap-2 mt-4">
+                <button onclick="generateAICopy(${lead.id})" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-purple-500/[0.08] border border-purple-500/20 hover:bg-purple-500/15 transition-colors flex-1 group">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-[10px] font-bold text-purple-400">Gerar IA</span>
+                </button>
                 ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-500/[0.05] border border-green-500/15 hover:bg-green-500/10 transition-colors flex-1">
-                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.687-1.228A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.347 0-4.518-.803-6.237-2.15l-.364-.298-3.02.792.83-3.042-.327-.39A9.96 9.96 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
                     <span class="text-[10px] font-semibold text-green-400">WhatsApp</span>
-                </a>` : ''}
-                ${emails[0] ? `<a href="mailto:${emails[0]}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/15 hover:bg-blue-500/10 transition-colors flex-1">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    <span class="text-[10px] font-semibold text-blue-400">Email</span>
-                </a>` : ''}
-                ${lead.website ? `<a href="${escapeHtml(lead.website)}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-violet-500/[0.05] border border-violet-500/15 hover:bg-violet-500/10 transition-colors flex-1">
-                    <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    <span class="text-[10px] font-semibold text-violet-400">Site</span>
                 </a>` : ''}
                 <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/15 hover:bg-emerald-500/10 transition-colors flex-1">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span class="text-[10px] font-semibold text-emerald-400">Fechar</span>
                 </button>
             </div>
+            
+            <div id="aiCopyArea-${lead.id}" class="hidden mt-4 p-4 rounded-xl bg-purple-500/[0.03] border border-purple-500/10 fade-up">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Sugestão de Abordagem</p>
+                    <button onclick="copyAICopy(${lead.id})" class="text-[10px] text-zinc-500 hover:text-zinc-300">Copiar</button>
+                </div>
+                <p id="aiCopyText-${lead.id}" class="text-[12px] text-zinc-300 leading-relaxed"></p>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="sendAIWhatsApp(${lead.id})" class="btn-accent !bg-green-600 !border-green-500/30 !py-1.5 !px-3 text-[10px] flex-1">Enviar via WhatsApp</button>
+                </div>
+            </div>
+
 
             <!-- Tags -->
             <div class="mt-4">
@@ -632,6 +641,47 @@ async function removeTag(leadId, tagToRemove) {
     } catch (e) {
         showToast(e.message, 'error');
     }
+}
+
+async function generateAICopy(id) {
+    const area = document.getElementById(`aiCopyArea-${id}`);
+    const text = document.getElementById(`aiCopyText-${id}`);
+    
+    area.classList.remove('hidden');
+    text.innerHTML = '<div class="flex items-center gap-2 py-2"><div class="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div><span class="text-[11px] text-purple-400/70">Analisando inteligência do lead...</span></div>';
+    
+    try {
+        const data = await api(`/api/leads/${id}/ai-copy`);
+        text.textContent = data.message;
+        text.dataset.fullMessage = data.message;
+    } catch (e) {
+        showToast('Erro ao gerar abordagem', 'error');
+        area.classList.add('hidden');
+    }
+}
+
+function copyAICopy(id) {
+    const text = document.getElementById(`aiCopyText-${id}`).textContent;
+    navigator.clipboard.writeText(text);
+    showToast('Abordagem copiada!', 'success');
+}
+
+async function sendAIWhatsApp(id) {
+    const text = document.getElementById(`aiCopyText-${id}`).textContent;
+    const lead = await api(`/api/leads/${id}`);
+    const phone = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
+    
+    if (!phone) {
+        showToast('Lead sem telefone', 'error');
+        return;
+    }
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+    
+    // Mark as contacted
+    api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'contacted' }) });
+    loadLeads(currentPage);
 }
 
 async function loadLeadActivities(leadId) {
