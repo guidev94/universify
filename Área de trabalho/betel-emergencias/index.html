@@ -322,100 +322,127 @@
     </div>
   </section>
 
-  <!-- ═══════════════ COMO FUNCIONA — Horizontal journey ═══════════════ -->
-  <section id="como-funciona" class="py-28 md:py-36 relative overflow-hidden">
-    <!-- Background decoration -->
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--color-primary-50)_0%,_transparent_60%)]"></div>
+  <!-- ═══════════════ COMO FUNCIONA — Numbered strip ═══════════════ -->
+  <section id="como-funciona" class="py-28 md:py-36 bg-primary-darker text-white relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;1&quot; fill=&quot;white&quot;/%3E%3C/svg%3E')"></div>
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-      <div class="section-header mb-20">
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-          <div>
-            <p class="text-sm font-semibold text-primary mb-3 tracking-wide">4 passos simples</p>
-            <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight">Do contato à chegada<br class="hidden md:block"> em poucos minutos</h2>
+      <div class="section-header text-center mb-20">
+        <p class="text-sm font-semibold text-primary-light mb-4 tracking-wide">Como funciona</p>
+        <h2 class="font-clash font-bold text-3xl md:text-5xl text-white leading-tight max-w-2xl mx-auto">Do primeiro contato à chegada em minutos</h2>
+      </div>
+
+      <!-- Horizontal numbered strip -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-0">
+        <div class="how-step relative p-8 md:p-6 lg:p-8 border-b md:border-b-0 md:border-r border-white/10 group">
+          <div class="text-[4rem] md:text-[5rem] font-clash font-bold text-white/[0.06] leading-none absolute top-4 right-6 md:top-3 md:right-4 select-none">1</div>
+          <div class="relative z-10">
+            <div class="w-10 h-10 rounded-full bg-primary-light/20 flex items-center justify-center mb-5">
+              <svg class="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            </div>
+            <h3 class="font-clash font-semibold text-lg text-white mb-2">Contato</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Ligue, envie WhatsApp para (11) 97167-4912 ou preencha o formulário do site. Central 24h.</p>
           </div>
-          <p class="text-muted text-base max-w-sm">Solicitar uma ambulância particular nunca foi tão rápido. Processo transparente do início ao fim.</p>
+        </div>
+
+        <div class="how-step relative p-8 md:p-6 lg:p-8 border-b md:border-b-0 md:border-r border-white/10 group">
+          <div class="text-[4rem] md:text-[5rem] font-clash font-bold text-white/[0.06] leading-none absolute top-4 right-6 md:top-3 md:right-4 select-none">2</div>
+          <div class="relative z-10">
+            <div class="w-10 h-10 rounded-full bg-primary-light/20 flex items-center justify-center mb-5">
+              <svg class="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 class="font-clash font-semibold text-lg text-white mb-2">Orçamento</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Valor exato e tempo de chegada informados antes de confirmar. Sem surpresas.</p>
+          </div>
+        </div>
+
+        <div class="how-step relative p-8 md:p-6 lg:p-8 border-b md:border-b-0 md:border-r border-white/10 group">
+          <div class="text-[4rem] md:text-[5rem] font-clash font-bold text-white/[0.06] leading-none absolute top-4 right-6 md:top-3 md:right-4 select-none">3</div>
+          <div class="relative z-10">
+            <div class="w-10 h-10 rounded-full bg-primary-light/20 flex items-center justify-center mb-5">
+              <svg class="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 class="font-clash font-semibold text-lg text-white mb-2">Despacho</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Ambulância com oxigênio, desfibrilador e equipe APH sai imediatamente. Até 40 min.</p>
+          </div>
+        </div>
+
+        <div class="how-step relative p-8 md:p-6 lg:p-8 group">
+          <div class="text-[4rem] md:text-[5rem] font-clash font-bold text-white/[0.06] leading-none absolute top-4 right-6 md:top-3 md:right-4 select-none">4</div>
+          <div class="relative z-10">
+            <div class="w-10 h-10 rounded-full bg-primary-light/20 flex items-center justify-center mb-5">
+              <svg class="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3 class="font-clash font-semibold text-lg text-white mb-2">Atendimento</h3>
+            <p class="text-sm text-white/60 leading-relaxed">Equipe realiza atendimento pré-hospitalar e transporta com monitoramento contínuo.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Steps como "journey cards" com imagem de fundo contextual -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
-        <!-- Step 1 — dark card, highlight -->
-        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
-          <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=70&auto=format&fit=crop" alt="Pessoa usando celular para solicitar ambulância" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
-          <div class="relative z-10">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">01</span>
-            <h3 class="font-clash font-semibold text-xl text-white mb-1">Entre em contato</h3>
-            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Ligue, envie WhatsApp para (11) 97167-4912 ou preencha o formulário. Nossa central opera 24h, inclusive feriados.</p>
-          </div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
-          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=70&auto=format&fit=crop" alt="Cálculo de orçamento transparente" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
-          <div class="relative z-10">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">02</span>
-            <h3 class="font-clash font-semibold text-xl text-white mb-1">Orçamento imediato</h3>
-            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Informamos valor exato e tempo estimado de chegada antes de confirmar. Sem surpresas — transparência total.</p>
-          </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
-          <img src="https://images.unsplash.com/photo-1587745416684-47953f16f02f?w=800&q=70&auto=format&fit=crop" alt="Ambulância equipada em movimento nas ruas de São Paulo" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
-          <div class="relative z-10">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">03</span>
-            <h3 class="font-clash font-semibold text-xl text-white mb-1">Ambulância a caminho</h3>
-            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Ambulância equipada com oxigênio, desfibrilador e equipe de socorristas certificados sai imediatamente. Chegada em até 40 min.</p>
-          </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
-          <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1b89?w=800&q=70&auto=format&fit=crop" alt="Equipe médica realizando atendimento pré-hospitalar" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
-          <div class="relative z-10">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">04</span>
-            <h3 class="font-clash font-semibold text-xl text-white mb-1">Atendimento seguro</h3>
-            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Equipe APH realiza o atendimento pré-hospitalar e transporta o paciente com monitoramento contínuo até o destino.</p>
-          </div>
-        </div>
+      <!-- CTA abaixo -->
+      <div class="mt-14 text-center">
+        <a href="#orcamento" data-magnetic class="inline-flex items-center gap-3 bg-white text-primary-darker hover:bg-primary-light rounded-full px-8 py-4 font-semibold text-[15px] transition-all duration-300 shadow-xl shadow-black/20">
+          Solicitar agora — resposta em 5 min
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════ SOBRE NÓS ═══════════════ -->
-  <section id="sobre" class="py-24 md:py-32">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-        <div class="order-2 lg:order-1">
-          <div class="rounded-3xl overflow-hidden ring-1 ring-slate-100">
-            <img src="assets/images/equipe.jpeg" alt="Equipe de socorristas da Sagrado Betel ao lado de ambulância equipada em São Paulo" class="w-full h-[350px] lg:h-[500px] object-cover" loading="lazy" width="1600" height="1600">
+  <!-- ═══════════════ SOBRE NÓS — Full-width editorial ═══════════════ -->
+  <section id="sobre" class="py-28 md:py-36">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+      <!-- Headline acima -->
+      <div class="section-header max-w-3xl mb-14">
+        <p class="text-sm font-semibold text-primary mb-3 tracking-wide">Sobre nós</p>
+        <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight">+15 anos salvando vidas em São Paulo com humanidade e rapidez</h2>
+      </div>
+
+      <!-- Conteúdo em 3 colunas tipo editorial -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-14">
+        <div class="about-text">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
           </div>
+          <h3 class="font-clash font-semibold text-base text-text mb-2">Nossa história</h3>
+          <p class="text-sm text-muted leading-relaxed">A <strong class="text-text">SAGRADO BETEL Emergência Médicas</strong> nasceu da necessidade de oferecer transporte médico humanizado, rápido e com preço justo para a população de São Paulo. Há mais de 15 anos, atuamos sem interrupção — 24h por dia, todos os dias do ano.</p>
         </div>
 
-        <div class="order-1 lg:order-2">
-          <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight mb-6">Quem Está Por Trás da Sagrado Betel</h2>
-
-          <div class="space-y-5 text-muted leading-relaxed">
-            <p class="about-text">A <strong class="text-text">SAGRADO BETEL Emergência Médicas</strong> nasceu há mais de 15 anos com uma missão clara: oferecer transporte médico humanizado, rápido e acessível para quem mais precisa em São Paulo.</p>
-
-            <p class="about-text">Localizada na Av. Gen. Ataliba Leonel, no Carandiru, temos posição estratégica com acesso direto às zonas Norte, Centro e às marginais Tietê e Pinheiros — o que garante tempos de resposta curtos para toda a capital e região metropolitana.</p>
-
-            <p class="about-text">Nossa equipe é formada por socorristas e enfermeiros com certificação APH (Atendimento Pré-Hospitalar), treinados para atuar em situações de alta pressão com calma e eficiência. Cada ambulância é equipada com oxigênio medicinal, desfibrilador DEA, monitor cardíaco, maca articulada e kit completo de emergência.</p>
+        <div class="about-text">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           </div>
+          <h3 class="font-clash font-semibold text-base text-text mb-2">Localização estratégica</h3>
+          <p class="text-sm text-muted leading-relaxed">Sediados na Av. Gen. Ataliba Leonel, Carandiru — com acesso direto às zonas Norte, Centro e às Marginais Tietê e Pinheiros. Isso nos permite tempos de resposta abaixo de 30 minutos para a maior parte da capital.</p>
+        </div>
 
-          <div class="flex flex-wrap gap-3 mt-8">
-            <span class="about-badge inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/5 rounded-full px-4 py-2 ring-1 ring-primary/10">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-              Equipe APH certificada
-            </span>
-            <span class="about-badge inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/5 rounded-full px-4 py-2 ring-1 ring-primary/10">24/7 sem interrupção</span>
-            <span class="about-badge inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/5 rounded-full px-4 py-2 ring-1 ring-primary/10">+10.000 atendimentos</span>
-            <span class="about-badge inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/5 rounded-full px-4 py-2 ring-1 ring-primary/10">Ambulâncias equipadas</span>
+        <div class="about-text">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <h3 class="font-clash font-semibold text-base text-text mb-2">Equipe e equipamentos</h3>
+          <p class="text-sm text-muted leading-relaxed">Socorristas e enfermeiros com certificação APH, treinados para alta pressão. Ambulâncias com oxigênio medicinal, desfibrilador DEA, monitor cardíaco, maca articulada e kit completo de emergência conforme ANVISA.</p>
+        </div>
+      </div>
+
+      <!-- Stats em faixa de impacto -->
+      <div class="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-2xl p-8 md:p-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <div class="about-badge text-center">
+            <p class="text-3xl md:text-4xl font-clash font-bold text-primary">15+</p>
+            <p class="text-xs text-muted mt-1 font-medium">anos de atuação</p>
+          </div>
+          <div class="about-badge text-center">
+            <p class="text-3xl md:text-4xl font-clash font-bold text-primary">10k+</p>
+            <p class="text-xs text-muted mt-1 font-medium">famílias atendidas</p>
+          </div>
+          <div class="about-badge text-center">
+            <p class="text-3xl md:text-4xl font-clash font-bold text-primary">24/7</p>
+            <p class="text-xs text-muted mt-1 font-medium">sem interrupção</p>
+          </div>
+          <div class="about-badge text-center">
+            <p class="text-3xl md:text-4xl font-clash font-bold text-primary">APH</p>
+            <p class="text-xs text-muted mt-1 font-medium">equipe certificada</p>
           </div>
         </div>
       </div>
@@ -786,7 +813,7 @@
       </div>
 
       <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="text-xs text-white/40">&copy; 2024 SAGRADO BETEL Emergência Médicas. Todos os direitos reservados. CNPJ registrado.</p>
+        <p class="text-xs text-white/40">&copy; 2026 SAGRADO BETEL Emergência Médicas. Todos os direitos reservados. CNPJ registrado.</p>
         <p class="text-xs text-white/40">Ambulância particular 24h — São Paulo, SP</p>
       </div>
     </div>
