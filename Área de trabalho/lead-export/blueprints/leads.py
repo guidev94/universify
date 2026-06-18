@@ -117,16 +117,23 @@ def bulk_delete_by_score():
         return jsonify({"error": "max_score deve ser entre 0 e 100"}), 400
 
     conn = get_connection()
-    count = conn.execute("SELECT COUNT(*) as c FROM leads WHERE score <= ?", (max_score,)).fetchone()["c"]
+    # Also fetch tiers for the preview
+    rows = conn.execute("SELECT count(*) as count, tier FROM leads WHERE score <= ? GROUP BY tier", (max_score,)).fetchall()
+    counts_by_tier = {row["tier"]: row["count"] for row in rows}
+    total_count = sum(counts_by_tier.values())
 
     if data.get("dry_run"):
         conn.close()
-        return jsonify({"count": count, "dry_run": True})
+        return jsonify({
+            "count": total_count, 
+            "details": counts_by_tier,
+            "dry_run": True
+        })
 
     conn.execute("DELETE FROM leads WHERE score <= ?", (max_score,))
     conn.commit()
     conn.close()
-    return jsonify({"deleted": count})
+    return jsonify({"deleted": total_count})
 
 
 @bp.route("/api/leads/<int:lead_id>/action/whatsapp")

@@ -652,32 +652,80 @@ async function loadLeadActivities(leadId) {
 }
 
 // Bulk delete by score
-async function bulkDeleteByScore() {
-    const scoreStr = prompt("Excluir leads com pontuação menor ou igual a:", "30");
-    if (scoreStr === null) return;
-    const max_score = parseInt(scoreStr);
-    if (isNaN(max_score)) {
-        showToast('Pontuação inválida', 'error');
-        return;
-    }
-    try {
-        const preview = await api('/api/leads/bulk-delete-by-score', {
-            method: 'POST',
-            body: JSON.stringify({ max_score: max_score, dry_run: true }),
-        });
-        if (preview.count === 0) {
-            showToast(`Nenhum lead com pontuação ≤ ${max_score}`, 'info');
-            return;
+function bulkDeleteByScore() {
+    document.getElementById('cleanupModal').classList.remove('hidden');
+    updateCleanupPreview();
+}
+
+function hideCleanupModal() {
+    document.getElementById('cleanupModal').classList.add('hidden');
+}
+
+let cleanupTimeout = null;
+async function updateCleanupPreview() {
+    const score = document.getElementById('cleanupScoreRange').value;
+    document.getElementById('cleanupScoreValue').textContent = score;
+    
+    // Debounce preview request
+    clearTimeout(cleanupTimeout);
+    cleanupTimeout = setTimeout(async () => {
+        try {
+            const data = await api('/api/leads/bulk-delete-by-score', {
+                method: 'POST',
+                body: JSON.stringify({ max_score: parseInt(score), dry_run: true }),
+            });
+            
+            document.getElementById('cleanupTotal').textContent = data.count;
+            const details = document.getElementById('cleanupTierDetails');
+            
+            if (data.count === 0) {
+                details.innerHTML = '<span class="text-[10px] text-zinc-600 italic">Nenhum lead nesta faixa</span>';
+                document.getElementById('confirmCleanupBtn').disabled = true;
+                document.getElementById('confirmCleanupBtn').style.opacity = 0.5;
+            } else {
+                document.getElementById('confirmCleanupBtn').disabled = false;
+                document.getElementById('confirmCleanupBtn').style.opacity = 1;
+                
+                let html = '';
+                const colors = { hot: 'text-amber-400', warm: 'text-orange-400', cold: 'text-zinc-500' };
+                const labels = { hot: 'Quentes', warm: 'Mornos', cold: 'Frios' };
+                
+                for (const [tier, count] of Object.entries(data.details)) {
+                    if (count > 0) {
+                        html += `<span class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/5 ${colors[tier]}">${count} ${labels[tier]}</span>`;
+                    }
+                }
+                details.innerHTML = html;
+            }
+        } catch (e) {
+            console.error(e);
         }
-        if (!await confirmModal(`Excluir ${preview.count} leads com pontuação ≤ ${max_score}?`, 'Excluir', true)) return;
+    }, 300);
+}
+
+async function executeCleanup() {
+    const score = document.getElementById('cleanupScoreRange').value;
+    const btn = document.getElementById('confirmCleanupBtn');
+    
+    const count = document.getElementById('cleanupTotal').textContent;
+    if (count === "0") return;
+
+    btn.disabled = true;
+    btn.textContent = 'Excluindo...';
+
+    try {
         const result = await api('/api/leads/bulk-delete-by-score', {
             method: 'POST',
-            body: JSON.stringify({ max_score: max_score }),
+            body: JSON.stringify({ max_score: parseInt(score) }),
         });
-        showToast(`${result.deleted} leads excluídos`, 'success');
+        showToast(`${result.deleted} leads excluídos com sucesso`, 'success');
+        hideCleanupModal();
         loadLeads(1);
     } catch (e) {
-        showToast(e.message || 'Erro', 'error');
+        showToast(e.message || 'Erro ao excluir', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar Exclusão';
     }
 }
 

@@ -241,3 +241,44 @@
 <script src="/static/js/leads.js"></script>
 <script>lucide.createIcons();</script>
 {% endblock %}
+
+<!-- Delete by Score Modal -->
+<div id="cleanupModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideCleanupModal()"></div>
+    <div class="relative glass-card p-6 w-full max-w-md mx-4 fade-up">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="icon-box bg-red-500/10">
+                <i data-lucide="trash-2" class="w-5 h-5 text-red-400 stroke-[1.5]"></i>
+            </div>
+            <div>
+                <h3 class="text-[14px] font-semibold text-zinc-100">Limpeza por Pontuação</h3>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Remover leads de baixa qualidade</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wide">Excluir leads com menos de:</label>
+                <div class="flex items-center gap-3">
+                    <input type="range" id="cleanupScoreRange" min="0" max="100" value="30" step="5" class="flex-1 accent-red-500" oninput="updateCleanupPreview()">
+                    <span id="cleanupScoreValue" class="text-lg font-bold text-red-400 w-8 text-center">30</span>
+                </div>
+            </div>
+
+            <div id="cleanupPreviewArea" class="p-4 rounded-xl bg-red-500/[0.03] border border-red-500/10">
+                <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-2">Leads afetados</p>
+                <div class="flex flex-col gap-2">
+                    <p class="text-[11px] text-zinc-400">Total a ser removido: <span id="cleanupTotal" class="text-zinc-100 font-bold">0</span></p>
+                    <div id="cleanupTierDetails" class="flex flex-wrap gap-2 mt-1">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+            <button onclick="hideCleanupModal()" class="btn-ghost flex-1">Cancelar</button>
+            <button id="confirmCleanupBtn" onclick="executeCleanup()" class="btn-accent !bg-red-600 !border-red-500/50 hover:!bg-red-700 flex-1">Confirmar Exclusão</button>
+        </div>
+    </div>
+</div>

@@ -24,10 +24,19 @@ async function loadKanban() {
             
             const tierColor = lead.tier === 'hot' ? 'text-amber-400' : lead.tier === 'warm' ? 'text-orange-400' : 'text-zinc-500';
             const domain = lead.website ? lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0] : '';
+            
+            // Site quality badge
+            let techBadge = '';
+            if (lead.site_quality === 'poor' && lead.site_verified) {
+                techBadge = '<span class="ml-1 px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold bg-red-500/15 text-red-400 border border-red-500/10">SITE ANTIGO</span>';
+            }
 
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
-                    <span class="text-[10px] font-bold uppercase tracking-tighter ${tierColor}">${lead.tier}</span>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold uppercase tracking-tighter ${tierColor}">${lead.tier}</span>
+                        ${techBadge}
+                    </div>
                     <span class="text-[10px] font-bold text-zinc-600">#${lead.score}</span>
                 </div>
                 <h4 class="text-[13px] font-semibold text-zinc-100 truncate mb-1">${escapeHtml(lead.name)}</h4>
@@ -37,6 +46,7 @@ async function loadKanban() {
                     <div class="flex gap-1.5">
                         ${lead.whatsapp ? `<i data-lucide="message-square" class="w-3 h-3 text-green-500/70"></i>` : ''}
                         ${lead.website ? `<i data-lucide="globe" class="w-3 h-3 text-blue-500/70"></i>` : ''}
+                        ${lead.cnpj ? `<i data-lucide="building-2" class="w-3 h-3 text-purple-500/70" title="CNPJ Disponível"></i>` : ''}
                     </div>
                     <span class="text-[9px] text-zinc-700 font-medium">${formatDate(lead.created_at)}</span>
                 </div>
