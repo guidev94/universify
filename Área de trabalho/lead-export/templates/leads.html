@@ -180,67 +180,6 @@
         </div>
     </div>
 </div>
-<!-- Lead Detail Modal -->
-<div id="leadDetailModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLeadDetail()"></div>
-    <div class="relative glass-card p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-[15px] font-semibold text-zinc-100" id="leadDetailName">Lead</h3>
-            <button onclick="closeLeadDetail()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div id="leadDetailBody" class="space-y-4">
-        </div>
-    </div>
-</div>
-<!-- Export Modal -->
-<div id="exportModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeExportModal()"></div>
-    <div class="relative glass-card p-6 w-full max-w-md mx-4">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-[15px] font-semibold text-zinc-100">Exportar Leads</h3>
-            <button onclick="closeExportModal()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Qualificação</label>
-                <select id="expTier" class="select-glass w-full mt-1">
-                    <option value="hot,warm,cold">Todos</option>
-                    <option value="hot">Quente</option>
-                    <option value="warm">Morno</option>
-                    <option value="cold">Frio</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Quantidade</label>
-                <input type="number" id="expQty" placeholder="Sem limite" class="input-glass mt-1" min="1">
-            </div>
-            <div>
-                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Formato</label>
-                <div class="flex gap-2 mt-1">
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="expFormat" value="csv" class="sr-only peer" checked>
-                        <div class="text-center py-2 rounded-xl border border-zinc-800 text-[12px] font-medium text-zinc-500 peer-checked:border-blue-500/40 peer-checked:text-blue-400 peer-checked:bg-blue-500/5 transition-all">CSV</div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="expFormat" value="xlsx" class="sr-only peer">
-                        <div class="text-center py-2 rounded-xl border border-zinc-800 text-[12px] font-medium text-zinc-500 peer-checked:border-blue-500/40 peer-checked:text-blue-400 peer-checked:bg-blue-500/5 transition-all">XLSX</div>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <button onclick="doInlineExport()" class="btn-accent w-full mt-5 !py-3 text-[13px]">Baixar Arquivo</button>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script src="/static/js/leads.js"></script>
-<script>lucide.createIcons();</script>
-{% endblock %}
 
 <!-- Delete by Score Modal -->
 <div id="cleanupModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -282,3 +221,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="/static/js/leads.js"></script>
+<script>lucide.createIcons();</script>
+{% endblock %}

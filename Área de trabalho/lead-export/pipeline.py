@@ -184,7 +184,16 @@ class LeadPipeline:
                     conn.execute(f"UPDATE leads SET {', '.join(updates)} WHERE id = ?", params)
                     conn.commit()
                     enriched_count += 1
-                conn.close()
+                # Deep Contact Scraper Trigger
+                try:
+                    from crawler.deep_scraper import DeepContactScraper
+                    ds = DeepContactScraper()
+                    threading.Thread(target=ds.scrape_additional_info, args=(row_dict["id"], row_dict["website"]), daemon=True).start()
+                except Exception as e:
+                    logger.debug(f"[pipeline:deep] error triggering: {e}")
+
+        conn.close()
+
             except Exception as e:
                 logger.warning(f"[pipeline:enrich] lead {lead_id} failed: {e}")
 
