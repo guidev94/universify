@@ -49,6 +49,11 @@ def validate_lead(lead):
         return None
 
     name = clean_name(lead.get("name", ""))
+    
+    # Reject names with too many non-latin characters (Chinese, Arabic, etc.)
+    if re.search(r"[\u4e00-\u9fff]", name):
+        return None
+        
     email = validate_email_address(lead.get("email", ""))
     phone = validate_phone(lead.get("phone", ""))
     whatsapp = validate_phone(lead.get("whatsapp", "")) or phone
