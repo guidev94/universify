@@ -73,7 +73,7 @@ async function doExport() {
                 format,
                 tier: tier || null,
                 status: status || null,
-                quantity: quantity ? parseInt(quantity) : null,
+                quantity: quantity && parseInt(quantity) > 0 ? parseInt(quantity) : null,
                 keyword: keyword || null,
             }),
         });

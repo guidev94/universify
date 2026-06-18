@@ -653,21 +653,28 @@ async function loadLeadActivities(leadId) {
 
 // Bulk delete by score
 async function bulkDeleteByScore() {
+    const scoreStr = prompt("Excluir leads com pontuação menor ou igual a:", "30");
+    if (scoreStr === null) return;
+    const max_score = parseInt(scoreStr);
+    if (isNaN(max_score)) {
+        showToast('Pontuação inválida', 'error');
+        return;
+    }
     try {
         const preview = await api('/api/leads/bulk-delete-by-score', {
             method: 'POST',
-            body: JSON.stringify({ max_score: 30, dry_run: true }),
+            body: JSON.stringify({ max_score: max_score, dry_run: true }),
         });
         if (preview.count === 0) {
-            showToast('Nenhum lead com pontuação ≤ 30', 'info');
+            showToast(`Nenhum lead com pontuação ≤ ${max_score}`, 'info');
             return;
         }
-        if (!await confirmModal(`Excluir ${preview.count} leads com pontuação ≤ 30?`, 'Excluir Fracos', true)) return;
+        if (!await confirmModal(`Excluir ${preview.count} leads com pontuação ≤ ${max_score}?`, 'Excluir', true)) return;
         const result = await api('/api/leads/bulk-delete-by-score', {
             method: 'POST',
-            body: JSON.stringify({ max_score: 30 }),
+            body: JSON.stringify({ max_score: max_score }),
         });
-        showToast(`${result.deleted} leads fracos excluídos`, 'success');
+        showToast(`${result.deleted} leads excluídos`, 'success');
         loadLeads(1);
     } catch (e) {
         showToast(e.message || 'Erro', 'error');

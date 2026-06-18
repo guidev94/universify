@@ -61,6 +61,47 @@ def safe_request(session, url, method="get", timeout=15, delay=0, **kwargs):
         return None
 
 
+def get_neighborhoods(city="São Paulo"):
+    neighborhoods = {
+        "São Paulo": [
+            "Centro", "Moema", "Itaim Bibi", "Vila Olímpia", "Pinheiros", "Jardins", 
+            "Morumbi", "Tatuapé", "Santana", "Lapa", "Brooklin", "Vila Mariana", 
+            "Perdizes", "Butantã", "Ipiranga", "Santo Amaro", "Mooca", "Vila Madalena"
+        ],
+        "Rio de Janeiro": [
+            "Barra da Tijuca", "Copacabana", "Ipanema", "Leblon", "Botafogo", 
+            "Centro", "Tijuca", "Recreio", "Flamengo", "Gávea", "Laranjeiras"
+        ],
+        "Belo Horizonte": ["Savassi", "Lourdes", "Pampulha", "Buritis", "Sion"],
+        "Curitiba": ["Batel", "Centro", "Água Verde", "Bigorrilho"],
+        "Porto Alegre": ["Moinhos de Vento", "Petrópolis", "Centro Histórico"]
+    }
+    return neighborhoods.get(city, neighborhoods["São Paulo"])
+
+def expand_local_keywords(keyword, location):
+    # Detect city from location
+    city = "São Paulo"
+    if "rio" in location.lower():
+        city = "Rio de Janeiro"
+    elif "belo" in location.lower() or "bh" in location.lower():
+        city = "Belo Horizonte"
+    elif "curitiba" in location.lower():
+        city = "Curitiba"
+    elif "porto" in location.lower():
+        city = "Porto Alegre"
+        
+    neighborhoods = get_neighborhoods(city)
+    expanded = []
+    
+    # Base keyword
+    expanded.append(f"{keyword} {location}")
+    
+    # Add variations for neighborhoods
+    for nh in neighborhoods[:15]: # Limit to 15 to not explode
+        expanded.append(f"{keyword} {nh} {location}")
+        
+    return expanded
+
 def extract_emails_from_text(text, html=""):
     import re
     pattern = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"

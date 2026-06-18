@@ -226,11 +226,14 @@ def pipeline_stats():
     conn = get_connection()
     stages = ["new", "contacted", "negotiating", "closed_won", "closed_lost"]
     pipeline = {}
+    revenue = {}
     for stage in stages:
         pipeline[stage] = conn.execute("SELECT COUNT(*) as c FROM leads WHERE status = ?", (stage,)).fetchone()["c"]
+        revenue[stage] = round(conn.execute("SELECT COALESCE(SUM(deal_value), 0) as v FROM leads WHERE status = ?", (stage,)).fetchone()["v"], 2)
     total = sum(pipeline.values())
+    total_pipeline_value = round(revenue["negotiating"] + revenue["contacted"], 2)
     conn.close()
-    return jsonify({"pipeline": pipeline, "total": total})
+    return jsonify({"pipeline": pipeline, "revenue": revenue, "total": total, "total_pipeline_value": total_pipeline_value})
 
 
 @bp.route("/api/leads/today")

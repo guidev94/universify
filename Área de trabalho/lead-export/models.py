@@ -133,6 +133,17 @@ class Lead:
         return removed
 
     @staticmethod
+    def delete_by_score(min_score):
+        conn = get_connection()
+        try:
+            cursor = conn.execute("DELETE FROM leads WHERE score < ?", (min_score,))
+            count = cursor.rowcount
+            conn.commit()
+            return count
+        finally:
+            conn.close()
+
+    @staticmethod
     def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None):
         conn = get_connection()
         conditions = []

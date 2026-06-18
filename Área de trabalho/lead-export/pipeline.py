@@ -123,10 +123,21 @@ class LeadPipeline:
         conn = get_connection()
         for lid in verified_ids:
             row = conn.execute(
-                "SELECT id, website, site_verified FROM leads WHERE id = ?", (lid,)
+                "SELECT id, name, website, site_verified FROM leads WHERE id = ?", (lid,)
             ).fetchone()
-            if row and row["site_verified"]:
-                self.enrich_queue.put(dict(row))
+            if row:
+                row_dict = dict(row)
+                if row_dict["site_verified"]:
+                    self.enrich_queue.put(row_dict)
+                
+                # CNPJ Enrichment Trigger
+                try:
+                    from crawler.cnpj_enricher import CNPJEnricher
+                    enricher = CNPJEnricher()
+                    enricher.enrich_lead(row_dict["id"], row_dict["name"])
+                except Exception as e:
+                    logger.debug(f"[pipeline:cnpj] error triggering enrichment: {e}")
+
         conn.close()
 
         if self.event_bus:

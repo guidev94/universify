@@ -82,7 +82,7 @@
         <button onclick="applyPreset('no_contact')" class="filter-pill px-2.5 py-1 rounded-lg text-[10px] font-medium border border-zinc-700 text-zinc-400/70 hover:bg-zinc-500/10 transition-all">Sem Contato</button>
 
         <span class="text-zinc-800 mx-1">|</span>
-        <button onclick="bulkDeleteByScore()" class="px-2.5 py-1 rounded-lg text-[10px] font-medium border border-red-500/20 text-red-400/70 hover:bg-red-500/10 transition-all">Limpar &lt; 30 pts</button>
+        <button onclick="bulkDeleteByScore()" class="px-2.5 py-1 rounded-lg text-[10px] font-medium border border-red-500/20 text-red-400/70 hover:bg-red-500/10 transition-all">Limpar por Pontuação</button>
     </div>
 </div>
 
@@ -216,7 +216,7 @@
             </div>
             <div>
                 <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Quantidade</label>
-                <input type="number" id="expQty" placeholder="Sem limite" class="input-glass mt-1" min="1" max="5000">
+                <input type="number" id="expQty" placeholder="Sem limite" class="input-glass mt-1" min="1">
             </div>
             <div>
                 <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Formato</label>

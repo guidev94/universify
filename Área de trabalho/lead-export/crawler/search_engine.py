@@ -14,13 +14,29 @@ class SearchEngine:
         self.ua = UserAgent()
         self.delay = int(os.getenv("REQUEST_DELAY_MS", "1500")) / 1000
         self.session = requests.Session()
+        
+        # Enhanced headers and proxies preparation
         self.session.headers.update({
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
         })
         self._engine_health = {"duckduckgo": True, "bing": True, "google": True}
+        self.proxies = [] # Could be populated with a list of proxies if available
+        self._last_ua_update = 0
+
+    def _rotate_identity(self):
+        """Rotates User-Agent and potentially clears cookies to avoid tracking."""
+        now = time.time()
+        if now - self._last_ua_update > 300: # Every 5 minutes
+            self.session.headers["User-Agent"] = self.ua.random
+            self.session.cookies.clear()
+            self._last_ua_update = now
 
     def search(self, query, num_results=30):
+        self._rotate_identity()
         engines = [
             ("duckduckgo", self._search_duckduckgo),
             ("bing", self._search_bing),

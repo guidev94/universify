@@ -260,42 +260,50 @@ class ParallelScheduler:
             conn.close()
 
     def _auto_crawl(self):
-        keywords = Keyword.get_for_autocrawl(limit=5)
+        keywords = Keyword.get_for_autocrawl(limit=3)
         if not keywords:
             logger.info("[scheduler:crawl] no keywords for auto-crawl")
             return
 
-        expanded = self._expand_keywords(keywords)[:5]
-        logger.info(f"[scheduler:crawl] auto-crawl started — {len(expanded)} keywords")
+        # Use the multiplier to get neighborhood coverage
+        from crawler.utils import expand_local_keywords
+        
+        expanded_pool = []
+        for kw in keywords:
+            # Expand each keyword but take only 3 neighborhoods from each to keep it healthy
+            variations = expand_local_keywords(kw["keyword"], kw["location"])
+            expanded_pool.extend(variations[:4]) 
 
-        for kw in expanded:
+        logger.info(f"[scheduler:crawl] auto-crawl started — {len(expanded_pool)} variations from {len(keywords)} base keywords")
+
+        for query_string in expanded_pool[:10]: # Cap at 10 total jobs per cycle
+            # Extract keyword and location from the query_string if it was expanded
+            # This is a bit simplified, usually it's "Keyword Neighborhood City"
+            # We'll treat the whole string as the keyword for the search engine
+            
             self.total_runs += 1
             retries = 0
-            max_retries = 3
-            delay = 30
-
+            max_retries = 2
+            
             while retries < max_retries:
-                if not crawl_gate.acquire(timeout=60):
-                    logger.warning(f"[scheduler:crawl] semaphore timeout for '{kw['keyword']}'")
+                if not crawl_gate.acquire(timeout=30):
                     break
                 try:
-                    count = self._run_multi_source_crawl(kw["keyword"], kw["location"])
+                    # Run with a slightly smaller quantity for auto-crawl to maintain speed
+                    count = self._run_multi_source_crawl(query_string, "", quantity_override=20)
                     self.total_successes += 1
                     self.last_crawl = time.time()
                     self._save_state()
-                    logger.info(f"[scheduler:crawl] '{kw['keyword']}' — {count} leads saved")
                     break
                 except Exception as e:
                     retries += 1
-                    self.last_error = f"{kw['keyword']}: {e}"
-                    if retries < max_retries:
-                        logger.warning(f"[scheduler:crawl] retry {retries}/{max_retries} for '{kw['keyword']}'")
-                        time.sleep(delay)
-                        delay *= 2
-                    else:
-                        logger.error(f"[scheduler:crawl] '{kw['keyword']}' failed after {max_retries} retries: {e}")
+                    if retries >= max_retries:
+                        logger.error(f"[scheduler:crawl] auto-crawl failed for '{query_string}': {e}")
                 finally:
                     crawl_gate.release()
+            
+            # Short sleep between jobs to avoid IP blocking
+            time.sleep(5)
 
     def _crawl_campaigns(self):
         from database import get_connection

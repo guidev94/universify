@@ -8,6 +8,7 @@ COLUMNS = [
     ("Email", "email"),
     ("Telefone", "phone"),
     ("WhatsApp", "whatsapp"),
+    ("WA_Link", "wa_link"),
     ("Website", "website"),
     ("Score", "score"),
     ("Tier", "tier"),
@@ -28,7 +29,18 @@ def export_csv(leads, filepath):
         for lead in leads:
             row = []
             for _, key in COLUMNS:
-                val = lead.get(key, "")
+                if key == "wa_link":
+                    wa = lead.get("whatsapp", "") or lead.get("phone", "")
+                    digits = "".join(filter(str.isdigit, wa))
+                    if digits:
+                        if not digits.startswith("55") and (10 <= len(digits) <= 11):
+                            digits = "55" + digits
+                        val = f"https://wa.me/{digits}"
+                    else:
+                        val = ""
+                else:
+                    val = lead.get(key, "")
+                    
                 if key == "site_verified":
                     val = "Sim" if val else "Não"
                 row.append(val)
@@ -65,7 +77,18 @@ def export_xlsx(leads, filepath):
 
     for row_idx, lead in enumerate(leads, 2):
         for col_idx, (_, key) in enumerate(COLUMNS, 1):
-            val = lead.get(key, "")
+            if key == "wa_link":
+                wa = lead.get("whatsapp", "") or lead.get("phone", "")
+                digits = "".join(filter(str.isdigit, wa))
+                if digits:
+                    if not digits.startswith("55") and (10 <= len(digits) <= 11):
+                        digits = "55" + digits
+                    val = f"https://wa.me/{digits}"
+                else:
+                    val = ""
+            else:
+                val = lead.get(key, "")
+                
             if key == "site_verified":
                 val = "Sim" if val else "Não"
 
@@ -82,9 +105,9 @@ def export_xlsx(leads, filepath):
             elif row_idx % 2 == 0:
                 cell.fill = even_fill
 
-    col_widths = [30, 35, 20, 20, 40, 8, 10, 12, 15, 25, 14]
+    col_widths = [30, 35, 20, 20, 40, 40, 8, 10, 12, 15, 25, 14, 20, 10]
     for i, width in enumerate(col_widths, 1):
-        ws.column_dimensions[chr(64 + i)].width = width
+        ws.column_dimensions[chr(64 + i) if i <= 26 else f"A{chr(64 + i - 26)}"].width = width
 
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = ws.dimensions

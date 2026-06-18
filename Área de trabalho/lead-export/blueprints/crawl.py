@@ -56,38 +56,52 @@ def start_crawl():
     query = data.get("query", "").strip()
     quantity = min(int(data.get("quantity", 25)), Config.MAX_LEADS_PER_CRAWL)
     location = data.get("location", "").strip()
-
-    if '|' in query:
-        query = query.split('|')[0].strip()
-    if '|' in location:
-        location = location.split('|')[0].strip()
+    expand = data.get("expand", False)
 
     if not query:
         return jsonify({"error": "Informe a palavra-chave"}), 400
     if source not in ("website", "maps", "both"):
         return jsonify({"error": "Fonte inválida"}), 400
 
-    conn_dup = get_connection()
-    already_running = conn_dup.execute(
-        "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", (query,)
-    ).fetchone()["c"]
-    conn_dup.close()
-    if already_running > 0:
-        return jsonify({"error": f"Já existe uma extração rodando para '{query}'"}), 409
+    queries_to_run = [query]
+    if expand:
+        from crawler.utils import expand_local_keywords
+        queries_to_run = expand_local_keywords(query, location)
+        # Limit the number of sub-jobs to avoid crashing or being blocked
+        queries_to_run = queries_to_run[:8] 
 
-    job_uuid = str(uuid.uuid4())
-    job_id = CrawlJob.create(job_uuid, query, location, source, quantity)
+    job_uuids = []
+    
+    for q in queries_to_run:
+        q_clean = q
+        if '|' in q_clean:
+            q_clean = q_clean.split('|')[0].strip()
+            
+        conn_dup = get_connection()
+        already_running = conn_dup.execute(
+            "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", (q_clean,)
+        ).fetchone()["c"]
+        conn_dup.close()
+        
+        if already_running > 0:
+            continue
 
-    job_manager.register(job_uuid, quantity)
+        job_uuid = str(uuid.uuid4())
+        job_id = CrawlJob.create(job_uuid, q_clean, location, source, quantity)
+        job_manager.register(job_uuid, quantity)
 
-    thread = threading.Thread(
-        target=run_crawl,
-        args=(job_uuid, job_id, source, query, quantity, location),
-        daemon=True,
-    )
-    thread.start()
+        thread = threading.Thread(
+            target=run_crawl,
+            args=(job_uuid, job_id, source, q_clean, quantity, location),
+            daemon=True,
+        )
+        thread.start()
+        job_uuids.append(job_uuid)
 
-    return jsonify({"job_id": job_uuid})
+    if not job_uuids:
+        return jsonify({"error": "Nenhuma nova extração pôde ser iniciada (já em execução)"}), 409
+
+    return jsonify({"job_id": job_uuids[0], "count": len(job_uuids)})
 
 
 def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name=None, require_quality=False):

@@ -70,22 +70,47 @@ class SiteVerifier:
             if not url.startswith(("http://", "https://")):
                 url = "https://" + url
             response = requests.get(url, timeout=8, allow_redirects=True)
-            html = response.text[:5000].lower()
+            html = response.text[:10000].lower()
 
             issues = 0
+            tech_score = 100
+            
+            is_legacy = False
+            if '<table' in html and ('width=' in html or 'cellpadding=' in html):
+                is_legacy = True
+                tech_score -= 30
+            if 'frameset' in html or 'frame src' in html:
+                is_legacy = True
+                tech_score -= 40
+            if 'frontpage' in html or 'dreamweaver' in html:
+                is_legacy = True
+                tech_score -= 20
+            if 'jquery/1.' in html or 'jquery-1.' in html:
+                tech_score -= 15
+            if 'flash' in html or '.swf' in html:
+                is_legacy = True
+                tech_score -= 50
+            
             if 'viewport' not in html:
+                tech_score -= 20
                 issues += 1
+            
             if not response.url.startswith("https"):
                 issues += 1
-            if 'wordpress' in html and ('flavor' in html or 'flavor' in response.headers.get('x-powered-by', '').lower()):
-                issues += 1
+                tech_score -= 10
+            
             if response.elapsed.total_seconds() > 4:
                 issues += 1
-            if len(html) < 500:
+                tech_score -= 10
+            
+            if len(html) < 800:
                 issues += 1
+                tech_score -= 20
 
-            if issues >= 2:
+            if tech_score < 55 or is_legacy:
                 return "poor"
+            elif tech_score < 75:
+                return "regular"
             return "good"
         except Exception:
             return "poor"
