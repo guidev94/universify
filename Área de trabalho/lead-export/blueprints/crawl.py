@@ -57,6 +57,7 @@ def start_crawl():
     quantity = min(int(data.get("quantity", 25)), Config.MAX_LEADS_PER_CRAWL)
     location = data.get("location", "").strip()
     expand = data.get("expand", False)
+    metropolitan = data.get("metropolitan", False)
 
     if not query:
         return jsonify({"error": "Informe a palavra-chave"}), 400
@@ -67,7 +68,15 @@ def start_crawl():
     if expand:
         from crawler.utils import expand_local_keywords
         queries_to_run = expand_local_keywords(query, location)
-        queries_to_run = queries_to_run[:12] # Slightly more sub-jobs
+        
+    if metropolitan:
+        from crawler.utils import expand_metropolitan_search
+        metro_queries = expand_metropolitan_search(query, location)
+        # Combine unique queries
+        queries_to_run = list(dict.fromkeys(queries_to_run + metro_queries))
+
+    # Safety limit for total parallel jobs from a single request
+    queries_to_run = queries_to_run[:15] 
 
     job_uuids = []
     

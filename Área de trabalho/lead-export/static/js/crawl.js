@@ -22,6 +22,7 @@ form.addEventListener('submit', async (e) => {
     const location = document.getElementById('location').value.trim();
     const quantity = parseInt(quantitySlider.value);
     const expand = document.getElementById('expand').checked;
+    const metropolitan = document.getElementById('metropolitan').checked;
 
     if (!query) return;
 
@@ -31,7 +32,7 @@ form.addEventListener('submit', async (e) => {
     try {
         const data = await api('/api/crawl', {
             method: 'POST',
-            body: JSON.stringify({ source, query, location, quantity, expand }),
+            body: JSON.stringify({ source, query, location, quantity, expand, metropolitan }),
         });
 
         currentJobId = data.job_id;

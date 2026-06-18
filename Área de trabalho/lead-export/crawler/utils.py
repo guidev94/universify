@@ -61,6 +61,45 @@ def safe_request(session, url, method="get", timeout=15, delay=0, **kwargs):
         return None
 
 
+def get_metropolitan_areas(city="São Paulo"):
+    # Cidades satélites e regiões metropolitanas estratégicas
+    areas = {
+        "São Paulo": [
+            "Guarulhos", "Osasco", "Santo André", "São Bernardo do Campo", 
+            "São Caetano do Sul", "Diadema", "Barueri", "Alphaville", 
+            "Santana de Parnaíba", "Mogi das Cruzes", "Jundiaí", "Campinas"
+        ],
+        "Rio de Janeiro": [
+            "Niterói", "Duque de Caxias", "Nova Iguaçu", "São Gonçalo", 
+            "Belford Roxo", "Petrópolis", "Macaé"
+        ],
+        "Belo Horizonte": ["Contagem", "Betim", "Nova Lima", "Ribeirão das Neves"],
+        "Curitiba": ["São José dos Pinhais", "Colombo", "Araucária", "Pinhais"],
+        "Porto Alegre": ["Canoas", "Novo Hamburgo", "São Leopoldo", "Gravataí"]
+    }
+    return areas.get(city, [])
+
+def expand_metropolitan_search(keyword, location):
+    # Detect city from location
+    city = "São Paulo"
+    loc_lower = location.lower()
+    if "rio" in loc_lower: city = "Rio de Janeiro"
+    elif "belo" in loc_lower or "bh" in loc_lower: city = "Belo Horizonte"
+    elif "curitiba" in loc_lower: city = "Curitiba"
+    elif "porto" in loc_lower: city = "Porto Alegre"
+        
+    satellites = get_metropolitan_areas(city)
+    expanded = []
+    
+    # Original
+    expanded.append(f"{keyword} {location}")
+    
+    # Add satellites
+    for sat in satellites[:10]:
+        expanded.append(f"{keyword} {sat}")
+        
+    return expanded
+
 def get_neighborhoods(city="São Paulo"):
     neighborhoods = {
         "São Paulo": [

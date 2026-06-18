@@ -75,21 +75,39 @@
                 </div>
             </div>
 
-            <!-- Multiplier Toggle -->
-            <div class="flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-white/[0.01]">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                        <i data-lucide="expand" class="w-4 h-4 text-purple-400 stroke-[2]"></i>
+            <!-- Multiplier Toggles -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-white/[0.01]">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                            <i data-lucide="expand" class="w-4 h-4 text-purple-400 stroke-[2]"></i>
+                        </div>
+                        <div>
+                            <p class="text-[12px] font-semibold text-zinc-300">Bairros</p>
+                            <p class="text-[10px] text-zinc-600">Busca local</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-[12px] font-semibold text-zinc-300">Multiplicar por Bairros</p>
-                        <p class="text-[10px] text-zinc-600">Busca automática em bairros nobres da região</p>
-                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="expand" name="expand" value="1" class="sr-only peer">
+                        <div class="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:after:bg-white"></div>
+                    </label>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="expand" name="expand" value="1" class="sr-only peer">
-                    <div class="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:after:bg-white"></div>
-                </label>
+
+                <div class="flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-white/[0.01]">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <i data-lucide="map" class="w-4 h-4 text-blue-400 stroke-[2]"></i>
+                        </div>
+                        <div>
+                            <p class="text-[12px] font-semibold text-zinc-300">Cidades Vizinhas</p>
+                            <p class="text-[10px] text-zinc-600">Busca regional</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="metropolitan" name="metropolitan" value="1" class="sr-only peer">
+                        <div class="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-500 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
+                    </label>
+                </div>
             </div>
 
             <!-- Quantity Slider -->

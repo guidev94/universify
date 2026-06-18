@@ -748,7 +748,16 @@ async function executeCleanup() {
 
 // SSE real-time updates
 if (typeof events !== 'undefined') {
-    events.on('lead_new', () => {
+    events.on('lead_new', (data) => {
+        if (data && data.score >= 80) {
+            showToast(`🔥 Novo Lead HOT: ${data.name}!`, 'success');
+            // Play subtle sound if possible
+            try {
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.volume = 0.3;
+                audio.play();
+            } catch(e) {}
+        }
         if (selectedIds.size === 0 && currentPage === 1) loadLeads(1);
     });
     events.on('stats_updated', () => {
