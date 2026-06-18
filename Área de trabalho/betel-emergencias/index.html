@@ -94,7 +94,7 @@
   <nav id="navbar" class="fixed top-0 left-0 right-0 z-40 flex justify-center pointer-events-none pt-4 md:pt-5 px-4 transition-transform duration-700 ease-[var(--ease-fluid)]">
     <div class="pointer-events-auto backdrop-blur-2xl bg-white/80 rounded-full px-5 md:px-8 py-3 shadow-lg shadow-black/[0.04] ring-1 ring-black/[0.06] flex items-center gap-5 md:gap-8 w-full max-w-5xl md:w-auto transition-all duration-500">
       <a href="#inicio" class="shrink-0">
-        <img src="assets/images/logo.png" alt="Sagrado Betel - Ambulância 24h São Paulo" class="h-10 md:h-14 w-auto" width="1020" height="798" fetchpriority="high">
+        <img src="assets/images/logo.png" alt="Sagrado Betel - Ambulância 24h São Paulo" class="h-12 md:h-16 w-auto" width="1020" height="798" fetchpriority="high">
       </a>
 
       <div class="hidden lg:flex items-center gap-7">
@@ -449,115 +449,59 @@
     </div>
   </section>
 
-  <!-- ═══════════════ COBERTURA — Layout mapa visual ═══════════════ -->
+  <!-- ═══════════════ COBERTURA — Valor + Urgência ═══════════════ -->
   <section id="cobertura" class="py-28 md:py-36 bg-footer text-white relative overflow-hidden">
-    <!-- Decorative grid pattern -->
-    <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cpath d=&quot;M0 0h60v60H0z&quot; fill=&quot;none&quot; stroke=&quot;white&quot; stroke-width=&quot;0.5&quot;/%3E%3C/svg%3E')"></div>
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;0.8&quot; fill=&quot;white&quot;/%3E%3C/svg%3E')"></div>
 
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-      <div class="section-header flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
-        <div>
-          <p class="text-sm font-semibold text-primary-light mb-3 tracking-wide">Área de cobertura</p>
-          <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-white leading-tight">Ambulância em toda<br class="hidden md:block"> São Paulo e região</h2>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
+      <div class="section-header text-center mb-16">
+        <p class="text-sm font-semibold text-primary-light mb-4 tracking-wide">Cobertura e atendimento</p>
+        <h2 class="font-clash font-bold text-3xl md:text-5xl text-white leading-tight max-w-2xl mx-auto">Chegamos até você em minutos</h2>
+      </div>
+
+      <!-- 3 cards de proposta de valor -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14">
+        <!-- Card 1: Tempo -->
+        <div class="coverage-region bg-white/[0.06] rounded-2xl p-8 border border-white/[0.08]">
+          <div class="w-14 h-14 rounded-2xl bg-primary-light/10 flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <p class="text-4xl font-clash font-bold text-white mb-2">20–40 <span class="text-lg text-white/50">min</span></p>
+          <h3 class="font-semibold text-white text-base mb-3">Tempo médio em SP capital</h3>
+          <p class="text-sm text-white/60 leading-relaxed">Base no Carandiru com acesso direto às Marginais Tietê e Pinheiros. Cobertura rápida para todas as zonas: Norte, Sul, Leste, Oeste e Centro.</p>
         </div>
-        <div class="flex items-center gap-6">
-          <div class="text-center">
-            <p class="text-3xl font-clash font-bold text-primary-light">20–40</p>
-            <p class="text-xs text-white/50 mt-1">minutos SP capital</p>
+
+        <!-- Card 2: Cobertura -->
+        <div class="coverage-region bg-white/[0.06] rounded-2xl p-8 border border-white/[0.08]">
+          <div class="w-14 h-14 rounded-2xl bg-primary-light/10 flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
-          <div class="w-px h-12 bg-white/10"></div>
-          <div class="text-center">
-            <p class="text-3xl font-clash font-bold text-primary-light">24h</p>
-            <p class="text-xs text-white/50 mt-1">todos os dias</p>
+          <p class="text-4xl font-clash font-bold text-white mb-2">SP + <span class="text-lg text-white/50">região</span></p>
+          <h3 class="font-semibold text-white text-base mb-3">Capital e Grande São Paulo</h3>
+          <p class="text-sm text-white/60 leading-relaxed">São Paulo capital inteira, Guarulhos, Osasco, ABC Paulista, Barueri, Taboão da Serra, Cotia e mais. Próximos aos hospitais Mandaqui, São Camilo e HC.</p>
+        </div>
+
+        <!-- Card 3: Disponibilidade -->
+        <div class="coverage-region bg-white/[0.06] rounded-2xl p-8 border border-white/[0.08]">
+          <div class="w-14 h-14 rounded-2xl bg-primary-light/10 flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
           </div>
+          <p class="text-4xl font-clash font-bold text-white mb-2">24h <span class="text-lg text-white/50">/ 365</span></p>
+          <h3 class="font-semibold text-white text-base mb-3">Feriados, madrugada, domingo</h3>
+          <p class="text-sm text-white/60 leading-relaxed">Não importa o horário ou dia. Nossa equipe está de prontidão permanente — Natal, Ano Novo, madrugada de terça. Sempre alguém pronto para atender.</p>
         </div>
       </div>
 
-      <!-- Bento grid de regiões -->
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-        <!-- Zona Norte — featured -->
-        <div class="coverage-region col-span-2 row-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-6 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
-          <div class="flex items-center gap-2 mb-4">
-            <div class="w-2 h-2 rounded-full bg-primary-light"></div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-primary-light">Zona Norte</p>
-          </div>
-          <p class="text-[13px] text-white/70 leading-relaxed mb-4">Nossa base fica no Carandiru — acesso rápido a toda Zona Norte com tempos de resposta abaixo de 25 minutos.</p>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Santana</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tucuruvi</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Carandiru</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Casa Verde</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Freguesia do Ó</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Pirituba</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Maria</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Mandaqui</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tremembé</span>
-          </div>
-        </div>
-
-        <!-- Zona Sul -->
-        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-400">Zona Sul</p>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Moema</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Itaim Bibi</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Mariana</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Jabaquara</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Santo Amaro</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Interlagos</span>
-          </div>
-        </div>
-
-        <!-- Zona Leste -->
-        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-amber-400">Zona Leste</p>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tatuapé</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Mooca</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Penha</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Itaquera</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">São Mateus</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Matilde</span>
-          </div>
-        </div>
-
-        <!-- Zona Oeste/Centro -->
-        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-sky-400">Oeste / Centro</p>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Pinheiros</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Perdizes</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Lapa</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Sé</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Liberdade</span>
-            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Consolação</span>
-          </div>
-        </div>
-
-        <!-- Grande SP -->
-        <div class="coverage-region col-span-2 md:col-span-4 lg:col-span-2 bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm rounded-2xl p-5 border border-primary/20">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-primary-light"></div>
-            <p class="text-xs font-semibold uppercase tracking-widest text-primary-light">Grande SP</p>
-          </div>
-          <p class="text-[13px] text-white/70 leading-relaxed">Guarulhos, Osasco, Barueri, Santo André, São Bernardo, São Caetano, Diadema, Mauá, Taboão da Serra, Cotia</p>
-          <a href="#orcamento" class="inline-flex items-center gap-2 text-sm font-semibold text-primary-light mt-4 hover:gap-3 transition-all duration-300">
-            Solicitar ambulância
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-          </a>
-        </div>
+      <!-- CTA -->
+      <div class="text-center mb-10">
+        <a href="#orcamento" data-magnetic class="inline-flex items-center gap-3 bg-primary-light text-primary-darker hover:bg-white rounded-full px-8 py-4 font-semibold text-[15px] transition-all duration-300 shadow-lg shadow-black/20">
+          Consulte tempo de chegada para sua região
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
       </div>
 
-      <p class="text-center text-xs text-white/30 mt-8">Hospitais de referência: Mandaqui &bull; São Camilo &bull; Hospital das Clínicas &bull; Servidor Público Estadual</p>
+      <!-- SEO: bairros em texto corrido sutil -->
+      <p class="text-center text-[11px] text-white/25 leading-relaxed max-w-4xl mx-auto">Atendemos: Santana, Tucuruvi, Carandiru, Casa Verde, Pirituba, Moema, Vila Mariana, Jabaquara, Tatuapé, Mooca, Penha, Itaquera, Pinheiros, Perdizes, Lapa, Sé, Liberdade, Consolação, Guarulhos, Osasco, Santo André, São Bernardo, São Caetano, Diadema, Mauá, Barueri, Taboão da Serra, Cotia e toda região metropolitana de São Paulo.</p>
     </div>
   </section>
 
