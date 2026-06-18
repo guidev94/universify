@@ -33,8 +33,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/images/logo.png" as="image" fetchpriority="high">
+  <link rel="preload" href="dist/output.css" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="dist/output.css">
 
@@ -91,12 +93,8 @@
   <!-- ═══════════════ NAVIGATION ═══════════════ -->
   <nav id="navbar" class="fixed top-0 left-0 right-0 z-40 flex justify-center pointer-events-none pt-4 md:pt-5 px-4 transition-transform duration-700 ease-[var(--ease-fluid)]">
     <div class="pointer-events-auto backdrop-blur-2xl bg-white/80 rounded-full px-5 md:px-8 py-3 shadow-lg shadow-black/[0.04] ring-1 ring-black/[0.06] flex items-center gap-5 md:gap-8 w-full max-w-5xl md:w-auto transition-all duration-500">
-      <a href="#inicio" class="flex items-center gap-3 shrink-0">
-        <img src="assets/images/logo.png" alt="Sagrado Betel" class="h-9 md:h-11 w-auto" width="1020" height="798">
-        <div class="hidden md:flex flex-col leading-none">
-          <span class="font-clash font-bold text-[11px] uppercase tracking-[0.15em] text-text">Sagrado Betel</span>
-          <span class="text-[10px] text-muted tracking-wide">Emergência Médica</span>
-        </div>
+      <a href="#inicio" class="shrink-0">
+        <img src="assets/images/logo.png" alt="Sagrado Betel - Ambulância 24h São Paulo" class="h-10 md:h-14 w-auto" width="1020" height="798" fetchpriority="high">
       </a>
 
       <div class="hidden lg:flex items-center gap-7">
@@ -136,7 +134,7 @@
   <!-- ═══════════════ HERO ═══════════════ -->
   <section id="inicio" class="min-h-[100dvh] relative overflow-hidden flex items-center">
     <div class="hero-video-wrap">
-      <video autoplay muted loop playsinline preload="auto" poster="assets/images/logo.png">
+      <video autoplay muted loop playsinline preload="metadata" poster="assets/images/logo.png">
         <source src="assets/video/hero.mp4" type="video/mp4">
       </video>
     </div>
@@ -324,53 +322,65 @@
     </div>
   </section>
 
-  <!-- ═══════════════ COMO FUNCIONA — Timeline ═══════════════ -->
-  <section id="como-funciona" class="py-24 md:py-32 bg-slate-50">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-      <div class="section-header text-center mb-16">
-        <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight mb-4">Como Solicitar uma Ambulância</h2>
-        <p class="text-muted text-base max-w-xl mx-auto">Processo simples e rápido. Do contato à chegada em poucos minutos.</p>
+  <!-- ═══════════════ COMO FUNCIONA — Horizontal journey ═══════════════ -->
+  <section id="como-funciona" class="py-28 md:py-36 relative overflow-hidden">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--color-primary-50)_0%,_transparent_60%)]"></div>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+      <div class="section-header mb-20">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div>
+            <p class="text-sm font-semibold text-primary mb-3 tracking-wide">4 passos simples</p>
+            <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight">Do contato à chegada<br class="hidden md:block"> em poucos minutos</h2>
+          </div>
+          <p class="text-muted text-base max-w-sm">Solicitar uma ambulância particular nunca foi tão rápido. Processo transparente do início ao fim.</p>
+        </div>
       </div>
 
-      <div class="relative">
-        <!-- Linha vertical conectora -->
-        <div class="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-slate-200"></div>
-
-        <div class="space-y-12">
-          <!-- Step 1 -->
-          <div class="how-step relative flex items-start gap-6 md:gap-12">
-            <div class="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-clash font-bold text-lg shadow-lg shadow-primary/20">1</div>
-            <div class="pt-2 flex-1">
-              <h3 class="font-clash font-semibold text-lg text-text mb-1">Entre em contato</h3>
-              <p class="text-sm text-muted leading-relaxed">Ligue, envie WhatsApp para (11) 97167-4912 ou preencha o formulário acima. Nossa central atende 24h, inclusive feriados.</p>
-            </div>
+      <!-- Steps como "journey cards" com imagem de fundo contextual -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
+        <!-- Step 1 — dark card, highlight -->
+        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
+          <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=70&auto=format&fit=crop" alt="Pessoa usando celular para solicitar ambulância" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+          <div class="relative z-10">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">01</span>
+            <h3 class="font-clash font-semibold text-xl text-white mb-1">Entre em contato</h3>
+            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Ligue, envie WhatsApp para (11) 97167-4912 ou preencha o formulário. Nossa central opera 24h, inclusive feriados.</p>
           </div>
+        </div>
 
-          <!-- Step 2 -->
-          <div class="how-step relative flex items-start gap-6 md:gap-12">
-            <div class="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-clash font-bold text-lg shadow-lg shadow-primary/20">2</div>
-            <div class="pt-2 flex-1">
-              <h3 class="font-clash font-semibold text-lg text-text mb-1">Receba o orçamento imediato</h3>
-              <p class="text-sm text-muted leading-relaxed">Informamos o valor exato e tempo estimado de chegada antes de confirmar. Sem surpresas no final — transparência total.</p>
-            </div>
+        <!-- Step 2 -->
+        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
+          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=70&auto=format&fit=crop" alt="Cálculo de orçamento transparente" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+          <div class="relative z-10">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">02</span>
+            <h3 class="font-clash font-semibold text-xl text-white mb-1">Orçamento imediato</h3>
+            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Informamos valor exato e tempo estimado de chegada antes de confirmar. Sem surpresas — transparência total.</p>
           </div>
+        </div>
 
-          <!-- Step 3 -->
-          <div class="how-step relative flex items-start gap-6 md:gap-12">
-            <div class="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-clash font-bold text-lg shadow-lg shadow-primary/20">3</div>
-            <div class="pt-2 flex-1">
-              <h3 class="font-clash font-semibold text-lg text-text mb-1">Ambulância equipada a caminho</h3>
-              <p class="text-sm text-muted leading-relaxed">Após confirmação, a ambulância sai imediatamente com equipe de socorristas e enfermeiros, oxigênio, desfibrilador e todos os equipamentos necessários.</p>
-            </div>
+        <!-- Step 3 -->
+        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
+          <img src="https://images.unsplash.com/photo-1587745416684-47953f16f02f?w=800&q=70&auto=format&fit=crop" alt="Ambulância equipada em movimento nas ruas de São Paulo" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+          <div class="relative z-10">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">03</span>
+            <h3 class="font-clash font-semibold text-xl text-white mb-1">Ambulância a caminho</h3>
+            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Ambulância equipada com oxigênio, desfibrilador e equipe de socorristas certificados sai imediatamente. Chegada em até 40 min.</p>
           </div>
+        </div>
 
-          <!-- Step 4 -->
-          <div class="how-step relative flex items-start gap-6 md:gap-12">
-            <div class="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-clash font-bold text-lg shadow-lg shadow-primary/20">4</div>
-            <div class="pt-2 flex-1">
-              <h3 class="font-clash font-semibold text-lg text-text mb-1">Atendimento e transporte seguro</h3>
-              <p class="text-sm text-muted leading-relaxed">Equipe realiza o atendimento pré-hospitalar no local e transporta o paciente com monitoramento contínuo até o destino.</p>
-            </div>
+        <!-- Step 4 -->
+        <div class="how-step group relative rounded-[1.5rem] overflow-hidden min-h-[220px] md:min-h-[260px] flex flex-col justify-end p-7 md:p-8">
+          <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1b89?w=800&q=70&auto=format&fit=crop" alt="Equipe médica realizando atendimento pré-hospitalar" class="absolute inset-0 w-full h-full object-cover" loading="lazy" width="800" height="530">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10"></div>
+          <div class="relative z-10">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm text-white font-clash font-bold text-sm mb-4">04</span>
+            <h3 class="font-clash font-semibold text-xl text-white mb-1">Atendimento seguro</h3>
+            <p class="text-sm text-white/75 leading-relaxed max-w-xs">Equipe APH realiza o atendimento pré-hospitalar e transporta o paciente com monitoramento contínuo até o destino.</p>
           </div>
         </div>
       </div>
@@ -412,125 +422,222 @@
     </div>
   </section>
 
-  <!-- ═══════════════ COBERTURA ═══════════════ -->
-  <section id="cobertura" class="py-24 md:py-32 bg-slate-50">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
-      <div class="section-header text-center mb-14">
-        <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight mb-4">Onde Atendemos</h2>
-        <p class="text-muted text-base max-w-xl mx-auto">Cobertura completa em São Paulo capital e região metropolitana. Ambulância particular com acesso rápido a todas as regiões.</p>
+  <!-- ═══════════════ COBERTURA — Layout mapa visual ═══════════════ -->
+  <section id="cobertura" class="py-28 md:py-36 bg-footer text-white relative overflow-hidden">
+    <!-- Decorative grid pattern -->
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cpath d=&quot;M0 0h60v60H0z&quot; fill=&quot;none&quot; stroke=&quot;white&quot; stroke-width=&quot;0.5&quot;/%3E%3C/svg%3E')"></div>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+      <div class="section-header flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
+        <div>
+          <p class="text-sm font-semibold text-primary-light mb-3 tracking-wide">Área de cobertura</p>
+          <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-white leading-tight">Ambulância em toda<br class="hidden md:block"> São Paulo e região</h2>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-center">
+            <p class="text-3xl font-clash font-bold text-primary-light">20–40</p>
+            <p class="text-xs text-white/50 mt-1">minutos SP capital</p>
+          </div>
+          <div class="w-px h-12 bg-white/10"></div>
+          <div class="text-center">
+            <p class="text-3xl font-clash font-bold text-primary-light">24h</p>
+            <p class="text-xs text-white/50 mt-1">todos os dias</p>
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div class="coverage-region">
-          <h3 class="font-clash font-semibold text-xl text-text mb-5">São Paulo Capital</h3>
-          <div class="space-y-4">
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Zona Norte</p>
-              <p class="text-sm text-muted leading-relaxed">Santana, Tucuruvi, Mandaqui, Tremembé, Jaçanã, Vila Guilherme, Vila Maria, Casa Verde, Limão, Freguesia do Ó, Pirituba, Carandiru. Próximo ao Hospital Mandaqui e Hospital do Servidor Público Estadual.</p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Zona Sul</p>
-              <p class="text-sm text-muted leading-relaxed">Moema, Itaim Bibi, Vila Mariana, Saúde, Jabaquara, Santo Amaro, Campo Belo, Brooklin, Interlagos, Grajaú, Capela do Socorro.</p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Zona Leste</p>
-              <p class="text-sm text-muted leading-relaxed">Tatuapé, Mooca, Penha, Vila Matilde, São Mateus, Itaquera, Guaianases, São Miguel Paulista, Cidade Tiradentes.</p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Zona Oeste e Centro</p>
-              <p class="text-sm text-muted leading-relaxed">Pinheiros, Perdizes, Lapa, Butantã, Sé, República, Liberdade, Bela Vista, Consolação, Santa Cecília. Acesso rápido ao Hospital São Camilo e Hospital das Clínicas.</p>
-            </div>
+      <!-- Bento grid de regiões -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+        <!-- Zona Norte — featured -->
+        <div class="coverage-region col-span-2 row-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-6 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-2 h-2 rounded-full bg-primary-light"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-primary-light">Zona Norte</p>
+          </div>
+          <p class="text-[13px] text-white/70 leading-relaxed mb-4">Nossa base fica no Carandiru — acesso rápido a toda Zona Norte com tempos de resposta abaixo de 25 minutos.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Santana</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tucuruvi</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Carandiru</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Casa Verde</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Freguesia do Ó</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Pirituba</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Maria</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Mandaqui</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tremembé</span>
           </div>
         </div>
 
-        <div class="coverage-region">
-          <h3 class="font-clash font-semibold text-xl text-text mb-5">Grande São Paulo</h3>
-          <div class="space-y-4">
-            <div>
-              <p class="text-sm font-medium text-text mb-2">ABC Paulista</p>
-              <p class="text-sm text-muted leading-relaxed">Santo André, São Bernardo do Campo, São Caetano do Sul, Diadema, Mauá, Ribeirão Pires.</p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Região Norte/Oeste</p>
-              <p class="text-sm text-muted leading-relaxed">Guarulhos, Osasco, Barueri, Carapicuíba, Jandira, Itapevi, Cotia, Taboão da Serra.</p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-text mb-2">Tempo de resposta</p>
-              <p class="text-sm text-muted leading-relaxed">20 a 40 min para SP capital. Para região metropolitana, o tempo varia conforme distância — informamos antes de confirmar o serviço.</p>
-            </div>
+        <!-- Zona Sul -->
+        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-400">Zona Sul</p>
           </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Moema</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Itaim Bibi</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Mariana</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Jabaquara</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Santo Amaro</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Interlagos</span>
+          </div>
+        </div>
 
-          <a href="#orcamento" class="inline-flex items-center gap-2 text-sm font-semibold text-primary mt-6 hover:gap-3 transition-all duration-300">
-            Solicitar ambulância para sua região
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        <!-- Zona Leste -->
+        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-amber-400">Zona Leste</p>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Tatuapé</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Mooca</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Penha</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Itaquera</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">São Mateus</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Vila Matilde</span>
+          </div>
+        </div>
+
+        <!-- Zona Oeste/Centro -->
+        <div class="coverage-region col-span-2 bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-white/[0.08] hover:border-primary/30 transition-colors duration-500">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-sky-400">Oeste / Centro</p>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Pinheiros</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Perdizes</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Lapa</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Sé</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Liberdade</span>
+            <span class="text-[11px] bg-white/[0.08] text-white/70 px-2 py-0.5 rounded">Consolação</span>
+          </div>
+        </div>
+
+        <!-- Grande SP -->
+        <div class="coverage-region col-span-2 md:col-span-4 lg:col-span-2 bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm rounded-2xl p-5 border border-primary/20">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-primary-light"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-primary-light">Grande SP</p>
+          </div>
+          <p class="text-[13px] text-white/70 leading-relaxed">Guarulhos, Osasco, Barueri, Santo André, São Bernardo, São Caetano, Diadema, Mauá, Taboão da Serra, Cotia</p>
+          <a href="#orcamento" class="inline-flex items-center gap-2 text-sm font-semibold text-primary-light mt-4 hover:gap-3 transition-all duration-300">
+            Solicitar ambulância
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </a>
         </div>
       </div>
+
+      <p class="text-center text-xs text-white/30 mt-8">Hospitais de referência: Mandaqui &bull; São Camilo &bull; Hospital das Clínicas &bull; Servidor Público Estadual</p>
     </div>
   </section>
 
-  <!-- ═══════════════ CUSTOS ═══════════════ -->
-  <section id="custos" class="py-24 md:py-32">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
-      <div class="section-header text-center mb-14">
-        <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight mb-4">Quanto Custa a Ambulância</h2>
-        <p class="text-muted text-base max-w-xl mx-auto">Preços transparentes. Você sabe exatamente quanto vai pagar antes da ambulância sair.</p>
+  <!-- ═══════════════ CUSTOS — Bento pricing ═══════════════ -->
+  <section id="custos" class="py-28 md:py-36">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+      <div class="section-header mb-16">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div>
+            <p class="text-sm font-semibold text-primary mb-3 tracking-wide">Transparência total</p>
+            <h2 class="font-clash font-bold text-3xl md:text-[2.75rem] text-text leading-tight">Valores claros,<br class="hidden md:block"> sem surpresas</h2>
+          </div>
+          <p class="text-muted text-base max-w-sm">Você sabe exatamente quanto vai pagar antes da ambulância sair. Orçamento gratuito e sem compromisso.</p>
+        </div>
       </div>
 
-      <div class="pricing-card grid grid-cols-1 md:grid-cols-2 gap-0 rounded-3xl overflow-hidden ring-1 ring-slate-100">
-        <!-- Coluna do preço -->
-        <div class="bg-gradient-to-br from-primary to-primary-dark p-8 md:p-12 text-white flex flex-col justify-center">
-          <p class="text-sm uppercase tracking-wider opacity-80 mb-2">A partir de</p>
-          <div class="flex items-baseline gap-1 mb-4">
-            <span class="text-lg opacity-70">R$</span>
-            <span class="text-6xl font-clash font-bold">250</span>
+      <!-- Bento pricing grid -->
+      <div class="pricing-card grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <!-- Main price card -->
+        <div class="md:row-span-2 bg-gradient-to-br from-primary via-primary-dark to-footer rounded-[1.75rem] p-8 md:p-10 text-white flex flex-col justify-between relative overflow-hidden min-h-[380px]">
+          <div class="absolute -top-20 -right-20 w-56 h-56 bg-white/[0.04] rounded-full"></div>
+          <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-white/[0.04] rounded-full"></div>
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-8">
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+              <span class="text-[11px] font-medium text-white/80">Remoção em SP capital</span>
+            </div>
+            <p class="text-sm text-white/60 mb-1">A partir de</p>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl text-white/50 font-medium">R$</span>
+              <span class="text-[5.5rem] font-clash font-bold leading-[0.85] tracking-tight">250</span>
+            </div>
           </div>
-          <ul class="space-y-3 text-sm opacity-90">
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              Ambulância equipada + equipe
+          <div class="relative z-10 mt-auto">
+            <a href="#orcamento" data-magnetic class="inline-flex items-center gap-3 w-full justify-center bg-white text-primary rounded-2xl px-6 py-4 font-semibold text-[15px] transition-all duration-300 hover:shadow-lg hover:shadow-white/20">
+              Pedir orçamento gratuito
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- O que está incluso -->
+        <div class="bg-slate-50 rounded-[1.75rem] p-7 flex flex-col justify-center">
+          <p class="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Incluso no valor</p>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-3 text-sm text-text">
+              <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
+              Ambulância equipada + equipe APH
             </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              Oxigênio, monitor e desfibrilador
+            <li class="flex items-center gap-3 text-sm text-text">
+              <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
+              Oxigênio, monitor, desfibrilador
             </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <li class="flex items-center gap-3 text-sm text-text">
+              <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
               Tolerância de 1h30 no destino
             </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <li class="flex items-center gap-3 text-sm text-text">
+              <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
               Maca, prancha, kit emergência
             </li>
           </ul>
         </div>
 
-        <!-- Coluna de detalhes -->
-        <div class="bg-white p-8 md:p-12">
-          <h3 class="font-semibold text-text mb-6">Detalhes importantes</h3>
-          <dl class="space-y-5 text-sm">
-            <div>
-              <dt class="font-medium text-text">Hora parada adicional</dt>
-              <dd class="text-muted mt-0.5">R$ 50,00 por hora após a tolerância de 1h30</dd>
-            </div>
-            <div>
-              <dt class="font-medium text-text">Variação de preço</dt>
-              <dd class="text-muted mt-0.5">O valor final depende da distância, tipo de atendimento e equipamentos necessários</dd>
-            </div>
-            <div>
-              <dt class="font-medium text-text">Formas de pagamento</dt>
-              <dd class="text-muted mt-0.5">PIX, cartão de crédito/débito e dinheiro. Sem burocracia.</dd>
-            </div>
-            <div>
-              <dt class="font-medium text-text">Orçamento</dt>
-              <dd class="text-muted mt-0.5">100% gratuito e sem compromisso. Informamos antes de enviar a ambulância.</dd>
-            </div>
-          </dl>
+        <!-- Hora adicional -->
+        <div class="bg-white rounded-[1.75rem] p-7 ring-1 ring-slate-100 flex flex-col justify-center">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-xs font-semibold uppercase tracking-widest text-muted">Hora adicional</p>
+            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="flex items-baseline gap-1">
+            <span class="text-sm text-muted">R$</span>
+            <span class="text-4xl font-clash font-bold text-text">50</span>
+            <span class="text-sm text-muted">/hora</span>
+          </div>
+          <p class="text-xs text-muted mt-2">Após a tolerância de 1h30 no destino</p>
+        </div>
 
-          <a href="#orcamento" data-magnetic class="inline-flex items-center gap-2 mt-8 bg-primary hover:bg-primary-dark text-white rounded-full px-6 py-3 text-sm font-semibold transition-colors duration-300">
-            Pedir orçamento gratuito
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-          </a>
+        <!-- Pagamento -->
+        <div class="bg-white rounded-[1.75rem] p-7 ring-1 ring-slate-100">
+          <p class="text-xs font-semibold uppercase tracking-widest text-muted mb-4">Formas de pagamento</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-text bg-slate-50 rounded-xl px-4 py-2.5">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              PIX
+            </span>
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-text bg-slate-50 rounded-xl px-4 py-2.5">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              Cartão
+            </span>
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-text bg-slate-50 rounded-xl px-4 py-2.5">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              Dinheiro
+            </span>
+          </div>
+          <p class="text-xs text-muted mt-3">Sem burocracia. Pagamento após o atendimento.</p>
+        </div>
+
+        <!-- Variação -->
+        <div class="bg-primary/5 rounded-[1.75rem] p-7 border border-primary/10">
+          <p class="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Valor final depende de</p>
+          <ul class="space-y-2 text-sm text-muted">
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Distância do trajeto</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Tipo de atendimento (urgência, programado)</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Equipamentos adicionais necessários</li>
+          </ul>
+          <p class="text-xs text-primary/70 mt-4 font-medium">Informamos antes de confirmar — sem surpresas.</p>
         </div>
       </div>
     </div>
