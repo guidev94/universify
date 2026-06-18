@@ -47,6 +47,7 @@ async function loadKanban() {
                         ${lead.whatsapp ? `<i data-lucide="message-square" class="w-3 h-3 text-green-500/70"></i>` : ''}
                         ${lead.website ? `<i data-lucide="globe" class="w-3 h-3 text-blue-500/70"></i>` : ''}
                         ${lead.cnpj ? `<i data-lucide="building-2" class="w-3 h-3 text-purple-500/70" title="CNPJ Disponível"></i>` : ''}
+                        ${lead.has_ads ? `<i data-lucide="megaphone" class="w-3 h-3 text-amber-500" title="Investe em Anúncios: ${escapeHtml(lead.ads_platforms)}"></i>` : ''}
                     </div>
                     <span class="text-[9px] text-zinc-700 font-medium">${formatDate(lead.created_at)}</span>
                 </div>

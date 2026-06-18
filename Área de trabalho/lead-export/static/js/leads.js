@@ -108,6 +108,8 @@ function renderTable(leads) {
         const siteLink = lead.website
             ? `<a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 text-[11px] truncate max-w-[120px] inline-block">${escapeHtml(lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0])}</a>`
             : '<span class="text-zinc-700">—</span>';
+        
+        const adsIcon = lead.has_ads ? `<span class="ml-1 text-amber-500" title="Investe em Anúncios: ${escapeHtml(lead.ads_platforms)}">📢</span>` : '';
 
         const rowClass = lead.tier === 'hot' ? 'border-l-2 border-l-amber-400/60 bg-amber-500/[0.02]' : lead.tier === 'warm' ? 'border-l-2 border-l-orange-400/40' : '';
         const qualBadge = lead.score >= 80 ? '<span class="ml-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/15 text-amber-400">QUALIFICADO</span>' : '';
@@ -115,7 +117,7 @@ function renderTable(leads) {
         return `
             <tr class="${rowClass}">
                 <td><input type="checkbox" class="lead-checkbox rounded-sm cursor-pointer" data-id="${lead.id}" ${checked} onchange="toggleSelect(${lead.id})"></td>
-                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}${qualBadge}</td>
+                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}${qualBadge}${adsIcon}</td>
                 <td class="group">${lead.email ? `<span class="inline-flex items-center gap-1"><a href="mailto:${escapeHtml(lead.email.split(';')[0])}" class="text-zinc-300 hover:text-blue-400 truncate max-w-[140px] inline-block text-[12px]">${escapeHtml(lead.email.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.email.split(';')[0]}'); showToast('Email copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
                 <td class="group">${lead.phone ? `<span class="inline-flex items-center gap-1"><a href="tel:${lead.phone.split(';')[0]}" class="text-zinc-300 hover:text-emerald-400 text-[12px]">${escapeHtml(lead.phone.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.phone.split(';')[0]}'); showToast('Telefone copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
                 <td>${siteLink}</td>
@@ -355,6 +357,7 @@ async function openLeadDetail(id) {
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[11px] font-bold uppercase tracking-wider ${tierColors[lead.tier] || tierColors.cold}">${tierLabels[lead.tier] || '—'}</span>
                             ${lead.site_verified ? '<span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">&#10003; Verificado</span>' : ''}
+                            ${lead.has_ads ? `<span class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full" title="${escapeHtml(lead.ads_platforms)}">📢 Anuncia</span>` : ''}
                         </div>
                         <p class="text-[11px] text-zinc-500">${lead.source || 'Fonte desconhecida'} &middot; ${lead.category || 'Sem categoria'}</p>
                     </div>

@@ -50,6 +50,8 @@ class SiteVerifier:
         lead_data["cms"] = tech_data["cms"]
         lead_data["has_pixel"] = tech_data["has_pixel"]
         lead_data["has_analytics"] = tech_data["has_analytics"]
+        lead_data["has_ads"] = tech_data["has_ads"]
+        lead_data["ads_platforms"] = tech_data["ads_platforms"]
 
         score, tier = calculate_score(lead_data)
 
@@ -58,6 +60,8 @@ class SiteVerifier:
             score = min(100, score + 15)
         if not tech_data["has_pixel"] and site_ok:
             score = min(100, score + 5)
+        if tech_data["has_ads"]:
+            score = min(100, score + 10) # Leads who spend money are higher quality
 
         Lead.update_verification(
             lead["id"],
@@ -74,9 +78,12 @@ class SiteVerifier:
                cms = ?, 
                has_pixel = ?, 
                has_analytics = ?, 
+               has_ads = ?,
+               ads_platforms = ?,
                tech_score = ? 
                WHERE id = ?""", 
-            (tech_data["quality"], tech_data["cms"], tech_data["has_pixel"], tech_data["has_analytics"], tech_data["score"], lead["id"])
+            (tech_data["quality"], tech_data["cms"], tech_data["has_pixel"], tech_data["has_analytics"], 
+             tech_data["has_ads"], tech_data["ads_platforms"], tech_data["score"], lead["id"])
         )
         conn.commit()
         conn.close()
@@ -111,6 +118,22 @@ class SiteVerifier:
             if 'googletagmanager.com' in html or 'google-analytics.com' in html:
                 has_analytics = 1
             
+            # Specific Ads Platform Detection
+            ads_platforms = []
+            if 'googleadservices.com' in html or 'aw-' in html:
+                ads_platforms.append("Google Ads")
+            if has_pixel:
+                ads_platforms.append("Meta Ads")
+            if 'ads-twitter' in html:
+                ads_platforms.append("X Ads")
+            if 'linkedin.com/profile/insight' in html:
+                ads_platforms.append("LinkedIn Ads")
+            if 'analytics.tiktok.com' in html:
+                ads_platforms.append("TikTok Ads")
+            
+            has_ads = 1 if ads_platforms else 0
+            ads_platforms_str = ", ".join(ads_platforms)
+
             is_legacy = False
             if '<table' in html and ('width=' in html or 'cellpadding=' in html):
                 is_legacy = True
@@ -155,10 +178,12 @@ class SiteVerifier:
                 "score": tech_score,
                 "cms": cms,
                 "has_pixel": has_pixel,
-                "has_analytics": has_analytics
+                "has_analytics": has_analytics,
+                "has_ads": has_ads,
+                "ads_platforms": ads_platforms_str
             }
         except Exception:
-            return {"quality": "poor", "score": 0, "cms": "Unknown", "has_pixel": 0, "has_analytics": 0}
+            return {"quality": "poor", "score": 0, "cms": "Unknown", "has_pixel": 0, "has_analytics": 0, "has_ads": 0, "ads_platforms": ""}
 
     def _check_http(self, url):
         try:
