@@ -136,6 +136,10 @@ async function loadCampaigns() {
             const goalReached = c.leads_count >= c.goal;
             const isExtracting = extractingCampaigns.has(c.id);
 
+            // ROI calculation (Heuristic since we don't have full stats in list_campaigns yet)
+            // But we can show contacted vs won if we add it to the API
+            const convRate = c.won_count ? Math.round((c.won_count / Math.max(1, c.leads_count)) * 100) : 0;
+
             return `
                 <div class="p-4 rounded-xl bg-white/[0.02] border ${goalReached ? 'border-emerald-500/20' : isExtracting ? 'border-blue-500/20' : 'border-white/5'} hover:border-white/10 transition-colors" id="campCard-${c.id}">
                     <div class="flex items-center justify-between mb-2">
@@ -147,9 +151,15 @@ async function loadCampaigns() {
                             </div>
                             <p class="text-[10px] text-zinc-500 mt-0.5">${c.keyword || '—'} · ${c.location || 'Brasil'}</p>
                         </div>
-                        <div class="text-right ml-3">
-                            <p class="text-[18px] font-bold ${goalReached ? 'text-emerald-400' : isExtracting ? 'text-blue-400' : 'text-zinc-100'}" id="campCount-${c.id}">${c.leads_count}</p>
-                            <p class="text-[9px] text-zinc-600">de ${c.goal} leads</p>
+                        <div class="flex gap-4 ml-3">
+                            <div class="text-right">
+                                <p class="text-[10px] text-zinc-600 uppercase font-bold tracking-tighter">Conversão</p>
+                                <p class="text-[14px] font-bold text-emerald-400">${convRate}%</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[18px] font-bold ${goalReached ? 'text-emerald-400' : isExtracting ? 'text-blue-400' : 'text-zinc-100'}" id="campCount-${c.id}">${c.leads_count}</p>
+                                <p class="text-[9px] text-zinc-600">de ${c.goal} leads</p>
+                            </div>
                         </div>
                     </div>
                     <div class="progress-track mt-2 ${isExtracting ? 'overflow-hidden' : ''}">
@@ -157,9 +167,11 @@ async function loadCampaigns() {
                         ${isExtracting ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-shimmer"></div>' : ''}
                     </div>
                     <div class="flex items-center justify-between mt-2">
-                        <span class="text-[10px] ${isExtracting ? 'text-blue-400' : 'text-zinc-500'}">
-                            ${goalReached ? '100% concluído' : isExtracting ? '⚡ Extraindo... ' + progress + '% · +' + remaining + ' restantes' : progress + '% · ' + remaining + ' restantes'}
-                        </span>
+                        <div class="flex gap-3">
+                            <span class="text-[10px] ${isExtracting ? 'text-blue-400' : 'text-zinc-500'}">
+                                ${goalReached ? '100% concluído' : isExtracting ? '⚡ Extraindo... ' + progress + '% · +' + remaining + ' restantes' : progress + '% · ' + remaining + ' restantes'}
+                            </span>
+                        </div>
                         <div class="flex items-center gap-1">
                             <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads" aria-label="Ver leads da campanha">
                                 <i data-lucide="eye" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>

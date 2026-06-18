@@ -135,6 +135,7 @@ def list_campaigns():
     for c in campaigns:
         conn = get_connection()
         c["leads_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ?", (c["name"],)).fetchone()["cnt"]
+        c["won_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ? AND status = 'closed_won'", (c["name"],)).fetchone()["cnt"]
         conn.close()
     return jsonify({"campaigns": campaigns})
 

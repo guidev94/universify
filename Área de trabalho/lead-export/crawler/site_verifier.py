@@ -37,31 +37,47 @@ class SiteVerifier:
 
         url = lead["website"]
         site_ok = self._check_http(url)
-        ssl_ok = self._check_ssl(url) if site_ok else False
-        quality = self._check_quality(url) if site_ok else "poor"
-
-        if not site_ok:
-            quality = "poor"
+        
+        tech_data = self._check_quality(url) if site_ok else {"quality": "poor", "score": 0, "cms": "Offline", "has_pixel": 0, "has_analytics": 0}
 
         lead_data = Lead.get_by_id(lead["id"])
         if not lead_data:
             return
 
         lead_data["site_verified"] = 1 if site_ok else 0
-        lead_data["ssl_valid"] = 1 if ssl_ok else 0
+        lead_data["ssl_valid"] = 1 if (site_ok and self._check_ssl(url)) else 0
+        lead_data["site_quality"] = tech_data["quality"]
+        lead_data["cms"] = tech_data["cms"]
+        lead_data["has_pixel"] = tech_data["has_pixel"]
+        lead_data["has_analytics"] = tech_data["has_analytics"]
 
         score, tier = calculate_score(lead_data)
 
+        # Bonus for specific sales opportunities
+        if tech_data["quality"] == "poor" and site_ok:
+            score = min(100, score + 15)
+        if not tech_data["has_pixel"] and site_ok:
+            score = min(100, score + 5)
+
         Lead.update_verification(
             lead["id"],
-            site_verified=1 if site_ok else 0,
-            ssl_valid=1 if ssl_ok else 0,
+            site_verified=lead_data["site_verified"],
+            ssl_valid=lead_data["ssl_valid"],
             new_score=score,
             new_tier=tier,
         )
 
         conn = get_connection()
-        conn.execute("UPDATE leads SET site_quality = ? WHERE id = ?", (quality, lead["id"]))
+        conn.execute(
+            """UPDATE leads SET 
+               site_quality = ?, 
+               cms = ?, 
+               has_pixel = ?, 
+               has_analytics = ?, 
+               tech_score = ? 
+               WHERE id = ?""", 
+            (tech_data["quality"], tech_data["cms"], tech_data["has_pixel"], tech_data["has_analytics"], tech_data["score"], lead["id"])
+        )
         conn.commit()
         conn.close()
 
@@ -70,10 +86,30 @@ class SiteVerifier:
             if not url.startswith(("http://", "https://")):
                 url = "https://" + url
             response = requests.get(url, timeout=8, allow_redirects=True)
-            html = response.text[:10000].lower()
+            html = response.text[:20000].lower()
 
             issues = 0
             tech_score = 100
+            cms = "Custom/Other"
+            has_pixel = 0
+            has_analytics = 0
+            
+            # CMS Detection
+            if 'wp-content' in html or '/wp-includes/' in html:
+                cms = "WordPress"
+                if 'elementor' in html: cms = "WordPress (Elementor)"
+            elif 'wix.com' in html or 'wix-style' in html:
+                cms = "Wix"
+            elif 'shopify.com' in html or 'cdn.shopify.com' in html:
+                cms = "Shopify"
+            elif 'vtex' in html:
+                cms = "VTEX"
+
+            # Pixel & Analytics Detection
+            if 'fbevents.js' in html or 'connect.facebook.net' in html:
+                has_pixel = 1
+            if 'googletagmanager.com' in html or 'google-analytics.com' in html:
+                has_analytics = 1
             
             is_legacy = False
             if '<table' in html and ('width=' in html or 'cellpadding=' in html):
@@ -108,7 +144,22 @@ class SiteVerifier:
                 tech_score -= 20
 
             if tech_score < 55 or is_legacy:
-                return "poor"
+                quality = "poor"
+            elif tech_score < 75:
+                quality = "regular"
+            else:
+                quality = "good"
+                
+            return {
+                "quality": quality,
+                "score": tech_score,
+                "cms": cms,
+                "has_pixel": has_pixel,
+                "has_analytics": has_analytics
+            }
+        except Exception:
+            return {"quality": "poor", "score": 0, "cms": "Unknown", "has_pixel": 0, "has_analytics": 0}
+
             elif tech_score < 75:
                 return "regular"
             return "good"
