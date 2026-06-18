@@ -376,10 +376,11 @@ class Lead:
             params.extend([f"%{keyword}%", f"%{keyword}%"])
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-        limit = f"LIMIT {int(quantity)}" if quantity else ""
+        limit = f"LIMIT {int(quantity)}" if quantity and int(quantity) > 0 else ""
 
+        # Priority: Newest leads first (created_at DESC)
         rows = conn.execute(
-            f"SELECT * FROM leads {where} ORDER BY score DESC {limit}", params
+            f"SELECT * FROM leads {where} ORDER BY created_at DESC {limit}", params
         ).fetchall()
         conn.close()
         return [dict(r) for r in rows]

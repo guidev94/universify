@@ -30,7 +30,8 @@ def export_leads():
         from database import get_connection
         conn = get_connection()
         placeholders = ",".join("?" * len(ids))
-        rows = conn.execute(f"SELECT * FROM leads WHERE id IN ({placeholders}) ORDER BY score DESC", ids).fetchall()
+        # Ensure selected leads are also sorted by newest
+        rows = conn.execute(f"SELECT * FROM leads WHERE id IN ({placeholders}) ORDER BY created_at DESC", ids).fetchall()
         conn.close()
         leads = [dict(r) for r in rows]
     else:
