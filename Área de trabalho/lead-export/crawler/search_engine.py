@@ -37,30 +37,37 @@ class SearchEngine:
 
     def search(self, query, num_results=30):
         self._rotate_identity()
+        
+        # Parallel search across engines for speed and volume
+        from concurrent.futures import ThreadPoolExecutor
+        
+        all_urls = []
         engines = [
             ("duckduckgo", self._search_duckduckgo),
             ("bing", self._search_bing),
             ("google", self._search_google),
         ]
+        
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            future_to_engine = {
+                executor.submit(fn, query, num_results): name 
+                for name, fn in engines if self._engine_health.get(name, True)
+            }
+            
+            for future in future_to_engine:
+                name = future_to_engine[future]
+                try:
+                    urls = future.result(timeout=20)
+                    if urls:
+                        logger.info(f"[search] {name} retornou {len(urls)} URLs")
+                        all_urls.extend(urls)
+                except Exception as e:
+                    logger.warning(f"[search] {name} falhou: {e}")
+                    self._engine_health[name] = False
 
-        for name, fn in engines:
-            if not self._engine_health.get(name, True):
-                logger.info(f"[search] pulando {name} (marcado como indisponível)")
-                continue
-
-            try:
-                urls = fn(query, num_results)
-                if urls:
-                    logger.info(f"[search] {name} retornou {len(urls)} URLs para '{query[:40]}'")
-                    return urls
-                else:
-                    logger.warning(f"[search] {name} retornou 0 resultados para '{query[:40]}'")
-            except Exception as e:
-                logger.error(f"[search] {name} falhou: {e}")
-                self._engine_health[name] = False
-
-        logger.error(f"[search] todas as engines falharam para '{query[:40]}'")
-        return []
+        # Dedup and return unique URLs
+        unique_urls = list(dict.fromkeys(all_urls))
+        return unique_urls[:num_results]
 
     def _search_duckduckgo(self, query, num_results):
         urls = []

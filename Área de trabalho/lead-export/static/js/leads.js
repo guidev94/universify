@@ -684,6 +684,39 @@ async function sendAIWhatsApp(id) {
     loadLeads(currentPage);
 }
 
+async function bulkAIContact() {
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    
+    if (!await confirmModal(`Gerar abordagem IA e abrir WhatsApp para ${ids.length} leads?`, 'Iniciar Lote', false)) return;
+    
+    showToast('Processando abordagens...', 'info');
+    
+    for (const id of ids) {
+        try {
+            const data = await api(`/api/leads/${id}/ai-copy`);
+            const lead = await api(`/api/leads/${id}`);
+            const phone = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
+            
+            if (phone) {
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(data.message)}`;
+                window.open(url, '_blank');
+                // Mark as contacted
+                await api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'contacted' }) });
+            }
+            // Small delay between opens to not crash browser
+            await new Promise(r => setTimeout(r, 800));
+        } catch (e) {
+            console.error(`Error on bulk AI for lead ${id}`, e);
+        }
+    }
+    
+    selectedIds.clear();
+    updateBulkBar();
+    loadLeads(currentPage);
+    showToast('Lote processado!', 'success');
+}
+
 async function loadLeadActivities(leadId) {
     const container = document.getElementById(`leadActivities-${leadId}`);
     try {

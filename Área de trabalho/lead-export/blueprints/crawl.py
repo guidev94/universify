@@ -182,12 +182,27 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
         saved_ids = []
         seen = set()
 
-        for lead in leads:
+        # Pre-filter to remove duplicates from this batch
+        unique_leads = []
+        for l in leads:
+            e = l.get("email", "").strip().lower()
+            p = l.get("phone", "").strip()
+            w = l.get("website", "").strip().lower()
+            key = f"{e}|{p}|{w}"
+            if key not in seen:
+                seen.add(key)
+                unique_leads.append(l)
+
+        for lead in unique_leads:
             if saved_count >= quantity:
                 break
 
+            # DEBUG: Log raw lead before validation
+            # logger.info(f"[crawl:debug] processing raw lead: {lead.get('name')} | {lead.get('website')}")
+
             validated = validate_lead(lead)
             if not validated:
+                # logger.info(f"[crawl:debug] validation failed for: {lead.get('name')}")
                 continue
 
             if require_quality:

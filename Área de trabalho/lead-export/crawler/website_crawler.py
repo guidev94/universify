@@ -55,13 +55,47 @@ class WebsiteCrawler:
         return leads[:quantity]
 
     def _extract_from_url(self, url):
+        from crawler.validator import validate_lead
+        from crawler.lead_scorer import calculate_score
+        from crawler.utils import safe_request, extract_emails_from_text, extract_phones_from_text, extract_whatsapp_from_html, extract_business_name, extract_social_from_html
+        
         leads = []
+        try:
+            response = safe_request(self.session, url, timeout=15)
+            if not response or response.status_code != 200:
+                return leads
 
-        self.session.headers["User-Agent"] = self.ua.random
-        response = safe_request(self.session, url, timeout=15)
+            html = response.text
+            soup = BeautifulSoup(html, "lxml")
+            domain = urlparse(url).netloc
 
-        if not response or response.status_code != 200:
-            return leads
+            emails = extract_emails_from_text(html)
+            phones = extract_phones_from_text(html)
+            whatsapp = extract_whatsapp_from_html(html)
+            social = extract_social_from_html(html)
+            
+            # If we find contacts, it's a lead!
+            if emails or phones or whatsapp:
+                raw_lead = {
+                    "name": extract_business_name(soup, domain),
+                    "email": ";".join(emails),
+                    "phone": ";".join(phones),
+                    "whatsapp": whatsapp,
+                    "website": url,
+                    "instagram": social.get("instagram", ""),
+                    "facebook": social.get("facebook", ""),
+                    "source": "website_crawler"
+                }
+                
+                # Check for old site markers already here for faster scoring
+                # (Scoring will happen again in blueprints/crawl.py)
+                leads.append(raw_lead)
+
+        except Exception as e:
+            logger.debug(f"[website] erro em {url}: {e}")
+            
+        return leads
+
 
         content_type = response.headers.get("Content-Type", "")
         if "text/html" not in content_type:

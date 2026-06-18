@@ -242,6 +242,8 @@ def extract_campaign(camp_id):
 
     search_kw = keyword.split('|')[0].strip() if '|' in keyword else keyword
     search = f"%{search_kw}%"
+    
+    # Heuristic assignment of existing unassigned leads
     unassigned = conn2.execute("""
         SELECT id FROM leads
         WHERE (campaign = '' OR campaign IS NULL)
@@ -249,16 +251,6 @@ def extract_campaign(camp_id):
         AND (email != '' OR website != '')
         ORDER BY score DESC LIMIT ?
     """, (search, search, search, remaining)).fetchall()
-
-    if len(unassigned) < remaining:
-        extra = conn2.execute("""
-            SELECT id FROM leads
-            WHERE (campaign = '' OR campaign IS NULL)
-            AND (email != '' AND website != '')
-            AND id NOT IN (SELECT id FROM leads WHERE category LIKE ? OR name LIKE ? OR website LIKE ?)
-            ORDER BY score DESC LIMIT ?
-        """, (search, search, search, remaining - len(unassigned))).fetchall()
-        unassigned = list(unassigned) + list(extra)
 
     assigned = 0
     for row in unassigned:
@@ -272,68 +264,63 @@ def extract_campaign(camp_id):
     if remaining <= 0:
         return jsonify({"ok": True, "assigned": assigned, "leads_count": current_count + assigned, "goal": camp["goal"], "message": "Meta atingida com leads existentes!"})
 
-    quantity = min(30, remaining)
-    continuous = remaining > 30
-
+    # Start extraction for the rest
     job_uuid = str(uuid.uuid4())
-    job_id = CrawlJob.create(job_uuid, keyword, location, "both", quantity)
+    # Register in job_manager immediately for UI feedback
     job_manager.register(job_uuid, remaining)
+    
+    def continuous_extract(first_uuid, camp_name, camp_goal, kw, loc):
+        # Initial batch
+        batch_qty = min(30, remaining)
+        batch_id = CrawlJob.create(first_uuid, kw, loc, "both", batch_qty)
+        run_crawl(first_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
 
-    def continuous_extract(first_uuid, first_id, camp_name, camp_goal, kw, loc):
-        run_crawl(first_uuid, first_id, "both", kw, quantity, loc, campaign_name=camp_name, require_quality=True)
-
-        if not continuous:
-            return
-
-        dry_rounds = 0
-        max_batches = 15
+        # Subsequent batches if needed
+        max_batches = 10
         import time as _time
         for batch in range(max_batches):
-            _time.sleep(5)
+            _time.sleep(2) # Small break
+            
+            # Check current progress
             conn_check = get_connection()
             current = conn_check.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
             conn_check.close()
 
             left = camp_goal - current
-            if left <= 0:
-                job_manager.complete(first_uuid, current)
+            if left <= 1: # Threshold
                 break
 
-            prev_count = current
-            batch_qty = min(30, left)
-            batch_uuid = str(uuid.uuid4())
-            batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
-
-            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
-
-            conn_after = get_connection()
-            after_count = conn_after.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
-            conn_after.close()
-
-            job_manager.update(first_uuid, progress=after_count)
-
-            if after_count <= prev_count:
-                dry_rounds += 1
-                if dry_rounds >= 2:
-                    logger.info(f"[campaign] '{camp_name}' — 2 dry batches, stopping continuous extraction")
-                    break
-            else:
-                dry_rounds = 0
-
+            # Check if job was cancelled via UI
             state = job_manager.get(first_uuid)
             if state and state.get("status") == "cancelled":
                 break
 
-        job_manager.complete(first_uuid, 0)
+            # Run another batch
+            batch_uuid = str(uuid.uuid4())
+            batch_qty = min(30, left)
+            batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
+            
+            # Update main job_id progress with cumulative total found in campaign
+            job_manager.update(first_uuid, progress=current)
+            
+            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
+
+        job_manager.complete(first_uuid, current_count + assigned)
 
     thread = threading.Thread(
         target=continuous_extract,
-        args=(job_uuid, job_id, camp["name"], camp["goal"], keyword, location),
+        args=(job_uuid, camp["name"], camp["goal"], keyword, location),
         daemon=True,
     )
     thread.start()
 
-    return jsonify({"job_id": job_uuid, "quantity": quantity, "total_remaining": remaining, "continuous": continuous})
+    return jsonify({
+        "ok": True,
+        "job_id": job_uuid,
+        "assigned": assigned,
+        "quantity": remaining, # Added missing field
+        "total_remaining": remaining
+    })
 
 
 @bp.route("/api/dashboard/activity")
