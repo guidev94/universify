@@ -35,7 +35,8 @@ class EnrichmentCrawler:
             return {}
 
         self.session.headers["User-Agent"] = self.ua.random
-        response = safe_request(self.session, website, timeout=12)
+        # Reduced timeout from 12 to 8
+        response = safe_request(self.session, website, timeout=8)
         if not response or response.status_code != 200:
             return {}
 

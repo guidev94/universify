@@ -28,6 +28,9 @@ def list_leads():
     has_phone = bool(request.args.get("has_phone", "").strip())
     has_website = bool(request.args.get("has_website", "").strip())
     has_whatsapp = bool(request.args.get("has_whatsapp", "").strip())
+    has_ads = request.args.get("has_ads", "").strip()
+    has_pixel = request.args.get("has_pixel", "").strip()
+    site_quality = request.args.get("site_quality", "").strip() or None
     created_days = request.args.get("created_days", type=int)
 
     per_page = min(per_page, 100)
@@ -41,6 +44,9 @@ def list_leads():
         category=category, score_min=score_min, score_max=score_max,
         has_email=has_email, has_phone=has_phone, has_website=has_website,
         has_whatsapp=has_whatsapp, created_days=created_days,
+        has_ads=True if has_ads == '1' else False if has_ads == '0' else None,
+        has_pixel=True if has_pixel == '1' else False if has_pixel == '0' else None,
+        site_quality=site_quality,
     )
 
     return jsonify({
@@ -283,9 +289,61 @@ def lead_ai_copy(lead_id):
         "subject": subject
     })
 
-@bp.route("/api/leads/categories")
-def lead_categories():
+@bp.route("/api/leads/bulk-status-update", methods=["POST"])
+def bulk_status_update():
+    data = request.get_json()
+    if not data or "from_status" not in data or "to_status" not in data:
+        return jsonify({"error": "Status de origem e destino obrigatórios"}), 400
+
+    from_status = data["from_status"]
+    to_status = data["to_status"]
+    
+    allowed = {"new", "contacted", "negotiating", "closed_won", "closed_lost"}
+    if to_status not in allowed:
+        return jsonify({"error": "Status de destino inválido"}), 400
+
     conn = get_connection()
-    rows = conn.execute("SELECT DISTINCT category FROM leads WHERE category != '' ORDER BY category").fetchall()
+    # If from_status is 'opportunities', we handle it specially based on the technical logic
+    if from_status == 'opportunities':
+        # This matches the frontend filter logic
+        conn.execute("""
+            UPDATE leads SET status = ?, updated_at = datetime('now', 'localtime')
+            WHERE (site_quality = 'poor' AND site_verified = 1) 
+            OR (website = '' AND site_verified = 0)
+        """, (to_status,))
+    else:
+        conn.execute("""
+            UPDATE leads SET status = ?, updated_at = datetime('now', 'localtime')
+            WHERE status = ?
+        """, (to_status, from_status))
+    
+    count = conn.execute("SELECT changes()").fetchone()[0]
+    conn.commit()
     conn.close()
-    return jsonify({"categories": [dict(r)["category"] for r in rows]})
+    
+    return jsonify({"updated": count})
+
+
+@bp.route("/api/leads/bulk-delete-column", methods=["POST"])
+def bulk_delete_column():
+    data = request.get_json()
+    if not data or "status" not in data:
+        return jsonify({"error": "Status obrigatório"}), 400
+
+    status = data["status"]
+    conn = get_connection()
+    
+    if status == 'opportunities':
+        conn.execute("""
+            DELETE FROM leads 
+            WHERE (site_quality = 'poor' AND site_verified = 1) 
+            OR (website = '' AND site_verified = 0)
+        """)
+    else:
+        conn.execute("DELETE FROM leads WHERE status = ?", (status,))
+        
+    count = conn.execute("SELECT changes()").fetchone()[0]
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"deleted": count})

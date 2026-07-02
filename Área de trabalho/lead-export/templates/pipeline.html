@@ -7,80 +7,149 @@
 
 {% block head %}
 <style>
-    .kanban-column {
-        min-width: 300px;
-        max-width: 300px;
+    .opportunity-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .kanban-card {
-        cursor: grab;
+    .opportunity-card:hover {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-color: rgba(37, 99, 235, 0.2) !important;
     }
-    .kanban-card:active {
-        cursor: grabbing;
+    .action-btn {
+        transition: all 0.2s ease;
     }
-    .kanban-ghost {
-        opacity: 0.4;
-        background: rgba(59, 130, 246, 0.1);
-        border: 2px dashed rgba(59, 130, 246, 0.3);
+    .action-btn:hover {
+        transform: translateY(-2px);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col h-[calc(100vh-180px)]">
-    <!-- Kanban Board -->
-    <div id="kanbanBoard" class="flex gap-4 overflow-x-auto pb-4 flex-1 items-start scrollbar-thin">
-        <!-- New -->
-        <div class="kanban-column flex flex-col h-full bg-zinc-900/40 rounded-2xl border border-white/5 p-4" data-status="new">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <h3 class="text-[12px] font-bold text-zinc-100 uppercase tracking-wider">Novos</h3>
-                </div>
-                <span class="count-badge bg-blue-500/10 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+<div class="max-w-5xl mx-auto space-y-8 pb-20">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 fade-up">
+        <div>
+            <h2 class="text-[24px] font-black text-zinc-100 tracking-tight">Oportunidades de Venda</h2>
+            <p class="text-[13px] text-zinc-500 font-medium">Focado em leads que precisam de um novo site ou melhorias técnicas</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openExportModal()" class="btn-ghost !py-2 !px-4 flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span class="text-[11px] font-bold uppercase tracking-wider">Exportar</span>
+            </button>
+            <select id="filterQuality" onchange="loadPipeline()" class="select-glass !text-[11px] font-bold uppercase tracking-wider">
+                <option value="">Qualidade: Todas</option>
+                <option value="poor">Apenas Sites Ruins/Antigos</option>
+                <option value="none">Apenas Sem Site</option>
+            </select>
+            <select id="filterSource" onchange="loadPipeline()" class="select-glass !text-[11px] font-bold uppercase tracking-wider">
+                <option value="">Todas as Fontes</option>
+                <option value="google_maps">Google Maps</option>
+                <option value="website_crawler">Web Crawler</option>
+            </select>
+            <button onclick="loadPipeline()" class="btn-ghost !py-2 !px-4 flex items-center gap-2">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span class="text-[11px] font-bold uppercase tracking-wider">Atualizar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Feed Container -->
+    <div id="pipelineFeed" class="space-y-4">
+        <!-- Loading State -->
+        <div class="flex flex-col items-center justify-center py-20 opacity-20">
+            <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-[12px] font-bold uppercase tracking-widest">Analisando Oportunidades...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Export Selection Modal -->
+<div id="exportModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeExportModal()"></div>
+    <div class="relative glass-card p-8 w-full max-w-sm mx-auto">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <i data-lucide="download" class="w-5 h-5"></i>
             </div>
-            <div class="kanban-list space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-none" id="list-new"></div>
+            <div>
+                <h3 class="text-[16px] font-bold text-zinc-100">Exportar Leads</h3>
+                <p class="text-[11px] text-zinc-500 font-medium">Selecione o filtro de exportação</p>
+            </div>
+        </div>
+        
+        <div class="space-y-3 mb-8">
+            <button onclick="exportPipeline('poor')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/30 transition-all text-left group">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                    <i data-lucide="monitor-x" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-zinc-200">Sites Antigos/Ruins</p>
+                    <p class="text-[10px] text-zinc-500">Leads com falhas técnicas</p>
+                </div>
+            </button>
+
+            <button onclick="exportPipeline('none')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-red-500/30 transition-all text-left group">
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                    <i data-lucide="globe" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-zinc-200">Sem Website</p>
+                    <p class="text-[10px] text-zinc-500">Empresas sem site oficial</p>
+                </div>
+            </button>
+
+            <button onclick="exportPipeline('ads')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all text-left group">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-zinc-200">Gasta com Ads</p>
+                    <p class="text-[10px] text-zinc-500">Empresas que investem em tráfego</p>
+                </div>
+            </button>
         </div>
 
-        <!-- Contacted -->
-        <div class="kanban-column flex flex-col h-full bg-zinc-900/40 rounded-2xl border border-white/5 p-4" data-status="contacted">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                    <h3 class="text-[12px] font-bold text-zinc-100 uppercase tracking-wider">Contatados</h3>
-                </div>
-                <span class="count-badge bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
-            </div>
-            <div class="kanban-list space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-none" id="list-contacted"></div>
-        </div>
+        <button onclick="closeExportModal()" class="w-full btn-ghost !py-3">Cancelar</button>
+    </div>
+</div>
 
-        <!-- Negotiating -->
-        <div class="kanban-column flex flex-col h-full bg-zinc-900/40 rounded-2xl border border-white/5 p-4" data-status="negotiating">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-orange-400"></div>
-                    <h3 class="text-[12px] font-bold text-zinc-100 uppercase tracking-wider">Negociando</h3>
-                </div>
-                <span class="count-badge bg-orange-500/10 text-orange-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
-            </div>
-            <div class="kanban-list space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-none" id="list-negotiating"></div>
+<!-- Lead Detail Modal -->
+<div id="leadDetailModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeLeadDetail()"></div>
+    <div class="relative glass-card w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+        <button onclick="closeLeadDetail()" class="absolute top-6 right-6 p-2 rounded-xl hover:bg-white/5 transition-colors z-10">
+            <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
+        </button>
+        <div id="leadDetailContent">
+            <!-- Dynamic content -->
         </div>
+    </div>
+</div>
 
-        <!-- Won -->
-        <div class="kanban-column flex flex-col h-full bg-emerald-900/10 rounded-2xl border border-emerald-500/10 p-4" data-status="closed_won">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                    <h3 class="text-[12px] font-bold text-zinc-100 uppercase tracking-wider">Fechados</h3>
-                </div>
-                <span class="count-badge bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+<!-- Sales Script Modal -->
+<div id="salesScriptModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeSalesScript()"></div>
+    <div class="relative glass-card p-8 w-full max-w-lg mx-auto">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <i data-lucide="message-square" class="w-5 h-5"></i>
             </div>
-            <div class="kanban-list space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-none" id="list-closed_won"></div>
+            <div>
+                <h3 class="text-[16px] font-bold text-zinc-100">Script de Abordagem</h3>
+                <p class="text-[11px] text-zinc-500 font-medium">Baseado na falha técnica detectada</p>
+            </div>
+        </div>
+        <div class="bg-zinc-950/50 border border-white/5 rounded-xl p-5 mb-6">
+            <p id="scriptText" class="text-[14px] text-zinc-300 leading-relaxed italic"></p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="copyScript()" class="btn-accent flex-1 !py-3">Copiar Script</button>
+            <button onclick="closeSalesScript()" class="btn-ghost flex-1 !py-3">Fechar</button>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="/static/js/kanban.js"></script>
+<script src="/static/js/pipeline.js"></script>
 {% endblock %}

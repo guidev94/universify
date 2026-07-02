@@ -12,6 +12,8 @@ function getFilters() {
         category: document.getElementById('filterCategory').value,
         sort: document.getElementById('sortBy').value,
         verified: document.getElementById('filterVerified').checked,
+        ads: document.getElementById('filterAds') ? document.getElementById('filterAds').value : '',
+        quality: document.getElementById('filterQuality') ? document.getElementById('filterQuality').value : '',
         days: document.getElementById('filterDays') ? document.getElementById('filterDays').value : '',
         has_email: activePills.has_email,
         has_phone: activePills.has_phone,
@@ -70,6 +72,8 @@ async function loadLeads(page = 1) {
     if (filters.source) params.set('source', filters.source);
     if (filters.category) params.set('category', filters.category);
     if (filters.verified) params.set('verified', '1');
+    if (filters.ads) params.set('has_ads', filters.ads);
+    if (filters.quality) params.set('site_quality', filters.quality);
     if (filters.sort === 'name') params.set('order', 'asc');
     if (filters.days) params.set('created_days', filters.days);
     if (filters.has_email) params.set('has_email', '1');
@@ -247,7 +251,7 @@ document.getElementById('selectAll').addEventListener('change', function() {
     });
 });
 
-['filterTier', 'filterStatus', 'filterSource', 'filterCategory', 'sortBy', 'filterDays'].forEach(id => {
+['filterTier', 'filterStatus', 'filterSource', 'filterCategory', 'sortBy', 'filterDays', 'filterAds', 'filterQuality'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', () => loadLeads(1));
 });
@@ -423,6 +427,17 @@ async function openLeadDetail(id) {
 
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Tecnologias</p>
+                    <p class="text-[11px] text-zinc-300 font-medium mt-1">${lead.cms || 'Próprio'} &middot; ${lead.ads_platforms || 'Sem anúncios'}</p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">CNPJ / Sócios</p>
+                    <p class="text-[11px] text-zinc-300 font-medium mt-1 truncate" title="${escapeHtml(lead.partners || '')}">${lead.cnpj || 'Não encontrado'} ${lead.partners ? ' &middot; ' + lead.partners.split(';')[0] : ''}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-2">
+                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
                     <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Criado em</p>
                     <p class="text-[12px] text-zinc-300 font-medium mt-1">${formatDate(lead.created_at)}</p>
                 </div>
@@ -584,12 +599,25 @@ async function doInlineExport() {
     const tier = document.getElementById('expTier').value;
     const qty = document.getElementById('expQty').value;
     const format = document.querySelector('input[name="expFormat"]:checked').value;
+    
+    const colChecks = document.querySelectorAll('input[name="exp_col"]:checked');
+    const columns = Array.from(colChecks).map(c => c.value);
+    
+    if (columns.length === 0) {
+        showToast('Selecione pelo menos um campo', 'error');
+        return;
+    }
 
     try {
         const response = await fetch('/api/export', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCSRFToken() },
-            body: JSON.stringify({ format, tier, quantity: qty ? parseInt(qty) : null }),
+            body: JSON.stringify({ 
+                format, 
+                tier, 
+                quantity: qty ? parseInt(qty) : null,
+                columns: columns
+            }),
         });
 
         if (!response.ok) {
@@ -840,21 +868,30 @@ async function executeCleanup() {
 
 
 // SSE real-time updates
+let lastLeadLoad = 0;
 if (typeof events !== 'undefined') {
     events.on('lead_new', (data) => {
         if (data && data.score >= 80) {
             showToast(`🔥 Novo Lead HOT: ${data.name}!`, 'success');
-            // Play subtle sound if possible
             try {
                 const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                 audio.volume = 0.3;
                 audio.play();
             } catch(e) {}
         }
-        if (selectedIds.size === 0 && currentPage === 1) loadLeads(1);
+        
+        const now = Date.now();
+        if (selectedIds.size === 0 && currentPage === 1 && (now - lastLeadLoad > 3000)) {
+            lastLeadLoad = now;
+            loadLeads(1);
+        }
     });
     events.on('stats_updated', () => {
-        if (selectedIds.size === 0) loadLeads(currentPage);
+        const now = Date.now();
+        if (selectedIds.size === 0 && (now - lastLeadLoad > 3000)) {
+            lastLeadLoad = now;
+            loadLeads(currentPage);
+        }
     });
 }
 

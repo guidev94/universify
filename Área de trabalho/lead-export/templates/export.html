@@ -75,11 +75,34 @@
 
             <!-- Quantity -->
             <div>
-                <label class="block text-[11px] font-semibold text-zinc-400 mb-2 uppercase tracking-wide">Limite</label>
+                <label class="block text-[11px] font-semibold text-zinc-400 mb-2 uppercase tracking-wide">Limite de Leads</label>
                 <div class="flex items-center gap-3">
                     <input type="number" id="exportQuantity" placeholder="Sem limite"
-                        class="input-glass w-36 !py-2.5 text-[13px]" min="1" max="10000">
-                    <span class="text-[10px] text-zinc-600 font-medium">Vazio = exportar todos</span>
+                        class="input-glass w-36 !py-2.5 text-[13px]" min="1">
+                    <span class="text-[10px] text-zinc-600 font-medium">Os mais novos primeiro</span>
+                </div>
+            </div>
+
+            <!-- Column Selection -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <label class="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Campos para Exportar</label>
+                    <button onclick="toggleAllColumns()" class="text-[10px] text-blue-400 hover:text-blue-300">Marcar/Desmarcar todos</button>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="columnGrid">
+                    {% set columns = [
+                        ('name', 'Nome'), ('email', 'Email'), ('phone', 'Telefone'), 
+                        ('whatsapp', 'WhatsApp'), ('wa_link', 'WA_Link'), ('website', 'Website'), 
+                        ('score', 'Score'), ('tier', 'Tier'), ('status', 'Status'),
+                        ('deal_value', 'Valor'), ('source', 'Origem'), ('category', 'Nicho'),
+                        ('site_verified', 'Verificado'), ('cms', 'CMS'), ('has_ads', 'Ads')
+                    ] %}
+                    {% for key, label in columns %}
+                    <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700 transition-colors">
+                        <input type="checkbox" name="export_col" value="{{ key }}" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[11px] text-zinc-400">{{ label }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
             </div>
         </div>

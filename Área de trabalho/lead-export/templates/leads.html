@@ -37,7 +37,21 @@
             <option value="duckduckgo">DuckDuckGo</option>
             <option value="bing">Bing</option>
             <option value="google_maps">Maps</option>
+            <option value="linkedin">LinkedIn</option>
             <option value="niche_directory">Nicho</option>
+        </select>
+
+        <select id="filterAds" class="select-glass !w-auto !min-w-0">
+            <option value="">Anúncios</option>
+            <option value="1">Com Anúncios</option>
+            <option value="0">Sem Anúncios</option>
+        </select>
+
+        <select id="filterQuality" class="select-glass !w-auto !min-w-0">
+            <option value="">Qualidade Site</option>
+            <option value="good">Bom</option>
+            <option value="regular">Regular</option>
+            <option value="poor">Ruim</option>
         </select>
 
         <select id="filterCategory" class="select-glass !w-auto !min-w-0 !max-w-[130px]">
@@ -224,6 +238,126 @@
         </div>
     </div>
 </div>
+
+<!-- Lead Detail Modal -->
+<div id="leadDetailModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLeadDetail()"></div>
+    <div class="relative glass-card p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-[15px] font-semibold text-zinc-100" id="leadDetailName">Lead</h3>
+            <button onclick="closeLeadDetail()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="leadDetailBody" class="space-y-4">
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeExportModal()"></div>
+    <div class="relative glass-card p-6 w-full max-w-md mx-4">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-[15px] font-semibold text-zinc-100">Exportar Leads</h3>
+            <button onclick="closeExportModal()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Qualificação</label>
+                <select id="expTier" class="select-glass w-full mt-1">
+                    <option value="hot,warm,cold">Todos</option>
+                    <option value="hot">Quente</option>
+                    <option value="warm">Morno</option>
+                    <option value="cold">Frio</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Quantidade</label>
+                <input type="number" id="expQty" placeholder="Sem limite" class="input-glass mt-1" min="1">
+                <p class="text-[9px] text-zinc-600 mt-1">Os mais novos primeiro</p>
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide block mb-2">Campos</label>
+                <div class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto pr-2 scrollbar-thin">
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="name" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Nome</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="email" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Email</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="phone" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Tel</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="whatsapp" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">WPP</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="wa_link" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Link</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="website" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Site</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="score" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Score</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="tier" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Tier</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="has_ads" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Ads</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="cms" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">CMS</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="cnpj" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">CNPJ</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="partners" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Sócios</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="company_value" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Capital</span>
+                    </label>
+                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-800 bg-white/[0.01] cursor-pointer hover:border-zinc-700">
+                        <input type="checkbox" name="exp_col" value="location" class="rounded-sm accent-blue-500" checked>
+                        <span class="text-[10px] text-zinc-400">Local</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">Formato</label>
+                <div class="flex gap-2 mt-1">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="expFormat" value="csv" class="sr-only peer" checked>
+                        <div class="text-center py-2 rounded-xl border border-zinc-800 text-[12px] font-medium text-zinc-500 peer-checked:border-blue-500/40 peer-checked:text-blue-400 peer-checked:bg-blue-500/5 transition-all">CSV</div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="expFormat" value="xlsx" class="sr-only peer">
+                        <div class="text-center py-2 rounded-xl border border-zinc-800 text-[12px] font-medium text-zinc-500 peer-checked:border-blue-500/40 peer-checked:text-blue-400 peer-checked:bg-blue-500/5 transition-all">XLSX</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <button onclick="doInlineExport()" class="btn-accent w-full mt-5 !py-3 text-[13px]">Baixar Arquivo</button>
+    </div>
+</div>
+
 {% endblock %}
 
 

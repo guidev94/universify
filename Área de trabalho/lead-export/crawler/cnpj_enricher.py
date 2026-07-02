@@ -14,14 +14,38 @@ class CNPJEnricher:
         self.timeout = 10
 
     def enrich_lead(self, lead_id, company_name):
-        """
-        Attempts to find CNPJ and partners for a company name.
-        Note: This is a heuristic search. Real CNPJ search by name usually requires 
-        different APIs or web scraping. This implementation focuses on enriching 
-        if we already have a CNPJ or using a placeholder for the logic.
-        """
-        # Placeholder for real search logic. 
-        # In a production environment, we might use a search engine to find the CNPJ first.
+        """Attempts to find CNPJ via Google Search and then enrich using BrasilAPI."""
+        if not company_name or len(company_name) < 3:
+            return False
+
+        from crawler.search_engine import SearchEngine
+        import re
+        
+        try:
+            se = SearchEngine()
+            # Search for CNPJ on Google
+            search_query = f'cnpj "{company_name}"'
+            urls = se.search(search_query, num_results=5)
+            
+            cnpj_pattern = re.compile(r"\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}")
+            
+            for url in urls:
+                # Many sites like cnpj.biz, casadosdados, etc have the CNPJ in the title or URL
+                match = cnpj_pattern.search(url)
+                if match:
+                    cnpj = match.group(0)
+                    return self.enrich_by_cnpj(lead_id, cnpj)
+                
+                # If not in URL, try a quick request to the page if it's a known directory
+                if any(domain in url for domain in ["cnpj.biz", "casadosdados.com.br", "econodata.com.br"]):
+                    res = requests.get(url, timeout=5)
+                    match = cnpj_pattern.search(res.text)
+                    if match:
+                        cnpj = match.group(0)
+                        return self.enrich_by_cnpj(lead_id, cnpj)
+        except Exception as e:
+            logger.debug(f"[cnpj] search heuristic failed: {e}")
+            
         return False
 
     def enrich_by_cnpj(self, lead_id, cnpj):

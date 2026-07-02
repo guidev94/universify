@@ -143,48 +143,59 @@ class DirectoryCrawler:
 
         urls = self.search_engine.search(search_query, limit * 2)
 
-        for url in urls[:limit * 2]:
-            if len(leads) >= limit:
-                break
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        def _process_url(url):
+            try:
+                temp_session = requests.Session()
+                temp_session.headers["User-Agent"] = self.ua.random
+                response = safe_request(temp_session, url, timeout=12)
+                if not response or response.status_code != 200:
+                    return None
 
-            self.session.headers["User-Agent"] = self.ua.random
-            response = safe_request(self.session, url, timeout=12)
-            if not response or response.status_code != 200:
-                continue
+                content_type = response.headers.get("Content-Type", "")
+                if "text/html" not in content_type:
+                    return None
 
-            content_type = response.headers.get("Content-Type", "")
-            if "text/html" not in content_type:
-                continue
+                soup = BeautifulSoup(response.text, "lxml")
+                text = soup.get_text(separator=" ")
 
-            soup = BeautifulSoup(response.text, "lxml")
-            text = soup.get_text(separator=" ")
+                from urllib.parse import urlparse
+                domain = urlparse(url).netloc
 
-            from urllib.parse import urlparse
-            domain = urlparse(url).netloc
+                name = ""
+                og = soup.find("meta", property="og:site_name")
+                if og and og.get("content"):
+                    name = og["content"].strip()
+                elif soup.find("title") and soup.find("title").string:
+                    name = soup.find("title").string.strip().split(" | ")[0].split(" - ")[0]
+                else:
+                    name = domain.replace("www.", "").split(".")[0].title()
 
-            name = ""
-            og = soup.find("meta", property="og:site_name")
-            if og and og.get("content"):
-                name = og["content"].strip()
-            elif soup.find("title") and soup.find("title").string:
-                name = soup.find("title").string.strip().split(" | ")[0].split(" - ")[0]
-            else:
-                name = domain.replace("www.", "").split(".")[0].title()
+                phone_match = re.search(r"\(?\d{2}\)?\s*\d{4,5}[\-\s]?\d{4}", text)
+                phone = phone_match.group() if phone_match else ""
 
-            phone_match = re.search(r"\(?\d{2}\)?\s*\d{4,5}[\-\s]?\d{4}", text)
-            phone = phone_match.group() if phone_match else ""
+                if name and (phone or url):
+                    return {
+                        "name": name,
+                        "email": "",
+                        "phone": phone,
+                        "whatsapp": "",
+                        "website": url,
+                        "source": "directory_search",
+                        "category": query,
+                    }
+            except Exception:
+                pass
+            return None
 
-            if name and (phone or url):
-                leads.append({
-                    "name": name,
-                    "email": "",
-                    "phone": phone,
-                    "whatsapp": "",
-                    "website": url,
-                    "source": "directory_search",
-                    "category": query,
-                })
-
-            time.sleep(self.delay)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_url = {executor.submit(_process_url, url): url for url in urls[:limit * 2]}
+            for future in as_completed(future_to_url):
+                if len(leads) >= limit:
+                    break
+                res = future.result()
+                if res:
+                    leads.append(res)
 
         return leads

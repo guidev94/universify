@@ -167,7 +167,12 @@
         document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
 
         // Sidebar leads counter — SSE-powered
+        let lastSidebarUpdate = 0;
         async function updateSidebarLeads() {
+            const now = Date.now();
+            if (now - lastSidebarUpdate < 2000) return;
+            lastSidebarUpdate = now;
+
             try {
                 const data = await api('/api/leads/today');
                 _setSidebarCount(data.today || 0);
@@ -232,12 +237,44 @@
                 }
             });
 
+            // Pipeline real-time feedback
+            let verifiedCount = 0;
+            let enrichedCount = 0;
+            let pipelineTimer;
+
+            events.on('lead_verified', (data) => {
+                verifiedCount++;
+                clearTimeout(pipelineTimer);
+                pipelineTimer = setTimeout(() => {
+                    if (verifiedCount > 0) {
+                        showToast(`${verifiedCount} sites verificados agora`, 'success');
+                        verifiedCount = 0;
+                    }
+                }, 1000);
+            });
+
+            events.on('lead_enriched', (data) => {
+                enrichedCount++;
+                clearTimeout(pipelineTimer);
+                pipelineTimer = setTimeout(() => {
+                    if (enrichedCount > 0) {
+                        showToast(`${enrichedCount} leads enriquecidos agora`, 'info');
+                        enrichedCount = 0;
+                    }
+                }, 1000);
+            });
+
             events.on('pipeline_verify', (data) => {
-                if (data && data.count > 0) showToast(`${data.count} sites verificados`, 'info');
+                // Batch finished, clear any pending individual toasts and show final
+                clearTimeout(pipelineTimer);
+                verifiedCount = 0;
+                if (data && data.count > 0) showToast(`Lote concluído: ${data.count} sites verificados`, 'success');
             });
 
             events.on('pipeline_enrich', (data) => {
-                if (data && data.count > 0) showToast(`${data.count} leads enriquecidos`, 'info');
+                clearTimeout(pipelineTimer);
+                enrichedCount = 0;
+                if (data && data.count > 0) showToast(`Lote concluído: ${data.count} leads enriquecidos`, 'info');
             });
         }
 

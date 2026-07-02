@@ -6,8 +6,12 @@ from database import get_connection
 
 class Lead:
     @staticmethod
-    def create(data, crawl_job_id=None):
-        conn = get_connection()
+    def create(data, crawl_job_id=None, conn=None):
+        should_close = False
+        if conn is None:
+            conn = get_connection()
+            should_close = True
+            
         dedup_hash = Lead._generate_hash(data)
 
         try:
@@ -34,32 +38,46 @@ class Lead:
 
                 best_score = max(new_score, existing["score"] or 0)
 
+                # Campaign logic: if existing lead is unassigned, assign it to the new campaign
+                new_campaign = data.get("campaign", "")
+                existing_campaign = conn.execute("SELECT campaign FROM leads WHERE id = ?", (existing["id"],)).fetchone()["campaign"]
+                
+                campaign_sql = ""
+                campaign_params = []
+                if new_campaign and not existing_campaign:
+                    campaign_sql = ", campaign = ?"
+                    campaign_params = [new_campaign]
+
                 conn.execute(
-                    """UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?,
-                       updated_at = datetime('now', 'localtime') WHERE id = ?""",
-                    (merged_email, merged_phone, merged_whatsapp, best_score, existing["id"]),
+                    f"""UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?,
+                       updated_at = datetime('now', 'localtime'){campaign_sql} WHERE id = ?""",
+                    [merged_email, merged_phone, merged_whatsapp, best_score] + campaign_params + [existing["id"]],
                 )
-                conn.commit()
+                if should_close:
+                    conn.commit()
                 return existing["id"]
 
             conn.execute(
                 """INSERT INTO leads (name, email, phone, whatsapp, website, category, source,
-                   score, tier, site_verified, ssl_valid, crawl_job_id, dedup_hash)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   score, tier, site_verified, ssl_valid, crawl_job_id, dedup_hash, campaign, location)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     data["name"], data.get("email", ""), data.get("phone", ""),
                     data.get("whatsapp", ""), data.get("website", ""),
                     data.get("category", ""), data.get("source", ""),
                     data.get("score", 0), data.get("tier", "cold"),
                     data.get("site_verified", 0), data.get("ssl_valid", 0),
-                    crawl_job_id, dedup_hash,
+                    crawl_job_id, dedup_hash, data.get("campaign", ""),
+                    data.get("location", ""),
                 ),
             )
-            conn.commit()
+            if should_close:
+                conn.commit()
             lead_id = conn.execute("SELECT id FROM leads WHERE dedup_hash = ?", (dedup_hash,)).fetchone()
             return lead_id["id"] if lead_id else None
         finally:
-            conn.close()
+            if should_close:
+                conn.close()
 
     @staticmethod
     def deduplicate_existing():
@@ -144,7 +162,7 @@ class Lead:
             conn.close()
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None, has_ads=None, has_pixel=None, site_quality=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -162,8 +180,8 @@ class Lead:
             conditions.append("category LIKE ?")
             params.append(f"%{category}%")
         if search:
-            conditions.append("(name LIKE ? OR email LIKE ? OR category LIKE ? OR phone LIKE ? OR website LIKE ? OR whatsapp LIKE ? OR notes LIKE ?)")
-            params.extend([f"%{search}%"] * 7)
+            conditions.append("(name LIKE ? OR email LIKE ? OR category LIKE ? OR phone LIKE ? OR website LIKE ? OR whatsapp LIKE ? OR notes LIKE ? OR cnpj LIKE ? OR partners LIKE ?)")
+            params.extend([f"%{search}%"] * 9)
         if only_verified:
             conditions.append("site_verified = 1 AND website != ''")
         if score_min is not None:
@@ -180,6 +198,15 @@ class Lead:
             conditions.append("website != ''")
         if has_whatsapp:
             conditions.append("whatsapp != ''")
+        if has_ads is not None:
+            conditions.append("has_ads = ?")
+            params.append(1 if has_ads else 0)
+        if has_pixel is not None:
+            conditions.append("has_pixel = ?")
+            params.append(1 if has_pixel else 0)
+        if site_quality:
+            conditions.append("site_quality = ?")
+            params.append(site_quality)
         if created_days is not None:
             conditions.append("created_at >= datetime('now', ? || ' days', 'localtime')")
             params.append(f"-{int(created_days)}")
@@ -302,6 +329,8 @@ class Lead:
         stats["with_email"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE email != ''").fetchone()["cnt"]
         stats["with_phone"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE phone != ''").fetchone()["cnt"]
         stats["with_whatsapp"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE whatsapp != ''").fetchone()["cnt"]
+        stats["with_ads"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE has_ads = 1").fetchone()["cnt"]
+        stats["with_pixel"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE has_pixel = 1").fetchone()["cnt"]
         stats["verified"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE site_verified = 1").fetchone()["cnt"]
 
         avg_row = conn.execute("SELECT AVG(score) as avg_score FROM leads").fetchone()
@@ -358,7 +387,7 @@ class Lead:
         return chart
 
     @staticmethod
-    def get_for_export(tier=None, status=None, quantity=None, keyword=None):
+    def get_for_export(tier=None, status=None, quantity=None, keyword=None, campaign=None, site_quality=None, has_ads=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -371,6 +400,18 @@ class Lead:
         if status:
             conditions.append("status = ?")
             params.append(status)
+        if campaign:
+            conditions.append("campaign = ?")
+            params.append(campaign)
+        if site_quality:
+            if site_quality == 'none':
+                conditions.append("website = '' AND site_verified = 0")
+            else:
+                conditions.append("site_quality = ?")
+                params.append(site_quality)
+        if has_ads is not None:
+            conditions.append("has_ads = ?")
+            params.append(1 if has_ads else 0)
         if keyword:
             conditions.append("(category LIKE ? OR name LIKE ?)")
             params.extend([f"%{keyword}%", f"%{keyword}%"])
@@ -395,7 +436,8 @@ class Lead:
         # If has website, use domain for dedup (Strongest)
         if website:
             from urllib.parse import urlparse
-            domain = urlparse(website).netloc.lower().replace("www.", "")
+            website_clean = website.lower().strip().split('?')[0].rstrip('/')
+            domain = urlparse(website_clean).netloc.lower().replace("www.", "")
             if domain:
                 raw = f"site:{domain}"
                 return hashlib.sha256(raw.encode()).hexdigest()
@@ -417,17 +459,18 @@ class Lead:
 
 class CrawlJob:
     @staticmethod
-    def create(job_uuid, keyword, location, source, quantity):
+    def create(job_uuid, keyword, location, source, quantity_requested):
+        from database import get_connection
         conn = get_connection()
         conn.execute(
             """INSERT INTO crawl_jobs (job_uuid, keyword, location, source, quantity_requested)
                VALUES (?, ?, ?, ?, ?)""",
-            (job_uuid, keyword, location, source, quantity),
+            (job_uuid, keyword, location, source, quantity_requested),
         )
         conn.commit()
         row = conn.execute("SELECT id FROM crawl_jobs WHERE job_uuid = ?", (job_uuid,)).fetchone()
         conn.close()
-        return row["id"]
+        return row["id"] if row else None
 
     @staticmethod
     def update_progress(job_uuid, progress, quantity_found=None):
@@ -564,14 +607,15 @@ class Activity:
 
 class Campaign:
     @staticmethod
-    def create(name, keyword="", location="", goal=100):
+    def create(name, keyword="", location="", goal=100, expand_auto=0):
         conn = get_connection()
         conn.execute(
-            "INSERT INTO campaigns (name, keyword, location, goal) VALUES (?, ?, ?, ?)",
-            (name, keyword, location, goal),
+            "INSERT INTO campaigns (name, keyword, location, goal, expand_auto) VALUES (?, ?, ?, ?, ?)",
+            (name, keyword, location, goal, 1 if expand_auto else 0),
         )
         conn.commit()
         conn.close()
+
 
     @staticmethod
     def get_all():
@@ -599,7 +643,7 @@ class Campaign:
     @staticmethod
     def update(campaign_id, **kwargs):
         conn = get_connection()
-        allowed = {"name", "keyword", "location", "goal", "status", "description"}
+        allowed = {"name", "keyword", "location", "goal", "status", "description", "expand_auto"}
         updates = []
         params = []
         for key, value in kwargs.items():
@@ -622,6 +666,21 @@ class Campaign:
         current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (campaign_name,)).fetchone()["c"]
         conn.close()
         return max(0, goal - current)
+
+    @staticmethod
+    def update_extraction_status(campaign_id, status):
+        conn = get_connection()
+        conn.execute(
+            "UPDATE campaigns SET extraction_status = ?, updated_at = datetime('now', 'localtime') WHERE id = ?",
+            (status, campaign_id),
+        )
+        if status == "running":
+            conn.execute(
+                "UPDATE campaigns SET last_extracted_at = datetime('now', 'localtime') WHERE id = ?",
+                (campaign_id,),
+            )
+        conn.commit()
+        conn.close()
 
 
 class MessageTemplate:

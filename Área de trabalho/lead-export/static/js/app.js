@@ -34,17 +34,30 @@ function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
-    return div.innerHTML;
+    return div.innerHTML.replace(/'/g, '&#39;');
 }
 
 function showToast(message, type = 'info') {
-    document.querySelectorAll('.toast').forEach(t => t.remove());
+    const container = document.getElementById('toast-container') || (() => {
+        const c = document.createElement('div');
+        c.id = 'toast-container';
+        c.className = 'fixed bottom-5 right-5 z-[1000] flex flex-col gap-2';
+        document.body.appendChild(c);
+        return c;
+    })();
+
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    toast.className = `toast toast-${type} !relative !bottom-0 !right-0`;
     toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="ml-3 opacity-60 hover:opacity-100">✕</button>`;
     toast.style.transition = 'all 0.3s ease';
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; setTimeout(() => toast.remove(), 300); }, 4000);
+    container.appendChild(toast);
+    
+    // Auto remove
+    setTimeout(() => { 
+        toast.style.opacity = '0'; 
+        toast.style.transform = 'translateX(20px)'; 
+        setTimeout(() => toast.remove(), 300); 
+    }, 4000);
 }
 
 function formatDate(dateStr) {

@@ -35,21 +35,22 @@ class WebsiteCrawler:
 
         logger.info(f"[website] buscando '{query}' — {len(urls)} URLs para processar")
 
-        for url in urls:
-            if len(leads) >= quantity:
-                break
-
-            try:
-                page_leads = self._extract_from_url(url)
-                leads.extend(page_leads)
-
-                if on_progress:
-                    on_progress(len(leads))
-
-                time.sleep(self.delay)
-            except Exception as e:
-                logger.debug(f"[website] erro extraindo {url[:60]}: {e}")
-                continue
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_url = {executor.submit(self._extract_from_url, url): url for url in urls}
+            
+            for future in as_completed(future_to_url):
+                if len(leads) >= quantity:
+                    break
+                
+                try:
+                    page_leads = future.result()
+                    leads.extend(page_leads)
+                    if on_progress:
+                        on_progress(len(leads))
+                except Exception as e:
+                    logger.debug(f"[website] erro processando futuro: {e}")
 
         logger.info(f"[website] '{query}' — {len(leads)} leads extraídos")
         return leads[:quantity]
@@ -69,70 +70,48 @@ class WebsiteCrawler:
             soup = BeautifulSoup(html, "lxml")
             domain = urlparse(url).netloc
 
-            emails = extract_emails_from_text(html)
+            # Tenta encontrar link para página de contato
+            contact_url = ""
+            for a in soup.find_all("a", href=True):
+                href = a["href"].lower()
+                if "contato" in href or "contact" in href or "fale-conosco" in href:
+                    if href.startswith("http"):
+                        contact_url = a["href"]
+                    else:
+                        base = f"{urlparse(url).scheme}://{domain}"
+                        contact_url = f"{base}/{a['href'].lstrip('/')}"
+                    break
+            
+            if contact_url:
+                logger.debug(f"[website] visitando página de contato: {contact_url}")
+                contact_resp = safe_request(self.session, contact_url, timeout=10)
+                if contact_resp and contact_resp.status_code == 200:
+                    html += " " + contact_resp.text
+
+            emails = extract_emails_from_text(html, html)
             phones = extract_phones_from_text(html)
             whatsapp = extract_whatsapp_from_html(html)
             social = extract_social_from_html(html)
             
-            # If we find contacts, it's a lead!
             if emails or phones or whatsapp:
-                raw_lead = {
-                    "name": extract_business_name(soup, domain),
+                name = extract_business_name(soup, domain)
+                
+                # Create leads for each unique email/phone combination if possible
+                # But typically we want one lead per website
+                lead = {
+                    "name": name,
                     "email": ";".join(emails),
                     "phone": ";".join(phones),
-                    "whatsapp": whatsapp,
+                    "whatsapp": whatsapp or (phones[0] if phones else ""),
                     "website": url,
                     "instagram": social.get("instagram", ""),
                     "facebook": social.get("facebook", ""),
-                    "source": "website_crawler"
+                    "source": "website_crawler",
+                    "category": ""
                 }
-                
-                # Check for old site markers already here for faster scoring
-                # (Scoring will happen again in blueprints/crawl.py)
-                leads.append(raw_lead)
+                leads.append(lead)
 
         except Exception as e:
             logger.debug(f"[website] erro em {url}: {e}")
             
-        return leads
-
-
-        content_type = response.headers.get("Content-Type", "")
-        if "text/html" not in content_type:
-            return leads
-
-        soup = BeautifulSoup(response.text, "lxml")
-        text = soup.get_text(separator=" ")
-        domain = urlparse(url).netloc
-
-        emails = extract_emails_from_text(text, response.text)
-        phones = extract_phones_from_text(text)
-        whatsapp = extract_whatsapp_from_html(response.text)
-        name = extract_business_name(soup, domain)
-
-        if emails or phones:
-            lead = {
-                "name": name,
-                "email": emails[0] if emails else "",
-                "phone": phones[0] if phones else "",
-                "whatsapp": whatsapp or (phones[0] if phones else ""),
-                "website": url,
-                "source": "website",
-                "category": "",
-            }
-            leads.append(lead)
-
-            for i in range(1, max(len(emails), len(phones))):
-                extra_lead = {
-                    "name": name,
-                    "email": emails[i] if i < len(emails) else "",
-                    "phone": phones[i] if i < len(phones) else "",
-                    "whatsapp": whatsapp or "",
-                    "website": url,
-                    "source": "website",
-                    "category": "",
-                }
-                if extra_lead["email"] or extra_lead["phone"]:
-                    leads.append(extra_lead)
-
         return leads

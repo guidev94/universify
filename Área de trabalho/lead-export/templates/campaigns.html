@@ -23,22 +23,26 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="relative">
                 <i data-lucide="bookmark" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
-                <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px] !pl-10" aria-label="Nome da campanha">
+                <input type="text" id="campName" placeholder="Nome da campanha" class="input-glass text-[13px] !pl-10">
             </div>
             <div class="relative">
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
-                <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px] !pl-10" aria-label="Palavra-chave">
+                <input type="text" id="campKeyword" placeholder="Palavra-chave (ex: dentista)" class="input-glass text-[13px] !pl-10">
             </div>
             <div class="relative">
                 <i data-lucide="map-pin" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
-                <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px] !pl-10" aria-label="Localização">
+                <input type="text" id="campLocation" placeholder="Localização (ex: São Paulo)" class="input-glass text-[13px] !pl-10">
             </div>
         </div>
         <div class="flex items-center gap-3 mt-3">
             <div class="relative">
                 <i data-lucide="target" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 stroke-[1.5]"></i>
-                <input type="number" id="campGoal" placeholder="Meta" value="100" min="10" max="5000" class="input-glass !w-36 text-[13px] !pl-10" aria-label="Meta de leads">
+                <input type="number" id="campGoal" placeholder="Meta" value="100" min="10" max="5000" class="input-glass !w-36 text-[13px] !pl-10">
             </div>
+            <label class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-white/5">
+                <input type="checkbox" id="expandAuto" class="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-blue-500">
+                <span class="text-[11px] text-zinc-400 font-medium">Auto-Explorar Bairros</span>
+            </label>
             <button onclick="createCampaign()" class="btn-accent !py-2.5 !px-5 text-[12px]">
                 <i data-lucide="plus" class="w-4 h-4 inline mr-1 stroke-[2]"></i>Criar Campanha
             </button>
@@ -49,7 +53,7 @@
     <div class="glass-card p-6 fade-up">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-[13px] font-semibold text-zinc-200">Campanhas Ativas</h3>
-            <button onclick="loadCampaigns()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Atualizar lista">
+            <button onclick="loadCampaigns()" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
                 <i data-lucide="refresh-cw" class="w-4 h-4 text-zinc-500"></i>
             </button>
         </div>
@@ -63,26 +67,26 @@
 <div id="editCampaignModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditCampaign()"></div>
     <div class="relative glass-card p-6 w-full max-w-md mx-4">
-        <button onclick="closeEditCampaign()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Fechar">
+        <button onclick="closeEditCampaign()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
             <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
         </button>
         <h3 class="text-[14px] font-semibold text-zinc-100 mb-5">Editar Campanha</h3>
         <div class="space-y-3">
             <div>
                 <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Nome</label>
-                <input type="text" id="editCampName" class="input-glass text-[13px] w-full" aria-label="Nome da campanha">
+                <input type="text" id="editCampName" class="input-glass text-[13px] w-full">
             </div>
             <div>
                 <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Palavra-chave</label>
-                <input type="text" id="editCampKeyword" class="input-glass text-[13px] w-full" aria-label="Palavra-chave">
+                <input type="text" id="editCampKeyword" class="input-glass text-[13px] w-full">
             </div>
             <div>
                 <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Localização</label>
-                <input type="text" id="editCampLocation" class="input-glass text-[13px] w-full" aria-label="Localização">
+                <input type="text" id="editCampLocation" class="input-glass text-[13px] w-full">
             </div>
             <div>
                 <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1 block">Meta de leads</label>
-                <input type="number" id="editCampGoal" class="input-glass text-[13px] w-full" min="1" max="10000" aria-label="Meta de leads">
+                <input type="number" id="editCampGoal" class="input-glass text-[13px] w-full" min="1">
             </div>
         </div>
         <div class="flex gap-2 mt-5">
@@ -96,18 +100,18 @@
 <div id="campLeadsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCampLeadsModal()"></div>
     <div class="relative glass-card p-6 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
-        <button onclick="closeCampLeadsModal()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Fechar">
+        <button onclick="closeCampLeadsModal()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
             <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
         </button>
         <div id="campLeadsContent"></div>
     </div>
 </div>
 
-<!-- Lead Detail Modal (from campaign) -->
+<!-- Lead Detail Modal -->
 <div id="campLeadDetailModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCampLeadDetail()"></div>
     <div class="relative glass-card p-6 w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto">
-        <button onclick="closeCampLeadDetail()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors" aria-label="Fechar">
+        <button onclick="closeCampLeadDetail()" class="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
             <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
         </button>
         <div id="campLeadDetailContent"></div>
@@ -118,12 +122,13 @@
 {% block scripts %}
 <script>
 let editingCampaignId = null;
-const extractingCampaigns = new Set();
+const processingLocal = new Set();
 
 async function loadCampaigns() {
     try {
         const data = await api('/api/campaigns');
         const list = document.getElementById('campaignList');
+        if (!list) return;
 
         if (!data.campaigns || !data.campaigns.length) {
             list.innerHTML = '<p class="text-center text-zinc-600 py-6 text-[12px]">Nenhuma campanha criada ainda</p>';
@@ -131,14 +136,12 @@ async function loadCampaigns() {
         }
 
         list.innerHTML = data.campaigns.map(c => {
-            const progress = c.goal ? Math.min(100, Math.round((c.leads_count / c.goal) * 100)) : 0;
-            const remaining = Math.max(0, c.goal - c.leads_count);
-            const goalReached = c.leads_count >= c.goal;
-            const isExtracting = extractingCampaigns.has(c.id);
-
-            // ROI calculation (Heuristic since we don't have full stats in list_campaigns yet)
-            // But we can show contacted vs won if we add it to the API
-            const convRate = c.won_count ? Math.round((c.won_count / Math.max(1, c.leads_count)) * 100) : 0;
+            const goal = parseInt(c.goal) || 100;
+            const progress = goal ? Math.min(100, Math.round((c.leads_count / goal) * 100)) : 0;
+            const remaining = Math.max(0, goal - c.leads_count);
+            const goalReached = c.leads_count >= goal;
+            const isExtracting = c.extraction_status === 'running' || processingLocal.has(c.id);
+            const convRate = c.leads_count ? Math.round((c.won_count / c.leads_count) * 100) : 0;
 
             return `
                 <div class="p-4 rounded-xl bg-white/[0.02] border ${goalReached ? 'border-emerald-500/20' : isExtracting ? 'border-blue-500/20' : 'border-white/5'} hover:border-white/10 transition-colors" id="campCard-${c.id}">
@@ -146,44 +149,53 @@ async function loadCampaigns() {
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <p class="text-[13px] font-semibold text-zinc-100 truncate">${escapeHtml(c.name)}</p>
-                                ${goalReached ? '<span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400">META ATINGIDA</span>' : ''}
-                                ${isExtracting ? '<span class="shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>Extraindo</span>' : ''}
+                                ${goalReached ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-400">META ATINGIDA</span>' : ''}
+                                ${isExtracting ? '<span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>Extraindo</span>' : ''}
                             </div>
-                            <p class="text-[10px] text-zinc-500 mt-0.5">${c.keyword || '—'} · ${c.location || 'Brasil'}</p>
+                            <p class="text-[10px] text-zinc-500 mt-0.5">${escapeHtml(c.keyword || '')} · ${escapeHtml(c.location || 'Brasil')}</p>
                         </div>
-                        <div class="flex gap-4 ml-3">
+                        <div class="flex gap-4 ml-3 shrink-0">
                             <div class="text-right">
-                                <p class="text-[10px] text-zinc-600 uppercase font-bold tracking-tighter">Conversão</p>
-                                <p class="text-[14px] font-bold text-emerald-400">${convRate}%</p>
+                                <p class="text-[9px] text-zinc-600 uppercase font-bold tracking-tighter">Conv.</p>
+                                <p class="text-[13px] font-bold text-emerald-400">${convRate}%</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-[18px] font-bold ${goalReached ? 'text-emerald-400' : isExtracting ? 'text-blue-400' : 'text-zinc-100'}" id="campCount-${c.id}">${c.leads_count}</p>
-                                <p class="text-[9px] text-zinc-600">de ${c.goal} leads</p>
+                                <p class="text-[16px] font-bold ${goalReached ? 'text-emerald-400' : isExtracting ? 'text-blue-400' : 'text-zinc-100'}" id="campCount-${c.id}">${c.leads_count}</p>
+                                <p class="text-[9px] text-zinc-600">de ${goal}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="progress-track mt-2 ${isExtracting ? 'overflow-hidden' : ''}">
-                        <div class="progress-fill ${goalReached ? '!bg-emerald-500' : isExtracting ? 'transition-all duration-1000' : ''}" style="width: ${progress}%" id="campProgress-${c.id}"></div>
-                        ${isExtracting ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-shimmer"></div>' : ''}
+                    <div class="progress-track mt-2 h-1.5 bg-zinc-800/50 rounded-full relative overflow-hidden">
+                        <div class="h-full bg-blue-500 ${goalReached ? '!bg-emerald-500' : ''} transition-all duration-700" style="width: ${progress}%" id="campProgress-${c.id}"></div>
+                        ${isExtracting ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" style="background-size: 200% 100%"></div>' : ''}
                     </div>
-                    <div class="flex items-center justify-between mt-2">
+                    <div class="flex items-center justify-between mt-3">
                         <div class="flex gap-3">
                             <span class="text-[10px] ${isExtracting ? 'text-blue-400' : 'text-zinc-500'}">
-                                ${goalReached ? '100% concluído' : isExtracting ? '⚡ Extraindo... ' + progress + '% · +' + remaining + ' restantes' : progress + '% · ' + remaining + ' restantes'}
+                                ${goalReached ? '100% concluído' : isExtracting ? '⚡ Processando... ' + progress + '%' : progress + '% concluído'}
                             </span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="viewCampaignLeads(${c.id}, '${escapeHtml(c.name)}')" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads" aria-label="Ver leads da campanha">
-                                <i data-lucide="eye" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
+                            <button onclick="viewCampaignLeads(${c.id}, this.dataset.name)" data-name="${escapeHtml(c.name)}" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Ver Leads">
+                                <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
                             </button>
-                            <button onclick="openEditCampaign(${c.id}, '${escapeHtml(c.name)}', '${escapeHtml(c.keyword || '')}', '${escapeHtml(c.location || '')}', ${c.goal})" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Editar" aria-label="Editar campanha">
-                                <i data-lucide="pencil" class="w-4 h-4 text-zinc-400 hover:text-zinc-200"></i>
+                            <button onclick="exportCampaign(${c.id}, this.dataset.name)" data-name="${escapeHtml(c.name)}" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Exportar XLSX">
+                                <i data-lucide="download" class="w-4 h-4 text-zinc-400"></i>
                             </button>
-                            <button onclick="extractCampaign(${c.id}, this)" id="extractBtn-${c.id}" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors ${goalReached || isExtracting ? 'opacity-30 pointer-events-none' : ''}" title="${isExtracting ? 'Extração em andamento' : 'Extrair Leads'}" aria-label="Extrair leads">
-                                ${isExtracting ? '<div class="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>' : '<i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>'}
+                            <button onclick="openEditCampaign(${c.id}, this.dataset.name, this.dataset.keyword, this.dataset.location, ${goal})" data-name="${escapeHtml(c.name)}" data-keyword="${escapeHtml(c.keyword || '')}" data-location="${escapeHtml(c.location || '')}" class="p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Editar">
+                                <i data-lucide="pencil" class="w-4 h-4 text-zinc-400"></i>
                             </button>
-                            <button onclick="deleteCampaign(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Excluir" aria-label="Excluir campanha">
-                                <i data-lucide="trash-2" class="w-4 h-4 text-red-400/60 hover:text-red-400"></i>
+                            ${isExtracting ? `
+                                <button onclick="cancelExtraction(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Parar">
+                                    <i data-lucide="square" class="w-4 h-4 text-red-400"></i>
+                                </button>
+                            ` : `
+                                <button onclick="extractCampaign(${c.id}, this)" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors ${goalReached ? 'opacity-30 pointer-events-none' : ''}" title="Extrair">
+                                    <i data-lucide="zap" class="w-4 h-4 text-blue-400"></i>
+                                </button>
+                            `}
+                            <button onclick="deleteCampaign(${c.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" title="Excluir">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-red-400/50"></i>
                             </button>
                         </div>
                     </div>
@@ -192,7 +204,9 @@ async function loadCampaigns() {
         }).join('');
         lucide.createIcons();
     } catch (e) {
-        document.getElementById('campaignList').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar</p>';
+        console.error(e);
+        const list = document.getElementById('campaignList');
+        if (list) list.innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao conectar com servidor</p>';
     }
 }
 
@@ -201,13 +215,16 @@ async function createCampaign() {
     const keyword = document.getElementById('campKeyword').value.trim();
     const location = document.getElementById('campLocation').value.trim();
     const goal = parseInt(document.getElementById('campGoal').value) || 100;
+    const expandAuto = document.getElementById('expandAuto')?.checked || false;
 
-    if (!name) { showToast('Nome obrigatório', 'error'); return; }
-    if (!keyword) { showToast('Palavra-chave obrigatória', 'error'); return; }
+    if (!name || !keyword) { showToast('Nome e Palavra-chave são obrigatórios', 'error'); return; }
 
     try {
-        await api('/api/campaigns', { method: 'POST', body: JSON.stringify({ name, keyword, location, goal }) });
-        showToast('Campanha criada!', 'success');
+        await api('/api/campaigns', { 
+            method: 'POST', 
+            body: JSON.stringify({ name, keyword, location, goal, expand_auto: expandAuto }) 
+        });
+        showToast('Campanha criada com sucesso!', 'success');
         document.getElementById('campName').value = '';
         document.getElementById('campKeyword').value = '';
         document.getElementById('campLocation').value = '';
@@ -215,6 +232,182 @@ async function createCampaign() {
     } catch (e) {
         showToast(e.message, 'error');
     }
+}
+
+async function extractCampaign(id, btn) {
+    if (processingLocal.has(id)) return;
+    
+    processingLocal.add(id);
+    const icon = btn.querySelector('i');
+    if (icon) icon.classList.add('animate-spin');
+
+    try {
+        await api(`/api/campaigns/${id}/extract`, { method: 'POST' });
+        showToast('Extração iniciada em segundo plano!', 'success');
+        await loadCampaigns();
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        processingLocal.delete(id);
+        if (icon) icon.classList.remove('animate-spin');
+    }
+}
+
+async function cancelExtraction(id) {
+    if (!await confirmModal('Deseja interromper a extração desta campanha?', 'Interromper', true)) return;
+    try {
+        await api(`/api/campaigns/${id}/cancel`, { method: 'POST' });
+        showToast('Extração interrompida', 'info');
+        loadCampaigns();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function deleteCampaign(id) {
+    if (!await confirmModal('Excluir esta campanha? (Os leads salvos serão mantidos)', 'Excluir', true)) return;
+    try {
+        await api(`/api/campaigns/${id}`, { method: 'DELETE' });
+        showToast('Campanha excluída', 'success');
+        loadCampaigns();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function exportCampaign(id, name) {
+    try {
+        showToast('Gerando relatório XLSX...', 'info');
+        const response = await fetch('/api/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCSRFToken() },
+            body: JSON.stringify({ campaign: name, format: 'xlsx' })
+        });
+        if (!response.ok) throw new Error('Falha na geração do arquivo');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads_campanha_${id}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast('Download concluído!', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function viewCampaignLeads(id, name) {
+    const content = document.getElementById('campLeadsContent');
+    content.innerHTML = `
+        <h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3>
+        <div class="flex justify-center py-10"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>
+    `;
+    document.getElementById('campLeadsModal').classList.remove('hidden');
+
+    try {
+        const data = await api(`/api/campaigns/${id}/leads`);
+        if (!data.leads || !data.leads.length) {
+            content.innerHTML = `<h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3><p class="text-center text-zinc-600 py-10">Nenhum lead encontrado ainda.</p>`;
+            return;
+        }
+
+        let html = `<h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)} <span class="text-[11px] text-zinc-500 font-normal">(${data.total} total)</span></h3>`;
+        html += '<div class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">';
+        html += data.leads.map(l => {
+            const phone = l.whatsapp || l.phone || '';
+            const wa = phone ? `https://wa.me/${phone.replace(/\D/g, '')}` : '';
+            return `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors cursor-pointer group" onclick="openCampLeadDetail(${l.id})">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-8 h-8 rounded-lg ${l.tier === 'hot' ? 'bg-amber-500/10 text-amber-400' : l.tier === 'warm' ? 'bg-orange-500/10 text-orange-400' : 'bg-zinc-500/10 text-zinc-400'} flex items-center justify-center shrink-0">
+                            <span class="text-[10px] font-bold">${l.score}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[12px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
+                            <p class="text-[10px] text-zinc-500 truncate">${escapeHtml(l.email || l.phone || '—')}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-2">
+                        ${wa ? `<a href="${wa}" target="_blank" onclick="event.stopPropagation()" class="p-1.5 rounded-lg hover:bg-green-500/10 text-green-400"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i></a>` : ''}
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors"></i>
+                    </div>
+                </div>`;
+        }).join('');
+        html += '</div>';
+        content.innerHTML = html;
+        lucide.createIcons();
+    } catch (e) {
+        content.innerHTML = '<p class="text-center text-red-400 py-10">Erro ao carregar lista de leads</p>';
+    }
+}
+
+function closeCampLeadsModal() { document.getElementById('campLeadsModal').classList.add('hidden'); }
+function closeCampLeadDetail() { document.getElementById('campLeadDetailModal').classList.add('hidden'); }
+
+async function openCampLeadDetail(id) {
+    const container = document.getElementById('campLeadDetailContent');
+    container.innerHTML = '<div class="flex justify-center py-10"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
+    document.getElementById('campLeadDetailModal').classList.remove('hidden');
+
+    try {
+        const lead = await api(`/api/leads/${id}`);
+        const scoreColor = lead.score >= 80 ? '#fde047' : lead.score >= 50 ? '#fb923c' : '#a1a1aa';
+        const wa = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
+        const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
+
+        container.innerHTML = `
+            <div class="rounded-xl bg-white/[0.03] border border-white/5 p-5 mb-5 flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full border-2 flex items-center justify-center shrink-0" style="border-color: ${scoreColor}">
+                    <span class="text-lg font-bold" style="color: ${scoreColor}">${lead.score}</span>
+                </div>
+                <div class="min-w-0">
+                    <h3 class="text-lg font-bold text-white truncate">${escapeHtml(lead.name)}</h3>
+                    <p class="text-xs text-zinc-500">${escapeHtml(lead.category || 'Lead')} · ${escapeHtml(lead.source || 'Busca')}</p>
+                </div>
+            </div>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1.5 block">Status do Lead</label>
+                    <select class="select-glass w-full text-sm" onchange="updateLeadStatus(${lead.id}, this.value)">
+                        ${Object.entries(statusLabels).map(([k,v]) => `<option value="${k}" ${lead.status === k ? 'selected' : ''}>${v}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    ${lead.email ? `<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"><span class="text-sm text-zinc-200 truncate">${escapeHtml(lead.email)}</span><button onclick="navigator.clipboard.writeText('${lead.email}');showToast('Copiado!','success')" class="p-1.5 hover:bg-white/5 rounded"><i data-lucide="copy" class="w-4 h-4 text-zinc-500"></i></button></div>` : ''}
+                    ${lead.phone ? `<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"><span class="text-sm text-zinc-200">${escapeHtml(lead.phone)}</span><button onclick="navigator.clipboard.writeText('${lead.phone}');showToast('Copiado!','success')" class="p-1.5 hover:bg-white/5 rounded"><i data-lucide="copy" class="w-4 h-4 text-zinc-500"></i></button></div>` : ''}
+                    ${lead.website ? `<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5"><a href="${lead.website}" target="_blank" class="text-sm text-blue-400 hover:underline truncate block">${escapeHtml(lead.website)}</a></div>` : ''}
+                </div>
+            </div>
+            <div class="flex gap-2">
+                ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-accent !bg-green-600 !border-green-500/30 flex-1 text-center py-3 rounded-xl flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp</a>` : ''}
+                <button onclick="deleteCampLead(${lead.id})" class="btn-ghost !text-red-400 border-red-500/20 px-4 rounded-xl"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+        `;
+        lucide.createIcons();
+    } catch (e) {
+        container.innerHTML = '<p class="text-center text-red-400">Falha ao carregar detalhes</p>';
+    }
+}
+
+async function updateLeadStatus(id, status) {
+    try {
+        await api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+        showToast('Status atualizado!', 'success');
+        loadCampaigns();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteCampLead(id) {
+    if (!await confirmModal('Excluir este lead permanentemente?', 'Excluir', true)) return;
+    try {
+        await api(`/api/leads/${id}`, { method: 'DELETE' });
+        showToast('Lead excluído', 'success');
+        closeCampLeadDetail();
+        loadCampaigns();
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
 function openEditCampaign(id, name, keyword, location, goal) {
@@ -238,224 +431,27 @@ async function submitEditCampaign() {
         location: document.getElementById('editCampLocation').value.trim(),
         goal: parseInt(document.getElementById('editCampGoal').value) || 100,
     };
-    if (!payload.name) { showToast('Nome não pode ser vazio', 'error'); return; }
+    if (!payload.name) { showToast('Nome obrigatório', 'error'); return; }
     try {
         await api(`/api/campaigns/${editingCampaignId}`, { method: 'PATCH', body: JSON.stringify(payload) });
         showToast('Campanha atualizada!', 'success');
         closeEditCampaign();
         loadCampaigns();
-    } catch (e) {
-        showToast(e.message, 'error');
-    }
+    } catch (e) { showToast(e.message, 'error'); }
 }
 
-async function extractCampaign(id, btn) {
-    extractingCampaigns.add(id);
-    loadCampaigns();
-
-    try {
-        const data = await api(`/api/campaigns/${id}/extract`, { method: 'POST' });
-        const isContinuous = data.continuous;
-        const totalRemaining = data.total_remaining;
-
-        showToast(isContinuous
-            ? `Extração contínua iniciada! Buscando ${totalRemaining} leads...`
-            : `Extraindo ${data.quantity} leads...`, 'info');
-
-        const jobId = data.job_id;
-        let lastCount = 0;
-        const poll = setInterval(async () => {
-            try {
-                const status = await api(`/api/crawl/status/${jobId}`);
-
-                const countEl = document.getElementById(`campCount-${id}`);
-                const progressEl = document.getElementById(`campProgress-${id}`);
-                if (countEl && status.progress > lastCount) {
-                    lastCount = status.progress;
-                }
-
-                loadCampaigns();
-
-                if (status.status === 'completed') {
-                    clearInterval(poll);
-                    extractingCampaigns.delete(id);
-                    showToast(`Concluído! Leads extraídos com sucesso`, 'success');
-                    loadCampaigns();
-                } else if (status.status === 'error') {
-                    clearInterval(poll);
-                    extractingCampaigns.delete(id);
-                    showToast('Extração pausada — clique novamente para continuar', 'error');
-                    loadCampaigns();
-                }
-            } catch (e) {
-                clearInterval(poll);
-                extractingCampaigns.delete(id);
-                loadCampaigns();
-            }
-        }, 4000);
-    } catch (e) {
-        extractingCampaigns.delete(id);
-        showToast(e.message || 'Erro na extração', 'error');
-        loadCampaigns();
-    }
+// Eventos em tempo real
+if (typeof events !== 'undefined') {
+    events.on('campaign_progress', (data) => {
+        const countEl = document.getElementById(`campCount-${data.id}`);
+        const fillEl = document.getElementById(`campProgress-${data.id}`);
+        if (countEl) countEl.textContent = data.leads_count;
+        if (fillEl && data.progress) fillEl.style.width = `${data.progress}%`;
+    });
+    events.on('job_completed', () => loadCampaigns());
 }
 
-async function deleteCampaign(id) {
-    if (!await confirmModal('Excluir esta campanha? Os leads não serão deletados.', 'Excluir', true)) return;
-    try {
-        await api(`/api/campaigns/${id}`, { method: 'DELETE' });
-        showToast('Campanha excluída', 'success');
-        loadCampaigns();
-    } catch (e) {
-        showToast(e.message, 'error');
-    }
-}
-
-async function viewCampaignLeads(id, name) {
-    document.getElementById('campLeadsContent').innerHTML = `
-        <h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3>
-        <div class="flex justify-center py-8"><div class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>
-    `;
-    document.getElementById('campLeadsModal').classList.remove('hidden');
-
-    try {
-        const data = await api(`/api/campaigns/${id}/leads`);
-        const container = document.getElementById('campLeadsContent');
-
-        if (!data.leads.length) {
-            container.innerHTML = `
-                <h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)}</h3>
-                <p class="text-center text-zinc-600 py-6 text-[12px]">Nenhum lead nesta campanha ainda. Clique "Extrair" para buscar.</p>
-            `;
-            return;
-        }
-
-        let html = `<h3 class="text-[14px] font-semibold text-zinc-100 mb-4">Leads: ${escapeHtml(name)} <span class="text-[11px] text-zinc-500 font-normal">(${data.total} total)</span></h3>`;
-        html += '<div class="space-y-2">';
-        html += data.leads.map(l => {
-            const phone = l.whatsapp || l.phone || '';
-            const wa = phone ? `https://wa.me/${phone.replace(/\\D/g, '')}` : '';
-            return `<div class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors cursor-pointer group" onclick="openCampLeadDetail(${l.id})">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-7 h-7 rounded-lg ${l.tier === 'hot' ? 'bg-amber-500/10 text-amber-400' : l.tier === 'warm' ? 'bg-orange-500/10 text-orange-400' : 'bg-zinc-500/10 text-zinc-400'} flex items-center justify-center shrink-0">
-                        <span class="text-[9px] font-bold">${l.score}</span>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-[12px] font-medium text-zinc-100 truncate">${escapeHtml(l.name)}</p>
-                        <p class="text-[10px] text-zinc-500 truncate">${l.email || l.phone || '—'}</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 ml-2">
-                    ${wa ? `<a href="${wa}" target="_blank" onclick="event.stopPropagation()" class="p-1.5 rounded-lg hover:bg-green-500/10" aria-label="WhatsApp"><i data-lucide="message-circle" class="w-3.5 h-3.5 text-green-400"></i></a>` : ''}
-                    ${l.email ? `<a href="mailto:${l.email.split(';')[0]}" onclick="event.stopPropagation()" class="p-1.5 rounded-lg hover:bg-blue-500/10" aria-label="Email"><i data-lucide="mail" class="w-3.5 h-3.5 text-blue-400"></i></a>` : ''}
-                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors"></i>
-                </div>
-            </div>`;
-        }).join('');
-        html += '</div>';
-
-        if (data.total > 20) {
-            html += `<p class="text-center text-[10px] text-zinc-500 mt-3">Mostrando 20 de ${data.total} leads</p>`;
-        }
-
-        container.innerHTML = html;
-        lucide.createIcons();
-    } catch (e) {
-        document.getElementById('campLeadsContent').innerHTML = '<p class="text-center text-red-400 py-4 text-[12px]">Erro ao carregar leads</p>';
-    }
-}
-
-function closeCampLeadsModal() {
-    document.getElementById('campLeadsModal').classList.add('hidden');
-}
-
-function closeCampLeadDetail() {
-    document.getElementById('campLeadDetailModal').classList.add('hidden');
-}
-
-async function openCampLeadDetail(id) {
-    const lead = await api(`/api/leads/${id}`);
-    if (!lead) return;
-
-    const scoreColor = lead.score >= 75 ? '#fde047' : lead.score >= 45 ? '#fb923c' : '#a1a1aa';
-    const circumference = 2 * Math.PI * 36;
-    const offset = circumference - (lead.score / 100) * circumference;
-    const phones = (lead.phone || '').split(';').filter(p => p.trim());
-    const emails = (lead.email || '').split(';').filter(e => e.trim());
-    const wa = lead.whatsapp || phones[0] || '';
-    const tierLabel = lead.tier === 'hot' ? 'QUENTE' : lead.tier === 'warm' ? 'MORNO' : 'FRIO';
-    const tierGrad = { hot: 'from-amber-500/20 to-orange-500/10', warm: 'from-orange-500/15 to-yellow-500/5', cold: 'from-zinc-500/10 to-zinc-600/5' };
-    const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
-
-    document.getElementById('campLeadDetailContent').innerHTML = `
-        <div class="bg-gradient-to-br ${tierGrad[lead.tier] || tierGrad.cold} rounded-xl p-5 mb-5">
-            <div class="flex items-start gap-4">
-                <div class="relative w-16 h-16 shrink-0">
-                    <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
-                        <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                        <circle cx="40" cy="40" r="36" fill="none" stroke="${scoreColor}" stroke-width="6" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-[14px] font-bold text-zinc-100">${lead.score}</span>
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-[15px] font-bold text-zinc-100 truncate">${escapeHtml(lead.name)}</h3>
-                    <p class="text-[11px] text-zinc-400 mt-0.5">${lead.category || 'Sem categoria'} · ${lead.source || ''}</p>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${lead.tier === 'hot' ? 'bg-amber-500/20 text-amber-400' : lead.tier === 'warm' ? 'bg-orange-500/20 text-orange-400' : 'bg-zinc-500/20 text-zinc-400'}">${tierLabel}</span>
-                        ${lead.site_verified ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Verificado</span>' : ''}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="text-[10px] text-zinc-500 font-medium uppercase tracking-wide mb-1.5 block">Status</label>
-            <select class="select-glass !text-[12px] w-full" onchange="changeCampLeadStatus(${lead.id}, this.value)">
-                ${Object.entries(statusLabels).map(([k,v]) => '<option value="' + k + '"' + (lead.status === k ? ' selected' : '') + '>' + v + '</option>').join('')}
-            </select>
-        </div>
-
-        <div class="space-y-2.5 mb-5">
-            ${emails.length ? emails.map(e => '<div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5"><span class="text-[12px] text-zinc-200 truncate flex-1">' + escapeHtml(e) + '</span><button onclick="navigator.clipboard.writeText(\'' + e + '\');showToast(\'Copiado!\',\'success\')" class="p-1 rounded hover:bg-white/5"><svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>').join('') : '<p class="text-[11px] text-zinc-600">Sem email</p>'}
-            ${phones.length ? phones.map(p => '<div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/5"><span class="text-[12px] text-zinc-200">' + escapeHtml(p) + '</span><button onclick="navigator.clipboard.writeText(\'' + p + '\');showToast(\'Copiado!\',\'success\')" class="p-1 rounded hover:bg-white/5"><svg class="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>').join('') : ''}
-            ${lead.website ? '<div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5"><a href="' + lead.website + '" target="_blank" rel="noopener" class="text-[12px] text-blue-400 hover:underline truncate block">' + escapeHtml(lead.website) + '</a></div>' : '<p class="text-[11px] text-emerald-400 font-medium">Sem site — prospect ideal!</p>'}
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            ${wa ? '<a href="https://wa.me/' + wa.replace(/\\D/g, '') + '" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10"><span class="text-green-400">WhatsApp</span></a>' : '<span></span>'}
-            ${emails[0] ? '<a href="mailto:' + emails[0] + '" class="btn-ghost !py-2.5 text-[11px] text-center !border-blue-500/20 hover:!bg-blue-500/10"><span class="text-blue-400">Email</span></a>' : '<span></span>'}
-            ${lead.website ? '<a href="' + lead.website + '" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center"><span class="text-zinc-300">Website</span></a>' : '<span></span>'}
-            <button onclick="deleteCampLead(${lead.id})" class="btn-ghost !py-2.5 text-[11px] !border-red-500/20 hover:!bg-red-500/5"><span class="text-red-400">Excluir</span></button>
-        </div>
-    `;
-
-    document.getElementById('campLeadDetailModal').classList.remove('hidden');
-}
-
-async function changeCampLeadStatus(id, status) {
-    try {
-        await api('/api/leads/' + id, { method: 'PATCH', body: JSON.stringify({ status }) });
-        showToast('Status atualizado!', 'success');
-    } catch (e) {
-        showToast(e.message, 'error');
-    }
-}
-
-async function deleteCampLead(id) {
-    if (!await confirmModal('Excluir este lead?', 'Excluir', true)) return;
-    try {
-        await api('/api/leads/' + id, { method: 'DELETE' });
-        showToast('Lead excluído', 'success');
-        closeCampLeadDetail();
-        loadCampaigns();
-    } catch (e) {
-        showToast(e.message, 'error');
-    }
-}
-
+setInterval(loadCampaigns, 15000);
 loadCampaigns();
-lucide.createIcons();
 </script>
 {% endblock %}

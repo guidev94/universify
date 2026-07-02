@@ -74,11 +74,18 @@ def calculate_score(lead):
         # Leads without website might be good targets for web agencies, 
         # but let's make sure they have other contact info
         if has_phone or has_whatsapp:
-            score += 15
+            score += 25 # Increased bonus for no site (Pure opportunity)
     elif lead.get("site_quality") == "poor":
-        score += 10
+        score += 20 # Increased bonus for poor quality site
     elif lead.get("ssl_valid") == 0 and lead.get("site_verified"):
-        score += 5
+        score += 10
+    
+    # Extra points for modern tech users (likely to spend on new services)
+    if lead.get("has_ads"):
+        score += 15
+    if lead.get("has_pixel"):
+        score += 10
+
 
     if has_instagram and not has_website:
         score += 10

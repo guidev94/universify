@@ -1,16 +1,19 @@
-# LeadHunter - Vision & Goals
+# Lead Export Project
 
 ## Vision
-To be the most efficient and high-quality lead extraction and qualification tool for the Brazilian market, focusing on B2B conversion and actionable data.
+A robust lead generation and management platform that automates the process of finding, scoring, and exporting leads for sales campaigns.
 
-## Strategic Goals
-1. **Quality over Quantity:** Prioritize leads with high conversion potential (Hot Leads).
-2. **Brazilian Focus:** Eliminate noise from foreign leads and optimize for Brazilian business patterns.
-3. **Automation:** Minimize manual work in the search, qualification, and enrichment pipeline.
-4. **Performance:** Maintain high throughput without compromising system stability or triggering anti-bot measures.
+## Key Features
+- **Multi-source Crawling:** Extract leads from DuckDuckGo, Bing, Google Maps, Yellow Pages, etc.
+- **Lead Scoring & Enrichment:** Automatically score leads based on website quality, SSL validity, and other factors.
+- **Campaign Management:** Organize leads into campaigns with specific goals.
+- **Exporting:** Export leads to CSV/Excel for external use.
+- **Real-time Pipeline:** Async processing of lead extraction and enrichment.
 
-## Success Metrics
-- **Hot Lead Ratio:** >40% of total leads should be classified as "Hot".
-- **Gringo Noise:** <2% of captured leads from foreign sources.
-- **Enrichment Rate:** >70% of leads with at least one social media handle or secondary contact.
-- **Conversion Readiness:** Leads exported should have enough data for immediate outreach (WhatsApp/Email).
+## Tech Stack
+- **Backend:** Python / Flask
+- **Frontend:** HTML/JS (jQuery/Tailwind)
+- **Database:** SQLite
+- **Async Processing:** Custom LeadPipeline and Scheduler
+- **Crawling:** Requests, Selenium, BeautifulSoup
+- **Testing:** Pytest / Playwright

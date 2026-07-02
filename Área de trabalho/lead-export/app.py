@@ -13,11 +13,14 @@ if sentry_dsn:
 
 
 def create_app():
+    print("[app] Starting create_app...")
     app = Flask(__name__)
     app.secret_key = Config.SECRET_KEY
 
+    print("[app] Initializing DB...")
     init_db()
 
+    print("[app] Registering blueprints...")
     from blueprints.dashboard import bp as dashboard_bp
     from blueprints.leads import bp as leads_bp
     from blueprints.crawl import bp as crawl_bp
@@ -34,16 +37,19 @@ def create_app():
     def inject_csrf():
         return {"csrf_token": ""}
 
+    print("[app] Starting LeadPipeline...")
     from pipeline import LeadPipeline
     pipeline = LeadPipeline(event_bus=event_bus)
     pipeline.start()
     app.config["PIPELINE"] = pipeline
 
+    print("[app] Starting Scheduler...")
     from scheduler import scheduler
     scheduler.pipeline = pipeline
     scheduler.event_bus = event_bus
     scheduler.start()
 
+    print("[app] App ready!")
     def graceful_shutdown():
         logging.disable(logging.CRITICAL)
         scheduler.stop()
@@ -57,4 +63,5 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, threaded=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug_mode, port=5000, threaded=True)

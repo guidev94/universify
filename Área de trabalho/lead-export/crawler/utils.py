@@ -105,15 +105,26 @@ def get_neighborhoods(city="São Paulo"):
         "São Paulo": [
             "Centro", "Moema", "Itaim Bibi", "Vila Olímpia", "Pinheiros", "Jardins", 
             "Morumbi", "Tatuapé", "Santana", "Lapa", "Brooklin", "Vila Mariana", 
-            "Perdizes", "Butantã", "Ipiranga", "Santo Amaro", "Mooca", "Vila Madalena"
+            "Perdizes", "Butantã", "Ipiranga", "Santo Amaro", "Mooca", "Vila Madalena",
+            "Bela Vista", "Consolação", "Liberdade", "Cambuci", "Aclimação", "Saúde"
         ],
         "Rio de Janeiro": [
             "Barra da Tijuca", "Copacabana", "Ipanema", "Leblon", "Botafogo", 
-            "Centro", "Tijuca", "Recreio", "Flamengo", "Gávea", "Laranjeiras"
+            "Centro", "Tijuca", "Recreio", "Flamengo", "Gávea", "Laranjeiras",
+            "Humaitá", "Urca", "Catete", "Glória", "Santa Teresa", "Cosme Velho"
         ],
-        "Belo Horizonte": ["Savassi", "Lourdes", "Pampulha", "Buritis", "Sion"],
-        "Curitiba": ["Batel", "Centro", "Água Verde", "Bigorrilho"],
-        "Porto Alegre": ["Moinhos de Vento", "Petrópolis", "Centro Histórico"]
+        "Belo Horizonte": [
+            "Savassi", "Lourdes", "Pampulha", "Buritis", "Sion", "Belvedere",
+            "Funcionários", "Santo Agostinho", "Anchieta", "Cruzeiro"
+        ],
+        "Curitiba": [
+            "Batel", "Centro", "Água Verde", "Bigorrilho", "Cabral", "Juvevê",
+            "Mercês", "Santa Felicidade", "Vila Izabel", "Rebouças"
+        ],
+        "Porto Alegre": [
+            "Moinhos de Vento", "Petrópolis", "Centro Histórico", "Menino Deus",
+            "Bela Vista", "Três Figueiras", "Mont'Serrat", "Rio Branco"
+        ]
     }
     return neighborhoods.get(city, neighborhoods["São Paulo"])
 
@@ -176,16 +187,20 @@ def extract_emails_from_text(text, html=""):
 def extract_phones_from_text(text):
     import re
     patterns = [
-        r"\+55\s*\(?\d{2}\)?\s*\d{4,5}[\-\s]?\d{4}",
-        r"\(?\d{2}\)?\s*\d{4,5}[\-\s]?\d{4}",
-        r"\d{2}\s\d{5}\s\d{4}",
+        r"\+55\s*\(?\d{2}\)?\s*9\d{4}[\-\s]?\d{4}", # Celular com 9
+        r"\+55\s*\(?\d{2}\)?\s*\d{4}[\-\s]?\d{4}",   # Fixo
+        r"\(?\d{2}\)?\s*9\d{4}[\-\s]?\d{4}",         # Celular local
+        r"\(?\d{2}\)?\s*\d{4}[\-\s]?\d{4}",           # Fixo local
+        r"\d{2}\s9\d{4}\s\d{4}",
+        r"\d{2}\s\d{4}\s\d{4}",
+        r"0800\s\d{3}\s\d{4}",                        # 0800
     ]
 
     phones = set()
     for pattern in patterns:
         for match in re.findall(pattern, text):
             digits = re.sub(r"\D", "", match)
-            if 10 <= len(digits) <= 13:
+            if 10 <= len(digits) <= 13 or digits.startswith("0800"):
                 phones.add(match.strip())
 
     return list(phones)[:5]
@@ -196,7 +211,10 @@ def extract_whatsapp_from_html(html):
     patterns = [
         r"wa\.me/(\d+)",
         r"api\.whatsapp\.com/send\?phone=(\d+)",
+        r"web\.whatsapp\.com/send\?phone=(\d+)",
+        r"whatsapp.*?phone=(\d+)",
         r"whatsapp.*?(\d{12,13})",
+        r"https?://vcard\.link/card/(\w+)", # VCard links sometimes used
     ]
 
     for pattern in patterns:
@@ -210,38 +228,92 @@ def extract_whatsapp_from_html(html):
 
 
 def extract_business_name(soup, domain):
-    og_title = soup.find("meta", property="og:site_name")
-    if og_title and og_title.get("content"):
-        return og_title["content"].strip()
-
-    title = soup.find("title")
-    if title and title.string:
-        name = title.string.strip()
-        for sep in [" | ", " - ", " — ", " – ", " :: "]:
-            if sep in name:
-                name = name.split(sep)[0].strip()
-                break
-        if len(name) <= 60:
+    """Extrai o nome da empresa de forma inteligente a partir do HTML."""
+    # 1. Tenta og:site_name (geralmente o nome limpo da marca)
+    og_site = soup.find("meta", property="og:site_name")
+    if og_site and og_site.get("content"):
+        name = og_site["content"].strip()
+        if len(name) > 2 and len(name) < 60:
             return name
 
+    # 2. Tenta og:title
+    og_title = soup.find("meta", property="og:title")
+    if og_title and og_title.get("content"):
+        name = og_title["content"].strip()
+        # Limpa separadores comuns se o nome for longo
+        for sep in [" | ", " - ", " — ", " – "]:
+            if sep in name:
+                parts = name.split(sep)
+                # Pega a parte que não parece ser descrição
+                if len(parts[0]) > 2: name = parts[0].strip()
+                break
+        if len(name) > 2 and len(name) < 60:
+            return name
+
+    # 3. Tenta a tag <title>
+    title_el = soup.find("title")
+    if title_el and title_el.string:
+        name = title_el.string.strip()
+        
+        # Lista de palavras genéricas para ignorar/pular
+        generic_terms = ["home", "início", "inicio", "página inicial", "welcome", "index", "website", "oficial"]
+        
+        for sep in [" | ", " - ", " — ", " – ", " :: "]:
+            if sep in name:
+                parts = name.split(sep)
+                # Tenta a primeira parte
+                candidate = parts[0].strip()
+                if candidate.lower() not in generic_terms and len(candidate) > 2:
+                    name = candidate
+                    break
+                # Se a primeira for genérica, tenta a segunda (ex: "Home - Empresa X")
+                if len(parts) > 1:
+                    candidate = parts[1].strip()
+                    if candidate.lower() not in generic_terms and len(candidate) > 2:
+                        name = candidate
+                        break
+        
+        if len(name) > 2 and len(name) < 70 and name.lower() not in generic_terms:
+            return name
+
+    # 4. Tenta o primeiro H1 (muitas vezes é o logo ou nome da empresa)
+    h1 = soup.find("h1")
+    if h1:
+        h1_text = h1.get_text().strip()
+        if h1_text and len(h1_text) > 2 and len(h1_text) < 50:
+            return h1_text
+
+    # 5. Fallback: Nome do domínio formatado
     domain_name = domain.replace("www.", "").split(".")[0]
-    return domain_name.title()
+    # Se o domínio for muito curto ou estranho, capitaliza
+    if len(domain_name) > 2:
+        return domain_name.title()
+    
+    return "Empresa sem Nome"
 
 
 def extract_social_from_html(html):
     import re
-    social = {"instagram": "", "facebook": ""}
+    social = {"instagram": "", "facebook": "", "linkedin": "", "youtube": "", "twitter": ""}
 
     ig_match = re.search(r'instagram\.com/([a-zA-Z0-9_.]+)', html)
     if ig_match:
-        handle = ig_match.group(1)
+        handle = ig_match.group(1).split('?')[0].rstrip('/')
         if handle not in ("p", "explore", "reel", "stories", "accounts"):
             social["instagram"] = f"@{handle}"
 
     fb_match = re.search(r'facebook\.com/([a-zA-Z0-9.]+)', html)
     if fb_match:
-        handle = fb_match.group(1)
+        handle = fb_match.group(1).split('?')[0].rstrip('/')
         if handle not in ("sharer", "share", "dialog", "plugins", "tr"):
             social["facebook"] = handle
+            
+    li_match = re.search(r'linkedin\.com/company/([a-zA-Z0-9\-]+)', html)
+    if li_match:
+        social["linkedin"] = li_match.group(1)
+        
+    yt_match = re.search(r'youtube\.com/(c/|channel/|user/)?([a-zA-Z0-9\-@_]+)', html)
+    if yt_match:
+        social["youtube"] = yt_match.group(2)
 
     return social

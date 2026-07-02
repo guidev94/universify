@@ -133,6 +133,12 @@ def campaigns_page():
 def list_campaigns():
     campaigns = Campaign.get_all()
     for c in campaigns:
+        # Garante que goal seja sempre um número para evitar NaN no frontend
+        try:
+            c["goal"] = int(c["goal"]) if c.get("goal") else 100
+        except (ValueError, TypeError):
+            c["goal"] = 100
+            
         conn = get_connection()
         c["leads_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ?", (c["name"],)).fetchone()["cnt"]
         c["won_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ? AND status = 'closed_won'", (c["name"],)).fetchone()["cnt"]
@@ -146,7 +152,12 @@ def create_campaign():
     name = data.get("name", "").strip()
     if not name:
         return jsonify({"error": "Nome obrigatório"}), 400
-    Campaign.create(name, data.get("keyword", ""), data.get("location", ""), int(data.get("goal", 100)))
+    
+    keyword = data.get("keyword", "")
+    location = data.get("location", "")
+    expand_auto = data.get("expand_auto", False)
+    
+    Campaign.create(name, keyword, location, int(data.get("goal", 100)), expand_auto=expand_auto)
     return jsonify({"ok": True})
 
 
@@ -212,13 +223,20 @@ def campaign_leads(camp_id):
     return jsonify({"leads": [dict(r) for r in rows], "total": total, "page": page, "pages": (total + per_page - 1) // per_page})
 
 
+# Fila dedicada para campanhas para gerenciar concorrência sem travar
+from concurrent.futures import ThreadPoolExecutor
+campaign_executor = ThreadPoolExecutor(max_workers=5, thread_name_prefix="campaign-worker")
+
 @bp.route("/api/campaigns/<int:camp_id>/extract", methods=["POST"])
 def extract_campaign(camp_id):
-    import uuid, threading
+    import uuid
     from blueprints.crawl import run_crawl
-    from models import CrawlJob
+    from models import CrawlJob, Campaign
     from job_manager import job_manager
 
+    # Responde rápido
+    job_uuid = str(uuid.uuid4())
+    
     conn = get_connection()
     camp = conn.execute("SELECT * FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
     conn.close()
@@ -226,101 +244,86 @@ def extract_campaign(camp_id):
     if not camp:
         return jsonify({"error": "Campanha não encontrada"}), 404
 
-    camp = dict(camp)
-    keyword = camp["keyword"]
-    location = camp.get("location", "")
-
-    conn2 = get_connection()
-    current_count = conn2.execute(
-        "SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)
-    ).fetchone()["c"]
-
-    remaining = camp["goal"] - current_count
-    if remaining <= 0:
-        conn2.close()
-        return jsonify({"error": "Meta já atingida!", "leads_count": current_count, "goal": camp["goal"]}), 400
-
-    search_kw = keyword.split('|')[0].strip() if '|' in keyword else keyword
-    search = f"%{search_kw}%"
+    camp_dict = dict(camp)
     
-    # Heuristic assignment of existing unassigned leads
-    unassigned = conn2.execute("""
-        SELECT id FROM leads
-        WHERE (campaign = '' OR campaign IS NULL)
-        AND (category LIKE ? OR name LIKE ? OR website LIKE ?)
-        AND (email != '' OR website != '')
-        ORDER BY score DESC LIMIT ?
-    """, (search, search, search, remaining)).fetchall()
+    # Se já está rodando, não inicia outra
+    if camp_dict.get("extraction_status") == "running":
+        return jsonify({"error": "Esta campanha já está sendo processada"}), 400
 
-    assigned = 0
-    for row in unassigned:
-        conn2.execute("UPDATE leads SET campaign = ? WHERE id = ?", (camp["name"], row["id"]))
-        assigned += 1
-    if assigned > 0:
-        conn2.commit()
-    conn2.close()
+    # Marca como rodando imediatamente
+    Campaign.update_extraction_status(camp_id, "running")
+    job_manager.register(job_uuid, camp_dict["goal"])
 
-    remaining -= assigned
-    if remaining <= 0:
-        return jsonify({"ok": True, "assigned": assigned, "leads_count": current_count + assigned, "goal": camp["goal"], "message": "Meta atingida com leads existentes!"})
-
-    # Start extraction for the rest
-    job_uuid = str(uuid.uuid4())
-    # Register in job_manager immediately for UI feedback
-    job_manager.register(job_uuid, remaining)
-    
-    def continuous_extract(first_uuid, camp_name, camp_goal, kw, loc):
-        # Initial batch
-        batch_qty = min(30, remaining)
-        batch_id = CrawlJob.create(first_uuid, kw, loc, "both", batch_qty)
-        run_crawl(first_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
-
-        # Subsequent batches if needed
-        max_batches = 10
-        import time as _time
-        for batch in range(max_batches):
-            _time.sleep(2) # Small break
+    def background_extract(job_uuid, camp_id, camp_name, camp_goal, keyword, location):
+        try:
+            # 1. Atribuição heurística rápida
+            conn_bg = get_connection()
+            current_count = conn_bg.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
+            remaining = camp_goal - current_count
             
-            # Check current progress
-            conn_check = get_connection()
-            current = conn_check.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
-            conn_check.close()
-
-            left = camp_goal - current
-            if left <= 1: # Threshold
-                break
-
-            # Check if job was cancelled via UI
-            state = job_manager.get(first_uuid)
-            if state and state.get("status") == "cancelled":
-                break
-
-            # Run another batch
-            batch_uuid = str(uuid.uuid4())
-            batch_qty = min(30, left)
-            batch_id = CrawlJob.create(batch_uuid, kw, loc, "both", batch_qty)
+            if remaining > 0:
+                search_kw = keyword.split('|')[0].strip() if '|' in keyword else keyword
+                conn_bg.execute("""
+                    UPDATE leads SET campaign = ? 
+                    WHERE id IN (
+                        SELECT id FROM leads 
+                        WHERE (campaign = '' OR campaign IS NULL) 
+                        AND (category LIKE ? OR name LIKE ?) 
+                        LIMIT ?
+                    )
+                """, (camp_name, f"%{search_kw}%", f"%{search_kw}%", remaining))
+                conn_bg.commit()
             
-            # Update main job_id progress with cumulative total found in campaign
-            job_manager.update(first_uuid, progress=current)
+            # Recalcula após atribuição
+            current_count = conn_bg.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp_name,)).fetchone()["c"]
+            conn_bg.close()
             
-            run_crawl(batch_uuid, batch_id, "both", kw, batch_qty, loc, campaign_name=camp_name, require_quality=True)
+            if current_count >= camp_goal:
+                Campaign.update_extraction_status(camp_id, "idle")
+                job_manager.complete(job_uuid, current_count)
+                return
 
-        job_manager.complete(first_uuid, current_count + assigned)
+            # 2. Extração em massa
+            from crawler.utils import expand_local_keywords
+            queries = expand_local_keywords(keyword, location)
+            
+            current_total = current_count
+            for q in queries:
+                # Check status safe
+                conn_chk = get_connection()
+                status = conn_chk.execute("SELECT extraction_status FROM campaigns WHERE id = ?", (camp_id,)).fetchone()
+                conn_chk.close()
+                if not status or status["extraction_status"] != "running": break
+                
+                left = camp_goal - current_total
+                if left <= 5: break
+                
+                batch_uuid = str(uuid.uuid4())
+                batch_id = CrawlJob.create(batch_uuid, q, location, "both", min(40, left))
+                found = run_crawl(batch_uuid, batch_id, "both", q, min(40, left), location, campaign_name=camp_name, require_quality=True)
+                current_total += (found or 0)
+                job_manager.update(job_uuid, progress=current_total)
 
-    thread = threading.Thread(
-        target=continuous_extract,
-        args=(job_uuid, camp["name"], camp["goal"], keyword, location),
-        daemon=True,
-    )
-    thread.start()
+            Campaign.update_extraction_status(camp_id, "idle")
+            job_manager.complete(job_uuid, current_total)
 
-    return jsonify({
-        "ok": True,
-        "job_id": job_uuid,
-        "assigned": assigned,
-        "quantity": remaining, # Added missing field
-        "total_remaining": remaining
-    })
+        except Exception as e:
+            logger.error(f"Background extraction failed: {e}")
+            Campaign.update_extraction_status(camp_id, "error")
+
+    # Envia para a fila gerenciada
+    campaign_executor.submit(background_extract, job_uuid, camp_id, camp_dict["name"], camp_dict["goal"], camp_dict["keyword"], camp_dict.get("location", ""))
+
+    return jsonify({"ok": True, "job_id": job_uuid})
+
+
+
+
+@bp.route("/api/campaigns/<int:camp_id>/cancel", methods=["POST"])
+def cancel_campaign_extraction(camp_id):
+    from models import Campaign
+    Campaign.update_extraction_status(camp_id, "idle")
+    return jsonify({"ok": True})
 
 
 @bp.route("/api/dashboard/activity")
@@ -355,6 +358,7 @@ def dashboard_activity():
 
     feed.sort(key=lambda x: x.get("at") or "", reverse=True)
     return jsonify({"feed": feed[:15]})
+
 
 
 @bp.route("/api/system/health")

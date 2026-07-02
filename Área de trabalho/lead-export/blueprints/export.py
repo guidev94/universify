@@ -19,9 +19,16 @@ def export_leads():
     fmt = data.get("format", "csv")
     tier = data.get("tier", "").strip() or None
     status = data.get("status", "").strip() or None
+    campaign = data.get("campaign", "").strip() or None
+    site_quality = data.get("site_quality", "").strip() or None
+    has_ads = data.get("has_ads")
+    if has_ads is not None:
+        has_ads = bool(has_ads)
+    
     quantity = data.get("quantity")
     keyword = data.get("keyword", "").strip() or None
     ids = data.get("ids")
+    selected_columns = data.get("columns") # New parameter
 
     if fmt not in ("csv", "xlsx"):
         return jsonify({"error": "Formato inválido"}), 400
@@ -35,7 +42,11 @@ def export_leads():
         conn.close()
         leads = [dict(r) for r in rows]
     else:
-        leads = Lead.get_for_export(tier=tier, status=status, quantity=quantity, keyword=keyword)
+        leads = Lead.get_for_export(
+            tier=tier, status=status, quantity=quantity, 
+            keyword=keyword, campaign=campaign, 
+            site_quality=site_quality, has_ads=has_ads
+        )
 
     if not leads:
         return jsonify({"error": "Nenhum lead encontrado com esses filtros"}), 404
@@ -45,10 +56,10 @@ def export_leads():
     filepath = os.path.join(Config.EXPORT_DIR, filename)
 
     if fmt == "xlsx":
-        export_xlsx(leads, filepath)
+        export_xlsx(leads, filepath, selected_columns=selected_columns)
         mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     else:
-        export_csv(leads, filepath)
+        export_csv(leads, filepath, selected_columns=selected_columns)
         mimetype = "text/csv"
 
     return send_file(filepath, as_attachment=True, download_name=filename, mimetype=mimetype)

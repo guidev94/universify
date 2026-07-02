@@ -3,32 +3,51 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
 
-COLUMNS = [
-    ("Nome", "name"),
-    ("Email", "email"),
-    ("Telefone", "phone"),
-    ("WhatsApp", "whatsapp"),
-    ("WA_Link", "wa_link"),
-    ("Website", "website"),
-    ("Score", "score"),
-    ("Tier", "tier"),
-    ("Status", "status"),
-    ("Valor Negócio", "deal_value"),
-    ("Notas", "deal_notes"),
-    ("Origem", "source"),
-    ("Categoria", "category"),
-    ("Site Verificado", "site_verified"),
-]
+ALL_COLUMNS = {
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefone",
+    "whatsapp": "WhatsApp",
+    "wa_link": "WA_Link",
+    "website": "Website",
+    "score": "Score",
+    "tier": "Tier",
+    "status": "Status",
+    "deal_value": "Valor Negócio",
+    "deal_notes": "Notas",
+    "source": "Origem",
+    "category": "Categoria",
+    "site_verified": "Site Verificado",
+    "cms": "CMS",
+    "cnpj": "CNPJ",
+    "partners": "Sócios",
+    "has_ads": "Anuncia",
+    "has_pixel": "Pixel",
+    "has_analytics": "Analytics",
+    "tech_score": "Tech Score",
+    "company_value": "Capital Social",
+    "legal_nature": "Nat. Juridica",
+    "location": "Localização",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+}
 
+def export_csv(leads, filepath, selected_columns=None):
+    if not selected_columns:
+        selected_columns = list(ALL_COLUMNS.keys())
 
-def export_csv(leads, filepath):
     with open(filepath, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f, delimiter=";")
-        writer.writerow([col[0] for col in COLUMNS])
+        
+        # Header
+        writer.writerow([ALL_COLUMNS[col] for col in selected_columns if col in ALL_COLUMNS])
 
         for lead in leads:
             row = []
-            for _, key in COLUMNS:
+            for key in selected_columns:
+                if key not in ALL_COLUMNS:
+                    continue
+                    
                 if key == "wa_link":
                     wa = lead.get("whatsapp", "") or lead.get("phone", "")
                     digits = "".join(filter(str.isdigit, wa))
@@ -38,16 +57,19 @@ def export_csv(leads, filepath):
                         val = f"https://wa.me/{digits}"
                     else:
                         val = ""
+                elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics"):
+                    val = "Sim" if lead.get(key) else "Não"
                 else:
                     val = lead.get(key, "")
-                    
-                if key == "site_verified":
-                    val = "Sim" if val else "Não"
+                
                 row.append(val)
             writer.writerow(row)
 
 
-def export_xlsx(leads, filepath):
+def export_xlsx(leads, filepath, selected_columns=None):
+    if not selected_columns:
+        selected_columns = list(ALL_COLUMNS.keys())
+
     wb = Workbook()
     ws = wb.active
     ws.title = "Leads"
@@ -62,8 +84,10 @@ def export_xlsx(leads, filepath):
         bottom=Side(style="thin", color="E5E7EB"),
     )
 
-    for col_idx, (header, _) in enumerate(COLUMNS, 1):
-        cell = ws.cell(row=1, column=col_idx, value=header)
+    # Header
+    actual_cols = [col for col in selected_columns if col in ALL_COLUMNS]
+    for col_idx, key in enumerate(actual_cols, 1):
+        cell = ws.cell(row=1, column=col_idx, value=ALL_COLUMNS[key])
         cell.font = header_font
         cell.fill = header_fill
         cell.alignment = header_alignment
@@ -76,7 +100,7 @@ def export_xlsx(leads, filepath):
     warm_fill = PatternFill(start_color="FFEDD5", end_color="FFEDD5", fill_type="solid")
 
     for row_idx, lead in enumerate(leads, 2):
-        for col_idx, (_, key) in enumerate(COLUMNS, 1):
+        for col_idx, key in enumerate(actual_cols, 1):
             if key == "wa_link":
                 wa = lead.get("whatsapp", "") or lead.get("phone", "")
                 digits = "".join(filter(str.isdigit, wa))
@@ -86,11 +110,10 @@ def export_xlsx(leads, filepath):
                     val = f"https://wa.me/{digits}"
                 else:
                     val = ""
+            elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics"):
+                val = "Sim" if lead.get(key) else "Não"
             else:
                 val = lead.get(key, "")
-                
-            if key == "site_verified":
-                val = "Sim" if val else "Não"
 
             cell = ws.cell(row=row_idx, column=col_idx, value=val)
             cell.font = data_font
@@ -105,9 +128,15 @@ def export_xlsx(leads, filepath):
             elif row_idx % 2 == 0:
                 cell.fill = even_fill
 
-    col_widths = [30, 35, 20, 20, 40, 40, 8, 10, 12, 15, 25, 14, 20, 10]
-    for i, width in enumerate(col_widths, 1):
-        ws.column_dimensions[chr(64 + i) if i <= 26 else f"A{chr(64 + i - 26)}"].width = width
+    # Dynamic column widths
+    for i in range(1, len(actual_cols) + 1):
+        col_letter = chr(64 + i) if i <= 26 else f"A{chr(64 + i - 26)}"
+        ws.column_dimensions[col_letter].width = 25
+
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
+
+    wb.save(filepath)
 
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = ws.dimensions

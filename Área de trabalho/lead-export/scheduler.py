@@ -5,6 +5,7 @@ import time
 import logging
 from logging.handlers import RotatingFileHandler
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from database import get_connection
 from crawler.site_verifier import SiteVerifier
 from crawler.website_crawler import WebsiteCrawler
 from crawler.maps_crawler import MapsCrawler
@@ -48,14 +49,15 @@ class CrawlSemaphore:
         self._semaphore.release()
 
 
-crawl_gate = CrawlSemaphore(max_concurrent=3)
+crawl_gate = CrawlSemaphore(max_concurrent=10)
 
 
 class ParallelScheduler:
     """Independent timer-based scheduler — tasks never block each other."""
 
     def __init__(self):
-        self.executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="sched")
+        # Executor global com mais capacidade
+        self.executor = ThreadPoolExecutor(max_workers=15, thread_name_prefix="sched")
         self.timers = {}
         self.running = False
         self._lock = threading.Lock()
@@ -76,17 +78,33 @@ class ParallelScheduler:
         self.running = True
         self.status = "running"
 
+        # Intervalos mais agressivos para não deixar filas paradas
         self._schedule_repeating("cleanup", self._cleanup_stuck_jobs, interval=30, initial_delay=5)
-        self._schedule_repeating("campaign_fill", self._crawl_campaigns, interval=300, initial_delay=15)
-        self._schedule_repeating("verify", self._verify_and_feed_pipeline, interval=Config.SCHEDULER_VERIFY_INTERVAL, initial_delay=20)
-        self._schedule_repeating("auto_crawl", self._auto_crawl, interval=Config.SCHEDULER_CRAWL_INTERVAL, initial_delay=30)
+        self._schedule_repeating("campaign_fill", self._crawl_campaigns, interval=45, initial_delay=15)
+        self._schedule_repeating("verify", self._verify_and_feed_pipeline, interval=60, initial_delay=20)
+        self._schedule_repeating("auto_crawl", self._auto_crawl, interval=1800, initial_delay=30) # Reduzido para 30min
         self._schedule_repeating("decay", self._decay_scores, interval=21600, initial_delay=60)
-        self._schedule_repeating("enrich", self._feed_enrichment, interval=2700, initial_delay=45)
+        self._schedule_repeating("enrich", self._feed_enrichment, interval=60, initial_delay=45)
+        self._schedule_repeating("db_maintenance", self._db_maintenance, interval=10800, initial_delay=300) # Mais frequente
 
         logger.info(
-            "[scheduler] ParallelScheduler started — 6 tasks registered "
-            f"(verify={Config.SCHEDULER_VERIFY_INTERVAL}s, crawl={Config.SCHEDULER_CRAWL_INTERVAL}s)"
+            "[scheduler] ParallelScheduler started — 7 tasks registered "
+            f"(verify=300s, crawl=3600s)"
         )
+
+    def _db_maintenance(self):
+        """Urgente: Mantém a integridade e performance do SQLite 24/7."""
+        conn = get_connection()
+        try:
+            logger.info("[scheduler:db] Iniciando manutenção preventiva...")
+            conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
+            conn.execute("VACUUM")
+            conn.execute("ANALYZE")
+            logger.info("[scheduler:db] Manutenção concluída com sucesso.")
+        except Exception as e:
+            logger.error(f"[scheduler:db] Erro na manutenção: {e}")
+        finally:
+            conn.close()
 
     def stop(self):
         self.running = False
@@ -151,7 +169,6 @@ class ParallelScheduler:
                 lock.release()
 
     def _decay_scores(self):
-        from database import get_connection
         conn = get_connection()
         affected = conn.execute("""
             UPDATE leads SET
@@ -170,13 +187,13 @@ class ParallelScheduler:
         conn.close()
 
     def _cleanup_stuck_jobs(self):
-        from database import get_connection
         from job_manager import job_manager
 
         conn = get_connection()
+        # Mark jobs as error if they haven't started in 15 mins OR haven't finished in 15 mins
         stuck = conn.execute(
             "UPDATE crawl_jobs SET status = 'error', completed_at = datetime('now','localtime') "
-            "WHERE status = 'running' AND started_at < datetime('now', '-5 minutes', 'localtime')"
+            "WHERE status = 'running' AND started_at < datetime('now', '-10 minutes', 'localtime')"
         )
         if stuck.rowcount > 0:
             logger.warning(f"[scheduler:cleanup] {stuck.rowcount} stuck jobs marked as error")
@@ -188,7 +205,7 @@ class ParallelScheduler:
     def _verify_and_feed_pipeline(self):
         self.last_verify = time.time()
         if self.pipeline:
-            count = self.pipeline.feed_unverified(limit=100)
+            count = self.pipeline.feed_unverified(limit=200)
             if count > 0:
                 logger.info(f"[scheduler:verify] fed {count} leads to pipeline verify queue")
         else:
@@ -204,14 +221,13 @@ class ParallelScheduler:
 
     def _feed_enrichment(self):
         if self.pipeline:
-            count = self.pipeline.feed_unenriched(limit=30)
+            count = self.pipeline.feed_unenriched(limit=100)
             if count > 0:
                 logger.info(f"[scheduler:enrich] fed {count} leads to pipeline enrich queue")
         else:
             self._enrich_leads_legacy()
 
     def _enrich_leads_legacy(self):
-        from database import get_connection
         conn = get_connection()
         rows = conn.execute(
             """SELECT id, name, email, phone, whatsapp, website, instagram, facebook
@@ -306,7 +322,6 @@ class ParallelScheduler:
             time.sleep(5)
 
     def _crawl_campaigns(self):
-        from database import get_connection
         conn = get_connection()
         campaigns = conn.execute(
             "SELECT * FROM campaigns WHERE status = 'active'"
@@ -328,7 +343,6 @@ class ParallelScheduler:
                 logger.warning(f"[scheduler:campaign] error: {e}")
 
     def _fill_single_campaign(self, camp):
-        from database import get_connection
         conn = get_connection()
         current = conn.execute("SELECT COUNT(*) as c FROM leads WHERE campaign = ?", (camp["name"],)).fetchone()["c"]
         conn.close()
@@ -350,19 +364,43 @@ class ParallelScheduler:
 
         remaining -= assigned
         quantity = min(30, remaining)
+        
+        # Lógica de Auto-Exploração no agendador automático
+        active_keyword = keyword
+        if camp.get("expand_auto"):
+            from crawler.utils import expand_local_keywords
+            variations = expand_local_keywords(keyword, location)
+            # Escolhe uma variação baseada no tempo para garantir rodízio contínuo
+            import time as _time
+            # Ciclo de 10 minutos por bairro
+            cycle_index = int(_time.time() / 600) % len(variations)
+            active_keyword = variations[cycle_index]
+            logger.info(f"[scheduler:campaign] '{camp['name']}' rodízio auto-expandido: {active_keyword} (variação {cycle_index+1}/{len(variations)})")
 
-        logger.info(f"[scheduler:campaign] '{camp['name']}': {current + assigned}/{camp['goal']} — fetching {quantity} new")
+        logger.info(f"[scheduler:campaign] '{camp['name']}': {current + assigned}/{camp['goal']} — processando")
 
-        if not crawl_gate.acquire(timeout=30):
-            logger.warning(f"[scheduler:campaign] '{camp['name']}' — crawl gate busy, skipping")
+        # Verifica se já existe um job RODANDO para este termo exato para evitar duplicidade inútil
+        conn_job = get_connection()
+        already_running = conn_job.execute(
+            "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", 
+            (active_keyword,)
+        ).fetchone()["c"]
+        conn_job.close()
+
+        if already_running > 0:
+            logger.info(f"[scheduler:campaign] '{camp['name']}' — já existe extração ativa para '{active_keyword}'")
+            return
+
+        if not crawl_gate.acquire(timeout=5):
+            logger.warning(f"[scheduler:campaign] '{camp['name']}' — limite de concorrência atingido, pulando ciclo")
             return
         try:
-            count = self._run_multi_source_crawl(keyword, location, campaign_name=camp["name"], quantity_override=quantity)
-            logger.info(f"[scheduler:campaign] '{camp['name']}': +{count} new leads")
+            count = self._run_multi_source_crawl(active_keyword, location, campaign_name=camp["name"], quantity_override=quantity)
+            logger.info(f"[scheduler:campaign] '{camp['name']}': +{count} novos leads para {active_keyword}")
             if self.event_bus:
                 self.event_bus.publish("campaign_progress", {"name": camp["name"], "added": count, "goal": camp["goal"]})
         except Exception as e:
-            logger.warning(f"[scheduler:campaign] '{camp['name']}' failed: {e}")
+            logger.warning(f"[scheduler:campaign] '{camp['name']}' falhou: {e}")
         finally:
             crawl_gate.release()
 
@@ -379,7 +417,6 @@ class ParallelScheduler:
         return expanded[:10]
 
     def _assign_existing_leads(self, campaign_name, keyword, location, limit):
-        from database import get_connection
         conn = get_connection()
         search = f"%{keyword.split('|')[0].strip()}%"
         rows = conn.execute("""
@@ -410,8 +447,7 @@ class ParallelScheduler:
         if not keyword:
             return 0
 
-        from database import get_connection as _gc
-        conn_check = _gc()
+        conn_check = get_connection()
         running = conn_check.execute(
             "SELECT COUNT(*) as c FROM crawl_jobs WHERE keyword = ? AND status = 'running'", (keyword,)
         ).fetchone()["c"]
@@ -439,17 +475,26 @@ class ParallelScheduler:
             "directory": lambda: DirectoryCrawler().crawl(keyword, location, fetch_qty),
             "niche": lambda: NicheCrawler().crawl(keyword, location, fetch_qty),
             "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, fetch_qty),
+            "linkedin": lambda: self._crawl_linkedin_dork(keyword, location, quantity),
         }
 
         try:
-            with ThreadPoolExecutor(max_workers=4) as executor:
+            with ThreadPoolExecutor(max_workers=8) as executor:
                 futures = {executor.submit(fn): name for name, fn in sources.items()}
 
-                for future in as_completed(futures, timeout=120):
+                for future in as_completed(futures, timeout=180): # Aumentado de 120 para 180
                     name = futures[future]
                     try:
-                        results = future.result(timeout=60)
+                        results = future.result(timeout=120) # Aumentado de 60 para 120
                         leads.extend(results)
+                        # Notifica progresso em tempo real por fonte
+                        if self.event_bus:
+                            self.event_bus.publish("source_progress", {
+                                "job_uuid": job_uuid,
+                                "source": name,
+                                "count": len(results),
+                                "keyword": keyword
+                            })
                         job_manager.update(job_uuid, sources={**job_manager.get(job_uuid).get("sources", {}), name: len(results)})
                     except Exception as e:
                         logger.warning(f"[scheduler:crawl] {name} failed: {e}")
@@ -461,41 +506,43 @@ class ParallelScheduler:
 
         saved_count = 0
         saved_ids = []
-        for lead in leads:
-            if saved_count >= quantity:
-                break
+        conn = get_connection()
+        try:
+            # Iniciamos uma transação única para todo o batch
+            conn.execute("BEGIN TRANSACTION")
+            
+            for lead in leads:
+                if saved_count >= quantity:
+                    break
 
-            validated = validate_lead(lead)
-            if not validated:
-                continue
-
-            if campaign_name:
-                has_email = bool(validated.get("email", "").strip())
-                has_website = bool(validated.get("website", "").strip())
-                if not has_email and not has_website:
+                validated = validate_lead(lead)
+                if not validated:
                     continue
 
-            score, tier = calculate_score(validated)
-            validated["score"] = score
-            validated["tier"] = tier
-            if campaign_name:
-                validated["campaign"] = campaign_name
-
-            lead_id = Lead.create(validated, crawl_job_id=job_id)
-            if lead_id:
-                saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
                 if campaign_name:
-                    from database import get_connection as gc
-                    c = gc()
-                    current_camp = c.execute("SELECT campaign FROM leads WHERE id = ?", (lead_id,)).fetchone()
-                    current_val = current_camp["campaign"] if current_camp else ""
-                    if current_val != campaign_name:
-                        c.execute("UPDATE leads SET campaign = ? WHERE id = ?", (campaign_name, lead_id))
-                        c.commit()
-                        saved_count += 1
-                    c.close()
-                else:
+                    has_email = bool(validated.get("email", "").strip())
+                    has_website = bool(validated.get("website", "").strip())
+                    has_phone = bool(validated.get("phone", "").strip())
+                    if not (has_email or has_website or has_phone):
+                        continue
+
+                score, tier = calculate_score(validated)
+                validated["score"] = score
+                validated["tier"] = tier
+                if campaign_name:
+                    validated["campaign"] = campaign_name
+
+                lead_id = Lead.create(validated, crawl_job_id=job_id, conn=conn)
+                if lead_id:
+                    saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
                     saved_count += 1
+            
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"[scheduler:crawl] Erro ao salvar leads: {e}")
+        finally:
+            conn.close()
 
         CrawlJob.complete(job_uuid, saved_count)
         job_manager.complete(job_uuid, saved_count)
@@ -508,6 +555,23 @@ class ParallelScheduler:
             self.event_bus.publish("job_completed", {"uuid": job_uuid, "keyword": keyword, "found": saved_count})
 
         return saved_count
+
+    def _crawl_linkedin_dork(self, keyword, location, quantity):
+        from crawler.search_engine import SearchEngine
+        se = SearchEngine()
+        profiles = se.search_linkedin(keyword, location, num_results=quantity)
+        leads = []
+        for url in profiles:
+            name = url.split("/in/")[-1].replace("-", " ").title().split("/")[0]
+            leads.append({
+                "name": name,
+                "website": url,
+                "source": "linkedin",
+                "category": "Decision Maker",
+                "email": "",
+                "phone": ""
+            })
+        return leads
 
     def _load_state(self):
         try:

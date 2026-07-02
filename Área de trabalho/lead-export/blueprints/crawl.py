@@ -22,7 +22,7 @@ logger = logging.getLogger("leadhunter.crawl")
 
 bp = Blueprint("crawl", __name__)
 
-MAX_JOB_DURATION = 240
+MAX_JOB_DURATION = 600
 
 
 def _get_event_bus():
@@ -178,72 +178,69 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
             for future in futures:
                 future.cancel()
 
-        saved_count = 0
-        saved_ids = []
-        seen = set()
-
-        # Pre-filter to remove duplicates from this batch
+        # Dedup leads by website/phone before processing
         unique_leads = []
+        seen_leads = set()
         for l in leads:
-            e = l.get("email", "").strip().lower()
-            p = l.get("phone", "").strip()
-            w = l.get("website", "").strip().lower()
-            key = f"{e}|{p}|{w}"
-            if key not in seen:
-                seen.add(key)
+            l_key = (l.get("website", "").strip(), l.get("phone", "").strip())
+            if l_key not in seen_leads:
+                seen_leads.add(l_key)
                 unique_leads.append(l)
 
-        for lead in unique_leads:
-            if saved_count >= quantity:
-                break
+        saved_count = 0
+        saved_ids = []
+        seen_validated = set()
+        
+        conn = get_connection()
+        try:
+            for lead in unique_leads:
+                if saved_count >= quantity:
+                    break
 
-            # DEBUG: Log raw lead before validation
-            # logger.info(f"[crawl:debug] processing raw lead: {lead.get('name')} | {lead.get('website')}")
-
-            validated = validate_lead(lead)
-            if not validated:
-                # logger.info(f"[crawl:debug] validation failed for: {lead.get('name')}")
-                continue
-
-            if require_quality:
-                has_email = bool(validated.get("email", "").strip())
-                has_website = bool(validated.get("website", "").strip())
-                if not has_email and not has_website:
+                validated = validate_lead(lead)
+                if not validated:
                     continue
 
-            key = (validated.get("email", ""), validated.get("phone", ""))
-            if key != ("", "") and key in seen:
-                continue
-            seen.add(key)
+                if require_quality:
+                    has_email = bool(validated.get("email", "").strip())
+                    has_website = bool(validated.get("website", "").strip())
+                    has_phone = bool(validated.get("phone", "").strip())
+                    # Allow if has email OR website OR phone
+                    if not (has_email or has_website or has_phone):
+                        continue
 
-            score, tier = calculate_score(validated)
-            validated["score"] = score
-            validated["tier"] = tier
-            if campaign_name:
-                validated["campaign"] = campaign_name
+                v_email = validated.get("email", "").strip()
+                v_phone = validated.get("phone", "").strip()
+                v_key = (v_email, v_phone)
+                
+                if v_key != ("", "") and v_key in seen_validated:
+                    continue
+                seen_validated.add(v_key)
 
-            lead_id = Lead.create(validated, crawl_job_id=job_id)
-            if lead_id:
-                saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
+                score, tier = calculate_score(validated)
+                validated["score"] = score
+                validated["tier"] = tier
                 if campaign_name:
-                    conn = get_connection()
-                    current_camp = conn.execute("SELECT campaign FROM leads WHERE id = ?", (lead_id,)).fetchone()
-                    current_val = current_camp["campaign"] if current_camp else ""
-                    if current_val != campaign_name:
-                        conn.execute("UPDATE leads SET campaign = ? WHERE id = ?", (campaign_name, lead_id))
-                        conn.commit()
-                        saved_count += 1
-                    conn.close()
-                else:
+                    validated["campaign"] = campaign_name
+                if location:
+                    validated["location"] = location
+
+                lead_id = Lead.create(validated, crawl_job_id=job_id, conn=conn)
+                if lead_id:
+                    saved_ids.append({"id": lead_id, "website": validated.get("website", "")})
                     saved_count += 1
 
-                if event_bus:
-                    event_bus.publish("lead_new", {
-                        "id": lead_id, "name": validated.get("name", ""),
-                        "tier": tier, "score": score,
-                    })
+                    if event_bus:
+                        event_bus.publish("lead_new", {
+                            "id": lead_id, "name": validated.get("name", ""),
+                            "tier": tier, "score": score,
+                        })
+            conn.commit()
+        finally:
+            conn.close()
 
         CrawlJob.complete(job_uuid, saved_count)
+
         job_manager.complete(job_uuid, saved_count)
         Keyword.track(query, location, saved_count)
 

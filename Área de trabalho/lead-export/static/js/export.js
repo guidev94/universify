@@ -3,6 +3,17 @@ function getSelectedTiers() {
     return Array.from(checked).map(cb => cb.value).join(',');
 }
 
+function getSelectedColumns() {
+    const checked = document.querySelectorAll('input[name="export_col"]:checked');
+    return Array.from(checked).map(cb => cb.value);
+}
+
+function toggleAllColumns() {
+    const checkboxes = document.querySelectorAll('input[name="export_col"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+}
+
 async function loadKeywords() {
     try {
         const data = await api('/api/keywords/suggestions');
@@ -57,6 +68,12 @@ async function doExport() {
     const status = document.getElementById('exportStatus').value;
     const quantity = document.getElementById('exportQuantity').value;
     const keyword = document.getElementById('exportKeyword').value;
+    const columns = getSelectedColumns();
+
+    if (columns.length === 0) {
+        showToast('Selecione pelo menos um campo para exportar', 'error');
+        return;
+    }
 
     const btn = document.getElementById('exportBtn');
     btn.disabled = true;
@@ -75,6 +92,7 @@ async function doExport() {
                 status: status || null,
                 quantity: quantity && parseInt(quantity) > 0 ? parseInt(quantity) : null,
                 keyword: keyword || null,
+                columns: columns
             }),
         });
 

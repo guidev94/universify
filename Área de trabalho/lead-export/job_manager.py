@@ -57,7 +57,7 @@ class JobManager:
         with self._lock:
             return {k: dict(v) for k, v in self._cache.items() if v.get("status") == "running"}
 
-    def cleanup_stale(self, max_age=300):
+    def cleanup_stale(self, max_age=900): # Aumentado de 300 para 900 (15 min)
         now = time.time()
         stale = []
         with self._lock:

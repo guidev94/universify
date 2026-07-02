@@ -31,6 +31,9 @@ async function loadStats() {
             { id: 'statEmail', key: 'with_email' },
             { id: 'statPhone', key: 'with_phone' },
             { id: 'statWhatsapp', key: 'with_whatsapp' },
+            { id: 'statHasAds', key: 'with_ads' },
+            { id: 'statHasPixel', key: 'with_pixel' },
+            { id: 'statVerified', key: 'verified' },
         ];
 
         for (const { id, key } of fields) {

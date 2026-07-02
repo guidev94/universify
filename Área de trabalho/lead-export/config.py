@@ -9,8 +9,8 @@ class Config:
     DATABASE_PATH = os.path.join(os.path.dirname(__file__), "data", "leads.db")
     EXPORT_DIR = os.path.join(os.path.dirname(__file__), "exports")
     LOG_FILE = os.path.join(os.path.dirname(__file__), "data", "crawl.log")
-    MAX_CONCURRENT_REQUESTS = int(os.getenv("MAX_CONCURRENT_REQUESTS", "5"))
-    REQUEST_DELAY_MS = int(os.getenv("REQUEST_DELAY_MS", "1500"))
-    MAX_LEADS_PER_CRAWL = 500
+    MAX_CONCURRENT_REQUESTS = int(os.getenv("MAX_CONCURRENT_REQUESTS", "12"))
+    REQUEST_DELAY_MS = int(os.getenv("REQUEST_DELAY_MS", "1000"))
+    MAX_LEADS_PER_CRAWL = 1000
     SCHEDULER_CRAWL_INTERVAL = int(os.getenv("SCHEDULER_CRAWL_INTERVAL", "10800"))
     SCHEDULER_VERIFY_INTERVAL = int(os.getenv("SCHEDULER_VERIFY_INTERVAL", "3600"))

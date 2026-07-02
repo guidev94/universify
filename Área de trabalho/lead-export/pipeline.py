@@ -1,8 +1,11 @@
 import queue
 import threading
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from crawler.site_verifier import SiteVerifier
 from crawler.enrichment_crawler import EnrichmentCrawler
+from crawler.cnpj_enricher import CNPJEnricher
+from crawler.deep_scraper import DeepContactScraper
 from database import get_connection
 
 logger = logging.getLogger("leadhunter.pipeline")
@@ -13,8 +16,19 @@ class LeadPipeline:
 
     def __init__(self, event_bus=None):
         self.event_bus = event_bus
-        self.verify_queue = queue.Queue()
-        self.enrich_queue = queue.Queue()
+        self.verify_queue = queue.Queue(maxsize=2000)
+        self.enrich_queue = queue.Queue(maxsize=1000)
+        
+        # Aumentando workers para paralelismo real em I/O
+        self.deep_executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="pipeline-deep")
+        self.enrich_executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="pipeline-enrich")
+        self.cnpj_executor = ThreadPoolExecutor(max_workers=5, thread_name_prefix="pipeline-cnpj")
+        
+        # Verifier com mais workers internos
+        self.verifier = SiteVerifier(max_workers=15)
+        self.enricher = EnrichmentCrawler()
+        self.cnpj_enricher = CNPJEnricher()
+        self.deep_scraper = DeepContactScraper()
         self._running = False
 
     def start(self):
@@ -27,6 +41,7 @@ class LeadPipeline:
 
     def stop(self):
         self._running = False
+        self.deep_executor.shutdown(wait=False)
 
     def submit_for_verification(self, leads):
         """Submit leads for site verification. leads = list of {id, website}."""
@@ -39,11 +54,15 @@ class LeadPipeline:
         for lead in leads:
             self.enrich_queue.put(lead)
 
-    def feed_unverified(self, limit=100):
+    def feed_unverified(self, limit=200):
         """Pull unverified leads from DB and push to verify queue."""
         conn = get_connection()
+        # Only pick leads that haven't been updated in the last 12 hours
         rows = conn.execute(
-            "SELECT id, website FROM leads WHERE site_verified = 0 AND website != '' LIMIT ?",
+            """SELECT id, website FROM leads 
+               WHERE site_verified = 0 AND website != '' 
+               AND (updated_at < datetime('now', '-12 hours', 'localtime') OR updated_at = created_at)
+               LIMIT ?""",
             (limit,),
         ).fetchall()
         conn.close()
@@ -53,13 +72,15 @@ class LeadPipeline:
             count += 1
         return count
 
-    def feed_unenriched(self, limit=30):
+    def feed_unenriched(self, limit=100):
         """Pull verified but unenriched leads and push to enrich queue."""
         conn = get_connection()
+        # Filter by updated_at to avoid re-enriching failed attempts too soon
         rows = conn.execute(
             """SELECT id, name, email, phone, whatsapp, website, instagram, facebook
                FROM leads WHERE website != '' AND site_verified = 1
                AND (instagram = '' OR instagram IS NULL)
+               AND (updated_at < datetime('now', '-24 hours', 'localtime') OR updated_at IS NULL OR updated_at = created_at)
                ORDER BY score DESC LIMIT ?""",
             (limit,),
         ).fetchall()
@@ -115,45 +136,60 @@ class LeadPipeline:
     def _verify_batch(self, leads):
         if not leads:
             return
-        logger.info(f"[pipeline:verify] processing {len(leads)} leads")
-        verifier = SiteVerifier(max_workers=5)
-        verifier.verify_leads(leads)
+        logger.info(f"[pipeline:verify] processing batch of {len(leads)} leads")
+        
+        def on_lead_done(lead_id, site_verified):
+            if self.event_bus:
+                 self.event_bus.publish("lead_verified", {"id": lead_id, "site_verified": site_verified})
 
-        verified_ids = [l["id"] for l in leads]
+        try:
+            self.verifier.verify_leads(leads, on_lead_complete=on_lead_done)
+        except Exception as e:
+            logger.error(f"[pipeline:verify] verifier error: {e}")
+
         conn = get_connection()
-        for lid in verified_ids:
-            row = conn.execute(
-                "SELECT id, name, website, site_verified FROM leads WHERE id = ?", (lid,)
-            ).fetchone()
-            if row:
+        try:
+            # Batch select to avoid N+1
+            ids = [l["id"] for l in leads]
+            placeholders = ",".join("?" * len(ids))
+            rows = conn.execute(
+                f"SELECT id, name, website, site_verified FROM leads WHERE id IN ({placeholders})", ids
+            ).fetchall()
+            
+            for row in rows:
                 row_dict = dict(row)
                 if row_dict["site_verified"]:
+                    logger.debug(f"[pipeline:verify] lead {row_dict['id']} verified, feeding to enrich")
                     self.enrich_queue.put(row_dict)
                 
-                # CNPJ Enrichment Trigger
+                # CNPJ Enrichment Trigger (Background, limited workers)
                 try:
-                    from crawler.cnpj_enricher import CNPJEnricher
-                    enricher = CNPJEnricher()
-                    enricher.enrich_lead(row_dict["id"], row_dict["name"])
+                    self.cnpj_executor.submit(self.cnpj_enricher.enrich_lead, row_dict["id"], row_dict["name"])
                 except Exception as e:
                     logger.debug(f"[pipeline:cnpj] error triggering enrichment: {e}")
 
-        conn.close()
+            conn.close()
+        except Exception as e:
+            logger.error(f"[pipeline:verify] DB loop error: {e}")
+            if conn: conn.close()
 
         if self.event_bus:
             self.event_bus.publish("pipeline_verify", {"count": len(leads)})
 
-        logger.info(f"[pipeline:verify] done — {len(leads)} verified")
+        logger.info(f"[pipeline:verify] batch of {len(leads)} done")
 
     def _enrich_batch(self, leads):
         if not leads:
             return
         logger.info(f"[pipeline:enrich] processing {len(leads)} leads")
-        enricher = EnrichmentCrawler()
-        enriched_count = 0
-
-        for lead_id, data in enricher.enrich_batch(leads, max_count=len(leads)):
+        
+        def process_single_enrich(lead):
             try:
+                data = self.enricher.enrich_lead(lead)
+                if not data:
+                    return False
+                
+                lead_id = lead["id"]
                 conn = get_connection()
                 updates = []
                 params = []
@@ -183,25 +219,27 @@ class LeadPipeline:
                     params.append(lead_id)
                     conn.execute(f"UPDATE leads SET {', '.join(updates)} WHERE id = ?", params)
                     conn.commit()
-                    enriched_count += 1
                 
                 # Fetch website for deep scraper
                 row = conn.execute("SELECT website FROM leads WHERE id = ?", (lead_id,)).fetchone()
                 if row and row["website"]:
                     try:
-                        from crawler.deep_scraper import DeepContactScraper
-                        ds = DeepContactScraper()
-                        import threading
-                        threading.Thread(target=ds.scrape_additional_info, args=(lead_id, row["website"]), daemon=True).start()
+                        self.deep_executor.submit(self.deep_scraper.scrape_additional_info, lead_id, row["website"])
                     except Exception as e:
                         logger.debug(f"[pipeline:deep] error triggering: {e}")
                 
                 conn.close()
-
+                
+                if self.event_bus:
+                    self.event_bus.publish("lead_enriched", {"id": lead_id, "success": True})
+                return True
             except Exception as e:
-                if 'conn' in locals():
-                    conn.close()
-                logger.warning(f"[pipeline:enrich] lead {lead_id} failed: {e}")
+                logger.warning(f"[pipeline:enrich] lead {lead.get('id')} failed: {e}")
+                return False
+
+        # Parallel enrichment
+        futures = [self.enrich_executor.submit(process_single_enrich, l) for l in leads]
+        enriched_count = sum(1 for f in futures if f.result())
 
         if self.event_bus:
             self.event_bus.publish("pipeline_enrich", {"count": enriched_count})

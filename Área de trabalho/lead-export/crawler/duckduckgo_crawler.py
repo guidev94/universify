@@ -77,6 +77,19 @@ class DuckDuckGoCrawler:
                     timeout=15,
                 )
 
+                if response.status_code == 202:
+                    logger.warning(f"[duckduckgo] desafio detectado na busca — tentando rota alternativa")
+                    # Try GET instead of POST
+                    try:
+                        response = self.session.get(
+                            f"https://html.duckduckgo.com/html/?{urlencode(data)}",
+                            timeout=15,
+                        )
+                    except:
+                        break
+                    if response.status_code != 200:
+                        break
+                
                 if response.status_code != 200:
                     logger.warning(f"[duckduckgo] status {response.status_code} na busca")
                     break
@@ -134,7 +147,8 @@ class DuckDuckGoCrawler:
         leads = []
         self.session.headers["User-Agent"] = self.ua.random
 
-        response = safe_request(self.session, url, timeout=12)
+        # Reduced timeout from 12 to 8
+        response = safe_request(self.session, url, timeout=8)
         if not response or response.status_code != 200:
             return leads
 
