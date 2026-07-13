@@ -33,14 +33,14 @@ h1, h2, h3, h4 {
     text-rendering: optimizeLegibility;
 }
 
-/* Continuous dark canvas — soft accents, no hard section seams */
+/* Continuous dark canvas — soft accents, no hard section seams.
+   IMPORTANT: overflow-x:clip forces overflow-y to compute as auto/clip in CSS,
+   which hard-cuts vertical glow bleeds. Keep overflow visible; body clips X. */
 .section-canvas {
     position: relative;
     isolation: isolate;
     background-color: #0a0a0a;
-    /* Prefer clip on X only so vertical glows can soft-bleed into neighbors */
-    overflow-x: clip;
-    overflow-y: visible;
+    overflow: visible;
 }
 
 .section-canvas > .container,
@@ -56,12 +56,11 @@ h1, h2, h3, h4 {
         #0a0a0a;
 }
 
+/* Servicos owns mid-section accents only — seam glow lives on portfolio ambient */
 #servicos {
     background:
         radial-gradient(ellipse 65% 48% at 0% 10%, rgba(207, 255, 4, 0.05), transparent 58%),
-        radial-gradient(ellipse 45% 40% at 100% 85%, rgba(207, 255, 4, 0.03), transparent 52%),
-        /* Soft handoff into portfolio glow */
-        radial-gradient(ellipse 70% 40% at 18% 108%, rgba(207, 255, 4, 0.05), transparent 68%),
+        radial-gradient(ellipse 40% 36% at 100% 72%, rgba(207, 255, 4, 0.025), transparent 55%),
         #0a0a0a;
 }
 
@@ -89,20 +88,20 @@ h1, h2, h3, h4 {
     z-index: 2;
 }
 
-/* Atmosphere layer extends past section box so radials aren't hard-clipped */
+/* ONE continuous ambient across servicos→portfolio→produtos seam — no stacked twins */
 .portfolio-section::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    top: -18%;
-    bottom: -22%;
+    /* Tall bleed into servicos above and produtos below */
+    top: -42%;
+    bottom: -36%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 85% 45% at 12% 12%, rgba(207, 255, 4, 0.08), transparent 58%),
-        radial-gradient(ellipse 70% 40% at 88% 78%, rgba(207, 255, 4, 0.045), transparent 55%),
-        radial-gradient(ellipse 55% 30% at 50% 100%, rgba(207, 255, 4, 0.035), transparent 62%);
+        radial-gradient(ellipse 88% 42% at 14% 28%, rgba(207, 255, 4, 0.075), transparent 62%),
+        radial-gradient(ellipse 70% 38% at 88% 68%, rgba(207, 255, 4, 0.04), transparent 58%);
 }
 
 .portfolio-section::before {
@@ -121,6 +120,22 @@ h1, h2, h3, h4 {
 .portfolio-section > * {
     position: relative;
     z-index: 1;
+}
+
+/* Content visibility failsafes — AOS/GSAP must never leave the page blank */
+.case-item,
+#portfolio-horizontal > *,
+#portfolio-rail .case-item {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+html.content-revealed [data-aos],
+html.content-revealed [data-aos].aos-animate {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto !important;
 }
 
 .portfolio-rail {
@@ -202,6 +217,9 @@ h1, h2, h3, h4 {
     scroll-snap-align: start;
     height: auto;
     isolation: isolate;
+    /* Failsafe: never inherit AOS/GSAP opacity:0 */
+    opacity: 1;
+    visibility: visible;
 }
 
 .portfolio-track .case-media {
@@ -232,6 +250,8 @@ h1, h2, h3, h4 {
     display: flex;
     flex-direction: column;
     z-index: 1;
+    opacity: 1;
+    visibility: visible;
 }
 
 .case-item:hover,
@@ -446,7 +466,7 @@ h1, h2, h3, h4 {
     color: var(--todoz);
 }
 
-/* Produtos — bento readable; section glow soft-bleeds from portfolio above */
+/* Produtos — bento readable; ambient bleed comes from portfolio ::after above */
 .produtos-section {
     position: relative;
     isolation: isolate;
@@ -454,22 +474,20 @@ h1, h2, h3, h4 {
     background-color: #0a0a0a;
     border-top: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    overflow-x: clip;
-    overflow-y: visible;
+    overflow: visible;
 }
 
 .produtos-glow {
     position: absolute;
     left: 0;
     right: 0;
-    top: -16%;
+    top: 8%;
     bottom: -8%;
     z-index: 0;
     pointer-events: none;
     overflow: visible;
     background:
-        /* Borrow soft lime from portfolio seam above */
-        radial-gradient(ellipse 70% 36% at 80% 0%, rgba(207, 255, 4, 0.05), transparent 62%),
+        /* Local accents only — no top seam twin of portfolio glow */
         radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.08), transparent 72%),
         radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.035), transparent 70%);
 }
