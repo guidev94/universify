@@ -3,5 +3,12 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+.vercel/
 *.log
 .DS_Store
+.specs/
+design-system/
+hero.mp4
+index (copiar 1).html
+index (copiar 2).html
+Gemini_Generated_Image_*.png

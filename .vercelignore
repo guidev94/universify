@@ -1,0 +1,15 @@
+node_modules
+tests
+test-results
+playwright-report
+blob-report
+.playwright
+.specs
+design-system
+.git
+*.log
+.DS_Store
+hero.mp4
+index (copiar 1).html
+index (copiar 2).html
+Gemini_Generated_Image_hw7heehw7heehw7h.png

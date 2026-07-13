@@ -37,6 +37,48 @@ body {
     overflow-x: hidden;
 }
 
+/**
+ * Shared section width — matches Tailwind `container mx-auto px-6`
+ * so header, sections, footer, and portfolio rail share one edge.
+ */
+.site-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .site-container {
+        max-width: 640px;
+    }
+}
+
+@media (min-width: 768px) {
+    .site-container {
+        max-width: 768px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .site-container {
+        max-width: 1024px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .site-container {
+        max-width: 1280px;
+    }
+}
+
+@media (min-width: 1536px) {
+    .site-container {
+        max-width: 1536px;
+    }
+}
+
 /* Header — estado scrolled legível sobre qualquer seção */
 #main-header {
     background-color: transparent;
@@ -79,7 +121,8 @@ body {
 }
 
 .section-canvas > .container,
-.section-canvas > .container-fluid {
+.section-canvas > .container-fluid,
+.section-canvas > .site-container {
     position: relative;
     z-index: 1;
 }
@@ -159,26 +202,9 @@ body {
     z-index: 1;
 }
 
-/* No-JS / pre-boot: never blank. After js-ready, GSAP owns opacity until failsafe. */
-html:not(.js-ready) [data-aos],
-html:not(.js-ready) [data-reveal] {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-.case-item,
-#portfolio-horizontal > *,
-#portfolio-rail .case-item {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-}
-
+/* Failsafe: if AOS/GSAP never fire, reveal after .content-revealed (timeout in JS). */
 html.content-revealed [data-aos],
-html.content-revealed [data-reveal],
-html.content-revealed .service-card,
-html.content-revealed .produto-card,
-html.content-revealed .blog-card {
+html.content-revealed [data-reveal] {
     opacity: 1 !important;
     visibility: visible !important;
 }
@@ -223,11 +249,11 @@ html.content-revealed .blog-card {
 }
 
 /*
- * Match Tailwind `.container.mx-auto.px-6` content box at each breakpoint.
+ * Match `.site-container` content box at each breakpoint.
  * Previous 72rem calc over-indented the first card vs the header.
  */
 .portfolio-track {
-    --portfolio-gutter: 1.5rem; /* px-6 */
+    --portfolio-gutter: 1.5rem; /* site-container padding */
     display: flex;
     gap: 2.5rem;
     width: max-content;
@@ -1160,17 +1186,17 @@ button.magnetic.border-todoz:hover {
     border-color: var(--todoz);
 }
 
-/* Hero product logos — always one row */
+/* Hero product logos — always one row, enlarged for readability */
 .hero-logos {
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    gap: clamp(0.75rem, 2.5vw, 2.75rem);
+    gap: clamp(1rem, 3vw, 3.5rem);
     width: 100%;
-    max-width: 56rem;
-    margin: 2.5rem auto 0;
-    padding-top: 2rem;
+    max-width: 72rem;
+    margin: 2.75rem auto 0;
+    padding-top: 2.25rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -1180,8 +1206,8 @@ button.magnetic.border-todoz:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.85;
-    filter: grayscale(0.15) brightness(1.1);
+    opacity: 0.9;
+    filter: grayscale(0.1) brightness(1.12);
     transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
 }
 
@@ -1192,7 +1218,7 @@ button.magnetic.border-todoz:hover {
 }
 
 .hero-logo img {
-    height: clamp(1.65rem, 3.8vw, 3.25rem);
+    height: clamp(2.5rem, 6vw, 5rem);
     width: auto;
     max-width: 100%;
     object-fit: contain;
