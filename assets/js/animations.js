@@ -1,6 +1,8 @@
-gsap.registerPlugin(ScrollTrigger);
+const gsap = window.gsap;
+const ScrollTrigger = window.ScrollTrigger;
+const AOS = window.AOS;
 
-/** Never leave AOS / GSAP entrance nodes stuck invisible (Lenis + pin refreshes). */
+/** Never leave AOS nodes stuck invisible (Lenis + pin refreshes). */
 const revealAnimatedContent = () => {
     document.documentElement.classList.add("content-revealed");
     document.querySelectorAll(".case-item, [data-aos], #portfolio-horizontal > *").forEach((el) => {
@@ -11,32 +13,35 @@ const revealAnimatedContent = () => {
 };
 
 const initAOS = () => {
-    if (!window.AOS) {
+    // Content must be readable even if AOS is missing or broken with Lenis.
+    revealAnimatedContent();
+
+    if (!AOS) return;
+
+    try {
+        AOS.init({
+            duration: 1000,
+            once: true,
+            easing: "ease-out-expo",
+            mirror: false,
+            disable: false
+        });
+        const refresh = () => {
+            if (typeof AOS.refreshHard === "function") AOS.refreshHard();
+            else AOS.refresh();
+            revealAnimatedContent();
+        };
+        requestAnimationFrame(refresh);
+        window.addEventListener("load", refresh, { once: true });
+        window.setTimeout(refresh, 600);
+    } catch (err) {
+        console.warn("[WV] AOS init failed; content kept visible.", err);
         revealAnimatedContent();
-        return;
     }
-
-    AOS.init({
-        duration: 1000,
-        once: true,
-        easing: "ease-out-expo",
-        mirror: false
-    });
-
-    // Lenis + late layout can leave fade nodes stuck at opacity 0 (aos.css).
-    const refresh = () => {
-        if (typeof AOS.refreshHard === "function") AOS.refreshHard();
-        else AOS.refresh();
-    };
-    requestAnimationFrame(refresh);
-    window.addEventListener("load", refresh, { once: true });
-    // One delayed pass after fonts/images/pin spacer settle.
-    window.setTimeout(refresh, 600);
-    // Hard failsafe: content must be readable even if AOS never fires.
-    window.setTimeout(revealAnimatedContent, 1200);
 };
 
 const initCursor = () => {
+    if (!gsap) return;
     const cursor = document.querySelector("#cursor");
     if (!cursor) return;
 
@@ -59,19 +64,17 @@ const initCursor = () => {
 const initBlogAnimations = () => {};
 
 /**
- * Cases: pin da seção + progressão vertical → scrollLeft (sem transform no track).
- * pinType "fixed" evita o bug de hit-test do pin com transform.
- *
- * Sem gsap.from/autoAlpha na entrada — cards ficam sempre visíveis (hover só via CSS).
+ * Cases: pin + scrollLeft (sem transform no track; sem esconder cards).
  */
 const initPortfolioAnimations = () => {
+    if (!gsap || !ScrollTrigger) return;
+
     const section = document.querySelector("#portfolio");
     const rail = document.querySelector("#portfolio-rail");
     const track = document.querySelector("#portfolio-horizontal");
     const cases = gsap.utils.toArray(".case-item");
     if (!section || !rail || !track || !cases.length) return;
 
-    // Garantia imediata: nunca começar oculto.
     gsap.set(cases, { clearProps: "opacity,visibility,transform" });
     cases.forEach((item) => {
         item.style.opacity = "1";
@@ -88,7 +91,6 @@ const initPortfolioAnimations = () => {
     });
 
     const getMaxScroll = () => Math.max(0, rail.scrollWidth - rail.clientWidth);
-
     const mm = gsap.matchMedia();
 
     mm.add("(min-width: 768px)", () => {
@@ -108,14 +110,7 @@ const initPortfolioAnimations = () => {
 
         const onResize = () => ScrollTrigger.refresh();
         window.addEventListener("resize", onResize);
-        // Refresh after pin layout so AOS recalculate.
-        requestAnimationFrame(() => {
-            ScrollTrigger.refresh();
-            if (window.AOS) {
-                if (typeof AOS.refreshHard === "function") AOS.refreshHard();
-                else AOS.refresh();
-            }
-        });
+        requestAnimationFrame(() => ScrollTrigger.refresh());
 
         return () => {
             window.removeEventListener("resize", onResize);
@@ -124,7 +119,6 @@ const initPortfolioAnimations = () => {
         };
     });
 
-    // Mobile: wheel horizontal + drag leve
     mm.add("(max-width: 767px)", () => {
         rail.addEventListener(
             "wheel",
@@ -184,6 +178,8 @@ const initPortfolioAnimations = () => {
 };
 
 const initHeaderAnim = () => {
+    if (!gsap || !ScrollTrigger) return;
+
     ScrollTrigger.create({
         start: "top -100",
         onEnter: () => {
@@ -210,18 +206,13 @@ const initHeaderAnim = () => {
 };
 
 const bootAnimations = () => {
+    // Reveal BEFORE anything else — page must never boot blank.
+    revealAnimatedContent();
     initAOS();
     initCursor();
     initPortfolioAnimations();
     initHeaderAnim();
     initBlogAnimations();
-    // Early CSS failsafe class even before AOS timeout.
-    requestAnimationFrame(() => {
-        document.querySelectorAll(".case-item, #portfolio-horizontal > *").forEach((el) => {
-            el.style.opacity = "1";
-            el.style.visibility = "visible";
-        });
-    });
     window.__wvAnimationsBooted = true;
 };
 

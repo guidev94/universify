@@ -122,7 +122,16 @@ h1, h2, h3, h4 {
     z-index: 1;
 }
 
-/* Content visibility failsafes — AOS/GSAP must never leave the page blank */
+/* Content visibility failsafes — AOS must never leave the page blank.
+   AOS.css sets [data-aos]{opacity:0} until .aos-animate; that breaks when
+   JS modules fail or Lenis/ScrollTrigger prevent AOS from firing. */
+[data-aos] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto !important;
+}
+
 .case-item,
 #portfolio-horizontal > *,
 #portfolio-rail .case-item {

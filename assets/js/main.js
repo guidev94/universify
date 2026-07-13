@@ -1,19 +1,26 @@
-// Initialize Lenis Smooth Scroll
-const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smoothWheel: true,
-    orientation: "vertical"
-});
+const gsap = window.gsap;
+const ScrollTrigger = window.ScrollTrigger;
+const Lenis = window.Lenis;
 
-window.lenis = lenis;
+if (!gsap || !ScrollTrigger || !Lenis) {
+    console.error("[WV] Missing globals (gsap/ScrollTrigger/Lenis). Scripts did not boot.");
+} else {
+    gsap.registerPlugin(ScrollTrigger);
 
-gsap.registerPlugin(ScrollTrigger);
+    const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        orientation: "vertical"
+    });
 
-lenis.on("scroll", ScrollTrigger.update);
+    window.lenis = lenis;
 
-// Single RAF owner — avoid double-driving Lenis (was gsap.ticker + rAF).
-gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-});
-gsap.ticker.lagSmoothing(0);
+    lenis.on("scroll", ScrollTrigger.update);
+
+    // Single RAF owner — avoid double-driving Lenis.
+    gsap.ticker.add((time) => {
+        lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+}
