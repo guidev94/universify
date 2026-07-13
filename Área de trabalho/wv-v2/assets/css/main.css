@@ -1,0 +1,98 @@
+/* Smooth Scroll Overrides */
+html.lenis {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+/* Identidade Visual: Lima Neon Todoz */
+:root {
+    --todoz: #CFFF04;
+}
+
+/* Glow Effects */
+.bg-todoz-glow {
+    box-shadow: 0 0 50px rgba(207, 255, 4, 0.2);
+}
+
+/* Custom Selection */
+::selection {
+    background: var(--todoz);
+    color: #000;
+}
+
+/* Typography Polish */
+h1, h2, h3, h4 {
+    letter-spacing: -0.04em;
+    text-rendering: optimizeLegibility;
+}
+
+/* Case Card Refinement */
+.case-item:hover .relative.rounded-\[3rem\] {
+    border-color: var(--todoz);
+    box-shadow: 0 0 40px rgba(207, 255, 4, 0.1);
+}
+
+.case-item:hover h4 {
+    color: var(--todoz);
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+/* Glassmorphism Refined for Product Cards */
+.bg-zinc-900\/30 {
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+}
+
+/* Custom Gradients */
+.text-gradient {
+    background: linear-gradient(to right, #fff, var(--todoz));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbar Custom */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--todoz);
+}
+
+/* Text Glow Effect */
+.text-glow {
+    text-shadow: 0 0 30px rgba(207, 255, 4, 0.4);
+}
+
+/* Modal Open State Animation Support */
+#contact-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Footer Links Hover */
+footer ul li a {
+    transition: all 0.3s ease;
+}
+
+footer ul li a:hover {
+    padding-left: 8px;
+    color: var(--todoz);
+}

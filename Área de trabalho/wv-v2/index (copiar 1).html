@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WV_Todoz | Agência Interativa - Elite Tech Agency</title>
+    <meta name="description" content="Especialistas no desenvolvimento de aplicativos mobile, sistemas web sob medida e marketing de conversão. Transformamos ideias em resultados expressivos com tecnologia de ponta.">
+    
+    <!-- Favicon (Guess based on site logo mark) -->
+    <link rel="icon" type="image/png" href="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-300x115.png">
+    
+    <!-- Bibliotecas Externas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- GSAP & Smooth Scroll -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a0a0a',
+                        todoz: '#CFFF04',
+                        todozDark: '#A8D600',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-primary text-white selection:bg-todoz selection:text-black overflow-x-hidden">
+
+    <!-- Cursor Customizado -->
+    <div id="cursor" class="fixed w-3 h-3 bg-todoz rounded-full pointer-events-none z-[9999] opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Navegação Premium -->
+    <header id="main-header" class="fixed top-0 w-full z-50 py-6 transition-all duration-500 border-b border-white/0">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <a href="/" class="block w-40 md:w-56 overflow-hidden">
+                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="WV_Todoz Logo" class="w-full h-auto">
+            </a>
+            <nav class="hidden lg:flex items-center gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                <a href="#sobre" class="hover:text-todoz transition-colors">Quem Somos</a>
+                <a href="#servicos" class="hover:text-todoz transition-colors">Serviços</a>
+                <a href="#produtos" class="hover:text-todoz transition-colors">Produtos</a>
+                <a href="#portfolio" class="hover:text-todoz transition-colors">Cases</a>
+                <a href="#contato" class="px-8 py-3 bg-todoz/10 border border-todoz/30 rounded-full text-todoz hover:bg-todoz hover:text-black transition-all">Fale Conosco</a>
+            </nav>
+            <button class="lg:hidden text-3xl text-todoz"><i class="ph ph-list"></i></button>
+        </div>
+    </header>
+
+    <main id="main-wrapper">
+        <!-- Hero Section Cinematográfica -->
+        <section id="hero" class="min-h-screen relative flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-40 brightness-75">
+                    <source src="hero.mp4" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-gradient-to-b from-primary via-transparent to-primary"></div>
+            </div>
+            
+            <div class="container mx-auto px-6 relative z-10 text-center">
+                <div class="inline-block px-4 py-1.5 rounded-full bg-todoz/10 text-todoz text-[10px] font-black tracking-[0.3em] uppercase mb-8 border border-todoz/20" data-aos="fade-down">
+                    Líder em Desenvolvimento Interativo
+                </div>
+                <h1 class="text-[clamp(2.5rem,9vw,7rem)] font-black leading-[0.9] tracking-tighter mb-8" data-aos="zoom-out" data-aos-delay="200">
+                    TRANSFORMAMOS <br> IDEIAS EM <span class="text-todoz">RESULTADOS.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed mb-12" data-aos="fade-up" data-aos-delay="400">
+                    Somos especialistas no desenvolvimento de aplicativos sociais, mobile e sistemas web de alto desempenho. Sua empresa vista a qualquer hora e em qualquer lugar.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-6" data-aos="fade-up" data-aos-delay="600">
+                    <a href="#portfolio" class="magnetic group px-10 py-5 bg-todoz text-black font-black rounded-full flex items-center gap-3 hover:shadow-[0_0_40px_rgba(139,197,63,0.5)] transition-all">
+                        EXPLORAR CASES <i class="ph ph-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                    </a>
+                    <a href="#contato" class="px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 transition-all">
+                        CONHECER SOLUÇÕES
+                    </a>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-todoz/50 text-2xl animate-bounce">
+                <i class="ph ph-mouse-simple"></i>
+            </div>
+        </section>
+
+        <!-- Clientes (Social Proof Premium) -->
+        <section id="clientes" class="py-24 bg-black border-y border-white/5 overflow-hidden">
+            <div class="container mx-auto px-6">
+                <p class="text-center text-[10px] font-black tracking-[0.5em] uppercase text-zinc-600 mb-16">Trusted by Global Leaders</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 md:gap-20 items-center opacity-50 grayscale transition-all duration-700 hover:grayscale-0">
+                    <div class="flex justify-center" data-aos="fade-up">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Coca Cola" class="h-12 md:h-16 w-auto hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="100">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="PagSeguro" class="h-12 md:h-16 w-auto hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="200">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="Syngenta" class="h-12 md:h-16 w-auto hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="300">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="VMware" class="h-12 md:h-16 w-auto hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="400">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/confirp-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Confirp" class="h-12 md:h-16 w-auto hover:scale-110 transition-transform">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Sobre (Refatorada) -->
+        <section id="sobre" class="py-32 relative">
+            <div class="container mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                    <div data-aos="fade-right">
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-none">SEJA <span class="text-todoz">TODOZ</span> <br> COM A GENTE.</h2>
+                        <p class="text-zinc-400 text-xl leading-relaxed mb-10">
+                            Não somos apenas uma agência, somos seu parceiro de inovação. Desde 2011, convertemos desafios complexos em soluções digitais que aparecem, transformam e acontecem. Fique tranquilo, sua empresa está nas mãos de quem fala a linguagem da web.
+                        </p>
+                        <div class="grid grid-cols-2 gap-12">
+                            <div class="border-l-2 border-todoz pl-6">
+                                <span class="block text-5xl font-black text-white mb-2">15+</span>
+                                <span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Anos de Expertise</span>
+                            </div>
+                            <div class="border-l-2 border-todoz pl-6">
+                                <span class="block text-5xl font-black text-white mb-2">500+</span>
+                                <span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Projetos de Elite</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative" data-aos="zoom-out-up">
+                        <div class="relative z-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-[0_0_80px_rgba(207,255,4,0.05)]">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Facebook-1920x1080.jpg" alt="Agência Interativa" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Glass Element Decor -->
+                        <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-todoz/20 rounded-full blur-[80px] -z-10"></div>
+                        <div class="absolute -top-10 -right-10 w-72 h-72 bg-blue-600/10 rounded-full blur-[100px] -z-10"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Serviços (Bento Grid Profissional) -->
+        <section id="servicos" class="py-32 bg-zinc-950 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div class="max-w-2xl" data-aos="fade-right">
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white">O QUE <br><span class="text-todoz">FAZEMOS.</span></h2>
+                    </div>
+                    <div class="max-w-xs text-right" data-aos="fade-left">
+                        <p class="text-zinc-500 mb-6 text-sm leading-relaxed">Engenharia de software e design de interação para empresas que buscam o estado da arte digital.</p>
+                        <a href="#contato" class="text-todoz font-bold text-xs uppercase tracking-widest flex items-center justify-end gap-3 group">
+                            Solicitar Orçamento <i class="ph ph-arrow-right group-hover:translate-x-2 transition-all"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[240px]">
+                    <!-- Apps Sociais (Grande) -->
+                    <div class="md:col-span-8 md:row-span-2 p-12 bg-primary border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group relative overflow-hidden flex flex-col justify-between" data-aos="fade-up">
+                        <div class="relative z-10">
+                            <div class="w-16 h-16 bg-todoz/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-todoz group-hover:text-black transition-all">
+                                <i class="ph ph-facebook-logo text-4xl"></i>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-6 text-white leading-none">Social Apps <br> & Ecossistemas.</h3>
+                            <p class="text-zinc-400 max-w-sm text-lg">Pioneiros no desenvolvimento de aplicações que conectam marcas e pessoas. Criamos experiências imersivas no Facebook e Twitter que transformam fãs em clientes leais.</p>
+                            <div class="mt-8 flex gap-3 flex-wrap">
+                                <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-zinc-400 uppercase tracking-widest border border-white/5">Integração API</span>
+                                <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-zinc-400 uppercase tracking-widest border border-white/5">Gamificação</span>
+                                <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] text-zinc-400 uppercase tracking-widest border border-white/5">Social Commerce</span>
+                            </div>
+                        </div>
+                        <div class="relative z-10">
+                            <button class="px-8 py-3 bg-white/5 border border-white/10 rounded-full text-white font-bold hover:bg-todoz hover:text-black transition-all">Ver Detalhes</button>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-todoz/5 rounded-full blur-[80px] group-hover:bg-todoz/10 transition-all"></div>
+                    </div>
+
+                    <!-- Sistemas Web (Vertical) -->
+                    <div class="md:col-span-4 md:row-span-3 p-10 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group flex flex-col justify-between" data-aos="fade-up" data-aos-delay="100">
+                        <div>
+                            <div class="w-14 h-14 bg-todoz/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-todoz group-hover:text-black transition-all">
+                                <i class="ph ph-monitor text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-6 text-white text-gradient">Sistemas Web <br> de Alta Complexidade.</h3>
+                            <p class="text-zinc-500 text-sm leading-relaxed">Desenvolvemos missões impossíveis em qualquer navegador. Intranets inteligentes, CRMs robustos e ferramentas de gestão sob medida com arquitetura escalável.</p>
+                        </div>
+                        <div class="py-8">
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest"><i class="ph ph-check-circle text-todoz"></i> Segurança de Dados</div>
+                                <div class="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest"><i class="ph ph-check-circle text-todoz"></i> UX Otimizada</div>
+                                <div class="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest"><i class="ph ph-check-circle text-todoz"></i> Código Limpo</div>
+                                <div class="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest"><i class="ph ph-check-circle text-todoz"></i> Cloud Native</div>
+                            </div>
+                        </div>
+                        <a href="#" class="w-full py-4 bg-todoz/10 text-todoz rounded-2xl font-bold text-center group-hover:bg-todoz group-hover:text-black transition-all">Falar com Especialista</a>
+                    </div>
+
+                    <!-- Mobile (Horizontal) -->
+                    <div class="md:col-span-8 md:row-span-1 p-10 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group flex items-center justify-between gap-10" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2 text-white">Apps Mobile Elite</h3>
+                            <p class="text-zinc-500 text-sm">iOS e Android com performance nativa e design que encanta o usuário final em cada toque.</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <button class="p-5 bg-white/5 rounded-full border border-white/10 group-hover:bg-todoz group-hover:text-black transition-all">
+                                <i class="ph ph-arrow-up-right text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfólio (Cases Profissionais com Mockups) -->
+        <section id="portfolio" class="py-32 overflow-hidden bg-primary">
+            <div class="container mx-auto px-6 mb-20">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-10">
+                    <div>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-right">Selected Work</span>
+                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white" data-aos="fade-right" data-aos-delay="100">CASES QUE <br> <span class="text-todoz/30">MARCAM.</span></h2>
+                    </div>
+                    <div class="pb-4" data-aos="fade-left">
+                        <button class="px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all">Explorar Todos</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="portfolio-horizontal" class="flex gap-16 px-6 w-fit pb-20">
+                <!-- Case Let's Work (Mockup) -->
+                <div class="case-item min-w-[320px] md:min-w-[700px] group" data-aos="zoom-in">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg" alt="Let's Work" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <!-- Info Overlay -->
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div>
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">AI / Mobile</span>
+                                <h4 class="text-4xl font-black text-white">Let's Work Facial</h4>
+                            </div>
+                            <button class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all">
+                                <i class="ph ph-arrow-up-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center">
+                        <p class="text-zinc-500 font-medium">Controle de ponto inovador com reconhecimento facial.</p>
+                        <span class="text-zinc-700 font-black">01</span>
+                    </div>
+                </div>
+
+                <!-- Case Facíleme -->
+                <div class="case-item min-w-[320px] md:min-w-[700px] group" data-aos="zoom-in">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg" alt="Facíleme" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div>
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">Social Commerce</span>
+                                <h4 class="text-4xl font-black text-white">Facíleme Store</h4>
+                            </div>
+                            <button class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all">
+                                <i class="ph ph-arrow-up-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center">
+                        <p class="text-zinc-500 font-medium">Ecossistema de vendas integrado ao Facebook.</p>
+                        <span class="text-zinc-700 font-black">02</span>
+                    </div>
+                </div>
+
+                <!-- Case Syngenta -->
+                <div class="case-item min-w-[320px] md:min-w-[700px] group" data-aos="zoom-in">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg" alt="Syngenta" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div>
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">Enterprise</span>
+                                <h4 class="text-4xl font-black text-white">Syngenta Wi-Fi</h4>
+                            </div>
+                            <button class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all">
+                                <i class="ph ph-arrow-up-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center">
+                        <p class="text-zinc-500 font-medium">Gestão de conectividade para grandes infraestruturas.</p>
+                        <span class="text-zinc-700 font-black">03</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produtos (Redesign Premium) -->
+        <section id="produtos" class="py-32 relative">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-24">
+                    <h2 class="text-5xl md:text-7xl font-black tracking-tighter" data-aos="fade-up">ECOSSISTEMA <br><span class="text-todoz">PROPRIETÁRIO.</span></h2>
+                    <p class="text-zinc-500 mt-6 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">Desenvolvemos ferramentas robustas que já resolvem os maiores desafios do mercado digital.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <!-- Facíleme -->
+                    <div class="group relative p-12 rounded-[3.5rem] bg-zinc-900/30 border border-white/5 hover:border-todoz/30 transition-all duration-700 overflow-hidden" data-aos="fade-right">
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-16 h-16 bg-todoz rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(207,255,4,0.3)]">
+                                    <i class="ph ph-storefront text-3xl font-black"></i>
+                                </div>
+                                <span class="text-4xl font-black italic tracking-tighter">Facíleme</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-6 text-white leading-tight">Social Commerce & Ingressos Profissionais.</h3>
+                            <p class="text-zinc-400 mb-10 text-lg leading-relaxed">
+                                A primeira e mais completa solução de e-commerce integrada ao Facebook. Venda produtos, serviços e ingressos onde seu público já está, com checkout simplificado e alta conversão.
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="https://www.facileme.com.br/" class="magnetic px-8 py-4 bg-todoz text-black font-black rounded-full text-xs uppercase tracking-widest">Loja Virtual</a>
+                                <a href="https://www.facilemeingresso.com.br/" class="px-8 py-4 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all">Ingressos</a>
+                            </div>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-todoz/5 rounded-full blur-[100px] group-hover:bg-todoz/10 transition-all"></div>
+                    </div>
+
+                    <!-- Let's Work -->
+                    <div class="group relative p-12 rounded-[3.5rem] bg-zinc-900/30 border border-white/5 hover:border-todoz/30 transition-all duration-700 overflow-hidden" data-aos="fade-left">
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-16 h-16 bg-todoz rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(207,255,4,0.3)]">
+                                    <i class="ph ph-fingerprint text-3xl font-black"></i>
+                                </div>
+                                <span class="text-4xl font-black italic tracking-tighter">Let's Work</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-6 text-white leading-tight">Gestão de Ponto com Biometria Facial.</h3>
+                            <p class="text-zinc-400 mb-10 text-lg leading-relaxed">
+                                Revolucione o controle de jornada da sua equipe. Tecnologia de reconhecimento facial e geolocalização que garante precisão, segurança e conformidade jurídica em tempo real.
+                            </p>
+                            <a href="https://www.letswork.com.br" class="magnetic px-10 py-4 bg-white text-black font-black rounded-full inline-block text-xs uppercase tracking-widest">Ver Demonstração</a>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-todoz/5 rounded-full blur-[100px] group-hover:bg-todoz/10 transition-all"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog (Intelligence Section) -->
+        <section id="blog" class="py-32 bg-zinc-950">
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Latest Insights</span>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter">CONTEÚDO & <br> <span class="text-zinc-700">INOVAÇÃO.</span></h2>
+                    </div>
+                    <div class="flex gap-4">
+                        <button class="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center text-zinc-500 hover:border-todoz hover:text-todoz transition-all">
+                            <i class="ph ph-caret-left text-xl"></i>
+                        </button>
+                        <button class="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center text-zinc-500 hover:border-todoz hover:text-todoz transition-all">
+                            <i class="ph ph-caret-right text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20">
+                    <!-- Post 1 -->
+                    <article class="group cursor-pointer" data-aos="fade-up">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[2rem] overflow-hidden mb-8 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2018/04/programacao.jpg" alt="Dev" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                            <span class="absolute top-6 left-6 px-4 py-1.5 bg-todoz text-black text-[10px] font-black uppercase rounded-full">Tecnologia</span>
+                        </div>
+                        <h4 class="text-2xl font-bold text-white mb-4 group-hover:text-todoz transition-colors leading-tight">O futuro das linguagens de programação.</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-6">A futurologia que aborda os eventos que podem ditar o desenvolvimento de software nos próximos anos e como se preparar para o inevitável.</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-todoz">WV</div>
+                            <span class="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Abril 2026 • 5 min read</span>
+                        </div>
+                    </article>
+                    <!-- Post 2 -->
+                    <article class="group cursor-pointer" data-aos="fade-up" data-aos-delay="100">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[2rem] overflow-hidden mb-8 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2018/07/segmentar-leads-1-300x169.png" alt="Leads" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                            <span class="absolute top-6 left-6 px-4 py-1.5 bg-todoz text-black text-[10px] font-black uppercase rounded-full">Marketing</span>
+                        </div>
+                        <h4 class="text-2xl font-bold text-white mb-4 group-hover:text-todoz transition-colors leading-tight">Segmentação de leads além do e-mail.</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-6">Entenda como trabalhar sua base de contatos de forma inteligente usando social data para aumentar as conversões reais em canais alternativos.</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-todoz">WV</div>
+                            <span class="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Março 2026 • 8 min read</span>
+                        </div>
+                    </article>
+                    <!-- Post 3 -->
+                    <article class="group cursor-pointer" data-aos="fade-up" data-aos-delay="200">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[2rem] overflow-hidden mb-8 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2017/09/responsividade.jpg" alt="Responsividade" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                            <span class="absolute top-6 left-6 px-4 py-1.5 bg-todoz text-black text-[10px] font-black uppercase rounded-full">Inovação</span>
+                        </div>
+                        <h4 class="text-2xl font-bold text-white mb-4 group-hover:text-todoz transition-colors leading-tight">Afinal, o que é o conceito AI-First?</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-6">A revolução silenciosa da Inteligência Artificial e como ela está sendo integrada nativamente nos produtos digitais de maior sucesso no mundo.</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-todoz">WV</div>
+                            <span class="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Fevereiro 2026 • 6 min read</span>
+                        </div>
+                    </article>
+                </div>
+                
+                <div class="text-center">
+                    <a href="https://www.wvtodoz.com.br/blog" class="inline-block px-12 py-5 border border-white/10 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">Acessar Hub de Conteúdo</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contato (Clean & Bold) -->
+        <section id="contato" class="py-40 bg-todoz flex items-center justify-center text-center">
+            <div class="container mx-auto px-6" data-aos="zoom-in">
+                <h2 class="text-black text-[clamp(2rem,8vw,5rem)] font-black leading-none mb-12">PRONTO PARA SER <br> <span class="bg-black text-todoz px-6">TODOZ?</span></h2>
+                <div class="flex flex-col md:flex-row justify-center gap-10 items-center">
+                    <a href="tel:1155311779" class="text-black/60 hover:text-black font-bold text-2xl transition-colors">(11) 5531-1779</a>
+                    <a href="mailto:contato@wvtodoz.com.br" class="magnetic px-12 py-6 bg-black text-todoz font-black text-xl rounded-full shadow-2xl hover:scale-105 transition-all">INICIAR CONVERSA</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-20 bg-black">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-20">
+                <div class="w-48">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-full">
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-16">
+                    <div>
+                        <h5 class="text-white font-bold mb-6 text-xs uppercase tracking-widest">Endereço</h5>
+                        <p class="text-zinc-500 text-sm leading-relaxed">Av. Morumbi, 8435 cj.104 <br> Brooklin, São Paulo - SP</p>
+                    </div>
+                    <div>
+                        <h5 class="text-white font-bold mb-6 text-xs uppercase tracking-widest">Social</h5>
+                        <div class="flex gap-4 text-zinc-500 text-2xl">
+                            <a href="#" class="hover:text-todoz"><i class="ph ph-facebook-logo"></i></a>
+                            <a href="#" class="hover:text-todoz"><i class="ph ph-instagram-logo"></i></a>
+                            <a href="#" class="hover:text-todoz"><i class="ph ph-linkedin-logo"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between text-zinc-600 text-[10px] uppercase tracking-widest font-bold">
+                <span>© 2026 WV_TODOZ - AGÊNCIA INTERATIVA</span>
+                <span>DESENVOLVIDO COM <i class="ph ph-heart-fill text-todoz"></i> NO BRASIL</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/animations.js"></script>
+    <script src="assets/js/components.js"></script>
+</body>
+</html>
