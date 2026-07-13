@@ -1,8 +1,8 @@
 const gsap = window.gsap;
 const ScrollTrigger = window.ScrollTrigger;
-const AOS = window.AOS;
+const AOS = window.AOS; // unused — AOS incompatible with Lenis; kept for clarity
 
-/** Never leave AOS nodes stuck invisible (Lenis + pin refreshes). */
+/** Never leave nodes stuck invisible. */
 const revealAnimatedContent = () => {
     document.documentElement.classList.add("content-revealed");
     document.querySelectorAll(".case-item, [data-aos], #portfolio-horizontal > *").forEach((el) => {
@@ -13,31 +13,12 @@ const revealAnimatedContent = () => {
 };
 
 const initAOS = () => {
-    // Content must be readable even if AOS is missing or broken with Lenis.
+    // Lenis uses virtual scroll — AOS never sees pageYOffset change and leaves
+    // [data-aos] stuck at opacity:0. Skip AOS; mark all nodes visible.
     revealAnimatedContent();
-
-    if (!AOS) return;
-
-    try {
-        AOS.init({
-            duration: 1000,
-            once: true,
-            easing: "ease-out-expo",
-            mirror: false,
-            disable: false
-        });
-        const refresh = () => {
-            if (typeof AOS.refreshHard === "function") AOS.refreshHard();
-            else AOS.refresh();
-            revealAnimatedContent();
-        };
-        requestAnimationFrame(refresh);
-        window.addEventListener("load", refresh, { once: true });
-        window.setTimeout(refresh, 600);
-    } catch (err) {
-        console.warn("[WV] AOS init failed; content kept visible.", err);
-        revealAnimatedContent();
-    }
+    document.querySelectorAll("[data-aos]").forEach((el) => {
+        el.classList.add("aos-animate");
+    });
 };
 
 const initCursor = () => {
@@ -178,31 +159,31 @@ const initPortfolioAnimations = () => {
 };
 
 const initHeaderAnim = () => {
-    if (!gsap || !ScrollTrigger) return;
+    const header = document.querySelector("#main-header");
+    if (!header) return;
+
+    // CSS class is more reliable than GSAP inline styles (backdrop-filter).
+    const setScrolled = (on) => {
+        header.classList.toggle("is-scrolled", on);
+    };
+
+    if (!gsap || !ScrollTrigger) {
+        const onScroll = () => setScrolled(window.scrollY > 80 || (window.lenis?.scroll || 0) > 80);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.lenis?.on("scroll", ({ scroll }) => setScrolled(scroll > 80));
+        onScroll();
+        return;
+    }
 
     ScrollTrigger.create({
-        start: "top -100",
-        onEnter: () => {
-            gsap.to("#main-header", {
-                paddingTop: "1.2rem",
-                paddingBottom: "1.2rem",
-                backgroundColor: "rgba(10, 10, 10, 0.8)",
-                backdropFilter: "blur(20px)",
-                borderBottom: "1px solid rgba(207, 255, 4, 0.2)",
-                duration: 0.5
-            });
-        },
-        onLeaveBack: () => {
-            gsap.to("#main-header", {
-                paddingTop: "1.5rem",
-                paddingBottom: "1.5rem",
-                backgroundColor: "transparent",
-                backdropFilter: "blur(0px)",
-                borderBottom: "1px solid transparent",
-                duration: 0.5
-            });
-        }
+        start: "top -80",
+        onEnter: () => setScrolled(true),
+        onLeaveBack: () => setScrolled(false),
+        onUpdate: (self) => setScrolled(self.scroll() > 80)
     });
+
+    // Sync with Lenis immediately
+    window.lenis?.on("scroll", ({ scroll }) => setScrolled(scroll > 80));
 };
 
 const bootAnimations = () => {

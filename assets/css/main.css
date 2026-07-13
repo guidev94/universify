@@ -33,6 +33,41 @@ h1, h2, h3, h4 {
     text-rendering: optimizeLegibility;
 }
 
+body {
+    overflow-x: hidden;
+}
+
+/* Header — estado scrolled legível sobre qualquer seção */
+#main-header {
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom-color: transparent;
+}
+
+#main-header.is-scrolled {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    background-color: rgba(8, 8, 8, 0.94) !important;
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    border-bottom: 1px solid rgba(207, 255, 4, 0.22) !important;
+    box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.85);
+}
+
+#main-header.is-scrolled nav a:not(.magnetic) {
+    color: #e4e4e7;
+}
+
+#main-header.is-scrolled nav a:not(.magnetic):hover {
+    color: var(--todoz);
+}
+
+#main-header.is-scrolled img {
+    filter: none;
+    opacity: 1;
+}
+
 /* Continuous dark canvas — soft accents, no hard section seams.
    IMPORTANT: overflow-x:clip forces overflow-y to compute as auto/clip in CSS,
    which hard-cuts vertical glow bleeds. Keep overflow visible; body clips X. */
@@ -92,16 +127,18 @@ h1, h2, h3, h4 {
 .portfolio-section::after {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    /* Tall bleed into servicos above and produtos below */
-    top: -42%;
-    bottom: -36%;
+    left: -5%;
+    right: -5%;
+    /* Tall soft bleed into servicos above and produtos below — no hard mid cut */
+    top: -48%;
+    bottom: -42%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 88% 42% at 14% 28%, rgba(207, 255, 4, 0.075), transparent 62%),
-        radial-gradient(ellipse 70% 38% at 88% 68%, rgba(207, 255, 4, 0.04), transparent 58%);
+        radial-gradient(ellipse 90% 48% at 12% 32%, rgba(207, 255, 4, 0.09), transparent 68%),
+        radial-gradient(ellipse 75% 42% at 88% 62%, rgba(207, 255, 4, 0.045), transparent 65%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
 }
 
 .portfolio-section::before {
@@ -122,28 +159,14 @@ h1, h2, h3, h4 {
     z-index: 1;
 }
 
-/* Content visibility failsafes — AOS must never leave the page blank.
-   AOS.css sets [data-aos]{opacity:0} until .aos-animate; that breaks when
-   JS modules fail or Lenis/ScrollTrigger prevent AOS from firing. */
-[data-aos] {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    pointer-events: auto !important;
-}
-
+/* Content always readable — AOS disabled under Lenis (see animations.js). */
+[data-aos],
+[data-aos].aos-animate,
 .case-item,
 #portfolio-horizontal > *,
 #portfolio-rail .case-item {
     opacity: 1 !important;
     visibility: visible !important;
-}
-
-html.content-revealed [data-aos],
-html.content-revealed [data-aos].aos-animate {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
     pointer-events: auto !important;
 }
 
@@ -571,13 +594,14 @@ html.content-revealed [data-aos].aos-animate {
     flex-direction: column;
     border-radius: 1.5rem;
     background:
-        radial-gradient(ellipse 55% 45% at 78% 86%, rgba(207, 255, 4, 0.03), transparent 70%),
-        radial-gradient(ellipse 52% 42% at 24% 58%, var(--glow-a), transparent 68%),
+        radial-gradient(ellipse 70% 55% at 50% -10%, var(--glow-a), transparent 55%),
+        radial-gradient(ellipse 55% 45% at 78% 100%, rgba(207, 255, 4, 0.04), transparent 65%),
         linear-gradient(160deg, rgba(26, 26, 28, 0.98), rgba(10, 10, 12, 0.96));
     border: 1px solid rgba(255, 255, 255, 0.09);
-    overflow: hidden;
+    overflow: visible;
     box-shadow:
         0 16px 36px -28px rgba(0, 0, 0, 0.9),
+        0 0 40px -20px rgba(207, 255, 4, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.045);
     transition:
         border-color 0.35s ease,
@@ -614,43 +638,35 @@ html.content-revealed [data-aos].aos-animate {
     align-items: center;
     justify-content: flex-start;
     gap: 0.85rem;
-    margin-bottom: 0.2rem;
-    padding-bottom: 0.75rem;
+    margin-bottom: 0.35rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .produto-logo {
-    height: 2.6rem;
+    height: 3.75rem;
     width: auto;
-    max-width: 11rem;
+    max-width: 16rem;
     object-fit: contain;
     object-position: left center;
-    filter: brightness(1.22) contrast(1.06);
+    filter: brightness(1.25) contrast(1.06);
     transition: transform 0.35s ease, filter 0.35s ease;
 }
 
+@media (min-width: 768px) {
+    .produto-logo {
+        height: 4.25rem;
+        max-width: 18rem;
+    }
+}
+
 .produto-card:hover .produto-logo {
-    transform: scale(1.04);
-    filter: brightness(1.34) contrast(1.08) drop-shadow(0 0 12px rgba(207, 255, 4, 0.28));
+    transform: scale(1.05);
+    filter: brightness(1.38) contrast(1.08) drop-shadow(0 0 14px rgba(207, 255, 4, 0.3));
 }
 
 .produto-icon {
-    flex-shrink: 0;
-    width: 2.4rem;
-    height: 2.4rem;
-    border-radius: 0.7rem;
-    background: var(--todoz);
-    color: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.05rem;
-    box-shadow: 0 0 20px rgba(207, 255, 4, 0.22);
-    transition: transform 0.35s ease;
-}
-
-.produto-card:hover .produto-icon {
-    transform: scale(1.06) rotate(-3deg);
+    display: none !important;
 }
 
 .produto-title {
@@ -808,15 +824,16 @@ html.content-revealed [data-aos].aos-animate {
 }
 
 .produto-card--featured .produto-logo {
-    height: 3rem;
-    max-width: 12rem;
-    filter: brightness(1.3) contrast(1.08) drop-shadow(0 0 16px rgba(207, 255, 4, 0.28));
+    height: 4.75rem;
+    max-width: 18rem;
+    filter: brightness(1.32) contrast(1.08) drop-shadow(0 0 18px rgba(207, 255, 4, 0.32));
 }
 
-.produto-card--featured .produto-icon {
-    width: 2.65rem;
-    height: 2.65rem;
-    font-size: 1.15rem;
+@media (min-width: 768px) {
+    .produto-card--featured .produto-logo {
+        height: 5.5rem;
+        max-width: 20rem;
+    }
 }
 
 .produto-card--featured .produto-title {

@@ -16,11 +16,32 @@ if (!gsap || !ScrollTrigger || !Lenis) {
 
     window.lenis = lenis;
 
+    // Lenis doesn't drive native pageYOffset — ScrollTrigger needs a proxy.
+    ScrollTrigger.scrollerProxy(document.body, {
+        scrollTop(value) {
+            if (arguments.length) {
+                lenis.scrollTo(value, { immediate: true });
+            }
+            return lenis.scroll;
+        },
+        getBoundingClientRect() {
+            return {
+                top: 0,
+                left: 0,
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        },
+        pinType: document.body.style.transform ? "transform" : "fixed"
+    });
+
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Single RAF owner — avoid double-driving Lenis.
     gsap.ticker.add((time) => {
         lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
+
+    ScrollTrigger.addEventListener("refresh", () => lenis.resize());
+    ScrollTrigger.refresh();
 }
