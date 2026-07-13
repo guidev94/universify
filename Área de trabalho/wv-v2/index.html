@@ -6,7 +6,7 @@
     <title>WV_Todoz | Agência Interativa - Elite Tech Agency</title>
     <meta name="description" content="Especialistas no desenvolvimento de aplicativos mobile, sistemas web sob medida e marketing de conversão. Transformamos ideias em resultados expressivos com tecnologia de ponta.">
     
-    <!-- Favicon (Guess based on site logo mark) -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-300x115.png">
     
     <!-- Bibliotecas Externas -->
@@ -39,6 +39,9 @@
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body class="bg-primary text-white selection:bg-todoz selection:text-black overflow-x-hidden">
+
+    <!-- Custom Cursor -->
+    <div id="cursor" class="fixed w-3 h-3 bg-todoz rounded-full pointer-events-none z-[9999] opacity-0 transition-opacity duration-300"></div>
 
     <!-- Navegação Premium -->
     <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
@@ -73,7 +76,7 @@
                     Líder em Desenvolvimento Interativo
                 </div>
                 <h1 class="text-[clamp(2.5rem,9vw,7rem)] font-black leading-[0.9] tracking-tighter mb-8" data-aos="zoom-out" data-aos-delay="200">
-                    TRANSFORMAMOS <br> IDEIAS EM <span class="text-todoz">RESULTADOS.</span>
+                    TRANSFORMAMOS <br> IDEIAS EM <span class="text-todoz text-glow">RESULTADOS.</span>
                 </h1>
                 <p class="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed mb-12" data-aos="fade-up" data-aos-delay="400">
                     Somos especialistas no desenvolvimento de aplicativos sociais, mobile e sistemas web de alto desempenho. Sua empresa vista a qualquer hora e em qualquer lugar.
@@ -101,7 +104,7 @@
             </div>
         </section>
 
-        <!-- Clientes (Social Proof Premium) -->
+        <!-- Clientes (Frase de Impacto Real) -->
         <section id="clientes" class="py-24 bg-black border-y border-white/5 overflow-hidden">
             <div class="container mx-auto px-6">
                 <h3 class="text-center text-sm md:text-lg font-bold uppercase tracking-[0.2em] text-zinc-400 mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">
@@ -170,8 +173,8 @@
         </section>
 
         <!-- Seção de Autoridade (Value Proposition) -->
-        <section class="py-32 bg-zinc-950 relative overflow-hidden">
-            <div class="container mx-auto px-6 text-center relative z-10">
+        <section class="py-32 bg-zinc-950 relative overflow-hidden text-center">
+            <div class="container mx-auto px-6 relative z-10">
                 <div class="max-w-5xl mx-auto" data-aos="fade-up">
                     <span class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-8 block">Nossa Missão</span>
                     <h3 class="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-tighter text-white leading-[0.9] mb-12">
@@ -224,9 +227,9 @@
                     </div>
                     <div class="max-w-xs text-right" data-aos="fade-left">
                         <p class="text-zinc-500 mb-6 text-sm leading-relaxed">Engenharia de software e design de interação para empresas que buscam o estado da arte digital.</p>
-                        <a href="#contato" class="text-todoz font-bold text-xs uppercase tracking-widest flex items-center justify-end gap-3 group">
+                        <button class="open-modal text-todoz font-bold text-xs uppercase tracking-widest flex items-center justify-end gap-3 group ml-auto">
                             Solicitar Orçamento <i class="ph ph-arrow-right group-hover:translate-x-2 transition-all"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -292,10 +295,10 @@
             <div class="container mx-auto px-6 mb-20">
                 <div class="flex flex-col md:flex-row justify-between items-end gap-10">
                     <div>
-                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-right">Projetos Selecionados</span>
-                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white" data-aos="fade-right" data-aos-delay="100">CASES QUE <br> <span class="text-todoz/30">MARCAM.</span></h2>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
+                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white">CASES QUE <br> <span class="text-todoz/30 text-glow">MARCAM.</span></h2>
                     </div>
-                    <div class="pb-4" data-aos="fade-left">
+                    <div class="pb-4">
                         <button class="open-modal px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all">Explorar Todos</button>
                     </div>
                 </div>
@@ -435,7 +438,7 @@
                 <div class="flex flex-col lg:flex-row justify-between items-end mb-24 gap-8">
                     <div data-aos="fade-right">
                         <span class="text-todoz text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Tecnologia Proprietária</span>
-                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.85]">NOSSA <br> <span class="text-todoz">INTELIGÊNCIA.</span></h2>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.85]">NOSSA <br> <span class="text-todoz text-glow">INTELIGÊNCIA.</span></h2>
                     </div>
                     <p class="text-zinc-500 max-w-sm text-right leading-relaxed" data-aos="fade-left">Soluções prontas para escalar que nasceram da nossa expertise em resolver problemas complexos de negócios.</p>
                 </div>
@@ -515,7 +518,7 @@
                                     <i class="ph ph-brain text-3xl font-black"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-3xl font-black italic tracking-tighter text-white uppercase">Inovação Continua</h3>
+                                    <h3 class="text-3xl font-black italic tracking-tighter text-white uppercase">Inovação Contínua</h3>
                                     <span class="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em]">R&D / Lab</span>
                                 </div>
                             </div>
@@ -529,26 +532,6 @@
                             </button>
                         </div>
                         <div class="absolute inset-0 bg-gradient-to-r from-todoz/0 via-todoz/0 to-todoz/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    </div>
-                </div>
-                                <div>
-                                    <span class="text-3xl font-black italic tracking-tighter block text-white">Facíleme</span>
-                                    <span class="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em]">Suíte Social</span>
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-bold mb-6 text-white leading-tight">E-commerce onde a atenção do seu cliente reside.</h3>
-                            <p class="text-zinc-500 text-sm leading-relaxed mb-10">
-                                Transforme sua presença em redes sociais em uma máquina de vendas. Gestão simplificada e checkout imersivo.
-                            </p>
-                        </div>
-                        <div class="relative z-10 space-y-3">
-                            <a href="https://www.facileme.com.br/" class="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-center inline-block text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Loja Virtual</a>
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="https://www.facilemeingresso.com.br/" class="py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-center inline-block text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ingressos</a>
-                                <a href="https://www.facilemecursos.com.br/" class="py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-center inline-block text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Cursos</a>
-                            </div>
-                        </div>
-                        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-todoz/5 rounded-full blur-[100px]"></div>
                     </div>
                 </div>
             </div>
@@ -576,7 +559,7 @@
                         </div>
                     </div>
                     <div class="order-1 lg:order-2" data-aos="fade-left">
-                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-none">MARKETING DE <br> <span class="text-todoz">CONVERSÃO.</span></h2>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-none text-white uppercase">Marketing de <br> <span class="text-todoz text-glow">Conversão.</span></h2>
                         <p class="text-zinc-400 text-xl leading-relaxed mb-8">
                             Somada à nossa capacidade de desenvolvimento, oferecemos estratégias que funcionam. Criamos conteúdo engajador e técnicas de monitoração para transformar cliques em clientes.
                         </p>
@@ -614,7 +597,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
                     <div>
                         <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Latest Insights</span>
-                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter">CONTEÚDO & <br> <span class="text-zinc-700">INOVAÇÃO.</span></h2>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">Conteúdo & <br> <span class="text-zinc-700">Inovação.</span></h2>
                     </div>
                     <div class="flex gap-4">
                         <button class="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center text-zinc-500 hover:border-todoz hover:text-todoz transition-all">
@@ -677,7 +660,7 @@
         <!-- Contato (Premium Final CTA) -->
         <section id="contato" class="py-40 bg-todoz flex items-center justify-center text-center relative overflow-hidden">
             <div class="container mx-auto px-6 relative z-10" data-aos="zoom-in">
-                <h2 class="text-black text-[clamp(2rem,8vw,6rem)] font-black leading-none mb-12 tracking-tighter">PRONTO PARA O <br> <span class="bg-black text-todoz px-6">PRÓXIMO NÍVEL?</span></h2>
+                <h2 class="text-black text-[clamp(2rem,8vw,6rem)] font-black leading-none mb-12 tracking-tighter uppercase">Pronto para o <br> <span class="bg-black text-todoz px-6">Próximo Nível?</span></h2>
                 <div class="flex flex-col md:flex-row justify-center gap-10 items-center">
                     <a href="tel:1155311779" class="text-black font-black text-3xl md:text-4xl tracking-tighter hover:opacity-70 transition-opacity">(11) 5531-1779</a>
                     <button class="open-modal magnetic px-16 py-6 bg-black text-todoz font-black text-lg md:text-xl rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-widest">
@@ -692,11 +675,11 @@
         </section>
     </main>
 
-    <footer class="py-32 bg-black relative overflow-hidden">
+    <footer class="py-32 bg-black relative overflow-hidden border-t border-white/5">
         <div class="container mx-auto px-6 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-24 mb-24">
                 <div class="md:col-span-4">
-                    <a href="/" class="block w-48 mb-10">
+                    <a href="index.html" class="block w-48 mb-10">
                         <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-full">
                     </a>
                     <p class="text-zinc-500 leading-relaxed mb-10">Transformamos a complexidade tecnológica em vantagem competitiva para marcas globais.</p>
@@ -713,7 +696,7 @@
                     <ul class="space-y-4 text-zinc-500 font-bold text-sm">
                         <li><a href="#sobre" class="hover:text-todoz transition-colors">Sobre Nós</a></li>
                         <li><a href="#servicos" class="hover:text-todoz transition-colors">Serviços</a></li>
-                        <li><a href="#portfolio" class="hover:text-todoz transition-colors">Portfólio</a></li>
+                        <li><a href="#portfolio" class="hover:text-todoz transition-colors">Projetos</a></li>
                         <li><a href="#blog" class="hover:text-todoz transition-colors">Insights</a></li>
                     </ul>
                 </div>
@@ -756,7 +739,7 @@
     </footer>
 
     <!-- Case Modal -->
-    <div id="case-modal" class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500">
+    <div id="case-modal" class="fixed inset-0 z-[999] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500">
         <div class="absolute inset-0 bg-black/98 backdrop-blur-3xl"></div>
         <div class="relative bg-zinc-900 border border-white/10 w-full max-w-7xl h-auto max-h-[90vh] overflow-y-auto md:overflow-hidden rounded-[3rem] m-6 transform translate-y-20 transition-all duration-700 pointer-events-auto shadow-[0_0_120px_rgba(0,0,0,0.5)] flex flex-col md:flex-row">
             <button id="close-case-modal" class="absolute top-8 right-10 text-zinc-500 hover:text-todoz transition-colors text-4xl z-20">
@@ -793,7 +776,7 @@
     </div>
 
     <!-- Contact Modal -->
-    <div id="contact-modal" class="fixed inset-0 z-[201] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500">
+    <div id="contact-modal" class="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500">
         <div class="absolute inset-0 bg-black/95 backdrop-blur-3xl"></div>
         <div class="relative bg-zinc-900 border border-white/10 w-full max-w-2xl p-12 rounded-[3rem] m-6 transform translate-y-20 transition-all duration-700 pointer-events-auto shadow-[0_0_100px_rgba(207,255,4,0.1)]">
             <button id="close-modal" class="absolute top-8 right-8 text-zinc-500 hover:text-todoz transition-colors text-3xl">
