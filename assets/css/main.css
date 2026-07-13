@@ -33,17 +33,57 @@ h1, h2, h3, h4 {
     text-rendering: optimizeLegibility;
 }
 
+/* Continuous dark canvas — soft accents, no hard section seams */
+.section-canvas {
+    position: relative;
+    isolation: isolate;
+    background-color: #0a0a0a;
+}
+
+.section-canvas > .container,
+.section-canvas > .container-fluid {
+    position: relative;
+    z-index: 1;
+}
+
+#sobre {
+    background:
+        radial-gradient(ellipse 55% 50% at 85% 20%, rgba(207, 255, 4, 0.055), transparent 62%),
+        radial-gradient(ellipse 40% 35% at 10% 100%, rgba(207, 255, 4, 0.03), transparent 55%),
+        #0a0a0a;
+}
+
+#servicos {
+    background:
+        radial-gradient(ellipse 65% 48% at 0% 10%, rgba(207, 255, 4, 0.05), transparent 58%),
+        radial-gradient(ellipse 45% 40% at 100% 85%, rgba(207, 255, 4, 0.03), transparent 52%),
+        #0a0a0a;
+}
+
+#marketing {
+    background:
+        radial-gradient(ellipse 75% 55% at 85% 30%, rgba(207, 255, 4, 0.045), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 5% -5%, rgba(207, 255, 4, 0.03), transparent 50%),
+        #0a0a0a;
+}
+
+#blog {
+    background:
+        radial-gradient(ellipse 55% 45% at 20% -8%, rgba(207, 255, 4, 0.04), transparent 58%),
+        #0a0a0a;
+}
+
 /* Portfolio — faixa horizontal + pin scroll */
 .portfolio-section {
     position: relative;
     padding: 7rem 0 5rem;
     background:
-        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(207, 255, 4, 0.08), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(207, 255, 4, 0.05), transparent 50%),
+        radial-gradient(ellipse 85% 55% at 12% -8%, rgba(207, 255, 4, 0.075), transparent 58%),
+        radial-gradient(ellipse 65% 45% at 92% 108%, rgba(207, 255, 4, 0.045), transparent 52%),
         #0a0a0a;
-    border-top: 1px solid rgba(207, 255, 4, 0.12);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
+    border-top: none;
+    border-bottom: none;
+    overflow: visible;
     z-index: 2;
 }
 
@@ -352,22 +392,23 @@ h1, h2, h3, h4 {
     position: relative;
     padding: 8rem 0;
     background:
-        radial-gradient(ellipse 70% 45% at 50% 0%, rgba(207, 255, 4, 0.09), transparent 60%),
+        radial-gradient(ellipse 75% 50% at 50% -12%, rgba(207, 255, 4, 0.08), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 100% 85%, rgba(207, 255, 4, 0.035), transparent 52%),
         #0a0a0a;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: hidden;
+    border-top: none;
+    overflow: visible;
 }
 
 .produtos-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.65rem;
 }
 
 @media (min-width: 768px) {
     .produtos-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1.75rem;
+        gap: 1.85rem;
     }
 }
 
@@ -376,9 +417,13 @@ h1, h2, h3, h4 {
     display: flex;
     flex-direction: column;
     border-radius: 2.25rem;
-    background: rgba(24, 24, 27, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background:
+        linear-gradient(165deg, rgba(32, 32, 36, 0.92), rgba(16, 16, 18, 0.88));
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
+    box-shadow:
+        0 18px 40px -28px rgba(0, 0, 0, 0.85),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
     transition:
         border-color 0.4s ease,
         transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
@@ -387,32 +432,120 @@ h1, h2, h3, h4 {
 }
 
 .produto-card:hover {
-    border-color: rgba(207, 255, 4, 0.4);
+    border-color: rgba(207, 255, 4, 0.38);
     transform: translateY(-8px);
-    box-shadow: 0 28px 60px -24px rgba(207, 255, 4, 0.18);
-    background: rgba(24, 24, 27, 0.85);
+    box-shadow:
+        0 30px 64px -26px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(207, 255, 4, 0.08),
+        0 22px 50px -28px rgba(207, 255, 4, 0.2);
+}
+
+.produto-badge {
+    position: absolute;
+    top: 1.15rem;
+    right: 1.15rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    background: var(--todoz);
+    color: #0a0a0a;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: 0 0 28px rgba(207, 255, 4, 0.45);
 }
 
 .produto-card--featured {
-    border-color: rgba(207, 255, 4, 0.22);
+    border-color: rgba(207, 255, 4, 0.42);
+    background:
+        linear-gradient(160deg, rgba(36, 40, 18, 0.95), rgba(14, 14, 16, 0.92));
+    box-shadow:
+        0 0 0 1px rgba(207, 255, 4, 0.18),
+        0 0 48px -12px rgba(207, 255, 4, 0.28),
+        0 24px 56px -28px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(207, 255, 4, 0.12);
+}
+
+.produto-card--featured:hover {
+    border-color: rgba(207, 255, 4, 0.62);
+    box-shadow:
+        0 0 0 1px rgba(207, 255, 4, 0.28),
+        0 0 64px -10px rgba(207, 255, 4, 0.38),
+        0 28px 60px -26px rgba(0, 0, 0, 0.85);
+}
+
+.produto-card--featured .produto-logo-wrap {
+    min-height: 10rem;
+    padding: 2.35rem 2.25rem 1.5rem;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(207, 255, 4, 0.28), transparent 58%),
+        radial-gradient(circle at 18% 80%, rgba(207, 255, 4, 0.1), transparent 45%),
+        linear-gradient(180deg, rgba(207, 255, 4, 0.08), rgba(0, 0, 0, 0.45));
+    border-bottom-color: rgba(207, 255, 4, 0.18);
+}
+
+.produto-card--featured .produto-logo {
+    height: 5.25rem;
+    max-width: 16rem;
+    filter: brightness(1.3) contrast(1.08) drop-shadow(0 0 22px rgba(207, 255, 4, 0.35));
+}
+
+.produto-card--featured .produto-title {
+    font-size: clamp(1.85rem, 2.4vw, 2.15rem);
+}
+
+.produto-card--featured .produto-desc {
+    color: #c4c4c8;
+}
+
+@media (min-width: 768px) {
+    .produto-card--featured {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: stretch;
+        min-height: 17.5rem;
+    }
+
+    .produto-card--featured .produto-logo-wrap {
+        flex: 0 0 38%;
+        min-height: 100%;
+        padding: 2.5rem 2.5rem;
+        border-bottom: none;
+        border-right: 1px solid rgba(207, 255, 4, 0.16);
+    }
+
+    .produto-card--featured .produto-card-body {
+        flex: 1;
+        justify-content: center;
+        padding: 2.25rem 2.5rem 2.5rem;
+        gap: 0.65rem;
+    }
+
+    .produto-card--featured .produto-badge {
+        top: 1.35rem;
+        right: 1.35rem;
+    }
 }
 
 .produto-logo-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 8.5rem;
-    padding: 2rem 2rem 1.25rem;
+    min-height: 9rem;
+    padding: 2.15rem 2rem 1.4rem;
     background:
-        radial-gradient(circle at 30% 40%, rgba(207, 255, 4, 0.14), transparent 55%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.25));
+        radial-gradient(circle at 30% 40%, rgba(207, 255, 4, 0.12), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(0, 0, 0, 0.32));
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .produto-logo {
-    height: 4.5rem;
+    height: 4.65rem;
     width: auto;
-    max-width: 14rem;
+    max-width: 14.5rem;
     object-fit: contain;
     filter: brightness(1.2) contrast(1.05);
     opacity: 1;
@@ -420,7 +553,7 @@ h1, h2, h3, h4 {
 }
 
 .produto-card:hover .produto-logo {
-    transform: scale(1.08);
+    transform: scale(1.07);
     filter: brightness(1.35) contrast(1.08) drop-shadow(0 0 18px rgba(207, 255, 4, 0.35));
 }
 
@@ -429,15 +562,15 @@ h1, h2, h3, h4 {
     z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    padding: 1.75rem 2rem 2.15rem;
+    gap: 0.6rem;
+    padding: 1.9rem 2.1rem 2.25rem;
     flex: 1;
 }
 
 .produto-icon {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 0.85rem;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 0.9rem;
     background: var(--todoz);
     color: #000;
     display: flex;
@@ -445,7 +578,7 @@ h1, h2, h3, h4 {
     justify-content: center;
     font-size: 1.25rem;
     box-shadow: 0 0 24px rgba(207, 255, 4, 0.28);
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.2rem;
     transition: transform 0.35s ease;
 }
 
@@ -455,7 +588,7 @@ h1, h2, h3, h4 {
 
 .produto-title {
     color: #fff;
-    font-size: 1.65rem;
+    font-size: 1.7rem;
     font-weight: 900;
     letter-spacing: -0.04em;
     font-style: italic;
@@ -473,8 +606,8 @@ h1, h2, h3, h4 {
 .produto-desc {
     color: #a1a1aa;
     font-size: 0.95rem;
-    line-height: 1.6;
-    margin: 0.2rem 0 1.1rem;
+    line-height: 1.65;
+    margin: 0.15rem 0 1.15rem;
     flex: 1;
 }
 
