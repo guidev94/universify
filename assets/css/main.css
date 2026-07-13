@@ -127,14 +127,29 @@ body {
     z-index: 1;
 }
 
+/* Sobre — ambient ::after bleeds into missao below (portfolio / Insights pattern) */
 #sobre {
-    background:
-        radial-gradient(ellipse 55% 50% at 85% 20%, rgba(207, 255, 4, 0.055), transparent 62%),
-        radial-gradient(ellipse 40% 35% at 10% 100%, rgba(207, 255, 4, 0.03), transparent 55%),
-        #0a0a0a;
+    background-color: #0a0a0a;
 }
 
-/* Missão — soft ambient inside paint (no blur blobs clipped by section edges) */
+#sobre::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    top: -22%;
+    /* Soft bleed into missao — no hard bottom cut on SEJA TODOZ glow */
+    bottom: -38%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 55% 50% at 85% 28%, rgba(207, 255, 4, 0.055), transparent 62%),
+        radial-gradient(ellipse 42% 38% at 10% 82%, rgba(207, 255, 4, 0.035), transparent 58%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 82%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 82%, transparent 100%);
+}
+
+/* Missão — soft ambient inside paint; top seam softens via #sobre::after bleed */
 #missao {
     background:
         radial-gradient(ellipse 58% 70% at 92% 8%, rgba(207, 255, 4, 0.06), transparent 68%),
@@ -142,25 +157,72 @@ body {
         #0a0a0a;
 }
 
-/* Servicos owns mid-section accents only — seam glow lives on portfolio ambient */
+/* Servicos — paint-box base; ambient ::after bleeds into section above
+   (same pattern as Insights / portfolio). Bottom seam owned by portfolio. */
 #servicos {
-    background:
-        radial-gradient(ellipse 65% 48% at 0% 10%, rgba(207, 255, 4, 0.05), transparent 58%),
-        radial-gradient(ellipse 40% 36% at 100% 72%, rgba(207, 255, 4, 0.025), transparent 55%),
-        #0a0a0a;
+    background-color: #0a0a0a;
 }
 
+#servicos::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    /* Soft bleed into mobile strategist / missao above — no hard top cut */
+    top: -45%;
+    bottom: 18%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 75% 55% at 10% 32%, rgba(207, 255, 4, 0.075), transparent 66%),
+        radial-gradient(ellipse 48% 42% at 92% 68%, rgba(207, 255, 4, 0.03), transparent 62%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
+}
+
+/* Marketing — ambient ::after bleeds into Insights (#blog) below */
 #marketing {
-    background:
-        radial-gradient(ellipse 75% 55% at 85% 30%, rgba(207, 255, 4, 0.045), transparent 60%),
-        radial-gradient(ellipse 40% 30% at 5% -5%, rgba(207, 255, 4, 0.03), transparent 50%),
-        #0a0a0a;
+    background-color: #0a0a0a;
 }
 
-#blog {
+#marketing::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    top: -28%;
+    /* Soft bleed into blog — no hard bottom cut on conversion glow */
+    bottom: -40%;
+    z-index: 0;
+    pointer-events: none;
     background:
-        radial-gradient(ellipse 55% 45% at 20% -8%, rgba(207, 255, 4, 0.04), transparent 58%),
-        #0a0a0a;
+        radial-gradient(ellipse 75% 55% at 85% 32%, rgba(207, 255, 4, 0.045), transparent 60%),
+        radial-gradient(ellipse 48% 40% at 12% 78%, rgba(207, 255, 4, 0.035), transparent 58%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+}
+
+/* Insights — ambient layer extends past edges (portfolio pattern),
+   so glow is not hard-clipped at the section paint box. */
+#blog {
+    background-color: #0a0a0a;
+}
+
+#blog::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    /* Bleed into marketing above; soft fade before contato yellow below */
+    top: -40%;
+    bottom: -28%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 70% 55% at 18% 28%, rgba(207, 255, 4, 0.06), transparent 64%),
+        radial-gradient(ellipse 50% 45% at 88% 62%, rgba(207, 255, 4, 0.03), transparent 60%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
 }
 
 /* Portfolio — faixa horizontal + pin scroll */
@@ -1203,9 +1265,9 @@ button.magnetic.border-todoz:hover {
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    gap: clamp(1rem, 3vw, 3.5rem);
+    gap: clamp(0.75rem, 2.25vw, 2.625rem);
     width: 100%;
-    max-width: 72rem;
+    max-width: 54rem;
     margin: 2.75rem auto 0;
     padding-top: 2.25rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1229,7 +1291,8 @@ button.magnetic.border-todoz:hover {
 }
 
 .hero-logo img {
-    height: clamp(2.5rem, 6vw, 5rem);
+    /* 75% of prior clamp(2.5rem, 6vw, 5rem) */
+    height: clamp(1.875rem, 4.5vw, 3.75rem);
     width: auto;
     max-width: 100%;
     object-fit: contain;
