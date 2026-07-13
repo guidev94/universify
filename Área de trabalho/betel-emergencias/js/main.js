@@ -1,7 +1,10 @@
 (function () {
   'use strict';
 
-  gsap.registerPlugin(ScrollTrigger);
+  var hasGsap = typeof gsap !== 'undefined';
+  if (hasGsap && typeof ScrollTrigger !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+  }
 
   var EASE_FLUID = 'power3.out';
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -305,19 +308,18 @@
         });
 
         var message = encodeURIComponent(parts.join('\n'));
-        var successEl = form.parentElement.querySelector('[data-form-success]');
 
-        if (successEl) {
-          form.style.display = 'none';
-          successEl.classList.remove('hidden');
-          if (!reducedMotion) {
-            gsap.from(successEl, { scale: 0.9, opacity: 0, duration: 0.5, ease: EASE_FLUID });
-          }
+        // Open WhatsApp immediately
+        window.open('https://wa.me/5511971674912?text=' + message, '_blank');
+
+        // Send copy via AJAX (email + save to admin)
+        if (typeof betel_ajax !== 'undefined' && betel_ajax.url) {
+          var ajaxData = new URLSearchParams();
+          ajaxData.append('action', 'betel_form_ajax');
+          ajaxData.append('pagina', window.location.pathname);
+          formData.forEach(function(value, key) { ajaxData.append(key, value); });
+          fetch(betel_ajax.url, { method: 'POST', body: ajaxData }).catch(function(){});
         }
-
-        setTimeout(function () {
-          window.open('https://wa.me/5511971674912?text=' + message, '_blank');
-        }, 600);
 
         if (window.dataLayer) {
           window.dataLayer.push({ event: 'form_submit', form_name: form.id || 'orcamento' });
@@ -428,10 +430,15 @@
 
   // ═══════════════ INIT ═══════════════
   document.addEventListener('DOMContentLoaded', function () {
-    initHeroAnimation();
-    initScrollReveals();
+    // GSAP-dependent (only run if GSAP loaded — front page)
+    if (hasGsap) {
+      initHeroAnimation();
+      initScrollReveals();
+      initCounters();
+      initParallax();
+      initMagneticButtons();
+    }
     initFallbackVisibility();
-    initCounters();
     initNavbar();
     initMobileMenu();
     initSmoothScroll();
@@ -439,8 +446,6 @@
     initForm();
     initFAQ();
     initCookies();
-    initParallax();
-    initMagneticButtons();
     initActiveNav();
 
     window.addEventListener('load', function () {

@@ -1,4 +1,13 @@
-{# ===== PIPELINE COMERCIAL ===== #}
+{# ===== STATUS CHIP DINÂMICO ===== #}
+<div class="lwa-status-strip">
+    <div class="lwa-status-chip"><i class="ri-money-dollar-circle-line"></i> Pipeline: <strong>R$ {{ (kpis.valor_pipeline|default(0) / 1000)|number_format(0, ',', '.') }}k</strong></div>
+    <div class="lwa-status-chip"><i class="ri-calendar-check-line"></i> Reuniões: <strong>{{ (kpis.reunioes_agendadas|default(0) + kpis.reunioes_realizadas|default(0)) }}</strong></div>
+    <div class="lwa-status-chip lwa-status-chip--alert"><i class="ri-alarm-warning-line"></i> Sem ação: <strong>{{ kpis.hot_no_followup|default(0) }}</strong></div>
+    <div class="lwa-status-chip"><i class="ri-trophy-line"></i> Ganhos: <strong>{{ kpis.ganhos|default(0) }}</strong></div>
+</div>
+
+{# ===== BLOCO MÉTRICAS (PRIMEIRO - DESTAQUE) ===== #}
+<div class="lwa-block lwa-block--metrics">
 <div class="lwa-section-label">Pipeline Comercial</div>
 <div class="lwa-kpi-row lwa-kpi-row--full">
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
@@ -16,6 +25,10 @@
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Quente', value: temperatura_counts.quente|default(0), icon: 'ri-fire-line', color: 'error',
         kpi_id: 'temp_quente', description: 'Score 61–100'
+    } %}
+    {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
+        title: 'Prioritário', value: temperatura_counts.prioritario|default(0), icon: 'ri-vip-crown-line', color: 'purple',
+        kpi_id: 'temp_prioritario', description: 'Score 100+'
     } %}
     {% include '@LetsworkAnalytics/Analytics/partials/kpi_card.html.twig' with {
         title: 'Reuniões', value: kpis.reunioes_agendadas + kpis.reunioes_realizadas + kpis.reunioes_fechamento, icon: 'ri-calendar-check-line', color: 'primary',
@@ -72,6 +85,15 @@
             <canvas class="lwa-chart" data-chart-type="doughnut" data-chart-data="{{ charts.temperature|json_encode }}" style="height:220px;width:100%;"></canvas>
         </div>
     </div>
+</div>
+
+{# ===== ALERTAS INTELIGENTES (compacto, após KPIs) ===== #}
+<div class="lwa-section-label">
+    <span><i class="ri-alarm-warning-line"></i> Alertas</span>
+    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaLoadSmartAlerts()" style="font-size:11px;padding:4px 10px"><i class="ri-refresh-line"></i></button>
+</div>
+<div id="lwa-smart-alerts" style="margin-bottom:20px">
+    <div style="text-align:center;padding:8px;color:var(--lwa-gray-400);font-size:12px"><i class="ri-loader-3-line ri-spin"></i></div>
 </div>
 
 {# ===== E-MAIL MARKETING ===== #}
@@ -205,14 +227,20 @@
     </div>
 </div>
 
-{# ===== INSIGHTS IA ===== #}
+
+</div>{# end .lwa-block--metrics #}
+
+<div class="lwa-block-divider"></div>
+
+{# ===== BLOCO INTELIGÊNCIA ===== #}
+<div class="lwa-block lwa-block--intelligence">
 <div class="lwa-section-label">
     <span><i class="ri-sparkling-line"></i> Insights IA</span>
-    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaLoadInsights()" style="font-size:11px;padding:4px 10px">Gerar Análise</button>
+    <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaLoadInsights()" style="font-size:11px;padding:4px 10px">Regenerar</button>
 </div>
 <div id="lwa-insights" class="lwa-card" style="margin-bottom:24px">
     <div class="lwa-card-body" style="text-align:center;padding:20px;color:var(--lwa-gray-400);font-size:13px">
-        Clique em "Gerar Análise" para a IA analisar suas métricas e sugerir ações.
+        <i class="ri-loader-3-line ri-spin"></i> Gerando insights...
     </div>
 </div>
 
@@ -267,5 +295,7 @@
     </div>
 </div>
 <div id="lwa-ai-tab-result-funnel" style="display:none;margin-bottom:24px"></div>
+
+</div>{# end .lwa-block--intelligence #}
 
 {# Modais movidos para index.html.twig (globais) #}

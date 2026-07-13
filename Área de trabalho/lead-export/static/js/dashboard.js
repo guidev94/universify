@@ -472,6 +472,20 @@ loadRecentJobs();
 loadSchedulerStatus();
 loadActivityFeed();
 
+// Debounced reloads to avoid redundant calls from multiple SSE events
+let loadStatsTimeout;
+let loadActivityTimeout;
+
+function debouncedLoadStats() {
+    clearTimeout(loadStatsTimeout);
+    loadStatsTimeout = setTimeout(loadStats, 1000);
+}
+
+function debouncedLoadActivity() {
+    clearTimeout(loadActivityTimeout);
+    loadActivityTimeout = setTimeout(loadActivityFeed, 1500);
+}
+
 // SSE real-time updates (with polling fallback)
 if (typeof events !== 'undefined') {
     events.on('stats_updated', (data) => {
@@ -490,8 +504,8 @@ if (typeof events !== 'undefined') {
     });
 
     events.on('lead_new', () => {
-        loadStats();
-        loadActivityFeed();
+        debouncedLoadStats();
+        debouncedLoadActivity();
     });
 
     events.on('job_progress', (data) => {
@@ -504,34 +518,38 @@ if (typeof events !== 'undefined') {
             if (bar) bar.style.width = `${pct}%`;
             if (txt) txt.textContent = `${data.progress}/${data.total}`;
         } else {
-            loadActivityFeed();
+            debouncedLoadActivity();
         }
     });
 
     events.on('job_completed', (data) => {
-        loadStats();
+        debouncedLoadStats();
         loadRecentJobs();
-        loadActivityFeed();
+        debouncedLoadActivity();
         if (data && data.keyword) {
-            showToast(`Extração "${data.keyword}": ${data.found} leads`, 'success');
+            const typeLabel = data.type === 'auto' ? 'Auto-Crawl: ' : data.type === 'campaign' ? 'Campanha: ' : '';
+            showToast(`${typeLabel}Extração "${data.keyword}" finalizada: ${data.found} leads salvos`, 'success');
         }
     });
 
     events.on('job_error', (data) => {
         loadRecentJobs();
-        loadActivityFeed();
+        debouncedLoadActivity();
         if (data && data.keyword) {
             showToast(`Erro na extração "${data.keyword}"`, 'error');
         }
     });
 
-    events.on('campaign_progress', () => {
-        loadStats();
-        loadActivityFeed();
+    events.on('campaign_progress', (data) => {
+        debouncedLoadStats();
+        debouncedLoadActivity();
+        if (data && data.added > 0) {
+            showToast(`Campanha "${data.name}": +${data.added} leads`, 'info');
+        }
     });
 
-    events.on('pipeline_verify', () => loadStats());
-    events.on('pipeline_enrich', () => loadStats());
+    events.on('pipeline_verify', () => debouncedLoadStats());
+    events.on('pipeline_enrich', () => debouncedLoadStats());
 }
 
 // Fallback polling (SSE handles real-time, these are safety nets)

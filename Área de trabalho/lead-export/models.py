@@ -162,7 +162,7 @@ class Lead:
             conn.close()
 
     @staticmethod
-    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None, has_ads=None, has_pixel=None, site_quality=None):
+    def get_all(page=1, per_page=25, tier=None, status=None, source=None, search=None, sort="score", order="desc", only_verified=False, category=None, score_min=None, score_max=None, has_email=False, has_phone=False, has_website=False, has_whatsapp=False, created_days=None, has_ads=None, has_pixel=None, site_quality=None, is_qualified=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -176,6 +176,9 @@ class Lead:
         if source:
             conditions.append("source = ?")
             params.append(source)
+        if is_qualified is not None:
+            conditions.append("is_qualified = ?")
+            params.append(1 if is_qualified else 0)
         if category:
             conditions.append("category LIKE ?")
             params.append(f"%{category}%")
@@ -298,6 +301,19 @@ class Lead:
         conn.close()
 
     @staticmethod
+    def toggle_qualified(lead_id):
+        conn = get_connection()
+        row = conn.execute("SELECT is_qualified FROM leads WHERE id = ?", (lead_id,)).fetchone()
+        if row:
+            new_val = 0 if row["is_qualified"] else 1
+            conn.execute("UPDATE leads SET is_qualified = ? WHERE id = ?", (new_val, lead_id))
+            conn.commit()
+            conn.close()
+            return True, new_val
+        conn.close()
+        return False, None
+
+    @staticmethod
     def bulk_delete(ids):
         if not ids:
             return 0
@@ -387,7 +403,7 @@ class Lead:
         return chart
 
     @staticmethod
-    def get_for_export(tier=None, status=None, quantity=None, keyword=None, campaign=None, site_quality=None, has_ads=None):
+    def get_for_export(tier=None, status=None, quantity=None, keyword=None, campaign=None, site_quality=None, has_ads=None, score_min=None, sort="created_at", order="desc", is_qualified=None):
         conn = get_connection()
         conditions = []
         params = []
@@ -400,12 +416,15 @@ class Lead:
         if status:
             conditions.append("status = ?")
             params.append(status)
+        if is_qualified is not None:
+            conditions.append("is_qualified = ?")
+            params.append(1 if is_qualified else 0)
         if campaign:
             conditions.append("campaign = ?")
             params.append(campaign)
         if site_quality:
             if site_quality == 'none':
-                conditions.append("website = '' AND site_verified = 0")
+                conditions.append("(website = '' OR website IS NULL) AND site_verified = 0")
             else:
                 conditions.append("site_quality = ?")
                 params.append(site_quality)
@@ -415,13 +434,19 @@ class Lead:
         if keyword:
             conditions.append("(category LIKE ? OR name LIKE ?)")
             params.extend([f"%{keyword}%", f"%{keyword}%"])
+        if score_min is not None:
+            conditions.append("score >= ?")
+            params.append(int(score_min))
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
         limit = f"LIMIT {int(quantity)}" if quantity and int(quantity) > 0 else ""
 
-        # Priority: Newest leads first (created_at DESC)
+        allowed_sorts = {"score", "created_at", "name"}
+        sort_col = sort if sort in allowed_sorts else "created_at"
+        sort_order = "ASC" if order == "asc" else "DESC"
+
         rows = conn.execute(
-            f"SELECT * FROM leads {where} ORDER BY created_at DESC {limit}", params
+            f"SELECT * FROM leads {where} ORDER BY {sort_col} {sort_order} {limit}", params
         ).fetchall()
         conn.close()
         return [dict(r) for r in rows]

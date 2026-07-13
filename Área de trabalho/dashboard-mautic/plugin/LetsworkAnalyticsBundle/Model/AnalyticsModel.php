@@ -39,6 +39,7 @@ class AnalyticsModel
                 'disparos'            => $this->getTotalDisparos(),
                 'emails_abertos'      => $this->getEmailsOpened($dateRange),
                 'taxa_abertura'       => $this->getEmailOpenRate($dateRange),
+                'valor_pipeline'      => $this->getValorPipeline(),
             ],
             'temperatura_counts' => $this->getTemperatureCounts(),
             'top_dores' => $this->getTopDores(),
@@ -65,8 +66,10 @@ class AnalyticsModel
 
     public function getConversaoData(array $dateRange): array
     {
-        $totalLeads = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added BETWEEN :from AND :to AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
-        $totalGanhos = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE LOWER(status_comercial) = 'ganho' AND date_modified BETWEEN :from AND :to AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))", ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59']);
+        $dateFilter = ['from' => $dateRange['from'], 'to' => $dateRange['to'] . ' 23:59:59'];
+        $validLead = "((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))";
+        $totalLeads = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added BETWEEN :from AND :to AND $validLead", $dateFilter);
+        $totalGanhos = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE LOWER(status_comercial) = 'ganho' AND date_added BETWEEN :from AND :to AND $validLead", $dateFilter);
 
         return [
             'funnel'       => $this->getConversionFunnel($dateRange),
@@ -197,7 +200,7 @@ class AnalyticsModel
         // Dynamic cases via if/elseif
         } elseif (strpos($kpi, 'temp_') === 0) {
             $tempValue = substr($kpi, 5);
-            $where = "LOWER(temperatura) = LOWER(:temp) AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))";
+            $where = "LOWER(REPLACE(REPLACE(temperatura,'á','a'),'ó','o')) = LOWER(:temp) AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))";
             $params = ['temp' => $tempValue];
         } elseif (preg_match('/^conv_stage_(\d+)$/', $kpi, $m)) {
             return $this->getLeadsByStage((int)$m[1], $dateRange);
@@ -298,8 +301,26 @@ class AnalyticsModel
         if (!$this->columnExists('leads', 'temperatura')) {
             return 0;
         }
-        $sql = "SELECT COUNT(*) FROM leads WHERE LOWER(temperatura) IN ('quente','prioritário','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))";
+        $sql = "SELECT COUNT(*) FROM leads WHERE LOWER(temperatura) IN ('quente','prioritário','prioritario') AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW()) AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido')) AND (email IS NOT NULL AND email != '' AND email NOT LIKE '%@anonymous%') AND (firstname IS NOT NULL AND CHAR_LENGTH(firstname) >= 2)";
         return (int) $this->connection->fetchOne($sql);
+    }
+
+    public function getPendingFollowups(): array
+    {
+        if (!$this->columnExists('leads', 'data_proximo_followup')) return ['count' => 0, 'leads' => []];
+
+        $sql = "SELECT id, firstname, lastname, company, temperatura, data_proximo_followup, status_comercial
+                FROM leads
+                WHERE data_proximo_followup IS NOT NULL
+                  AND data_proximo_followup <= DATE_ADD(NOW(), INTERVAL 1 DAY)
+                  AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))
+                ORDER BY data_proximo_followup ASC
+                LIMIT 15";
+        $leads = $this->connection->fetchAllAssociative($sql);
+
+        $hotCount = $this->getHotWithoutFollowup();
+
+        return ['count' => count($leads) + $hotCount, 'followups' => $leads, 'hot_no_followup' => $hotCount];
     }
 
     private function getCountByStatusAll(string $status): int
@@ -352,7 +373,8 @@ class AnalyticsModel
         $result = [];
         foreach ($rows as $row) {
             $key = strtolower(trim($row['temperatura']));
-            if ($key) $result[$key] = (int)$row['total'];
+            $key = str_replace(['á','é','í','ó','ú'], ['a','e','i','o','u'], $key);
+            if ($key) $result[$key] = ($result[$key] ?? 0) + (int)$row['total'];
         }
         return $result;
     }
@@ -1138,30 +1160,58 @@ Responda APENAS em JSON:
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
         $status = str_replace('_', ' ', $lead['status_comercial'] ?? 'sem status');
 
-        $prompt = "Voce e analista comercial da LetsWork (software RH). Gere um resumo consolidado deste lead para o time comercial.
+        $daysSince = 'desconhecido';
+        if (!empty($lead['data_ultima_interacao'])) {
+            $days = (int)((time() - strtotime($lead['data_ultima_interacao'])) / 86400);
+            $daysSince = $days . ' dias';
+        }
+
+        $emailStats = $this->connection->fetchAssociative(
+            "SELECT COUNT(*) as total, SUM(is_read) as opened FROM email_stats WHERE lead_id = :id",
+            ['id' => $leadId]
+        );
+        $emailInfo = "Emails enviados: " . ($emailStats['total'] ?? 0) . " | Abertos: " . ($emailStats['opened'] ?? 0);
+
+        $prompt = "Voce e o analista comercial senior da LetsWork (plataforma de gestao de pessoas para RH/DP).
+Gere um RESUMO CONSOLIDADO executivo deste lead para briefing do time comercial.
 
 LEAD:
 - Nome: $name | Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
 - Segmento: {$lead['segmento']} | Origem: {$lead['origem_principal']}
-- Modulo: {$lead['modulo_interesse']} | Dor: {$lead['dor_principal']}
+- Modulo de interesse: {$lead['modulo_interesse']} | Dor principal: {$lead['dor_principal']}
 - Score: {$lead['interesse_score']} | Temperatura: {$lead['temperatura']} | Status: $status
 - Valor potencial: R$ " . number_format((float)($lead['valor_potencial'] ?? 0), 0, ',', '.') . "
+- Dias desde ultima interacao: $daysSince
+- $emailInfo
 
-TIMELINE RECENTE:
+TIMELINE COMPLETA:
 $timelineText
 
-OPCOES DE PROXIMA ACAO: nutrir, enviar_case, pedir_reuniao, passar_para_comercial, reativar_depois, desqualificar
+ANALISE NECESSARIA:
+1. Resumo: Quem e esse lead? O que sabemos? Qual a situacao atual? (3-4 linhas)
+2. Interacoes-chave: Os momentos mais importantes na timeline
+3. Dores: O que podemos inferir das interacoes + dados
+4. Objecoes: Sinais de resistencia ou blockers identificados
+5. Acao recomendada: Baseada no STATUS ATUAL e no historico
+6. Mensagem: Pronta para copiar e enviar pelo canal mais adequado
 
-Responda APENAS em JSON:
+REGRAS:
+- Se nao ha dados suficientes, diga claramente e sugira qualificacao
+- Probabilidade deve considerar: engagement (emails abertos), tempo sem interacao, temperatura
+- Mensagem deve ser ESPECIFICA para esse lead, citando empresa/dor/modulo
+- Lead sem interacao em >14 dias = risco de esfriar
+- Lead com emails abertos mas sem resposta = dor existe, mudar abordagem
+
+Responda APENAS em JSON valido:
 {
-  \"resumo\": \"resumo de 3-4 linhas do lead\",
-  \"principais_interacoes\": [\"interacao 1\", \"interacao 2\"],
-  \"dores_identificadas\": [\"dor 1\"],
-  \"objecoes\": [\"objecao se houver\"],
-  \"proxima_acao\": \"uma das opcoes acima\",
-  \"justificativa_acao\": \"porque essa acao\",
+  \"resumo\": \"resumo executivo de 3-4 linhas\",
+  \"principais_interacoes\": [\"interacao 1\", \"interacao 2\", \"interacao 3\"],
+  \"dores_identificadas\": [\"dor 1\", \"dor 2\"],
+  \"objecoes\": [\"objecao ou blocker\"],
+  \"proxima_acao\": \"acao concreta com canal e prazo\",
+  \"justificativa_acao\": \"racional estrategico\",
   \"probabilidade\": \"Alta|Media|Baixa\",
-  \"mensagem_sugerida\": \"mensagem de abordagem ou follow-up\"
+  \"mensagem_sugerida\": \"mensagem pronta para enviar (3-4 linhas)\"
 }";
 
         return $this->callGemini($prompt);
@@ -1266,7 +1316,7 @@ Responda APENAS em JSON:
 
     public function sendEmailToLead(int $leadId, string $subject, string $body): array
     {
-        $lead = $this->connection->fetchAssociative("SELECT id, email, firstname, lastname FROM leads WHERE id = :id", ['id' => $leadId]);
+        $lead = $this->connection->fetchAssociative("SELECT id, email, firstname, lastname, company FROM leads WHERE id = :id", ['id' => $leadId]);
         if (!$lead) return ['error' => 'Lead não encontrado'];
         if (empty($lead['email'])) return ['error' => 'Lead não possui e-mail cadastrado'];
 
@@ -1274,25 +1324,15 @@ Responda APENAS em JSON:
         $leadName = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
         $now = date('Y-m-d H:i:s');
 
-        // Send email via Mautic's configured SMTP
-        $fromEmail = getenv('MAUTIC_ADMIN_EMAIL') ?: ($_ENV['MAUTIC_ADMIN_EMAIL'] ?? ($_SERVER['MAUTIC_ADMIN_EMAIL'] ?? 'noreply@localhost'));
-        $htmlBody = nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8'));
+        $smtpConfig = $this->getMauticSmtpConfig();
+        if (isset($smtpConfig['error'])) return $smtpConfig;
 
-        // Try Mautic's mailer DSN from config
-        $sent = false;
-        try {
-            $mailerDsn = $this->connection->fetchOne("SELECT value FROM plugin_integration_settings WHERE name = 'mailer_dsn'") ?: '';
-            if (!$mailerDsn) {
-                // Fallback: read from local.php or use PHP mail
-                $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
-            } else {
-                $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
-            }
-        } catch (\Exception $e) {
-            $sent = mail($to, $subject, $htmlBody, "From: $fromEmail\r\nContent-Type: text/html; charset=UTF-8\r\n");
-        }
+        $fromEmail = $smtpConfig['from_email'];
+        $fromName = $smtpConfig['from_name'];
+        $htmlBody = $this->buildEmailHtml($body, $leadName, $fromName);
 
-        // Log in email_stats
+        $sent = $this->sendViaSmtp($smtpConfig, $fromEmail, $fromName, $to, $leadName, $subject, $htmlBody);
+
         $this->connection->insert('email_stats', [
             'lead_id' => $leadId,
             'email_address' => $to,
@@ -1303,19 +1343,17 @@ Responda APENAS em JSON:
             'source' => 'letswork_analytics',
         ]);
 
-        // Create note on lead
         $this->connection->insert('lead_notes', [
             'lead_id' => $leadId,
             'is_published' => 1,
             'date_added' => $now,
             'created_by' => 1,
             'created_by_user' => 'admin',
-            'text' => "📧 E-mail enviado: $subject",
+            'text' => "📧 E-mail enviado: $subject" . ($sent ? '' : ' [FALHA]'),
             'type' => 'general',
             'date_time' => $now,
         ]);
 
-        // Update last interaction
         if ($this->columnExists('leads', 'data_ultima_interacao')) {
             $this->connection->executeStatement(
                 "UPDATE leads SET data_ultima_interacao = :now, date_modified = :now WHERE id = :id",
@@ -1323,7 +1361,183 @@ Responda APENAS em JSON:
             );
         }
 
+        if (!$sent) return ['error' => 'Falha ao enviar email via SMTP. Verifique configuração do Mautic.'];
         return ['success' => true, 'message' => "E-mail enviado para $to"];
+    }
+
+    private function getMauticSmtpConfig(): array
+    {
+        $configPaths = [
+            '/var/www/html/config/local.php',
+            '/var/www/html/app/config/local.php',
+        ];
+
+        $config = [];
+        foreach ($configPaths as $path) {
+            if (file_exists($path)) {
+                $config = include $path;
+                break;
+            }
+        }
+
+        $host = $config['mailer_host'] ?? ($config['parameters']['mailer_host'] ?? '');
+        $port = (int)($config['mailer_port'] ?? ($config['parameters']['mailer_port'] ?? 587));
+        $user = $config['mailer_user'] ?? ($config['parameters']['mailer_user'] ?? '');
+        $password = $config['mailer_password'] ?? ($config['parameters']['mailer_password'] ?? '');
+        $encryption = $config['mailer_encryption'] ?? ($config['parameters']['mailer_encryption'] ?? 'tls');
+        $fromEmail = $config['mailer_from_email'] ?? ($config['parameters']['mailer_from_email'] ?? '');
+        $fromName = $config['mailer_from_name'] ?? ($config['parameters']['mailer_from_name'] ?? 'LetsWork');
+
+        if (!$host && isset($config['mailer_dsn'])) {
+            $dsn = $config['mailer_dsn'];
+            if (preg_match('#smtp://([^:]*):([^@]*)@([^:]+):?(\d+)?#', $dsn, $m)) {
+                $user = urldecode($m[1]);
+                $password = urldecode($m[2]);
+                $host = $m[3];
+                $port = isset($m[4]) ? (int)$m[4] : 587;
+            }
+        }
+        if (!$host && isset($config['parameters']['mailer_dsn'])) {
+            $dsn = $config['parameters']['mailer_dsn'];
+            if (preg_match('#smtp://([^:]*):([^@]*)@([^:]+):?(\d+)?#', $dsn, $m)) {
+                $user = urldecode($m[1]);
+                $password = urldecode($m[2]);
+                $host = $m[3];
+                $port = isset($m[4]) ? (int)$m[4] : 587;
+            }
+        }
+
+        if (!$host) {
+            $host = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? '');
+            $port = (int)(getenv('SMTP_PORT') ?: ($_ENV['SMTP_PORT'] ?? 587));
+            $user = getenv('SMTP_USER') ?: ($_ENV['SMTP_USER'] ?? '');
+            $password = getenv('SMTP_PASSWORD') ?: ($_ENV['SMTP_PASSWORD'] ?? '');
+        }
+
+        if (!$fromEmail) {
+            $fromEmail = getenv('MAUTIC_ADMIN_EMAIL') ?: ($_ENV['MAUTIC_ADMIN_EMAIL'] ?? $user);
+        }
+
+        if (!$host) return ['error' => 'SMTP não configurado. Configure email nas Configurações do Mautic.'];
+
+        return [
+            'host' => $host,
+            'port' => $port,
+            'user' => $user,
+            'password' => $password,
+            'encryption' => $encryption,
+            'from_email' => $fromEmail,
+            'from_name' => $fromName,
+        ];
+    }
+
+    private function sendViaSmtp(array $config, string $fromEmail, string $fromName, string $toEmail, string $toName, string $subject, string $htmlBody): bool
+    {
+        $host = $config['host'];
+        $port = $config['port'];
+        $user = $config['user'];
+        $password = $config['password'];
+        $encryption = $config['encryption'];
+
+        $contextOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
+        $context = stream_context_create($contextOptions);
+
+        $prefix = ($encryption === 'ssl' || $port === 465) ? 'ssl://' : 'tcp://';
+        $socket = @stream_socket_client($prefix . $host . ':' . $port, $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $context);
+        if (!$socket) return false;
+
+        $response = fgets($socket, 512);
+        if (strpos($response, '220') !== 0) { fclose($socket); return false; }
+
+        fwrite($socket, "EHLO localhost\r\n");
+        $this->smtpReadAll($socket);
+
+        if ($encryption === 'tls' && $port !== 465) {
+            fwrite($socket, "STARTTLS\r\n");
+            $response = fgets($socket, 512);
+            if (strpos($response, '220') !== 0) { fclose($socket); return false; }
+            $crypto = @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT);
+            if (!$crypto) { fclose($socket); return false; }
+            fwrite($socket, "EHLO localhost\r\n");
+            $this->smtpReadAll($socket);
+        }
+
+        if ($user && $password) {
+            fwrite($socket, "AUTH LOGIN\r\n");
+            $this->smtpReadAll($socket);
+            fwrite($socket, base64_encode($user) . "\r\n");
+            $this->smtpReadAll($socket);
+            fwrite($socket, base64_encode($password) . "\r\n");
+            $response = $this->smtpReadAll($socket);
+            if (strpos($response, '235') === false) { fclose($socket); return false; }
+        }
+
+        fwrite($socket, "MAIL FROM:<$fromEmail>\r\n");
+        $this->smtpReadAll($socket);
+        fwrite($socket, "RCPT TO:<$toEmail>\r\n");
+        $response = $this->smtpReadAll($socket);
+        if (strpos($response, '250') === false) { fclose($socket); return false; }
+
+        fwrite($socket, "DATA\r\n");
+        $this->smtpReadAll($socket);
+
+        $boundary = md5(uniqid());
+        $headers = "From: $fromName <$fromEmail>\r\n";
+        $headers .= "To: $toName <$toEmail>\r\n";
+        $headers .= "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "Content-Transfer-Encoding: base64\r\n";
+        $headers .= "Date: " . date('r') . "\r\n";
+        $headers .= "Message-ID: <" . uniqid('lwa_') . "@letswork>\r\n";
+        $headers .= "\r\n";
+        $headers .= chunk_split(base64_encode($htmlBody));
+        $headers .= "\r\n.\r\n";
+
+        fwrite($socket, $headers);
+        $response = $this->smtpReadAll($socket);
+        fwrite($socket, "QUIT\r\n");
+        fclose($socket);
+
+        return strpos($response, '250') !== false;
+    }
+
+    private function smtpReadAll($socket): string
+    {
+        $response = '';
+        stream_set_timeout($socket, 5);
+        while ($line = fgets($socket, 512)) {
+            $response .= $line;
+            $meta = stream_get_meta_data($socket);
+            if ($meta['timed_out']) break;
+            if (isset($line[3]) && $line[3] === ' ') break;
+        }
+        return $response;
+    }
+
+    private function buildEmailHtml(string $body, string $leadName, string $senderName): string
+    {
+        $bodyHtml = nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8'));
+        return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:32px 16px">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+<tr><td style="padding:32px 40px 24px;border-bottom:1px solid #e4e4e7">
+<div style="font-size:20px;font-weight:700;color:#18181b">LetsWork</div>
+</td></tr>
+<tr><td style="padding:32px 40px">
+<div style="font-size:15px;line-height:1.7;color:#3f3f46">' . $bodyHtml . '</div>
+</td></tr>
+<tr><td style="padding:24px 40px 32px;border-top:1px solid #e4e4e7">
+<div style="font-size:13px;color:#71717a;line-height:1.5">
+<strong style="color:#3f3f46">' . htmlspecialchars($senderName) . '</strong><br>
+LetsWork — Gestão de Pessoas
+</div>
+</td></tr>
+</table>
+</td></tr></table>
+</body></html>';
     }
 
     // --- AI Tab Analysis ---
@@ -1443,52 +1657,102 @@ DADOS:
 Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insight 2\", \"insight 3\"], \"acao_principal\": \"o que fazer com leads que viram precos\", \"campanha_sugerida\": \"campanha para quem visitou o site\"}";
     }
 
-    private function callGemini(string $prompt): array
+    private function getGeminiApiKey(): string
     {
+        static $cached = null;
+        if ($cached !== null) return $cached;
+
+        // 1. Environment variables (Docker container, Apache SetEnv, .htaccess)
         $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
+
+        // 2. Plugin .env files (relative to Model/ dir — works both local and Docker mount)
         if (!$apiKey) {
-            $envFile = __DIR__ . '/../.env.example';
-            if (file_exists($envFile)) {
-                $lines = file($envFile);
+            $envFiles = [
+                __DIR__ . '/../.env',
+                __DIR__ . '/../.env.example',
+                '/var/www/html/plugins/LetsworkAnalyticsBundle/.env',
+                '/var/www/html/plugins/LetsworkAnalyticsBundle/.env.example',
+                '/var/www/html/.env',
+                '/var/www/html/.env.local',
+            ];
+            foreach ($envFiles as $envFile) {
+                if (!file_exists($envFile)) continue;
+                $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
                 foreach ($lines as $line) {
+                    if (strpos($line, '#') === 0) continue;
                     if (strpos($line, 'GEMINI_API_KEY=') === 0) {
                         $apiKey = trim(substr($line, 15));
-                        break;
+                        if ($apiKey) break 2;
                     }
                 }
             }
         }
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
+
+        // 3. Mautic local.php config (custom parameter)
+        if (!$apiKey) {
+            $configPaths = ['/var/www/html/config/local.php', '/var/www/html/app/config/local.php'];
+            foreach ($configPaths as $path) {
+                if (!file_exists($path)) continue;
+                $config = include $path;
+                $params = $config['parameters'] ?? $config;
+                if (!empty($params['gemini_api_key'])) { $apiKey = $params['gemini_api_key']; break; }
+            }
+        }
+
+        $cached = $apiKey ?: '';
+        return $cached;
+    }
+
+    private function callGemini(string $prompt): array
+    {
+        $apiKey = $this->getGeminiApiKey();
+        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Adicione no .env do Mautic ou nas variáveis de ambiente do container.'];
+
         $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
         $payload = json_encode([
             'contents' => [['parts' => [['text' => $prompt]]]],
-            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 800],
+            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 1000],
         ]);
 
         $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => ['Content-Type: application/json'], CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20]);
+        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => ['Content-Type: application/json'], CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 25]);
         $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
+        if ($curlError) return ['error' => 'Erro de conexão com Gemini: ' . $curlError];
+        if ($httpCode === 429) return ['error' => 'Limite de requisições Gemini atingido. Aguarde 1 minuto.'];
+        if ($httpCode === 403) return ['error' => 'API key Gemini inválida ou sem permissão.'];
+        if ($httpCode !== 200) return ['error' => 'Gemini retornou HTTP ' . $httpCode];
+
         $data = json_decode($response, true);
+        if (!is_array($data)) return ['error' => 'Resposta inválida da IA (não é JSON).'];
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-        // Strip markdown code blocks
+        if (!$text) {
+            $blockReason = $data['promptFeedback']['blockReason'] ?? '';
+            if ($blockReason) return ['error' => 'Prompt bloqueado pela IA: ' . $blockReason];
+            return ['error' => 'IA retornou resposta vazia.'];
+        }
+
         $text = preg_replace('/```json\s*/i', '', $text);
         $text = preg_replace('/```\s*/', '', $text);
         $text = trim($text);
 
-        if (preg_match('/\{[\s\S]*\}/s', $text, $matches)) {
-            $parsed = json_decode($matches[0], true);
-            if ($parsed) return $parsed;
-        }
+        // Try array first (most prompts expect array response)
         if (preg_match('/\[[\s\S]*\]/s', $text, $matches)) {
             $parsed = json_decode($matches[0], true);
-            if ($parsed) return $parsed;
+            if ($parsed && is_array($parsed)) return $parsed;
+        }
+        // Then try object
+        if (preg_match('/\{[\s\S]*\}/s', $text, $matches)) {
+            $parsed = json_decode($matches[0], true);
+            if ($parsed && is_array($parsed)) return $parsed;
         }
 
-        return ['titulo' => 'Análise', 'insights' => [$text ?: 'Sem resposta da IA.']];
+        return ['titulo' => 'Análise', 'insights' => [$text]];
     }
 
     // --- AI Insights (Dashboard) ---
@@ -1507,23 +1771,7 @@ Responda em JSON: {\"titulo\": \"titulo\", \"insights\": [\"insight 1\", \"insig
             'taxa_email' => $this->getEmailOpenRate($dateRange),
         ];
 
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
-        if (!$apiKey) {
-            $envFile = __DIR__ . '/../.env.example';
-            if (file_exists($envFile)) {
-                $lines = file($envFile);
-                foreach ($lines as $line) {
-                    if (strpos($line, 'GEMINI_API_KEY=') === 0) {
-                        $apiKey = trim(substr($line, 15));
-                        break;
-                    }
-                }
-            }
-        }
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
-
-        $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
+        $prompt = "Voce e o analista de dados comercial da LetsWork (software de RH/DP). Analise estas metricas do CRM e gere 4 insights estrategicos curtos e acionaveis para o time comercial.
 
 METRICAS:
 - Leads em prospeccao (sem contato): {$data['prospeccao']}
@@ -1538,141 +1786,693 @@ METRICAS:
 
 REGRAS:
 - Cada insight deve ter no maximo 2 linhas
-- Foque em: onde estamos perdendo, onde estamos ganhando, o que pode melhorar
-- Sugira acoes concretas
-- Tom direto e objetivo
+- Foque em: onde estamos perdendo, onde estamos ganhando, o que pode melhorar AGORA
+- Sugira acoes concretas com responsavel e prazo
+- Tom direto e objetivo, como um VP de vendas falaria no standup
+- Se leads quentes sem follow-up > 0: SEMPRE alertar (dinheiro na mesa)
+- Se taxa email < 20%: alertar sobre qualidade do assunto/segmentacao
 
 Responda APENAS em JSON:
 [
-  {\"tipo\": \"alerta|oportunidade|melhoria|sucesso\", \"titulo\": \"titulo curto\", \"descricao\": \"descricao de 1-2 linhas com acao\"},
-  ...
+  {\"tipo\": \"alerta|oportunidade|melhoria|sucesso\", \"titulo\": \"titulo curto (max 6 palavras)\", \"descricao\": \"descricao de 1-2 linhas com acao concreta\"},
+  {\"tipo\": \"...\", \"titulo\": \"...\", \"descricao\": \"...\"},
+  {\"tipo\": \"...\", \"titulo\": \"...\", \"descricao\": \"...\"},
+  {\"tipo\": \"...\", \"titulo\": \"...\", \"descricao\": \"...\"}
 ]";
 
-        $payload = json_encode([
-            'contents' => [['parts' => [['text' => $prompt]]]],
-            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 600],
-        ]);
+        $result = $this->callGemini($prompt);
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => ['Content-Type: application/json'], CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15]);
-        $response = curl_exec($ch);
-        curl_close($ch);
+        if (isset($result['error'])) return [['tipo' => 'alerta', 'titulo' => 'Erro IA', 'descricao' => $result['error']]];
 
-        $responseData = json_decode($response, true);
-        $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
-        $text = preg_replace('/```json\s*/i', '', $text);
-        $text = preg_replace('/```\s*/', '', $text);
-        $text = trim($text);
+        // Gemini returned array of insights directly
+        if (isset($result[0]) && is_array($result[0]) && isset($result[0]['tipo'])) return $result;
 
-        if (preg_match('/\[[\s\S]*\]/s', $text, $matches)) {
-            $parsed = json_decode($matches[0], true);
-            if ($parsed) return $parsed;
+        // Gemini returned single object with array inside
+        if (isset($result['insights']) && is_array($result['insights'])) {
+            $formatted = [];
+            foreach ($result['insights'] as $i) {
+                if (is_array($i) && isset($i['tipo'])) {
+                    $formatted[] = $i;
+                } elseif (is_string($i)) {
+                    $formatted[] = ['tipo' => 'melhoria', 'titulo' => 'Insight', 'descricao' => $i];
+                }
+            }
+            return $formatted ?: [['tipo' => 'melhoria', 'titulo' => $result['titulo'] ?? 'Análise', 'descricao' => $result['insights'][0] ?? 'Sem dados']];
         }
 
-        return [['tipo' => 'melhoria', 'titulo' => 'Dados insuficientes', 'descricao' => 'Adicione mais leads para gerar insights automaticos.']];
+        // Gemini returned single insight object
+        if (isset($result['tipo']) && isset($result['descricao'])) return [$result];
+
+        // Fallback: raw text came back
+        if (isset($result['titulo'])) {
+            return [['tipo' => 'melhoria', 'titulo' => $result['titulo'], 'descricao' => is_array($result['insights'] ?? null) ? implode(' ', $result['insights']) : ($result['descricao'] ?? 'Sem dados')]];
+        }
+
+        return [['tipo' => 'melhoria', 'titulo' => 'Dados insuficientes', 'descricao' => 'Adicione mais leads para gerar insights automáticos.']];
     }
 
     // --- AI (Gemini) ---
 
     public function getAiSuggestion(array $lead): array
     {
-        $apiKey = getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? ($_SERVER['GEMINI_API_KEY'] ?? ($_SERVER['REDIRECT_GEMINI_API_KEY'] ?? '')));
-        if (!$apiKey) {
-            $envFile = __DIR__ . '/../.env.example';
-            if (file_exists($envFile)) {
-                $lines = file($envFile);
-                foreach ($lines as $line) {
-                    if (strpos($line, 'GEMINI_API_KEY=') === 0) {
-                        $apiKey = trim(substr($line, 15));
-                        break;
-                    }
-                }
-            }
-        }
-        if (!$apiKey) return ['error' => 'GEMINI_API_KEY não configurada. Configure a variável de ambiente ou o arquivo .env.example do plugin.'];
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey";
-
+        $leadId = (int)($lead['id'] ?? 0);
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
         $status = str_replace('_', ' ', $lead['status_comercial'] ?? '');
 
-        $segmentos = $this->connection->fetchAllAssociative("SELECT DISTINCT segmento FROM leads WHERE segmento IS NOT NULL AND segmento != '' LIMIT 10");
-        $segList = implode(', ', array_column($segmentos, 'segmento')) ?: 'diversos';
+        $timeline = $leadId ? $this->getLeadTimeline($leadId) : [];
+        $timelineText = implode("\n", array_map(function($t) {
+            return date('d/m', strtotime($t['date'])) . " [{$t['type']}] {$t['text']}";
+        }, array_slice($timeline, 0, 10)));
+
+        $daysSinceLastInteraction = 'desconhecido';
+        if (!empty($lead['data_ultima_interacao'])) {
+            $days = (int)((time() - strtotime($lead['data_ultima_interacao'])) / 86400);
+            $daysSinceLastInteraction = $days . ' dias';
+        }
+
+        $emailsOpened = 0;
+        if ($leadId) {
+            $emailsOpened = (int)$this->connection->fetchOne(
+                "SELECT COUNT(*) FROM email_stats WHERE lead_id = :id AND is_read = 1",
+                ['id' => $leadId]
+            );
+        }
+
         $modulos = $this->getTopModulos();
         $modList = implode(', ', array_column($modulos, 'modulo_interesse')) ?: 'gestao de RH';
 
-        $prompt = "Voce e o assistente comercial da LetsWork, plataforma de gestao de pessoas para RH e DP. Nossos modulos: $modList.
+        $prompt = "Voce e o estrategista comercial senior da LetsWork (plataforma de gestao de pessoas para RH/DP).
+Modulos: $modList.
 
-Nosso ICP sao empresas dos segmentos $segList, com cargos de RH, DP, Inovacao.
-
-Analise este lead e gere uma recomendacao comercial estrategica:
+Analise este lead em PROFUNDIDADE e recomende a proxima acao mais efetiva:
 
 LEAD:
-- Nome: $name
-- Empresa: {$lead['company']}
-- Cargo: {$lead['cargo']}
-- Segmento: {$lead['segmento']}
-- Modulo de interesse: {$lead['modulo_interesse']}
-- Dor principal: {$lead['dor_principal']}
-- Temperatura: {$lead['temperatura']}
-- Score de interesse: {$lead['interesse_score']}
-- Status comercial: $status
+- Nome: $name | Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
+- Segmento: {$lead['segmento']} | Modulo: {$lead['modulo_interesse']}
+- Dor: {$lead['dor_principal']}
+- Temperatura: {$lead['temperatura']} | Score: {$lead['interesse_score']} | Status: $status
 - Origem: {$lead['origem_principal']}
+- Dias desde ultima interacao: $daysSinceLastInteraction
+- Emails abertos: $emailsOpened
+
+TIMELINE RECENTE:
+$timelineText
+
+CONTEXTO ESTRATEGICO:
+- Se lead NAO interagiu em >7 dias → precisa de nova abordagem/canal
+- Se lead abriu emails mas nao respondeu → dor existe, abordagem errada
+- Se score alto + sem reuniao → bloqueio no decisor, escalar
+- Se temperatura fria + score baixo → desqualificar ou nutrir com conteudo
+- Se lead perdido → analisar motivo_perda e reativar se fizer sentido
 
 REGRAS:
-- Mensagem deve ser consultiva e profissional, nunca generica
-- Citar a dor especifica do lead na abordagem
-- Sugerir proximo passo concreto com prazo
-- Tom corporativo mas humano, primeira pessoa do singular
-- Maximo 3 linhas na mensagem
+- Proxima acao DEVE ser especifica (canal + acao + prazo)
+- Mensagem de follow-up: 2-3 linhas, consultiva, citar dor especifica
+- Se nao ha dados suficientes, sugira qualificacao antes de acao comercial
+- Tom: direto, estrategico, sem enrolacao
 
 Responda APENAS em JSON valido:
 {
-  \"proxima_acao\": \"acao concreta com prazo (ex: Agendar diagnostico esta semana)\",
-  \"mensagem_followup\": \"mensagem de 2-3 linhas consultiva citando a dor do lead\",
+  \"proxima_acao\": \"acao especifica com canal e prazo\",
+  \"mensagem_followup\": \"mensagem pronta para enviar (2-3 linhas)\",
   \"intencao\": \"Sem interesse | Curioso | Dor identificada | Pronto para reuniao | Negociando\",
   \"probabilidade_conversao\": \"Alta | Media | Baixa\",
-  \"dica_comercial\": \"insight estrategico para o vendedor sobre como abordar\"
+  \"dica_comercial\": \"insight estrategico unico para esse lead\"
 }";
 
-        $payload = json_encode([
-            'contents' => [['parts' => [['text' => $prompt]]]],
-            'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 500],
+        $result = $this->callGemini($prompt);
+
+        if (isset($result['error'])) return $result;
+        if (isset($result['proxima_acao'])) return $result;
+
+        return ['proxima_acao' => 'Analisar manualmente', 'mensagem_followup' => $result['insights'][0] ?? '-', 'intencao' => '-', 'probabilidade_conversao' => '-', 'dica_comercial' => '-'];
+    }
+
+    public function generateEmailForLead(int $leadId): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $timeline = $this->getLeadTimeline($leadId);
+        $recentEvents = array_slice($timeline, 0, 10);
+        $timelineText = implode("\n", array_map(function($t) {
+            return date('d/m', strtotime($t['date'])) . " [{$t['type']}] {$t['text']}";
+        }, $recentEvents));
+
+        $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
+        $firstName = trim($lead['firstname'] ?? '') ?: $name;
+        $status = str_replace('_', ' ', $lead['status_comercial'] ?? 'prospeccao');
+        $temp = strtolower($lead['temperatura'] ?? 'frio');
+
+        $cenario = 'primeiro_contato';
+        if (in_array($status, ['perdido', 'Perdido'])) {
+            $cenario = 'reativacao';
+        } elseif (in_array($status, ['negociacao', 'proposta enviada', 'proposta_enviada'])) {
+            $cenario = 'negociacao';
+        } elseif (in_array($status, ['reuniao agendada', 'reuniao_agendada'])) {
+            $cenario = 'pos_reuniao';
+        } elseif (in_array($status, ['engajado', 'Engajado']) || $temp === 'quente') {
+            $cenario = 'followup_quente';
+        } elseif ($temp === 'morno') {
+            $cenario = 'nutricao';
+        }
+
+        $cenarioInstructions = [
+            'primeiro_contato' => 'Email de primeiro contato. Deve ser curto (3-4 paragrafos), gerar curiosidade sobre como a LetsWork resolve a dor do lead, e terminar com CTA para agendar conversa de 15 min. Tom: consultivo, leve, sem pressao.',
+            'followup_quente' => 'Follow-up para lead quente que ja demonstrou interesse. Referenciar interacoes anteriores, reforcar valor especifico para a empresa, e propor proximo passo concreto (demo, reuniao, proposta). Tom: direto e confiante.',
+            'nutricao' => 'Email de nutricao para lead morno. Compartilhar insight relevante para o segmento/cargo do lead, posicionar LetsWork como especialista, sem vender diretamente. Terminar com pergunta aberta. Tom: educativo e generoso.',
+            'negociacao' => 'Email para lead em negociacao. Reforcar diferenciais vs concorrencia, tratar possiveis objecoes do segmento, criar senso de urgencia sutil (ex: vagas no onboarding). Tom: profissional e assertivo.',
+            'pos_reuniao' => 'Follow-up pos-reuniao. Recapitular pontos discutidos (inferir da timeline), confirmar proximos passos, e enviar material relevante. Tom: organizado e proativo.',
+            'reativacao' => 'Reativacao de lead perdido. Reconhecer que nao deu certo antes, apresentar novidade ou melhoria relevante, oferecer valor sem compromisso (ex: diagnostico gratuito). Tom: humilde e renovado.',
+        ];
+
+        $instrucao = $cenarioInstructions[$cenario];
+
+        $prompt = "Voce e o copywriter comercial da LetsWork, plataforma de gestao de pessoas (RH/DP).
+Gere um email comercial COMPLETO para este lead.
+
+CONTEXTO DO LEAD:
+- Nome: $name (primeiro nome: $firstName)
+- Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
+- Segmento: {$lead['segmento']} | Modulo de interesse: {$lead['modulo_interesse']}
+- Dor principal: {$lead['dor_principal']}
+- Temperatura: {$lead['temperatura']} | Score: {$lead['interesse_score']}
+- Status comercial: $status
+- Origem: {$lead['origem_principal']}
+
+TIMELINE RECENTE:
+$timelineText
+
+CENARIO: $cenario
+INSTRUCAO: $instrucao
+
+REGRAS DE COPYWRITING:
+- Assunto: maximo 50 caracteres, gerar curiosidade, sem ALL CAPS ou pontuacao excessiva
+- Corpo: usar primeiro nome do lead, ser especifico sobre a empresa/cargo/dor
+- Paragrafos curtos (2-3 linhas max cada)
+- CTA claro no final (1 so, nao multiplos)
+- Assinatura: nao incluir (sera adicionada automaticamente)
+- Tom: humano, consultivo, como se fosse de um especialista que realmente entende o problema
+- NAO usar: 'Prezado', 'Venho por meio desta', jargoes corporativos genericos
+- PODE usar: nome da empresa do lead, dados especificos do segmento, tendencias do mercado
+- Escrever em portugues brasileiro natural
+
+Responda APENAS em JSON valido:
+{
+  \"assunto\": \"assunto do email (max 50 chars)\",
+  \"corpo\": \"corpo completo do email com quebras de linha usando \\n\",
+  \"cenario_detectado\": \"$cenario\"
+}";
+
+        $result = $this->callGemini($prompt);
+
+        if (isset($result['error'])) return $result;
+        if (isset($result['assunto']) && isset($result['corpo'])) return $result;
+
+        return ['assunto' => 'Follow-up LetsWork', 'corpo' => $result['mensagem_followup'] ?? $result['insights'][0] ?? 'Erro ao gerar email', 'cenario_detectado' => $cenario];
+    }
+
+    // =============================================
+    // CADÊNCIA AUTOMATIZADA (Sequences)
+    // =============================================
+
+    public function getCadencias(): array
+    {
+        if (!$this->tableExists('letswork_cadencias')) return [];
+        return $this->connection->fetchAllAssociative(
+            "SELECT c.*, (SELECT COUNT(*) FROM letswork_cadencia_leads cl WHERE cl.cadencia_id = c.id AND cl.status = 'ativa') as leads_ativos
+             FROM letswork_cadencias c WHERE c.is_active = 1 ORDER BY c.created_at DESC"
+        );
+    }
+
+    public function createCadencia(string $nome, array $steps, string $descricao = ''): array
+    {
+        if (!$this->tableExists('letswork_cadencias')) return ['error' => 'Tabela letswork_cadencias não existe. Execute install.sql.'];
+        $this->connection->insert('letswork_cadencias', [
+            'nome' => $nome,
+            'descricao' => $descricao,
+            'steps' => json_encode($steps),
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        return ['success' => true, 'id' => (int)$this->connection->lastInsertId(), 'message' => "Cadência '$nome' criada"];
+    }
+
+    public function addLeadToCadencia(int $leadId, int $cadenciaId): array
+    {
+        if (!$this->tableExists('letswork_cadencia_leads')) return ['error' => 'Tabela não existe'];
+        $lead = $this->connection->fetchAssociative("SELECT id FROM leads WHERE id = :id", ['id' => $leadId]);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $exists = $this->connection->fetchOne("SELECT COUNT(*) FROM letswork_cadencia_leads WHERE lead_id = :lead AND cadencia_id = :cad AND status = 'ativa'", ['lead' => $leadId, 'cad' => $cadenciaId]);
+        if ($exists) return ['error' => 'Lead já está nesta cadência'];
+
+        $cadencia = $this->connection->fetchAssociative("SELECT steps FROM letswork_cadencias WHERE id = :id", ['id' => $cadenciaId]);
+        if (!$cadencia) return ['error' => 'Cadência não encontrada'];
+
+        $steps = json_decode($cadencia['steps'], true);
+        $firstStepDay = $steps[0]['day'] ?? 0;
+        $nextAction = date('Y-m-d H:i:s', strtotime("+{$firstStepDay} days"));
+
+        $this->connection->insert('letswork_cadencia_leads', [
+            'cadencia_id' => $cadenciaId,
+            'lead_id' => $leadId,
+            'current_step' => 0,
+            'status' => 'ativa',
+            'started_at' => date('Y-m-d H:i:s'),
+            'next_action_at' => $nextAction,
         ]);
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 15,
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => date('Y-m-d H:i:s'),
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => "🔄 Adicionado à cadência (step 1/" . count($steps) . ")",
+            'type' => 'general', 'date_time' => date('Y-m-d H:i:s'),
         ]);
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
-        if ($httpCode !== 200 || !$response) {
-            return ['error' => 'Falha ao consultar IA', 'raw' => $response];
+        return ['success' => true, 'message' => 'Lead adicionado à cadência', 'next_action' => $nextAction];
+    }
+
+    public function getLeadCadenciaStatus(int $leadId): ?array
+    {
+        if (!$this->tableExists('letswork_cadencia_leads')) return null;
+        $active = $this->connection->fetchAssociative(
+            "SELECT cl.*, c.nome, c.steps FROM letswork_cadencia_leads cl
+             JOIN letswork_cadencias c ON c.id = cl.cadencia_id
+             WHERE cl.lead_id = :id AND cl.status = 'ativa' ORDER BY cl.started_at DESC LIMIT 1",
+            ['id' => $leadId]
+        );
+        if (!$active) return null;
+        $active['steps_parsed'] = json_decode($active['steps'], true);
+        $active['total_steps'] = count($active['steps_parsed']);
+        return $active;
+    }
+
+    // =============================================
+    // COMPARATIVO PERÍODO
+    // =============================================
+
+    public function getComparativo(array $dateRange): array
+    {
+        $from = $dateRange['from'];
+        $to = $dateRange['to'];
+        $days = max(1, (strtotime($to) - strtotime($from)) / 86400);
+        $prevFrom = date('Y-m-d', strtotime($from . " -{$days} days"));
+        $prevTo = date('Y-m-d', strtotime($from . ' -1 day'));
+        $prevRange = ['from' => $prevFrom, 'to' => $prevTo];
+
+        $current = [
+            'ganhos' => $this->getCountByStatus($dateRange, 'ganho'),
+            'perdidos' => $this->getCountByStatus($dateRange, 'perdido'),
+            'reunioes' => $this->getReunioesCount($dateRange),
+            'frio_to_morno' => $this->getFrioToMorno($dateRange),
+        ];
+        $previous = [
+            'ganhos' => $this->getCountByStatus($prevRange, 'ganho'),
+            'perdidos' => $this->getCountByStatus($prevRange, 'perdido'),
+            'reunioes' => $this->getReunioesCount($prevRange),
+            'frio_to_morno' => $this->getFrioToMorno($prevRange),
+        ];
+
+        $comparativo = [];
+        foreach ($current as $key => $val) {
+            $prev = $previous[$key] ?? 0;
+            $diff = $prev > 0 ? round((($val - $prev) / $prev) * 100) : ($val > 0 ? 100 : 0);
+            $comparativo[$key] = ['current' => $val, 'previous' => $prev, 'diff' => $diff];
         }
 
-        $data = json_decode($response, true);
-        $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        return $comparativo;
+    }
 
-        // Strip markdown code blocks
-        $text = preg_replace('/```json\s*/i', '', $text);
-        $text = preg_replace('/```\s*/', '', $text);
-        $text = trim($text);
+    // =============================================
+    // RELATÓRIO SEMANAL IA
+    // =============================================
 
-        $parsed = null;
-        if (preg_match('/\{[\s\S]*\}/s', $text, $matches)) {
-            $parsed = json_decode($matches[0], true);
+    public function generateWeeklyReport(): array
+    {
+        $dateRange = ['from' => date('Y-m-d', strtotime('-7 days')), 'to' => date('Y-m-d')];
+
+        $data = [
+            'novos_leads' => (int)$this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE date_added >= :from AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))", ['from' => $dateRange['from']]),
+            'ganhos' => $this->getCountByStatus($dateRange, 'ganho'),
+            'perdidos' => $this->getCountByStatus($dateRange, 'perdido'),
+            'reunioes' => $this->getReunioesCount($dateRange),
+            'hot_no_followup' => $this->getHotWithoutFollowup(),
+            'valor_pipeline' => $this->getValorPipeline(),
+            'taxa_conversao' => 0,
+        ];
+
+        $totalActive = (int)$this->connection->fetchOne("SELECT COUNT(*) FROM leads WHERE status_comercial IS NOT NULL AND LOWER(status_comercial) NOT IN ('','ganho','perdido')");
+        if ($totalActive > 0) $data['taxa_conversao'] = round(($data['ganhos'] / max(1, $totalActive)) * 100, 1);
+
+        $topOportunidades = $this->connection->fetchAllAssociative(
+            "SELECT firstname, lastname, company, valor_potencial, temperatura, interesse_score
+             FROM leads WHERE LOWER(status_comercial) IN ('proposta_enviada','negociacao','reuniao_agendada')
+             AND valor_potencial > 0 ORDER BY valor_potencial DESC LIMIT 5"
+        );
+
+        $prompt = "Gere um resumo executivo semanal para o gestor comercial da LetsWork (software RH/DP).
+
+MÉTRICAS DA SEMANA:
+- Novos leads: {$data['novos_leads']}
+- Reuniões: {$data['reunioes']}
+- Ganhos: {$data['ganhos']} | Perdidos: {$data['perdidos']}
+- Pipeline ativo: R$ " . number_format($data['valor_pipeline'], 0, ',', '.') . "
+- Leads quentes sem ação: {$data['hot_no_followup']}
+- Taxa de conversão: {$data['taxa_conversao']}%
+
+TOP OPORTUNIDADES:
+" . implode("\n", array_map(function($l) {
+            return "- " . trim(($l['firstname']??'').' '.($l['lastname']??'')) . " ({$l['company']}) — R$ " . number_format((float)$l['valor_potencial'],0,',','.') . " [{$l['temperatura']}]";
+        }, $topOportunidades)) . "
+
+Gere em JSON:
+{
+  \"titulo\": \"Resumo Semanal (data)\",
+  \"destaque\": \"frase principal da semana (1 linha)\",
+  \"pontos_positivos\": [\"ponto 1\", \"ponto 2\"],
+  \"pontos_atencao\": [\"atenção 1\", \"atenção 2\"],
+  \"acoes_prioritarias\": [\"ação 1 com prazo\", \"ação 2\"],
+  \"previsao_proxima_semana\": \"previsão em 1 linha\"
+}";
+
+        $aiReport = $this->callGemini($prompt);
+
+        return ['data' => $data, 'top_oportunidades' => $topOportunidades, 'ai_report' => $aiReport];
+    }
+
+    // =============================================
+    // IA COACH — Feedback pós-interação
+    // =============================================
+
+    public function getIaCoachFeedback(int $leadId, string $action, string $content = ''): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
+        $timeline = $this->getLeadTimeline($leadId);
+        $recentText = implode("\n", array_map(function($t) {
+            return date('d/m', strtotime($t['date'])) . " [{$t['type']}] {$t['text']}";
+        }, array_slice($timeline, 0, 5)));
+
+        $prompt = "Voce e o coach de vendas da LetsWork. O vendedor acabou de executar uma acao com um lead.
+Dê feedback CONSTRUTIVO e ESPECIFICO (não genérico).
+
+AÇÃO EXECUTADA: $action
+CONTEÚDO: " . mb_substr($content, 0, 200) . "
+
+LEAD:
+- Nome: $name | Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
+- Segmento: {$lead['segmento']} | Temperatura: {$lead['temperatura']}
+- Status: {$lead['status_comercial']}
+
+HISTÓRICO RECENTE:
+$recentText
+
+REGRAS DO COACH:
+- Se email: avaliar comprimento, tom, CTA, personalização
+- Se WhatsApp: avaliar se é curto demais ou longo demais
+- Se follow-up: avaliar timing (muito cedo? muito tarde?)
+- Sempre sugerir o PRÓXIMO passo ideal com timing
+- Tom: direto, construtivo, como mentor experiente
+- Max 3 linhas de feedback + 1 sugestão concreta
+
+Responda em JSON:
+{
+  \"feedback\": \"feedback em 2-3 linhas\",
+  \"nota\": 1-10,
+  \"sugestao\": \"próximo passo sugerido\",
+  \"timing\": \"quando fazer (ex: amanhã 10h)\"
+}";
+
+        return $this->callGemini($prompt);
+    }
+
+    // =============================================
+    // KANBAN DATA
+    // =============================================
+
+    public function getKanbanData(array $dateRange): array
+    {
+        $columns = [
+            ['key' => 'prospeccao', 'label' => 'Prospecção', 'color' => '#94a3b8'],
+            ['key' => 'engajado', 'label' => 'Engajado', 'color' => '#3b82f6'],
+            ['key' => 'reuniao_agendada', 'label' => 'Reunião', 'color' => '#8b5cf6'],
+            ['key' => 'proposta_enviada', 'label' => 'Proposta', 'color' => '#f59e0b'],
+            ['key' => 'negociacao', 'label' => 'Negociação', 'color' => '#ec4899'],
+            ['key' => 'ganho', 'label' => 'Ganho', 'color' => '#10b981'],
+            ['key' => 'perdido', 'label' => 'Perdido', 'color' => '#dc2626'],
+        ];
+
+        $leads = $this->connection->fetchAllAssociative(
+            "SELECT id, firstname, lastname, company, temperatura, interesse_score, status_comercial, valor_potencial, data_ultima_interacao, responsavel_comercial, segmento
+             FROM leads
+             WHERE (status_comercial IS NULL OR LOWER(status_comercial) NOT IN (''))
+               AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))
+             ORDER BY interesse_score DESC
+             LIMIT 200"
+        );
+
+        $board = [];
+        foreach ($columns as $col) {
+            $board[$col['key']] = ['label' => $col['label'], 'color' => $col['color'], 'leads' => [], 'total_valor' => 0];
         }
 
-        if (!$parsed) {
-            return ['proxima_acao' => 'Analisar manualmente', 'mensagem_followup' => $text, 'intencao' => '-', 'probabilidade_conversao' => '-', 'dica_comercial' => '-'];
+        foreach ($leads as $l) {
+            $status = strtolower(trim($l['status_comercial'] ?? 'prospeccao')) ?: 'prospeccao';
+            $status = str_replace(['ã', 'ç'], ['a', 'c'], $status);
+            if (!isset($board[$status])) $status = 'prospeccao';
+            $board[$status]['leads'][] = $l;
+            $board[$status]['total_valor'] += (float)($l['valor_potencial'] ?? 0);
         }
 
-        return $parsed;
+        return ['columns' => $columns, 'board' => $board];
+    }
+
+    // =============================================
+    // INBOX DATA
+    // =============================================
+
+    public function getInboxData(array $dateRange): array
+    {
+        $items = [];
+
+        // Follow-ups vencidos
+        if ($this->columnExists('leads', 'data_proximo_followup')) {
+            $overdue = $this->connection->fetchAllAssociative(
+                "SELECT id, firstname, lastname, company, temperatura, data_proximo_followup, status_comercial, responsavel_comercial
+                 FROM leads WHERE data_proximo_followup < NOW() AND data_proximo_followup IS NOT NULL
+                 AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))
+                 ORDER BY data_proximo_followup ASC LIMIT 20"
+            );
+            foreach ($overdue as $l) {
+                $items[] = ['type' => 'overdue', 'lead' => $l, 'priority' => 'high',
+                    'title' => 'Follow-up vencido', 'date' => $l['data_proximo_followup']];
+            }
+        }
+
+        // Leads novos sem contato (últimos 7 dias)
+        $newLeads = $this->connection->fetchAllAssociative(
+            "SELECT id, firstname, lastname, company, temperatura, date_added, origem_principal
+             FROM leads WHERE date_added >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+             AND (data_ultima_interacao IS NULL OR data_ultima_interacao = date_added)
+             AND (status_comercial IS NULL OR LOWER(status_comercial) IN ('','prospeccao','novo'))
+             AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))
+             ORDER BY date_added DESC LIMIT 15"
+        );
+        foreach ($newLeads as $l) {
+            $items[] = ['type' => 'new_lead', 'lead' => $l, 'priority' => 'medium',
+                'title' => 'Novo lead sem contato', 'date' => $l['date_added']];
+        }
+
+        // Emails abertos sem follow-up
+        if ($this->tableExists('email_stats')) {
+            $opened = $this->connection->fetchAllAssociative(
+                "SELECT l.id, l.firstname, l.lastname, l.company, l.temperatura, MAX(es.date_sent) as last_email
+                 FROM email_stats es JOIN leads l ON l.id = es.lead_id
+                 WHERE es.is_read = 1 AND es.date_sent >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 AND (l.data_proximo_followup IS NULL OR l.data_proximo_followup < NOW())
+                 AND (l.status_comercial IS NULL OR LOWER(l.status_comercial) NOT IN ('ganho','perdido'))
+                 GROUP BY l.id, l.firstname, l.lastname, l.company, l.temperatura
+                 HAVING last_email >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 ORDER BY last_email DESC LIMIT 10"
+            );
+            foreach ($opened as $l) {
+                $items[] = ['type' => 'email_opened', 'lead' => $l, 'priority' => 'medium',
+                    'title' => 'Email aberto, sem follow-up', 'date' => $l['last_email']];
+            }
+        }
+
+        // Leads quentes sem ação
+        if ($this->columnExists('leads', 'temperatura')) {
+            $hot = $this->connection->fetchAllAssociative(
+                "SELECT id, firstname, lastname, company, temperatura, interesse_score, data_ultima_interacao
+                 FROM leads WHERE LOWER(temperatura) IN ('quente','prioritario','prioritário')
+                 AND (data_proximo_followup IS NULL OR data_proximo_followup < NOW())
+                 AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))
+                 ORDER BY interesse_score DESC LIMIT 10"
+            );
+            foreach ($hot as $l) {
+                $items[] = ['type' => 'hot_idle', 'lead' => $l, 'priority' => 'critical',
+                    'title' => 'Lead quente sem ação', 'date' => $l['data_ultima_interacao']];
+            }
+        }
+
+        usort($items, function($a, $b) {
+            $order = ['critical' => 0, 'high' => 1, 'medium' => 2, 'low' => 3];
+            return ($order[$a['priority']] ?? 9) - ($order[$b['priority']] ?? 9);
+        });
+
+        return ['items' => $items, 'count' => count($items)];
+    }
+
+    // =============================================
+    // SCORE PREDITIVO IA
+    // =============================================
+
+    public function getPredictiveScore(int $leadId): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $wonLeads = $this->connection->fetchAllAssociative(
+            "SELECT segmento, origem_principal, modulo_interesse, interesse_score, temperatura,
+                    DATEDIFF(date_modified, date_added) as days_in_funnel
+             FROM leads WHERE LOWER(status_comercial) = 'ganho' LIMIT 50"
+        );
+
+        $lostLeads = $this->connection->fetchAllAssociative(
+            "SELECT segmento, origem_principal, modulo_interesse, interesse_score,
+                    DATEDIFF(date_modified, date_added) as days_in_funnel
+             FROM leads WHERE LOWER(status_comercial) = 'perdido' LIMIT 50"
+        );
+
+        $wonCount = count($wonLeads);
+        $lostCount = count($lostLeads);
+        if ($wonCount + $lostCount < 5) {
+            return ['probability' => null, 'reason' => 'Dados insuficientes (mínimo 5 leads fechados)', 'factors' => []];
+        }
+
+        $factors = [];
+        $score = 50;
+
+        // Factor: Segmento match
+        $wonSegmentos = array_count_values(array_filter(array_column($wonLeads, 'segmento')));
+        if (!empty($lead['segmento']) && isset($wonSegmentos[$lead['segmento']])) {
+            $pct = ($wonSegmentos[$lead['segmento']] / $wonCount) * 100;
+            $boost = min(15, round($pct / 5));
+            $score += $boost;
+            $factors[] = ['label' => 'Segmento (' . $lead['segmento'] . ')', 'impact' => '+' . $boost, 'positive' => true];
+        }
+
+        // Factor: Origem match
+        $wonOrigens = array_count_values(array_filter(array_column($wonLeads, 'origem_principal')));
+        if (!empty($lead['origem_principal']) && isset($wonOrigens[$lead['origem_principal']])) {
+            $pct = ($wonOrigens[$lead['origem_principal']] / $wonCount) * 100;
+            $boost = min(10, round($pct / 6));
+            $score += $boost;
+            $factors[] = ['label' => 'Origem (' . $lead['origem_principal'] . ')', 'impact' => '+' . $boost, 'positive' => true];
+        }
+
+        // Factor: Score de interesse
+        $avgWonScore = $wonCount > 0 ? array_sum(array_column($wonLeads, 'interesse_score')) / $wonCount : 50;
+        $leadScore = (int)($lead['interesse_score'] ?? 0);
+        if ($leadScore >= $avgWonScore) {
+            $boost = min(15, round(($leadScore - $avgWonScore) / 5));
+            $score += $boost;
+            $factors[] = ['label' => 'Score acima da média dos ganhos', 'impact' => '+' . $boost, 'positive' => true];
+        } else {
+            $penalty = min(10, round(($avgWonScore - $leadScore) / 8));
+            $score -= $penalty;
+            $factors[] = ['label' => 'Score abaixo da média', 'impact' => '-' . $penalty, 'positive' => false];
+        }
+
+        // Factor: Temperatura
+        $temp = strtolower(str_replace(['á','ó'], ['a','o'], $lead['temperatura'] ?? ''));
+        $tempBoost = ['prioritario' => 12, 'quente' => 8, 'morno' => 0, 'frio' => -10];
+        $tb = $tempBoost[$temp] ?? -5;
+        $score += $tb;
+        $factors[] = ['label' => 'Temperatura: ' . ($lead['temperatura'] ?? '-'), 'impact' => ($tb >= 0 ? '+' : '') . $tb, 'positive' => $tb >= 0];
+
+        // Factor: Dias no funil
+        $avgDays = $wonCount > 0 ? array_sum(array_column($wonLeads, 'days_in_funnel')) / $wonCount : 30;
+        $leadDays = !empty($lead['date_added']) ? (int)((time() - strtotime($lead['date_added'])) / 86400) : 0;
+        if ($leadDays > $avgDays * 1.5) {
+            $penalty = min(10, round(($leadDays - $avgDays) / 10));
+            $score -= $penalty;
+            $factors[] = ['label' => 'No funil há ' . $leadDays . ' dias (média: ' . round($avgDays) . ')', 'impact' => '-' . $penalty, 'positive' => false];
+        }
+
+        // Factor: Valor potencial
+        if (!empty($lead['valor_potencial']) && (float)$lead['valor_potencial'] > 0) {
+            $score += 5;
+            $factors[] = ['label' => 'Valor definido: R$ ' . number_format((float)$lead['valor_potencial'], 0, ',', '.'), 'impact' => '+5', 'positive' => true];
+        }
+
+        $probability = max(5, min(95, $score));
+
+        return ['probability' => $probability, 'factors' => $factors, 'data_quality' => $wonCount + $lostCount . ' leads históricos'];
+    }
+
+    // =============================================
+    // AUTO-CLASSIFICATION IA
+    // =============================================
+
+    public function autoClassifyLead(int $leadId): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
+
+        $prompt = "Voce e o classificador automatico de leads da LetsWork (plataforma RH/DP).
+Classifique este lead com base nos dados disponiveis:
+
+LEAD:
+- Nome: $name | Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
+- Segmento atual: " . ($lead['segmento'] ?: 'NÃO DEFINIDO') . "
+- Módulo interesse: " . ($lead['modulo_interesse'] ?: 'NÃO DEFINIDO') . "
+- Origem: {$lead['origem_principal']} | Score: {$lead['interesse_score']}
+
+MÓDULOS LETSWORK: Ponto eletrônico, Gestão de férias, Gestão de escalas, Holerite digital, Admissão digital, Treinamentos, Avaliação de desempenho
+
+Responda APENAS em JSON:
+{
+  \"segmento\": \"segmento inferido (Tecnologia/Saúde/Educação/Indústria/Varejo/Serviços/Financeiro/Construção/Agro/Logística/Outros)\",
+  \"modulo_provavel\": \"módulo mais provável baseado no cargo/empresa\",
+  \"icp_score\": 0-100,
+  \"icp_justificativa\": \"por que esse ICP score\",
+  \"temperatura_sugerida\": \"Frio|Morno|Quente\",
+  \"perfil\": \"resumo de 1 linha do perfil do lead\"
+}";
+
+        $result = $this->callGemini($prompt);
+        if (isset($result['error'])) return $result;
+
+        $now = date('Y-m-d H:i:s');
+        $updates = ['date_modified' => $now];
+
+        if (!empty($result['segmento']) && $this->columnExists('leads', 'segmento') && empty($lead['segmento'])) {
+            $updates['segmento'] = $result['segmento'];
+        }
+        if (!empty($result['modulo_provavel']) && $this->columnExists('leads', 'modulo_interesse') && empty($lead['modulo_interesse'])) {
+            $updates['modulo_interesse'] = $result['modulo_provavel'];
+        }
+        if (!empty($result['icp_score']) && $this->columnExists('leads', 'icp_score')) {
+            $updates['icp_score'] = (int)$result['icp_score'];
+        }
+
+        $sets = [];
+        $params = ['id' => $leadId];
+        foreach ($updates as $col => $val) {
+            if ($this->columnExists('leads', $col)) { $sets[] = "$col = :$col"; $params[$col] = $val; }
+        }
+        if ($sets) {
+            $this->connection->executeStatement("UPDATE leads SET " . implode(', ', $sets) . " WHERE id = :id", $params);
+        }
+
+        return ['success' => true, 'classification' => $result, 'updated_fields' => array_keys($updates)];
     }
 
     // --- Mautic Native Tables ---
@@ -1820,29 +2620,88 @@ Responda APENAS em JSON valido:
         if (!$lead) return ['error' => 'Lead não encontrado'];
 
         $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
-        $vars = [
-            '{nome}' => $name ?: 'Prezado(a)',
-            '{empresa}' => $lead['company'] ?? 'sua empresa',
-            '{segmento}' => $lead['segmento'] ?? 'seu segmento',
-            '{dor_principal}' => $lead['dor_principal'] ?? 'gestão de pessoas',
-            '{modulo_interesse}' => $lead['modulo_interesse'] ?? 'gestão de RH',
-            '{cargo}' => $lead['cargo'] ?? 'RH',
+        $firstName = trim($lead['firstname'] ?? '') ?: $name;
+
+        $timeline = $this->getLeadTimeline($leadId);
+        $recentText = implode("\n", array_map(function($t) {
+            return date('d/m', strtotime($t['date'])) . " [{$t['type']}] {$t['text']}";
+        }, array_slice($timeline, 0, 8)));
+
+        $tipoInstructions = [
+            'inicial_linkedin' => "Gere uma mensagem de PRIMEIRO CONTATO para LinkedIn.
+REGRAS LINKEDIN:
+- MAXIMO 280 caracteres (limite do LinkedIn para InMail/conexao)
+- 1 paragrafo apenas, sem quebra de linha
+- Comece com o primeiro nome da pessoa
+- Cite algo especifico (cargo, empresa ou segmento) para mostrar que nao e generico
+- Termine com pergunta aberta curta que gere curiosidade
+- NAO use: 'Prezado', 'Espero que esteja bem', links, emojis excessivos
+- Tom: leve, coloquial, peer-to-peer (como se fosse de um colega de industria)
+- PODE usar 1 emoji maximo se fizer sentido",
+
+            'diagnostico' => "Gere uma mensagem de FOLLOW-UP oferecendo diagnostico gratuito.
+REGRAS:
+- 3-4 linhas no maximo
+- Referenciar a dor/modulo de interesse do lead
+- Oferecer diagnostico de 15 min sem compromisso
+- Posicionar como algo que ja fazemos com empresas do segmento
+- Terminar com CTA claro (dia/horario sugerido)
+- Tom: consultivo, expert, sem pressao",
+
+            'reativacao' => "Gere uma mensagem de REATIVACAO para lead perdido.
+REGRAS:
+- 3-4 linhas no maximo
+- Reconhecer que houve contato anterior (sem ser submisso)
+- Apresentar novidade ou melhoria relevante
+- Perguntar se a dor ainda existe ou se resolveram
+- Tom: curioso, renovado, sem desculpas
+- NAO mencionar que 'perdemos' o contato — apenas retomar naturalmente",
+
+            'checklist' => "Gere uma mensagem oferecendo CONTEUDO de valor (checklist/material).
+REGRAS:
+- 2-3 linhas no maximo
+- Oferecer material especifico para o segmento/cargo
+- Gerar curiosidade sobre o conteudo sem entregar tudo
+- Tom: generoso, educativo",
         ];
 
-        $templates = [
-            'inicial_linkedin' => "Oi, {nome}. Vi que você atua com {cargo} na {empresa}.\nTenho conversado com empresas de {segmento} que estão tentando reduzir retrabalho em {dor_principal}.\nIsso também é um desafio por aí?",
-            'checklist' => "Posso te mandar um checklist rápido para avaliar se o processo atual de {modulo_interesse} está gerando retrabalho, risco ou perda de visibilidade?",
-            'diagnostico' => "Se fizer sentido, consigo olhar contigo em 15 minutos e apontar onde normalmente aparecem os maiores gargalos em {dor_principal}.\nSem compromisso — é um diagnóstico rápido que temos feito com empresas de {segmento}.",
-            'reativacao' => "Oi, {nome}. Retomando nosso contato: vocês chegaram a resolver a parte de {dor_principal} aí na {empresa}?\nPergunto porque temos ajudado empresas a reduzir bastante o retrabalho do RH nessa rotina.",
-        ];
-
-        if (!isset($templates[$tipo])) {
-            return ['error' => 'Tipo de playbook inválido. Use: inicial_linkedin, checklist, diagnostico, reativacao'];
+        if (!isset($tipoInstructions[$tipo])) {
+            return ['error' => 'Tipo de playbook inválido. Use: inicial_linkedin, diagnostico, reativacao, checklist'];
         }
 
-        $message = str_replace(array_keys($vars), array_values($vars), $templates[$tipo]);
+        $prompt = "Voce e o SDR senior da LetsWork (plataforma de gestao de pessoas para RH/DP).
+Sua especialidade e outbound consultivo B2B.
 
-        return ['success' => true, 'tipo' => $tipo, 'message' => $message, 'lead_name' => $name];
+LEAD:
+- Nome: $name (primeiro nome: $firstName)
+- Empresa: {$lead['company']} | Cargo: {$lead['cargo']}
+- Segmento: {$lead['segmento']} | Modulo de interesse: {$lead['modulo_interesse']}
+- Dor principal: {$lead['dor_principal']}
+- Temperatura: {$lead['temperatura']} | Status: {$lead['status_comercial']}
+- Motivo perda (se houver): " . ($lead['motivo_perda'] ?? 'N/A') . "
+
+TIMELINE RECENTE:
+$recentText
+
+{$tipoInstructions[$tipo]}
+
+Responda APENAS em JSON valido:
+{
+  \"message\": \"a mensagem pronta para copiar e enviar\",
+  \"contexto\": \"por que essa abordagem faz sentido para esse lead (1 linha)\"
+}";
+
+        $result = $this->callGemini($prompt);
+
+        if (isset($result['error'])) return $result;
+
+        return [
+            'success' => true,
+            'tipo' => $tipo,
+            'message' => $result['message'] ?? $result['insights'][0] ?? 'Erro ao gerar mensagem',
+            'contexto' => $result['contexto'] ?? '',
+            'lead_name' => $name,
+        ];
     }
 
     // --- Webhook (Roboze / LetsWork CRM) ---
@@ -2016,5 +2875,679 @@ Responda APENAS em JSON valido:
             }
         }
         return $cache[$key];
+    }
+
+    // =============================================
+    // 7. SMART ALERTS — Intelligent Notifications
+    // =============================================
+
+    public function getSmartAlerts(): array
+    {
+        $alerts = [];
+        $now = date('Y-m-d H:i:s');
+
+        // Alert: Hot leads that visited pricing/high-intent pages in last 24h
+        if ($this->tableExists('page_hits')) {
+            $hotVisitors = $this->connection->fetchAllAssociative(
+                "SELECT DISTINCT l.id, l.firstname, l.lastname, l.company, l.temperatura, ph.url_title, MAX(ph.date_hit) as date_hit
+                 FROM page_hits ph
+                 JOIN leads l ON l.id = ph.lead_id
+                 WHERE ph.date_hit >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                   AND LOWER(l.temperatura) IN ('quente','prioritario','prioritário')
+                   AND (l.email IS NOT NULL AND l.email != '' AND l.email NOT LIKE '%@anonymous%')
+                   AND (l.firstname IS NOT NULL AND CHAR_LENGTH(l.firstname) >= 2)
+                   AND (LOWER(ph.url_title) LIKE '%preco%' OR LOWER(ph.url_title) LIKE '%pricing%' OR LOWER(ph.url_title) LIKE '%plano%' OR LOWER(ph.url_title) LIKE '%demo%' OR LOWER(ph.url_title) LIKE '%contato%')
+                 GROUP BY l.id, l.firstname, l.lastname, l.company, l.temperatura, ph.url_title
+                 ORDER BY date_hit DESC LIMIT 5"
+            );
+            foreach ($hotVisitors as $v) {
+                $name = trim(($v['firstname'] ?? '') . ' ' . ($v['lastname'] ?? '')) ?: $v['company'];
+                $alerts[] = [
+                    'type' => 'hot_visit',
+                    'severity' => 'critical',
+                    'icon' => 'ri-fire-line',
+                    'title' => $name . ' visitou página de conversão',
+                    'description' => 'Página: ' . ($v['url_title'] ?: 'pricing/contato') . ' — ' . date('H:i', strtotime($v['date_hit'])),
+                    'lead_id' => $v['id'],
+                    'action' => 'Ligar AGORA — sinal forte de compra',
+                ];
+            }
+        }
+
+        // Alert: Emails opened 3+ times without reply (no interaction after)
+        if ($this->tableExists('email_stats')) {
+            $multiOpeners = $this->connection->fetchAllAssociative(
+                "SELECT l.id, l.firstname, l.lastname, l.company, l.temperatura, COUNT(es.id) as opens, MAX(es.date_sent) as last_email
+                 FROM email_stats es
+                 JOIN leads l ON l.id = es.lead_id
+                 WHERE es.is_read = 1
+                   AND es.date_sent >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                   AND (l.status_comercial IS NULL OR LOWER(l.status_comercial) NOT IN ('ganho','perdido'))
+                 GROUP BY l.id, l.firstname, l.lastname, l.company, l.temperatura
+                 HAVING opens >= 3
+                 ORDER BY opens DESC LIMIT 10"
+            );
+            foreach ($multiOpeners as $m) {
+                $name = trim(($m['firstname'] ?? '') . ' ' . ($m['lastname'] ?? '')) ?: $m['company'];
+                $alerts[] = [
+                    'type' => 'multi_open',
+                    'severity' => 'high',
+                    'icon' => 'ri-mail-open-line',
+                    'title' => $name . ' abriu ' . $m['opens'] . 'x sem responder',
+                    'description' => 'Interesse confirmado mas algo bloqueia. Mudar canal (ligar/WhatsApp).',
+                    'lead_id' => $m['id'],
+                    'action' => 'Abordar por outro canal — dor existe',
+                ];
+            }
+        }
+
+        // Alert: Score jumped 20+ points recently
+        if ($this->tableExists('letswork_score_event_log')) {
+            $scoreJumps = $this->connection->fetchAllAssociative(
+                "SELECT l.id, l.firstname, l.lastname, l.company, l.temperatura, l.interesse_score,
+                        SUM(sel.delta) as score_gain
+                 FROM letswork_score_event_log sel
+                 JOIN leads l ON l.id = sel.lead_id
+                 WHERE sel.created_at >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
+                   AND sel.delta > 0
+                   AND (l.status_comercial IS NULL OR LOWER(l.status_comercial) NOT IN ('ganho','perdido'))
+                 GROUP BY l.id, l.firstname, l.lastname, l.company, l.temperatura, l.interesse_score
+                 HAVING score_gain >= 20
+                 ORDER BY score_gain DESC LIMIT 10"
+            );
+            foreach ($scoreJumps as $s) {
+                $name = trim(($s['firstname'] ?? '') . ' ' . ($s['lastname'] ?? '')) ?: $s['company'];
+                $alerts[] = [
+                    'type' => 'score_jump',
+                    'severity' => 'medium',
+                    'icon' => 'ri-arrow-up-circle-line',
+                    'title' => $name . ' — score +' . $s['score_gain'] . ' pts (48h)',
+                    'description' => 'Score atual: ' . $s['interesse_score'] . '. Lead esquentando rápido.',
+                    'lead_id' => $s['id'],
+                    'action' => 'Priorizar contato — momentum alto',
+                ];
+            }
+        }
+
+        // Alert: Leads going cold (no interaction 10+ days, was warm/hot)
+        if ($this->columnExists('leads', 'data_ultima_interacao')) {
+            $goingCold = $this->connection->fetchAllAssociative(
+                "SELECT id, firstname, lastname, company, temperatura, data_ultima_interacao, interesse_score
+                 FROM leads
+                 WHERE LOWER(temperatura) IN ('morno','quente','prioritario','prioritário')
+                   AND data_ultima_interacao < DATE_SUB(NOW(), INTERVAL 10 DAY)
+                   AND (status_comercial IS NULL OR LOWER(status_comercial) NOT IN ('ganho','perdido'))
+                   AND ((email IS NOT NULL AND email != '') OR (firstname IS NOT NULL AND firstname != ''))
+                 ORDER BY interesse_score DESC LIMIT 5"
+            );
+            foreach ($goingCold as $c) {
+                $name = trim(($c['firstname'] ?? '') . ' ' . ($c['lastname'] ?? '')) ?: $c['company'];
+                $days = (int)((time() - strtotime($c['data_ultima_interacao'])) / 86400);
+                $alerts[] = [
+                    'type' => 'going_cold',
+                    'severity' => 'medium',
+                    'icon' => 'ri-temp-cold-line',
+                    'title' => $name . ' esfriando (' . $days . ' dias)',
+                    'description' => $c['temperatura'] . ' com score ' . $c['interesse_score'] . ' mas sem contato.',
+                    'lead_id' => $c['id'],
+                    'action' => 'Reengajar antes de perder',
+                ];
+            }
+        }
+
+        usort($alerts, function($a, $b) {
+            $order = ['critical' => 0, 'high' => 1, 'medium' => 2];
+            return ($order[$a['severity']] ?? 3) - ($order[$b['severity']] ?? 3);
+        });
+
+        return ['alerts' => $alerts, 'count' => count($alerts)];
+    }
+
+    // =============================================
+    // 9. WEBHOOK BIDIRECIONAL — Mautic ↔ CRM
+    // =============================================
+
+    public function processCampaignWebhook(string $event, int $leadId, array $data): array
+    {
+        $lead = $this->connection->fetchAssociative("SELECT id, temperatura, interesse_score, status_comercial FROM leads WHERE id = :id", ['id' => $leadId]);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $now = date('Y-m-d H:i:s');
+        $updates = ['date_modified' => $now];
+        $scoreEvent = null;
+
+        switch ($event) {
+            case 'mautic.lead.campaign.add':
+                $campaignName = $data['campaign_name'] ?? '';
+                $scoreEvent = 'campaign_join';
+                if (stripos($campaignName, 'nurtur') !== false || stripos($campaignName, 'nutri') !== false) {
+                    if (empty($lead['status_comercial']) || $lead['status_comercial'] === 'prospeccao') {
+                        $updates['status_comercial'] = 'engajado';
+                    }
+                }
+                break;
+
+            case 'mautic.email.open':
+                $scoreEvent = 'email_aberto';
+                break;
+
+            case 'mautic.email.click':
+                $scoreEvent = 'link_clicado';
+                if (in_array($lead['status_comercial'], ['', 'prospeccao', null])) {
+                    $updates['status_comercial'] = 'engajado';
+                }
+                break;
+
+            case 'mautic.page.hit':
+                $url = $data['url'] ?? '';
+                if (preg_match('/preco|pricing|plano|demo|contato/i', $url)) {
+                    $scoreEvent = 'visita_pricing';
+                } else {
+                    $scoreEvent = 'visita_pagina';
+                }
+                break;
+
+            case 'mautic.form.submit':
+                $scoreEvent = 'formulario_preenchido';
+                if (in_array($lead['status_comercial'], ['', 'prospeccao', 'engajado', null])) {
+                    $updates['status_comercial'] = 'engajado';
+                }
+                break;
+
+            case 'mautic.lead.stage.change':
+                $stageName = strtolower($data['stage_name'] ?? '');
+                if (strpos($stageName, 'reuni') !== false) $updates['status_comercial'] = 'reuniao_agendada';
+                elseif (strpos($stageName, 'propos') !== false) $updates['status_comercial'] = 'proposta_enviada';
+                elseif (strpos($stageName, 'negoci') !== false) $updates['status_comercial'] = 'negociacao';
+                elseif (strpos($stageName, 'ganh') !== false || strpos($stageName, 'won') !== false) $updates['status_comercial'] = 'ganho';
+                elseif (strpos($stageName, 'perd') !== false || strpos($stageName, 'lost') !== false) $updates['status_comercial'] = 'perdido';
+                break;
+
+            default:
+                $scoreEvent = $event;
+        }
+
+        if ($this->columnExists('leads', 'data_ultima_interacao')) {
+            $updates['data_ultima_interacao'] = $now;
+        }
+
+        $sets = [];
+        $params = ['id' => $leadId];
+        foreach ($updates as $col => $val) {
+            if ($this->columnExists('leads', $col)) {
+                $sets[] = "$col = :$col";
+                $params[$col] = $val;
+            }
+        }
+        if ($sets) {
+            $this->connection->executeStatement("UPDATE leads SET " . implode(', ', $sets) . " WHERE id = :id", $params);
+        }
+
+        $scoreResult = null;
+        if ($scoreEvent && isset($this->getScoreEventsCatalog()[$scoreEvent])) {
+            $scoreResult = $this->addScoreEvent($leadId, $scoreEvent, "Webhook: $event");
+        }
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'mautic_webhook',
+            'text' => "[Mautic] $event" . (!empty($data['campaign_name']) ? " — {$data['campaign_name']}" : ''),
+            'type' => 'general', 'date_time' => $now,
+        ]);
+
+        return ['success' => true, 'event' => $event, 'updates' => $updates, 'score' => $scoreResult];
+    }
+
+    public function triggerMauticCampaignAction(int $leadId, string $action): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $campaignActions = [
+            'nurture_cold' => ['campaign' => 'Nutrição Frio', 'segment' => 'letswork_frio'],
+            'nurture_warm' => ['campaign' => 'Nutrição Morno', 'segment' => 'letswork_morno'],
+            'reactivate' => ['campaign' => 'Reativação', 'segment' => 'letswork_reativacao'],
+            'onboarding' => ['campaign' => 'Onboarding Cliente', 'segment' => 'letswork_ganho'],
+        ];
+
+        if (!isset($campaignActions[$action])) {
+            return ['error' => 'Ação inválida. Use: ' . implode(', ', array_keys($campaignActions))];
+        }
+
+        $config = $campaignActions[$action];
+        $now = date('Y-m-d H:i:s');
+
+        $segment = $this->connection->fetchAssociative(
+            "SELECT id FROM lead_lists WHERE alias = :alias",
+            ['alias' => $config['segment']]
+        );
+
+        if ($segment) {
+            $exists = $this->connection->fetchOne(
+                "SELECT COUNT(*) FROM lead_lists_leads WHERE leadlist_id = :list AND lead_id = :lead",
+                ['list' => $segment['id'], 'lead' => $leadId]
+            );
+            if (!$exists) {
+                $this->connection->insert('lead_lists_leads', [
+                    'leadlist_id' => $segment['id'],
+                    'lead_id' => $leadId,
+                    'date_added' => $now,
+                    'manually_added' => 1,
+                    'manually_removed' => 0,
+                ]);
+            }
+        }
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => "🔄 Adicionado à campanha: {$config['campaign']}",
+            'type' => 'general', 'date_time' => $now,
+        ]);
+
+        return ['success' => true, 'message' => "Lead adicionado à campanha {$config['campaign']}", 'campaign' => $config['campaign']];
+    }
+
+    // =============================================
+    // 10. WHATSAPP API — Send via Twilio/360dialog
+    // =============================================
+
+    public function sendWhatsApp(int $leadId, string $message, string $templateName = ''): array
+    {
+        $lead = $this->connection->fetchAssociative("SELECT id, phone, firstname, lastname, company FROM leads WHERE id = :id", ['id' => $leadId]);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+        if (empty($lead['phone'])) return ['error' => 'Lead sem telefone cadastrado'];
+
+        $phone = preg_replace('/[^0-9]/', '', $lead['phone']);
+        if (strlen($phone) === 11 || strlen($phone) === 10) $phone = '55' . $phone;
+        if (strlen($phone) < 12) return ['error' => 'Telefone inválido: ' . $lead['phone']];
+
+        $config = $this->getWhatsAppConfig();
+        if (isset($config['error'])) return $config;
+
+        $now = date('Y-m-d H:i:s');
+        $leadName = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? ''));
+        $sent = false;
+
+        if ($config['provider'] === 'twilio') {
+            $sent = $this->sendWhatsAppTwilio($config, $phone, $message, $templateName);
+        } elseif ($config['provider'] === '360dialog') {
+            $sent = $this->sendWhatsApp360($config, $phone, $message, $templateName, $leadName);
+        } elseif ($config['provider'] === 'evolution') {
+            $sent = $this->sendWhatsAppEvolution($config, $phone, $message);
+        }
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => "📱 WhatsApp " . ($sent ? 'enviado' : 'FALHOU') . ": " . mb_substr($message, 0, 80),
+            'type' => 'general', 'date_time' => $now,
+        ]);
+
+        if ($this->columnExists('leads', 'data_ultima_interacao')) {
+            $this->connection->executeStatement("UPDATE leads SET data_ultima_interacao = :now, date_modified = :now WHERE id = :id", ['now' => $now, 'id' => $leadId]);
+        }
+
+        if ($sent) {
+            $this->addScoreEvent($leadId, 'whatsapp_enviado', 'WhatsApp: ' . mb_substr($message, 0, 50));
+        }
+
+        if (!$sent) return ['error' => 'Falha ao enviar WhatsApp. Verifique configuração da API.'];
+        return ['success' => true, 'message' => 'WhatsApp enviado para +' . $phone];
+    }
+
+    private function getWhatsAppConfig(): array
+    {
+        $provider = getenv('WHATSAPP_PROVIDER') ?: ($_ENV['WHATSAPP_PROVIDER'] ?? '');
+        $apiKey = getenv('WHATSAPP_API_KEY') ?: ($_ENV['WHATSAPP_API_KEY'] ?? '');
+        $fromNumber = getenv('WHATSAPP_FROM') ?: ($_ENV['WHATSAPP_FROM'] ?? '');
+
+        if (!$provider || !$apiKey) {
+            $envFiles = [__DIR__ . '/../.env', '/var/www/html/plugins/LetsworkAnalyticsBundle/.env'];
+            foreach ($envFiles as $f) {
+                if (!file_exists($f)) continue;
+                $lines = file($f, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($lines as $line) {
+                    if (strpos($line, '#') === 0) continue;
+                    if (strpos($line, 'WHATSAPP_PROVIDER=') === 0) $provider = trim(substr($line, 18));
+                    if (strpos($line, 'WHATSAPP_API_KEY=') === 0) $apiKey = trim(substr($line, 17));
+                    if (strpos($line, 'WHATSAPP_FROM=') === 0) $fromNumber = trim(substr($line, 14));
+                    if (strpos($line, 'WHATSAPP_INSTANCE=') === 0) $fromNumber = trim(substr($line, 18));
+                }
+            }
+        }
+
+        if (!$provider) $provider = 'evolution';
+        if (!$apiKey) return ['error' => 'WhatsApp API não configurada. Adicione WHATSAPP_PROVIDER e WHATSAPP_API_KEY no .env do plugin.'];
+
+        return ['provider' => $provider, 'api_key' => $apiKey, 'from' => $fromNumber];
+    }
+
+    private function sendWhatsAppTwilio(array $config, string $phone, string $message, string $template): bool
+    {
+        $sid = $config['from'];
+        $token = $config['api_key'];
+        $from = 'whatsapp:+' . preg_replace('/[^0-9]/', '', $config['from']);
+        $to = 'whatsapp:+' . $phone;
+
+        $url = "https://api.twilio.com/2010-04-01/Accounts/$sid/Messages.json";
+        $data = ['From' => $from, 'To' => $to, 'Body' => $message];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_USERPWD => "$sid:$token", CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return $httpCode >= 200 && $httpCode < 300;
+    }
+
+    private function sendWhatsApp360(array $config, string $phone, string $message, string $template, string $contactName): bool
+    {
+        $url = 'https://waba.360dialog.io/v1/messages';
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $phone,
+            'type' => 'text',
+            'text' => ['body' => $message],
+        ];
+
+        if ($template) {
+            $payload = [
+                'messaging_product' => 'whatsapp',
+                'to' => $phone,
+                'type' => 'template',
+                'template' => ['name' => $template, 'language' => ['code' => 'pt_BR']],
+            ];
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'D360-API-KEY: ' . $config['api_key']],
+            CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return $httpCode >= 200 && $httpCode < 300;
+    }
+
+    private function sendWhatsAppEvolution(array $config, string $phone, string $message): bool
+    {
+        $baseUrl = getenv('WHATSAPP_BASE_URL') ?: ($_ENV['WHATSAPP_BASE_URL'] ?? 'http://localhost:8080');
+        $instance = $config['from'] ?: 'default';
+        $url = rtrim($baseUrl, '/') . "/message/sendText/$instance";
+
+        $payload = ['number' => $phone, 'text' => $message];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'apikey: ' . $config['api_key']],
+            CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return $httpCode >= 200 && $httpCode < 300;
+    }
+
+    // =============================================
+    // GOOGLE CALENDAR — Create meeting event
+    // =============================================
+
+    public function createCalendarEvent(int $leadId, array $eventData): array
+    {
+        $lead = $this->getLeadDetail($leadId);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $name = trim(($lead['firstname'] ?? '') . ' ' . ($lead['lastname'] ?? '')) ?: $lead['company'];
+        $title = $eventData['title'] ?? "Reunião — $name ({$lead['company']})";
+        $date = $eventData['date'] ?? '';
+        $time = $eventData['time'] ?? '10:00';
+        $duration = (int)($eventData['duration'] ?? 30);
+        $description = $eventData['description'] ?? '';
+
+        if (!$date) return ['error' => 'Data obrigatória'];
+
+        $startDt = date('Ymd\THis', strtotime("$date $time"));
+        $endDt = date('Ymd\THis', strtotime("$date $time +{$duration} minutes"));
+        $now = date('Y-m-d H:i:s');
+
+        $autoDesc = "Lead: $name\nEmpresa: {$lead['company']}\nCargo: {$lead['cargo']}\n";
+        $autoDesc .= "Segmento: {$lead['segmento']}\nMódulo: {$lead['modulo_interesse']}\n";
+        $autoDesc .= "Dor: {$lead['dor_principal']}\nScore: {$lead['interesse_score']} ({$lead['temperatura']})\n";
+        if ($lead['email']) $autoDesc .= "Email: {$lead['email']}\n";
+        if ($lead['phone']) $autoDesc .= "Telefone: {$lead['phone']}\n";
+        if ($description) $autoDesc .= "\nNotas: $description";
+
+        $calendarUrl = $this->buildGoogleCalendarUrl($title, $startDt, $endDt, $autoDesc, $lead['email'] ?? '');
+
+        if ($this->columnExists('leads', 'status_comercial')) {
+            $currentStatus = strtolower($lead['status_comercial'] ?? '');
+            if (!in_array($currentStatus, ['reuniao_agendada', 'reuniao_realizada', 'proposta_enviada', 'negociacao', 'ganho'])) {
+                $this->connection->executeStatement(
+                    "UPDATE leads SET status_comercial = 'reuniao_agendada', date_modified = :now WHERE id = :id",
+                    ['now' => $now, 'id' => $leadId]
+                );
+            }
+        }
+
+        if ($this->columnExists('leads', 'data_proximo_followup')) {
+            $this->connection->executeStatement(
+                "UPDATE leads SET data_proximo_followup = :date, data_ultima_interacao = :now, date_modified = :now WHERE id = :id",
+                ['date' => "$date $time", 'now' => $now, 'id' => $leadId]
+            );
+        }
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => "📅 Reunião agendada: " . date('d/m/Y H:i', strtotime("$date $time")) . " ($duration min)\n$title",
+            'type' => 'general', 'date_time' => "$date $time",
+        ]);
+
+        $this->addScoreEvent($leadId, 'reuniao_agendada', "Reunião: $title");
+
+        return [
+            'success' => true,
+            'message' => 'Reunião criada! Abrindo Google Calendar...',
+            'calendar_url' => $calendarUrl,
+            'event' => ['title' => $title, 'date' => $date, 'time' => $time, 'duration' => $duration],
+        ];
+    }
+
+    private function buildGoogleCalendarUrl(string $title, string $startDt, string $endDt, string $description, string $guestEmail): string
+    {
+        $params = [
+            'action' => 'TEMPLATE',
+            'text' => $title,
+            'dates' => $startDt . '/' . $endDt,
+            'details' => $description,
+            'sf' => 'true',
+        ];
+        if ($guestEmail) $params['add'] = $guestEmail;
+
+        return 'https://calendar.google.com/calendar/render?' . http_build_query($params);
+    }
+
+    // =============================================
+    // ENRIQUECIMENTO CNPJ — ReceitaWS / BrasilAPI
+    // =============================================
+
+    public function enrichLeadByCnpj(int $leadId, string $cnpj): array
+    {
+        $lead = $this->connection->fetchAssociative("SELECT id, company FROM leads WHERE id = :id", ['id' => $leadId]);
+        if (!$lead) return ['error' => 'Lead não encontrado'];
+
+        $cnpj = preg_replace('/[^0-9]/', '', $cnpj);
+        if (strlen($cnpj) !== 14) return ['error' => 'CNPJ inválido — deve ter 14 dígitos'];
+
+        $data = $this->fetchCnpjData($cnpj);
+        if (isset($data['error'])) return $data;
+
+        $now = date('Y-m-d H:i:s');
+        $updates = ['date_modified' => $now];
+
+        if (!empty($data['razao_social']) && $this->columnExists('leads', 'company')) {
+            $updates['company'] = $data['razao_social'];
+        }
+        if (!empty($data['segmento']) && $this->columnExists('leads', 'segmento')) {
+            $updates['segmento'] = $data['segmento'];
+        }
+
+        $sets = [];
+        $params = ['id' => $leadId];
+        foreach ($updates as $col => $val) {
+            if ($this->columnExists('leads', $col)) {
+                $sets[] = "$col = :$col";
+                $params[$col] = $val;
+            }
+        }
+        if ($sets) {
+            $this->connection->executeStatement("UPDATE leads SET " . implode(', ', $sets) . " WHERE id = :id", $params);
+        }
+
+        $noteText = "🏢 CNPJ Enriquecido: " . substr($cnpj, 0, 2) . '.' . substr($cnpj, 2, 3) . '.' . substr($cnpj, 5, 3) . '/' . substr($cnpj, 8, 4) . '-' . substr($cnpj, 12, 2);
+        $noteText .= "\n• Razão Social: " . ($data['razao_social'] ?? '-');
+        $noteText .= "\n• Porte: " . ($data['porte'] ?? '-');
+        $noteText .= "\n• Atividade: " . ($data['atividade_principal'] ?? '-');
+        $noteText .= "\n• UF: " . ($data['uf'] ?? '-') . " | Município: " . ($data['municipio'] ?? '-');
+        if (!empty($data['capital_social'])) $noteText .= "\n• Capital Social: R$ " . number_format((float)$data['capital_social'], 0, ',', '.');
+        if (!empty($data['socios'])) $noteText .= "\n• Sócios: " . implode(', ', array_slice($data['socios'], 0, 3));
+
+        $this->connection->insert('lead_notes', [
+            'lead_id' => $leadId, 'is_published' => 1, 'date_added' => $now,
+            'created_by' => 1, 'created_by_user' => 'admin',
+            'text' => $noteText, 'type' => 'general', 'date_time' => $now,
+        ]);
+
+        return ['success' => true, 'data' => $data, 'message' => 'Lead enriquecido com dados do CNPJ'];
+    }
+
+    private function fetchCnpjData(string $cnpj): array
+    {
+        $urls = [
+            "https://brasilapi.com.br/api/cnpj/v1/$cnpj",
+            "https://receitaws.com.br/v1/cnpj/$cnpj",
+        ];
+
+        foreach ($urls as $url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+                CURLOPT_HTTPHEADER => ['Accept: application/json', 'User-Agent: LetsWork-CRM/1.0'],
+                CURLOPT_FOLLOWLOCATION => true,
+            ]);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $response) {
+                $raw = json_decode($response, true);
+                if ($raw && !isset($raw['error']) && !isset($raw['message'])) {
+                    return $this->normalizeCnpjResponse($raw);
+                }
+            }
+        }
+
+        return ['error' => 'Não foi possível consultar CNPJ. Tente novamente em alguns segundos.'];
+    }
+
+    private function normalizeCnpjResponse(array $raw): array
+    {
+        // BrasilAPI format
+        if (isset($raw['razao_social'])) {
+            $socios = [];
+            if (!empty($raw['qsa'])) {
+                foreach ($raw['qsa'] as $s) {
+                    $socios[] = ($s['nome_socio'] ?? $s['nome'] ?? '') . ' (' . ($s['qual_socio'] ?? $s['qualificacao_socio'] ?? '') . ')';
+                }
+            }
+
+            $atividadePrincipal = '';
+            if (!empty($raw['cnae_fiscal_descricao'])) {
+                $atividadePrincipal = $raw['cnae_fiscal_descricao'];
+            } elseif (!empty($raw['atividade_principal'][0]['text'])) {
+                $atividadePrincipal = $raw['atividade_principal'][0]['text'];
+            }
+
+            $segmento = $this->inferSegmento($atividadePrincipal, $raw['razao_social'] ?? '');
+
+            return [
+                'razao_social' => $raw['razao_social'] ?? '',
+                'nome_fantasia' => $raw['nome_fantasia'] ?? '',
+                'cnpj' => $raw['cnpj'] ?? '',
+                'porte' => $raw['porte'] ?? ($raw['descricao_porte'] ?? ''),
+                'atividade_principal' => $atividadePrincipal,
+                'capital_social' => $raw['capital_social'] ?? 0,
+                'uf' => $raw['uf'] ?? ($raw['descricao_tipo_de_logradouro'] ?? ''),
+                'municipio' => $raw['municipio'] ?? ($raw['descricao_municipio'] ?? ''),
+                'abertura' => $raw['data_inicio_atividade'] ?? ($raw['abertura'] ?? ''),
+                'situacao' => $raw['descricao_situacao_cadastral'] ?? ($raw['situacao'] ?? ''),
+                'socios' => $socios,
+                'segmento' => $segmento,
+                'telefone' => $raw['ddd_telefone_1'] ?? ($raw['telefone'] ?? ''),
+                'email_empresa' => $raw['email'] ?? '',
+            ];
+        }
+
+        // ReceitaWS format
+        $socios = [];
+        if (!empty($raw['qsa'])) {
+            foreach ($raw['qsa'] as $s) {
+                $socios[] = ($s['nome'] ?? '') . ' (' . ($s['qual'] ?? '') . ')';
+            }
+        }
+
+        $atividadePrincipal = !empty($raw['atividade_principal'][0]['text']) ? $raw['atividade_principal'][0]['text'] : '';
+        $segmento = $this->inferSegmento($atividadePrincipal, $raw['nome'] ?? '');
+
+        return [
+            'razao_social' => $raw['nome'] ?? '',
+            'nome_fantasia' => $raw['fantasia'] ?? '',
+            'cnpj' => $raw['cnpj'] ?? '',
+            'porte' => $raw['porte'] ?? '',
+            'atividade_principal' => $atividadePrincipal,
+            'capital_social' => $raw['capital_social'] ?? 0,
+            'uf' => $raw['uf'] ?? '',
+            'municipio' => $raw['municipio'] ?? '',
+            'abertura' => $raw['abertura'] ?? '',
+            'situacao' => $raw['situacao'] ?? '',
+            'socios' => $socios,
+            'segmento' => $segmento,
+            'telefone' => $raw['telefone'] ?? '',
+            'email_empresa' => $raw['email'] ?? '',
+        ];
+    }
+
+    private function inferSegmento(string $atividade, string $razaoSocial): string
+    {
+        $text = strtolower($atividade . ' ' . $razaoSocial);
+        $map = [
+            'Tecnologia' => ['software', 'tecnologia', 'informática', 'sistemas', 'digital', 'dados', 'ti ', 'saas'],
+            'Saúde' => ['saúde', 'saude', 'médic', 'clinic', 'hospital', 'farma', 'odonto'],
+            'Educação' => ['educa', 'ensino', 'escola', 'universid', 'curso', 'treinamento'],
+            'Indústria' => ['indústri', 'industri', 'fabricação', 'manufat', 'metalurg', 'química'],
+            'Varejo' => ['varejo', 'comércio', 'comercio', 'loja', 'magazine', 'atacad'],
+            'Serviços' => ['consultori', 'consultoria', 'advocacia', 'escritório', 'serviço'],
+            'Financeiro' => ['banco', 'financ', 'seguro', 'crédito', 'invest', 'contábil', 'contabil'],
+            'Construção' => ['construção', 'construcao', 'imobili', 'engenharia', 'arquitet'],
+            'Agro' => ['agro', 'agrícola', 'agricola', 'pecuária', 'fazenda', 'rural'],
+            'Logística' => ['logística', 'logistica', 'transporte', 'frete', 'entrega'],
+        ];
+
+        foreach ($map as $segmento => $keywords) {
+            foreach ($keywords as $kw) {
+                if (strpos($text, $kw) !== false) return $segmento;
+            }
+        }
+        return 'Outros';
     }
 }

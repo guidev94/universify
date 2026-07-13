@@ -224,7 +224,8 @@
                 box.classList.add('hidden');
                 box.classList.remove('flex');
                 if (data && data.found > 0) {
-                    showToast(`Extração concluída: ${data.found} leads de "${data.keyword}"`, 'success');
+                    const typeLabel = data.type === 'auto' ? 'Auto-Crawl: ' : data.type === 'campaign' ? 'Campanha: ' : '';
+                    showToast(`${typeLabel}Extração concluída com ${data.found} leads de "${data.keyword}"`, 'success');
                 }
             });
 
@@ -238,43 +239,16 @@
             });
 
             // Pipeline real-time feedback
-            let verifiedCount = 0;
-            let enrichedCount = 0;
-            let pipelineTimer;
-
-            events.on('lead_verified', (data) => {
-                verifiedCount++;
-                clearTimeout(pipelineTimer);
-                pipelineTimer = setTimeout(() => {
-                    if (verifiedCount > 0) {
-                        showToast(`${verifiedCount} sites verificados agora`, 'success');
-                        verifiedCount = 0;
-                    }
-                }, 1000);
-            });
-
-            events.on('lead_enriched', (data) => {
-                enrichedCount++;
-                clearTimeout(pipelineTimer);
-                pipelineTimer = setTimeout(() => {
-                    if (enrichedCount > 0) {
-                        showToast(`${enrichedCount} leads enriquecidos agora`, 'info');
-                        enrichedCount = 0;
-                    }
-                }, 1000);
-            });
-
             events.on('pipeline_verify', (data) => {
-                // Batch finished, clear any pending individual toasts and show final
-                clearTimeout(pipelineTimer);
-                verifiedCount = 0;
-                if (data && data.count > 0) showToast(`Lote concluído: ${data.count} sites verificados`, 'success');
+                if (data && data.count > 0) {
+                    showToast(`Pipeline: ${data.count} sites verificados com sucesso`, 'success');
+                }
             });
 
             events.on('pipeline_enrich', (data) => {
-                clearTimeout(pipelineTimer);
-                enrichedCount = 0;
-                if (data && data.count > 0) showToast(`Lote concluído: ${data.count} leads enriquecidos`, 'info');
+                if (data && data.count > 0) {
+                    showToast(`Pipeline: ${data.count} leads enriquecidos com dados sociais`, 'info');
+                }
             });
         }
 

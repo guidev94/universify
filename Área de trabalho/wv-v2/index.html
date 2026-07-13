@@ -81,9 +81,9 @@
             <div class="container mx-auto px-6 relative z-10">
                 <div class="max-w-6xl mx-auto flex flex-col items-center">
                     <!-- Tech Badge -->
-                    <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-10 transition-all hover:border-todoz/40 group" data-aos="fade-down">
+                    <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-10 mt-20 transition-all hover:border-todoz/40 group" data-aos="fade-down">
                         <span class="w-2 h-2 rounded-full bg-todoz animate-pulse shadow-[0_0_10px_#CFFF04]"></span>
-                        <span class="text-white font-black text-[10px] tracking-[0.3em] uppercase">Elite Tech Agency 2026</span>
+                        <span class="text-white font-black text-[10px] tracking-[0.3em] uppercase">Software House 2026</span>
                     </div>
 
                     <!-- Main Headline -->
@@ -113,16 +113,16 @@
                     <!-- Client Logos Strip -->
                     <div class="mt-24 pt-10 border-t border-white/5 w-full flex flex-wrap justify-center items-center gap-10 md:gap-20 lg:gap-32 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700" data-aos="fade-up" data-aos-delay="800">
                         <div class="h-10 md:h-14 lg:h-16 flex items-center justify-center">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-LW-1-300x113.png" alt="LW" class="max-h-full w-auto object-contain">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-LW-1-300x113.png" alt="LW" class="max-h-full w-auto object-contain scale-110">
                         </div>
                         <div class="h-10 md:h-14 lg:h-16 flex items-center justify-center">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Facileme-2-300x113.png" alt="Facileme" class="max-h-full w-auto object-contain">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Facileme-2-300x113.png" alt="Facileme" class="max-h-full w-auto object-contain scale-110">
                         </div>
                         <div class="h-10 md:h-14 lg:h-16 flex items-center justify-center">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Ingresso-2-300x113.png" alt="Ingresso" class="max-h-full w-auto object-contain">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Ingresso-2-300x113.png" alt="Ingresso" class="max-h-full w-auto object-contain scale-110">
                         </div>
                         <div class="h-10 md:h-14 lg:h-16 flex items-center justify-center">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Cursos-1-300x113.png" alt="Cursos" class="max-h-full w-auto object-contain">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Cursos-1-300x113.png" alt="Cursos" class="max-h-full w-auto object-contain scale-110">
                         </div>
                     </div>
                 </div>
@@ -131,10 +131,16 @@
             <!-- Scroll Indicator -->
             <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40">
                 <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
-                    <div class="w-1 h-2 bg-todoz rounded-full animate-bounce"></div>
+                    <div class="w-1.5 h-1.5 bg-todoz rounded-full animate-[scroll_2s_infinite]"></div>
                 </div>
                 <span class="text-[8px] font-black uppercase tracking-[0.4em] text-white">Scroll</span>
             </div>
+            <style>
+                @keyframes scroll {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(15px); opacity: 0; }
+                }
+            </style>
         </section>
 
         <!-- Clientes -->

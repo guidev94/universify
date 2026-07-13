@@ -114,6 +114,7 @@ def _migrate(cursor):
         ("has_ads", "ALTER TABLE leads ADD COLUMN has_ads INTEGER DEFAULT 0"),
         ("ads_platforms", "ALTER TABLE leads ADD COLUMN ads_platforms TEXT DEFAULT ''"),
         ("tech_score", "ALTER TABLE leads ADD COLUMN tech_score INTEGER DEFAULT 0"),
+        ("is_qualified", "ALTER TABLE leads ADD COLUMN is_qualified INTEGER DEFAULT 0"),
     ]
 
     for col, sql in migrations:

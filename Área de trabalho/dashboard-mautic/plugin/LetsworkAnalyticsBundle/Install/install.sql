@@ -47,6 +47,33 @@ ALTER TABLE leads ADD COLUMN IF NOT EXISTS ultima_reuniao_proximos_passos TEXT D
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS ultima_reuniao_transcricao_url VARCHAR(500) DEFAULT NULL;
 
 -- Nota: MySQL 8.0+ suporta IF NOT EXISTS no ALTER TABLE
+-- =====================================================
+-- Tabela: Cadências (Sequences)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS letswork_cadencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    steps JSON NOT NULL COMMENT '[{day:0,channel:"email",template:""},{day:2,channel:"linkedin"}]',
+    is_active TINYINT(1) DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS letswork_cadencia_leads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cadencia_id INT NOT NULL,
+    lead_id INT NOT NULL,
+    current_step INT DEFAULT 0,
+    status ENUM('ativa','pausada','concluida','respondeu') DEFAULT 'ativa',
+    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    next_action_at DATETIME,
+    completed_at DATETIME,
+    INDEX idx_cadencia_lead (cadencia_id, lead_id),
+    INDEX idx_status (status),
+    INDEX idx_next_action (next_action_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Para MySQL 5.7 ou MariaDB, remova "IF NOT EXISTS" e ignore erros de "Duplicate column"
 
 -- =====================================================

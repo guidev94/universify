@@ -1,58 +1,42 @@
 let currentLeads = [];
+let selectedLeads = new Set();
+let currentPage = 1;
+let totalPages = 1;
+const perPage = 50;
 
 async function loadPipeline() {
     const feed = document.getElementById('pipelineFeed');
     const source = document.getElementById('filterSource').value;
     const quality = document.getElementById('filterQuality').value;
+    const qualified = document.getElementById('filterQualified').value;
+    const search = document.getElementById('pipelineSearch').value.toLowerCase();
     
+    // Clear feed and show loading
+    feed.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 opacity-20">
+            <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-[12px] font-bold uppercase tracking-widest">Sincronizando Leads...</p>
+        </div>
+    `;
+
     try {
-        // Fetch more leads to have a good pool for the feed
-        const data = await api(`/api/leads?per_page=300&sort=score&order=desc${source ? '&source='+source : ''}`);
+        let url = `/api/leads?per_page=${perPage}&page=${currentPage}&sort=score&order=desc&status=new`;
+        if (source) url += `&source=${source}`;
+        if (quality) url += `&site_quality=${quality}`;
+        if (qualified) url += `&qualified=${qualified}`;
+        if (search) url += `&search=${search}`;
+
+        const data = await api(url);
         currentLeads = data.leads;
+        totalPages = data.pages;
+        
+        document.getElementById('totalPages').textContent = totalPages;
+        document.getElementById('currentPage').textContent = currentPage;
+        document.getElementById('paginationContainer').classList.toggle('hidden', totalPages <= 1);
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+        document.getElementById('nextBtn').disabled = currentPage >= totalPages;
 
-        if (!currentLeads.length) {
-            feed.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl">
-                    <i data-lucide="search-x" class="w-12 h-12 text-zinc-700 mb-4"></i>
-                    <p class="text-zinc-500 font-medium">Nenhuma oportunidade encontrada com os filtros atuais.</p>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
-
-        // Identify Priority Leads (Tech Opportunities)
-        let priorityLeads = currentLeads.filter(l => 
-            (l.site_quality === 'poor' && l.site_verified) || 
-            (!l.website && l.site_verified === 0)
-        );
-
-        if (quality === 'poor') {
-            priorityLeads = priorityLeads.filter(l => l.site_quality === 'poor' && l.site_verified);
-        } else if (quality === 'none') {
-            priorityLeads = priorityLeads.filter(l => !l.website && l.site_verified === 0);
-        }
-
-        const otherLeads = currentLeads.filter(l => 
-            !priorityLeads.find(p => p.id === l.id) && l.status === 'new'
-        );
-
-        let html = '';
-
-        if (priorityLeads.length) {
-            html += `<div class="mb-6"><h3 class="text-[11px] font-black text-amber-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><i data-lucide="zap" class="w-3 h-3"></i> Alta Prioridade (Redesign Necessário)</h3>`;
-            html += priorityLeads.map(l => renderOpportunityCard(l, true)).join('');
-            html += `</div>`;
-        }
-
-        if (otherLeads.length) {
-            html += `<div class="mb-6"><h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><i data-lucide="clock" class="w-3 h-3"></i> Recém Capturados</h3>`;
-            html += otherLeads.slice(0, 50).map(l => renderOpportunityCard(l, false)).join('');
-            html += `</div>`;
-        }
-
-        feed.innerHTML = html;
-        lucide.createIcons();
+        renderPipeline();
 
     } catch (e) {
         showToast('Erro ao carregar pipeline', 'error');
@@ -60,53 +44,366 @@ async function loadPipeline() {
     }
 }
 
+function resetAndLoad() {
+    currentPage = 1;
+    loadPipeline();
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        loadPipeline();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        loadPipeline();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// Local search filtering (only for current page leads, for deep search use backend)
+function filterPipeline() {
+    // We'll reset pagination and load from backend for real search
+    const search = document.getElementById('pipelineSearch').value;
+    if (search.length > 2 || search.length === 0) {
+        resetAndLoad();
+    }
+}
+
+function renderPipeline() {
+    const feed = document.getElementById('pipelineFeed');
+    
+    if (!currentLeads.length) {
+        feed.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl">
+                <i data-lucide="search-x" class="w-12 h-12 text-zinc-700 mb-4"></i>
+                <p class="text-zinc-500 font-medium">Nenhuma oportunidade nesta página.</p>
+            </div>
+        `;
+        lucide.createIcons();
+        return;
+    }
+
+    // Three groupings: Qualified, Technical Priority, Others
+    const qualifiedLeads = currentLeads.filter(l => l.is_qualified);
+    
+    const priorityLeads = currentLeads.filter(l => 
+        !l.is_qualified && (
+            (l.site_quality === 'poor' && l.site_verified) || 
+            (!l.website && l.site_verified === 0)
+        )
+    );
+
+    const otherLeads = currentLeads.filter(l => 
+        !l.is_qualified && !priorityLeads.find(p => p.id === l.id)
+    );
+
+    // Update Counters (for current page)
+    document.getElementById('statPriorityCount').textContent = priorityLeads.length + qualifiedLeads.length;
+    document.getElementById('statRecentCount').textContent = otherLeads.length;
+
+    let html = '';
+
+    if (qualifiedLeads.length) {
+        html += `<div class="mb-8">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <h3 class="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em] flex items-center gap-2"><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i> Leads Qualificados (${qualifiedLeads.length})</h3>
+            </div>`;
+        html += qualifiedLeads.map(l => renderOpportunityCard(l, false)).join('');
+        html += `</div>`;
+    }
+
+    if (priorityLeads.length) {
+        html += `<div class="mb-8">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <h3 class="text-[11px] font-black text-amber-500 uppercase tracking-[0.2em] flex items-center gap-2"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Alta Prioridade (${priorityLeads.length})</h3>
+                <button onclick="selectGroup('priority')" class="text-[10px] font-bold text-zinc-500 hover:text-blue-400 transition-colors uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">Selecionar Grupo</button>
+            </div>`;
+        html += priorityLeads.map(l => renderOpportunityCard(l, true)).join('');
+        html += `</div>`;
+    }
+
+    if (otherLeads.length) {
+        html += `<div class="mb-8">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Outras Oportunidades (${otherLeads.length})</h3>
+                <button onclick="selectGroup('recent')" class="text-[10px] font-bold text-zinc-500 hover:text-blue-400 transition-colors uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">Selecionar Grupo</button>
+            </div>`;
+        html += otherLeads.map(l => renderOpportunityCard(l, false)).join('');
+        html += `</div>`;
+    }
+
+    feed.innerHTML = html;
+    lucide.createIcons();
+    updateSelectionUI();
+}
+
 function renderOpportunityCard(lead, isPriority) {
     const hasNoSite = !lead.website && lead.site_verified === 0;
     const isOldSite = lead.site_quality === 'poor' && lead.site_verified;
     const hasAds = lead.has_ads;
+    const isSelected = selectedLeads.has(lead.id);
+    const isQualified = lead.is_qualified;
     
     let techBadge = '';
-    if (hasNoSite) techBadge = '<span class="px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 text-[10px] font-black border border-red-500/10">SEM SITE</span>';
-    else if (isOldSite) techBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 text-[10px] font-black border border-amber-500/10">SITE ANTIGO</span>';
+    let techIcon = 'globe';
+    if (hasNoSite) {
+        techBadge = '<span class="px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 text-[10px] font-black border border-red-500/10">SEM SITE</span>';
+        techIcon = 'alert-circle';
+    } else if (isOldSite) {
+        techBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 text-[10px] font-black border border-amber-500/10">SITE ANTIGO</span>';
+        techIcon = 'monitor-x';
+    }
     
-    const adsBadge = hasAds ? '<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-black border border-emerald-500/10 ml-2">GASTA COM ADS</span>' : '';
+    const adsBadge = hasAds ? '<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-black border border-emerald-500/10 ml-2">ADS ACTIVE</span>' : '';
 
     return `
-        <div class="opportunity-card glass-card !p-6 mb-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 fade-up cursor-pointer group" id="lead-${lead.id}" onclick="openLeadDetail(${lead.id})">
-            <div class="flex items-start gap-5 flex-1 min-w-0">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${isPriority ? 'from-amber-500/20 to-orange-600/10' : 'from-zinc-800 to-zinc-900'} border border-white/5 flex items-center justify-center shrink-0">
-                    <span class="text-[18px] font-black text-zinc-100">${lead.score}</span>
+        <div class="opportunity-card glass-card !p-5 mb-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 fade-up cursor-pointer group ${isSelected ? 'border-blue-500/50 bg-blue-500/[0.04]' : ''}" id="lead-${lead.id}" onclick="toggleLeadSelection(${lead.id})">
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+                <div class="shrink-0 flex items-center gap-3" onclick="event.stopPropagation()">
+                    <input type="checkbox" class="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-blue-500/50 cursor-pointer" ${isSelected ? 'checked' : ''} onchange="toggleLeadSelection(${lead.id})">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${isPriority ? 'from-amber-500/20 to-orange-600/10 text-amber-500' : 'from-zinc-800 to-zinc-900 text-zinc-400'} border border-white/5 flex items-center justify-center shrink-0 shadow-lg" onclick="openLeadDetail(${lead.id})">
+                        <i data-lucide="${techIcon}" class="w-5 h-5"></i>
+                    </div>
                 </div>
-                <div class="min-w-0 flex-1">
+                
+                <div class="min-w-0 flex-1" onclick="event.stopPropagation(); openLeadDetail(${lead.id})">
                     <div class="flex items-center gap-2 mb-1">
-                        <h4 class="text-[16px] font-bold text-zinc-100 truncate group-hover:text-blue-400 transition-colors">${escapeHtml(lead.name)}</h4>
+                        <h4 class="text-[15px] font-bold text-zinc-100 truncate group-hover:text-blue-400 transition-colors">${escapeHtml(lead.name)}</h4>
                         ${techBadge}
                         ${adsBadge}
+                        <button onclick="event.stopPropagation(); toggleQualify(${lead.id})" class="ml-auto lg:ml-2 p-1 rounded-lg hover:bg-white/5 transition-colors" title="Qualificar Lead">
+                            <i data-lucide="star" class="w-4 h-4 ${isQualified ? 'fill-emerald-400 text-emerald-400' : 'text-zinc-600'}"></i>
+                        </button>
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-zinc-500">
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-500 font-medium">
                         <span class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-zinc-600"></i> ${escapeHtml(lead.location || 'Brasil')}</span>
                         <span class="flex items-center gap-1.5"><i data-lucide="tag" class="w-3 h-3 text-zinc-600"></i> ${escapeHtml(lead.category || 'Lead')}</span>
-                        ${lead.website ? `<a href="${lead.website}" target="_blank" onclick="event.stopPropagation()" class="flex items-center gap-1.5 text-blue-400 hover:underline"><i data-lucide="external-link" class="w-3 h-3"></i> Ver Site</a>` : ''}
+                        <span class="flex items-center gap-1.5 text-zinc-400 font-bold"><i data-lucide="award" class="w-3 h-3"></i> ${lead.score} pts</span>
+                        ${lead.website ? `<a href="${lead.website}" target="_blank" onclick="event.stopPropagation()" class="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors"><i data-lucide="external-link" class="w-3 h-3"></i> Website</a>` : ''}
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0" onclick="event.stopPropagation()">
-                <button onclick="openSalesScript(${lead.id})" class="action-btn w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10" title="Script de Venda">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                </button>
-                <button onclick="contactLead(${lead.id}, 'whatsapp')" class="action-btn px-4 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-2 text-green-400 font-bold text-[12px] hover:bg-green-500/20">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-                </button>
-                <button onclick="markContacted(${lead.id})" class="action-btn w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 hover:bg-blue-500/20" title="Marcar como Contatado">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                </button>
-                <button onclick="archiveLead(${lead.id})" class="action-btn w-10 h-10 rounded-xl bg-red-500/5 border border-red-500/10 flex items-center justify-center text-red-400/50 hover:text-red-400 hover:bg-red-500/10" title="Arquivar">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
+            <div class="flex items-center gap-2 w-full lg:w-auto pt-3 lg:pt-0 border-t lg:border-t-0 border-white/5 justify-between lg:justify-end" onclick="event.stopPropagation()">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openSalesScript(${lead.id})" class="action-btn w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10" title="Script de Venda">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="contactLead(${lead.id}, 'whatsapp')" class="action-btn h-9 px-3 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-2 text-green-400 font-bold text-[11px] hover:bg-green-500/20">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> Contato
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <button onclick="markContacted(${lead.id})" class="action-btn w-9 h-9 rounded-xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center text-blue-400/60 hover:text-blue-400 hover:bg-blue-500/15" title="Mover p/ Contatados">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="archiveLead(${lead.id})" class="action-btn w-9 h-9 rounded-xl bg-red-500/5 border border-red-500/10 flex items-center justify-center text-red-400/40 hover:text-red-400 hover:bg-red-500/10" title="Arquivar">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
         </div>
     `;
+}
+
+async function toggleQualify(id) {
+    try {
+        const res = await api(`/api/leads/${id}/qualify`, { method: 'PATCH' });
+        const lead = currentLeads.find(l => l.id === id);
+        if (lead) lead.is_qualified = res.is_qualified;
+        
+        showToast(res.is_qualified ? 'Lead qualificado com sucesso' : 'Qualificação removida', 'success');
+        
+        const star = document.querySelector(`#lead-${id} [data-lucide="star"]`);
+        if (star) {
+            star.classList.toggle('fill-emerald-400', res.is_qualified);
+            star.classList.toggle('text-emerald-400', res.is_qualified);
+            star.classList.toggle('text-zinc-600', !res.is_qualified);
+        }
+    } catch (e) {
+        showToast('Erro ao qualificar lead', 'error');
+    }
+}
+
+function toggleLeadSelection(id) {
+    const card = document.getElementById(`lead-${id}`);
+    const checkbox = card?.querySelector('input[type="checkbox"]');
+    
+    if (selectedLeads.has(id)) {
+        selectedLeads.delete(id);
+        card?.classList.remove('border-blue-500/50', 'bg-blue-500/[0.04]');
+        if (checkbox) checkbox.checked = false;
+    } else {
+        selectedLeads.add(id);
+        card?.classList.add('border-blue-500/50', 'bg-blue-500/[0.04]');
+        if (checkbox) checkbox.checked = true;
+    }
+    updateSelectionUI();
+}
+
+function updateSelectionUI() {
+    const count = selectedLeads.size;
+    const bar = document.getElementById('selectionActions');
+    const countText = document.getElementById('selectedCount');
+    
+    if (count > 0) {
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        countText.textContent = `${count} Sel.`;
+    } else {
+        bar.classList.add('hidden');
+        bar.classList.remove('flex');
+    }
+}
+
+function clearSelection() {
+    selectedLeads.clear();
+    const checks = document.querySelectorAll('input[type="checkbox"]');
+    checks.forEach(c => c.checked = false);
+    const cards = document.querySelectorAll('.opportunity-card');
+    cards.forEach(c => c.classList.remove('border-blue-500/50', 'bg-blue-500/[0.04]'));
+    updateSelectionUI();
+}
+
+function selectAllLeads() {
+    currentLeads.forEach(l => selectedLeads.add(l.id));
+    renderPipeline(); 
+}
+
+function selectGroup(group) {
+    let pool = [];
+    if (group === 'priority') {
+        pool = currentLeads.filter(l => 
+            (l.site_quality === 'poor' && l.site_verified) || 
+            (!l.website && l.site_verified === 0)
+        );
+    } else if (group === 'recent') {
+        const priorityIds = new Set(currentLeads.filter(l => 
+            (l.site_quality === 'poor' && l.site_verified) || 
+            (!l.website && l.site_verified === 0)
+        ).map(l => l.id));
+        pool = currentLeads.filter(l => !priorityIds.has(l.id));
+    }
+    
+    pool.forEach(l => selectedLeads.add(l.id));
+    renderPipeline();
+}
+
+async function exportSelected() {
+    if (selectedLeads.size === 0) return;
+    try {
+        showToast('Preparando exportação...', 'info');
+        const response = await api('/api/export', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                format: 'xlsx',
+                ids: Array.from(selectedLeads)
+            })
+        });
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads_selecionados_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showToast('Exportação concluída!', 'success');
+        clearSelection();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function exportByScore() {
+    const minScore = document.getElementById('exportMinScore').value;
+    closeExportModal();
+    try {
+        showToast(`Exportando leads com score ${minScore}+`, 'info');
+        const response = await api('/api/export', {
+            method: 'POST',
+            body: JSON.stringify({ format: 'xlsx', score_min: minScore, sort: 'score', order: 'desc' })
+        });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads_score_${minScore}_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showToast('Exportação concluída!', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function batchAction(type) {
+    if (!selectedLeads.size) return;
+    
+    const count = selectedLeads.size;
+    let message = `Deseja processar ${count} leads?`;
+    let payload = {};
+    let toastMsg = 'Leads atualizados';
+
+    if (type === 'archive') {
+        message = `Deseja arquivar ${count} leads?`;
+        payload = { status: 'closed_lost' };
+        toastMsg = 'Leads arquivados';
+    } else if (type === 'contacted') {
+        message = `Deseja marcar ${count} leads como contatados?`;
+        payload = { status: 'contacted' };
+    } else if (type === 'qualify') {
+        message = `Deseja qualificar ${count} leads selecionados?`;
+        payload = { qualify: true };
+        toastMsg = 'Leads qualificados';
+    }
+
+    if (!await confirmModal(message, 'Ação em Massa', type === 'archive')) return;
+
+    try {
+        showToast(`Processando ${count} leads...`, 'info');
+        const ids = Array.from(selectedLeads);
+        payload.ids = ids;
+        
+        await api('/api/leads/bulk-update', {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+        });
+
+        showToast(toastMsg, 'success');
+        
+        if (type !== 'qualify') {
+            // Visual exit animation for status changes
+            ids.forEach(id => {
+                gsap.to(`#lead-${id}`, { 
+                    x: type === 'archive' ? 0 : 30, 
+                    scale: type === 'archive' ? 0.9 : 1,
+                    opacity: 0, 
+                    duration: 0.4, 
+                    stagger: 0.05 
+                });
+            });
+
+            setTimeout(() => {
+                selectedLeads.clear();
+                loadPipeline();
+            }, 500);
+        } else {
+            // Just refresh current view to show stars
+            loadPipeline();
+        }
+
+    } catch (e) {
+        showToast('Erro no processamento em massa', 'error');
+    }
 }
 
 async function contactLead(id, type) {
@@ -128,6 +425,8 @@ async function markContacted(id) {
             x: 20, opacity: 0, duration: 0.3, onComplete: () => {
                 const el = document.getElementById(`lead-${id}`);
                 if (el) el.remove();
+                selectedLeads.delete(id);
+                updateSelectionUI();
                 closeLeadDetail();
             }
         });
@@ -145,6 +444,8 @@ async function archiveLead(id) {
             scale: 0.9, opacity: 0, duration: 0.2, onComplete: () => {
                 const el = document.getElementById(`lead-${id}`);
                 if (el) el.remove();
+                selectedLeads.delete(id);
+                updateSelectionUI();
                 closeLeadDetail();
             }
         });
@@ -152,6 +453,7 @@ async function archiveLead(id) {
 }
 
 async function exportPipeline(type) {
+    closeExportModal();
     try {
         showToast('Preparando exportação...', 'info');
         
@@ -159,6 +461,17 @@ async function exportPipeline(type) {
         if (type === 'poor') payload.site_quality = 'poor';
         else if (type === 'none') payload.site_quality = 'none';
         else if (type === 'ads') payload.has_ads = true;
+        else if (type === 'qualified') payload.is_qualified = true;
+        else if (type === 'hot') {
+            payload.score_min = 80;
+            payload.sort = 'score';
+            payload.order = 'desc';
+        }
+        else if (type === 'recent') {
+            payload.quantity = 100;
+            payload.sort = 'created_at';
+            payload.order = 'desc';
+        }
 
         const response = await api('/api/export', {
             method: 'POST',
@@ -190,7 +503,6 @@ async function openLeadDetail(id) {
 
     try {
         const lead = await api(`/api/leads/${id}`);
-        
         const hasNoSite = !lead.website && lead.site_verified === 0;
         const isOldSite = lead.site_quality === 'poor' && lead.site_verified;
         
@@ -219,6 +531,7 @@ async function openLeadDetail(id) {
                             <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-wider text-zinc-400">${escapeHtml(lead.category || 'Lead')}</span>
                             ${lead.has_ads ? '<span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/10 text-[10px] font-black uppercase tracking-wider text-emerald-400">Ads Spender</span>' : ''}
                             <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/10 text-[10px] font-black uppercase tracking-wider text-blue-400">${lead.tier}</span>
+                            ${lead.is_qualified ? '<span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/10 text-[10px] font-black uppercase tracking-wider text-emerald-400">Qualificado</span>' : ''}
                         </div>
                     </div>
                 </div>
@@ -305,36 +618,6 @@ function openExportModal() {
 function closeExportModal() {
     document.getElementById('exportModal').classList.add('hidden');
 }
-
-async function exportPipeline(type) {
-    closeExportModal();
-    try {
-        showToast('Preparando exportação...', 'info');
-        
-        const payload = { format: 'xlsx' };
-        if (type === 'poor') payload.site_quality = 'poor';
-        else if (type === 'none') payload.site_quality = 'none';
-        else if (type === 'ads') payload.has_ads = true;
-
-        const response = await api('/api/export', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `leads_pipeline_${type}_${new Date().getTime()}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        showToast('Exportação concluída!', 'success');
-    } catch (e) {
-        showToast(e.message, 'error');
-    }
-}
-
 
 function openSalesScript(id) {
     const lead = currentLeads.find(l => l.id === id);

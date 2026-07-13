@@ -2,6 +2,8 @@
  * Letswork Analytics Dashboard — Premium interactions
  */
 
+Mautic.lwaEsc = function(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'').replace(/>/g,'').replace(/\n/g,' '); };
+
 Mautic.letsworkAnalyticsOnLoad = function(container) {
     Mautic.lwaRenderCharts();
     Mautic.lwaAnimateKpis();
@@ -338,6 +340,27 @@ Mautic.lwaShowKpiDetail = function(kpiId, title) {
             mQuery('#lwa-kpi-detail-body').html('<div class="lwa-empty-state"><p>Erro ao carregar dados</p></div>');
         }
     });
+};
+
+/**
+ * AI Contextual Tips — smart suggestions per KPI
+ */
+Mautic.lwaGetKpiTip = function(kpiId, leadCount) {
+    var tips = {
+        'prospeccao': {icon: 'ri-sparkling-line', color: '#3b82f6', text: 'Leads sem interação perdem interesse rápido. Priorize contato em até 48h após entrada.'},
+        'temp_frio': {icon: 'ri-lightbulb-line', color: '#3b82f6', text: 'Leads frios respondem melhor a conteúdo educativo. Evite abordagem comercial direta.'},
+        'temp_morno': {icon: 'ri-sparkling-line', color: '#f59e0b', text: 'Leads mornos já demonstraram interesse. É hora de oferecer diagnóstico ou case do segmento.'},
+        'temp_quente': {icon: 'ri-fire-line', color: '#dc2626', text: 'Leads quentes precisam de ação IMEDIATA. Cada dia sem contato reduz 5% a chance de conversão.'},
+        'temp_prioritario': {icon: 'ri-vip-crown-line', color: '#9333ea', text: 'Prioritários são sua receita mais provável. Garanta contato pessoal (ligação/reunião) esta semana.'},
+        'reunioes': {icon: 'ri-calendar-check-line', color: '#10b981', text: 'Após reunião, envie resumo em até 2h. Leads que recebem follow-up rápido convertem 3x mais.'},
+        'propostas': {icon: 'ri-file-text-line', color: '#7c3aed', text: 'Propostas abertas por mais de 7 dias esfriam. Ligue para entender objeções e ajustar.'},
+        'ganhos': {icon: 'ri-trophy-line', color: '#10b981', text: 'Analise o que esses clientes têm em comum (segmento, dor, origem) para replicar o padrão.'},
+        'perdidos': {icon: 'ri-alert-line', color: '#dc2626', text: 'Identifique o motivo #1 de perda e crie objeção-resposta para o time. Reative após 60 dias.'},
+        'hot_no_followup': {icon: 'ri-alarm-warning-line', color: '#dc2626', text: 'URGENTE: Esses leads estão quentes MAS sem nenhuma ação agendada. Dinheiro na mesa.'},
+    };
+    var tip = tips[kpiId];
+    if (!tip) return '';
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;background:' + tip.color + '08;border-left:3px solid ' + tip.color + ';border-radius:0 8px 8px 0;margin-bottom:16px"><i class="' + tip.icon + '" style="color:' + tip.color + ';font-size:16px;margin-top:2px;flex-shrink:0"></i><div style="font-size:12px;line-height:1.5;color:var(--lwa-gray-700)"><strong style="color:' + tip.color + '">Dica IA:</strong> ' + tip.text + (leadCount ? ' <span style="color:var(--lwa-gray-400)">(' + leadCount + ' leads)</span>' : '') + '</div></div>';
 };
 
 /**
@@ -835,7 +858,8 @@ Mautic.lwaRenderKpiPage = function() {
 
     var tempColors = {'frio':'#3b82f6','morno':'#f59e0b','quente':'#dc2626','prioritario':'#9333ea','prioritário':'#9333ea'};
 
-    var html = '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><div style="display:flex;gap:8px;align-items:center"><button onclick="Mautic.lwaExportCSV(\'#lwa-kpi-detail-body .lwa-table\',\'leads\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--lwa-gray-200);background:white;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ri-download-2-line"></i> CSV</button><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div></div>';
+    var html = Mautic.lwaGetKpiTip(kpi, leads.length);
+    html += '<div class="lwa-kd-header-bar"><span class="lwa-kd-count"><strong>' + leads.length + '</strong> leads</span><div style="display:flex;gap:8px;align-items:center"><button onclick="Mautic.lwaExportCSV(\'#lwa-kpi-detail-body .lwa-table\',\'leads\')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--lwa-gray-200);background:white;cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ri-download-2-line"></i> CSV</button><span class="lwa-kd-page">Pág ' + page + '/' + totalPages + '</span></div></div>';
     html += '<div class="lwa-search"><i class="ri-search-line"></i><input type="text" placeholder="Buscar lead..." onkeyup="Mautic.lwaFilterLeads(this.value)"></div>';
     html += '<table class="lwa-table" style="margin:0"><thead><tr><th>Lead</th><th>Empresa</th><th>Temperatura</th><th>Score</th><th>Origem</th>';
     if (isPerdidos) html += '<th>Motivo</th>';
@@ -1047,13 +1071,17 @@ Mautic.lwaLoadInsights = function() {
 
             var html = '<div class="lwa-insights-grid">';
             insights.forEach(function(i) {
+                if (typeof i === 'string') { i = {tipo:'melhoria', titulo:'Insight', descricao: i}; }
+                if (!i || typeof i !== 'object') return;
+                var titulo = typeof i.titulo === 'string' ? i.titulo : JSON.stringify(i.titulo || '');
+                var descricao = typeof i.descricao === 'string' ? i.descricao : JSON.stringify(i.descricao || '');
                 var icon = icons[i.tipo] || 'ri-information-line';
                 var color = colors[i.tipo] || '#64748b';
                 html += '<div class="lwa-insight-card" data-tipo="' + (i.tipo || '') + '">';
                 html += '  <div class="lwa-insight-icon" style="color:' + color + '"><i class="' + icon + '"></i></div>';
                 html += '  <div class="lwa-insight-content">';
-                html += '    <div class="lwa-insight-title">' + (i.titulo || '') + '</div>';
-                html += '    <div class="lwa-insight-desc">' + (i.descricao || '') + '</div>';
+                html += '    <div class="lwa-insight-title">' + titulo + '</div>';
+                html += '    <div class="lwa-insight-desc">' + descricao + '</div>';
                 html += '  </div>';
                 html += '</div>';
             });
@@ -1140,6 +1168,9 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             var score = parseInt(l.interesse_score) || 0;
             var scorePct = Math.min(100, Math.round((score / 200) * 100));
 
+            var daysInFunnel = l.date_added ? Math.floor((Date.now() - new Date(l.date_added).getTime()) / 86400000) : 0;
+            var icpScore = parseInt(l.icp_score) || 0;
+
             var html = '<div style="padding:4px 0">';
 
             // === HEADER ===
@@ -1151,6 +1182,15 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             if (l.email) html += '    <div style="font-size:13px;color:var(--lwa-gray-400);margin-top:4px"><i class="ri-mail-line" style="margin-right:4px"></i>'+l.email+'</div>';
             html += '  </div>';
             html += '  <span class="lwa-badge lwa-badge--'+temp+'" style="font-size:13px;padding:5px 12px">'+(l.temperatura||'—')+'</span>';
+            html += '</div>';
+
+            // === META BADGES ===
+            html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
+            if (l.segmento) html += '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:#ede9fe;color:#7c3aed;font-weight:600">' + l.segmento + '</span>';
+            if (icpScore > 0) html += '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:' + (icpScore >= 70 ? '#dcfce7;color:#16a34a' : '#fef3c7;color:#d97706') + ';font-weight:600">ICP: ' + icpScore + '%</span>';
+            if (daysInFunnel > 0) html += '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--lwa-gray-50);color:var(--lwa-gray-500);font-weight:600">Há ' + daysInFunnel + ' dias no funil</span>';
+            if (l.responsavel_comercial) html += '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:#f0f9ff;color:#0369a1;font-weight:600"><i class="ri-user-line"></i> ' + l.responsavel_comercial + '</span>';
+            if (l.motivo_perda && (l.status_comercial||'').toLowerCase() === 'perdido') html += '<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:#fef2f2;color:#dc2626;font-weight:600">Perda: ' + l.motivo_perda + '</span>';
             html += '</div>';
 
             // === SCORE BAR ===
@@ -1171,11 +1211,13 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             }
 
             // === AÇÕES RÁPIDAS ===
-            html += '<div style="display:flex;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
-            if (l.phone) html += '<a href="https://wa.me/55'+(l.phone||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0"><i class="ri-whatsapp-line"></i> WhatsApp</a>';
-            html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
-            html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
-            html += '<button onclick="Mautic.lwaPushToCrm('+l.id+',\''+name.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#f0f9ff;color:#0369a1;font-size:13px;font-weight:600;border:1px solid #bae6fd;cursor:pointer"><i class="ri-send-plane-line"></i> Enviar CRM</button>';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--lwa-gray-100)">';
+            if (l.phone) html += '<button onclick="Mautic.lwaWhatsAppModal('+l.id+',\''+(l.phone||'').replace(/[^0-9]/g,'').replace(/'/g,"\\'")+'\',\''+Mautic.lwaEsc(name)+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;text-decoration:none;border:1px solid #bbf7d0;cursor:pointer"><i class="ri-whatsapp-line"></i> WhatsApp</button>';
+            html += '<button onclick="Mautic.lwaEmailLead('+l.id+',\''+(l.email||'').replace(/'/g,"\\'")+'\',\''+Mautic.lwaEsc(name)+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#eff6ff;color:#3b82f6;font-size:13px;font-weight:600;border:1px solid #bfdbfe;cursor:pointer"><i class="ri-mail-send-line"></i> E-mail</button>';
+            html += '<button onclick="Mautic.lwaScheduleFollowup('+l.id+',\''+Mautic.lwaEsc(name)+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:var(--lwa-gray-50);color:var(--lwa-gray-700);font-size:13px;font-weight:600;border:1px solid var(--lwa-gray-200);cursor:pointer"><i class="ri-calendar-todo-line"></i> Follow-up</button>';
+            html += '<button onclick="Mautic.lwaPushToCrm('+l.id+',\''+Mautic.lwaEsc(name)+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#f0f9ff;color:#0369a1;font-size:13px;font-weight:600;border:1px solid #bae6fd;cursor:pointer"><i class="ri-send-plane-line"></i> Enviar CRM</button>';
+            html += '<button onclick="Mautic.lwaCalendarModal('+l.id+',\''+Mautic.lwaEsc(name)+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:600;border:1px solid #bbf7d0;cursor:pointer"><i class="ri-calendar-check-line"></i> Reunião</button>';
+            html += '<button onclick="Mautic.lwaCnpjModal('+l.id+',\''+Mautic.lwaEsc(name)+'\',\''+(l.company||'').replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#faf5ff;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-building-2-line"></i> CNPJ</button>';
             html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Quente\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#fef3c7;color:#d97706;font-size:13px;font-weight:600;border:1px solid #fde68a;cursor:pointer"><i class="ri-fire-line"></i> Quente</button>';
             html += '<button onclick="Mautic.lwaUpdateLead('+l.id+',\'temperatura\',\'Prioritário\')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:#ede9fe;color:#7c3aed;font-size:13px;font-weight:600;border:1px solid #ddd6fe;cursor:pointer"><i class="ri-vip-crown-line"></i> Prioritário</button>';
             html += '</div>';
@@ -1193,6 +1235,21 @@ Mautic.lwaOpenLeadModal = function(leadId) {
             // === CAMPANHAS (carrega async) ===
             html += '<div id="lwa-lead-campaigns" style="margin-bottom:16px"></div>';
 
+            // === SMART ALERT ===
+            var tempLower = (l.temperatura||'').toLowerCase().replace('á','a');
+            var alertMsg = '';
+            if ((tempLower === 'quente' || tempLower === 'prioritario') && (!l.data_proximo_followup || l.data_proximo_followup < new Date().toISOString().substring(0,10))) {
+                alertMsg = '<div style="display:flex;gap:8px;align-items:center;padding:10px 14px;background:#fef2f2;border-radius:8px;border-left:3px solid #dc2626;margin-bottom:12px;font-size:12px;color:#991b1b"><i class="ri-alarm-warning-line" style="font-size:16px;color:#dc2626;flex-shrink:0"></i><span><strong>Ação urgente:</strong> Lead ' + (l.temperatura||'quente') + ' sem follow-up agendado. Agende contato para não perder a janela.</span></div>';
+            } else if (l.data_ultima_interacao) {
+                var diasSem = Math.floor((Date.now() - new Date(l.data_ultima_interacao).getTime()) / 86400000);
+                if (diasSem > 14) {
+                    alertMsg = '<div style="display:flex;gap:8px;align-items:center;padding:10px 14px;background:#fffbeb;border-radius:8px;border-left:3px solid #f59e0b;margin-bottom:12px;font-size:12px;color:#92400e"><i class="ri-time-line" style="font-size:16px;color:#f59e0b;flex-shrink:0"></i><span><strong>' + diasSem + ' dias sem interação.</strong> Risco de esfriar — considere reativação ou novo canal.</span></div>';
+                } else if (diasSem > 7 && tempLower !== 'frio') {
+                    alertMsg = '<div style="display:flex;gap:8px;align-items:center;padding:10px 14px;background:#f0f9ff;border-radius:8px;border-left:3px solid #3b82f6;margin-bottom:12px;font-size:12px;color:#1e40af"><i class="ri-information-line" style="font-size:16px;color:#3b82f6;flex-shrink:0"></i><span>' + diasSem + ' dias sem interação. Bom momento para follow-up.</span></div>';
+                }
+            }
+            html += alertMsg;
+
             // === IA & MENSAGENS ===
             html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
             html += '<button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest('+l.id+')"><i class="ri-sparkling-line"></i> IA: Próxima Ação</button>';
@@ -1205,6 +1262,8 @@ Mautic.lwaOpenLeadModal = function(leadId) {
                 html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaGeneratePlaybook('+l.id+',\'diagnostico\')"><i class="ri-stethoscope-line"></i> Follow-up</button>';
             }
             html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaShowTimeline('+l.id+')"><i class="ri-time-line"></i> Timeline</button>';
+            html += '<button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaPredictiveScore('+l.id+')"><i class="ri-bar-chart-grouped-line"></i> Score Preditivo</button>';
+            html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaAutoClassify('+l.id+')"><i class="ri-robot-line"></i> Auto-classificar</button>';
             html += '</div>';
 
             // AI suggestion placeholder
@@ -1218,7 +1277,7 @@ Mautic.lwaOpenLeadModal = function(leadId) {
 
             // Load campaigns async
             mQuery.ajax({
-                url: '/s/analytics/lead/' + leadId + '?include=campaigns',
+                url: '/s/analytics/lead/' + leadId + '/campaigns',
                 dataType: 'json',
                 success: function(cRes) {
                     var camps = cRes.campaigns || [];
@@ -1283,7 +1342,8 @@ Mautic.lwaSendEmail = function(leadId) {
         success: function(res) {
             if (res.success) {
                 Mautic.lwaToast(res.message);
-                Mautic.lwaCloseModal();
+                Mautic.lwaIaCoach(leadId, 'email_enviado', subject + ': ' + body.substring(0, 100));
+                Mautic.lwaOpenLeadModal(leadId);
             } else {
                 Mautic.lwaToast(res.error || 'Erro ao enviar');
             }
@@ -1293,60 +1353,103 @@ Mautic.lwaSendEmail = function(leadId) {
 };
 
 Mautic.lwaAiEmailSuggest = function(leadId) {
-    mQuery('#lwa-email-body').val('Gerando sugestão...');
+    mQuery('#lwa-email-subject').attr('disabled', true);
+    mQuery('#lwa-email-body').attr('disabled', true).val('Gerando email com IA...');
     mQuery.ajax({
-        url: '/s/analytics/ai/suggest/' + leadId,
+        url: '/s/analytics/ai/generate-email/' + leadId,
         dataType: 'json',
         success: function(res) {
-            var s = res.suggestion;
-            if (s.mensagem_followup) {
-                mQuery('#lwa-email-body').val(s.mensagem_followup);
-                if (!mQuery('#lwa-email-subject').val()) {
-                    mQuery('#lwa-email-subject').val(s.proxima_acao || 'Follow-up');
-                }
-                Mautic.lwaToast('Mensagem gerada pela IA');
+            mQuery('#lwa-email-subject').attr('disabled', false);
+            mQuery('#lwa-email-body').attr('disabled', false);
+            if (res.error) {
+                mQuery('#lwa-email-body').val('');
+                Mautic.lwaToast(res.error);
+                return;
             }
+            if (res.assunto) mQuery('#lwa-email-subject').val(res.assunto);
+            if (res.corpo) mQuery('#lwa-email-body').val(res.corpo.replace(/\\n/g, '\n'));
+            Mautic.lwaToast('Email gerado — cenário: ' + (res.cenario_detectado || 'auto'));
         },
-        error: function() { mQuery('#lwa-email-body').val(''); Mautic.lwaToast('Erro ao consultar IA'); }
+        error: function() {
+            mQuery('#lwa-email-subject').attr('disabled', false);
+            mQuery('#lwa-email-body').attr('disabled', false).val('');
+            Mautic.lwaToast('Erro ao gerar email com IA');
+        }
     });
 };
 
 Mautic.lwaScheduleFollowup = function(leadId, name) {
-    var tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 2);
-    var defaultDate = tomorrow.toISOString().split('T')[0];
+    var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    var in3 = new Date(); in3.setDate(in3.getDate() + 3);
+    var in7 = new Date(); in7.setDate(in7.getDate() + 7);
+
+    function fmtDate(d) { return d.toISOString().split('T')[0]; }
+    function fmtLabel(d) { var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']; return dias[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1); }
 
     mQuery('#lwa-modal-title').text('Agendar Follow-up');
     var html = '<div class="lwa-form-section">';
-    html += '<div class="lwa-form-header"><i class="ri-calendar-todo-line"></i> ' + name + '</div>';
-    html += '<div class="lwa-form-group"><label>Data do Follow-up</label><input type="date" id="lwa-followup-date" class="lwa-input" value="' + defaultDate + '"></div>';
-    html += '<div class="lwa-form-group"><label>Observação (opcional)</label><textarea id="lwa-followup-note" class="lwa-textarea" rows="3" placeholder="Ex: Enviar proposta revisada, ligar para confirmar reunião..."></textarea></div>';
-    html += '<div class="lwa-form-info"><i class="ri-notification-3-line"></i> Você receberá uma notificação 1 dia antes.</div>';
+    html += '<div class="lwa-form-header" style="display:flex;align-items:center;gap:10px"><i class="ri-calendar-todo-line" style="font-size:20px;color:#7c3aed"></i> <span>' + name + '</span></div>';
+
+    html += '<div class="lwa-form-group"><label style="font-size:12px;font-weight:600;color:var(--lwa-gray-500);margin-bottom:8px">Quando?</label>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
+    html += '<div class="lwa-date-chip active" onclick="Mautic.lwaSelectFollowupDate(this,\'' + fmtDate(tomorrow) + '\')"><div style="font-size:16px;font-weight:700">Amanhã</div><div style="font-size:11px;color:var(--lwa-gray-400)">' + fmtLabel(tomorrow) + '</div></div>';
+    html += '<div class="lwa-date-chip" onclick="Mautic.lwaSelectFollowupDate(this,\'' + fmtDate(in3) + '\')"><div style="font-size:16px;font-weight:700">+3 dias</div><div style="font-size:11px;color:var(--lwa-gray-400)">' + fmtLabel(in3) + '</div></div>';
+    html += '<div class="lwa-date-chip" onclick="Mautic.lwaSelectFollowupDate(this,\'' + fmtDate(in7) + '\')"><div style="font-size:16px;font-weight:700">+7 dias</div><div style="font-size:11px;color:var(--lwa-gray-400)">' + fmtLabel(in7) + '</div></div>';
+    html += '<div class="lwa-date-chip" onclick="mQuery(\'#lwa-followup-custom\').toggle();mQuery(\'.lwa-date-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><div style="font-size:14px;font-weight:700"><i class="ri-calendar-line"></i></div><div style="font-size:11px;color:var(--lwa-gray-400)">Escolher</div></div>';
+    html += '</div>';
+    html += '<input type="date" id="lwa-followup-custom" class="lwa-input" style="display:none;margin-top:8px" onchange="mQuery(\'#lwa-followup-date\').val(this.value)">';
+    html += '<input type="hidden" id="lwa-followup-date" value="' + fmtDate(tomorrow) + '">';
+    html += '</div>';
+
+    html += '<div class="lwa-form-group"><label style="font-size:12px;font-weight:600;color:var(--lwa-gray-500);margin-bottom:8px">Tipo de ação</label>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    html += '<label class="lwa-action-chip active" onclick="mQuery(\'.lwa-action-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-followup-tipo" value="ligar" checked style="display:none"><i class="ri-phone-line"></i> Ligar</label>';
+    html += '<label class="lwa-action-chip" onclick="mQuery(\'.lwa-action-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-followup-tipo" value="email" style="display:none"><i class="ri-mail-line"></i> Email</label>';
+    html += '<label class="lwa-action-chip" onclick="mQuery(\'.lwa-action-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-followup-tipo" value="whatsapp" style="display:none"><i class="ri-whatsapp-line"></i> WhatsApp</label>';
+    html += '<label class="lwa-action-chip" onclick="mQuery(\'.lwa-action-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-followup-tipo" value="reuniao" style="display:none"><i class="ri-video-chat-line"></i> Reunião</label>';
+    html += '<label class="lwa-action-chip" onclick="mQuery(\'.lwa-action-chip\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-followup-tipo" value="linkedin" style="display:none"><i class="ri-linkedin-line"></i> LinkedIn</label>';
+    html += '</div></div>';
+
+    html += '<div class="lwa-form-group"><label style="font-size:12px;font-weight:600;color:var(--lwa-gray-500)">Observação</label><textarea id="lwa-followup-note" class="lwa-textarea" rows="2" placeholder="Ex: Enviar proposta revisada, confirmar reunião..."></textarea></div>';
+    html += '<div style="padding:10px 12px;background:#faf5ff;border-radius:8px;border-left:3px solid #7c3aed;margin-bottom:16px;font-size:12px;color:#6b21a8"><i class="ri-notification-3-line"></i> Notificação automática 1 dia antes no sino do dashboard.</div>';
     html += '<div class="lwa-form-actions">';
-    html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaConfirmFollowup(' + leadId + ')"><i class="ri-check-line"></i> Agendar</button>';
+    html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaConfirmFollowup(' + leadId + ')"><i class="ri-calendar-check-line"></i> Agendar</button>';
     html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Voltar</button>';
     html += '</div></div>';
 
-    mQuery('#lwa-modal-title').text('Agendar Follow-up');
     mQuery('#lwa-modal-body').html(html);
     mQuery('#lwa-lead-modal').show();
+};
+
+Mautic.lwaSelectFollowupDate = function(el, date) {
+    mQuery('.lwa-date-chip').removeClass('active');
+    mQuery(el).addClass('active');
+    mQuery('#lwa-followup-date').val(date);
+    mQuery('#lwa-followup-custom').hide();
 };
 
 Mautic.lwaConfirmFollowup = function(leadId) {
     var date = mQuery('#lwa-followup-date').val();
     var note = mQuery('#lwa-followup-note').val().trim();
+    var tipo = mQuery('input[name="lwa-followup-tipo"]:checked').val() || 'ligar';
     if (!date) { Mautic.lwaToast('Selecione uma data'); return; }
+    var today = new Date().toISOString().split('T')[0];
+    if (date < today) { Mautic.lwaToast('Data não pode ser no passado'); return; }
+
+    var fullNote = '[' + tipo.toUpperCase() + '] ' + (note || '');
 
     mQuery.ajax({
         url: '/s/analytics/action/followup',
         method: 'POST',
-        data: { lead_id: leadId, date: date, note: note },
+        data: { lead_id: leadId, date: date, note: fullNote.trim() },
         headers: {'X-CSRF-Token': mauticAjaxCsrf},
         dataType: 'json',
         success: function(res) {
             if (res.success) {
                 Mautic.lwaToast(res.message);
-                Mautic.lwaCloseModal();
+                Mautic.lwaOpenLeadModal(leadId);
+                // Refresh notification count
+                Mautic.lwaLoadNotifications();
             } else {
                 Mautic.lwaToast(res.error || 'Erro ao agendar');
             }
@@ -1360,28 +1463,42 @@ Mautic.lwaConfirmFollowup = function(leadId) {
  */
 Mautic.lwaAiSuggest = function(leadId) {
     var $result = mQuery('#lwa-ai-result');
-    $result.html('<div class="lwa-ai-loading"><i class="ri-sparkling-line ri-spin"></i> Consultando IA...</div>');
+    $result.html('<div class="lwa-ai-loading"><i class="ri-sparkling-line ri-spin"></i> Analisando lead com IA...</div>');
 
     mQuery.ajax({
         url: '/s/analytics/ai/suggest/' + leadId,
         dataType: 'json',
+        timeout: 25000,
         success: function(res) {
             var s = res.suggestion;
-            if (s.error) { $result.html('<div class="lwa-ai-error">' + s.error + '</div>'); return; }
+            if (s.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + s.error + '</div>'); return; }
+
+            var probColor = s.probabilidade_conversao === 'Alta' ? '#10b981' : s.probabilidade_conversao === 'Media' ? '#f59e0b' : '#dc2626';
 
             var html = '<div class="lwa-ai-card">';
-            html += '<div class="lwa-ai-header"><i class="ri-sparkling-line"></i> Sugestão da IA</div>';
-            html += '<div class="lwa-ai-row"><strong>Próxima Ação:</strong> ' + (s.proxima_acao || '-') + '</div>';
-            html += '<div class="lwa-ai-row"><strong>Intenção:</strong> ' + (s.intencao || '-') + '</div>';
-            html += '<div class="lwa-ai-row"><strong>Probabilidade:</strong> ' + (s.probabilidade_conversao || '-') + '</div>';
-            html += '<div class="lwa-ai-row"><strong>Dica:</strong> ' + (s.dica_comercial || '-') + '</div>';
-            html += '<div class="lwa-ai-message"><strong>Mensagem sugerida:</strong><p>' + (s.mensagem_followup || '-') + '</p></div>';
-            html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + (s.mensagem_followup || '').replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar Mensagem</button>';
+            html += '<div class="lwa-ai-header"><i class="ri-sparkling-line"></i> Análise Estratégica IA</div>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0">';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Intenção</div><div style="font-size:13px;font-weight:600;margin-top:3px">' + (s.intencao || '-') + '</div></div>';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Probabilidade</div><div style="font-size:13px;font-weight:700;margin-top:3px;color:' + probColor + '">' + (s.probabilidade_conversao || '-') + '</div></div>';
+            html += '</div>';
+            html += '<div style="padding:12px;background:#f0fdf4;border-radius:8px;border-left:3px solid #10b981;margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;margin-bottom:4px">Próxima Ação</div><div style="font-size:14px;font-weight:600;color:#15803d">' + (s.proxima_acao || '-') + '</div></div>';
+            if (s.dica_comercial && s.dica_comercial !== '-') {
+                html += '<div style="font-size:12px;color:var(--lwa-gray-500);margin-bottom:12px;padding-left:12px;border-left:2px solid var(--lwa-gray-200)"><strong>Dica:</strong> ' + s.dica_comercial + '</div>';
+            }
+            if (s.mensagem_followup && s.mensagem_followup !== '-') {
+                html += '<div style="padding:12px;background:var(--lwa-gray-50);border-radius:8px;border-left:3px solid #7c3aed;margin-bottom:10px"><div style="font-size:10px;font-weight:600;color:#7c3aed;text-transform:uppercase;margin-bottom:4px">Mensagem sugerida</div><p style="margin:0;font-size:13px;line-height:1.6;color:var(--lwa-gray-700)">' + s.mensagem_followup + '</p></div>';
+                html += '<div style="display:flex;gap:6px">';
+                html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + (s.mensagem_followup || '').replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
+                html += '<button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaAiSuggest(' + leadId + ')"><i class="ri-refresh-line"></i> Regenerar</button>';
+                html += '</div>';
+            }
             html += '</div>';
             $result.html(html);
         },
-        error: function() {
-            $result.html('<div class="lwa-ai-error">Erro ao consultar IA</div>');
+        error: function(xhr) {
+            var msg = 'Erro ao consultar IA.';
+            if (xhr.status === 0) msg = 'Timeout — a IA demorou. Tente novamente.';
+            $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + msg + '</div>');
         }
     });
 };
@@ -1417,11 +1534,13 @@ Mautic.lwaCloseModal = function() {
     mQuery('#lwa-lead-modal').hide();
 };
 
-Mautic.lwaToast = function(message) {
-    var $toast = mQuery('<div class="lwa-toast">' + message + '</div>');
-    mQuery('body').append($toast);
-    setTimeout(function() { $toast.addClass('lwa-toast--visible'); }, 10);
-    setTimeout(function() { $toast.removeClass('lwa-toast--visible'); setTimeout(function() { $toast.remove(); }, 300); }, 3000);
+Mautic.lwaToast = function(message, type) {
+    if (!mQuery('.lwa-toast-container').length) mQuery('body').append('<div class="lwa-toast-container"></div>');
+    type = type || (message.toLowerCase().indexOf('erro') > -1 ? 'error' : 'success');
+    var icons = {success:'ri-check-line', error:'ri-error-warning-line', warning:'ri-alert-line', info:'ri-information-line'};
+    var $toast = mQuery('<div class="lwa-toast-item lwa-toast-item--' + type + '"><i class="' + (icons[type]||icons.info) + '"></i> ' + message + '<div class="lwa-toast-progress"></div></div>');
+    mQuery('.lwa-toast-container').append($toast);
+    setTimeout(function() { $toast.css('opacity','0'); setTimeout(function() { $toast.remove(); }, 300); }, 3500);
 };
 
 /**
@@ -1510,26 +1629,39 @@ Mautic.lwaConfirmEnrich = function(leadId) {
  */
 Mautic.lwaGeneratePlaybook = function(leadId, tipo) {
     var $result = mQuery('#lwa-ai-result');
-    $result.html('<div class="lwa-ai-loading"><i class="ri-file-text-line ri-spin"></i> Gerando mensagem...</div>');
+    var tipoLabels = {'inicial_linkedin':'LinkedIn','diagnostico':'Diagnóstico','reativacao':'Reativação','checklist':'Conteúdo'};
+    $result.html('<div class="lwa-ai-loading"><i class="ri-sparkling-line ri-spin"></i> IA gerando ' + (tipoLabels[tipo]||tipo) + '...</div>');
 
     mQuery.ajax({
         url: '/s/analytics/ai/tab/playbook_' + tipo + '_' + leadId,
         dataType: 'json',
+        timeout: 25000,
         success: function(res) {
             var data = res.analysis || res;
-            if (data.error) { $result.html('<div class="lwa-ai-error">' + data.error + '</div>'); return; }
+            if (data.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + data.error + '</div>'); return; }
 
             var msg = data.message || '';
             var html = '<div class="lwa-ai-card">';
-            html += '<div class="lwa-ai-header"><i class="ri-file-text-line"></i> Playbook: ' + (data.tipo || tipo) + '</div>';
-            html += '<div class="lwa-ai-message"><p style="white-space:pre-line">' + msg + '</p></div>';
-            html += '<div style="display:flex;gap:6px;margin-top:10px">';
-            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + msg.replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
+            html += '<div class="lwa-ai-header"><i class="ri-sparkling-line"></i> ' + (tipoLabels[tipo]||tipo) + ' — gerado por IA</div>';
+            html += '<div class="lwa-ai-message" style="padding:14px;background:var(--lwa-gray-50);border-radius:10px;border-left:3px solid #7c3aed;margin:10px 0"><p style="white-space:pre-line;line-height:1.6;margin:0;font-size:14px">' + msg + '</p></div>';
+            if (data.contexto) {
+                html += '<div style="font-size:12px;color:var(--lwa-gray-400);margin-bottom:10px;padding-left:14px;border-left:2px solid var(--lwa-gray-200)"><em>' + data.contexto + '</em></div>';
+            }
+            if (tipo === 'inicial_linkedin') {
+                html += '<div style="font-size:11px;color:var(--lwa-gray-400);margin-bottom:8px">' + msg.length + '/280 caracteres</div>';
+            }
+            html += '<div style="display:flex;gap:6px;margin-top:8px">';
+            html += '  <button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + msg.replace(/"/g, '&quot;').replace(/\n/g, '&#10;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
+            html += '  <button class="lwa-modal-action-btn lwa-modal-action-btn--ai" onclick="Mautic.lwaGeneratePlaybook(' + leadId + ',\'' + tipo + '\')"><i class="ri-refresh-line"></i> Regenerar</button>';
             html += '</div>';
             html += '</div>';
             $result.html(html);
         },
-        error: function() { $result.html('<div class="lwa-ai-error">Erro ao gerar playbook.</div>'); }
+        error: function(xhr) {
+            var msg = 'Erro ao gerar mensagem.';
+            if (xhr.status === 0) msg = 'Timeout — tente novamente.';
+            $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + msg + '</div>');
+        }
     });
 };
 
@@ -1541,33 +1673,49 @@ Mautic.lwaShowTimeline = function(leadId) {
     $container.html('<div class="lwa-ai-loading"><i class="ri-time-line ri-spin"></i> Carregando timeline...</div>');
 
     mQuery.ajax({
-        url: '/s/analytics/lead/' + leadId + '?include=timeline',
+        url: '/s/analytics/lead/' + leadId + '/timeline',
         dataType: 'json',
+        timeout: 15000,
         success: function(res) {
             var items = res.timeline || [];
-            if (!items.length) { $container.html('<p style="text-align:center;color:var(--lwa-gray-400);padding:12px">Sem histórico.</p>'); return; }
+            if (!items.length) { $container.html('<div style="text-align:center;padding:20px;color:var(--lwa-gray-400)"><i class="ri-time-line" style="font-size:24px;display:block;margin-bottom:8px"></i>Sem histórico registrado.</div>'); return; }
 
-            var icons = { note: 'ri-sticky-note-line', email: 'ri-mail-line', page: 'ri-globe-line', form: 'ri-file-edit-line', download: 'ri-download-2-line' };
-            var colors = { note: '#64748b', email: '#3b82f6', page: '#10b981', form: '#7c3aed', download: '#f59e0b' };
+            var icons = { note: 'ri-sticky-note-line', email: 'ri-mail-line', page: 'ri-globe-line', form: 'ri-file-edit-line', download: 'ri-download-2-line', score: 'ri-arrow-up-circle-line', push: 'ri-send-plane-line', whatsapp: 'ri-whatsapp-line' };
+            var colors = { note: '#64748b', email: '#3b82f6', page: '#10b981', form: '#7c3aed', download: '#f59e0b', score: '#9333ea', push: '#0369a1', whatsapp: '#25d366' };
 
             var html = '<div class="lwa-timeline">';
-            html += '<div class="lwa-ai-header" style="margin-top:16px"><i class="ri-time-line"></i> Timeline</div>';
+            html += '<div class="lwa-ai-header" style="margin-top:16px"><i class="ri-time-line"></i> Timeline <span style="font-size:11px;color:var(--lwa-gray-400);font-weight:400">(' + items.length + ' eventos)</span></div>';
+
+            items.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+
             items.forEach(function(item) {
                 var icon = icons[item.type] || 'ri-record-circle-line';
                 var color = colors[item.type] || '#94a3b8';
-                var date = item.date ? new Date(item.date).toLocaleDateString('pt-BR') + ' ' + new Date(item.date).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '';
+                var date = '';
+                if (item.date) {
+                    try {
+                        var d = new Date(item.date);
+                        if (!isNaN(d.getTime())) {
+                            date = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+                        }
+                    } catch(e) {}
+                }
+                var safeText = (item.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 html += '<div class="lwa-timeline-item">';
-                html += '  <div class="lwa-timeline-icon" style="color:' + color + '"><i class="' + icon + '"></i></div>';
+                html += '  <div class="lwa-timeline-icon" style="color:' + color + ';background:' + color + '12"><i class="' + icon + '"></i></div>';
                 html += '  <div class="lwa-timeline-content">';
-                html += '    <div class="lwa-timeline-text">' + (item.text || '') + '</div>';
-                html += '    <div class="lwa-timeline-meta">' + date + (item.user ? ' · ' + item.user : '') + '</div>';
+                html += '    <div class="lwa-timeline-text">' + safeText + '</div>';
+                html += '    <div class="lwa-timeline-meta">' + date + (item.user && item.user !== 'system' ? ' · ' + item.user : '') + '</div>';
                 html += '  </div>';
                 html += '</div>';
             });
             html += '</div>';
             $container.html(html);
         },
-        error: function() { $container.html('<p style="color:#dc2626;padding:12px">Erro ao carregar timeline.</p>'); }
+        error: function(xhr) {
+            var msg = xhr.status === 0 ? 'Timeout — tente novamente.' : 'Erro ao carregar timeline.';
+            $container.html('<div style="color:#dc2626;padding:12px;text-align:center"><i class="ri-error-warning-line"></i> ' + msg + '</div>');
+        }
     });
 };
 
@@ -1581,14 +1729,22 @@ Mautic.lwaLeadSummary = function(leadId) {
     mQuery.ajax({
         url: '/s/analytics/ai/tab/summary_' + leadId,
         dataType: 'json',
+        timeout: 25000,
         success: function(res) {
             var s = res.analysis || res.summary || {};
-            if (s.error) { $result.html('<div class="lwa-ai-error">' + s.error + '</div>'); return; }
+            if (s.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + s.error + '</div>'); return; }
+            if (!s.resumo && !s.proxima_acao && !s.titulo) {
+                $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> IA não retornou dados. Verifique a GEMINI_API_KEY.</div>');
+                return;
+            }
 
             var html = '<div class="lwa-ai-card">';
             html += '<div class="lwa-ai-header"><i class="ri-file-list-3-line"></i> Resumo Consolidado</div>';
-            if (s.resumo) html += '<div class="lwa-ai-row" style="margin-bottom:12px">' + s.resumo + '</div>';
+            if (s.resumo) html += '<div class="lwa-ai-row" style="margin-bottom:12px;line-height:1.6">' + s.resumo + '</div>';
 
+            if (s.principais_interacoes && s.principais_interacoes.length) {
+                html += '<div class="lwa-ai-row"><strong>Interações:</strong> ' + s.principais_interacoes.join(' • ') + '</div>';
+            }
             if (s.dores_identificadas && s.dores_identificadas.length) {
                 html += '<div class="lwa-ai-row"><strong>Dores:</strong> ' + s.dores_identificadas.join(', ') + '</div>';
             }
@@ -1596,18 +1752,22 @@ Mautic.lwaLeadSummary = function(leadId) {
                 html += '<div class="lwa-ai-row"><strong>Objeções:</strong> ' + s.objecoes.join(', ') + '</div>';
             }
             if (s.proxima_acao) html += '<div class="lwa-ai-row"><strong>Próxima Ação:</strong> ' + s.proxima_acao + '</div>';
-            if (s.justificativa_acao) html += '<div class="lwa-ai-row"><strong>Justificativa:</strong> ' + s.justificativa_acao + '</div>';
-            if (s.probabilidade) html += '<div class="lwa-ai-row"><strong>Probabilidade:</strong> ' + s.probabilidade + '</div>';
+            if (s.justificativa_acao) html += '<div class="lwa-ai-row" style="color:var(--lwa-gray-500);font-size:12px"><em>' + s.justificativa_acao + '</em></div>';
+            if (s.probabilidade) html += '<div class="lwa-ai-row"><strong>Probabilidade:</strong> <span style="font-weight:700;color:' + (s.probabilidade === 'Alta' ? '#10b981' : s.probabilidade === 'Media' ? '#f59e0b' : '#dc2626') + '">' + s.probabilidade + '</span></div>';
 
             if (s.mensagem_sugerida) {
-                html += '<div class="lwa-ai-message"><strong>Mensagem sugerida:</strong><p>' + s.mensagem_sugerida + '</p></div>';
-                html += '<button class="lwa-modal-action-btn" onclick="Mautic.lwaCopyText(this)" data-text="' + (s.mensagem_sugerida || '').replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar</button>';
+                html += '<div class="lwa-ai-message" style="margin-top:12px;padding:12px;background:var(--lwa-gray-50);border-radius:8px;border-left:3px solid #7c3aed"><strong style="font-size:11px;text-transform:uppercase;color:var(--lwa-gray-400)">Mensagem sugerida:</strong><p style="margin:6px 0 0;line-height:1.5">' + s.mensagem_sugerida + '</p></div>';
+                html += '<button class="lwa-modal-action-btn" style="margin-top:8px" onclick="Mautic.lwaCopyText(this)" data-text="' + (s.mensagem_sugerida || '').replace(/"/g, '&quot;') + '"><i class="ri-file-copy-line"></i> Copiar mensagem</button>';
             }
 
             html += '</div>';
             $result.html(html);
         },
-        error: function() { $result.html('<div class="lwa-ai-error">Erro ao gerar resumo.</div>'); }
+        error: function(xhr) {
+            var msg = 'Erro ao gerar resumo.';
+            if (xhr.status === 0) msg = 'Timeout — a IA demorou demais. Tente novamente.';
+            $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + msg + '</div>');
+        }
     });
 };
 
@@ -1644,23 +1804,188 @@ Mautic.lwaFilterLeads = function(query) {
 };
 
 /**
- * Push Lead to CRM
+ * Push Lead to CRM — Modal
  */
 Mautic.lwaPushToCrm = function(leadId, leadName) {
-    var responsavel = prompt('Responsável comercial que receberá o lead:', '');
-    if (!responsavel) return;
+    mQuery('#lwa-modal-title').text('Enviar para CRM');
+    var html = '<div class="lwa-form-section">';
+    html += '<div class="lwa-form-header" style="display:flex;align-items:center;gap:10px"><i class="ri-send-plane-line" style="font-size:20px;color:#0369a1"></i> <span>' + leadName + '</span></div>';
+    html += '<div style="margin:16px 0;padding:14px;background:#f0f9ff;border-radius:10px;border-left:3px solid #0369a1">';
+    html += '<div style="font-size:12px;font-weight:600;color:#0369a1;margin-bottom:4px">O que acontece ao enviar?</div>';
+    html += '<div style="font-size:12px;color:var(--lwa-gray-600);line-height:1.5">O lead será atribuído ao responsável selecionado e receberá o evento de atribuição no CRM.</div>';
+    html += '</div>';
+    html += '<div class="lwa-form-group"><label>Responsável Comercial</label><input type="text" id="lwa-crm-responsavel" class="lwa-input" placeholder="Nome do responsável que receberá o lead" autocomplete="off"></div>';
+    html += '<div class="lwa-form-group"><label>Prioridade</label>';
+    html += '<div style="display:flex;gap:8px">';
+    html += '<label class="lwa-radio-card" onclick="mQuery(\'.lwa-radio-card\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-crm-prioridade" value="alta" style="display:none"><i class="ri-fire-line" style="color:#dc2626"></i> Alta</label>';
+    html += '<label class="lwa-radio-card active" onclick="mQuery(\'.lwa-radio-card\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-crm-prioridade" value="media" checked style="display:none"><i class="ri-flashlight-line" style="color:#f59e0b"></i> Média</label>';
+    html += '<label class="lwa-radio-card" onclick="mQuery(\'.lwa-radio-card\').removeClass(\'active\');mQuery(this).addClass(\'active\')"><input type="radio" name="lwa-crm-prioridade" value="baixa" style="display:none"><i class="ri-timer-line" style="color:#10b981"></i> Baixa</label>';
+    html += '</div></div>';
+    html += '<div class="lwa-form-group"><label>Observação (opcional)</label><textarea id="lwa-crm-obs" class="lwa-textarea" rows="2" placeholder="Ex: Lead quente, já pediu proposta..."></textarea></div>';
+    html += '<div class="lwa-form-actions">';
+    html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaConfirmPushCrm(' + leadId + ')"><i class="ri-send-plane-line"></i> Enviar para CRM</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Cancelar</button>';
+    html += '</div></div>';
+
+    mQuery('#lwa-modal-body').html(html);
+    mQuery('#lwa-lead-modal').show();
+    setTimeout(function() { mQuery('#lwa-crm-responsavel').focus(); }, 100);
+};
+
+Mautic.lwaConfirmPushCrm = function(leadId) {
+    var responsavel = mQuery('#lwa-crm-responsavel').val().trim();
+    if (!responsavel) { Mautic.lwaToast('Informe o responsável'); mQuery('#lwa-crm-responsavel').focus(); return; }
+    var prioridade = mQuery('input[name="lwa-crm-prioridade"]:checked').val() || 'media';
+    var obs = mQuery('#lwa-crm-obs').val().trim();
+
     mQuery.ajax({
         url: '/s/analytics/action/update-lead',
         method: 'POST',
-        data: { lead_id: leadId, field: 'webhook_event', source: 'analytics', event: 'letswork.meeting.scheduled', responsavel_comercial: responsavel },
+        data: { lead_id: leadId, field: 'webhook_event', source: 'analytics', event: 'letswork.meeting.scheduled', responsavel_comercial: responsavel, prioridade: prioridade, observacao: obs },
         headers: {'X-CSRF-Token': mauticAjaxCsrf},
         dataType: 'json',
         success: function(res) {
-            Mautic.lwaToast(res.success ? 'Lead enviado para ' + responsavel : (res.error || 'Erro'));
-            if (res.success) Mautic.lwaOpenLeadModal(leadId);
+            if (res.success) {
+                Mautic.lwaToast('Lead enviado para ' + responsavel + ' (' + prioridade + ')');
+                Mautic.lwaOpenLeadModal(leadId);
+            } else {
+                Mautic.lwaToast(res.error || 'Erro ao enviar');
+            }
+        },
+        error: function() { Mautic.lwaToast('Erro de conexão'); }
+    });
+};
+
+/**
+ * Notification Bell
+ */
+Mautic.lwaToggleNotifications = function() {
+    var $dropdown = mQuery('#lwa-notif-dropdown');
+    if ($dropdown.is(':visible')) { $dropdown.hide(); return; }
+    $dropdown.html('<div class="lwa-notif-empty"><i class="ri-loader-3-line ri-spin"></i></div>').show();
+    Mautic.lwaLoadNotifications();
+};
+
+Mautic.lwaLoadNotifications = function() {
+    mQuery.ajax({
+        url: '/s/analytics/notifications',
+        dataType: 'json',
+        success: function(res) {
+            var totalCount = res.count || 0;
+
+            // Also fetch smart alerts
+            mQuery.ajax({
+                url: '/s/analytics/smart-alerts',
+                dataType: 'json',
+                success: function(alertRes) {
+                    var alerts = alertRes.alerts || [];
+                    totalCount += alerts.length;
+                    var $badge = mQuery('#lwa-notif-badge');
+                    if (totalCount > 0) { $badge.text(totalCount > 99 ? '99+' : totalCount).show(); } else { $badge.hide(); }
+
+                    var html = '<div class="lwa-notif-header"><span><i class="ri-notification-3-line"></i> Central de Alertas</span><span style="font-size:11px;color:var(--lwa-gray-400)">' + totalCount + ' itens</span></div>';
+                    html += '<div class="lwa-notif-list">';
+
+                    // Smart Alerts (priority)
+                    var severityColors = {critical:'#dc2626', high:'#f59e0b', medium:'#3b82f6'};
+                    alerts.slice(0, 5).forEach(function(a) {
+                        var color = severityColors[a.severity] || '#64748b';
+                        html += '<div class="lwa-notif-item" style="border-left:3px solid ' + color + '" onclick="Mautic.lwaOpenLeadModal(' + a.lead_id + ');mQuery(\'#lwa-notif-dropdown\').hide()">';
+                        html += '<div class="lwa-notif-icon" style="color:' + color + '"><i class="' + (a.icon||'ri-alert-line') + '"></i></div>';
+                        html += '<div class="lwa-notif-body"><div class="lwa-notif-title">' + a.title + '</div><div class="lwa-notif-meta">' + (a.action||a.description) + '</div></div>';
+                        html += '</div>';
+                    });
+
+                    // Follow-ups
+                    if (res.followups && res.followups.length) {
+                        if (alerts.length) html += '<div style="padding:6px 16px;font-size:10px;font-weight:700;color:var(--lwa-gray-400);text-transform:uppercase;border-top:1px solid var(--lwa-gray-100)">Follow-ups</div>';
+                        res.followups.forEach(function(l) {
+                            var name = ((l.firstname||'') + ' ' + (l.lastname||'')).trim() || l.company || 'Lead';
+                            var date = l.data_proximo_followup ? l.data_proximo_followup.substring(0, 10) : '';
+                            var isOverdue = date && date < new Date().toISOString().substring(0, 10);
+                            var dateLabel = isOverdue ? 'Vencido ' + date.split('-').reverse().join('/') : date.split('-').reverse().join('/');
+                            var cls = isOverdue ? 'overdue' : 'today';
+                            html += '<div class="lwa-notif-item lwa-notif-item--' + cls + '" onclick="Mautic.lwaOpenLeadModal(' + l.id + ');mQuery(\'#lwa-notif-dropdown\').hide()">';
+                            html += '<div class="lwa-notif-icon lwa-notif-icon--' + cls + '"><i class="ri-calendar-check-line"></i></div>';
+                            html += '<div class="lwa-notif-body"><div class="lwa-notif-title">' + name + '</div><div class="lwa-notif-meta">' + dateLabel + ' • ' + (l.company||'') + '</div></div>';
+                            html += '</div>';
+                        });
+                    }
+
+                    if (res.hot_no_followup > 0) {
+                        html += '<div class="lwa-notif-item lwa-notif-item--overdue" onclick="Mautic.lwaShowKpiDetail(\'hot_no_followup\',\'Sem Follow-up\');mQuery(\'#lwa-notif-dropdown\').hide()">';
+                        html += '<div class="lwa-notif-icon lwa-notif-icon--hot"><i class="ri-fire-line"></i></div>';
+                        html += '<div class="lwa-notif-body"><div class="lwa-notif-title">' + res.hot_no_followup + ' leads quentes sem ação</div><div class="lwa-notif-meta">Clique para ver</div></div>';
+                        html += '</div>';
+                    }
+
+                    if (!alerts.length && (!res.followups || !res.followups.length) && !res.hot_no_followup) {
+                        html += '<div class="lwa-notif-empty"><i class="ri-check-double-line" style="font-size:24px;margin-bottom:8px;display:block"></i>Tudo em dia!</div>';
+                    }
+
+                    html += '</div>';
+                    mQuery('#lwa-notif-dropdown').html(html);
+                },
+                error: function() {
+                    // Fallback: show just follow-ups without alerts
+                    Mautic.lwaRenderNotifFallback(res);
+                }
+            });
+        },
+        error: function() {
+            mQuery('#lwa-notif-dropdown').html('<div class="lwa-notif-empty">Erro ao carregar</div>');
         }
     });
 };
+
+Mautic.lwaRenderNotifFallback = function(res) {
+    var count = res.count || 0;
+    var $badge = mQuery('#lwa-notif-badge');
+    if (count > 0) { $badge.text(count).show(); } else { $badge.hide(); }
+    var html = '<div class="lwa-notif-header"><span>Lembretes</span><span style="font-size:11px;color:var(--lwa-gray-400)">' + count + '</span></div><div class="lwa-notif-list">';
+    if (res.followups && res.followups.length) {
+        res.followups.forEach(function(l) {
+            var name = ((l.firstname||'') + ' ' + (l.lastname||'')).trim() || l.company || 'Lead';
+            html += '<div class="lwa-notif-item" onclick="Mautic.lwaOpenLeadModal(' + l.id + ');mQuery(\'#lwa-notif-dropdown\').hide()"><div class="lwa-notif-body"><div class="lwa-notif-title">' + name + '</div></div></div>';
+        });
+    }
+    html += '</div>';
+    mQuery('#lwa-notif-dropdown').html(html);
+};
+
+// Auto-load notification count on page load
+mQuery(document).ready(function() {
+    // Load notification badge count
+    mQuery.ajax({
+        url: '/s/analytics/notifications',
+        dataType: 'json',
+        success: function(res) {
+            var count = res.count || 0;
+            if (count > 0) mQuery('#lwa-notif-badge').text(count).show();
+        }
+    });
+    // Auto-load Smart Alerts + AI Insights if on overview tab
+    if (mQuery('#lwa-smart-alerts').length) {
+        Mautic.lwaLoadSmartAlerts();
+    }
+    if (mQuery('#lwa-insights').length) {
+        setTimeout(function() { Mautic.lwaLoadInsights(); }, 800);
+    }
+    // Close dropdown on outside click
+    mQuery(document).on('click', function(e) {
+        if (!mQuery(e.target).closest('.lwa-notification-bell').length) {
+            mQuery('#lwa-notif-dropdown').hide();
+        }
+    });
+    // Keyboard shortcuts
+    mQuery(document).on('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        if (e.key === 'k' && !e.ctrlKey) { window.location.href = mQuery('.lwa-tab[href*="kanban"]').attr('href') || '#'; }
+        if (e.key === 'i' && !e.ctrlKey) { window.location.href = mQuery('.lwa-tab[href*="inbox"]').attr('href') || '#'; }
+        if (e.key === 'o' && !e.ctrlKey) { window.location.href = mQuery('.lwa-tab[href*="overview"]').attr('href') || '#'; }
+        if (e.key === '/' && !e.ctrlKey) { e.preventDefault(); mQuery('.lwa-search input').first().focus(); }
+    });
+});
 
 /**
  * Export CSV
@@ -1692,4 +2017,346 @@ Mautic.lwaHexToRgba = function(hex, alpha) {
     var g = parseInt(hex.slice(3, 5), 16);
     var b = parseInt(hex.slice(5, 7), 16);
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+};
+
+/**
+ * Predictive Score — AI probability to close
+ */
+Mautic.lwaPredictiveScore = function(leadId) {
+    var $result = mQuery('#lwa-ai-result');
+    $result.html('<div class="lwa-ai-loading"><i class="ri-bar-chart-grouped-line ri-spin"></i> Calculando probabilidade...</div>');
+
+    mQuery.ajax({
+        url: '/s/analytics/ai/predictive-score/' + leadId,
+        dataType: 'json',
+        timeout: 10000,
+        success: function(res) {
+            if (res.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + res.error + '</div>'); return; }
+            if (res.probability === null) { $result.html('<div class="lwa-ai-error">' + (res.reason || 'Dados insuficientes') + '</div>'); return; }
+
+            var prob = res.probability;
+            var color = prob >= 70 ? '#10b981' : prob >= 40 ? '#f59e0b' : '#dc2626';
+            var label = prob >= 70 ? 'Alta' : prob >= 40 ? 'Média' : 'Baixa';
+
+            var html = '<div class="lwa-ai-card">';
+            html += '<div class="lwa-ai-header"><i class="ri-bar-chart-grouped-line"></i> Score Preditivo</div>';
+            html += '<div style="text-align:center;margin:16px 0">';
+            html += '<div style="font-size:48px;font-weight:800;color:' + color + '">' + prob + '%</div>';
+            html += '<div style="font-size:13px;color:var(--lwa-gray-500)">Probabilidade de fechar (' + label + ')</div>';
+            html += '</div>';
+            html += '<div class="lwa-predictive-bar"><div class="lwa-predictive-fill" style="width:' + prob + '%;background:' + color + '"></div></div>';
+
+            if (res.factors && res.factors.length) {
+                html += '<div class="lwa-predictive-factors" style="margin-top:14px">';
+                res.factors.forEach(function(f) {
+                    var fColor = f.positive ? '#10b981' : '#dc2626';
+                    var fIcon = f.positive ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line';
+                    html += '<div class="lwa-predictive-factor lwa-predictive-factor--' + (f.positive?'positive':'negative') + '">';
+                    html += '<i class="' + fIcon + '"></i> <span style="color:' + fColor + ';font-weight:600">' + f.impact + '</span> ' + f.label;
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            if (res.data_quality) html += '<div style="font-size:10px;color:var(--lwa-gray-400);margin-top:10px;text-align:center">Baseado em ' + res.data_quality + '</div>';
+            html += '</div>';
+            $result.html(html);
+        },
+        error: function() { $result.html('<div class="lwa-ai-error">Erro ao calcular score preditivo</div>'); }
+    });
+};
+
+/**
+ * Auto-classify Lead via IA
+ */
+Mautic.lwaAutoClassify = function(leadId) {
+    var $result = mQuery('#lwa-ai-result');
+    $result.html('<div class="lwa-ai-loading"><i class="ri-robot-line ri-spin"></i> Classificando lead com IA...</div>');
+
+    mQuery.ajax({
+        url: '/s/analytics/ai/auto-classify/' + leadId,
+        dataType: 'json',
+        timeout: 25000,
+        success: function(res) {
+            if (res.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + res.error + '</div>'); return; }
+
+            var c = res.classification || {};
+            var html = '<div class="lwa-ai-card">';
+            html += '<div class="lwa-ai-header"><i class="ri-robot-line"></i> Auto-classificação IA</div>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0">';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Segmento</div><div style="font-size:14px;font-weight:700;margin-top:3px;color:#7c3aed">' + (c.segmento || '-') + '</div></div>';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Módulo Provável</div><div style="font-size:14px;font-weight:700;margin-top:3px">' + (c.modulo_provavel || '-') + '</div></div>';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">ICP Score</div><div style="font-size:14px;font-weight:700;margin-top:3px;color:' + ((c.icp_score||0) >= 70 ? '#10b981' : '#f59e0b') + '">' + (c.icp_score || '0') + '/100</div></div>';
+            html += '<div style="padding:10px 12px;background:var(--lwa-gray-50);border-radius:8px"><div style="font-size:10px;font-weight:600;color:var(--lwa-gray-400);text-transform:uppercase">Temperatura</div><div style="font-size:14px;font-weight:700;margin-top:3px">' + (c.temperatura_sugerida || '-') + '</div></div>';
+            html += '</div>';
+            if (c.icp_justificativa) html += '<div style="font-size:12px;color:var(--lwa-gray-500);padding:8px 12px;border-left:2px solid #7c3aed"><em>' + c.icp_justificativa + '</em></div>';
+            if (c.perfil) html += '<div style="font-size:12px;margin-top:8px;padding:8px 12px;background:#f0fdf4;border-radius:6px;color:#166534"><strong>Perfil:</strong> ' + c.perfil + '</div>';
+            html += '<div style="margin-top:10px;text-align:center"><span style="background:#dcfce7;color:#16a34a;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600"><i class="ri-check-line"></i> Lead atualizado</span></div>';
+            html += '</div>';
+            $result.html(html);
+        },
+        error: function() { $result.html('<div class="lwa-ai-error">Erro ao classificar lead</div>'); }
+    });
+};
+
+/**
+ * WhatsApp Modal — Send via API or fallback to wa.me
+ */
+Mautic.lwaWhatsAppModal = function(leadId, phone, name) {
+    mQuery('#lwa-modal-title').text('WhatsApp');
+    var waLink = 'https://wa.me/55' + phone;
+    var html = '<div class="lwa-form-section">';
+    html += '<div class="lwa-form-header" style="display:flex;align-items:center;gap:10px"><i class="ri-whatsapp-line" style="font-size:20px;color:#25d366"></i> <span>' + name + '</span></div>';
+    html += '<div class="lwa-form-meta"><i class="ri-phone-line"></i> +55 ' + phone + '</div>';
+    html += '<div class="lwa-form-group"><label>Mensagem</label><textarea id="lwa-wa-message" class="lwa-textarea" rows="4" placeholder="Olá ' + (name.split(' ')[0]) + ', tudo bem?..."></textarea></div>';
+    html += '<div class="lwa-form-actions">';
+    html += '  <button class="lwa-btn" style="background:#25d366;color:white" onclick="Mautic.lwaSendWhatsApp(' + leadId + ')"><i class="ri-send-plane-line"></i> Enviar via API</button>';
+    html += '  <a href="' + waLink + '" target="_blank" class="lwa-btn lwa-btn--ghost" style="text-decoration:none"><i class="ri-external-link-line"></i> Abrir WhatsApp Web</a>';
+    html += '  <button class="lwa-btn lwa-btn--ai" onclick="Mautic.lwaGenerateWaMessage(' + leadId + ')"><i class="ri-sparkling-line"></i> Gerar com IA</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Voltar</button>';
+    html += '</div></div>';
+
+    mQuery('#lwa-modal-body').html(html);
+    mQuery('#lwa-lead-modal').show();
+};
+
+Mautic.lwaSendWhatsApp = function(leadId) {
+    var message = mQuery('#lwa-wa-message').val().trim();
+    if (!message) { Mautic.lwaToast('Escreva uma mensagem'); return; }
+
+    mQuery.ajax({
+        url: '/s/analytics/action/send-whatsapp',
+        method: 'POST',
+        data: { lead_id: leadId, message: message },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
+        dataType: 'json',
+        success: function(res) {
+            if (res.success) {
+                Mautic.lwaToast(res.message);
+                Mautic.lwaIaCoach(leadId, 'whatsapp_enviado', message.substring(0, 100));
+                Mautic.lwaOpenLeadModal(leadId);
+            } else {
+                Mautic.lwaToast(res.error || 'Erro ao enviar');
+            }
+        },
+        error: function() { Mautic.lwaToast('Erro de conexão'); }
+    });
+};
+
+Mautic.lwaGenerateWaMessage = function(leadId) {
+    mQuery('#lwa-wa-message').val('Gerando mensagem...');
+    mQuery.ajax({
+        url: '/s/analytics/ai/tab/playbook_inicial_linkedin_' + leadId,
+        dataType: 'json',
+        success: function(res) {
+            var data = res.analysis || res;
+            mQuery('#lwa-wa-message').val(data.message || 'Erro ao gerar');
+        },
+        error: function() { mQuery('#lwa-wa-message').val(''); }
+    });
+};
+
+/**
+ * Smart Alerts Panel — AI-driven notifications
+ */
+Mautic.lwaLoadSmartAlerts = function() {
+    var $container = mQuery('#lwa-smart-alerts');
+    if (!$container.length) return;
+    $container.html('<div style="text-align:center;padding:16px;color:var(--lwa-gray-400)"><i class="ri-loader-3-line ri-spin"></i> Analisando sinais...</div>');
+
+    mQuery.ajax({
+        url: '/s/analytics/smart-alerts',
+        dataType: 'json',
+        success: function(res) {
+            var alerts = res.alerts || [];
+            if (!alerts.length) {
+                $container.html('<div style="text-align:center;padding:20px;color:var(--lwa-gray-400);font-size:13px"><i class="ri-check-double-line" style="font-size:20px;display:block;margin-bottom:6px"></i>Nenhum alerta no momento.</div>');
+                return;
+            }
+
+            var severityColors = {critical: '#dc2626', high: '#f59e0b', medium: '#3b82f6'};
+            var severityBg = {critical: '#fef2f2', high: '#fffbeb', medium: '#eff6ff'};
+
+            var shown = alerts.slice(0, 5);
+            var html = '<div style="display:flex;flex-direction:column;gap:6px">';
+            shown.forEach(function(a) {
+                var color = severityColors[a.severity] || '#64748b';
+                var bg = severityBg[a.severity] || '#f8fafc';
+                html += '<div class="lwa-smart-alert" style="display:flex;gap:10px;padding:10px 14px;background:' + bg + ';border-radius:8px;border-left:3px solid ' + color + ';cursor:pointer" onclick="Mautic.lwaOpenLeadModal(' + a.lead_id + ')">';
+                html += '<i class="' + a.icon + '" style="font-size:14px;color:' + color + ';margin-top:1px;flex-shrink:0"></i>';
+                html += '<div style="flex:1;min-width:0">';
+                html += '<div style="font-size:12px;font-weight:600;color:var(--lwa-gray-800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.title + '</div>';
+                html += '<div style="font-size:11px;color:' + color + ';margin-top:2px">' + (a.action||a.description) + '</div>';
+                html += '</div></div>';
+            });
+            if (alerts.length > 5) {
+                html += '<div style="text-align:center;padding:6px;font-size:11px;color:var(--lwa-gray-400)">+ ' + (alerts.length - 5) + ' mais alertas no sino <i class="ri-notification-3-line"></i></div>';
+            }
+            html += '</div>';
+            $container.html(html);
+        },
+        error: function() { $container.html('<div style="color:#dc2626;font-size:12px;padding:12px">Erro ao carregar alertas</div>'); }
+    });
+};
+
+/**
+ * Trigger Mautic Campaign from modal
+ */
+Mautic.lwaTriggerCampaign = function(leadId, action, label) {
+    mQuery.ajax({
+        url: '/s/analytics/action/trigger-campaign',
+        method: 'POST',
+        data: { lead_id: leadId, action: action },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
+        dataType: 'json',
+        success: function(res) {
+            Mautic.lwaToast(res.success ? res.message : (res.error || 'Erro'));
+            if (res.success) Mautic.lwaOpenLeadModal(leadId);
+        },
+        error: function() { Mautic.lwaToast('Erro de conexão'); }
+    });
+};
+
+/**
+ * IA Coach — Feedback pós-interação
+ */
+Mautic.lwaIaCoach = function(leadId, action, content) {
+    setTimeout(function() {
+        mQuery.ajax({
+            url: '/s/analytics/ai/coach/' + leadId + '?action=' + encodeURIComponent(action) + '&content=' + encodeURIComponent(content || ''),
+            dataType: 'json',
+            timeout: 15000,
+            success: function(res) {
+                if (res.error || !res.feedback) return;
+                var nota = parseInt(res.nota) || 7;
+                var color = nota >= 8 ? '#10b981' : nota >= 5 ? '#f59e0b' : '#dc2626';
+                var html = '<div style="position:fixed;bottom:20px;right:20px;width:320px;background:white;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.15);border:1px solid var(--lwa-gray-200);z-index:9999;padding:16px;animation:lwa-slideInRight 0.3s ease" id="lwa-coach-popup">';
+                html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i class="ri-robot-line" style="font-size:18px;color:#7c3aed"></i><strong style="font-size:13px">Coach IA</strong><span style="margin-left:auto;font-size:12px;font-weight:700;color:' + color + '">' + nota + '/10</span></div>';
+                html += '<div style="font-size:12px;color:var(--lwa-gray-700);line-height:1.5;margin-bottom:8px">' + res.feedback + '</div>';
+                if (res.sugestao) html += '<div style="font-size:11px;color:#7c3aed;font-weight:600"><i class="ri-lightbulb-line"></i> ' + res.sugestao + (res.timing ? ' (' + res.timing + ')' : '') + '</div>';
+                html += '<button onclick="mQuery(\'#lwa-coach-popup\').remove()" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--lwa-gray-400);font-size:16px"><i class="ri-close-line"></i></button>';
+                html += '</div>';
+                mQuery('#lwa-coach-popup').remove();
+                mQuery('body').append(html);
+                setTimeout(function() { mQuery('#lwa-coach-popup').remove(); }, 12000);
+            }
+        });
+    }, 1500);
+};
+
+/**
+ * Google Calendar — Schedule meeting from modal
+ */
+Mautic.lwaCalendarModal = function(leadId, leadName) {
+    var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    var defaultDate = tomorrow.toISOString().split('T')[0];
+
+    mQuery('#lwa-modal-title').text('Agendar Reunião');
+    var html = '<div class="lwa-form-section">';
+    html += '<div class="lwa-form-header" style="display:flex;align-items:center;gap:10px"><i class="ri-calendar-check-line" style="font-size:20px;color:#10b981"></i> <span>' + leadName + '</span></div>';
+    html += '<div style="padding:12px;background:#f0fdf4;border-radius:10px;border-left:3px solid #10b981;margin-bottom:16px;font-size:12px;color:#166534"><i class="ri-information-line"></i> A reunião será criada no Google Calendar e o lead avança para "Reunião Agendada".</div>';
+    html += '<div class="lwa-form-group"><label>Título</label><input type="text" id="lwa-cal-title" class="lwa-input" placeholder="Reunião de diagnóstico" value="Reunião — ' + leadName + '"></div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+    html += '<div class="lwa-form-group"><label>Data</label><input type="date" id="lwa-cal-date" class="lwa-input" value="' + defaultDate + '"></div>';
+    html += '<div class="lwa-form-group"><label>Horário</label><input type="time" id="lwa-cal-time" class="lwa-input" value="10:00"></div>';
+    html += '<div class="lwa-form-group"><label>Duração</label><select id="lwa-cal-duration" class="lwa-input"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hora</option></select></div>';
+    html += '</div>';
+    html += '<div class="lwa-form-group"><label>Observações (opcional)</label><textarea id="lwa-cal-desc" class="lwa-textarea" rows="2" placeholder="Pauta, links de acesso, notas..."></textarea></div>';
+    html += '<div class="lwa-form-actions">';
+    html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaCreateCalendarEvent(' + leadId + ')"><i class="ri-calendar-check-line"></i> Criar no Google Calendar</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Cancelar</button>';
+    html += '</div></div>';
+
+    mQuery('#lwa-modal-body').html(html);
+    mQuery('#lwa-lead-modal').show();
+};
+
+Mautic.lwaCreateCalendarEvent = function(leadId) {
+    var data = {
+        lead_id: leadId,
+        title: mQuery('#lwa-cal-title').val().trim(),
+        date: mQuery('#lwa-cal-date').val(),
+        time: mQuery('#lwa-cal-time').val(),
+        duration: mQuery('#lwa-cal-duration').val(),
+        description: mQuery('#lwa-cal-desc').val().trim()
+    };
+    if (!data.date) { Mautic.lwaToast('Selecione uma data'); return; }
+
+    mQuery.ajax({
+        url: '/s/analytics/action/calendar-event',
+        method: 'POST',
+        data: data,
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
+        dataType: 'json',
+        success: function(res) {
+            if (res.success) {
+                Mautic.lwaToast(res.message);
+                window.open(res.calendar_url, '_blank');
+                Mautic.lwaOpenLeadModal(leadId);
+            } else {
+                Mautic.lwaToast(res.error || 'Erro');
+            }
+        },
+        error: function() { Mautic.lwaToast('Erro de conexão'); }
+    });
+};
+
+/**
+ * CNPJ Enrichment — Fetch company data
+ */
+Mautic.lwaCnpjModal = function(leadId, leadName, company) {
+    mQuery('#lwa-modal-title').text('Enriquecer via CNPJ');
+    var html = '<div class="lwa-form-section">';
+    html += '<div class="lwa-form-header" style="display:flex;align-items:center;gap:10px"><i class="ri-building-2-line" style="font-size:20px;color:#7c3aed"></i> <span>' + (company || leadName) + '</span></div>';
+    html += '<div style="padding:12px;background:#faf5ff;border-radius:10px;border-left:3px solid #7c3aed;margin-bottom:16px;font-size:12px;color:#6b21a8"><i class="ri-sparkling-line"></i> Consulta gratuita — puxa dados oficiais da Receita Federal (razão social, porte, segmento, sócios, capital social).</div>';
+    html += '<div class="lwa-form-group"><label>CNPJ da Empresa</label><input type="text" id="lwa-cnpj-input" class="lwa-input" placeholder="00.000.000/0001-00" maxlength="18" oninput="this.value=this.value.replace(/\\D/g,\'\').replace(/(\\d{2})(\\d)/,\'$1.$2\').replace(/(\\d{3})(\\d)/,\'$1.$2\').replace(/(\\d{3})(\\d)/,\'$1/$2\').replace(/(\\d{4})(\\d)/,\'$1-$2\')"></div>';
+    html += '<div id="lwa-cnpj-result"></div>';
+    html += '<div class="lwa-form-actions">';
+    html += '  <button class="lwa-btn lwa-btn--primary" onclick="Mautic.lwaEnrichCnpj(' + leadId + ')"><i class="ri-search-line"></i> Consultar CNPJ</button>';
+    html += '  <button class="lwa-btn lwa-btn--ghost" onclick="Mautic.lwaOpenLeadModal(' + leadId + ')">Voltar</button>';
+    html += '</div></div>';
+
+    mQuery('#lwa-modal-body').html(html);
+    mQuery('#lwa-lead-modal').show();
+    setTimeout(function() { mQuery('#lwa-cnpj-input').focus(); }, 100);
+};
+
+Mautic.lwaEnrichCnpj = function(leadId) {
+    var cnpj = mQuery('#lwa-cnpj-input').val().replace(/\D/g, '');
+    if (cnpj.length !== 14) { Mautic.lwaToast('CNPJ deve ter 14 dígitos'); return; }
+
+    var $result = mQuery('#lwa-cnpj-result');
+    $result.html('<div style="text-align:center;padding:16px;color:var(--lwa-gray-400)"><i class="ri-loader-3-line ri-spin"></i> Consultando Receita Federal...</div>');
+
+    mQuery.ajax({
+        url: '/s/analytics/action/enrich-cnpj',
+        method: 'POST',
+        data: { lead_id: leadId, cnpj: cnpj },
+        headers: {'X-CSRF-Token': mauticAjaxCsrf},
+        dataType: 'json',
+        success: function(res) {
+            if (res.error) { $result.html('<div class="lwa-ai-error"><i class="ri-error-warning-line"></i> ' + res.error + '</div>'); return; }
+
+            var d = res.data;
+            var html = '<div style="margin-top:16px;padding:16px;background:var(--lwa-gray-50);border-radius:10px">';
+            html += '<div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--lwa-gray-800)">' + (d.razao_social || '-') + '</div>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">';
+            html += '<div><span style="color:var(--lwa-gray-400)">Fantasia:</span> ' + (d.nome_fantasia || '-') + '</div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Porte:</span> <strong>' + (d.porte || '-') + '</strong></div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Segmento:</span> <strong style="color:#7c3aed">' + (d.segmento || '-') + '</strong></div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Capital Social:</span> R$ ' + (d.capital_social ? parseFloat(d.capital_social).toLocaleString('pt-BR') : '-') + '</div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Atividade:</span> ' + (d.atividade_principal || '-') + '</div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Local:</span> ' + (d.municipio || '') + '/' + (d.uf || '') + '</div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Situação:</span> ' + (d.situacao || '-') + '</div>';
+            html += '<div><span style="color:var(--lwa-gray-400)">Abertura:</span> ' + (d.abertura || '-') + '</div>';
+            html += '</div>';
+            if (d.socios && d.socios.length) {
+                html += '<div style="margin-top:10px;font-size:12px"><span style="color:var(--lwa-gray-400)">Sócios:</span> ' + d.socios.join(', ') + '</div>';
+            }
+            html += '<div style="margin-top:12px;text-align:center"><span style="background:#dcfce7;color:#16a34a;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600"><i class="ri-check-line"></i> Lead atualizado com sucesso</span></div>';
+            html += '</div>';
+            $result.html(html);
+            Mautic.lwaToast('Lead enriquecido com dados do CNPJ');
+        },
+        error: function() { $result.html('<div class="lwa-ai-error">Erro de conexão</div>'); }
+    });
 };

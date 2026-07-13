@@ -2,8 +2,12 @@ import ssl
 import socket
 import threading
 import requests
+import urllib3
 from concurrent.futures import ThreadPoolExecutor
 from crawler.lead_scorer import calculate_score
+
+# Desabilita avisos de SSL inseguro para limpar os logs do servidor
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class SiteVerifier:

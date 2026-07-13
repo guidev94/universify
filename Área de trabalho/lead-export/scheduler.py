@@ -552,7 +552,12 @@ class ParallelScheduler:
             self.pipeline.submit_for_verification(saved_ids)
 
         if self.event_bus and saved_count > 0:
-            self.event_bus.publish("job_completed", {"uuid": job_uuid, "keyword": keyword, "found": saved_count})
+            self.event_bus.publish("job_completed", {
+                "uuid": job_uuid, 
+                "keyword": keyword, 
+                "found": saved_count,
+                "type": "campaign" if campaign_name else "auto"
+            })
 
         return saved_count
 

@@ -32,6 +32,7 @@ def list_leads():
     has_pixel = request.args.get("has_pixel", "").strip()
     site_quality = request.args.get("site_quality", "").strip() or None
     created_days = request.args.get("created_days", type=int)
+    is_qualified = request.args.get("qualified", "").strip()
 
     per_page = min(per_page, 100)
 
@@ -47,6 +48,7 @@ def list_leads():
         has_ads=True if has_ads == '1' else False if has_ads == '0' else None,
         has_pixel=True if has_pixel == '1' else False if has_pixel == '0' else None,
         site_quality=site_quality,
+        is_qualified=True if is_qualified == '1' else False if is_qualified == '0' else None,
     )
 
     return jsonify({
@@ -76,6 +78,19 @@ def update_lead(lead_id):
     if not success:
         return jsonify({"error": "Status inválido"}), 400
     return jsonify({"ok": True})
+
+
+@bp.route("/api/leads/<int:lead_id>/qualify", methods=["PATCH"])
+def qualify_lead(lead_id):
+    success, new_val = Lead.toggle_qualified(lead_id)
+    if not success:
+        return jsonify({"error": "Lead não encontrado"}), 404
+    
+    # Log activity
+    Activity.log(lead_id, "lead_qualified" if new_val else "lead_unqualified", 
+                 "Lead marcado como qualificado" if new_val else "Lead desmarcado como qualificado")
+    
+    return jsonify({"ok": True, "is_qualified": bool(new_val)})
 
 
 @bp.route("/api/leads/<int:lead_id>/close", methods=["PATCH"])
@@ -316,6 +331,58 @@ def bulk_status_update():
             UPDATE leads SET status = ?, updated_at = datetime('now', 'localtime')
             WHERE status = ?
         """, (to_status, from_status))
+    
+    count = conn.execute("SELECT changes()").fetchone()[0]
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"updated": count})
+
+
+@bp.route("/api/leads/bulk-update", methods=["PATCH"])
+def bulk_update_leads():
+    data = request.get_json()
+    if not data or "ids" not in data:
+        return jsonify({"error": "IDs obrigatórios"}), 400
+
+    ids = [int(i) for i in data["ids"] if str(i).isdigit()]
+    status = data.get("status")
+    qualify = data.get("qualify") # True to qualify, False to unqualify, None to skip
+    
+    if not ids:
+        return jsonify({"updated": 0})
+
+    conn = get_connection()
+    placeholders = ",".join("?" * len(ids))
+    
+    updates = []
+    params = []
+    
+    if status:
+        allowed = {"new", "contacted", "negotiating", "closed_won", "closed_lost"}
+        if status in allowed:
+            updates.append("status = ?")
+            params.append(status)
+            
+            if status == "contacted":
+                updates.append("contacted_at = datetime('now', 'localtime')")
+            elif status in ("closed_won", "closed_lost"):
+                updates.append("closed_at = datetime('now', 'localtime')")
+    
+    if qualify is not None:
+        updates.append("is_qualified = ?")
+        params.append(1 if qualify else 0)
+
+    if not updates:
+        conn.close()
+        return jsonify({"error": "Nenhuma ação informada"}), 400
+
+    updates.append("updated_at = datetime('now', 'localtime')")
+    
+    conn.execute(
+        f"UPDATE leads SET {', '.join(updates)} WHERE id IN ({placeholders})",
+        params + ids
+    )
     
     count = conn.execute("SELECT changes()").fetchone()[0]
     conn.commit()

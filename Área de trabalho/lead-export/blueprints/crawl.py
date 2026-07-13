@@ -153,7 +153,8 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
 
         job_start = time.time()
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        # Aumentado para 8 para permitir que todas as fontes rodem em paralelo real
+        with ThreadPoolExecutor(max_workers=8) as executor:
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
 
             try:
@@ -245,7 +246,12 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
         Keyword.track(query, location, saved_count)
 
         if event_bus:
-            event_bus.publish("job_completed", {"uuid": job_uuid, "keyword": query, "found": saved_count})
+            event_bus.publish("job_completed", {
+                "uuid": job_uuid, 
+                "keyword": query, 
+                "found": saved_count,
+                "type": "manual"
+            })
             if saved_count > 0:
                 from models import Lead as _L
                 stats = _L.get_stats()

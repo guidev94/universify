@@ -10,7 +10,7 @@
   --color-surface: #FFFFFF;
   --color-surface-alt: #F8FAFC;
   --color-text: #0F172A;
-  --color-muted: #64748B;
+  --color-muted: #475569;
   --color-footer: #134E4A;
 
   --font-clash: 'Clash Display', sans-serif;
@@ -39,6 +39,7 @@
     color: var(--color-text);
     background: var(--color-surface);
     overflow-x: hidden;
+    font-size: 16px;
   }
 
   ::selection {
@@ -124,6 +125,15 @@
 
   .animate-float {
     animation: float 6s ease-in-out infinite;
+  }
+}
+
+@keyframes whatsapp-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(37, 211, 102, 0);
   }
 }
 

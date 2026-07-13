@@ -11,7 +11,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class AnalyticsController extends CommonController
 {
-    private const VALID_TABS = ['overview', 'conversao', 'segmentos', 'pipeline', 'perdas', 'utm'];
+    private const VALID_TABS = ['overview', 'conversao', 'segmentos', 'pipeline', 'perdas', 'utm', 'kanban', 'inbox'];
 
     private AnalyticsModel $analyticsModel;
 
@@ -105,6 +105,189 @@ class AnalyticsController extends CommonController
 
         $suggestion = $this->analyticsModel->getAiSuggestion($lead);
         return new JsonResponse(['suggestion' => $suggestion]);
+    }
+
+    public function aiGenerateEmailAction(Request $request, int $leadId): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $result = $this->analyticsModel->generateEmailForLead($leadId);
+        return new JsonResponse($result);
+    }
+
+    public function notificationsAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $result = $this->analyticsModel->getPendingFollowups();
+        return new JsonResponse($result);
+    }
+
+    public function smartAlertsAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        return new JsonResponse($this->analyticsModel->getSmartAlerts());
+    }
+
+    public function campaignWebhookAction(Request $request): JsonResponse
+    {
+        $event = $request->request->get('event', $request->get('event', ''));
+        $leadId = (int) ($request->request->get('lead_id', $request->get('lead_id', 0)));
+        $data = $request->request->all() ?: $request->query->all();
+
+        $token = $request->headers->get('X-Webhook-Token', $request->get('token', ''));
+        $expectedToken = getenv('ANALYTICS_WEBHOOK_TOKEN') ?: ($_ENV['ANALYTICS_WEBHOOK_TOKEN'] ?? '');
+        if ($expectedToken && $token !== $expectedToken) {
+            return new JsonResponse(['error' => 'Token inválido'], 401);
+        }
+
+        if (!$event || !$leadId) {
+            return new JsonResponse(['error' => 'event e lead_id obrigatórios'], 400);
+        }
+
+        $result = $this->analyticsModel->processCampaignWebhook($event, $leadId, $data);
+        return new JsonResponse($result);
+    }
+
+    public function triggerCampaignAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $leadId = (int) $request->request->get('lead_id');
+        $action = $request->request->get('action', '');
+
+        if (!$leadId || !$action) {
+            return new JsonResponse(['error' => 'lead_id e action obrigatórios'], 400);
+        }
+
+        return new JsonResponse($this->analyticsModel->triggerMauticCampaignAction($leadId, $action));
+    }
+
+    public function sendWhatsAppAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $leadId = (int) $request->request->get('lead_id');
+        $message = $request->request->get('message', '');
+        $template = $request->request->get('template', '');
+
+        if (!$leadId || !$message) {
+            return new JsonResponse(['error' => 'lead_id e message obrigatórios'], 400);
+        }
+
+        return new JsonResponse($this->analyticsModel->sendWhatsApp($leadId, $message, $template));
+    }
+
+    public function createCalendarEventAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $leadId = (int) $request->request->get('lead_id');
+        if (!$leadId) return new JsonResponse(['error' => 'lead_id obrigatório'], 400);
+
+        $eventData = [
+            'title' => $request->request->get('title', ''),
+            'date' => $request->request->get('date', ''),
+            'time' => $request->request->get('time', '10:00'),
+            'duration' => $request->request->get('duration', 30),
+            'description' => $request->request->get('description', ''),
+        ];
+
+        return new JsonResponse($this->analyticsModel->createCalendarEvent($leadId, $eventData));
+    }
+
+    public function enrichCnpjAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        $leadId = (int) $request->request->get('lead_id');
+        $cnpj = $request->request->get('cnpj', '');
+
+        if (!$leadId || !$cnpj) {
+            return new JsonResponse(['error' => 'lead_id e cnpj obrigatórios'], 400);
+        }
+
+        return new JsonResponse($this->analyticsModel->enrichLeadByCnpj($leadId, $cnpj));
+    }
+
+    public function cadenciasAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        return new JsonResponse(['cadencias' => $this->analyticsModel->getCadencias()]);
+    }
+
+    public function createCadenciaAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        $nome = $request->request->get('nome', '');
+        $steps = json_decode($request->request->get('steps', '[]'), true);
+        $descricao = $request->request->get('descricao', '');
+        if (!$nome || empty($steps)) return new JsonResponse(['error' => 'nome e steps obrigatórios'], 400);
+        return new JsonResponse($this->analyticsModel->createCadencia($nome, $steps, $descricao));
+    }
+
+    public function addLeadCadenciaAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        $leadId = (int)$request->request->get('lead_id');
+        $cadenciaId = (int)$request->request->get('cadencia_id');
+        if (!$leadId || !$cadenciaId) return new JsonResponse(['error' => 'lead_id e cadencia_id obrigatórios'], 400);
+        return new JsonResponse($this->analyticsModel->addLeadToCadencia($leadId, $cadenciaId));
+    }
+
+    public function weeklyReportAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        return new JsonResponse($this->analyticsModel->generateWeeklyReport());
+    }
+
+    public function iaCoachAction(Request $request, int $leadId): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        $action = $request->request->get('action', $request->get('action', ''));
+        $content = $request->request->get('content', $request->get('content', ''));
+        return new JsonResponse($this->analyticsModel->getIaCoachFeedback($leadId, $action, $content));
+    }
+
+    public function comparativoAction(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) return new JsonResponse(['error' => 'Acesso negado'], 403);
+        $dateFrom = $request->get('dateFrom', date('Y-m-d', strtotime('-90 days')));
+        $dateTo = $request->get('dateTo', date('Y-m-d'));
+        return new JsonResponse($this->analyticsModel->getComparativo(['from' => $dateFrom, 'to' => $dateTo]));
+    }
+
+    public function predictiveScoreAction(Request $request, int $leadId): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        return new JsonResponse($this->analyticsModel->getPredictiveScore($leadId));
+    }
+
+    public function autoClassifyAction(Request $request, int $leadId): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        return new JsonResponse($this->analyticsModel->autoClassifyLead($leadId));
     }
 
     public function scheduleFollowupAction(Request $request): JsonResponse
@@ -287,6 +470,15 @@ class AnalyticsController extends CommonController
         return new JsonResponse(['timeline' => $timeline]);
     }
 
+    public function leadCampaignsAction(Request $request, int $leadId): JsonResponse
+    {
+        if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
+            return new JsonResponse(['error' => 'Acesso negado'], 403);
+        }
+
+        return new JsonResponse(['campaigns' => $this->analyticsModel->getLeadCampaigns($leadId)]);
+    }
+
     public function classifyLinkedinAction(Request $request): JsonResponse
     {
         if (!$this->security->isGranted('letsworkAnalytics:analytics:view')) {
@@ -377,6 +569,8 @@ class AnalyticsController extends CommonController
             'pipeline' => $this->analyticsModel->getPipelineData($dateRange),
             'perdas' => $this->analyticsModel->getPerdasData($dateRange),
             'utm' => $this->analyticsModel->getUtmData($dateRange),
+            'kanban' => $this->analyticsModel->getKanbanData($dateRange),
+            'inbox' => $this->analyticsModel->getInboxData($dateRange),
             default => $this->analyticsModel->getOverviewData($dateRange),
         };
 
