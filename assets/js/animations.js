@@ -1,13 +1,11 @@
 gsap.registerPlugin(ScrollTrigger);
 
-// Inicialização AOS
 AOS.init({
     duration: 1000,
     once: true,
-    easing: 'ease-out-expo'
+    easing: "ease-out-expo"
 });
 
-// Cursor Customizado Reativo
 const initCursor = () => {
     const cursor = document.querySelector("#cursor");
     if (!cursor) return;
@@ -22,19 +20,24 @@ const initCursor = () => {
         });
     });
 
-    document.querySelectorAll("a, button, .case-item, .produto-card, .service-card, .blog-card").forEach(el => {
+    document.querySelectorAll("a, button, .case-item, .produto-card, .service-card, .blog-card").forEach((el) => {
         el.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 6, opacity: 0.15 }));
         el.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, opacity: 1 }));
     });
 };
 
-// Blog: hover via CSS (.blog-card) — sem GSAP transform (quebrava group-hover)
 const initBlogAnimations = () => {};
 
-// Portfolio horizontal: hover + scroll nativo (sem transform no track)
+/**
+ * Cases: pin da seção + progressão vertical → scrollLeft (sem transform no track).
+ * pinType "fixed" evita o bug de hit-test do pin com transform.
+ */
 const initPortfolioAnimations = () => {
-    const cases = document.querySelectorAll(".case-item");
+    const section = document.querySelector("#portfolio");
     const rail = document.querySelector("#portfolio-rail");
+    const track = document.querySelector("#portfolio-horizontal");
+    const cases = document.querySelectorAll(".case-item");
+    if (!section || !rail || !track || !cases.length) return;
 
     cases.forEach((item) => {
         const enter = () => item.classList.add("is-hovered");
@@ -48,69 +51,113 @@ const initPortfolioAnimations = () => {
         item.addEventListener("focusout", leave);
     });
 
-    if (!rail) return;
+    const getMaxScroll = () => Math.max(0, rail.scrollWidth - rail.clientWidth);
 
-    // Rodinha vertical → scroll horizontal (track não usa transform)
-    rail.addEventListener(
-        "wheel",
-        (e) => {
-            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-            if (rail.scrollWidth <= rail.clientWidth) return;
-            rail.scrollLeft += e.deltaY;
-            e.preventDefault();
-        },
-        { passive: false }
-    );
-
-    // Drag to scroll (sem abrir modal ao arrastar)
-    let isDown = false;
-    let didDrag = false;
-    let startX = 0;
-    let startScroll = 0;
-
-    rail.addEventListener("pointerdown", (e) => {
-        if (e.pointerType === "mouse" && e.button !== 0) return;
-        if (e.target.closest("a, button")) return;
-        isDown = true;
-        didDrag = false;
-        startX = e.clientX;
-        startScroll = rail.scrollLeft;
-        rail.classList.add("is-dragging");
-        rail.setPointerCapture?.(e.pointerId);
+    // Entrada dos cards
+    gsap.from(cases, {
+        autoAlpha: 0,
+        y: 48,
+        scale: 0.96,
+        duration: 0.9,
+        stagger: 0.12,
+        ease: "power3.out",
+        clearProps: "transform",
+        scrollTrigger: {
+            trigger: section,
+            start: "top 75%",
+            once: true
+        }
     });
 
-    rail.addEventListener("pointermove", (e) => {
-        if (!isDown) return;
-        const dx = e.clientX - startX;
-        if (Math.abs(dx) > 6) didDrag = true;
-        rail.scrollLeft = startScroll - dx;
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
+        const st = ScrollTrigger.create({
+            trigger: section,
+            start: "top top",
+            end: () => `+=${Math.max(getMaxScroll(), window.innerHeight * 0.8)}`,
+            pin: true,
+            pinType: "fixed",
+            scrub: 0.85,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+                rail.scrollLeft = self.progress * getMaxScroll();
+            }
+        });
+
+        const onResize = () => ScrollTrigger.refresh();
+        window.addEventListener("resize", onResize);
+
+        return () => {
+            window.removeEventListener("resize", onResize);
+            st.kill();
+            rail.scrollLeft = 0;
+        };
     });
 
-    const endDrag = () => {
-        isDown = false;
-        rail.classList.remove("is-dragging");
-    };
-    rail.addEventListener("pointerup", endDrag);
-    rail.addEventListener("pointercancel", endDrag);
+    // Mobile: wheel horizontal + drag leve
+    mm.add("(max-width: 767px)", () => {
+        rail.addEventListener(
+            "wheel",
+            (e) => {
+                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+                if (!getMaxScroll()) return;
+                rail.scrollLeft += e.deltaY;
+                e.preventDefault();
+            },
+            { passive: false }
+        );
 
-    rail.addEventListener("click", (e) => {
-        if (!didDrag) return;
-        e.preventDefault();
-        e.stopPropagation();
-        didDrag = false;
-    }, true);
+        let isDown = false;
+        let didDrag = false;
+        let startX = 0;
+        let startScroll = 0;
 
-    const scrollByCard = (dir) => {
-        const card = rail.querySelector(".case-item");
-        const step = card ? card.getBoundingClientRect().width + 40 : 720;
-        rail.scrollBy({ left: dir * step, behavior: "smooth" });
-    };
+        const onDown = (e) => {
+            if (e.pointerType === "mouse" && e.button !== 0) return;
+            if (e.target.closest("a, button")) return;
+            isDown = true;
+            didDrag = false;
+            startX = e.clientX;
+            startScroll = rail.scrollLeft;
+            rail.classList.add("is-dragging");
+        };
+        const onMove = (e) => {
+            if (!isDown) return;
+            const dx = e.clientX - startX;
+            if (Math.abs(dx) > 8) {
+                didDrag = true;
+                cases.forEach((c) => {
+                    c.dataset.dragged = "1";
+                });
+            }
+            rail.scrollLeft = startScroll - dx;
+        };
+        const onUp = () => {
+            isDown = false;
+            rail.classList.remove("is-dragging");
+            window.setTimeout(() => {
+                cases.forEach((c) => {
+                    c.dataset.dragged = "0";
+                });
+            }, 50);
+        };
 
-    document.querySelector("#portfolio-prev")?.addEventListener("click", () => scrollByCard(-1));
-    document.querySelector("#portfolio-next")?.addEventListener("click", () => scrollByCard(1));
+        rail.addEventListener("pointerdown", onDown);
+        rail.addEventListener("pointermove", onMove);
+        rail.addEventListener("pointerup", onUp);
+        rail.addEventListener("pointercancel", onUp);
+
+        return () => {
+            rail.removeEventListener("pointerdown", onDown);
+            rail.removeEventListener("pointermove", onMove);
+            rail.removeEventListener("pointerup", onUp);
+            rail.removeEventListener("pointercancel", onUp);
+        };
+    });
 };
 
-// Transformação do Header ao Scroll
 const initHeaderAnim = () => {
     ScrollTrigger.create({
         start: "top -100",
@@ -137,7 +184,6 @@ const initHeaderAnim = () => {
     });
 };
 
-// Inicializar Todas
 window.addEventListener("DOMContentLoaded", () => {
     initCursor();
     initPortfolioAnimations();

@@ -33,7 +33,7 @@ h1, h2, h3, h4 {
     text-rendering: optimizeLegibility;
 }
 
-/* Portfolio — faixa horizontal (sem GSAP transform no track) */
+/* Portfolio — faixa horizontal + pin scroll */
 .portfolio-section {
     position: relative;
     padding: 7rem 0 5rem;
@@ -44,6 +44,7 @@ h1, h2, h3, h4 {
     border-top: 1px solid rgba(207, 255, 4, 0.12);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
+    z-index: 2;
 }
 
 .portfolio-section::before {
@@ -58,35 +59,28 @@ h1, h2, h3, h4 {
     opacity: 0.5;
 }
 
-.portfolio-nav-btn {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-}
-
-.portfolio-nav-btn:hover {
-    background: var(--todoz);
-    border-color: var(--todoz);
-    color: #000;
-    transform: scale(1.06);
-}
-
 .portfolio-rail {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
     scroll-padding-inline: 1.5rem;
-    padding: 0.5rem 0 2.5rem;
-    cursor: grab;
+    padding: 0.75rem 0 2.75rem;
+    scrollbar-width: none;
+    position: relative;
+    z-index: 1;
+}
+
+.portfolio-rail::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .portfolio-rail {
+        overflow-x: hidden;
+        scroll-snap-type: none;
+        cursor: default;
+    }
 }
 
 .portfolio-rail.is-dragging {
@@ -94,32 +88,21 @@ h1, h2, h3, h4 {
     scroll-snap-type: none;
 }
 
-.portfolio-rail::-webkit-scrollbar {
-    height: 6px;
-}
-
-.portfolio-rail::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.portfolio-rail::-webkit-scrollbar-thumb {
-    background: rgba(207, 255, 4, 0.45);
-    border-radius: 9999px;
-}
-
 .portfolio-track {
     display: flex;
     gap: 2.5rem;
     width: max-content;
     padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
-    padding-right: 10vw;
+    padding-right: 12vw;
+    will-change: auto;
 }
 
 .portfolio-track .case-item {
-    flex: 0 0 min(700px, 84vw);
-    width: min(700px, 84vw);
+    flex: 0 0 min(680px, 85vw);
+    width: min(680px, 85vw);
     scroll-snap-align: start;
     height: auto;
+    isolation: isolate;
 }
 
 .portfolio-track .case-media {
@@ -149,6 +132,13 @@ h1, h2, h3, h4 {
     pointer-events: auto;
     display: flex;
     flex-direction: column;
+    z-index: 1;
+}
+
+.case-item:hover,
+.case-item.is-hovered,
+.case-item:focus-within {
+    z-index: 6;
 }
 
 .case-media {
@@ -159,7 +149,7 @@ h1, h2, h3, h4 {
     border: 1px solid rgba(255, 255, 255, 0.1);
     aspect-ratio: 16 / 10;
     box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.55);
-    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+    transition: border-color 0.35s ease, box-shadow 0.35s ease;
     pointer-events: auto;
 }
 
@@ -304,8 +294,7 @@ h1, h2, h3, h4 {
 .case-item.is-hovered .case-media,
 .case-item:focus-within .case-media {
     border-color: var(--todoz);
-    box-shadow: 0 0 36px rgba(207, 255, 4, 0.14);
-    transform: translateY(-4px);
+    box-shadow: 0 0 36px rgba(207, 255, 4, 0.18);
 }
 
 .case-item:hover .case-media-img,
@@ -358,12 +347,12 @@ h1, h2, h3, h4 {
     color: var(--todoz);
 }
 
-/* Produtos proprietários — 4 cards como no site WV */
+/* Produtos proprietários */
 .produtos-section {
     position: relative;
     padding: 8rem 0;
     background:
-        radial-gradient(ellipse 70% 45% at 50% 0%, rgba(207, 255, 4, 0.07), transparent 60%),
+        radial-gradient(ellipse 70% 45% at 50% 0%, rgba(207, 255, 4, 0.09), transparent 60%),
         #0a0a0a;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
@@ -386,11 +375,9 @@ h1, h2, h3, h4 {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 2rem 2rem 2.25rem;
     border-radius: 2.25rem;
-    background: rgba(24, 24, 27, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(24, 24, 27, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     overflow: hidden;
     transition:
         border-color 0.4s ease,
@@ -399,73 +386,66 @@ h1, h2, h3, h4 {
         background 0.4s ease;
 }
 
-.produto-card::after {
-    content: "";
-    position: absolute;
-    right: -4rem;
-    bottom: -4rem;
-    width: 16rem;
-    height: 16rem;
-    border-radius: 9999px;
-    background: rgba(207, 255, 4, 0.05);
-    filter: blur(80px);
-    pointer-events: none;
-    transition: background 0.4s ease;
-}
-
 .produto-card:hover {
-    border-color: rgba(207, 255, 4, 0.35);
-    transform: translateY(-6px);
-    box-shadow: 0 24px 50px -20px rgba(207, 255, 4, 0.12);
-    background: rgba(24, 24, 27, 0.7);
-}
-
-.produto-card:hover::after {
-    background: rgba(207, 255, 4, 0.12);
+    border-color: rgba(207, 255, 4, 0.4);
+    transform: translateY(-8px);
+    box-shadow: 0 28px 60px -24px rgba(207, 255, 4, 0.18);
+    background: rgba(24, 24, 27, 0.85);
 }
 
 .produto-card--featured {
-    border-color: rgba(207, 255, 4, 0.18);
-    background: linear-gradient(160deg, rgba(207, 255, 4, 0.06), rgba(24, 24, 27, 0.5) 45%);
+    border-color: rgba(207, 255, 4, 0.22);
 }
 
-.produto-card-top {
+.produto-logo-wrap {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    position: relative;
-    z-index: 1;
+    justify-content: center;
+    min-height: 8.5rem;
+    padding: 2rem 2rem 1.25rem;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(207, 255, 4, 0.14), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.25));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .produto-logo {
-    height: 2.75rem;
+    height: 4.5rem;
     width: auto;
-    max-width: 9.5rem;
+    max-width: 14rem;
     object-fit: contain;
-    filter: brightness(1.1);
-    opacity: 0.9;
-    transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+    filter: brightness(1.2) contrast(1.05);
+    opacity: 1;
+    transition: transform 0.4s ease, filter 0.4s ease;
 }
 
 .produto-card:hover .produto-logo {
-    opacity: 1;
-    filter: brightness(1.25);
-    transform: scale(1.04);
+    transform: scale(1.08);
+    filter: brightness(1.35) contrast(1.08) drop-shadow(0 0 18px rgba(207, 255, 4, 0.35));
+}
+
+.produto-card-body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.75rem 2rem 2.15rem;
+    flex: 1;
 }
 
 .produto-icon {
-    width: 3.25rem;
-    height: 3.25rem;
-    border-radius: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.85rem;
     background: var(--todoz);
     color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 0 28px rgba(207, 255, 4, 0.28);
+    font-size: 1.25rem;
+    box-shadow: 0 0 24px rgba(207, 255, 4, 0.28);
+    margin-bottom: 0.35rem;
     transition: transform 0.35s ease;
 }
 
@@ -474,10 +454,8 @@ h1, h2, h3, h4 {
 }
 
 .produto-title {
-    position: relative;
-    z-index: 1;
     color: #fff;
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     font-weight: 900;
     letter-spacing: -0.04em;
     font-style: italic;
@@ -485,8 +463,6 @@ h1, h2, h3, h4 {
 }
 
 .produto-subtitle {
-    position: relative;
-    z-index: 1;
     color: var(--todoz);
     font-size: 0.7rem;
     font-weight: 800;
@@ -495,18 +471,14 @@ h1, h2, h3, h4 {
 }
 
 .produto-desc {
-    position: relative;
-    z-index: 1;
     color: #a1a1aa;
     font-size: 0.95rem;
     line-height: 1.6;
-    margin: 0.35rem 0 1.25rem;
+    margin: 0.2rem 0 1.1rem;
     flex: 1;
 }
 
 .produto-actions {
-    position: relative;
-    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -760,60 +732,177 @@ button.magnetic.border-todoz:hover {
     border-color: var(--todoz);
 }
 
-/* Hero product logos */
+/* Hero product logos — always one row */
 .hero-logos {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    gap: 2.5rem 3.5rem;
+    gap: clamp(0.75rem, 2.5vw, 2.75rem);
     width: 100%;
-    margin-top: 3rem;
-    padding-top: 2.5rem;
+    max-width: 56rem;
+    margin: 2.5rem auto 0;
+    padding-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-@media (min-width: 768px) {
-    .hero-logos {
-        gap: 3rem 4.5rem;
-        margin-top: 3.5rem;
-        padding-top: 3rem;
-    }
-}
-
 .hero-logo {
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.8;
-    filter: grayscale(0.25) brightness(1.08);
+    opacity: 0.85;
+    filter: grayscale(0.15) brightness(1.1);
     transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
 }
 
 .hero-logo:hover {
     opacity: 1;
-    filter: grayscale(0) brightness(1.2);
-    transform: translateY(-4px) scale(1.06);
+    filter: grayscale(0) brightness(1.25);
+    transform: translateY(-3px) scale(1.05);
 }
 
 .hero-logo img {
-    height: 3.5rem;
+    height: clamp(1.65rem, 3.8vw, 3.25rem);
     width: auto;
-    max-width: 12rem;
+    max-width: 100%;
     object-fit: contain;
 }
 
+/* Site modals — fechamento limpo, sem overlay fantasma */
+html.modal-open,
+body.modal-open {
+    overflow: hidden !important;
+}
+
+.site-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.site-modal--contact {
+    z-index: 1001;
+}
+
+.site-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.site-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    cursor: pointer;
+}
+
+.site-modal-panel {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-height: min(90vh, 920px);
+    overflow: auto;
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
+    box-shadow: 0 0 120px rgba(0, 0, 0, 0.55);
+    pointer-events: auto;
+}
+
+.site-modal-panel--case {
+    max-width: 80rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 @media (min-width: 768px) {
-    .hero-logo img {
-        height: 4.75rem;
-        max-width: 15rem;
+    .site-modal-panel--case {
+        flex-direction: row;
+        overflow: hidden;
     }
 }
 
-@media (min-width: 1024px) {
-    .hero-logo img {
-        height: 5.5rem;
-        max-width: 17rem;
+.site-modal-panel--contact {
+    max-width: 42rem;
+    padding: 3rem;
+}
+
+.site-modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.75rem;
+    z-index: 30;
+    color: #71717a;
+    font-size: 2rem;
+    line-height: 1;
+    transition: color 0.25s ease;
+}
+
+.site-modal-close:hover {
+    color: var(--todoz);
+}
+
+.site-modal-media {
+    position: relative;
+    width: 100%;
+    height: 14rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .site-modal-media {
+        width: 58%;
+        height: auto;
+        min-height: 28rem;
+    }
+}
+
+.site-modal-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.site-modal-media-fade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #18181b, transparent 45%);
+    pointer-events: none;
+}
+
+@media (min-width: 768px) {
+    .site-modal-media-fade {
+        background: linear-gradient(to right, transparent, #18181b);
+    }
+}
+
+.site-modal-body {
+    width: 100%;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #18181b;
+}
+
+@media (min-width: 768px) {
+    .site-modal-body {
+        width: 42%;
+        padding: 3.5rem;
     }
 }
 
@@ -825,12 +914,6 @@ button.magnetic.border-todoz:hover {
 
 .animate-bounce-x {
     animation: bounce-x 1.5s infinite;
-}
-
-/* Modal Open State Animation Support */
-#contact-modal.active {
-    opacity: 1;
-    pointer-events: auto;
 }
 
 /* Footer Links Hover */

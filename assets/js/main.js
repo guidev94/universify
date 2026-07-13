@@ -3,8 +3,10 @@ const lenis = new Lenis({
     duration: 1.2,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
-    orientation: 'vertical',
+    orientation: "vertical"
 });
+
+window.lenis = lenis;
 
 function raf(time) {
     lenis.raf(time);
@@ -13,8 +15,7 @@ function raf(time) {
 
 requestAnimationFrame(raf);
 
-// Integrate GSAP with Lenis
-lenis.on('scroll', ScrollTrigger.update);
+lenis.on("scroll", ScrollTrigger.update);
 
 gsap.ticker.add((time) => {
     lenis.raf(time * 1000);
@@ -22,7 +23,4 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-// Global Variables & Setup
 gsap.registerPlugin(ScrollTrigger);
-
-console.log('WV_Todoz: Infrastructure Setup Complete.');
