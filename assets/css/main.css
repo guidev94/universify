@@ -405,71 +405,60 @@ h1, h2, h3, h4 {
     pointer-events: none;
     overflow: hidden;
     background:
-        radial-gradient(ellipse 58% 42% at 18% 22%, rgba(207, 255, 4, 0.11), transparent 68%),
-        radial-gradient(ellipse 42% 36% at 88% 72%, rgba(207, 255, 4, 0.045), transparent 62%);
+        radial-gradient(ellipse 52% 38% at 14% 28%, rgba(207, 255, 4, 0.09), transparent 72%),
+        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.04), transparent 70%);
 }
 
 .produtos-bento {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.15rem;
+    gap: 1rem;
 }
 
 @media (min-width: 768px) {
     .produtos-bento {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: auto auto auto;
-        gap: 1.25rem;
+        grid-template-columns: 1.15fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 1.1rem;
+        align-items: stretch;
     }
 
     .produto-card--featured {
         grid-column: 1;
-        grid-row: 1 / 4;
+        grid-row: 1 / 3;
     }
 
     .produto-card--wide {
         grid-column: 2;
         grid-row: 1;
     }
+
+    .produtos-bento > .produto-card:nth-child(3),
+    .produtos-bento > .produto-card:nth-child(4) {
+        grid-column: 2;
+    }
+
+    .produtos-bento > .produto-card:nth-child(3) {
+        grid-row: 2;
+    }
 }
 
 @media (min-width: 1024px) {
     .produtos-bento {
-        grid-template-columns: 1.35fr 1fr 1fr;
-        grid-template-rows: minmax(15rem, auto) minmax(17rem, auto);
-        gap: 1.35rem;
+        grid-template-columns: 1.28fr 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 1.2rem;
     }
 
     .produto-card--featured {
         grid-column: 1;
         grid-row: 1 / 3;
-        min-height: 34rem;
+        min-height: 32rem;
     }
 
     .produto-card--wide {
         grid-column: 2 / 4;
         grid-row: 1;
-        flex-direction: row;
-        align-items: stretch;
-        min-height: 15rem;
-    }
-
-    .produto-card--wide .produto-logo-wrap {
-        flex: 0 0 36%;
-        min-height: 100%;
-        border-bottom: none;
-        border-right: 1px solid rgba(255, 255, 255, 0.06);
-        padding: 1.75rem 2rem;
-    }
-
-    .produto-card--wide .produto-card-body {
-        flex: 1;
-        justify-content: center;
-        padding: 1.75rem 2rem 1.9rem;
-    }
-
-    .produto-card--wide .produto-desc {
-        margin-bottom: 0.85rem;
     }
 
     .produtos-bento > .produto-card:nth-child(3) {
@@ -484,30 +473,161 @@ h1, h2, h3, h4 {
 }
 
 .produto-card {
+    --glow-a: rgba(207, 255, 4, 0.1);
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 1.75rem;
+    border-radius: 1.5rem;
     background:
-        linear-gradient(165deg, rgba(28, 28, 30, 0.96), rgba(12, 12, 14, 0.94));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+        radial-gradient(ellipse 55% 45% at 78% 86%, rgba(207, 255, 4, 0.03), transparent 70%),
+        radial-gradient(ellipse 52% 42% at 24% 58%, var(--glow-a), transparent 68%),
+        linear-gradient(160deg, rgba(26, 26, 28, 0.98), rgba(10, 10, 12, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.09);
     overflow: hidden;
     box-shadow:
-        0 18px 40px -28px rgba(0, 0, 0, 0.85),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        0 16px 36px -28px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
     transition:
-        border-color 0.4s ease,
+        border-color 0.35s ease,
         transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.4s ease;
+        box-shadow 0.35s ease;
+}
+
+.produto-card[data-glow="soft"] {
+    --glow-a: rgba(207, 255, 4, 0.06);
 }
 
 .produto-card:hover {
-    border-color: rgba(207, 255, 4, 0.35);
-    transform: translateY(-5px);
+    border-color: rgba(207, 255, 4, 0.32);
+    transform: translateY(-4px);
     box-shadow:
-        0 26px 56px -28px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(207, 255, 4, 0.06),
-        0 18px 42px -30px rgba(207, 255, 4, 0.18);
+        0 22px 48px -26px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(207, 255, 4, 0.05),
+        0 14px 36px -28px rgba(207, 255, 4, 0.16);
+}
+
+.produto-card-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.5rem;
+    padding: 1.5rem 1.5rem 1.65rem;
+    min-height: 100%;
+}
+
+.produto-brand {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 0.2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.produto-logo {
+    height: 2.6rem;
+    width: auto;
+    max-width: 11rem;
+    object-fit: contain;
+    object-position: left center;
+    filter: brightness(1.22) contrast(1.06);
+    transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.produto-card:hover .produto-logo {
+    transform: scale(1.04);
+    filter: brightness(1.34) contrast(1.08) drop-shadow(0 0 12px rgba(207, 255, 4, 0.28));
+}
+
+.produto-icon {
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.7rem;
+    background: var(--todoz);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    box-shadow: 0 0 20px rgba(207, 255, 4, 0.22);
+    transition: transform 0.35s ease;
+}
+
+.produto-card:hover .produto-icon {
+    transform: scale(1.06) rotate(-3deg);
+}
+
+.produto-title {
+    color: #fff;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    font-style: italic;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.produto-subtitle {
+    color: var(--todoz);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.produto-desc {
+    color: #a1a1aa;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 0.1rem 0 0.85rem;
+    flex: 1;
+}
+
+.produto-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: auto;
+}
+
+.produto-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.35rem;
+    border-radius: 9999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.produto-btn--primary {
+    background: var(--todoz);
+    color: #0a0a0a;
+    border: 1px solid transparent;
+}
+
+.produto-btn--primary:hover {
+    filter: brightness(1.06);
+}
+
+.produto-btn--ghost {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.produto-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .produto-badge {
@@ -517,170 +637,148 @@ h1, h2, h3, h4 {
     z-index: 3;
     display: inline-flex;
     align-items: center;
-    padding: 0.4rem 0.85rem;
+    padding: 0.38rem 0.8rem;
     border-radius: 9999px;
     background: var(--todoz);
     color: #0a0a0a;
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     font-weight: 900;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    box-shadow: 0 0 28px rgba(207, 255, 4, 0.45);
+    box-shadow: 0 0 24px rgba(207, 255, 4, 0.4);
 }
 
+/* Featured — taller, stronger lime, filled mid band */
 .produto-card--featured {
-    border-color: rgba(207, 255, 4, 0.45);
+    --glow-a: rgba(207, 255, 4, 0.14);
+    border-color: rgba(207, 255, 4, 0.42);
     background:
-        linear-gradient(165deg, rgba(38, 44, 14, 0.98), rgba(12, 12, 14, 0.96) 55%);
+        radial-gradient(ellipse 58% 48% at 76% 88%, rgba(207, 255, 4, 0.05), transparent 70%),
+        radial-gradient(ellipse 54% 44% at 26% 52%, rgba(207, 255, 4, 0.12), transparent 68%),
+        linear-gradient(165deg, rgba(36, 42, 12, 0.98), rgba(10, 10, 12, 0.97) 58%);
     box-shadow:
-        0 0 0 1px rgba(207, 255, 4, 0.2),
-        0 0 56px -14px rgba(207, 255, 4, 0.32),
-        0 24px 56px -28px rgba(0, 0, 0, 0.9),
-        inset 0 1px 0 rgba(207, 255, 4, 0.14);
+        0 0 0 1px rgba(207, 255, 4, 0.16),
+        0 0 48px -18px rgba(207, 255, 4, 0.28),
+        0 22px 48px -28px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(207, 255, 4, 0.12);
 }
 
 .produto-card--featured:hover {
-    border-color: rgba(207, 255, 4, 0.65);
+    border-color: rgba(207, 255, 4, 0.6);
     box-shadow:
-        0 0 0 1px rgba(207, 255, 4, 0.3),
-        0 0 72px -12px rgba(207, 255, 4, 0.4),
-        0 28px 60px -26px rgba(0, 0, 0, 0.85);
+        0 0 0 1px rgba(207, 255, 4, 0.26),
+        0 0 64px -14px rgba(207, 255, 4, 0.36),
+        0 26px 54px -24px rgba(0, 0, 0, 0.88);
 }
 
-.produto-card--featured .produto-logo-wrap {
-    min-height: 11.5rem;
-    padding: 2.5rem 2.25rem 1.6rem;
-    background:
-        radial-gradient(circle at 50% 38%, rgba(207, 255, 4, 0.32), transparent 58%),
-        radial-gradient(circle at 16% 84%, rgba(207, 255, 4, 0.1), transparent 46%),
-        linear-gradient(180deg, rgba(207, 255, 4, 0.1), rgba(0, 0, 0, 0.5));
-    border-bottom-color: rgba(207, 255, 4, 0.18);
+.produto-card--featured .produto-card-inner {
+    padding: 1.85rem 1.85rem 2.1rem;
+    gap: 0;
+    justify-content: space-between;
 }
 
-.produto-card--featured .produto-logo {
-    height: 5.5rem;
-    max-width: 17rem;
-    filter: brightness(1.32) contrast(1.08) drop-shadow(0 0 24px rgba(207, 255, 4, 0.4));
+.produto-card--featured .produto-brand {
+    padding-bottom: 1.15rem;
+    margin-bottom: 0;
+    padding-right: 6rem;
 }
 
-.produto-card--featured .produto-title {
-    font-size: clamp(2rem, 2.6vw, 2.45rem);
-}
-
-.produto-card--featured .produto-desc {
-    color: #c8c8cc;
-    font-size: 1rem;
-}
-
-.produto-card--featured .produto-card-body {
-    flex: 1;
-    justify-content: flex-start;
-    padding: 1.85rem 2.15rem 2.35rem;
-}
-
-@media (min-width: 768px) {
-    .produto-card--featured .produto-logo-wrap {
-        min-height: 13rem;
-        padding: 2.75rem 2.35rem 1.75rem;
-    }
-
-    .produto-card--featured .produto-card-body {
-        padding: 2rem 2.35rem 2.5rem;
-        gap: 0.7rem;
-    }
-
-    .produto-card--featured .produto-badge {
-        top: 1.35rem;
-        right: 1.35rem;
-    }
-}
-
-.produto-logo-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 8.25rem;
-    padding: 1.85rem 1.75rem 1.25rem;
-    background:
-        radial-gradient(circle at 28% 38%, rgba(207, 255, 4, 0.1), transparent 55%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(0, 0, 0, 0.35));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.produto-logo {
-    height: 4.25rem;
-    width: auto;
-    max-width: 13.5rem;
-    object-fit: contain;
-    filter: brightness(1.2) contrast(1.05);
-    opacity: 1;
-    transition: transform 0.4s ease, filter 0.4s ease;
-}
-
-.produto-card:hover .produto-logo {
-    transform: scale(1.06);
-    filter: brightness(1.35) contrast(1.08) drop-shadow(0 0 18px rgba(207, 255, 4, 0.35));
-}
-
-.produto-card-body {
-    position: relative;
-    z-index: 1;
+.produto-card--featured .produto-main {
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
-    padding: 1.65rem 1.75rem 1.9rem;
     flex: 1;
+    justify-content: center;
+    padding: 1.35rem 0 1.5rem;
 }
 
-.produto-icon {
-    width: 2.65rem;
-    height: 2.65rem;
-    border-radius: 0.8rem;
-    background: var(--todoz);
-    color: #000;
+.produto-card--featured .produto-highlights {
+    list-style: none;
+    margin: 0.95rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.produto-card--featured .produto-highlights li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    box-shadow: 0 0 24px rgba(207, 255, 4, 0.28);
-    margin-bottom: 0.15rem;
-    transition: transform 0.35s ease;
+    gap: 0.55rem;
+    color: #d4d4d8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
-.produto-card:hover .produto-icon {
-    transform: scale(1.08) rotate(-4deg);
-}
-
-.produto-title {
-    color: #fff;
-    font-size: 1.55rem;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    font-style: italic;
-    line-height: 1.1;
-}
-
-.produto-subtitle {
+.produto-card--featured .produto-highlights i {
     color: var(--todoz);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    font-size: 0.95rem;
 }
 
-.produto-desc {
-    color: #a1a1aa;
-    font-size: 0.9rem;
+.produto-card--featured .produto-logo {
+    height: 3rem;
+    max-width: 12rem;
+    filter: brightness(1.3) contrast(1.08) drop-shadow(0 0 16px rgba(207, 255, 4, 0.28));
+}
+
+.produto-card--featured .produto-icon {
+    width: 2.65rem;
+    height: 2.65rem;
+    font-size: 1.15rem;
+}
+
+.produto-card--featured .produto-title {
+    font-size: clamp(1.9rem, 2.5vw, 2.4rem);
+}
+
+.produto-card--featured .produto-desc {
+    color: #c4c4c8;
+    font-size: 0.98rem;
     line-height: 1.6;
-    margin: 0.1rem 0 1rem;
-    flex: 1;
+    margin: 0.15rem 0 0;
+    flex: 0;
 }
 
-.produto-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-    margin-top: auto;
+.produto-card--featured .produto-actions {
+    margin-top: 0;
+}
+
+.produto-card--featured .produto-badge {
+    top: 1.35rem;
+    right: 1.35rem;
+}
+
+/* Wide Store — same stack language as sibling cards */
+.produto-card--wide .produto-card-inner {
+    padding: 1.55rem 1.75rem 1.7rem;
+}
+
+.produto-card--wide .produto-desc {
+    max-width: 40rem;
+}
+
+@media (min-width: 1024px) {
+    .produto-card--wide .produto-title {
+        font-size: 1.65rem;
+    }
+
+    .produto-card--wide .produto-card-inner {
+        padding: 1.55rem 1.85rem 1.7rem;
+    }
+
+    .produto-card--wide .produto-actions {
+        flex-wrap: nowrap;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .produto-card--featured .produto-card-inner {
+        padding: 1.7rem 1.6rem 1.9rem;
+    }
+
+    .produtos-bento > .produto-card:nth-child(4) {
+        grid-column: 1 / 3;
+    }
 }
 
 /* Service / blog card polish */
