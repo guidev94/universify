@@ -177,11 +177,142 @@
         <!-- Portfólio (Cases que Marcam) -->
         <section id="portfolio" class="py-32 overflow-hidden bg-primary">
             <div class="container mx-auto px-6 mb-20 text-left">
-                <div class="flex flex-col md:flex-row justify-between items-end gap-10 text-left">
-                    <div class="text-left">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-10">
+                    <div class="text-left" data-aos="fade-right">
                         <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
-                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white">CASES QUE <br> <span class="text-todoz text-glow uppercase">MARCAM.</span></h2>
+                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white uppercase">Cases que <br> <span class="text-todoz text-glow uppercase">marcam.</span></h2>
                     </div>
+                    <div class="pb-4" data-aos="fade-left">
+                        <button class="open-modal px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest text-xs text-white">Explorar Todos</button>
+                    </div>
+                </div>
+            </div>
+            <div id="portfolio-horizontal" class="flex gap-16 px-6 w-fit pb-20">
+                <!-- Case Let's Work -->
+                <div class="case-item open-case min-w-[320px] md:min-w-[700px] group cursor-pointer" 
+                     data-case-title="Let's Work Facial" 
+                     data-case-category="AI / Mobile" 
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg" 
+                     data-case-desc="O Let´s Work é um sistema de ponto eletrônico disruptivo via reconhecimento facial e geolocalização. Tecnologia nativa com processamento de imagem em tempo real.">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg" alt="" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div class="text-left">
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">AI / Mobile</span>
+                                <h4 class="text-4xl font-black text-white text-left">Let's Work Facial</h4>
+                            </div>
+                            <div class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <i class="ph ph-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center text-left">
+                        <p class="text-zinc-500 font-medium text-sm">Controle de ponto inovador com reconhecimento facial.</p>
+                        <span class="text-zinc-700 font-black">01</span>
+                    </div>
+                </div>
+
+                <!-- Case Pullman -->
+                <div class="case-item open-case min-w-[320px] md:min-w-[700px] group cursor-pointer" 
+                     data-case-title="Pullman Aplicativo" 
+                     data-case-category="Marketing Digital" 
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg" 
+                     data-case-desc="Desenvolvimento de plataforma interativa para a Pullman, focada em engajamento de marca e utilidade para o consumidor final. Um projeto que une design de interface premium com uma arquitetura mobile fluida e escalável.">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg" alt="" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div class="text-left">
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block text-left">Marketing Digital</span>
+                                <h4 class="text-4xl font-black text-white text-left">Pullman App</h4>
+                            </div>
+                            <div class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <i class="ph ph-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center text-left">
+                        <p class="text-zinc-500 font-medium text-sm">Engajamento de marca através de mobile experience.</p>
+                        <span class="text-zinc-700 font-black">02</span>
+                    </div>
+                </div>
+
+                <!-- Case Mega Senha Quiz -->
+                <div class="case-item open-case min-w-[320px] md:min-w-[700px] group cursor-pointer" 
+                     data-case-title="Mega Senha Quiz" 
+                     data-case-category="Social Gaming" 
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg" 
+                     data-case-desc="Transformamos o sucesso da TV em uma experiência digital interativa. O App Quiz do Mega Senha foi desenvolvido para o Facebook, permitindo que milhares de usuários jogassem simultaneamente, criando um ecossistema de gamificação e social share sem precedentes.">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg" alt="" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div class="text-left">
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block text-left">Social Gaming</span>
+                                <h4 class="text-4xl font-black text-white text-left">Mega Senha Quiz</h4>
+                            </div>
+                            <div class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <i class="ph ph-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center text-left">
+                        <p class="text-zinc-500 font-medium text-sm">Ecossistema de gamificação para redes sociais.</p>
+                        <span class="text-zinc-700 font-black">03</span>
+                    </div>
+                </div>
+
+                <!-- Case Facíleme -->
+                <div class="case-item open-case min-w-[320px] md:min-w-[700px] group cursor-pointer" 
+                     data-case-title="Facíleme Store" 
+                     data-case-category="Social Commerce" 
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg" 
+                     data-case-desc="O aplicativo Facíleme consiste em um ecossistema completo de lojas virtuais para venda direta nas redes sociais com checkout simplificado.">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg" alt="" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div class="text-left">
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block text-left">Social Commerce</span>
+                                <h4 class="text-4xl font-black text-white text-left">Facíleme Store</h4>
+                            </div>
+                            <div class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <i class="ph ph-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center text-left">
+                        <p class="text-zinc-500 font-medium text-sm">Venda direta nas redes sociais.</p>
+                        <span class="text-zinc-700 font-black">04</span>
+                    </div>
+                </div>
+
+                <!-- Case Syngenta -->
+                <div class="case-item open-case min-w-[320px] md:min-w-[700px] group cursor-pointer" 
+                     data-case-title="Syngenta Wi-Fi" 
+                     data-case-category="Enterprise" 
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg" 
+                     data-case-desc="Gerenciamento inteligente de Wi-Fi para hotéis e eventos de grande porte com controle absoluto de acesso e monitoramento de performance.">
+                    <div class="relative rounded-[3rem] overflow-hidden bg-zinc-900 border border-white/10 aspect-video shadow-2xl">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg" alt="" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                            <div class="text-left">
+                                <span class="px-4 py-1.5 rounded-full bg-todoz/20 text-todoz text-[10px] font-bold uppercase tracking-widest mb-4 inline-block text-left">Enterprise</span>
+                                <h4 class="text-4xl font-black text-white text-left">Syngenta Wi-Fi</h4>
+                            </div>
+                            <div class="w-14 h-14 bg-todoz rounded-full flex items-center justify-center text-black text-2xl opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <i class="ph ph-plus"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 px-4 flex justify-between items-center text-left">
+                        <p class="text-zinc-500 font-medium text-sm">Gestão de conectividade corporativa.</p>
+                        <span class="text-zinc-700 font-black">05</span>
+                    </div>
+                </div>
+            </div>
                     <div class="pb-4">
                         <button class="open-modal px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest text-xs text-white">Explorar Todos</button>
                     </div>
