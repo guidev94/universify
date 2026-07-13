@@ -5,7 +5,7 @@ const initMagneticButtons = () => {
 
 // Spotlight effect
 const initSpotlightEffect = () => {
-    const bentoItems = document.querySelectorAll('.bento-item, .case-item, .service-card');
+    const bentoItems = document.querySelectorAll('.bento-item, .case-item, .service-card, .produto-card');
     
     bentoItems.forEach(item => {
         const media = item.querySelector('.case-media') || item;

@@ -10,7 +10,8 @@ AOS.init({
 // Cursor Customizado Reativo
 const initCursor = () => {
     const cursor = document.querySelector("#cursor");
-    
+    if (!cursor) return;
+
     window.addEventListener("mousemove", (e) => {
         gsap.to(cursor, {
             x: e.clientX,
@@ -21,56 +22,92 @@ const initCursor = () => {
         });
     });
 
-    document.querySelectorAll("a, button, .case-item, article, #blog a.group").forEach(el => {
+    document.querySelectorAll("a, button, .case-item, .produto-card, .service-card, .blog-card").forEach(el => {
         el.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 6, opacity: 0.15 }));
         el.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, opacity: 1 }));
     });
 };
 
-// Blog Cards High-Level Animations
-const initBlogAnimations = () => {
-    const articles = document.querySelectorAll("#blog article, #blog a.group");
-    
-    articles.forEach((article) => {
-        const image = article.querySelector(".blog-card-image");
+// Blog: hover via CSS (.blog-card) — sem GSAP transform (quebrava group-hover)
+const initBlogAnimations = () => {};
 
-        // Subtle lift only — image/overlay hover stays on CSS so group-hover works
-        article.addEventListener("mouseenter", () => {
-            gsap.to(article, {
-                y: -15,
-                duration: 0.6,
-                ease: "expo.out",
-                boxShadow: "0 30px 60px -15px rgba(207, 255, 4, 0.1)"
-            });
-        });
-
-        article.addEventListener("mouseleave", () => {
-            gsap.to(article, {
-                y: 0,
-                duration: 0.6,
-                ease: "expo.out",
-                boxShadow: "none",
-                clearProps: "transform,boxShadow"
-            });
-            if (image) gsap.set(image, { clearProps: "transform" });
-        });
-    });
-};
-
-// Portfolio & Case hover
+// Portfolio horizontal: hover + scroll nativo (sem transform no track)
 const initPortfolioAnimations = () => {
     const cases = document.querySelectorAll(".case-item");
-    if (!cases.length) return;
+    const rail = document.querySelector("#portfolio-rail");
 
-    // Hover explícito: mesmo estado em todos os cards (CSS :hover + classe)
     cases.forEach((item) => {
         const enter = () => item.classList.add("is-hovered");
-        const leave = () => item.classList.remove("is-hovered");
+        const leave = (e) => {
+            if (e.type === "focusout" && item.contains(e.relatedTarget)) return;
+            item.classList.remove("is-hovered");
+        };
         item.addEventListener("pointerenter", enter);
         item.addEventListener("pointerleave", leave);
         item.addEventListener("focusin", enter);
         item.addEventListener("focusout", leave);
     });
+
+    if (!rail) return;
+
+    // Rodinha vertical → scroll horizontal (track não usa transform)
+    rail.addEventListener(
+        "wheel",
+        (e) => {
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+            if (rail.scrollWidth <= rail.clientWidth) return;
+            rail.scrollLeft += e.deltaY;
+            e.preventDefault();
+        },
+        { passive: false }
+    );
+
+    // Drag to scroll (sem abrir modal ao arrastar)
+    let isDown = false;
+    let didDrag = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    rail.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        if (e.target.closest("a, button")) return;
+        isDown = true;
+        didDrag = false;
+        startX = e.clientX;
+        startScroll = rail.scrollLeft;
+        rail.classList.add("is-dragging");
+        rail.setPointerCapture?.(e.pointerId);
+    });
+
+    rail.addEventListener("pointermove", (e) => {
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 6) didDrag = true;
+        rail.scrollLeft = startScroll - dx;
+    });
+
+    const endDrag = () => {
+        isDown = false;
+        rail.classList.remove("is-dragging");
+    };
+    rail.addEventListener("pointerup", endDrag);
+    rail.addEventListener("pointercancel", endDrag);
+
+    rail.addEventListener("click", (e) => {
+        if (!didDrag) return;
+        e.preventDefault();
+        e.stopPropagation();
+        didDrag = false;
+    }, true);
+
+    const scrollByCard = (dir) => {
+        const card = rail.querySelector(".case-item");
+        const step = card ? card.getBoundingClientRect().width + 40 : 720;
+        rail.scrollBy({ left: dir * step, behavior: "smooth" });
+    };
+
+    document.querySelector("#portfolio-prev")?.addEventListener("click", () => scrollByCard(-1));
+    document.querySelector("#portfolio-next")?.addEventListener("click", () => scrollByCard(1));
 };
 
 // Transformação do Header ao Scroll
@@ -83,7 +120,7 @@ const initHeaderAnim = () => {
                 paddingBottom: "1.2rem",
                 backgroundColor: "rgba(10, 10, 10, 0.8)",
                 backdropFilter: "blur(20px)",
-                borderBottom: "1px solid rgba(139, 197, 63, 0.2)",
+                borderBottom: "1px solid rgba(207, 255, 4, 0.2)",
                 duration: 0.5
             });
         },
