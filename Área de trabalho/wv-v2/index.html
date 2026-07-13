@@ -51,16 +51,44 @@
                 <a href="#produtos" class="hover:text-todoz transition-colors">Produtos</a>
                 <a href="#portfolio" class="hover:text-todoz transition-colors">Projetos</a>
                 <a href="https://wa.me/551155311779" target="_blank" class="magnetic px-8 py-3 bg-todoz text-black font-black rounded-full hover:shadow-[0_0_30px_rgba(207,255,4,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
-                    WHATSAPP 
+                    FALE CONOSCO 
                     <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
                         <i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
                         <i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
                     </div>
                 </a>
             </nav>
-            <button class="lg:hidden text-3xl text-todoz"><i class="ph ph-list"></i></button>
+            <button id="mobile-menu-trigger" class="lg:hidden text-4xl text-todoz flex flex-col gap-1.5 items-end">
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+                <span class="w-5 h-1 bg-todoz rounded-full"></span>
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+            </button>
         </div>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
+        <div id="mobile-menu-content" class="relative h-full w-[80%] max-w-sm bg-zinc-900 border-r border-white/5 p-12 flex flex-col justify-between -translate-x-full transition-transform duration-500 ease-expo">
+            <div class="space-y-12">
+                <button id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
+                <nav class="flex flex-col gap-8">
+                    <a href="index.html" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
+                    <a href="#sobre" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
+                    <a href="#servicos" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
+                    <a href="#produtos" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
+                    <a href="#portfolio" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
+                </nav>
+            </div>
+            <div class="space-y-8">
+                <div class="flex gap-6 text-zinc-400 text-3xl">
+                    <a href="#" class="hover:text-todoz"><i class="ph ph-instagram-logo"></i></a>
+                    <a href="#" class="hover:text-todoz"><i class="ph ph-linkedin-logo"></i></a>
+                </div>
+                <a href="https://wa.me/551155311779" class="w-full py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs">FALE CONOSCO</a>
+            </div>
+        </div>
+    </div>
 
     <main id="main-wrapper">
         <!-- Hero Section -->
@@ -144,7 +172,7 @@
         </section>
 
         <!-- Clientes -->
-        <section id="clientes" class="py-24 bg-black border-y border-white/5 overflow-hidden">
+        <section id="clientes" class="py-24 bg-primary border-y border-white/5 overflow-hidden">
             <div class="container mx-auto px-6 text-center">
                 <h3 class="text-sm md:text-lg font-bold uppercase tracking-[0.2em] text-white mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">NOSSA ESPECIALIDADE É CUIDAR QUE A SUA EMPRESA E IDEIAS <span class="text-todoz text-glow">ACONTEÇAM, TRANSFORMEM E APAREÇAM.</span></h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 md:gap-20 items-center opacity-60">
@@ -185,7 +213,7 @@
                     <div class="lg:col-span-8 text-left" data-aos="fade-right">
                         <span class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-6 block">Nossa Missão</span>
                         <h3 class="text-[clamp(2.2rem,5vw,5rem)] font-black tracking-tighter text-white leading-[0.95] mb-4 uppercase">
-                            "Transformamos a interação do consumidor em <br> <span class="text-todoz italic text-glow">fidelidade absoluta</span> para sua marca."
+                            Transformamos a interação do consumidor <br> em <span class="text-todoz italic text-glow">fidelidade absoluta</span> <br> para sua marca.
                         </h3>
                     </div>
                     <div class="lg:col-span-4 lg:border-l border-white/10 lg:pl-12 pt-8 lg:pt-0" data-aos="fade-left">

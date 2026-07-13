@@ -167,10 +167,51 @@ const initCaseModal = () => {
     });
 };
 
+// Mobile Menu Logic
+const initMobileMenu = () => {
+    const trigger = document.querySelector("#mobile-menu-trigger");
+    const menu = document.querySelector("#mobile-menu");
+    const menuContent = document.querySelector("#mobile-menu-content");
+    const closeBtn = document.querySelector("#mobile-menu-close");
+    const links = menu.querySelectorAll("nav a");
+
+    const openMenu = () => {
+        menu.classList.remove("invisible");
+        gsap.to(menu, { opacity: 1, duration: 0.3, pointerEvents: "auto" });
+        gsap.to(menuContent, { x: 0, duration: 0.6, ease: "expo.out" });
+        document.body.style.overflow = "hidden";
+    };
+
+    const closeMenu = () => {
+        gsap.to(menuContent, { x: "-100%", duration: 0.5, ease: "expo.in" });
+        gsap.to(menu, { 
+            opacity: 0, 
+            duration: 0.4, 
+            delay: 0.2,
+            onComplete: () => {
+                menu.classList.add("invisible");
+                document.body.style.overflow = "";
+            }
+        });
+    };
+
+    if (trigger) trigger.addEventListener("click", openMenu);
+    if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+    
+    links.forEach(link => {
+        link.addEventListener("click", closeMenu);
+    });
+
+    menu.addEventListener("click", (e) => {
+        if (e.target === menu) closeMenu();
+    });
+};
+
 // Initialize
 window.addEventListener("DOMContentLoaded", () => {
     initMagneticButtons();
     initSpotlightEffect();
     initContactModal();
     initCaseModal();
+    initMobileMenu();
 });
