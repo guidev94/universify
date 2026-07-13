@@ -460,6 +460,94 @@ h1, h2, h3, h4 {
     opacity: 1;
 }
 
+/* Button hover — CSS only (GSAP magnetic transform broke scale/icon swap) */
+.magnetic,
+.btn-anim {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s ease,
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        filter 0.3s ease;
+}
+
+.magnetic:hover,
+.btn-anim:hover {
+    transform: translateY(-3px) scale(1.04);
+}
+
+.magnetic:active,
+.btn-anim:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.magnetic.bg-todoz:hover,
+a.magnetic.bg-todoz:hover,
+button.magnetic.bg-todoz:hover {
+    box-shadow: 0 12px 40px rgba(207, 255, 4, 0.35);
+}
+
+/* Hero product logos */
+.hero-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem 3.5rem;
+    width: 100%;
+    margin-top: 3rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+    .hero-logos {
+        gap: 3rem 4.5rem;
+        margin-top: 3.5rem;
+        padding-top: 3rem;
+    }
+}
+
+.hero-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    filter: grayscale(0.25) brightness(1.08);
+    transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
+}
+
+.hero-logo:hover {
+    opacity: 1;
+    filter: grayscale(0) brightness(1.2);
+    transform: translateY(-4px) scale(1.06);
+}
+
+.hero-logo img {
+    height: 3.5rem;
+    width: auto;
+    max-width: 12rem;
+    object-fit: contain;
+}
+
+@media (min-width: 768px) {
+    .hero-logo img {
+        height: 4.75rem;
+        max-width: 15rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .hero-logo img {
+        height: 5.5rem;
+        max-width: 17rem;
+    }
+}
+
 /* Animations */
 @keyframes bounce-x {
     0%, 100% { transform: translateX(0); }

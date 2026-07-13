@@ -1,30 +1,6 @@
-// Magnetic Button Effect
+// Button hover uses CSS only — GSAP transform fights scale/icon animations
 const initMagneticButtons = () => {
-    const magneticButtons = document.querySelectorAll('.magnetic');
-
-    magneticButtons.forEach(btn => {
-        btn.addEventListener('mousemove', function(e) {
-            const position = btn.getBoundingClientRect();
-            const x = e.pageX - position.left - position.width / 2;
-            const y = e.pageY - position.top - position.height / 2;
-
-            gsap.to(btn, {
-                x: x * 0.3,
-                y: y * 0.3,
-                duration: 0.5,
-                ease: "power2.out"
-            });
-        });
-
-        btn.addEventListener('mouseleave', function(e) {
-            gsap.to(btn, {
-                x: 0,
-                y: 0,
-                duration: 0.5,
-                ease: "elastic.out(1, 0.3)"
-            });
-        });
-    });
+    // Keep API for init order; hover is handled by .btn-anim CSS
 };
 
 // Spotlight effect
