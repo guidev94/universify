@@ -149,12 +149,27 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 82%, transparent 100%);
 }
 
-/* Missão — soft ambient inside paint; top seam softens via #sobre::after bleed */
+/* Missão — paint-box base; ambient ::after bleeds into #sobre above
+   and mobile strategist / #servicos below (no clipped radial paint). */
 #missao {
+    background-color: #0a0a0a;
+}
+
+#missao::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    /* Soft bleed into SEJA TODOZ above and mobile / servicos below */
+    top: -38%;
+    bottom: -42%;
+    z-index: 0;
+    pointer-events: none;
     background:
-        radial-gradient(ellipse 58% 70% at 92% 8%, rgba(207, 255, 4, 0.06), transparent 68%),
-        radial-gradient(ellipse 42% 50% at 88% 95%, rgba(207, 255, 4, 0.035), transparent 65%),
-        #0a0a0a;
+        radial-gradient(ellipse 58% 70% at 92% 22%, rgba(207, 255, 4, 0.055), transparent 68%),
+        radial-gradient(ellipse 42% 48% at 88% 78%, rgba(207, 255, 4, 0.03), transparent 65%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
 }
 
 /* Servicos — paint-box base; ambient ::after bleeds into section above
@@ -180,7 +195,7 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
 }
 
-/* Marketing — ambient ::after bleeds into Insights (#blog) below */
+/* Marketing — ambient ::after bleeds into produtos above and Insights (#blog) below */
 #marketing {
     background-color: #0a0a0a;
 }
@@ -190,14 +205,14 @@ body {
     position: absolute;
     left: -5%;
     right: -5%;
-    top: -28%;
-    /* Soft bleed into blog — no hard bottom cut on conversion glow */
+    /* Bilateral soft bleed — no hard cut into produtos or blog */
+    top: -42%;
     bottom: -40%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 75% 55% at 85% 32%, rgba(207, 255, 4, 0.045), transparent 60%),
-        radial-gradient(ellipse 48% 40% at 12% 78%, rgba(207, 255, 4, 0.035), transparent 58%);
+        radial-gradient(ellipse 75% 55% at 85% 28%, rgba(207, 255, 4, 0.05), transparent 62%),
+        radial-gradient(ellipse 48% 40% at 12% 72%, rgba(207, 255, 4, 0.035), transparent 58%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
 }
@@ -617,14 +632,15 @@ html.content-revealed [data-reveal] {
     color: var(--todoz);
 }
 
-/* Produtos — bento readable; ambient bleed comes from portfolio ::after above */
+/* Produtos — bento readable; ambient bleed comes from portfolio ::after above;
+   soft foot into marketing (no hard border cut). */
 .produtos-section {
     position: relative;
     isolation: isolate;
     padding: 8rem 0;
     background-color: #0a0a0a;
     border-top: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: none;
     overflow: visible;
 }
 
@@ -633,7 +649,8 @@ html.content-revealed [data-reveal] {
     left: 0;
     right: 0;
     top: 8%;
-    bottom: -8%;
+    /* Soft foot into marketing — #marketing::after owns the strong upward seam */
+    bottom: -28%;
     z-index: 0;
     pointer-events: none;
     overflow: visible;
@@ -641,6 +658,8 @@ html.content-revealed [data-reveal] {
         /* Local accents only — no top seam twin of portfolio glow */
         radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.08), transparent 72%),
         radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.035), transparent 70%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 78%, transparent 100%);
 }
 
 .produtos-bento {
@@ -1452,4 +1471,232 @@ footer ul li a {
 footer ul li a:hover {
     padding-left: 8px;
     color: var(--todoz);
+}
+
+/* ========== Mobile polish (≤767px) ========== */
+@media (max-width: 767px) {
+    /* Hero readability — quieter video + mesh, slightly stronger glass veil */
+    #hero .hero-video {
+        opacity: 0.1;
+        filter: grayscale(1) brightness(0.35);
+    }
+
+    #hero .hero-mesh {
+        opacity: 0.14;
+    }
+
+    #hero .hero-glass {
+        background: linear-gradient(
+            to bottom,
+            rgba(10, 10, 10, 0.92) 0%,
+            rgba(10, 10, 10, 0.55) 42%,
+            rgba(10, 10, 10, 0.92) 100%
+        );
+    }
+
+    #hero .text-glow,
+    #hero .text-todoz.text-glow {
+        text-shadow: 0 0 16px rgba(207, 255, 4, 0.22);
+    }
+
+    .hero-logos {
+        gap: 0.65rem;
+        margin-top: 1.75rem;
+        padding-top: 1.5rem;
+        max-width: 100%;
+    }
+
+    .hero-logo img {
+        height: clamp(1.35rem, 7.5vw, 2.15rem);
+    }
+
+    /* Soften global lime glow copy on small screens */
+    .text-glow {
+        text-shadow: 0 0 18px rgba(207, 255, 4, 0.22);
+    }
+
+    /* Section vertical rhythm — less dead air on phones */
+    #sobre.section-canvas,
+    #servicos.section-canvas,
+    #blog.section-canvas {
+        padding-top: 4.5rem;
+        padding-bottom: 4.5rem;
+    }
+
+    .portfolio-section {
+        padding: 4.5rem 0 3.5rem;
+    }
+
+    .produtos-section {
+        padding: 4.5rem 0;
+    }
+
+    /* Product cards — centered stack on mobile */
+    .produto-card-inner {
+        align-items: center;
+        text-align: center;
+        padding: 1.35rem 1.25rem 1.45rem;
+    }
+
+    .produto-brand {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .produto-logo {
+        object-position: center center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 12rem;
+        height: 3.25rem;
+    }
+
+    .produto-actions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .produto-btn {
+        flex: 1 1 auto;
+        min-width: 8.5rem;
+    }
+
+    .produto-card--featured .produto-card-inner {
+        padding: 1.5rem 1.25rem 1.65rem;
+        align-items: center;
+    }
+
+    .produto-card--featured .produto-brand {
+        padding-right: 0;
+        justify-content: center;
+    }
+
+    .produto-card--featured .produto-main {
+        align-items: center;
+        text-align: center;
+    }
+
+    .produto-card--featured .produto-highlights {
+        width: 100%;
+        max-width: 16rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .produto-card--featured .produto-highlights li {
+        justify-content: center;
+    }
+
+    .produto-card--featured .produto-logo {
+        height: 4rem;
+        max-width: 14rem;
+    }
+
+    .produto-card--featured .produto-badge {
+        top: 0.85rem;
+        right: 0.85rem;
+    }
+
+    .produto-card--wide .produto-card-inner {
+        padding: 1.35rem 1.25rem 1.45rem;
+    }
+
+    .produto-card--wide .produto-desc {
+        max-width: none;
+    }
+
+    /* Portfolio rail cards — tighter overlay + readable meta */
+    .portfolio-track .case-item {
+        flex: 0 0 min(680px, 82vw);
+        width: min(680px, 82vw);
+    }
+
+    .portfolio-track .case-media {
+        border-radius: 1.5rem;
+    }
+
+    .portfolio-track .case-card-content {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+
+    .portfolio-track .case-card-content h4 {
+        font-size: clamp(1.15rem, 5vw, 1.45rem);
+    }
+
+    .case-tag {
+        font-size: 0.55rem;
+        letter-spacing: 0.12em;
+        padding: 0.35rem 0.7rem;
+        white-space: normal;
+        text-align: center;
+    }
+
+    /* Modals — fit phone viewports */
+    .site-modal {
+        padding: 0.85rem;
+        align-items: flex-end;
+    }
+
+    .site-modal-panel {
+        border-radius: 1.5rem;
+        max-height: min(92vh, 920px);
+    }
+
+    .site-modal-panel--contact {
+        padding: 1.75rem 1.25rem 1.5rem;
+        max-width: 100%;
+    }
+
+    .site-modal-body {
+        padding: 1.5rem 1.25rem 1.75rem;
+    }
+
+    .site-modal-close {
+        top: 0.85rem;
+        right: 1rem;
+        font-size: 1.75rem;
+    }
+
+    .contato-cta-highlight {
+        box-shadow: 0 0 28px rgba(0, 0, 0, 0.2), 0 0 18px rgba(207, 255, 4, 0.22);
+    }
+
+    /* Absolute seam glows stay softer on phones (less muddy text) */
+    #sobre::after,
+    #missao::after,
+    #servicos::after,
+    #marketing::after,
+    #blog::after,
+    .portfolio-section::after {
+        opacity: 0.72;
+    }
+
+    .produtos-glow {
+        opacity: 0.75;
+    }
+
+    footer {
+        padding-top: 4.5rem;
+        padding-bottom: 4.5rem;
+    }
+
+    footer ul li a:hover {
+        padding-left: 0;
+    }
+
+    #contato.contato-cta {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+}
+
+/* Touch devices — case CTA always reachable without hover */
+@media (hover: none) {
+    .case-open-btn {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+    }
 }
