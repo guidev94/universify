@@ -76,6 +76,12 @@ h1, h2, h3, h4 {
     background: var(--todoz);
 }
 
+/* Vertical Text Helper */
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
 /* Text Glow Effect */
 .text-glow {
     text-shadow: 0 0 30px rgba(207, 255, 4, 0.4);
