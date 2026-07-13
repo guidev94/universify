@@ -132,16 +132,13 @@ const initCaseModal = () => {
 
     caseItems.forEach(item => {
         item.addEventListener("click", (e) => {
-            // Permitir que elementos com .open-modal dentro do card funcionem separadamente se existirem
             if (e.target.closest('.open-modal')) return;
-            
             const data = {
                 title: item.getAttribute('data-case-title'),
                 category: item.getAttribute('data-case-category'),
                 img: item.getAttribute('data-case-img'),
                 desc: item.getAttribute('data-case-desc')
             };
-            
             if (data.title) {
                 openCase(data);
             }
