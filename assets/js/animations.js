@@ -1,24 +1,63 @@
 const gsap = window.gsap;
 const ScrollTrigger = window.ScrollTrigger;
-const AOS = window.AOS; // unused — AOS incompatible with Lenis; kept for clarity
 
-/** Never leave nodes stuck invisible. */
+/** Force visibility — safety net if entrance tweens stall. */
 const revealAnimatedContent = () => {
-    document.documentElement.classList.add("content-revealed");
-    document.querySelectorAll(".case-item, [data-aos], #portfolio-horizontal > *").forEach((el) => {
+    document.documentElement.classList.add("content-revealed", "js-ready");
+    document.querySelectorAll(".case-item, [data-aos], [data-reveal], #portfolio-horizontal > *").forEach((el) => {
         el.style.opacity = "1";
         el.style.visibility = "visible";
-        if (el.hasAttribute("data-aos")) el.classList.add("aos-animate");
+        el.classList.add("aos-animate", "is-revealed");
+        if (gsap) gsap.set(el, { clearProps: "opacity,visibility,transform" });
     });
 };
 
-const initAOS = () => {
-    // Lenis uses virtual scroll — AOS never sees pageYOffset change and leaves
-    // [data-aos] stuck at opacity:0. Skip AOS; mark all nodes visible.
-    revealAnimatedContent();
-    document.querySelectorAll("[data-aos]").forEach((el) => {
-        el.classList.add("aos-animate");
+const initRevealAnimations = () => {
+    document.documentElement.classList.add("js-ready");
+
+    // Cases always solid — never faded.
+    document.querySelectorAll(".case-item, #portfolio-horizontal > *").forEach((el) => {
+        el.style.opacity = "1";
+        el.style.visibility = "visible";
     });
+
+    if (!gsap || !ScrollTrigger) {
+        revealAnimatedContent();
+        return;
+    }
+
+    const targets = gsap.utils.toArray(
+        "[data-aos], [data-reveal], .service-card, .produto-card, .blog-card"
+    );
+
+    targets.forEach((el) => {
+        if (el.classList.contains("case-item")) return;
+        gsap.fromTo(
+            el,
+            { y: 36, opacity: 0 },
+            {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: "power3.out",
+                overwrite: "auto",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 90%",
+                    once: true
+                },
+                onComplete: () => {
+                    el.style.opacity = "1";
+                    el.style.visibility = "visible";
+                    el.classList.add("is-revealed", "aos-animate");
+                    gsap.set(el, { clearProps: "transform" });
+                }
+            }
+        );
+    });
+
+    // Failsafe if any ScrollTrigger never fires.
+    window.setTimeout(revealAnimatedContent, 2800);
 };
 
 const initCursor = () => {
@@ -31,21 +70,19 @@ const initCursor = () => {
             x: e.clientX,
             y: e.clientY,
             opacity: 1,
-            duration: 0.4,
+            duration: 0.35,
             ease: "power2.out"
         });
     });
 
     document.querySelectorAll("a, button, .case-item, .produto-card, .service-card, .blog-card").forEach((el) => {
-        el.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 6, opacity: 0.15 }));
-        el.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, opacity: 1 }));
+        el.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 6, opacity: 0.15, duration: 0.3 }));
+        el.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, opacity: 1, duration: 0.3 }));
     });
 };
 
-const initBlogAnimations = () => {};
-
 /**
- * Cases: pin + scrollLeft (sem transform no track; sem esconder cards).
+ * Cases: pin + scrollLeft (sem transform no track).
  */
 const initPortfolioAnimations = () => {
     if (!gsap || !ScrollTrigger) return;
@@ -78,7 +115,7 @@ const initPortfolioAnimations = () => {
         const st = ScrollTrigger.create({
             trigger: section,
             start: "top top",
-            end: () => `+=${Math.max(getMaxScroll(), window.innerHeight * 0.8)}`,
+            end: () => `+=${Math.max(getMaxScroll(), window.innerHeight * 0.85)}`,
             pin: true,
             pinType: "fixed",
             scrub: 0.85,
@@ -101,16 +138,13 @@ const initPortfolioAnimations = () => {
     });
 
     mm.add("(max-width: 767px)", () => {
-        rail.addEventListener(
-            "wheel",
-            (e) => {
-                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-                if (!getMaxScroll()) return;
-                rail.scrollLeft += e.deltaY;
-                e.preventDefault();
-            },
-            { passive: false }
-        );
+        const onWheel = (e) => {
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+            if (!getMaxScroll()) return;
+            rail.scrollLeft += e.deltaY;
+            e.preventDefault();
+        };
+        rail.addEventListener("wheel", onWheel, { passive: false });
 
         let isDown = false;
         let startX = 0;
@@ -127,21 +161,13 @@ const initPortfolioAnimations = () => {
         const onMove = (e) => {
             if (!isDown) return;
             const dx = e.clientX - startX;
-            if (Math.abs(dx) > 8) {
-                cases.forEach((c) => {
-                    c.dataset.dragged = "1";
-                });
-            }
+            if (Math.abs(dx) > 8) cases.forEach((c) => { c.dataset.dragged = "1"; });
             rail.scrollLeft = startScroll - dx;
         };
         const onUp = () => {
             isDown = false;
             rail.classList.remove("is-dragging");
-            window.setTimeout(() => {
-                cases.forEach((c) => {
-                    c.dataset.dragged = "0";
-                });
-            }, 50);
+            window.setTimeout(() => cases.forEach((c) => { c.dataset.dragged = "0"; }), 50);
         };
 
         rail.addEventListener("pointerdown", onDown);
@@ -150,6 +176,7 @@ const initPortfolioAnimations = () => {
         rail.addEventListener("pointercancel", onUp);
 
         return () => {
+            rail.removeEventListener("wheel", onWheel);
             rail.removeEventListener("pointerdown", onDown);
             rail.removeEventListener("pointermove", onMove);
             rail.removeEventListener("pointerup", onUp);
@@ -162,39 +189,25 @@ const initHeaderAnim = () => {
     const header = document.querySelector("#main-header");
     if (!header) return;
 
-    // CSS class is more reliable than GSAP inline styles (backdrop-filter).
-    const setScrolled = (on) => {
-        header.classList.toggle("is-scrolled", on);
+    const setScrolled = (on) => header.classList.toggle("is-scrolled", Boolean(on));
+
+    const sync = () => {
+        const y = window.lenis ? window.lenis.scroll : window.scrollY || window.pageYOffset || 0;
+        setScrolled(y > 80);
     };
 
-    if (!gsap || !ScrollTrigger) {
-        const onScroll = () => setScrolled(window.scrollY > 80 || (window.lenis?.scroll || 0) > 80);
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.lenis?.on("scroll", ({ scroll }) => setScrolled(scroll > 80));
-        onScroll();
-        return;
-    }
-
-    ScrollTrigger.create({
-        start: "top -80",
-        onEnter: () => setScrolled(true),
-        onLeaveBack: () => setScrolled(false),
-        onUpdate: (self) => setScrolled(self.scroll() > 80)
-    });
-
-    // Sync with Lenis immediately
-    window.lenis?.on("scroll", ({ scroll }) => setScrolled(scroll > 80));
+    window.lenis?.on("scroll", sync);
+    window.addEventListener("scroll", sync, { passive: true });
+    sync();
 };
 
 const bootAnimations = () => {
-    // Reveal BEFORE anything else — page must never boot blank.
-    revealAnimatedContent();
-    initAOS();
+    initRevealAnimations();
     initCursor();
     initPortfolioAnimations();
     initHeaderAnim();
-    initBlogAnimations();
     window.__wvAnimationsBooted = true;
+    requestAnimationFrame(() => ScrollTrigger?.refresh?.());
 };
 
 if (document.readyState === "loading") {

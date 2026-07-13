@@ -159,15 +159,38 @@ body {
     z-index: 1;
 }
 
-/* Content always readable — AOS disabled under Lenis (see animations.js). */
-[data-aos],
-[data-aos].aos-animate,
+/* No-JS / pre-boot: never blank. After js-ready, GSAP owns opacity until failsafe. */
+html:not(.js-ready) [data-aos],
+html:not(.js-ready) [data-reveal] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 .case-item,
 #portfolio-horizontal > *,
 #portfolio-rail .case-item {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
+}
+
+html.content-revealed [data-aos],
+html.content-revealed [data-reveal],
+html.content-revealed .service-card,
+html.content-revealed .produto-card,
+html.content-revealed .blog-card {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Final CTA — bigger type for impact */
+.contato-cta-title {
+    font-size: clamp(2.75rem, 11vw, 8.5rem);
+}
+
+.contato-cta-highlight {
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.25), 0 0 40px rgba(207, 255, 4, 0.35);
+    border-radius: 0.15em;
 }
 
 .portfolio-rail {
