@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WV_Todoz | Agência Interativa - Software House</title>
+    <meta name="description" content="Especialistas no desenvolvimento de aplicativos mobile, sistemas web sob medida e marketing de conversão. Transformamos ideias em resultados expressivos com tecnologia de ponta.">
+    <link rel="icon" type="image/png" href="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-300x115.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a0a0a',
+                        todoz: '#CFFF04',
+                        todozDark: '#A8D600',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-primary text-white selection:bg-todoz selection:text-black overflow-x-hidden">
+
+    <!-- Custom Cursor -->
+    <div id="cursor" class="fixed w-3 h-3 bg-todoz rounded-full pointer-events-none z-[9999] opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Navegação -->
+    <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <a href="index.html" class="block w-40 md:w-56 overflow-hidden">
+                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="WV_Todoz Logo" class="w-full h-auto">
+            </a>
+            <nav class="hidden lg:flex items-center gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                <a href="index.html" class="hover:text-todoz transition-colors">Home</a>
+                <a href="#sobre" class="hover:text-todoz transition-colors">Quem Somos</a>
+                <a href="#servicos" class="hover:text-todoz transition-colors">Serviços</a>
+                <a href="#produtos" class="hover:text-todoz transition-colors">Produtos</a>
+                <a href="#portfolio" class="hover:text-todoz transition-colors">Projetos</a>
+                <a href="https://wa.me/551155311779" target="_blank" class="magnetic px-8 py-3 bg-todoz text-black font-black rounded-full hover:shadow-[0_0_30px_rgba(207,255,4,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
+                    FALE CONOSCO 
+                    <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                        <i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
+                        <i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
+                    </div>
+                </a>
+            </nav>
+            <button type="button" id="mobile-menu-trigger" class="lg:hidden text-4xl text-todoz flex flex-col gap-1.5 items-end">
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+                <span class="w-5 h-1 bg-todoz rounded-full"></span>
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
+        <div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
+            <div class="space-y-12">
+                <div class="flex justify-between items-center">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-32 h-auto">
+                    <button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
+                </div>
+                <nav class="flex flex-col gap-6">
+                    <a href="index.html" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
+                    <a href="#sobre" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
+                    <a href="#servicos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
+                    <a href="#produtos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
+                    <a href="#portfolio" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
+                </nav>
+            </div>
+            <div class="space-y-8">
+                <div class="flex gap-6 text-zinc-400 text-3xl">
+                    <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
+                    <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                </div>
+                <a href="https://wa.me/551155311779" class="w-full py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs">FALE CONOSCO</a>
+            </div>
+        </div>
+    </div>
+
+    <main id="main-wrapper">
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen relative flex items-center justify-center overflow-hidden bg-[#050505]">
+            <!-- Background Layer -->
+            <div class="absolute inset-0 z-0">
+                <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-20 filter grayscale brightness-50">
+                    <source src="hero.mp4" type="video/mp4">
+                </video>
+                <!-- Dynamic Mesh Gradient -->
+                <div class="absolute inset-0 opacity-40 mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 40%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 40%);"></div>
+                <!-- Glass Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-b from-primary via-transparent to-primary"></div>
+                <!-- Noise Texture -->
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+            </div>
+
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="max-w-5xl mx-auto flex flex-col items-center pt-28 md:pt-36 pb-10">
+                    <!-- Tech Badge -->
+                    <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 transition-all hover:border-todoz/40 group" data-aos="fade-down">
+                        <span class="w-1.5 h-1.5 rounded-full bg-todoz animate-pulse shadow-[0_0_10px_#CFFF04]"></span>
+                        <span class="text-white font-black text-[10px] tracking-[0.28em] uppercase">Software House 2026</span>
+                    </div>
+
+                    <h1 class="text-center mb-8 md:mb-10" data-aos="zoom-out" data-aos-delay="200">
+                        <span class="hero-eyebrow block text-zinc-400 text-[clamp(0.7rem,1.4vw,0.85rem)] font-semibold tracking-[0.32em] uppercase mb-5 md:mb-6">
+                            Transformamos visões em
+                        </span>
+                        <span class="block text-[clamp(2.75rem,9.5vw,7rem)] font-black leading-[0.88] tracking-tighter text-white uppercase italic">
+                            Impacto <br class="hidden sm:block">
+                            <span class="text-todoz text-glow not-italic">Digital.</span>
+                        </span>
+                    </h1>
+
+                    <!-- Paragraph -->
+                    <p class="text-base md:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed mb-10 md:mb-12 text-center font-medium" data-aos="fade-up" data-aos-delay="400">
+                        Especialistas em arquitetura de <span class="text-white">aplicativos mobile</span>, sistemas de alta performance e <span class="text-white">marketing de conversão</span>.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full mb-4" data-aos="fade-up" data-aos-delay="600">
+                        <a href="https://wa.me/551155311779" target="_blank" class="magnetic group relative px-10 py-5 bg-todoz text-black font-black rounded-full text-xs uppercase tracking-widest transition-all hover:shadow-[0_0_50px_rgba(207,255,4,0.6)] flex items-center justify-center gap-4 min-w-[240px]">
+                            INICIAR PROJETO 
+                            <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                                <i class="ph-fill ph-rocket-launch text-lg group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            </div>
+                        </a>
+                        <button type="button" class="open-modal px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 transition-all text-xs uppercase tracking-widest backdrop-blur-sm min-w-[240px]">
+                            NOSSO ECOSSISTEMA
+                        </button>
+                    </div>
+
+                    <!-- Client Logos Strip -->
+                    <div class="mt-10 md:mt-14 pt-8 border-t border-white/5 w-full flex flex-wrap justify-center items-center gap-8 md:gap-16 lg:gap-24 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700" data-aos="fade-up" data-aos-delay="800">
+                        <div class="h-9 md:h-12 lg:h-14 flex items-center justify-center">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-LW-1-300x113.png" alt="LW" class="max-h-full w-auto object-contain">
+                        </div>
+                        <div class="h-9 md:h-12 lg:h-14 flex items-center justify-center">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Facileme-2-300x113.png" alt="Facileme" class="max-h-full w-auto object-contain">
+                        </div>
+                        <div class="h-9 md:h-12 lg:h-14 flex items-center justify-center">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Ingresso-2-300x113.png" alt="Ingresso" class="max-h-full w-auto object-contain">
+                        </div>
+                        <div class="h-9 md:h-12 lg:h-14 flex items-center justify-center">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Cursos-1-300x113.png" alt="Cursos" class="max-h-full w-auto object-contain">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 opacity-40">
+                <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
+                    <div class="w-1.5 h-1.5 bg-todoz rounded-full animate-[scroll_2s_infinite]"></div>
+                </div>
+                <span class="text-[8px] font-black uppercase tracking-[0.4em] text-white">Scroll</span>
+            </div>
+            <style>
+                @keyframes scroll {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(15px); opacity: 0; }
+                }
+            </style>
+        </section>
+
+        <!-- Clientes -->
+        <section id="clientes" class="py-24 bg-primary border-y border-white/5 overflow-hidden">
+            <div class="container mx-auto px-6 text-center">
+                <h3 class="text-xs md:text-lg font-bold uppercase tracking-[0.2em] text-white mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">NOSSA ESPECIALIDADE É CUIDAR QUE A SUA EMPRESA E IDEIAS <span class="text-todoz text-glow">ACONTEÇAM, TRANSFORMEM E APAREÇAM.</span></h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-20 items-center opacity-60">
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Coca Cola" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="100"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="PagSeguro" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="200"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="Syngenta" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="300"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="VMware" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="400"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/confirp-o59hfslv8qxu40yaxmr2w7jin97vldnnypm21lrk2.png" alt="Confirp" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sobre -->
+        <section id="sobre" class="py-32 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                    <div data-aos="fade-right" class="text-left">
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-[0.85]">SEJA <span class="text-todoz text-glow uppercase">TODOZ</span> <br> COM A GENTE.</h2>
+                        <p class="text-zinc-400 text-xl leading-relaxed mb-8">Pioneiros na linguagem das redes sociais e do desenvolvimento interativo. Criamos caminhos para que sua marca se torne indispensável.</p>
+                        <div class="grid grid-cols-2 gap-12 mb-12">
+                            <div class="border-l-2 border-todoz pl-6"><span class="block text-5xl font-black text-white mb-2">11+</span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Anos de Inovação</span></div>
+                            <div class="border-l-2 border-todoz pl-6"><span class="block text-5xl font-black text-white mb-2">500+</span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Projetos Entregues</span></div>
+                        </div>
+                        <div class="flex flex-wrap gap-6"><button type="button" class="open-modal magnetic px-10 py-5 bg-todoz text-black font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest hover:shadow-[0_0_30px_rgba(207,255,4,0.3)]">AGENDAR CONSULTORIA</button><button type="button" class="open-modal px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest">NOSSA EXPERTISE</button></div>
+                    </div>
+                    <div class="relative" data-aos="fade-left">
+                        <div class="relative z-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group"><img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/programming.jpg" alt="Dev" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div></div>
+                        <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-todoz/20 rounded-full blur-[80px] -z-10"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Autoridade -->
+        <section class="py-20 bg-zinc-950 relative overflow-hidden">
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                    <div class="lg:col-span-8 text-left" data-aos="fade-right">
+                        <span class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-6 block">Nossa Missão</span>
+                        <h3 class="text-[clamp(1.5rem,4vw,2.5rem)] font-black tracking-tighter text-white leading-[1] mb-6 uppercase">
+                            Transformamos a interação <br> do consumidor em <br> <span class="text-todoz italic text-glow">fidelidade absoluta</span> <br> para sua marca.
+                        </h3>
+                    </div>
+                    <div class="lg:col-span-4 lg:border-l border-white/10 lg:pl-12 pt-8 lg:pt-0" data-aos="fade-left">
+                        <p class="text-zinc-500 text-lg leading-relaxed font-light mb-10 text-left">
+                            No ecossistema digital, não basta apenas aparecer. É preciso **acontecer**. Utilizamos engenharia de elite para que cada clique seja o início de um relacionamento duradouro entre marca e cliente.
+                        </p>
+                        <button type="button" class="open-modal magnetic px-8 py-4 bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-todoz hover:text-black transition-all">
+                            CONHECER NOSSO DNA
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Subtle Decor -->
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-todoz/5 rounded-full blur-[120px] -z-0"></div>
+        </section>
+
+        <!-- Seção Mobile Strategist -->
+        <section class="pb-16 bg-zinc-950">
+            <div class="container mx-auto px-6">
+                <div class="max-w-6xl mx-auto group border border-white/5 bg-zinc-900/10 p-8 md:p-14 rounded-[3.5rem] backdrop-blur-xl relative overflow-hidden transition-all duration-700 hover:border-todoz/20" data-aos="zoom-in-up">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+                        <div class="lg:col-span-5 border-b lg:border-r lg:border-b-0 border-white/10 pb-8 lg:pb-0 lg:pr-12 text-left">
+                            <h3 class="text-3xl md:text-5xl font-black text-white leading-none tracking-tighter text-left uppercase italic">O mundo <br> é <span class="text-todoz text-glow">mobile,</span> <br> sua empresa <br> deve ser.</h3>
+                        </div>
+                        <div class="lg:col-span-7 text-left">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-10 h-px bg-todoz"></div>
+                                <span class="text-todoz font-black text-[9px] uppercase tracking-[0.4em] uppercase text-left">Tecnologia e Performance</span>
+                            </div>
+                            <p class="text-zinc-400 text-base md:text-lg leading-relaxed italic font-medium mb-8 text-left">
+                                "Sua marca precisa estar presente onde a atenção do seu cliente reside: na palma da mão. Convertemos conceitos complexos em aplicações nativas de alta fluidez para redes sociais, iOS e Android. Entregamos a segurança e a performance que sua empresa exige."
+                            </p>
+                            <button type="button" class="open-modal text-white font-black text-[10px] uppercase tracking-widest flex items-center gap-4 group/btn hover:text-todoz transition-colors uppercase">
+                                CONSULTAR ESTRATÉGIA <i class="ph ph-arrow-right group-hover/btn:translate-x-2 transition-transform"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[80px] -z-0 group-hover:bg-todoz/5 transition-all"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Serviços -->
+        <section id="servicos" class="py-32 bg-zinc-950 relative overflow-hidden">
+            <div class="container mx-auto px-6 text-left">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div class="max-w-2xl text-left" data-aos="fade-right"><h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">O QUE <br><span class="text-todoz text-glow">FAZEMOS.</span></h2></div>
+                    <div class="max-w-xs text-right" data-aos="fade-left">
+                        <p class="text-zinc-500 mb-6 text-sm leading-relaxed">Engenharia de software e design de interação de elite.</p>
+                        <button type="button" class="open-modal text-todoz font-bold text-xs uppercase tracking-widest flex items-center justify-end gap-3 group ml-auto">Solicitar Orçamento <i class="ph ph-arrow-right group-hover:translate-x-2 transition-all"></i></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:auto-rows-[minmax(240px,auto)]">
+                    <div class="md:col-span-8 md:row-span-2 p-8 md:p-12 bg-primary border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group relative flex flex-col gap-8 min-h-[420px]" data-aos="fade-up">
+                        <div class="relative z-10 text-left flex-1">
+                            <div class="w-16 h-16 bg-todoz/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-todoz group-hover:text-black transition-all duration-500">
+                                <i class="ph ph-app-window text-4xl"></i>
+                            </div>
+                            <h3 class="text-4xl md:text-5xl font-black mb-6 text-white leading-[0.9] tracking-tighter uppercase">Aplicativos Sociais <br> <span class="text-todoz">& Ecossistemas.</span></h3>
+                            <p class="text-zinc-400 max-w-lg text-lg leading-relaxed font-medium">Arquitetura e desenvolvimento de aplicações interativas que conectam marcas globais aos seus consumidores finais.</p>
+                        </div>
+                        <div class="relative z-10 mt-auto shrink-0">
+                            <button type="button" class="open-modal px-10 py-4 bg-white/5 border border-white/10 rounded-full text-white font-black text-[10px] uppercase tracking-widest hover:bg-todoz hover:text-black transition-all">Ver Detalhes do Serviço</button>
+                        </div>
+                    </div>
+                    <div class="md:col-span-4 md:row-span-3 p-8 md:p-12 bg-zinc-900/50 border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group flex flex-col justify-between gap-8 min-h-[420px]" data-aos="fade-up" data-aos-delay="100">
+                        <div class="text-left">
+                            <div class="w-16 h-16 bg-todoz/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-todoz group-hover:text-black transition-all duration-500">
+                                <i class="ph ph-terminal-window text-4xl"></i>
+                            </div>
+                            <h3 class="text-3xl font-black mb-6 text-white leading-none tracking-tighter uppercase">Sistemas Web <br> <span class="text-todoz">Sob Medida.</span></h3>
+                            <p class="text-zinc-500 text-sm leading-relaxed font-medium">Soluções robustas de back-end e front-end para operações de alta escala e segurança de dados absoluta.</p>
+                        </div>
+                        <div class="space-y-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] text-left">
+                            <div class="flex items-center gap-4"><div class="w-1.5 h-1.5 bg-todoz rounded-full"></div> Cloud Infrastructure</div>
+                            <div class="flex items-center gap-4"><div class="w-1.5 h-1.5 bg-todoz rounded-full"></div> UX Strategy</div>
+                        </div>
+                        <button type="button" class="open-modal w-full py-5 bg-todoz/5 border border-todoz/20 text-todoz rounded-2xl font-black text-[10px] uppercase tracking-widest text-center group-hover:bg-todoz group-hover:text-black transition-all shrink-0">Consultar Especialista</button>
+                    </div>
+                    <div class="md:col-span-8 md:row-span-1 p-8 md:p-12 bg-zinc-900/30 border border-white/5 rounded-[3rem] hover:border-todoz/30 transition-all group flex items-center justify-between gap-10 text-left min-h-[180px]" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex-1 text-left">
+                            <h3 class="text-2xl md:text-3xl font-black mb-2 text-white tracking-tighter uppercase">Aplicações Mobile <span class="text-todoz">Elite.</span></h3>
+                            <p class="text-zinc-500 text-sm font-medium italic">iOS e Android com performance nativa e design proprietário.</p>
+                        </div>
+                        <button type="button" class="open-modal p-6 bg-white/5 rounded-full border border-white/10 group-hover:bg-todoz group-hover:text-black transition-all shrink-0" aria-label="Solicitar desenvolvimento mobile"><i class="ph ph-arrow-up-right text-2xl"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfólio (Cases que Marcam) -->
+        <section id="portfolio" class="py-24 bg-primary">
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-10 mb-16 text-left">
+                    <div class="text-left" data-aos="fade-right">
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">Cases que <br> <span class="text-todoz text-glow">marcam.</span></h2>
+                    </div>
+                    <div class="pb-2" data-aos="fade-left">
+                        <a href="#portfolio-grid" class="px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest text-xs text-white inline-block">Explorar Todos</a>
+                    </div>
+                </div>
+
+                <div id="portfolio-grid" class="portfolio-grid">
+                <!-- Case 01 — Let's Work -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Let's Work Facial"
+                     data-case-category="AI / Mobile"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg"
+                     data-case-desc="Sistema de ponto eletrônico com reconhecimento facial e geolocalização. Processamento de imagem nativo em tempo real para controle de jornada seguro, preciso e auditável."
+                     data-aos="fade-up">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg" alt="Let's Work Facial" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">AI / Mobile</span>
+                                <h4>Let's Work Facial</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Let's Work Facial">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Biometria facial</strong>
+                            <p>Registro de ponto com reconhecimento facial e geolocalização em tempo real.</p>
+                        </div>
+                        <span class="case-index">01</span>
+                    </div>
+                </article>
+
+                <!-- Case 02 — Pullman -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Pullman App"
+                     data-case-category="Marketing Digital"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg"
+                     data-case-desc="Aplicativo interativo para a Pullman com foco em engajamento de marca e utilidade para o consumidor. Interface premium, jornada fluida e arquitetura mobile preparada para escala."
+                     data-aos="fade-up"
+                     data-aos-delay="100">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg" alt="Pullman App" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Marketing Digital</span>
+                                <h4>Pullman App</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Pullman App">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Brand experience</strong>
+                            <p>App mobile premium que aproxima a marca do consumidor com jornada fluida.</p>
+                        </div>
+                        <span class="case-index">02</span>
+                    </div>
+                </article>
+
+                <!-- Case 03 — Mega Senha -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Mega Senha Quiz"
+                     data-case-category="Social Gaming"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg"
+                     data-case-desc="Do sucesso da TV para uma experiência digital interativa. Quiz do Mega Senha no Facebook com milhares de jogadores simultâneos, gamificação e compartilhamento social em escala."
+                     data-aos="fade-up"
+                     data-aos-delay="200">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg" alt="Mega Senha Quiz" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Social Gaming</span>
+                                <h4>Mega Senha Quiz</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Mega Senha Quiz">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Gamificação social</strong>
+                            <p>Quiz interativo com milhares de jogadores simultâneos e alto engajamento.</p>
+                        </div>
+                        <span class="case-index">03</span>
+                    </div>
+                </article>
+
+                <!-- Case 04 — Facíleme -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Facíleme Store"
+                     data-case-category="Social Commerce"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg"
+                     data-case-desc="Ecossistema completo de lojas virtuais para venda direta nas redes sociais. Catálogo, checkout simplificado e conversão onde o público já está conectado."
+                     data-aos="fade-up"
+                     data-aos-delay="50">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg" alt="Facíleme Store" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Social Commerce</span>
+                                <h4>Facíleme Store</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Facíleme Store">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Venda nas redes</strong>
+                            <p>Loja virtual integrada ao social, do catálogo até o checkout simplificado.</p>
+                        </div>
+                        <span class="case-index">04</span>
+                    </div>
+                </article>
+
+                <!-- Case 05 — Syngenta -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Syngenta Wi-Fi"
+                     data-case-category="Enterprise"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg"
+                     data-case-desc="Gestão inteligente de Wi-Fi para hotéis e eventos de grande porte. Controle de acesso, monitoramento de performance e operação estável sob alta demanda."
+                     data-aos="fade-up"
+                     data-aos-delay="150">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg" alt="Syngenta Wi-Fi" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Enterprise</span>
+                                <h4>Syngenta Wi-Fi</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Syngenta Wi-Fi">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Conectividade</strong>
+                            <p>Gestão de Wi-Fi corporativo com controle de acesso e monitoramento.</p>
+                        </div>
+                        <span class="case-index">05</span>
+                    </div>
+                </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produtos -->
+        <section id="produtos" class="py-32 relative bg-primary border-t border-white/5">
+            <div class="container mx-auto px-6">
+                <div class="text-left mb-20">
+                    <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-up">Ecossistema</span>
+                    <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase" data-aos="fade-up" data-aos-delay="50">Produtos <br><span class="text-todoz text-glow">Proprietários.</span></h2>
+                    <p class="text-zinc-500 mt-6 max-w-2xl text-left" data-aos="fade-up" data-aos-delay="100">Ferramentas robustas que já resolvem os maiores desafios do mercado digital.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="group relative p-10 md:p-12 rounded-[3.5rem] bg-zinc-900/30 border border-white/5 hover:border-todoz/30 transition-all duration-700 overflow-hidden" data-aos="fade-right">
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-16 h-16 bg-todoz rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(207,255,4,0.3)]">
+                                    <i class="ph ph-storefront text-3xl font-black"></i>
+                                </div>
+                                <span class="text-4xl font-black italic tracking-tighter text-white">Facíleme</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-6 text-white leading-tight">Social Commerce & Ingressos Profissionais.</h3>
+                            <p class="text-zinc-400 mb-10 text-lg leading-relaxed">
+                                E-commerce integrado às redes sociais. Venda produtos, serviços e ingressos com checkout simplificado e alta conversão.
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="https://www.facileme.com.br/" target="_blank" rel="noopener noreferrer" class="magnetic px-8 py-4 bg-todoz text-black font-black rounded-full text-xs uppercase tracking-widest">Loja Virtual</a>
+                                <a href="https://www.facilemeingresso.com.br/" target="_blank" rel="noopener noreferrer" class="px-8 py-4 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all text-white">Ingressos</a>
+                            </div>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-todoz/5 rounded-full blur-[100px] group-hover:bg-todoz/10 transition-all pointer-events-none"></div>
+                    </div>
+
+                    <div class="group relative p-10 md:p-12 rounded-[3.5rem] bg-zinc-900/30 border border-white/5 hover:border-todoz/30 transition-all duration-700 overflow-hidden" data-aos="fade-left">
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-16 h-16 bg-todoz rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_rgba(207,255,4,0.3)]">
+                                    <i class="ph ph-fingerprint text-3xl font-black"></i>
+                                </div>
+                                <span class="text-4xl font-black italic tracking-tighter text-white">Let's Work</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-6 text-white leading-tight">Gestão de Ponto com Biometria Facial.</h3>
+                            <p class="text-zinc-400 mb-10 text-lg leading-relaxed">
+                                Reconhecimento facial e geolocalização para controle de jornada com precisão, segurança e conformidade.
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="magnetic px-10 py-4 bg-white text-black font-black rounded-full inline-block text-xs uppercase tracking-widest">Ver Demonstração</a>
+                                <button type="button" class="open-modal px-8 py-4 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all text-white">Falar com Especialista</button>
+                            </div>
+                        </div>
+                        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-todoz/5 rounded-full blur-[100px] group-hover:bg-todoz/10 transition-all pointer-events-none"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Marketing -->
+        <section id="marketing" class="py-24 bg-zinc-950 overflow-hidden text-left border-t border-white/5">
+            <div class="container mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                    <div class="relative order-2 lg:order-1" data-aos="fade-right">
+                        <div class="aspect-square bg-zinc-900 rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/marketing-de-conversao-4.jpg" alt="Marketing de Conversão" class="w-full h-full object-cover transition-all duration-1000 grayscale hover:grayscale-0">
+                        </div>
+                        <!-- Abstract UI decor -->
+                        <div class="absolute -bottom-10 -right-10 p-8 bg-zinc-900 border border-white/10 rounded-[2rem] shadow-2xl hidden md:block" data-aos="fade-up" data-aos-delay="500">
+                            <div class="flex gap-4 items-center">
+                                <div class="flex flex-col gap-1">
+                                    <div class="w-12 h-2 bg-todoz rounded-full"></div>
+                                    <div class="w-8 h-2 bg-zinc-700 rounded-full"></div>
+                                </div>
+                                <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Monitor de ROI</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2 text-left" data-aos="fade-left">
+                        <span class="text-todoz text-[10px] font-black uppercase tracking-[0.4em] mb-6 block">Estratégia de Performance</span>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-none text-white uppercase text-left">Marketing de <br> <span class="text-todoz text-glow">Conversão.</span></h2>
+                        <p class="text-zinc-400 text-xl leading-relaxed mb-10 text-left">
+                            Não basta cliques, é preciso conversão. Unimos nossa expertise em desenvolvimento com estratégias que transformam visitantes em leads qualificados e receita real.
+                        </p>
+                        <div class="space-y-6 mb-12 text-left">
+                            <div class="flex items-center gap-4 text-zinc-300 font-bold uppercase text-xs tracking-widest">
+                                <div class="w-2 h-2 bg-todoz rounded-full"></div> Monitoramento de Performance
+                            </div>
+                            <div class="flex items-center gap-4 text-zinc-300 font-bold uppercase text-xs tracking-widest">
+                                <div class="w-2 h-2 bg-todoz rounded-full"></div> Estratégias de Inbound
+                            </div>
+                        </div>
+                        <button type="button" class="open-modal px-10 py-5 border border-todoz text-todoz font-black rounded-full text-xs uppercase tracking-widest hover:bg-todoz hover:text-black transition-all">ESCALAR RESULTADOS</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog -->
+        <section id="blog" class="py-32 bg-zinc-950 text-left">
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 text-left">
+                    <div>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4 text-left">Insights</span>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase text-left">Conteúdo & <br> <span class="text-todoz uppercase text-glow">Inovação.</span></h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[1.5rem] overflow-hidden mb-6 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2018/04/programacao.jpg" alt="O futuro da programação" class="blog-card-image w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Tecnologia</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">O futuro da programação.</h4>
+                            <p class="text-zinc-500 text-sm mb-6 text-left leading-relaxed">Tendências que ditam o software de amanhã e como se preparar.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 12 Abr 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up" data-aos-delay="100">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[1.5rem] overflow-hidden mb-6 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2018/07/segmentar-leads-1-300x169.png" alt="Segmentação de Leads" class="blog-card-image w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Marketing</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">Segmentação de Leads.</h4>
+                            <p class="text-zinc-500 text-sm mb-6 text-left leading-relaxed">Trabalhando sua base de contatos com inteligência e conversão.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 08 Mar 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up" data-aos-delay="200">
+                        <div class="aspect-[16/10] bg-zinc-900 rounded-[1.5rem] overflow-hidden mb-6 border border-white/5 relative">
+                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2017/09/responsividade.jpg" alt="Revolução AI-First" class="blog-card-image w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Inovação</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">Revolução AI-First.</h4>
+                            <p class="text-zinc-500 text-sm mb-6 text-left leading-relaxed">IA no centro dos produtos digitais modernos e competitivos.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 21 Fev 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="text-center">
+                    <a href="blog-post.html" class="inline-block px-12 py-5 border border-white/10 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all uppercase">Ver Blog Completo</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section id="contato" class="py-40 bg-todoz flex items-center justify-center text-center relative overflow-hidden">
+            <div class="container mx-auto px-6 relative z-10" data-aos="zoom-in">
+                <h2 class="text-black text-[clamp(2rem,8vw,6rem)] font-black leading-none mb-12 tracking-tighter uppercase text-center">Pronto para o <br> <span class="bg-black text-todoz px-6 text-glow">Próximo Nível?</span></h2>
+                <div class="flex flex-col md:flex-row justify-center gap-10 items-center">
+                    <a href="tel:1155311779" class="text-black font-black text-3xl md:text-4xl tracking-tighter hover:opacity-70 transition-opacity">(11) 5531-1779</a>
+                    <a href="https://wa.me/551155311779" target="_blank" class="magnetic px-16 py-6 bg-black text-todoz font-black text-lg md:text-xl rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-4 min-w-[320px]">FALE CONOSCO <i class="ph-bold ph-whatsapp-logo text-3xl"></i></a>
+                </div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none uppercase">
+                <span class="text-[30rem] font-black text-black italic">TODOZ</span>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-32 bg-black relative overflow-hidden border-t border-white/5">
+        <div class="container mx-auto px-6 relative z-10 text-left">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-24 mb-24 text-left">
+                <div class="md:col-span-4 text-left">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-48 mb-10 mx-auto md:mx-0">
+                    <p class="text-zinc-500 leading-relaxed mb-10 text-left uppercase">Inovação e technology para marcas globais.</p>
+                    <div class="flex gap-6 text-zinc-400 text-3xl justify-center md:justify-start">
+                        <a href="https://www.facebook.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>
+                        <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
+                        <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                        <a href="https://www.youtube.com/@wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase" aria-label="YouTube"><i class="ph ph-youtube-logo"></i></a>
+                    </div>
+                </div>
+                <div class="md:col-span-2 text-left uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-8 text-left uppercase">Navegação</h5>
+                    <ul class="space-y-4 text-zinc-500 font-bold text-sm text-left uppercase">
+                        <li><a href="#sobre" class="hover:text-todoz transition-all">Sobre Nós</a></li>
+                        <li><a href="#servicos" class="hover:text-todoz transition-all">Serviços</a></li>
+                        <li><a href="#produtos" class="hover:text-todoz transition-all uppercase">Produtos</a></li>
+                        <li><a href="#portfolio" class="hover:text-todoz transition-all uppercase">Projetos</a></li>
+                        <li><a href="#blog" class="hover:text-todoz transition-all">Insights</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3 text-left uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-8 text-left uppercase">Produtos</h5>
+                    <ul class="space-y-4 text-zinc-500 font-bold text-sm text-left uppercase">
+                        <li><a href="https://www.facileme.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase">Facíleme Store</a></li>
+                        <li><a href="https://www.facilemeingresso.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase">Facíleme Ingresso</a></li>
+                        <li><a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase">Let's Work Facial</a></li>
+                        <li><a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all uppercase">Let's Work Mobile</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3 text-left uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-8 text-left uppercase">Localização</h5>
+                    <p class="text-zinc-500 leading-relaxed font-bold text-sm text-left uppercase">
+                        Av. Morumbi, 8435 cj.104 <br>
+                        Brooklin, São Paulo - SP <br>
+                        Brasil
+                    </p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Av.+Morumbi,+8435+Brooklin+S%C3%A3o+Paulo+SP" target="_blank" rel="noopener noreferrer" class="inline-block mt-6 text-todoz text-[10px] font-black uppercase tracking-widest border-b border-todoz/30 pb-1 uppercase">Ver no Google Maps</a>
+                </div>
+            </div>
+            
+            <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] uppercase">
+                    © 2026 WV_TODOZ — AGÊNCIA INTERATIVA
+                </div>
+                <div class="flex items-center gap-8 text-zinc-600 text-[10px] font-black uppercase tracking-widest uppercase">
+                    <a href="https://wa.me/551155311779?text=Ol%C3%A1%2C%20gostaria%20de%20receber%20a%20Pol%C3%ADtica%20de%20Privacidade." target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Política de Privacidade</a>
+                    <a href="https://wa.me/551155311779?text=Ol%C3%A1%2C%20gostaria%20de%20receber%20os%20Termos%20de%20Uso." target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Termos de Uso</a>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 right-0 pointer-events-none select-none opacity-5 translate-y-1/4 translate-x-1/4 uppercase">
+            <span class="text-[40rem] font-black text-white leading-none tracking-tighter italic">Z</span>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="case-modal" class="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500 uppercase">
+        <div class="absolute inset-0 bg-black/98 backdrop-blur-3xl"></div>
+        <div class="relative bg-zinc-900 border border-white/10 w-full max-w-7xl h-auto max-h-[90vh] overflow-y-auto md:overflow-hidden rounded-[3rem] m-6 transform translate-y-20 transition-all duration-700 pointer-events-auto shadow-[0_0_120px_rgba(0,0,0,0.5)] flex flex-col md:flex-row text-left">
+            <button type="button" id="close-case-modal" class="absolute top-8 right-10 text-zinc-500 hover:text-todoz transition-colors text-4xl z-20"><i class="ph ph-x-circle"></i></button>
+            <div class="w-full md:w-[60%] h-64 md:h-auto relative shrink-0 uppercase">
+                <img id="case-modal-img" src="" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-zinc-900"></div>
+            </div>
+            <div class="w-full md:w-[40%] p-10 md:p-16 flex flex-col justify-center bg-zinc-900 text-left">
+                <span id="case-modal-category" class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-6 block text-left uppercase">Categoria</span>
+                <h2 id="case-modal-title" class="text-4xl md:text-6xl font-black mb-10 tracking-tighter leading-[0.9] text-white text-left uppercase">Título</h2>
+                <p id="case-modal-desc" class="text-zinc-400 text-lg leading-relaxed mb-12 text-left">Descrição detalhada do projeto.</p>
+                <button type="button" class="open-modal-from-case magnetic px-10 py-6 bg-todoz text-black font-black rounded-full text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(207,255,4,0.3)]">SOLICITAR PROJETO SIMILAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="fixed inset-0 z-[1001] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-500 uppercase text-left">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-3xl"></div>
+        <div class="relative bg-zinc-900 border border-white/10 w-full max-w-2xl p-12 rounded-[3rem] m-6 transform translate-y-20 transition-all duration-700 pointer-events-auto shadow-[0_0_100px_rgba(207,255,4,0.1)] text-left uppercase">
+            <button type="button" id="close-modal" class="absolute top-8 right-8 text-zinc-500 hover:text-todoz transition-colors text-3xl text-left"><i class="ph ph-x"></i></button>
+            <h2 class="text-4xl font-black mb-8 tracking-tighter text-left text-white uppercase">VAMOS <span class="text-todoz text-glow uppercase">CONVERSAR.</span></h2>
+            <form id="contact-form" class="space-y-6 text-left normal-case">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">Nome Completo</label>
+                        <input name="nome" type="text" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="João Silva">
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">E-mail Corporativo</label>
+                        <input name="email" type="email" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="exemplo@empresa.com.br">
+                    </div>
+                </div>
+                <div class="space-y-2 text-left">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">Conte seu desafio</label>
+                    <textarea name="mensagem" rows="3" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white resize-none" placeholder="Quero desenvolver um aplicativo mobile..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-5 bg-todoz text-black font-black rounded-full text-xs uppercase tracking-widest shadow-lg shadow-todoz/20 hover:scale-[1.02] transition-transform text-center">Enviar Proposta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/551155311779" target="_blank" class="fixed bottom-10 right-10 z-[9999] group">
+        <div class="absolute inset-0 bg-todoz rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-all duration-700 scale-150"></div>
+        <div class="relative w-20 h-20 bg-todoz rounded-full flex items-center justify-center text-black text-4xl shadow-[0_15px_50px_rgba(207,255,4,0.3)] hover:shadow-[0_20px_60px_rgba(207,255,4,0.5)] hover:-translate-y-3 active:scale-90 transition-all duration-500">
+            <i class="ph-bold ph-whatsapp-logo"></i>
+        </div>
+        <div class="absolute right-full mr-8 top-1/2 -translate-y-1/2 px-6 py-4 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl text-white text-xs font-black uppercase tracking-widest whitespace-nowrap opacity-0 translate-x-10 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 hidden md:block">
+            <span class="flex items-center gap-3">Falar com Especialista <i class="ph ph-arrow-right text-todoz animate-bounce-x"></i></span>
+        </div>
+    </a>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/animations.js"></script>
+    <script src="assets/js/components.js"></script>
+</body>
+</html>
