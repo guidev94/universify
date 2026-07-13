@@ -134,6 +134,14 @@ body {
         #0a0a0a;
 }
 
+/* Missão — soft ambient inside paint (no blur blobs clipped by section edges) */
+#missao {
+    background:
+        radial-gradient(ellipse 58% 70% at 92% 8%, rgba(207, 255, 4, 0.06), transparent 68%),
+        radial-gradient(ellipse 42% 50% at 88% 95%, rgba(207, 255, 4, 0.035), transparent 65%),
+        #0a0a0a;
+}
+
 /* Servicos owns mid-section accents only — seam glow lives on portfolio ambient */
 #servicos {
     background:
@@ -693,9 +701,12 @@ html.content-revealed [data-reveal] {
 }
 
 .produto-logo {
+    display: block;
     height: 3.75rem;
     width: auto;
     max-width: 16rem;
+    margin: 0;
+    padding: 0;
     object-fit: contain;
     object-position: left center;
     filter: brightness(1.25) contrast(1.06);

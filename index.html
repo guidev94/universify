@@ -98,8 +98,8 @@
         <section id="hero" class="min-h-screen relative flex items-center justify-center overflow-hidden bg-[#050505]">
             <!-- Background Layer -->
             <div class="absolute inset-0 z-0">
-                <video autoplay muted loop playsinline class="w-full h-full object-cover opacity-20 filter grayscale brightness-50">
-                    <source src="hero.mp4" type="video/mp4">
+                <video autoplay muted loop playsinline preload="metadata" class="w-full h-full object-cover opacity-20 filter grayscale brightness-50">
+                    <source src="assets/video/hero.mp4" type="video/mp4">
                 </video>
                 <!-- Dynamic Mesh Gradient -->
                 <div class="absolute inset-0 opacity-40 mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 40%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 40%);"></div>
@@ -148,16 +148,16 @@
                     <!-- Product logos -->
                     <div class="hero-logos" data-aos="fade-up" data-aos-delay="800">
                         <a href="#produtos" class="hero-logo" aria-label="Facíleme">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Facileme-2.png" alt="Facíleme" width="480" height="180" loading="lazy">
+                            <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme" width="213" height="82" loading="lazy">
                         </a>
                         <a href="#produtos" class="hero-logo" aria-label="Facíleme Ingresso">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Ingresso-2.png" alt="Facíleme Ingresso" width="480" height="180" loading="lazy">
+                            <img src="assets/img/produtos/logo-ingresso.png" alt="Facíleme Ingresso" width="214" height="88" loading="lazy">
                         </a>
                         <a href="#produtos" class="hero-logo" aria-label="Facíleme Cursos">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Cursos-1.png" alt="Facíleme Cursos" width="480" height="180" loading="lazy">
+                            <img src="assets/img/produtos/logo-cursos.png" alt="Facíleme Cursos" width="282" height="82" loading="lazy">
                         </a>
                         <a href="#produtos" class="hero-logo" aria-label="Let's Work">
-                            <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-LW-1.png" alt="Let's Work" width="480" height="180" loading="lazy">
+                            <img src="assets/img/produtos/logo-letswork.png" alt="Let's Work" width="234" height="106" loading="lazy">
                         </a>
                     </div>
                 </div>
@@ -214,17 +214,17 @@
         </section>
 
         <!-- Seção de Autoridade -->
-        <section class="section-canvas py-20 bg-primary relative">
+        <section id="missao" class="section-canvas py-20 relative">
             <div class="site-container relative z-10">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-                    <div class="lg:col-span-8 text-left" data-aos="fade-right">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                    <div class="lg:col-span-6 text-left" data-aos="fade-right">
                         <span class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-6 block">Nossa Missão</span>
                         <h3 class="text-[clamp(1.5rem,4vw,2.5rem)] font-black tracking-tighter text-white leading-[1] mb-6 uppercase">
                             Transformamos a interação <br> do consumidor em <br> <span class="text-todoz italic text-glow">fidelidade absoluta</span> <br> para sua marca.
                         </h3>
                     </div>
-                    <div class="lg:col-span-4 lg:border-l border-white/10 lg:pl-12 pt-8 lg:pt-0" data-aos="fade-left">
-                        <p class="text-zinc-500 text-lg leading-relaxed font-light mb-10 text-left">
+                    <div class="lg:col-span-5 lg:col-start-7 lg:border-l border-white/10 lg:pl-8 pt-8 lg:pt-0" data-aos="fade-left">
+                        <p class="text-zinc-500 text-lg leading-relaxed font-light mb-10 text-left max-w-md">
                             No ecossistema digital, não basta apenas aparecer. É preciso **acontecer**. Utilizamos engenharia de elite para que cada clique seja o início de um relacionamento duradouro entre marca e cliente.
                         </p>
                         <button type="button" class="open-modal magnetic px-8 py-4 bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-todoz hover:text-black transition-all">
@@ -233,8 +233,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Subtle Decor -->
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-todoz/5 rounded-full blur-[120px] -z-0"></div>
         </section>
 
         <!-- Seção Mobile Strategist -->
@@ -486,7 +484,7 @@
                         <span class="produto-badge">Destaque</span>
                         <div class="produto-card-inner">
                             <div class="produto-brand">
-                                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-LW-1.png" alt="Let's Work" class="produto-logo" width="480" height="180" loading="lazy">
+                                <img src="assets/img/produtos/logo-letswork.png" alt="Let's Work" class="produto-logo" width="234" height="106" loading="lazy">
                             </div>
                             <div class="produto-main">
                                 <h3 class="produto-title">Let's Work</h3>
@@ -508,7 +506,7 @@
                     <article class="produto-card produto-card--wide" data-glow="soft" data-aos="fade-up" data-aos-delay="80">
                         <div class="produto-card-inner">
                             <div class="produto-brand">
-                                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Facileme-2.png" alt="Facíleme Store" class="produto-logo" width="480" height="180" loading="lazy">
+                                <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme Store" class="produto-logo" width="213" height="82" loading="lazy">
                             </div>
                             <h3 class="produto-title">Facíleme Store</h3>
                             <p class="produto-subtitle">Social Commerce</p>
@@ -523,7 +521,7 @@
                     <article class="produto-card" data-glow="soft" data-aos="fade-up" data-aos-delay="120">
                         <div class="produto-card-inner">
                             <div class="produto-brand">
-                                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Ingresso-2.png" alt="Facíleme Ingresso" class="produto-logo" width="480" height="180" loading="lazy">
+                                <img src="assets/img/produtos/logo-ingresso.png" alt="Facíleme Ingresso" class="produto-logo" width="214" height="88" loading="lazy">
                             </div>
                             <h3 class="produto-title">Facíleme Ingresso</h3>
                             <p class="produto-subtitle">Eventos &amp; Tickets</p>
@@ -538,7 +536,7 @@
                     <article class="produto-card" data-glow="soft" data-aos="fade-up" data-aos-delay="160">
                         <div class="produto-card-inner">
                             <div class="produto-brand">
-                                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logo-Cursos-1.png" alt="Facíleme Cursos" class="produto-logo" width="480" height="180" loading="lazy">
+                                <img src="assets/img/produtos/logo-cursos.png" alt="Facíleme Cursos" class="produto-logo" width="282" height="82" loading="lazy">
                             </div>
                             <h3 class="produto-title">Facíleme Cursos</h3>
                             <p class="produto-subtitle">Educação Digital</p>
