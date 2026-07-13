@@ -183,7 +183,7 @@ const initMobileMenu = () => {
     };
 
     const closeMenu = () => {
-        gsap.to(menuContent, { x: "-100%", duration: 0.5, ease: "expo.in" });
+        gsap.to(menuContent, { x: "100%", duration: 0.5, ease: "expo.in" });
         gsap.to(menu, { 
             opacity: 0, 
             duration: 0.4, 

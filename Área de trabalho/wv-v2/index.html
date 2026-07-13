@@ -69,15 +69,18 @@
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
         <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
-        <div id="mobile-menu-content" class="relative h-full w-[80%] max-w-sm bg-zinc-900 border-r border-white/5 p-12 flex flex-col justify-between -translate-x-full transition-transform duration-500 ease-expo">
+        <div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
             <div class="space-y-12">
-                <button id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
-                <nav class="flex flex-col gap-8">
-                    <a href="index.html" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
-                    <a href="#sobre" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
-                    <a href="#servicos" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
-                    <a href="#produtos" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
-                    <a href="#portfolio" class="text-3xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
+                <div class="flex justify-between items-center">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-32 h-auto">
+                    <button id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
+                </div>
+                <nav class="flex flex-col gap-6">
+                    <a href="index.html" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
+                    <a href="#sobre" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
+                    <a href="#servicos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
+                    <a href="#produtos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
+                    <a href="#portfolio" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
                 </nav>
             </div>
             <div class="space-y-8">
@@ -173,13 +176,13 @@
         <!-- Clientes -->
         <section id="clientes" class="py-24 bg-primary border-y border-white/5 overflow-hidden">
             <div class="container mx-auto px-6 text-center">
-                <h3 class="text-sm md:text-lg font-bold uppercase tracking-[0.2em] text-white mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">NOSSA ESPECIALIDADE É CUIDAR QUE A SUA EMPRESA E IDEIAS <span class="text-todoz text-glow">ACONTEÇAM, TRANSFORMEM E APAREÇAM.</span></h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 md:gap-20 items-center opacity-60">
-                    <div class="flex justify-center" data-aos="fade-up"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Coca Cola" class="h-10 md:h-14 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all"></div>
-                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="100"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="PagSeguro" class="h-10 md:h-14 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all"></div>
-                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="200"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="Syngenta" class="h-10 md:h-14 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all"></div>
-                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="300"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="VMware" class="h-10 md:h-14 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all"></div>
-                    <div class="flex justify-center" data-aos="fade-up" data-aos-delay="400"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/confirp-o59hfslv8qxu40yaxmr2w7jin97vldnnypm21lrk2.png" alt="Confirp" class="h-10 md:h-14 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all"></div>
+                <h3 class="text-xs md:text-lg font-bold uppercase tracking-[0.2em] text-white mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">NOSSA ESPECIALIDADE É CUIDAR QUE A SUA EMPRESA E IDEIAS <span class="text-todoz text-glow">ACONTEÇAM, TRANSFORMEM E APAREÇAM.</span></h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-20 items-center opacity-60">
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Coca Cola" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="100"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="PagSeguro" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="200"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="Syngenta" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="300"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="VMware" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
+                    <div class="flex justify-center h-8 md:h-14" data-aos="fade-up" data-aos-delay="400"><img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/confirp-o59hfslv8qxu40yaxmr2w7jin97vldnnypm21lrk2.png" alt="Confirp" class="max-h-full w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all object-contain"></div>
                 </div>
             </div>
         </section>
@@ -309,7 +312,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-end gap-10">
                     <div class="text-left" data-aos="fade-right">
                         <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
-                        <h2 class="text-6xl md:text-8xl font-black tracking-tighter text-white uppercase">Cases que <br> <span class="text-todoz text-glow">marcam.</span></h2>
+                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">Cases que <br> <span class="text-todoz text-glow">marcam.</span></h2>
                     </div>
                     <div class="pb-4" data-aos="fade-left">
                         <button class="open-modal px-10 py-4 border border-white/10 rounded-full font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest text-xs text-white">Explorar Todos</button>
