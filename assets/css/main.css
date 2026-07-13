@@ -38,6 +38,9 @@ h1, h2, h3, h4 {
     position: relative;
     isolation: isolate;
     background-color: #0a0a0a;
+    /* Prefer clip on X only so vertical glows can soft-bleed into neighbors */
+    overflow-x: clip;
+    overflow-y: visible;
 }
 
 .section-canvas > .container,
@@ -57,6 +60,8 @@ h1, h2, h3, h4 {
     background:
         radial-gradient(ellipse 65% 48% at 0% 10%, rgba(207, 255, 4, 0.05), transparent 58%),
         radial-gradient(ellipse 45% 40% at 100% 85%, rgba(207, 255, 4, 0.03), transparent 52%),
+        /* Soft handoff into portfolio glow */
+        radial-gradient(ellipse 70% 40% at 18% 108%, rgba(207, 255, 4, 0.05), transparent 68%),
         #0a0a0a;
 }
 
@@ -77,26 +82,45 @@ h1, h2, h3, h4 {
 .portfolio-section {
     position: relative;
     padding: 7rem 0 5rem;
-    background:
-        radial-gradient(ellipse 85% 55% at 12% -8%, rgba(207, 255, 4, 0.075), transparent 58%),
-        radial-gradient(ellipse 65% 45% at 92% 108%, rgba(207, 255, 4, 0.045), transparent 52%),
-        #0a0a0a;
+    background-color: #0a0a0a;
     border-top: none;
     border-bottom: none;
     overflow: visible;
     z-index: 2;
 }
 
+/* Atmosphere layer extends past section box so radials aren't hard-clipped */
+.portfolio-section::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -18%;
+    bottom: -22%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 85% 45% at 12% 12%, rgba(207, 255, 4, 0.08), transparent 58%),
+        radial-gradient(ellipse 70% 40% at 88% 78%, rgba(207, 255, 4, 0.045), transparent 55%),
+        radial-gradient(ellipse 55% 30% at 50% 100%, rgba(207, 255, 4, 0.035), transparent 62%);
+}
+
 .portfolio-section::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 0;
     pointer-events: none;
     background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
     background-size: 72px 72px;
     mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
     opacity: 0.5;
+}
+
+.portfolio-section > * {
+    position: relative;
+    z-index: 1;
 }
 
 .portfolio-rail {
@@ -128,13 +152,48 @@ h1, h2, h3, h4 {
     scroll-snap-type: none;
 }
 
+/*
+ * Match Tailwind `.container.mx-auto.px-6` content box at each breakpoint.
+ * Previous 72rem calc over-indented the first card vs the header.
+ */
 .portfolio-track {
+    --portfolio-gutter: 1.5rem; /* px-6 */
     display: flex;
     gap: 2.5rem;
     width: max-content;
-    padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
-    padding-right: 12vw;
+    padding-left: var(--portfolio-gutter);
+    padding-right: max(12vw, var(--portfolio-gutter));
     will-change: auto;
+}
+
+@media (min-width: 640px) {
+    .portfolio-track {
+        padding-left: max(var(--portfolio-gutter), calc((100vw - 640px) / 2 + var(--portfolio-gutter)));
+    }
+}
+
+@media (min-width: 768px) {
+    .portfolio-track {
+        padding-left: max(var(--portfolio-gutter), calc((100vw - 768px) / 2 + var(--portfolio-gutter)));
+    }
+}
+
+@media (min-width: 1024px) {
+    .portfolio-track {
+        padding-left: max(var(--portfolio-gutter), calc((100vw - 1024px) / 2 + var(--portfolio-gutter)));
+    }
+}
+
+@media (min-width: 1280px) {
+    .portfolio-track {
+        padding-left: max(var(--portfolio-gutter), calc((100vw - 1280px) / 2 + var(--portfolio-gutter)));
+    }
+}
+
+@media (min-width: 1536px) {
+    .portfolio-track {
+        padding-left: max(var(--portfolio-gutter), calc((100vw - 1536px) / 2 + var(--portfolio-gutter)));
+    }
 }
 
 .portfolio-track .case-item {
@@ -387,26 +446,32 @@ h1, h2, h3, h4 {
     color: var(--todoz);
 }
 
-/* Produtos proprietários — bento assimétrico, glow contido */
+/* Produtos — bento readable; section glow soft-bleeds from portfolio above */
 .produtos-section {
     position: relative;
     isolation: isolate;
     padding: 8rem 0;
     background-color: #0a0a0a;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    overflow: hidden;
+    border-top: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    overflow-x: clip;
+    overflow-y: visible;
 }
 
 .produtos-glow {
     position: absolute;
-    inset: 0;
+    left: 0;
+    right: 0;
+    top: -16%;
+    bottom: -8%;
     z-index: 0;
     pointer-events: none;
-    overflow: hidden;
+    overflow: visible;
     background:
-        radial-gradient(ellipse 52% 38% at 14% 28%, rgba(207, 255, 4, 0.09), transparent 72%),
-        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.04), transparent 70%);
+        /* Borrow soft lime from portfolio seam above */
+        radial-gradient(ellipse 70% 36% at 80% 0%, rgba(207, 255, 4, 0.05), transparent 62%),
+        radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.08), transparent 72%),
+        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.035), transparent 70%);
 }
 
 .produtos-bento {

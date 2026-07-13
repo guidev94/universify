@@ -8,19 +8,12 @@ const lenis = new Lenis({
 
 window.lenis = lenis;
 
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
-
-requestAnimationFrame(raf);
+gsap.registerPlugin(ScrollTrigger);
 
 lenis.on("scroll", ScrollTrigger.update);
 
+// Single RAF owner — avoid double-driving Lenis (was gsap.ticker + rAF).
 gsap.ticker.add((time) => {
     lenis.raf(time * 1000);
 });
-
 gsap.ticker.lagSmoothing(0);
-
-gsap.registerPlugin(ScrollTrigger);

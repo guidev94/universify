@@ -1,10 +1,25 @@
 gsap.registerPlugin(ScrollTrigger);
 
-AOS.init({
-    duration: 1000,
-    once: true,
-    easing: "ease-out-expo"
-});
+const initAOS = () => {
+    if (!window.AOS) return;
+
+    AOS.init({
+        duration: 1000,
+        once: true,
+        easing: "ease-out-expo",
+        mirror: false
+    });
+
+    // Lenis + late layout can leave fade nodes stuck at opacity 0 (aos.css).
+    const refresh = () => {
+        if (typeof AOS.refreshHard === "function") AOS.refreshHard();
+        else AOS.refresh();
+    };
+    requestAnimationFrame(refresh);
+    window.addEventListener("load", refresh, { once: true });
+    // One delayed pass after fonts/images/pin spacer settle.
+    window.setTimeout(refresh, 600);
+};
 
 const initCursor = () => {
     const cursor = document.querySelector("#cursor");
@@ -31,12 +46,15 @@ const initBlogAnimations = () => {};
 /**
  * Cases: pin da seção + progressão vertical → scrollLeft (sem transform no track).
  * pinType "fixed" evita o bug de hit-test do pin com transform.
+ *
+ * Entrada: fromTo + immediateRender:false — gsap.from(autoAlpha:0) deixa cards
+ * invisíveis se o ScrollTrigger do pin invalidar o tween antes do play.
  */
 const initPortfolioAnimations = () => {
     const section = document.querySelector("#portfolio");
     const rail = document.querySelector("#portfolio-rail");
     const track = document.querySelector("#portfolio-horizontal");
-    const cases = document.querySelectorAll(".case-item");
+    const cases = gsap.utils.toArray(".case-item");
     if (!section || !rail || !track || !cases.length) return;
 
     cases.forEach((item) => {
@@ -53,21 +71,58 @@ const initPortfolioAnimations = () => {
 
     const getMaxScroll = () => Math.max(0, rail.scrollWidth - rail.clientWidth);
 
-    // Entrada dos cards
-    gsap.from(cases, {
-        autoAlpha: 0,
-        y: 48,
-        scale: 0.96,
-        duration: 0.9,
-        stagger: 0.12,
-        ease: "power3.out",
-        clearProps: "transform",
-        scrollTrigger: {
-            trigger: section,
-            start: "top 75%",
-            once: true
+    const ensureCasesVisible = () => {
+        gsap.set(cases, { clearProps: "opacity,visibility,transform" });
+    };
+
+    const entrance = gsap.fromTo(
+        cases,
+        { opacity: 0, y: 48, scale: 0.96 },
+        {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "power3.out",
+            immediateRender: false,
+            paused: true,
+            clearProps: "transform",
+            onComplete: () => {
+                gsap.set(cases, { clearProps: "opacity,visibility" });
+            }
+        }
+    );
+
+    let entrancePlayed = false;
+    const playEntrance = () => {
+        if (entrancePlayed) return;
+        entrancePlayed = true;
+        entrance.play(0);
+    };
+
+    ScrollTrigger.create({
+        trigger: section,
+        start: "top 80%",
+        once: true,
+        onEnter: playEntrance,
+        onRefresh: (self) => {
+            // Já passou do start (ex.: deep-link / refresh com pin) — garante play.
+            if (self.isActive || self.progress > 0 || self.scroll() > self.start) {
+                playEntrance();
+            }
         }
     });
+
+    // Failsafe: nunca deixar cases presos em opacity 0.
+    window.setTimeout(() => {
+        const stuck = cases.some((el) => getComputedStyle(el).opacity === "0");
+        if (stuck) {
+            entrancePlayed = true;
+            entrance.progress(1).pause();
+            ensureCasesVisible();
+        }
+    }, 2200);
 
     const mm = gsap.matchMedia();
 
@@ -88,6 +143,8 @@ const initPortfolioAnimations = () => {
 
         const onResize = () => ScrollTrigger.refresh();
         window.addEventListener("resize", onResize);
+        // Refresh after pin layout so entrance ST + AOS recalculate.
+        requestAnimationFrame(() => ScrollTrigger.refresh());
 
         return () => {
             window.removeEventListener("resize", onResize);
@@ -110,7 +167,6 @@ const initPortfolioAnimations = () => {
         );
 
         let isDown = false;
-        let didDrag = false;
         let startX = 0;
         let startScroll = 0;
 
@@ -118,7 +174,6 @@ const initPortfolioAnimations = () => {
             if (e.pointerType === "mouse" && e.button !== 0) return;
             if (e.target.closest("a, button")) return;
             isDown = true;
-            didDrag = false;
             startX = e.clientX;
             startScroll = rail.scrollLeft;
             rail.classList.add("is-dragging");
@@ -127,7 +182,6 @@ const initPortfolioAnimations = () => {
             if (!isDown) return;
             const dx = e.clientX - startX;
             if (Math.abs(dx) > 8) {
-                didDrag = true;
                 cases.forEach((c) => {
                     c.dataset.dragged = "1";
                 });
@@ -184,9 +238,17 @@ const initHeaderAnim = () => {
     });
 };
 
-window.addEventListener("DOMContentLoaded", () => {
+const bootAnimations = () => {
+    initAOS();
     initCursor();
     initPortfolioAnimations();
     initHeaderAnim();
     initBlogAnimations();
-});
+    window.__wvAnimationsBooted = true;
+};
+
+if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", bootAnimations);
+} else {
+    bootAnimations();
+}
