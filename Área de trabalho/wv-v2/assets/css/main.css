@@ -87,6 +87,53 @@ h1, h2, h3, h4 {
     text-shadow: 0 0 30px rgba(207, 255, 4, 0.4);
 }
 
+/* Spotlight Border Effect */
+.case-item, .service-card, .bento-item {
+    position: relative;
+}
+
+.case-item .relative.rounded-\[3rem\], 
+.service-card {
+    position: relative;
+}
+
+.case-item .relative.rounded-\[3rem\]::before,
+.service-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 2px;
+    background: radial-gradient(
+        600px circle at var(--mouse-x) var(--mouse-y),
+        rgba(207, 255, 4, 0.4),
+        transparent 40%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.case-item:hover .relative.rounded-\[3rem\]::before,
+.service-card:hover::before {
+    opacity: 1;
+}
+
+/* Animations */
+@keyframes bounce-x {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+}
+
+.animate-bounce-x {
+    animation: bounce-x 1.5s infinite;
+}
+
 /* Modal Open State Animation Support */
 #contact-modal.active {
     opacity: 1;
