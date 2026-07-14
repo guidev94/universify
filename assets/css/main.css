@@ -549,22 +549,175 @@ h1, h2, h3, h4,
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    #missao.missao-highlight {
+        padding-top: 4.25rem;
+        padding-bottom: 5.75rem;
+    }
+
+    .missao-panel {
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .missao-main {
+        max-width: 100%;
+    }
+
+    .missao-eyebrow {
+        letter-spacing: 0.22em;
+        margin-bottom: 0.95rem;
+    }
+
+    .missao-title {
+        max-width: none;
+        margin-bottom: 1.1rem;
+        font-size: clamp(2.05rem, 8.8vw, 2.65rem);
+        letter-spacing: -0.028em;
+        line-height: 1.08;
+    }
+
+    .missao-support {
+        max-width: 100%;
+        font-size: 1.08rem;
+        line-height: 1.68;
+    }
+
+    .missao-aside {
+        gap: 2rem;
+        width: 100%;
+    }
+
     .missao-stats {
         grid-template-columns: 1fr;
-        gap: 1.35rem;
-        max-width: 20rem;
+        gap: 1.15rem;
+        max-width: none;
+        width: 100%;
     }
 
     .missao-stat,
     .missao-stat:first-child {
-        padding-left: 1rem;
+        padding: 0.1rem 0 0.1rem 0.95rem;
         border-left: 1.5px solid rgba(10, 10, 10, 0.28);
+    }
+
+    .missao-stat dt {
+        font-size: clamp(2.4rem, 11vw, 2.9rem);
+    }
+
+    .missao-stat dd {
+        font-size: 0.78rem;
+        letter-spacing: 0.07em;
+    }
+
+    .missao-product {
+        font-size: 1.1rem;
+    }
+
+    .missao-product--accent {
+        font-size: 1.12rem;
+        padding: 0.45rem 0.75rem;
+        max-width: 100%;
     }
 
     .missao-cta {
         width: 100%;
-        max-width: 24rem;
+        max-width: none;
+        min-height: 3rem;
+        padding: 1.15rem 1.35rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+    }
+
+    /* Gentler overlap — intentional, not crushed */
+    .mobile-bridge-section {
+        margin-top: -1.85rem;
+        padding-bottom: 3.5rem;
+    }
+
+    .mobile-bridge-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 2rem 1.35rem 2.15rem;
+        border-radius: 1.75rem;
+        box-shadow:
+            0 18px 42px rgba(0, 0, 0, 0.38),
+            0 6px 16px rgba(0, 0, 0, 0.24),
+            0 0 0 1px rgba(207, 255, 4, 0.05);
+    }
+
+    .mobile-bridge-grid {
+        gap: 1.5rem;
+    }
+
+    .mobile-bridge-title {
+        font-size: clamp(1.85rem, 8.2vw, 2.35rem);
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        text-align: left;
+        padding: 0.06em 0.08em;
+    }
+
+    .mobile-bridge-headline {
+        padding-bottom: 1.35rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: none;
+        padding-right: 0;
+    }
+
+    .mobile-bridge-copy {
+        align-items: stretch;
+        text-align: left;
+        padding-left: 0;
+        width: 100%;
+    }
+
+    .mobile-bridge-eyebrow {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        letter-spacing: 0.16em;
+        font-size: 0.65rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-bridge-lead {
+        margin-bottom: 1.4rem;
+        max-width: none;
+    }
+
+    .mobile-bridge-cta {
+        width: 100%;
+        max-width: none;
+        min-height: 3rem;
+        padding: 1.1rem 1.25rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+    }
+
+    #mobile-bridge::after {
+        opacity: 0.35;
+        left: 12%;
+        right: 12%;
+    }
+}
+
+@media (max-width: 430px) {
+    .missao-title {
+        font-size: clamp(1.95rem, 9.2vw, 2.35rem);
+    }
+
+    .mobile-bridge-card {
+        padding: 1.75rem 1.15rem 1.95rem;
+        border-radius: 1.5rem;
+    }
+
+    .mobile-bridge-title {
+        font-size: clamp(1.75rem, 8.8vw, 2.1rem);
+    }
+
+    .mobile-bridge-section {
+        margin-top: -1.5rem;
     }
 }
 
@@ -1177,7 +1330,7 @@ h1, h2, h3, h4,
 
 @media (max-width: 1023px) {
     .mobile-bridge-section {
-        margin-top: clamp(-2.5rem, -8vw, -3.25rem);
+        margin-top: clamp(-2.15rem, -5vw, -2.85rem);
     }
 
     .mobile-bridge-headline {
@@ -3041,8 +3194,8 @@ footer ul li a:hover {
 
     #missao .missao-support,
     .section-lead {
-        font-size: 1.15rem;
-        line-height: 1.7;
+        font-size: 1.08rem;
+        line-height: 1.68;
     }
 
     .blog-excerpt {
@@ -3051,16 +3204,18 @@ footer ul li a:hover {
     }
 
     #missao .missao-title {
-        max-width: 12ch;
-        font-size: clamp(2.25rem, 9.5vw, 2.85rem);
+        max-width: none;
+        font-size: clamp(2.05rem, 8.8vw, 2.65rem);
+        line-height: 1.08;
     }
 
     #missao .missao-cta {
         width: 100%;
-        max-width: 24rem;
-        padding: 1.2rem 1.65rem;
-        font-size: 0.82rem;
-        letter-spacing: 0.09em;
+        max-width: none;
+        min-height: 3rem;
+        padding: 1.15rem 1.35rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
     }
 
     #aplicacoes .aplicacoes-copy {
@@ -3082,8 +3237,17 @@ footer ul li a:hover {
     }
 
     #missao.missao-highlight {
-        padding-top: 5rem;
-        padding-bottom: 6.75rem;
+        padding-top: 4.25rem;
+        padding-bottom: 5.75rem;
+    }
+
+    .servicos-card-title {
+        font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+        line-height: 1.15;
+    }
+
+    .servicos-card-btn {
+        min-height: 2.85rem;
     }
 
     .portfolio-section {
