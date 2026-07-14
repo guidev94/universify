@@ -15,22 +15,23 @@ html.lenis {
 :root {
     --todoz: #CFFF04;
     --section-pad-y: clamp(4.5rem, 8vw, 8rem);
-    --headline-tracking: -0.04em;
-    /* Typefaces — Syne (display) + DM Sans (body); not Inter */
-    --font-display: "Syne", system-ui, sans-serif;
+    /* Typefaces — Instrument Sans (display) + DM Sans (body) */
+    --font-display: "Instrument Sans", system-ui, sans-serif;
     --font-body: "DM Sans", system-ui, sans-serif;
     /* Micro type floor — readable labels without killing hierarchy */
     --type-micro: 0.6875rem;   /* ~11px */
     --type-label: 0.78rem;
-    --type-eyebrow: 0.72rem;
+    --type-eyebrow: 0.7rem;
     --type-chip: 0.72rem;
-    /* Body / lead — stronger reading scale on dark */
-    --type-body: clamp(1.15rem, 1.65vw, 1.375rem);
-    --type-body-sm: clamp(1.08rem, 1.4vw, 1.2rem);
-    --type-body-color: #d6d6dc;
-    --type-body-muted: #b8b8c0;
-    --type-display: clamp(2.35rem, 7.5vw, 4.5rem);
-    --lh-body: 1.75;
+    /* Body / lead — comfortable reading on dark */
+    --type-body: clamp(1.12rem, 1.5vw, 1.3rem);
+    --type-body-sm: clamp(1.05rem, 1.3vw, 1.15rem);
+    --type-body-color: #d4d4da;
+    --type-body-muted: #b4b4bc;
+    /* Restrained display — less wall-of-caps aggression */
+    --type-display: clamp(2.1rem, 5.5vw, 3.65rem);
+    --headline-tracking: -0.025em;
+    --lh-body: 1.72;
 }
 
 body {
@@ -64,10 +65,10 @@ h1, h2, h3, h4,
 
 .section-headline {
     font-size: var(--type-display);
-    line-height: 0.9;
+    line-height: 0.95;
     letter-spacing: var(--headline-tracking);
-    font-weight: 800;
-    text-transform: uppercase;
+    font-weight: 700;
+    text-transform: none;
 }
 
 /* Modest bump for ultra-small Tailwind utilities used across the LP */
@@ -279,56 +280,57 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Missão — elevated two-column composition (specialty as display hero) */
+/* Missão — elevated two-column; refined mixed-case specialty */
 .missao-section {
-    padding-top: clamp(5rem, 9vw, 8rem);
-    padding-bottom: clamp(5rem, 9vw, 8rem);
+    padding-top: clamp(4.75rem, 8vw, 7.25rem);
+    padding-bottom: clamp(4.75rem, 8vw, 7.25rem);
 }
 
 .missao-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2.25rem;
+    gap: 2rem;
     align-items: start;
 }
 
 .missao-eyebrow {
     display: block;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     color: var(--todoz);
     font-family: var(--font-body);
     font-size: var(--type-eyebrow);
-    font-weight: 700;
-    letter-spacing: 0.36em;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
 }
 
 .missao-headline {
     margin: 0;
-    max-width: 14ch;
-    color: #fff;
+    max-width: 18ch;
+    color: #f4f4f5;
     font-family: var(--font-display);
-    font-size: clamp(1.95rem, 4.4vw, 3.15rem);
-    font-weight: 800;
-    line-height: 1.02;
-    letter-spacing: -0.045em;
-    text-transform: uppercase;
+    font-size: clamp(1.55rem, 2.6vw, 2.2rem);
+    font-weight: 600;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    text-transform: none;
 }
 
 .missao-headline-lead {
     display: block;
+    font-weight: 600;
 }
 
 .missao-headline-verbs {
     display: block;
-    margin-top: 0.18em;
+    margin-top: 0.35em;
     color: var(--todoz);
-    text-shadow: 0 0 48px rgba(207, 255, 4, 0.3);
+    font-weight: 600;
 }
 
 .missao-headline-verbs em {
     font-style: italic;
-    font-weight: 800;
+    font-weight: 600;
     font-family: var(--font-display);
 }
 
@@ -339,23 +341,23 @@ h1, h2, h3, h4,
 }
 
 .missao-and {
-    display: inline-block;
-    margin: 0 0.28em;
-    color: rgba(207, 255, 4, 0.72);
-    font-size: 0.55em;
+    display: inline;
+    margin: 0 0.2em;
+    color: rgba(207, 255, 4, 0.75);
+    font-size: 0.92em;
     font-style: normal;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: lowercase;
-    vertical-align: middle;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    vertical-align: baseline;
 }
 
 .missao-aside {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    padding-top: 0.25rem;
+    gap: 1.4rem;
+    padding-top: 0.2rem;
 }
 
 .missao-body {
@@ -363,10 +365,10 @@ h1, h2, h3, h4,
     max-width: 34rem;
     color: var(--type-body-color);
     font-family: var(--font-body);
-    font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+    font-size: clamp(1.08rem, 1.35vw, 1.22rem);
     font-weight: 450;
     line-height: var(--lh-body);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
 }
 
 .missao-body strong {
@@ -461,7 +463,7 @@ h1, h2, h3, h4,
     }
 
     .missao-headline {
-        max-width: 13ch;
+        max-width: 22ch;
     }
 }
 
@@ -493,11 +495,11 @@ h1, h2, h3, h4,
     margin: 0 0 1.15rem;
     color: #fff;
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-    font-weight: 800;
-    line-height: 0.9;
-    letter-spacing: -0.045em;
-    text-transform: uppercase;
+    font-size: clamp(2.25rem, 6vw, 3.75rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: none;
 }
 
 .servicos-intro {
@@ -588,24 +590,25 @@ h1, h2, h3, h4,
 .servicos-card-title {
     margin: 0;
     color: #fff;
-    font-size: clamp(1.55rem, 3.5vw, 2.65rem);
-    font-weight: 900;
-    line-height: 0.95;
-    letter-spacing: -0.04em;
-    text-transform: uppercase;
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 1.85vw, 1.55rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-transform: none;
 }
 
 .servicos-card-title--sm {
-    font-size: clamp(1.35rem, 2.8vw, 1.85rem);
+    font-size: clamp(1.15rem, 1.6vw, 1.35rem);
 }
 
 .servicos-card-desc {
     margin: 0;
     max-width: 34rem;
-    color: var(--type-body-color);
-    font-size: clamp(1.05rem, 1.3vw, 1.15rem);
-    line-height: 1.7;
-    font-weight: 500;
+    color: var(--type-body-muted);
+    font-size: clamp(0.98rem, 1.15vw, 1.08rem);
+    line-height: 1.65;
+    font-weight: 450;
 }
 
 .servicos-card-desc--sm {
@@ -878,7 +881,7 @@ h1, h2, h3, h4,
     }
 
     .servicos-card--featured .servicos-card-title {
-        font-size: clamp(2.1rem, 3vw, 3rem);
+        font-size: clamp(1.35rem, 2vw, 1.7rem);
     }
 }
 
@@ -2668,8 +2671,8 @@ footer ul li a:hover {
     }
 
     #missao .missao-headline {
-        font-size: clamp(1.85rem, 8vw, 2.4rem);
-        line-height: 1.04;
+        font-size: clamp(1.45rem, 5.5vw, 1.9rem);
+        line-height: 1.25;
         max-width: none;
     }
 
