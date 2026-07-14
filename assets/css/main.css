@@ -78,6 +78,18 @@ h1, h2, h3, h4,
     letter-spacing: -0.05em;
     text-transform: uppercase;
     text-align: left;
+    hyphens: none;
+    -webkit-hyphens: none;
+    overflow-wrap: normal;
+    word-break: keep-all;
+}
+
+/* Compact display — Cases spirit without mega-stack crush */
+.section-display--compact {
+    font-size: clamp(1.9rem, 3.4vw, 2.65rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 0;
 }
 
 .section-display-line {
@@ -90,6 +102,10 @@ h1, h2, h3, h4,
     text-shadow: 0 0 32px rgba(207, 255, 4, 0.38);
 }
 
+.section-display--compact .section-display-accent {
+    text-shadow: 0 0 22px rgba(207, 255, 4, 0.28);
+}
+
 .section-display-dot {
     display: inline-block;
     width: 0.2em;
@@ -98,6 +114,7 @@ h1, h2, h3, h4,
     background: var(--todoz);
     vertical-align: 0.12em;
     box-shadow: 0 0 16px rgba(207, 255, 4, 0.45);
+    flex-shrink: 0;
 }
 
 /* Breathing room: display → lead / intro */
@@ -334,7 +351,7 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Missão — full specialty display + balanced content band */
+/* Missão — editorial 12-col: restrained display + copy column */
 .missao-section {
     padding-top: clamp(4.75rem, 8.5vw, 7.5rem);
     padding-bottom: clamp(4.75rem, 8.5vw, 7.5rem);
@@ -345,55 +362,46 @@ h1, h2, h3, h4,
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-    max-width: none;
-}
-
-.missao-header {
-    width: 100%;
-    margin-bottom: 0;
 }
 
 .missao-eyebrow {
     display: block;
-    margin: 0 0 1.15rem;
+    margin: 0 0 1.25rem;
     color: var(--todoz);
     font-family: var(--font-body);
     font-size: var(--type-eyebrow);
     font-weight: 700;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
 }
 
-.missao-display {
-    max-width: 22ch;
-    margin-bottom: var(--space-after-display);
-}
-
-.missao-display .section-display-accent {
-    max-width: 28ch;
-}
-
-.missao-band {
+.missao-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: var(--space-after-display);
     width: 100%;
-    margin-top: 0.35rem;
-    padding: 1.75rem 0 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    align-items: start;
 }
 
-.missao-band-main {
+.missao-col-display,
+.missao-col-copy {
+    min-width: 0;
+}
+
+.missao-display {
+    max-width: none;
+}
+
+.missao-col-copy {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 1.35rem;
-    min-width: 0;
 }
 
 .missao-body {
     margin: 0;
-    max-width: 40rem;
+    max-width: 38rem;
     color: var(--type-body-color);
     font-family: var(--font-body);
     font-size: var(--type-body);
@@ -404,7 +412,7 @@ h1, h2, h3, h4,
 .missao-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
+    gap: 0.5rem 0.65rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -412,71 +420,49 @@ h1, h2, h3, h4,
 
 .missao-chips li {
     display: inline-flex;
-    padding: 0.5rem 0.85rem;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-    color: #e4e4e7;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-
-.missao-band-cta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.85rem;
-    padding: 1.35rem 1.35rem;
-    border-radius: 1.35rem;
-    border: 1px solid rgba(207, 255, 4, 0.22);
-    background:
-        linear-gradient(145deg, rgba(207, 255, 4, 0.08), transparent 60%),
-        rgba(18, 18, 20, 0.65);
-}
-
-.missao-cta-note {
-    margin: 0;
-    color: #a1a1aa;
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    font-weight: 500;
-    line-height: 1.4;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: transparent;
+    color: #d4d4d8;
+    font-size: var(--type-chip);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: none;
 }
 
 .missao-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 22rem;
-    padding: 1.15rem 1.65rem;
+    gap: 0.65rem;
+    margin-top: 0.25rem;
+    padding: 1rem 1.5rem;
+    width: auto;
+    max-width: none;
     border-radius: 9999px;
     border: 1px solid var(--todoz);
     background: var(--todoz);
     color: #0a0a0a;
     font-family: var(--font-body);
-    font-size: 0.76rem;
+    font-size: 0.78rem;
     font-weight: 800;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     line-height: 1;
-    box-shadow: 0 0 28px rgba(207, 255, 4, 0.18);
+    box-shadow: 0 0 24px rgba(207, 255, 4, 0.16);
     transition: filter 0.25s ease, box-shadow 0.25s ease;
 }
 
 .missao-cta i {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: #0a0a0a;
     transition: transform 0.25s ease;
 }
 
 .missao-cta:hover {
     filter: brightness(1.06);
-    box-shadow: 0 0 40px rgba(207, 255, 4, 0.28);
+    box-shadow: 0 0 36px rgba(207, 255, 4, 0.26);
 }
 
 .missao-cta:hover i {
@@ -484,24 +470,21 @@ h1, h2, h3, h4,
 }
 
 @media (min-width: 900px) {
-    .missao-display {
-        max-width: 28ch;
+    .missao-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: clamp(1.75rem, 3vw, 2.75rem);
+        row-gap: 0;
+        align-items: start;
     }
 
-    .missao-band {
-        grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.75fr);
-        gap: 2rem 2.5rem;
-        align-items: stretch;
-        padding-top: 2rem;
+    .missao-col-display {
+        grid-column: 1 / span 5;
     }
 
-    .missao-band-cta {
-        padding: 1.65rem 1.5rem;
-    }
-
-    .missao-cta {
-        width: 100%;
-        max-width: none;
+    .missao-col-copy {
+        grid-column: 6 / span 7;
+        gap: 1.5rem;
+        padding-top: 0.15rem;
     }
 }
 
@@ -2844,16 +2827,23 @@ footer ul li a:hover {
         line-height: 1.65;
     }
 
+    #missao .missao-display {
+        max-width: none;
+        font-size: clamp(1.85rem, 8.5vw, 2.35rem);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
     #missao .missao-cta {
         width: 100%;
         max-width: 20rem;
-        padding: 1.15rem 1.35rem;
-        font-size: 0.72rem;
-        letter-spacing: 0.1em;
+        padding: 1.05rem 1.35rem;
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
     }
 
     #missao .missao-compose,
-    #missao .missao-content,
+    #missao .missao-col-copy,
     #aplicacoes .aplicacoes-copy {
         align-items: flex-start;
         text-align: left;
