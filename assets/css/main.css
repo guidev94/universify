@@ -16,6 +16,11 @@ html.lenis {
     --todoz: #CFFF04;
     --section-pad-y: clamp(4.5rem, 8vw, 8rem);
     --headline-tracking: -0.04em;
+    /* Micro type floor — readable labels without killing hierarchy */
+    --type-micro: 0.6875rem;   /* ~11px (was often 10px) */
+    --type-label: 0.75rem;     /* 12px */
+    --type-eyebrow: 0.7rem;
+    --type-chip: 0.72rem;
 }
 
 /* Glow Effects */
@@ -41,6 +46,24 @@ h1, h2, h3, h4 {
     letter-spacing: var(--headline-tracking);
     font-weight: 900;
     text-transform: uppercase;
+}
+
+/* Modest bump for ultra-small Tailwind utilities used across the LP */
+.text-\[9px\] {
+    font-size: 0.625rem !important; /* 10px */
+}
+
+.text-\[10px\] {
+    font-size: var(--type-micro) !important; /* ~11px */
+}
+
+.text-\[11px\] {
+    font-size: 0.75rem !important; /* 12px — nav labels */
+}
+
+/* Slight lift for uppercase CTAs / section labels using text-xs (12px → ~13px) */
+.text-xs {
+    font-size: 0.8125rem !important;
 }
 
 body {
@@ -441,7 +464,7 @@ body {
 }
 
 .aplicacoes-chip-kicker {
-    font-size: 0.55rem;
+    font-size: 0.625rem;
     font-weight: 800;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -449,7 +472,7 @@ body {
 }
 
 .aplicacoes-chip-title {
-    font-size: 0.68rem;
+    font-size: var(--type-chip);
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -478,11 +501,11 @@ body {
     }
 
     .aplicacoes-chip-kicker {
-        font-size: 0.58rem;
+        font-size: 0.65rem;
     }
 
     .aplicacoes-chip-title {
-        font-size: 0.72rem;
+        font-size: 0.78rem;
         letter-spacing: 0.16em;
     }
 }
@@ -838,7 +861,7 @@ html.content-revealed [data-reveal] {
     border: 1px solid rgba(207, 255, 4, 0.28);
     background: rgba(207, 255, 4, 0.12);
     color: var(--todoz);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -1165,7 +1188,7 @@ html.content-revealed [data-reveal] {
 
 .produto-subtitle {
     color: var(--todoz);
-    font-size: 0.65rem;
+    font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -1193,7 +1216,7 @@ html.content-revealed [data-reveal] {
     justify-content: center;
     padding: 0.8rem 1.35rem;
     border-radius: 9999px;
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -1233,7 +1256,7 @@ html.content-revealed [data-reveal] {
     border-radius: 9999px;
     background: var(--todoz);
     color: #0a0a0a;
-    font-size: 0.58rem;
+    font-size: 0.65rem;
     font-weight: 900;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1456,7 +1479,7 @@ html.content-revealed [data-reveal] {
     margin-bottom: 0.85rem;
     padding: 0.3rem 0.65rem;
     border-radius: 9999px;
-    font-size: 0.58rem;
+    font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1493,7 +1516,7 @@ html.content-revealed [data-reveal] {
     justify-content: center;
     background: var(--todoz);
     color: #0a0a0a;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 900;
     letter-spacing: 0.06em;
     border: 1px solid rgba(207, 255, 4, 0.5);
@@ -1509,14 +1532,14 @@ html.content-revealed [data-reveal] {
 
 .blog-author-name {
     color: #fff;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 800;
     letter-spacing: 0.02em;
 }
 
 .blog-author-meta {
     color: #a1a1aa;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1723,9 +1746,9 @@ button.magnetic.border-todoz:hover {
 }
 
 .hero-scroll-label {
-    font-size: 0.5rem;
+    font-size: 0.625rem;
     font-weight: 900;
-    letter-spacing: 0.4em;
+    letter-spacing: 0.35em;
     text-transform: uppercase;
     color: #fff;
 }
@@ -2078,7 +2101,7 @@ footer ul li a:hover {
     }
 
     .case-tag {
-        font-size: 0.55rem;
+        font-size: 0.625rem;
         letter-spacing: 0.12em;
         padding: 0.35rem 0.7rem;
         white-space: normal;
