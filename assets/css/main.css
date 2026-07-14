@@ -324,50 +324,36 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.45) 10%, black 20%, black 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
 }
 
-/* Missão — right-weighted ambient into sobre above + mobile-bridge below
-   (left kept as a whisper so we don't twin Sobre / bridge blobs) */
-#missao {
-    background-color: transparent;
+/* Missão — featured lime band (highlight chapter between dark sections) */
+#missao.missao-highlight {
+    background-color: var(--todoz);
+    padding-top: clamp(4.75rem, 9vw, 7.25rem);
+    padding-bottom: clamp(4.75rem, 9vw, 7.25rem);
 }
 
-#missao.section-canvas {
-    background-color: transparent;
+#missao.missao-highlight::after {
+    content: none;
 }
 
-#missao::after {
-    content: "";
-    position: absolute;
-    left: -8%;
-    right: -8%;
-    top: -58%;
-    bottom: -48%;
-    z-index: 0;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse 72% 52% at 90% 18%, rgba(207, 255, 4, 0.12), transparent 62%),
-        radial-gradient(ellipse 48% 40% at 84% 78%, rgba(207, 255, 4, 0.07), transparent 64%),
-        radial-gradient(ellipse 28% 26% at 8% 42%, rgba(207, 255, 4, 0.025), transparent 72%);
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+.missao-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.25rem, 5vw, 3.5rem);
+    align-items: end;
+    width: 100%;
 }
 
-/* Missão — editorial 12-col: restrained display + copy column */
-.missao-section {
-    padding-top: clamp(4.75rem, 8.5vw, 7.5rem);
-    padding-bottom: clamp(4.75rem, 8.5vw, 7.5rem);
-}
-
-.missao-compose {
+.missao-main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 100%;
+    max-width: 38rem;
 }
 
 .missao-eyebrow {
     display: block;
-    margin: 0 0 1.25rem;
-    color: var(--todoz);
+    margin: 0 0 1rem;
+    color: rgba(10, 10, 10, 0.62);
     font-family: var(--font-body);
     font-size: var(--type-eyebrow);
     font-weight: 700;
@@ -375,94 +361,111 @@ h1, h2, h3, h4,
     text-transform: uppercase;
 }
 
-.missao-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-after-display);
-    width: 100%;
-    align-items: start;
+.missao-title {
+    margin: 0 0 1.25rem;
+    color: #0a0a0a;
+    font-family: var(--font-display);
+    font-size: clamp(2.35rem, 5.2vw, 3.85rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    text-transform: none;
+    hyphens: none;
+    -webkit-hyphens: none;
+    max-width: 11.5ch;
 }
 
-.missao-col-display,
-.missao-col-copy {
-    min-width: 0;
+.missao-support {
+    margin: 0;
+    color: rgba(10, 10, 10, 0.78);
+    font-family: var(--font-body);
+    font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+    font-weight: 500;
+    line-height: 1.65;
+    max-width: 34rem;
 }
 
-.missao-display {
-    max-width: none;
-}
-
-.missao-col-copy {
+.missao-aside {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.35rem;
+    gap: 1.75rem;
+    width: 100%;
 }
 
-.missao-body {
-    margin: 0;
-    max-width: 38rem;
-    color: var(--type-body-color);
-    font-family: var(--font-body);
-    font-size: var(--type-body);
-    font-weight: 450;
-    line-height: var(--lh-body);
-}
-
-.missao-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.65rem;
+.missao-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
     margin: 0;
     padding: 0;
-    list-style: none;
+    width: 100%;
+    max-width: 28rem;
 }
 
-.missao-chips li {
-    display: inline-flex;
-    padding: 0.45rem 0.8rem;
-    border-radius: 0.35rem;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: transparent;
-    color: #d4d4d8;
-    font-size: var(--type-chip);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: none;
+.missao-stat {
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid rgba(10, 10, 10, 0.85);
+    padding-left: 0.85rem;
+}
+
+.missao-stat dt {
+    margin: 0 0 0.25rem;
+    color: #0a0a0a;
+    font-family: var(--font-display);
+    font-size: clamp(1.85rem, 3.5vw, 2.35rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.missao-stat-brand {
+    font-size: clamp(1.15rem, 2.2vw, 1.45rem) !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.15 !important;
+}
+
+.missao-stat dd {
+    margin: 0;
+    color: rgba(10, 10, 10, 0.58);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.35;
 }
 
 .missao-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.65rem;
-    margin-top: 0.25rem;
-    padding: 1rem 1.5rem;
-    width: auto;
-    max-width: none;
+    gap: 0.7rem;
+    padding: 1.1rem 1.75rem;
+    border: none;
     border-radius: 9999px;
-    border: 1px solid var(--todoz);
-    background: var(--todoz);
-    color: #0a0a0a;
+    background: #0a0a0a;
+    color: var(--todoz);
     font-family: var(--font-body);
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1;
-    box-shadow: 0 0 24px rgba(207, 255, 4, 0.16);
-    transition: filter 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
 .missao-cta i {
-    font-size: 1.05rem;
-    color: #0a0a0a;
+    font-size: 1.1rem;
+    color: var(--todoz);
     transition: transform 0.25s ease;
 }
 
 .missao-cta:hover {
-    filter: brightness(1.06);
-    box-shadow: 0 0 36px rgba(207, 255, 4, 0.26);
+    filter: brightness(1.08);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
 }
 
 .missao-cta:hover i {
@@ -470,21 +473,32 @@ h1, h2, h3, h4,
 }
 
 @media (min-width: 900px) {
-    .missao-grid {
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        column-gap: clamp(1.75rem, 3vw, 2.75rem);
-        row-gap: 0;
-        align-items: start;
+    .missao-panel {
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+        column-gap: clamp(2.5rem, 5vw, 4.5rem);
+        align-items: end;
     }
 
-    .missao-col-display {
-        grid-column: 1 / span 5;
+    .missao-aside {
+        align-items: flex-start;
+        padding-bottom: 0.15rem;
     }
 
-    .missao-col-copy {
-        grid-column: 6 / span 7;
-        gap: 1.5rem;
-        padding-top: 0.15rem;
+    .missao-stats {
+        max-width: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .missao-stats {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        max-width: 16rem;
+    }
+
+    .missao-cta {
+        width: 100%;
+        max-width: 22rem;
     }
 }
 
@@ -2816,7 +2830,7 @@ footer ul li a:hover {
         line-height: 0.9;
     }
 
-    #missao .missao-body,
+    #missao .missao-support,
     .section-lead {
         font-size: 1.12rem;
         line-height: 1.7;
@@ -2827,23 +2841,19 @@ footer ul li a:hover {
         line-height: 1.65;
     }
 
-    #missao .missao-display {
-        max-width: none;
-        font-size: clamp(1.85rem, 8.5vw, 2.35rem);
-        line-height: 1.1;
-        letter-spacing: -0.02em;
+    #missao .missao-title {
+        max-width: 12ch;
+        font-size: clamp(2.1rem, 9vw, 2.65rem);
     }
 
     #missao .missao-cta {
         width: 100%;
-        max-width: 20rem;
-        padding: 1.05rem 1.35rem;
-        font-size: 0.74rem;
-        letter-spacing: 0.08em;
+        max-width: 22rem;
+        padding: 1.1rem 1.5rem;
+        font-size: 0.76rem;
+        letter-spacing: 0.09em;
     }
 
-    #missao .missao-compose,
-    #missao .missao-col-copy,
     #aplicacoes .aplicacoes-copy {
         align-items: flex-start;
         text-align: left;
@@ -2862,7 +2872,7 @@ footer ul li a:hover {
         padding-bottom: 4.5rem;
     }
 
-    #missao.missao-section {
+    #missao.missao-highlight {
         padding-top: 4.25rem;
         padding-bottom: 4.25rem;
     }
@@ -3027,7 +3037,6 @@ footer ul li a:hover {
 
     /* Absolute seam glows stay softer on phones (less muddy text) */
     #sobre::after,
-    #missao::after,
     #mobile-bridge::after,
     #servicos::after,
     #aplicacoes::after,
