@@ -229,23 +229,47 @@ const initMissaoStats = () => {
         return;
     }
 
-    counters.forEach((el) => {
-        const end = Number(el.dataset.count) || 0;
-        const state = { val: 0 };
-        render(el, 0);
+    counters.forEach((el) => render(el, 0));
 
-        gsap.to(state, {
-            val: end,
-            duration: 1.55,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: section,
-                start: "top 72%",
-                once: true
-            },
-            onUpdate: () => render(el, state.val)
+    let played = false;
+    const play = () => {
+        if (played) return;
+        played = true;
+
+        counters.forEach((el, i) => {
+            const end = Number(el.dataset.count) || 0;
+            const state = { val: 0 };
+
+            gsap.to(state, {
+                val: end,
+                duration: 1.65,
+                delay: i * 0.14,
+                ease: "power2.out",
+                onUpdate: () => render(el, state.val),
+                onComplete: () => render(el, end)
+            });
         });
+    };
+
+    const trigger = section.querySelector(".missao-stats") || section;
+
+    ScrollTrigger.create({
+        trigger,
+        start: "top 82%",
+        once: true,
+        onEnter: play
     });
+
+    // Lenis / late layout: if already in view, play without waiting for scroll
+    const maybePlay = () => {
+        const rect = trigger.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+        if (rect.top < vh * 0.88 && rect.bottom > 0) play();
+    };
+
+    requestAnimationFrame(maybePlay);
+    window.setTimeout(maybePlay, 600);
+    window.lenis?.on("scroll", maybePlay);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
