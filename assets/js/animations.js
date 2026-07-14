@@ -213,11 +213,47 @@ const initHeaderAnim = () => {
     window.lenis?.on("scroll", ({ scroll }) => setScrolled(scroll > 80));
 };
 
+const initMissaoStats = () => {
+    const section = document.querySelector("#missao");
+    const counters = gsap.utils.toArray("#missao [data-count]");
+    if (!section || !counters.length) return;
+
+    const render = (el, value) => {
+        const suffix = el.dataset.suffix || "";
+        el.textContent = `${Math.round(value)}${suffix}`;
+    };
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+        counters.forEach((el) => render(el, Number(el.dataset.count) || 0));
+        return;
+    }
+
+    counters.forEach((el) => {
+        const end = Number(el.dataset.count) || 0;
+        const state = { val: 0 };
+        render(el, 0);
+
+        gsap.to(state, {
+            val: end,
+            duration: 1.55,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: section,
+                start: "top 72%",
+                once: true
+            },
+            onUpdate: () => render(el, state.val)
+        });
+    });
+};
+
 window.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.add("js-ready");
     initCursor();
     initPortfolioAnimations();
     initHeaderAnim();
+    initMissaoStats();
     initBlogAnimations();
     window.__wvAnimationsBooted = true;
     requestAnimationFrame(() => ScrollTrigger.refresh());
