@@ -20,7 +20,7 @@
     <link rel="icon" type="image/png" href="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-300x115.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -207,7 +207,10 @@
             <div class="site-container">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-24 items-center">
                     <div data-aos="fade-right" class="text-center md:text-left">
-                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-10 leading-[0.85]">SEJA <span class="text-todoz text-glow uppercase">TODOZ</span> <br> COM A GENTE.</h2>
+                        <h2 class="section-display mb-10 text-center md:text-left">
+                            <span class="section-display-line">Seja Todoz</span>
+                            <span class="section-display-accent">com a gente<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
                         <p class="section-lead mb-8 max-w-xl mx-auto md:mx-0">Parceiros de quem precisa de software de verdade: apps, sistemas e inteligência artificial com a energia da WV_Todoz. Do primeiro alinhamento ao produto no ar, a gente caminha junto.</p>
                         <div class="grid grid-cols-2 gap-8 md:gap-12 mb-12 max-w-md mx-auto md:mx-0 md:max-w-none">
                             <div class="border-l-2 border-todoz pl-6 text-left"><span class="block text-4xl md:text-5xl font-black text-white mb-2">11+</span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Anos de Inovação</span></div>
@@ -226,36 +229,53 @@
             </div>
         </section>
 
-        <!-- Missão — specialty as hero (2-column, image-matched) -->
+        <!-- Missão — full-bleed statement + floating proof rail -->
         <section id="missao" class="section-canvas section-glow missao-section relative">
             <div class="site-container relative z-10">
-                <div class="missao-grid">
-                    <div class="missao-lead text-center lg:text-left" data-aos="fade-right">
-                        <span class="missao-eyebrow">Nossa Missão</span>
-                        <h2 class="missao-headline">
-                            <span class="missao-headline-lead">Fazer a sua empresa e as suas ideias</span>
-                            <span class="missao-headline-verbs">
-                                <em>acontecerem</em><span class="missao-comma">,</span>
-                                <em>transformarem</em>
-                                <span class="missao-and">e</span>
-                                <em>aparecerem</em><span class="missao-end">.</span>
-                            </span>
-                        </h2>
+                <div class="missao-stage" data-aos="fade-up">
+                    <div class="missao-stage-top">
+                        <span class="missao-eyebrow">Nossa missão</span>
+                        <p class="missao-kicker">Especialidade WV_Todoz</p>
                     </div>
-                    <div class="missao-aside text-center lg:text-left" data-aos="fade-left">
-                        <p class="missao-body">
-                            Somos a WV_Todoz, uma software house. Entregamos apps, sistemas e inteligência artificial para o negócio avançar de verdade, e também produtos próprios como Facíleme e Let's Work.
-                        </p>
-                        <ul class="missao-proof" aria-label="Capacidades">
-                            <li>Apps &amp; plataformas</li>
-                            <li>Sistemas sob medida</li>
-                            <li>IA aplicada</li>
-                            <li>Produtos próprios</li>
-                        </ul>
-                        <button type="button" class="open-modal magnetic missao-cta">
-                            Conversar com especialistas
-                            <i class="ph ph-arrow-right" aria-hidden="true"></i>
-                        </button>
+
+                    <h2 class="missao-statement">
+                        <span class="missao-statement-white">Fazer a sua empresa<br>e as suas ideias</span>
+                        <span class="missao-statement-verbs">
+                            <span class="missao-verb">acontecerem<span class="section-display-dot" aria-hidden="true"></span></span>
+                            <span class="missao-verb">transformarem<span class="section-display-dot" aria-hidden="true"></span></span>
+                            <span class="missao-verb">aparecerem<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </span>
+                    </h2>
+
+                    <div class="missao-band">
+                        <aside class="missao-rail" aria-label="Capacidades">
+                            <div class="missao-rail-item">
+                                <span class="missao-rail-num">01</span>
+                                <span class="missao-rail-label">Apps &amp; plataformas</span>
+                            </div>
+                            <div class="missao-rail-item">
+                                <span class="missao-rail-num">02</span>
+                                <span class="missao-rail-label">Sistemas sob medida</span>
+                            </div>
+                            <div class="missao-rail-item">
+                                <span class="missao-rail-num">03</span>
+                                <span class="missao-rail-label">IA aplicada</span>
+                            </div>
+                            <div class="missao-rail-item">
+                                <span class="missao-rail-num">04</span>
+                                <span class="missao-rail-label">Produtos próprios</span>
+                            </div>
+                        </aside>
+
+                        <div class="missao-panel">
+                            <p class="missao-body">
+                                Somos a WV_Todoz, uma software house. Entregamos apps, sistemas e inteligência artificial para o negócio avançar de verdade, e também produtos próprios como Facíleme e Let's Work.
+                            </p>
+                            <button type="button" class="open-modal magnetic missao-cta">
+                                Conversar com especialistas
+                                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -294,7 +314,10 @@
                 <div class="servicos-header" data-aos="fade-up">
                     <div class="servicos-header-copy text-center md:text-left">
                         <span class="servicos-eyebrow">O que entregamos</span>
-                        <h2 class="servicos-title">O que <br><span class="text-todoz text-glow">fazemos.</span></h2>
+                        <h2 class="section-display">
+                            <span class="section-display-line">O que</span>
+                            <span class="section-display-accent">fazemos<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
                         <p class="servicos-intro">
                             Ajudamos empresas a transformar ideia em software que funciona no dia a dia: apps, sistemas e inteligência a serviço de vendas, operação e relacionamento com o cliente. Do primeiro alinhamento à evolução depois do lançamento.
                         </p>
@@ -448,7 +471,10 @@
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 md:gap-10 text-center md:text-left">
                     <div>
                         <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
-                        <h2 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white uppercase">Cases que <br> <span class="text-todoz text-glow">marcam.</span></h2>
+                        <h2 class="section-display">
+                            <span class="section-display-line">Cases que</span>
+                            <span class="section-display-accent">marcam<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
                         <p class="text-zinc-500 mt-5 max-w-xl mx-auto md:mx-0 text-sm md:text-base">Deslize os cards no celular. No desktop, role a página e passe o mouse para colorir.</p>
                     </div>
                     <div class="pb-2">
@@ -608,7 +634,10 @@
             <div class="site-container relative z-10">
                 <div class="produtos-header text-center md:text-left mb-12 md:mb-16">
                     <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-up">Ecossistema</span>
-                    <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase" data-aos="fade-up" data-aos-delay="50">Produtos <br><span class="text-todoz text-glow">Proprietários.</span></h2>
+                    <h2 class="section-display" data-aos="fade-up" data-aos-delay="50">
+                        <span class="section-display-line">Produtos</span>
+                        <span class="section-display-accent">proprietários<span class="section-display-dot" aria-hidden="true"></span></span>
+                    </h2>
                     <p class="section-lead mt-6 max-w-2xl mx-auto md:mx-0" data-aos="fade-up" data-aos-delay="100">As mesmas plataformas do site WV_Todoz: social commerce, eventos, cursos e ponto com biometria facial.</p>
                 </div>
 
@@ -707,7 +736,10 @@
                     </div>
                     <div class="order-1 lg:order-2 text-center lg:text-left flex flex-col items-center lg:items-start" data-aos="fade-left">
                         <span class="text-todoz text-[10px] font-black uppercase tracking-[0.4em] mb-6 block">Quando o manual trava o crescimento</span>
-                        <h2 class="text-[clamp(2.5rem,8vw,4.5rem)] md:text-7xl font-black tracking-tighter mb-8 md:mb-10 leading-[0.9] text-white uppercase">Pare de perder <br> <span class="text-todoz text-glow">tempo e oportunidade.</span></h2>
+                        <h2 class="section-display mb-8 md:mb-10">
+                            <span class="section-display-line">Pare de perder</span>
+                            <span class="section-display-accent">tempo<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
                         <p class="section-lead mb-10 max-w-xl">
                             Processos manuais atrasam decisão, geram erro e exigem mais gente do que o negócio precisa. A gente coloca inteligência artificial dentro das suas aplicações e sistemas para a rotina fluir, o time respirar e a empresa crescer sem engolir retrabalho.
                         </p>
@@ -737,7 +769,10 @@
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-16 gap-8 text-center md:text-left">
                     <div>
                         <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Insights</span>
-                        <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase">Conteúdo & <br> <span class="text-todoz uppercase text-glow">Inovação.</span></h2>
+                        <h2 class="section-display">
+                            <span class="section-display-line">Conteúdo &amp;</span>
+                            <span class="section-display-accent">inovação<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">

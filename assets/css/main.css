@@ -63,12 +63,49 @@ h1, h2, h3, h4,
     text-rendering: optimizeLegibility;
 }
 
-.section-headline {
-    font-size: var(--type-display);
-    line-height: 0.95;
-    letter-spacing: var(--headline-tracking);
-    font-weight: 700;
-    text-transform: none;
+/* Section display titles — Cases gold standard (ALL CAPS, tight, lime accent + square period) */
+.section-display {
+    margin: 0;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(2.55rem, 8.2vw, 5.75rem);
+    font-weight: 800;
+    line-height: 0.88;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    text-align: inherit;
+}
+
+.section-display-line {
+    display: block;
+}
+
+.section-display-accent {
+    display: block;
+    color: var(--todoz);
+    text-shadow: 0 0 32px rgba(207, 255, 4, 0.38);
+}
+
+.section-display-dot {
+    display: inline-block;
+    width: 0.2em;
+    height: 0.2em;
+    margin-left: 0.06em;
+    background: var(--todoz);
+    vertical-align: 0.12em;
+    box-shadow: 0 0 16px rgba(207, 255, 4, 0.45);
+}
+
+.text-center .section-display,
+.section-display.text-center {
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .md\:text-left .section-display,
+    .section-display.md\:text-left {
+        text-align: left;
+    }
 }
 
 /* Modest bump for ultra-small Tailwind utilities used across the LP */
@@ -280,127 +317,153 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Missão — elevated two-column; refined mixed-case specialty */
+/* Missão — full-bleed statement + floating proof rail (not 50/50 divider) */
 .missao-section {
-    padding-top: clamp(4.75rem, 8vw, 7.25rem);
-    padding-bottom: clamp(4.75rem, 8vw, 7.25rem);
+    padding-top: clamp(4.5rem, 9vw, 7.5rem);
+    padding-bottom: clamp(4.5rem, 9vw, 7.5rem);
 }
 
-.missao-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    align-items: start;
+.missao-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.missao-stage-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .missao-eyebrow {
-    display: block;
-    margin-bottom: 1rem;
+    margin: 0;
     color: var(--todoz);
     font-family: var(--font-body);
     font-size: var(--type-eyebrow);
-    font-weight: 600;
-    letter-spacing: 0.28em;
+    font-weight: 700;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
 }
 
-.missao-headline {
+.missao-kicker {
     margin: 0;
+    color: #71717a;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.missao-statement {
+    margin: 0 0 clamp(2rem, 5vw, 3.25rem);
     max-width: 18ch;
-    color: #f4f4f5;
-    font-family: var(--font-display);
-    font-size: clamp(1.55rem, 2.6vw, 2.2rem);
-    font-weight: 600;
-    line-height: 1.22;
-    letter-spacing: -0.02em;
-    text-transform: none;
 }
 
-.missao-headline-lead {
+.missao-statement-white {
     display: block;
-    font-weight: 600;
-}
-
-.missao-headline-verbs {
-    display: block;
-    margin-top: 0.35em;
-    color: var(--todoz);
-    font-weight: 600;
-}
-
-.missao-headline-verbs em {
-    font-style: italic;
-    font-weight: 600;
+    margin-bottom: 0.35em;
+    color: #fff;
     font-family: var(--font-display);
+    font-size: clamp(2.4rem, 7.5vw, 5.25rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
 }
 
-.missao-comma,
-.missao-end {
-    color: var(--todoz);
-    font-style: normal;
-}
-
-.missao-and {
-    display: inline;
-    margin: 0 0.2em;
-    color: rgba(207, 255, 4, 0.75);
-    font-size: 0.92em;
-    font-style: normal;
-    font-weight: 500;
-    letter-spacing: 0;
-    text-transform: none;
-    vertical-align: baseline;
-}
-
-.missao-aside {
+.missao-statement-verbs {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 1.4rem;
-    padding-top: 0.2rem;
+    gap: 0.12em;
+    margin: 0;
+    padding: 0;
+}
+
+.missao-verb {
+    display: block;
+    color: var(--todoz);
+    font-family: var(--font-display);
+    font-size: clamp(1.85rem, 5.5vw, 3.75rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    text-shadow: 0 0 36px rgba(207, 255, 4, 0.32);
+}
+
+.missao-band {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.missao-rail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 1.15rem;
+    list-style: none;
+    border: 1px solid rgba(207, 255, 4, 0.18);
+    border-radius: 1.5rem;
+    background:
+        linear-gradient(160deg, rgba(207, 255, 4, 0.07), transparent 55%),
+        rgba(12, 12, 14, 0.85);
+    box-shadow: 0 0 48px rgba(207, 255, 4, 0.06);
+}
+
+.missao-rail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.55rem 0.35rem;
+}
+
+.missao-rail-num {
+    color: var(--todoz);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.missao-rail-label {
+    color: #e4e4e7;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+}
+
+.missao-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.35rem 1.25rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(24, 24, 27, 0.45);
 }
 
 .missao-body {
     margin: 0;
-    max-width: 34rem;
+    max-width: 36rem;
     color: var(--type-body-color);
     font-family: var(--font-body);
-    font-size: clamp(1.08rem, 1.35vw, 1.22rem);
+    font-size: clamp(1.08rem, 1.4vw, 1.25rem);
     font-weight: 450;
     line-height: var(--lh-body);
-    letter-spacing: 0.005em;
-}
-
-.missao-body strong {
-    color: #fafafa;
-    font-weight: 700;
-}
-
-.missao-proof {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.55rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    max-width: 36rem;
-}
-
-.missao-proof li {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 0.85rem;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-    color: #e4e4e7;
-    font-family: var(--font-body);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.11em;
-    text-transform: uppercase;
-    line-height: 1;
 }
 
 .missao-cta {
@@ -410,20 +473,19 @@ h1, h2, h3, h4,
     gap: 0.75rem;
     width: fit-content;
     max-width: 100%;
-    margin-top: 0.15rem;
-    padding: 1.2rem 1.9rem;
+    padding: 1.15rem 1.85rem;
     border-radius: 9999px;
     border: 1px solid var(--todoz);
     background: var(--todoz);
     color: #0a0a0a;
     font-family: var(--font-body);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.11em;
     text-transform: uppercase;
     line-height: 1;
     box-shadow: 0 0 28px rgba(207, 255, 4, 0.18);
-    transition: filter 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    transition: filter 0.25s ease, box-shadow 0.25s ease;
 }
 
 .missao-cta i {
@@ -441,29 +503,58 @@ h1, h2, h3, h4,
     transform: translateX(3px);
 }
 
+@media (min-width: 768px) {
+    .missao-statement-verbs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.35em 0.85em;
+        align-items: baseline;
+    }
+
+    .missao-verb {
+        font-size: clamp(1.75rem, 4vw, 2.85rem);
+    }
+
+    .missao-rail {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+}
+
 @media (min-width: 1024px) {
-    .missao-grid {
-        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-        gap: 3rem 3.5rem;
-        align-items: center;
-    }
-
-    .missao-aside {
-        align-items: flex-start;
-        padding-top: 0.5rem;
-        padding-left: 2.75rem;
-        border-left: 1px solid rgba(255, 255, 255, 0.14);
-        min-height: 100%;
-        justify-content: center;
-        gap: 1.6rem;
-    }
-
-    .missao-proof {
-        justify-content: flex-start;
-    }
-
-    .missao-headline {
+    .missao-statement {
         max-width: 22ch;
+    }
+
+    .missao-band {
+        grid-template-columns: minmax(16rem, 0.95fr) minmax(0, 1.35fr);
+        gap: 1.75rem;
+        align-items: stretch;
+    }
+
+    .missao-rail {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+        padding: 1.35rem 1.25rem;
+        transform: translateY(-0.5rem);
+    }
+
+    .missao-rail-item {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.7rem 0.25rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .missao-rail-item:last-child {
+        border-bottom: none;
+    }
+
+    .missao-panel {
+        padding: 1.75rem 1.85rem;
+        justify-content: center;
+        gap: 1.75rem;
     }
 }
 
@@ -2658,7 +2749,13 @@ footer ul li a:hover {
         text-shadow: 0 0 18px rgba(207, 255, 4, 0.22);
     }
 
-    /* Headline hierarchy — avoid clipped / oversized mobile titles */
+    /* Headline hierarchy — section-display stays bold but fits phones */
+    #sobre .section-display,
+    #servicos .section-display,
+    #aplicacoes .section-display,
+    #blog .section-display,
+    .portfolio-section .section-display,
+    .produtos-section .section-display,
     #sobre h2,
     #servicos h2,
     .servicos-title,
@@ -2666,33 +2763,45 @@ footer ul li a:hover {
     #blog h2,
     .portfolio-section h2,
     .produtos-section h2 {
-        font-size: clamp(2.35rem, 11vw, 3.25rem);
+        font-size: clamp(2.35rem, 11vw, 3.35rem);
+        line-height: 0.9;
+    }
+
+    #missao .missao-statement-white {
+        font-size: clamp(2.15rem, 10vw, 2.85rem);
         line-height: 0.92;
     }
 
-    #missao .missao-headline {
-        font-size: clamp(1.45rem, 5.5vw, 1.9rem);
-        line-height: 1.25;
-        max-width: none;
+    #missao .missao-verb {
+        font-size: clamp(1.55rem, 7vw, 2.1rem);
     }
 
     #missao .missao-body,
     .section-lead {
-        font-size: 1.15rem;
-        line-height: 1.72;
+        font-size: 1.12rem;
+        line-height: 1.7;
     }
 
     .blog-excerpt {
-        font-size: 1.08rem;
-        line-height: 1.68;
+        font-size: 1.05rem;
+        line-height: 1.65;
     }
 
     #missao .missao-cta {
         width: 100%;
         max-width: 20rem;
         padding: 1.15rem 1.35rem;
-        font-size: 0.74rem;
+        font-size: 0.72rem;
         letter-spacing: 0.1em;
+    }
+
+    #missao .missao-panel {
+        align-items: center;
+        text-align: center;
+    }
+
+    #missao .missao-body {
+        text-align: center;
     }
 
     /* Section vertical rhythm — less dead air on phones */
