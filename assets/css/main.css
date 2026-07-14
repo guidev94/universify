@@ -2773,23 +2773,26 @@ html.content-revealed [data-reveal] {
     color: #fff;
 }
 
-.hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(2.25rem, 5vw, 4rem);
-    font-weight: 600;
-    font-style: normal;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-    text-transform: none;
-    text-align: center;
-    color: #fff;
+/* Hero display — Cases .section-display language, centered & contained */
+.hero-display {
+    width: 100%;
     max-width: 16ch;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto clamp(1.5rem, 3vw, 2.25rem);
+    /* Same DNA as .section-display; slightly tempered for longer hero copy */
+    font-size: clamp(2.45rem, 7.2vw, 5.25rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    text-align: center;
+    hyphens: none;
+    -webkit-hyphens: none;
+    overflow-wrap: normal;
+    word-break: keep-all;
 }
 
-.hero-title-accent {
-    color: var(--todoz);
-    text-shadow: none;
+.hero-display .section-display-accent {
+    text-shadow: 0 0 32px rgba(207, 255, 4, 0.38);
 }
 
 .hero-subtitle {
@@ -2836,10 +2839,13 @@ html.content-revealed [data-reveal] {
         margin-bottom: 1.35rem;
     }
 
-    .hero-title {
-        max-width: 14ch;
-        margin-bottom: 1.25rem;
-        line-height: 1.12;
+    .hero-display {
+        max-width: none;
+        font-size: clamp(2.2rem, 10.5vw, 3.15rem);
+        line-height: 0.92;
+        letter-spacing: -0.045em;
+        margin-bottom: 1.35rem;
+        padding-inline: 0.25rem;
     }
 
     .hero-subtitle {
