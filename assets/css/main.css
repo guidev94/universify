@@ -208,7 +208,8 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.45) 10%, black 20%, black 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
 }
 
-/* Missão — bilateral into sobre above + mobile-bridge below */
+/* Missão — right-weighted ambient into sobre above + mobile-bridge below
+   (left kept as a whisper so we don't twin Sobre / bridge blobs) */
 #missao {
     background-color: transparent;
 }
@@ -222,17 +223,141 @@ body {
     position: absolute;
     left: -8%;
     right: -8%;
-    /* Tall soft bleed into SEJA TODOZ above and mobile bridge below */
-    top: -62%;
+    top: -58%;
     bottom: -48%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 75% 55% at 86% 12%, rgba(207, 255, 4, 0.11), transparent 62%),
-        radial-gradient(ellipse 52% 44% at 14% 28%, rgba(207, 255, 4, 0.06), transparent 60%),
-        radial-gradient(ellipse 48% 42% at 80% 82%, rgba(207, 255, 4, 0.05), transparent 64%);
+        radial-gradient(ellipse 72% 52% at 90% 18%, rgba(207, 255, 4, 0.12), transparent 62%),
+        radial-gradient(ellipse 48% 40% at 84% 78%, rgba(207, 255, 4, 0.07), transparent 64%),
+        radial-gradient(ellipse 28% 26% at 8% 42%, rgba(207, 255, 4, 0.025), transparent 72%);
     mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+}
+
+/* Missão — elevated two-column composition */
+.missao-section {
+    padding-top: clamp(4.75rem, 9vw, 7.5rem);
+    padding-bottom: clamp(4.75rem, 9vw, 7.5rem);
+}
+
+.missao-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+    align-items: start;
+}
+
+.missao-eyebrow {
+    display: block;
+    margin-bottom: 1.35rem;
+    color: var(--todoz);
+    font-size: var(--type-eyebrow);
+    font-weight: 800;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+}
+
+.missao-headline {
+    margin: 0;
+    max-width: 18ch;
+    color: #fff;
+    font-size: clamp(1.85rem, 4.2vw, 2.85rem);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+}
+
+.missao-headline-accent {
+    display: block;
+    margin-top: 0.12em;
+    margin-bottom: 0.08em;
+    color: var(--todoz);
+    font-style: italic;
+    text-shadow: 0 0 42px rgba(207, 255, 4, 0.28);
+}
+
+.missao-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75rem;
+    padding-top: 0.35rem;
+}
+
+.missao-body {
+    margin: 0;
+    max-width: 34rem;
+    color: #c4c4cc;
+    font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+    font-weight: 400;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+}
+
+.missao-body strong {
+    color: #f4f4f5;
+    font-weight: 700;
+}
+
+.missao-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 1.05rem 1.65rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(207, 255, 4, 0.35);
+    background: rgba(207, 255, 4, 0.06);
+    color: #fff;
+    font-size: var(--type-label);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.missao-cta i {
+    font-size: 1.05rem;
+    color: var(--todoz);
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.missao-cta:hover {
+    background: var(--todoz);
+    border-color: var(--todoz);
+    color: #0a0a0a;
+    box-shadow: 0 0 36px rgba(207, 255, 4, 0.22);
+}
+
+.missao-cta:hover i {
+    color: #0a0a0a;
+    transform: translateX(3px);
+}
+
+@media (min-width: 1024px) {
+    .missao-grid {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        gap: 3.5rem 4.5rem;
+        align-items: center;
+    }
+
+    .missao-aside {
+        align-items: flex-start;
+        padding-top: 0.5rem;
+        padding-left: 2.75rem;
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+        min-height: 100%;
+        justify-content: center;
+    }
+
+    .missao-headline {
+        max-width: 16ch;
+    }
 }
 
 /* Mobile bridge — between missão and serviços; must not opaque-cut either seam */
@@ -1983,19 +2108,37 @@ footer ul li a:hover {
         line-height: 0.92;
     }
 
-    #missao h3 {
-        font-size: clamp(1.45rem, 6.5vw, 2rem);
+    #missao .missao-headline {
+        font-size: clamp(1.65rem, 7vw, 2.15rem);
         line-height: 1.05;
+        max-width: none;
+    }
+
+    #missao .missao-body {
+        font-size: 1.05rem;
+        line-height: 1.65;
+    }
+
+    #missao .missao-cta {
+        width: 100%;
+        max-width: 20rem;
+        padding: 1.1rem 1.35rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
     }
 
     /* Section vertical rhythm — less dead air on phones */
     #sobre.section-canvas,
-    #missao.section-canvas,
     #servicos.section-canvas,
     #aplicacoes.section-canvas,
     #blog.section-canvas {
         padding-top: 4.5rem;
         padding-bottom: 4.5rem;
+    }
+
+    #missao.missao-section {
+        padding-top: 4.25rem;
+        padding-bottom: 4.25rem;
     }
 
     .portfolio-section {
