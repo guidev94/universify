@@ -122,12 +122,17 @@ body {
 
 /* Continuous dark canvas — soft accents, no hard section seams.
    IMPORTANT: overflow-x:clip forces overflow-y to compute as auto/clip in CSS,
-   which hard-cuts vertical glow bleeds. Keep overflow visible; body clips X. */
+   which hard-cuts vertical glow bleeds. Keep overflow visible; body clips X.
+   `.section-glow` sections use transparent paint so neighbor ::after bleeds show through. */
 .section-canvas {
     position: relative;
     isolation: isolate;
     background-color: #0a0a0a;
     overflow: visible;
+}
+
+.section-canvas.section-glow {
+    background-color: transparent;
 }
 
 .section-canvas > .container,
@@ -137,11 +142,30 @@ body {
     z-index: 1;
 }
 
-/* Sobre — bilateral ambient bleed into clientes above and missao below.
-   #missao must stay transparent so this overflow is not covered by an opaque paint box. */
+/* Clientes — soft ambient; transparent so hero foot / sobre head connect */
+#clientes {
+    background-color: transparent;
+}
+
+#clientes::after {
+    content: "";
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    top: -35%;
+    bottom: -40%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 70% 50% at 50% 40%, rgba(207, 255, 4, 0.045), transparent 68%),
+        radial-gradient(ellipse 45% 40% at 90% 70%, rgba(207, 255, 4, 0.03), transparent 62%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 84%, transparent 100%);
+}
+
+/* Sobre — bilateral into clientes above and missao below (no z-index fight) */
 #sobre {
-    background-color: #0a0a0a;
-    z-index: 1;
+    background-color: transparent;
 }
 
 #sobre::after {
@@ -149,24 +173,21 @@ body {
     position: absolute;
     left: -8%;
     right: -8%;
-    top: -42%;
-    /* Deep foot into #missao — soft mask keeps tip gentle but still visible */
-    bottom: -58%;
+    top: -45%;
+    bottom: -55%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 72% 55% at 82% 24%, rgba(207, 255, 4, 0.08), transparent 64%),
-        radial-gradient(ellipse 60% 48% at 16% 92%, rgba(207, 255, 4, 0.11), transparent 58%),
+        radial-gradient(ellipse 72% 55% at 82% 22%, rgba(207, 255, 4, 0.08), transparent 64%),
+        radial-gradient(ellipse 60% 48% at 16% 88%, rgba(207, 255, 4, 0.1), transparent 58%),
         radial-gradient(ellipse 50% 36% at 50% 100%, rgba(207, 255, 4, 0.07), transparent 70%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 72%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 72%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.45) 10%, black 20%, black 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.45) 10%, black 20%, black 74%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
 }
 
-/* Missão — transparent paint box so #sobre::after can bleed through the seam;
-   own ::after carries upward + downward ambient (blog/aplicacoes pattern). */
+/* Missão — bilateral into sobre above + mobile-bridge below */
 #missao {
     background-color: transparent;
-    z-index: 0;
 }
 
 #missao.section-canvas {
@@ -178,45 +199,64 @@ body {
     position: absolute;
     left: -8%;
     right: -8%;
-    /* Tall soft bleed into SEJA TODOZ above and mobile / servicos below */
-    top: -55%;
-    bottom: -42%;
+    /* Tall soft bleed into SEJA TODOZ above and mobile bridge below */
+    top: -62%;
+    bottom: -48%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 70% 55% at 88% 18%, rgba(207, 255, 4, 0.09), transparent 64%),
-        radial-gradient(ellipse 48% 42% at 12% 30%, rgba(207, 255, 4, 0.05), transparent 62%),
-        radial-gradient(ellipse 42% 48% at 88% 78%, rgba(207, 255, 4, 0.035), transparent 65%);
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 22%, black 84%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 22%, black 84%, transparent 100%);
+        radial-gradient(ellipse 75% 55% at 86% 12%, rgba(207, 255, 4, 0.11), transparent 62%),
+        radial-gradient(ellipse 52% 44% at 14% 28%, rgba(207, 255, 4, 0.06), transparent 60%),
+        radial-gradient(ellipse 48% 42% at 80% 82%, rgba(207, 255, 4, 0.05), transparent 64%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Servicos — paint-box base; ambient ::after bleeds into section above
-   (same pattern as Insights / portfolio). Bottom seam owned by portfolio. */
+/* Mobile bridge — between missão and serviços; must not opaque-cut either seam */
+#mobile-bridge {
+    background-color: transparent;
+}
+
+#mobile-bridge::after {
+    content: "";
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    top: -45%;
+    bottom: -45%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 65% 50% at 20% 35%, rgba(207, 255, 4, 0.055), transparent 66%),
+        radial-gradient(ellipse 55% 45% at 88% 65%, rgba(207, 255, 4, 0.04), transparent 64%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+}
+
+/* Serviços — bilateral into mobile-bridge above and portfolio below */
 #servicos {
-    background-color: #0a0a0a;
+    background-color: transparent;
 }
 
 #servicos::after {
     content: "";
     position: absolute;
-    left: -5%;
-    right: -5%;
-    /* Soft bleed into mobile strategist / missao above — no hard top cut */
-    top: -45%;
-    bottom: 18%;
+    left: -6%;
+    right: -6%;
+    top: -48%;
+    bottom: -42%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 75% 55% at 10% 32%, rgba(207, 255, 4, 0.075), transparent 66%),
-        radial-gradient(ellipse 48% 42% at 92% 68%, rgba(207, 255, 4, 0.03), transparent 62%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
+        radial-gradient(ellipse 75% 55% at 10% 28%, rgba(207, 255, 4, 0.08), transparent 66%),
+        radial-gradient(ellipse 48% 42% at 92% 72%, rgba(207, 255, 4, 0.04), transparent 62%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
 }
 
-/* Aplicações / IA — ambient ::after bleeds into produtos above and Insights (#blog) below */
+/* Aplicações / IA — bilateral into produtos above and Insights (#blog) below */
 #aplicacoes {
-    background-color: #0a0a0a;
+    background-color: transparent;
 }
 
 #aplicacoes::after {
@@ -224,14 +264,13 @@ body {
     position: absolute;
     left: -5%;
     right: -5%;
-    /* Bilateral soft bleed — no hard cut into produtos or blog */
-    top: -42%;
-    bottom: -40%;
+    top: -45%;
+    bottom: -42%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 75% 55% at 85% 28%, rgba(207, 255, 4, 0.05), transparent 62%),
-        radial-gradient(ellipse 48% 40% at 12% 72%, rgba(207, 255, 4, 0.035), transparent 58%);
+        radial-gradient(ellipse 75% 55% at 85% 28%, rgba(207, 255, 4, 0.06), transparent 62%),
+        radial-gradient(ellipse 48% 40% at 12% 72%, rgba(207, 255, 4, 0.04), transparent 58%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
 }
@@ -446,10 +485,9 @@ body {
     }
 }
 
-/* Insights — ambient layer extends past edges (portfolio pattern),
-   so glow is not hard-clipped at the section paint box. */
+/* Insights — bilateral into aplicacoes above; soft fade before contato yellow */
 #blog {
-    background-color: #0a0a0a;
+    background-color: transparent;
 }
 
 #blog::after {
@@ -457,23 +495,22 @@ body {
     position: absolute;
     left: -5%;
     right: -5%;
-    /* Bleed into aplicacoes above; soft fade before contato yellow below */
-    top: -40%;
-    bottom: -28%;
+    top: -45%;
+    bottom: -30%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 70% 55% at 18% 28%, rgba(207, 255, 4, 0.06), transparent 64%),
-        radial-gradient(ellipse 50% 45% at 88% 62%, rgba(207, 255, 4, 0.03), transparent 60%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+        radial-gradient(ellipse 70% 55% at 18% 26%, rgba(207, 255, 4, 0.07), transparent 64%),
+        radial-gradient(ellipse 50% 45% at 88% 62%, rgba(207, 255, 4, 0.035), transparent 60%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
 }
 
 /* Portfolio — faixa horizontal + pin scroll */
 .portfolio-section {
     position: relative;
     padding: 7rem 0 5rem;
-    background-color: #0a0a0a;
+    background-color: transparent;
     border-top: none;
     border-bottom: none;
     overflow: visible;
@@ -939,13 +976,12 @@ html.content-revealed [data-reveal] {
     color: var(--todoz);
 }
 
-/* Produtos — bento readable; ambient bleed comes from portfolio ::after above;
-   soft foot into aplicacoes (no hard border cut). */
+/* Produtos — transparent so portfolio foot + aplicacoes head connect */
 .produtos-section {
     position: relative;
     isolation: isolate;
     padding: 8rem 0;
-    background-color: #0a0a0a;
+    background-color: transparent;
     border-top: none;
     border-bottom: none;
     overflow: visible;
@@ -955,18 +991,16 @@ html.content-revealed [data-reveal] {
     position: absolute;
     left: 0;
     right: 0;
-    top: 8%;
-    /* Soft foot into aplicacoes — #aplicacoes::after owns the strong upward seam */
-    bottom: -28%;
+    top: -18%;
+    bottom: -32%;
     z-index: 0;
     pointer-events: none;
     overflow: visible;
     background:
-        /* Local accents only — no top seam twin of portfolio glow */
         radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.08), transparent 72%),
-        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.035), transparent 70%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 78%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 78%, transparent 100%);
+        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.04), transparent 70%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 80%, transparent 100%);
 }
 
 .produtos-bento {
@@ -2069,9 +2103,11 @@ footer ul li a:hover {
     /* Absolute seam glows stay softer on phones (less muddy text) */
     #sobre::after,
     #missao::after,
+    #mobile-bridge::after,
     #servicos::after,
     #aplicacoes::after,
     #blog::after,
+    #clientes::after,
     .portfolio-section::after {
         opacity: 0.72;
     }
