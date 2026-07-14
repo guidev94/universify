@@ -29,7 +29,7 @@
 - [x] Polish + responsive fixes
 - [x] Atualizar testes (unit + e2e)
 - [x] Fix Lenis scroll stack overflow
-- [ ] Commit + push (em andamento)
+- [x] Commit + push
 
 ## Deferred
 
