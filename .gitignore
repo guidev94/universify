@@ -6,7 +6,6 @@ blob-report/
 .vercel/
 *.log
 .DS_Store
-.specs/
 design-system/
 # Original 4K hero (~64MB) — deploy uses compressed assets/video/hero.mp4
 /hero.mp4
