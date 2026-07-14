@@ -226,12 +226,11 @@ body {
     bottom: -48%;
     z-index: 0;
     pointer-events: none;
-    /* Bilateral depth — left + right (Missão-style), soft vertical fade into neighbors */
+    /* Right-weighted ambient — kill left blob that echoed Missão; keep right depth */
     background:
-        radial-gradient(ellipse 58% 52% at 12% 38%, rgba(207, 255, 4, 0.09), transparent 64%),
-        radial-gradient(ellipse 62% 50% at 90% 28%, rgba(207, 255, 4, 0.1), transparent 62%),
-        radial-gradient(ellipse 48% 40% at 88% 78%, rgba(207, 255, 4, 0.055), transparent 65%),
-        radial-gradient(ellipse 40% 36% at 22% 82%, rgba(207, 255, 4, 0.04), transparent 68%);
+        radial-gradient(ellipse 68% 55% at 92% 30%, rgba(207, 255, 4, 0.12), transparent 62%),
+        radial-gradient(ellipse 52% 44% at 86% 72%, rgba(207, 255, 4, 0.07), transparent 64%),
+        radial-gradient(ellipse 36% 32% at 72% 48%, rgba(207, 255, 4, 0.035), transparent 70%);
     mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 20%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 20%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
