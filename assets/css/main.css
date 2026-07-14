@@ -16,16 +16,28 @@ html.lenis {
     --todoz: #CFFF04;
     --section-pad-y: clamp(4.5rem, 8vw, 8rem);
     --headline-tracking: -0.04em;
+    /* Typefaces — Syne (display) + DM Sans (body); not Inter */
+    --font-display: "Syne", system-ui, sans-serif;
+    --font-body: "DM Sans", system-ui, sans-serif;
     /* Micro type floor — readable labels without killing hierarchy */
-    --type-micro: 0.6875rem;   /* ~11px (was often 10px) */
-    --type-label: 0.75rem;     /* 12px */
-    --type-eyebrow: 0.7rem;
+    --type-micro: 0.6875rem;   /* ~11px */
+    --type-label: 0.78rem;
+    --type-eyebrow: 0.72rem;
     --type-chip: 0.72rem;
-    /* Body / lead paragraphs — comfortable reading on dark */
-    --type-body: clamp(1.125rem, 1.55vw, 1.32rem);
-    --type-body-sm: clamp(1.05rem, 1.35vw, 1.18rem);
-    --type-body-color: #d0d0d6;
-    --type-body-muted: #b4b4bc;
+    /* Body / lead — stronger reading scale on dark */
+    --type-body: clamp(1.15rem, 1.65vw, 1.375rem);
+    --type-body-sm: clamp(1.08rem, 1.4vw, 1.2rem);
+    --type-body-color: #d6d6dc;
+    --type-body-muted: #b8b8c0;
+    --type-display: clamp(2.35rem, 7.5vw, 4.5rem);
+    --lh-body: 1.75;
+}
+
+body {
+    overflow-x: hidden;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 /* Glow Effects */
@@ -40,16 +52,21 @@ html.lenis {
 }
 
 /* Typography Polish */
-h1, h2, h3, h4 {
+h1, h2, h3, h4,
+.section-headline,
+.servicos-title,
+.missao-headline,
+.produto-title {
+    font-family: var(--font-display);
     letter-spacing: var(--headline-tracking);
     text-rendering: optimizeLegibility;
 }
 
 .section-headline {
-    font-size: clamp(2.35rem, 7.5vw, 4.5rem);
+    font-size: var(--type-display);
     line-height: 0.9;
     letter-spacing: var(--headline-tracking);
-    font-weight: 900;
+    font-weight: 800;
     text-transform: uppercase;
 }
 
@@ -75,9 +92,10 @@ h1, h2, h3, h4 {
 .section-lead {
     margin: 0;
     color: var(--type-body-color);
+    font-family: var(--font-body);
     font-size: var(--type-body);
     font-weight: 450;
-    line-height: 1.72;
+    line-height: var(--lh-body);
     letter-spacing: 0.01em;
 }
 
@@ -90,13 +108,10 @@ h1, h2, h3, h4 {
 .blog-excerpt {
     margin: 0;
     color: var(--type-body-muted);
+    font-family: var(--font-body);
     font-size: var(--type-body-sm);
     font-weight: 500;
-    line-height: 1.65;
-}
-
-body {
-    overflow-x: hidden;
+    line-height: 1.7;
 }
 
 /**
@@ -264,64 +279,93 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Missão — elevated two-column composition */
+/* Missão — elevated two-column composition (specialty as display hero) */
 .missao-section {
-    padding-top: clamp(4.75rem, 9vw, 7.5rem);
-    padding-bottom: clamp(4.75rem, 9vw, 7.5rem);
+    padding-top: clamp(5rem, 9vw, 8rem);
+    padding-bottom: clamp(5rem, 9vw, 8rem);
 }
 
 .missao-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.25rem;
     align-items: start;
 }
 
 .missao-eyebrow {
     display: block;
-    margin-bottom: 1.15rem;
+    margin-bottom: 1.25rem;
     color: var(--todoz);
+    font-family: var(--font-body);
     font-size: var(--type-eyebrow);
-    font-weight: 800;
-    letter-spacing: 0.38em;
+    font-weight: 700;
+    letter-spacing: 0.36em;
     text-transform: uppercase;
 }
 
 .missao-headline {
     margin: 0;
-    max-width: 18ch;
+    max-width: 14ch;
     color: #fff;
-    font-size: clamp(1.7rem, 3.6vw, 2.55rem);
-    font-weight: 900;
-    line-height: 1.04;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-size: clamp(1.95rem, 4.4vw, 3.15rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
     text-transform: uppercase;
 }
 
-.missao-headline-accent {
+.missao-headline-lead {
     display: block;
-    margin-top: 0.12em;
-    margin-bottom: 0.06em;
+}
+
+.missao-headline-verbs {
+    display: block;
+    margin-top: 0.18em;
     color: var(--todoz);
+    text-shadow: 0 0 48px rgba(207, 255, 4, 0.3);
+}
+
+.missao-headline-verbs em {
     font-style: italic;
-    text-shadow: 0 0 42px rgba(207, 255, 4, 0.28);
+    font-weight: 800;
+    font-family: var(--font-display);
+}
+
+.missao-comma,
+.missao-end {
+    color: var(--todoz);
+    font-style: normal;
+}
+
+.missao-and {
+    display: inline-block;
+    margin: 0 0.28em;
+    color: rgba(207, 255, 4, 0.72);
+    font-size: 0.55em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    vertical-align: middle;
 }
 
 .missao-aside {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.35rem;
-    padding-top: 0.15rem;
+    gap: 1.5rem;
+    padding-top: 0.25rem;
 }
 
 .missao-body {
     margin: 0;
-    max-width: 36rem;
+    max-width: 34rem;
     color: var(--type-body-color);
-    font-size: clamp(1.15rem, 1.55vw, 1.35rem);
-    font-weight: 400;
-    line-height: 1.75;
+    font-family: var(--font-body);
+    font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+    font-weight: 450;
+    line-height: var(--lh-body);
     letter-spacing: 0.01em;
 }
 
@@ -344,14 +388,15 @@ body {
 .missao-proof li {
     display: inline-flex;
     align-items: center;
-    padding: 0.45rem 0.8rem;
+    padding: 0.5rem 0.85rem;
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.03);
     color: #e4e4e7;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
     line-height: 1;
 }
@@ -363,15 +408,16 @@ body {
     gap: 0.75rem;
     width: fit-content;
     max-width: 100%;
-    margin-top: 0.25rem;
-    padding: 1.15rem 1.85rem;
+    margin-top: 0.15rem;
+    padding: 1.2rem 1.9rem;
     border-radius: 9999px;
     border: 1px solid var(--todoz);
     background: var(--todoz);
     color: #0a0a0a;
-    font-size: 0.78rem;
-    font-weight: 900;
-    letter-spacing: 0.12em;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
     line-height: 1;
     box-shadow: 0 0 28px rgba(207, 255, 4, 0.18);
@@ -395,19 +441,19 @@ body {
 
 @media (min-width: 1024px) {
     .missao-grid {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 2.75rem 3.25rem;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 3rem 3.5rem;
         align-items: center;
     }
 
     .missao-aside {
         align-items: flex-start;
-        padding-top: 0.35rem;
-        padding-left: 2.5rem;
+        padding-top: 0.5rem;
+        padding-left: 2.75rem;
         border-left: 1px solid rgba(255, 255, 255, 0.14);
         min-height: 100%;
         justify-content: center;
-        gap: 1.5rem;
+        gap: 1.6rem;
     }
 
     .missao-proof {
@@ -415,7 +461,7 @@ body {
     }
 
     .missao-headline {
-        max-width: 16ch;
+        max-width: 13ch;
     }
 }
 
@@ -446,8 +492,9 @@ body {
 .servicos-title {
     margin: 0 0 1.15rem;
     color: #fff;
+    font-family: var(--font-display);
     font-size: clamp(2.5rem, 8vw, 4.5rem);
-    font-weight: 900;
+    font-weight: 800;
     line-height: 0.9;
     letter-spacing: -0.045em;
     text-transform: uppercase;
@@ -457,8 +504,9 @@ body {
     margin: 0;
     max-width: 40rem;
     color: var(--type-body-color);
+    font-family: var(--font-body);
     font-size: var(--type-body);
-    line-height: 1.7;
+    line-height: var(--lh-body);
 }
 
 .servicos-header-note {
@@ -2620,28 +2668,28 @@ footer ul li a:hover {
     }
 
     #missao .missao-headline {
-        font-size: clamp(1.65rem, 7vw, 2.15rem);
-        line-height: 1.05;
+        font-size: clamp(1.85rem, 8vw, 2.4rem);
+        line-height: 1.04;
         max-width: none;
     }
 
     #missao .missao-body,
     .section-lead {
-        font-size: 1.12rem;
-        line-height: 1.7;
+        font-size: 1.15rem;
+        line-height: 1.72;
     }
 
     .blog-excerpt {
-        font-size: 1.05rem;
-        line-height: 1.65;
+        font-size: 1.08rem;
+        line-height: 1.68;
     }
 
     #missao .missao-cta {
         width: 100%;
         max-width: 20rem;
         padding: 1.15rem 1.35rem;
-        font-size: 0.72rem;
-        letter-spacing: 0.12em;
+        font-size: 0.74rem;
+        letter-spacing: 0.1em;
     }
 
     /* Section vertical rhythm — less dead air on phones */

@@ -18,6 +18,9 @@
     <meta name="twitter:title" content="WV_Todoz | Software House — Apps, Sistemas e IA">
     <meta name="twitter:description" content="Aplicativos mobile, sistemas sob medida e inteligência artificial para empresas que exigem performance e vantagem competitiva.">
     <link rel="icon" type="image/png" href="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-300x115.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -36,7 +39,8 @@
                         todozDark: '#A8D600',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                        display: ['Syne', 'system-ui', 'sans-serif'],
                     }
                 }
             }
@@ -44,7 +48,7 @@
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
-<body class="bg-primary text-white selection:bg-todoz selection:text-black overflow-x-hidden">
+<body class="bg-primary text-white font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
 
     <!-- Custom Cursor -->
     <div id="cursor" class="fixed w-3 h-3 bg-todoz rounded-full pointer-events-none z-[9999] opacity-0 transition-opacity duration-300"></div>
@@ -222,16 +226,21 @@
             </div>
         </section>
 
-        <!-- Missão — posicionamento software house -->
+        <!-- Missão — specialty as hero (2-column, image-matched) -->
         <section id="missao" class="section-canvas section-glow missao-section relative">
             <div class="site-container relative z-10">
                 <div class="missao-grid">
                     <div class="missao-lead text-center lg:text-left" data-aos="fade-right">
-                        <span class="missao-eyebrow">Nossa Missão</span>
-                        <h3 class="missao-headline">
-                            Fazer a sua empresa e as suas ideias
-                            <span class="missao-headline-accent">acontecerem, transformarem e aparecerem.</span>
-                        </h3>
+                        <span class="missao-eyebrow">Nossa especialidade</span>
+                        <h2 class="missao-headline">
+                            <span class="missao-headline-lead">Fazer a sua empresa e as suas ideias</span>
+                            <span class="missao-headline-verbs">
+                                <em>acontecerem</em><span class="missao-comma">,</span>
+                                <em>transformarem</em>
+                                <span class="missao-and">e</span>
+                                <em>aparecerem</em><span class="missao-end">.</span>
+                            </span>
+                        </h2>
                     </div>
                     <div class="missao-aside text-center lg:text-left" data-aos="fade-left">
                         <p class="missao-body">
