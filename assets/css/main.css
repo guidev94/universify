@@ -334,28 +334,28 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 8%, black 18%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
 }
 
-/* Missão — clean section-display stack + content band (all left-aligned) */
+/* Missão — full specialty display + balanced content band */
 .missao-section {
-    padding-top: clamp(4.5rem, 8vw, 7rem);
-    padding-bottom: clamp(4.5rem, 8vw, 7rem);
+    padding-top: clamp(4.75rem, 8.5vw, 7.5rem);
+    padding-bottom: clamp(4.75rem, 8.5vw, 7.5rem);
 }
 
 .missao-compose {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0;
-    max-width: 52rem;
+    width: 100%;
+    max-width: none;
 }
 
 .missao-header {
     width: 100%;
-    margin-bottom: var(--space-section-gap);
+    margin-bottom: 0;
 }
 
 .missao-eyebrow {
     display: block;
-    margin: 0 0 1rem;
+    margin: 0 0 1.15rem;
     color: var(--todoz);
     font-family: var(--font-body);
     font-size: var(--type-eyebrow);
@@ -364,45 +364,36 @@ h1, h2, h3, h4,
     text-transform: uppercase;
 }
 
-.missao-header .section-display {
-    margin-bottom: 1rem;
+.missao-display {
+    max-width: 22ch;
+    margin-bottom: var(--space-after-display);
 }
 
-.missao-support {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.65rem 1rem;
-    margin: 0;
-    color: var(--todoz);
-    font-family: var(--font-display);
-    font-size: clamp(1rem, 1.8vw, 1.25rem);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+.missao-display .section-display-accent {
+    max-width: 28ch;
 }
 
-.missao-support-sep {
-    display: inline-block;
-    width: 0.35rem;
-    height: 0.35rem;
-    border-radius: 9999px;
-    background: rgba(207, 255, 4, 0.55);
+.missao-band {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 1.75rem 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.missao-content {
+.missao-band-main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 1.35rem;
-    width: 100%;
-    padding-top: var(--space-section-gap);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 0;
 }
 
 .missao-body {
     margin: 0;
-    max-width: 38rem;
+    max-width: 40rem;
     color: var(--type-body-color);
     font-family: var(--font-body);
     font-size: var(--type-body);
@@ -413,7 +404,7 @@ h1, h2, h3, h4,
 .missao-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.55rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -421,15 +412,38 @@ h1, h2, h3, h4,
 
 .missao-chips li {
     display: inline-flex;
-    padding: 0.45rem 0.8rem;
+    padding: 0.5rem 0.85rem;
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     color: #e4e4e7;
     font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+}
+
+.missao-band-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.85rem;
+    padding: 1.35rem 1.35rem;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(207, 255, 4, 0.22);
+    background:
+        linear-gradient(145deg, rgba(207, 255, 4, 0.08), transparent 60%),
+        rgba(18, 18, 20, 0.65);
+}
+
+.missao-cta-note {
+    margin: 0;
+    color: #a1a1aa;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 .missao-cta {
@@ -437,16 +451,17 @@ h1, h2, h3, h4,
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    margin-top: 0.35rem;
-    padding: 1.15rem 1.85rem;
+    width: 100%;
+    max-width: 22rem;
+    padding: 1.15rem 1.65rem;
     border-radius: 9999px;
     border: 1px solid var(--todoz);
     background: var(--todoz);
     color: #0a0a0a;
     font-family: var(--font-body);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 800;
-    letter-spacing: 0.11em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1;
     box-shadow: 0 0 28px rgba(207, 255, 4, 0.18);
@@ -468,31 +483,25 @@ h1, h2, h3, h4,
     transform: translateX(3px);
 }
 
-@media (min-width: 1024px) {
-    .missao-compose {
-        max-width: 58rem;
+@media (min-width: 900px) {
+    .missao-display {
+        max-width: 28ch;
     }
 
-    .missao-content {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 1.25rem 1.75rem;
+    .missao-band {
+        grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.75fr);
+        gap: 2rem 2.5rem;
+        align-items: stretch;
+        padding-top: 2rem;
     }
 
-    .missao-body {
-        flex: 1 1 22rem;
-        max-width: 28rem;
-    }
-
-    .missao-chips {
-        flex: 1 1 100%;
-        order: 3;
+    .missao-band-cta {
+        padding: 1.65rem 1.5rem;
     }
 
     .missao-cta {
-        margin-top: 0;
-        margin-left: auto;
+        width: 100%;
+        max-width: none;
     }
 }
 
