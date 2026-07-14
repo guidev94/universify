@@ -82,9 +82,9 @@ h1, h2, h3, h4 {
 }
 
 .section-lead--bridge {
-    font-style: italic;
+    font-style: normal;
     font-weight: 500;
-    color: #c8c8d0;
+    color: var(--type-body-color);
 }
 
 .blog-excerpt {
@@ -855,6 +855,42 @@ body {
         radial-gradient(ellipse 36% 32% at 72% 48%, rgba(207, 255, 4, 0.035), transparent 70%);
     mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 20%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 20%, black 80%, rgba(0, 0, 0, 0.5) 90%, transparent 100%);
+}
+
+.mobile-bridge-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1.05rem 1.65rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(207, 255, 4, 0.45);
+    background: rgba(207, 255, 4, 0.06);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mobile-bridge-cta i {
+    color: var(--todoz);
+    font-size: 1.05rem;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.mobile-bridge-cta:hover {
+    background: var(--todoz);
+    border-color: var(--todoz);
+    color: #0a0a0a;
+    box-shadow: 0 0 32px rgba(207, 255, 4, 0.22);
+}
+
+.mobile-bridge-cta:hover i {
+    color: #0a0a0a;
+    transform: translateX(3px);
 }
 
 /* Serviços — bilateral into mobile-bridge above and portfolio below */
