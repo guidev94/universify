@@ -305,6 +305,7 @@ h1, h2, h3, h4,
 /* Sobre — bilateral into clientes above and missao below (no z-index fight) */
 #sobre {
     background-color: transparent;
+    overflow-x: clip;
 }
 
 #sobre::after {
@@ -3446,6 +3447,45 @@ footer ul li a:hover {
     #contato.contato-cta {
         padding-top: 5rem;
         padding-bottom: 5rem;
+    }
+
+    /*
+     * AOS fade-left/right pre-animate uses translateX(±100), which expands
+     * scrollWidth on phones before the section enters view. Remap to a short
+     * vertical rise so layout stays within the viewport.
+     */
+    [data-aos="fade-left"],
+    [data-aos="fade-right"] {
+        transform: translate3d(0, 18px, 0) !important;
+    }
+
+    [data-aos="fade-left"].aos-animate,
+    [data-aos="fade-right"].aos-animate {
+        transform: none !important;
+    }
+
+    #servicos,
+    #aplicacoes {
+        overflow-x: clip;
+    }
+
+    #aplicacoes .aplicacoes-media-img {
+        transform: scale(1.02);
+    }
+
+    #aplicacoes .aplicacoes-media:hover .aplicacoes-media-img {
+        transform: scale(1.05);
+    }
+
+    .servicos-header,
+    .servicos-header-cta,
+    .servicos-header-note {
+        max-width: 100%;
+    }
+
+    .servicos-quote-link {
+        min-height: 2.75rem;
+        padding: 0.85rem 0.25rem;
     }
 }
 
