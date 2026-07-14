@@ -14,8 +14,9 @@ window.__wvScroll = 0;
 lenis.on("scroll", ({ scroll }) => {
     window.__wvScroll = scroll;
     ScrollTrigger.update();
-    // Let AOS re-check on Lenis scroll (native pageYOffset stays 0 under Lenis).
-    window.dispatchEvent(new Event("scroll"));
+    // Do NOT dispatch a native `scroll` event here — Lenis listens to window scroll
+    // (onNativeScroll) and would recurse until "Maximum call stack size exceeded".
+    // AOS is driven by driveAosWithLenis() via lenis.on("scroll") in animations.js.
 });
 
 // Single RAF loop (avoid double-driving Lenis).

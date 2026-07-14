@@ -86,6 +86,9 @@ describe("site structure constants", () => {
   it("lists required sections and nav hashes", () => {
     assert.ok(REQUIRED_SECTION_IDS.includes("portfolio"));
     assert.ok(REQUIRED_SECTION_IDS.includes("produtos"));
+    assert.ok(REQUIRED_SECTION_IDS.includes("aplicacoes"));
+    assert.ok(!REQUIRED_SECTION_IDS.includes("marketing"));
+    assert.ok(NAV_HASHES.includes("#aplicacoes"));
     assert.ok(NAV_HASHES.every((h) => h.startsWith("#")));
   });
 });
