@@ -6,10 +6,10 @@ A LP já tem identidade (dark + lima + glow), mas ainda há inconsistências de 
 
 ## Goals
 
-- [ ] Corrigir overflow/alinhamento mobile nas seções críticas (incl. Aplicações)
-- [ ] Uniformizar ritmo vertical e hierarquia tipográfica onde for seguro
-- [ ] Consistir hovers/CTAs `.magnetic`
-- [ ] Remover leftovers óbvios (typo "technology", etc.)
+- [x] Corrigir overflow/alinhamento mobile nas seções críticas (incl. Aplicações)
+- [x] Uniformizar ritmo vertical e hierarquia tipográfica onde for seguro
+- [x] Consistir hovers/CTAs `.magnetic`
+- [x] Remover leftovers óbvios (typo "technology", etc.)
 
 ## Out of Scope
 
@@ -49,9 +49,9 @@ A LP já tem identidade (dark + lima + glow), mas ainda há inconsistências de 
 
 | ID | Status |
 | --- | --- |
-| REQ-POL-01 | Pending |
-| REQ-POL-02 | Pending |
-| REQ-POL-03 | Pending |
-| REQ-POL-04 | Pending |
-| REQ-POL-05 | Pending |
-| REQ-POL-06 | Pending |
+| REQ-POL-01 | Done |
+| REQ-POL-02 | Done |
+| REQ-POL-03 | Done |
+| REQ-POL-04 | Done |
+| REQ-POL-05 | Done |
+| REQ-POL-06 | Done |

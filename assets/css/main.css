@@ -14,6 +14,8 @@ html.lenis {
 /* Identidade Visual: Lima Neon Todoz */
 :root {
     --todoz: #CFFF04;
+    --section-pad-y: clamp(4.5rem, 8vw, 8rem);
+    --headline-tracking: -0.04em;
 }
 
 /* Glow Effects */
@@ -29,8 +31,16 @@ html.lenis {
 
 /* Typography Polish */
 h1, h2, h3, h4 {
-    letter-spacing: -0.04em;
+    letter-spacing: var(--headline-tracking);
     text-rendering: optimizeLegibility;
+}
+
+.section-headline {
+    font-size: clamp(2.35rem, 7.5vw, 4.5rem);
+    line-height: 0.9;
+    letter-spacing: var(--headline-tracking);
+    font-weight: 900;
+    text-transform: uppercase;
 }
 
 body {
@@ -127,49 +137,58 @@ body {
     z-index: 1;
 }
 
-/* Sobre — bilateral ambient bleed into clientes above and missao below */
+/* Sobre — bilateral ambient bleed into clientes above and missao below.
+   #missao must stay transparent so this overflow is not covered by an opaque paint box. */
 #sobre {
     background-color: #0a0a0a;
+    z-index: 1;
 }
 
 #sobre::after {
     content: "";
     position: absolute;
-    left: -5%;
-    right: -5%;
-    /* Match missao/aplicacoes bilateral soft bleed — no hard cut either seam */
+    left: -8%;
+    right: -8%;
     top: -42%;
-    bottom: -40%;
+    /* Deep foot into #missao — soft mask keeps tip gentle but still visible */
+    bottom: -58%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 70% 55% at 82% 28%, rgba(207, 255, 4, 0.07), transparent 64%),
-        radial-gradient(ellipse 48% 42% at 12% 72%, rgba(207, 255, 4, 0.04), transparent 60%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+        radial-gradient(ellipse 72% 55% at 82% 24%, rgba(207, 255, 4, 0.08), transparent 64%),
+        radial-gradient(ellipse 60% 48% at 16% 92%, rgba(207, 255, 4, 0.11), transparent 58%),
+        radial-gradient(ellipse 50% 36% at 50% 100%, rgba(207, 255, 4, 0.07), transparent 70%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 72%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 72%, rgba(0, 0, 0, 0.55) 88%, transparent 100%);
 }
 
-/* Missão — paint-box base; ambient ::after bleeds into #sobre above
-   and mobile strategist / #servicos below (no clipped radial paint). */
+/* Missão — transparent paint box so #sobre::after can bleed through the seam;
+   own ::after carries upward + downward ambient (blog/aplicacoes pattern). */
 #missao {
-    background-color: #0a0a0a;
+    background-color: transparent;
+    z-index: 0;
+}
+
+#missao.section-canvas {
+    background-color: transparent;
 }
 
 #missao::after {
     content: "";
     position: absolute;
-    left: -5%;
-    right: -5%;
-    /* Soft bleed into SEJA TODOZ above and mobile / servicos below */
-    top: -38%;
+    left: -8%;
+    right: -8%;
+    /* Tall soft bleed into SEJA TODOZ above and mobile / servicos below */
+    top: -55%;
     bottom: -42%;
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 58% 70% at 92% 22%, rgba(207, 255, 4, 0.055), transparent 68%),
-        radial-gradient(ellipse 42% 48% at 88% 78%, rgba(207, 255, 4, 0.03), transparent 65%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+        radial-gradient(ellipse 70% 55% at 88% 18%, rgba(207, 255, 4, 0.09), transparent 64%),
+        radial-gradient(ellipse 48% 42% at 12% 30%, rgba(207, 255, 4, 0.05), transparent 62%),
+        radial-gradient(ellipse 42% 48% at 88% 78%, rgba(207, 255, 4, 0.035), transparent 65%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 22%, black 84%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 10%, black 22%, black 84%, transparent 100%);
 }
 
 /* Servicos — paint-box base; ambient ::after bleeds into section above
@@ -215,6 +234,48 @@ body {
         radial-gradient(ellipse 48% 40% at 12% 72%, rgba(207, 255, 4, 0.035), transparent 58%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 14%, black 84%, transparent 100%);
+}
+
+/* Aplicações media — AI-forward crop + subtle tech veil */
+.aplicacoes-media-img {
+    object-position: center 28%;
+    transform: scale(1.08);
+    filter: grayscale(0.35) contrast(1.05) brightness(0.92);
+    transition: transform 1s ease, filter 1s ease;
+}
+
+.aplicacoes-media:hover .aplicacoes-media-img {
+    transform: scale(1.14);
+    filter: grayscale(0) contrast(1.08) brightness(1);
+}
+
+.aplicacoes-media-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(160deg, rgba(10, 10, 10, 0.55) 0%, transparent 42%, rgba(10, 10, 10, 0.35) 100%),
+        radial-gradient(ellipse 70% 60% at 70% 30%, rgba(207, 255, 4, 0.14), transparent 55%);
+    mix-blend-mode: soft-light;
+    opacity: 0.9;
+    transition: opacity 0.6s ease;
+}
+
+.aplicacoes-media:hover .aplicacoes-media-veil {
+    opacity: 0.55;
+}
+
+.aplicacoes-media-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.12;
+    background-image:
+        linear-gradient(rgba(207, 255, 4, 0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(207, 255, 4, 0.35) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 45%, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 45%, black 20%, transparent 75%);
 }
 
 /* Insights — ambient layer extends past edges (portfolio pattern),
@@ -1653,6 +1714,22 @@ footer ul li a:hover {
         text-shadow: 0 0 18px rgba(207, 255, 4, 0.22);
     }
 
+    /* Headline hierarchy — avoid clipped / oversized mobile titles */
+    #sobre h2,
+    #servicos h2,
+    #aplicacoes h2,
+    #blog h2,
+    .portfolio-section h2,
+    .produtos-section h2 {
+        font-size: clamp(2.35rem, 11vw, 3.25rem);
+        line-height: 0.92;
+    }
+
+    #missao h3 {
+        font-size: clamp(1.45rem, 6.5vw, 2rem);
+        line-height: 1.05;
+    }
+
     /* Section vertical rhythm — less dead air on phones */
     #sobre.section-canvas,
     #missao.section-canvas,
@@ -1856,5 +1933,25 @@ footer ul li a:hover {
         opacity: 1;
         transform: none;
         pointer-events: auto;
+    }
+}
+
+/* Performance-safe motion preference */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .aplicacoes-media-img,
+    .hero-logo,
+    .magnetic,
+    .btn-anim,
+    .blog-card-image {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .hero-scroll-dot {
+        animation: none !important;
     }
 }

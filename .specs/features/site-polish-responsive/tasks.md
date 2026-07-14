@@ -33,6 +33,13 @@
 - **Done when**: e2e `no open-modal button throws` passes
 - **Status**: Done
 
+### T5: Spec elevation pass — type, CTA, glow seam, IA media
+
+- **Where**: `index.html`, `assets/css/main.css`, `assets/img/aplicacoes-ia.jpg`
+- **Depends on**: T1–T4
+- **Done when**: mobile headline clamps; remaining text CTAs use `.magnetic`; `#missao` transparent seam; IA image local + veil
+- **Status**: Done
+
 ## Cross-check
 
 | Task | Depends | OK |
@@ -41,3 +48,4 @@
 | T2 | aplicacoes id | ✅ |
 | T3 | T2 | ✅ |
 | T4 | — | ✅ |
+| T5 | T1–T4 | ✅ |

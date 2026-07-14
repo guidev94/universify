@@ -26,6 +26,9 @@
 - Footer typo + hover/CTA consistency
 - Fix Lenis scroll recursion (modal stack overflow)
 - Testes unit/e2e atualizados (`aplicacoes` em IDs)
+- Sobre↔Missao glow seam (transparent `#missao` + deeper `#sobre::after`)
+- IA media local (`assets/img/aplicacoes-ia.jpg`) + presentation veil
+- `prefers-reduced-motion` + mobile headline clamps
 
 **Spec-Driven Artifacts** — COMPLETE
 
