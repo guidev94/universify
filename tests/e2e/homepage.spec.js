@@ -75,7 +75,7 @@ test.describe("Contact modal", () => {
 
   test("opens from serviços CTA and closes with Escape", async ({ page }) => {
     await page.locator("#servicos").scrollIntoViewIfNeeded();
-    await page.getByRole("button", { name: /Ver Detalhes do Serviço/i }).click();
+    await page.getByRole("button", { name: /Quero saber mais|Solicitar orçamento/i }).first().click();
     await expect(page.locator("#contact-modal")).toHaveClass(/is-open/);
     await page.keyboard.press("Escape");
     await expect(page.locator("#contact-modal")).not.toHaveClass(/is-open/, { timeout: 5000 });

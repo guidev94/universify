@@ -689,8 +689,8 @@ h1, h2, h3, h4,
     .mobile-bridge-cta {
         width: 100%;
         max-width: none;
-        min-height: 3rem;
-        padding: 1.1rem 1.25rem;
+        min-height: 3.15rem;
+        padding: 1.15rem 1.25rem;
         font-size: 0.72rem;
         letter-spacing: 0.1em;
     }
@@ -1268,6 +1268,8 @@ h1, h2, h3, h4,
     align-items: center;
     justify-content: center;
     gap: 0.7rem;
+    box-sizing: border-box;
+    min-height: 3rem;
     padding: 1.05rem 1.65rem;
     border-radius: 9999px;
     border: 1px solid rgba(207, 255, 4, 0.45);
@@ -1740,7 +1742,8 @@ h1, h2, h3, h4,
     background-color: transparent;
     border-top: none;
     border-bottom: none;
-    overflow: visible;
+    overflow-x: clip;
+    overflow-y: visible;
     z-index: 2;
 }
 
@@ -1885,6 +1888,7 @@ html.content-revealed [data-reveal] {
     scrollbar-width: none;
     position: relative;
     z-index: 1;
+    max-width: 100%;
 }
 
 .portfolio-rail::-webkit-scrollbar {
@@ -3114,6 +3118,13 @@ footer ul li a {
 footer ul li a:hover {
     padding-left: 8px;
     color: var(--todoz);
+}
+
+.footer-tagline {
+    text-transform: none;
+    font-size: 1rem;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
 }
 
 /* ========== Mobile polish (≤767px) ========== */
