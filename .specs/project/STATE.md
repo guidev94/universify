@@ -1,16 +1,15 @@
 # State
 
-**Last updated:** 2026-07-14  
-**Session:** Spec quick-win elevation + IA image + Sobre/Missao glow seam
+**Last updated:** 2026-07-15  
+**Session:** WordPress theme + ACF free (Spec-Driven → Execute)
 
 ## Decisions
 
-- Anchor semântico `#aplicacoes` (não manter `#marketing`).
-- Nav label: **Aplicações**; H2: **Aplicações e Sistema com IA.**
-- Scripts clássicos; Lenis sem `dispatchEvent('scroll')`.
-- Push `origin/master` + `origin/main` (sem force).
-- `#missao` background **transparent** so `#sobre::after` bottom bleed is not covered by an opaque paint box.
-- IA visual: local `assets/img/aplicacoes-ia.jpg` (WV AI-first asset), not Gemini political infographic.
+- Tema em `wvtodoz-theme/` na raiz do repo (zip-ready), não sob `wordpress/wp-content/`.
+- ACF free only: Home page field groups + CPTs para repetíveis (sem Options Page / Repeater).
+- Fallbacks em `inc/defaults.php` preservam copy/visual do HTML estático quando Admin ainda vazio.
+- Backup em `backups/static-v3-20260715/` (originais não deletados).
+- Push `origin/master` (+ `origin/main` se tracking permitir, sem force).
 
 ## Blockers
 
@@ -18,26 +17,21 @@
 
 ## Lessons
 
-- Opaque sibling `background-color` covers overflowing section `::after` glow — use transparent paint box on the lower section + upward bleed on its own `::after`.
-- Soft masks that fade too early at the bottom of `::after` hide the seam glow.
+- ACF free: tabs + text/image/url/wysiwyg/true_false/select/file OK; Gallery/Repeater/Flexible/Options = Pro.
+- `get_field` deve ser guarded com `function_exists` para o tema não fatalar sem o plugin.
 
 ## Todos
 
-- [x] Spec-Driven artifacts
-- [x] Aplicações IA section + anchors
-- [x] Polish / responsive / Lenis fix
-- [x] Hero/contato screenshot fixes
-- [x] Spec quick-win elevation (type hierarchy, CTA magnetic consistency, reduced-motion)
-- [x] IA section image swap + presentation
-- [x] Sobre→Missao glow seam fix
-- [ ] Commit + push (em andamento)
+- [x] Spec-Driven wordpress-theme-acf
+- [x] Backup static HTML
+- [x] Theme scaffold + ACF/CPT/templates
+- [ ] Commit + push
 
 ## Deferred
 
-- Design system / tipografia custom (~R$50k)
-- Cases IA com mídia custom nova
-- Blog taxonomy "Marketing"
-- `webServer` no playwright.config.js
+- Seed automático de CPTs via WP-CLI
+- ACF Pro Options Page (se licença for adquirida)
+- Design system ~R$50k
 
 ## Preferences
 

@@ -1,47 +1,43 @@
 # WV_Todoz Site v2
 
-**Vision:** Landing page premium da software house WV_Todoz — escuro, accent lima (#CFFF04), GSAP/AOS/Lenis — posicionando a marca como parceira B2B de aplicativos, sistemas e inteligência artificial.
-**For:** Decisores de marketing, produto e TI em empresas que precisam de software sob medida e sistemas com IA.
-**Solves:** Site institucional genérico/desatualizado que ainda vende "marketing de conversão" em vez da oferta real de engenharia + IA.
+**Vision:** Landing page premium da software house WV_Todoz — escuro, accent lima (#CFFF04), GSAP/AOS/Lenis — posicionando a marca como parceira B2B de aplicativos, sistemas e inteligência artificial. Conteúdo gerenciável via WordPress + ACF free.
+**For:** Decisores de marketing, produto e TI em empresas que precisam de software sob medida e sistemas com IA; editores de conteúdo no WP Admin.
+**Solves:** Site institucional genérico/desatualizado; e a dor de editar HTML estático sem CMS.
 
 ## Goals
 
-- Reposicionar a seção antiga de Marketing como **Aplicações e Sistema com IA** (copy premium, anchors corretos, glow contínuo).
-- Elevar craft visual (tipografia, espaçamento, CTAs, mobile) sem reinventar a identidade.
-- Entregar artefatos Spec-Driven (roadmap quick wins vs elevação ~R$50k) para orientar próximos ciclos.
-- Manter stack clássica estável: scripts sem ES-module boot quebrado; portfolio horizontal funcional.
+- Reposicionar a seção antiga de Marketing como **Aplicações e Sistema com IA**.
+- Elevar craft visual sem reinventar a identidade.
+- Entregar artefatos Spec-Driven para orientar próximos ciclos.
+- **Entregar tema WordPress (`wvtodoz-theme/`) com ACF free + CPTs** para edição via Admin.
 
 ## Tech Stack
 
-**Core:**
+**Core (estático legado):**
 
-- Static HTML/CSS/JS (sem bundler de produção)
-- Tailwind CDN + `assets/css/main.css`
-- GSAP 3.12 + ScrollTrigger, AOS 2.3, Lenis 1.1
-- Phosphor Icons CDN
+- Static HTML/CSS/JS + Tailwind CDN + GSAP/AOS/Lenis
 
-**Key dependencies:** Playwright (e2e), Node test runner (unit), Vercel static hosting
+**Core (CMS):**
+
+- WordPress classic theme `wvtodoz-theme/`
+- ACF free (local field groups em PHP)
+- CPTs: `wv_case`, `wv_produto`, `wv_cliente`, `wv_servico`
 
 ## Scope
 
 **v1 includes:**
 
-- Spec-Driven completo (project + codebase + features)
-- Swap Marketing → Aplicações e Sistema com IA
-- Nav/footer/meta/hero alinhados à nova oferta
-- Polish tipográfico/espaçamento + fixes responsivos prioritários
-- Commits + push para deploy
+- Spec-Driven completo + swap Aplicações IA + polish
+- Tema WP completo com seções editáveis + backup estático
 
 **Explicitly out of scope:**
 
-- Redesign total da marca / nova paleta
-- CMS, blog dinâmico, backend
-- Vídeo hero novo ou assets pesados
-- Migração para framework (Next/React)
+- ACF Pro
+- Redesign total da marca
+- Multilíngue
 
 ## Constraints
 
-- Timeline: ciclo único (Specify → Design → Tasks → Execute)
-- Technical: classic script tags; não quebrar Lenis/GSAP portfolio pin
-- Visual: lime + dark; manter pattern de glow bleed entre seções
-- Copy: português, voz WV_Todoz premium B2B
+- ACF free only (sem Repeater / Options Page / Flexible Content / Gallery)
+- Preservar visual do `main.css` atual
+- Copy PT premium B2B

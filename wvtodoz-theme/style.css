@@ -1,0 +1,19 @@
+/*
+Theme Name: WV Todoz
+Theme URI: https://www.wvtodoz.com.br/
+Author: WV_Todoz
+Author URI: https://www.wvtodoz.com.br/
+Description: Tema da landing page WV_Todoz — software house. Conteúdo editável via ACF free + CPTs. Sem recursos ACF Pro.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: wvtodoz
+Tags: custom-logo, custom-menu, featured-images, one-column
+
+WV Todoz theme — styles live primarily in assets/css/main.css (enqueued).
+*/
+
+/* Thin WP admin/editor safety only; front styles are in main.css */

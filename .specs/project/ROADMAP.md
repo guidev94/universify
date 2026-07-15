@@ -1,11 +1,27 @@
 # Roadmap
 
-**Current Milestone:** Elevação LP — Aplicações IA + Polish Responsivo  
-**Status:** Complete
+**Current Milestone:** WordPress Theme + ACF Free  
+**Status:** In progress → Complete (este ciclo)
 
 ---
 
-## Milestone A — Quick Wins (este ciclo / baixo custo)
+## Milestone C — WordPress CMS (ACF Free)
+
+**Goal:** Transformar o HTML estático em tema WordPress editável sem ACF Pro.  
+**Target:** `wvtodoz-theme/` no repo + specs em `.specs/features/wordpress-theme-acf/`
+
+### Features
+
+**WordPress Theme + ACF Free** — COMPLETE
+
+- Backup estático em `backups/static-v3-20260715/`
+- Tema `wvtodoz-theme/` (front-page, sections, enqueue, CPTs, ACF PHP)
+- Specs Specify → Design → Tasks
+- README de instalação
+
+---
+
+## Milestone A — Quick Wins (ciclo anterior)
 
 **Goal:** Trocar a narrativa de Marketing por IA, corrigir mobile quebrado e elevar craft sem rebuild.  
 **Target:** Ship em `master`/`main` (Vercel)

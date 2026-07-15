@@ -1,0 +1,272 @@
+<?php
+/**
+ * Static fallbacks when ACF/CPT content is empty.
+ *
+ * @package WVTodoz
+ */
+
+declare(strict_types=1);
+
+if (!defined('ABSPATH')) {
+	exit;
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function wv_defaults(): array {
+	$uri = WVTODOZ_URI;
+	return [
+		'logo' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png',
+		'whatsapp' => 'https://wa.me/551155311779',
+		'hero' => [
+			'badge' => 'Software house',
+			'eyebrow' => 'Sites e aplicativos',
+			'title_line' => 'Feito pra',
+			'title_accent' => 'vender.',
+			'lead' => 'Somos a WV Todoz. Software house que entrega site e app com prazo, qualidade e gente de verdade do outro lado.',
+			'cta_primary' => 'Pedir orçamento',
+			'cta_secondary' => 'Ver o que fazemos',
+			'video' => $uri . '/assets/video/hero.mp4',
+		],
+		'clientes_title_html' => 'Marcas que <span class="text-todoz text-glow">confiam</span> na WV_Todoz.',
+		'clientes' => [
+			['name' => 'Coca-Cola', 'url' => 'https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png'],
+			['name' => 'PagSeguro', 'url' => 'https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png'],
+			['name' => 'Syngenta', 'url' => 'https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png'],
+			['name' => 'VMware', 'url' => 'https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png'],
+			['name' => 'Confirp', 'url' => $uri . '/assets/img/clientes/logo-confirp.png'],
+		],
+		'sobre' => [
+			'title_line' => 'Seja Todoz',
+			'title_accent' => 'com a gente',
+			'lead' => 'Parceiros de quem precisa de software de verdade: apps, sistemas e inteligência artificial com a energia da WV_Todoz. Do primeiro alinhamento ao produto no ar, a gente caminha junto.',
+			'stat1_n' => '11+',
+			'stat1_l' => 'Anos de Inovação',
+			'stat2_n' => '50+',
+			'stat2_l' => 'Projetos Entregues',
+			'cta_primary' => 'Agendar consultoria',
+			'cta_secondary' => 'Ver o que fazemos',
+			'image' => $uri . '/assets/img/office.png',
+		],
+		'missao' => [
+			'eyebrow' => 'Missão',
+			'title' => 'Do briefing ao produto no ar.',
+			'support' => 'A WV_Todoz é a software house que faz a sua empresa e as suas ideias acontecerem, transformarem e aparecerem — com apps, sistemas e IA feitos para resultado de verdade.',
+			'product_a' => 'Facíleme',
+			'product_b' => "Let's Work",
+			'cta' => 'Conversar com a WV_Todoz',
+		],
+		'mobile_bridge' => [
+			'eyebrow' => 'Apps que vendem e operam',
+			'lead' => 'Cliente e time vivem no celular. Desenvolvemos aplicativos para iPhone e Android que carregam a marca, agilizam a operação e acompanham o ritmo do negócio, com a mesma exigência de uma software house.',
+			'cta' => 'Quero um app mobile',
+		],
+		'servicos' => [
+			'eyebrow' => 'O que entregamos',
+			'title_line' => 'O que',
+			'title_accent' => 'fazemos',
+			'intro' => 'Ajudamos empresas a transformar ideia em software que funciona no dia a dia: apps, sistemas e inteligência a serviço de vendas, operação e relacionamento com o cliente. Do primeiro alinhamento à evolução depois do lançamento.',
+			'note' => 'Tecnologia pensada para o seu negócio, não para impressionar com jargão.',
+			'quote_cta' => 'Solicitar orçamento',
+		],
+		'process' => [
+			['title' => 'Entendimento', 'desc' => 'Conversamos sobre o negócio, os gargalos e o que precisa mudar de verdade.'],
+			['title' => 'Planejamento', 'desc' => 'Definimos o caminho, as prioridades e a base para o projeto crescer sem susto.'],
+			['title' => 'Construção', 'desc' => 'Desenvolvemos com ritmo e critério, sempre alinhados ao resultado que importa para você.'],
+			['title' => 'Evolução', 'desc' => 'Depois do lançamento, acompanhamos, ajustamos e expandimos o que já está no ar.'],
+		],
+		'portfolio' => [
+			'eyebrow' => 'Projetos Selecionados',
+			'title_line' => 'Cases que',
+			'title_accent' => 'marcam',
+			'lead' => 'Deslize os cards no celular. No desktop, role a página e passe o mouse para colorir.',
+			'cta' => 'Explorar Todos',
+		],
+		'produtos' => [
+			'eyebrow' => 'Ecossistema',
+			'title_line' => 'Produtos',
+			'title_accent' => 'proprietários',
+			'lead' => 'As mesmas plataformas do site WV_Todoz: social commerce, eventos, cursos e ponto com biometria facial.',
+		],
+		'aplicacoes' => [
+			'eyebrow' => 'Quando o manual trava o crescimento',
+			'title_line' => 'Pare de perder',
+			'title_accent' => 'tempo',
+			'lead' => 'Processos manuais atrasam decisão, geram erro e exigem mais gente do que o negócio precisa. A gente coloca inteligência artificial dentro das suas aplicações e sistemas para a rotina fluir, o time respirar e a empresa crescer sem engolir retrabalho.',
+			'image' => $uri . '/assets/img/aplicacoes-ia.jpg',
+			'chip_kicker' => 'Menos retrabalho',
+			'chip_title' => 'Mais resultado',
+			'b1' => 'Tarefas repetitivas deixam de consumir o dia do time',
+			'b2' => 'Decisões mais rápidas, com informação na hora certa',
+			'b3' => 'Escala a operação sem depender só de contratar mais gente',
+			'cta' => 'Quero reduzir o retrabalho',
+		],
+		'blog' => [
+			'eyebrow' => 'Insights',
+			'title_line' => 'Conteúdo &',
+			'title_accent' => 'inovação',
+			'cta' => 'Ver Blog Completo',
+		],
+		'contato' => [
+			'title_before' => 'Pronto para o',
+			'title_highlight' => 'Próximo Nível?',
+			'phone' => '(11) 5531-1779',
+			'tel' => '1155311779',
+			'cta' => 'FALE CONOSCO',
+		],
+		'footer' => [
+			'tagline' => 'Criamos software que tira a ideia do papel e gera resultado no negócio.',
+			'address' => "Av. Morumbi, 8435 cj.104\nBrooklin, São Paulo - SP\nBrasil",
+			'maps' => 'https://www.google.com/maps/search/?api=1&query=Av.+Morumbi,+8435+Brooklin+S%C3%A3o+Paulo+SP',
+			'copyright' => '© 2026 WV_TODOZ — AGÊNCIA INTERATIVA',
+			'facebook' => 'https://www.facebook.com/wvtodoz',
+			'instagram' => 'https://www.instagram.com/wvtodoz',
+			'linkedin' => 'https://www.linkedin.com/company/wvtodoz',
+			'youtube' => 'https://www.youtube.com/@wvtodoz',
+		],
+		'modal' => [
+			'title' => 'VAMOS',
+			'title_accent' => 'CONVERSAR.',
+		],
+		'cases' => [
+			[
+				'title' => "Let's Work Facial",
+				'category' => 'AI / Mobile',
+				'img' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg',
+				'desc' => 'Sistema de ponto eletrônico com reconhecimento facial e geolocalização. Processamento de imagem nativo em tempo real para controle de jornada seguro, preciso e auditável.',
+				'meta_strong' => 'Biometria facial',
+				'meta_p' => 'Registro de ponto com reconhecimento facial e geolocalização em tempo real.',
+			],
+			[
+				'title' => 'Pullman App',
+				'category' => 'Marketing Digital',
+				'img' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg',
+				'desc' => 'Aplicativo interativo para a Pullman com foco em engajamento de marca e utilidade para o consumidor. Interface premium, jornada fluida e arquitetura mobile preparada para escala.',
+				'meta_strong' => 'Brand experience',
+				'meta_p' => 'App mobile premium que aproxima a marca do consumidor com jornada fluida.',
+			],
+			[
+				'title' => 'Mega Senha Quiz',
+				'category' => 'Social Gaming',
+				'img' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg',
+				'desc' => 'Do sucesso da TV para uma experiência digital interativa. Quiz do Mega Senha no Facebook com milhares de jogadores simultâneos, gamificação e compartilhamento social em escala.',
+				'meta_strong' => 'Gamificação social',
+				'meta_p' => 'Quiz interativo com milhares de jogadores simultâneos e alto engajamento.',
+			],
+			[
+				'title' => 'Facíleme Store',
+				'category' => 'Social Commerce',
+				'img' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg',
+				'desc' => 'Ecossistema completo de lojas virtuais para venda direta nas redes sociais. Catálogo, checkout simplificado e conversão onde o público já está conectado.',
+				'meta_strong' => 'Venda nas redes',
+				'meta_p' => 'Loja virtual integrada ao social, do catálogo até o checkout simplificado.',
+			],
+			[
+				'title' => 'Syngenta Wi-Fi',
+				'category' => 'Enterprise',
+				'img' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg',
+				'desc' => 'Gestão inteligente de Wi-Fi para hotéis e eventos de grande porte. Controle de acesso, monitoramento de performance e operação estável sob alta demanda.',
+				'meta_strong' => 'Conectividade',
+				'meta_p' => 'Gestão de Wi-Fi corporativo com controle de acesso e monitoramento.',
+			],
+		],
+		'servicos_cards' => [
+			[
+				'variant' => 'featured',
+				'icon' => 'ph-app-window',
+				'title' => 'Aplicativos & <span class="text-todoz">plataformas.</span>',
+				'desc' => 'Criamos apps e plataformas digitais que aproximam a marca do cliente e organizam a operação por trás. Experiência clara, rápida e preparada para crescer com a demanda.',
+				'bullets' => "Jornadas pensadas para converter e fidelizar\nInterfaces modernas, leves e fáceis de usar\nConexão com CRM, pagamentos e sistemas da empresa",
+				'cta' => 'Quero saber mais',
+			],
+			[
+				'variant' => 'tall',
+				'icon' => 'ph-terminal-window',
+				'title' => 'Sistemas web <span class="text-todoz">sob medida.</span>',
+				'desc' => 'Sistemas feitos sob medida para a rotina da sua empresa: menos planilha, mais controle, mais segurança. Painéis, fluxos e automações que acompanham o crescimento do negócio.',
+				'bullets' => "Ambiente estável e seguro na nuvem\nPainéis claros para gestão e operação\nAutomações que reduzem trabalho manual\nExperiência pensada para o time que usa todo dia",
+				'cta' => 'Falar com especialista',
+				'cta_class' => 'servicos-card-btn--accent',
+			],
+			[
+				'variant' => 'mobile',
+				'icon' => 'ph-device-mobile',
+				'title' => 'Apps para <span class="text-todoz">celular.</span>',
+				'desc' => 'Seu cliente vive no celular. Desenvolvemos aplicativos para iPhone e Android com a cara da sua marca, rápidos de usar e prontos para gerar presença, vendas e relacionamento no bolso dele.',
+				'bullets' => "Presença forte onde o cliente realmente está\nNavegação simples, rápida e segura\nPublicação e acompanhamento após o lançamento",
+				'cta' => 'Solicitar app mobile',
+			],
+			[
+				'variant' => 'ia',
+				'icon' => 'ph-brain',
+				'title' => 'Inteligência <span class="text-todoz">no negócio.</span>',
+				'desc' => 'Usamos inteligência artificial para tirar peso da operação e acelerar decisões. Menos tarefa repetitiva, mais tempo para o que gera resultado.',
+				'bullets' => "Automação de rotinas e atendimento\nAssistentes que apoiam o time no dia a dia\nAnálises que ajudam a prever e priorizar",
+				'cta' => 'Explorar com IA',
+			],
+			[
+				'variant' => 'produtos',
+				'icon' => 'ph-cube',
+				'title' => 'Produtos <span class="text-todoz">próprios.</span>',
+				'desc' => 'Facíleme e Let\'s Work nasceram da mesma exigência que levamos aos projetos dos clientes: produto vivo, melhoria contínua e foco no resultado de quem usa.',
+				'bullets' => "Soluções já testadas no mercado\nMesmo padrão de qualidade dos projetos sob medida\nEvolução constante com base no uso real",
+				'cta' => 'Conhecer os produtos',
+				'link' => '#produtos',
+			],
+		],
+		'produtos_cards' => [
+			[
+				'featured' => true,
+				'badge' => 'Destaque',
+				'title' => "Let's Work",
+				'subtitle' => 'Ponto com Biometria Facial',
+				'desc' => 'Reconhecimento facial e geolocalização para controle de jornada com precisão, segurança e conformidade jurídica.',
+				'logo' => $uri . '/assets/img/produtos/logo-letswork.png',
+				'highlights' => "Biometria facial\nGeolocalização\nConformidade jurídica",
+				'primary_label' => 'Demonstração',
+				'primary_url' => 'https://www.letswork.com.br',
+				'secondary_label' => 'Especialista',
+				'secondary_modal' => true,
+			],
+			[
+				'featured' => false,
+				'wide' => true,
+				'title' => 'Facíleme Store',
+				'subtitle' => 'Social Commerce',
+				'desc' => 'Lojas virtuais para venda e revenda de produtos e serviços nas redes sociais, com checkout simplificado e alta conversão.',
+				'logo' => $uri . '/assets/img/produtos/logo-facileme.png',
+				'primary_label' => 'Loja Virtual',
+				'primary_url' => 'https://www.facileme.com.br/',
+				'secondary_label' => 'Falar conosco',
+				'secondary_modal' => true,
+			],
+			[
+				'title' => 'Facíleme Ingresso',
+				'subtitle' => 'Eventos & Tickets',
+				'desc' => 'Venda e divulgação de eventos com poucos cliques — controle de ingressos e presença onde o público já está conectado.',
+				'logo' => $uri . '/assets/img/produtos/logo-ingresso.png',
+				'primary_label' => 'Ver produto',
+				'primary_url' => 'https://www.facilemeingresso.com.br/',
+				'secondary_label' => 'Saiba mais',
+				'secondary_url' => 'https://www.wvtodoz.com.br/facileme-ingresso/',
+			],
+			[
+				'title' => 'Facíleme Cursos',
+				'subtitle' => 'Educação Digital',
+				'desc' => 'Plataforma para hospedar, divulgar e vender cursos de forma descomplicada — do catálogo à matrícula.',
+				'logo' => $uri . '/assets/img/produtos/logo-cursos.png',
+				'primary_label' => 'Ver produto',
+				'primary_url' => 'https://www.wvtodoz.com.br/facileme-cursos/',
+				'secondary_label' => 'Consultar',
+				'secondary_modal' => true,
+			],
+		],
+		'hero_logos' => [
+			['alt' => 'Facíleme', 'src' => $uri . '/assets/img/produtos/logo-facileme.png', 'w' => 213, 'h' => 82],
+			['alt' => 'Facíleme Ingresso', 'src' => $uri . '/assets/img/produtos/logo-ingresso.png', 'w' => 214, 'h' => 88],
+			['alt' => 'Facíleme Cursos', 'src' => $uri . '/assets/img/produtos/logo-cursos.png', 'w' => 282, 'h' => 82],
+			['alt' => "Let's Work", 'src' => $uri . '/assets/img/produtos/logo-letswork.png', 'w' => 234, 'h' => 106],
+		],
+	];
+}
