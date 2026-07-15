@@ -17,17 +17,25 @@ $lead = (string) wv_field('wv_produtos_lead', $d['lead']);
 
 $cards = [];
 $posts = wv_query_posts('wv_produto');
+$light_logo_default = WVTODOZ_URI . '/assets/img/produtos/letswork-logo-light.webp';
 if ($posts) {
 	foreach ($posts as $p) {
 		$logo = get_the_post_thumbnail_url($p, 'full') ?: '';
+		$featured = function_exists('get_field') ? (bool) get_field('wv_produto_featured', $p->ID) : false;
+		$title = get_the_title($p);
+		$logo_light = '';
+		if ($featured && (stripos($title, "Let's Work") !== false || stripos($logo, 'letswork') !== false)) {
+			$logo_light = $light_logo_default;
+		}
 		$cards[] = [
-			'featured' => function_exists('get_field') ? (bool) get_field('wv_produto_featured', $p->ID) : false,
+			'featured' => $featured,
 			'wide' => function_exists('get_field') ? (bool) get_field('wv_produto_wide', $p->ID) : false,
 			'badge' => function_exists('get_field') ? (string) get_field('wv_produto_badge', $p->ID) : '',
-			'title' => get_the_title($p),
+			'title' => $title,
 			'subtitle' => function_exists('get_field') ? (string) get_field('wv_produto_subtitle', $p->ID) : '',
 			'desc' => wp_strip_all_tags(get_the_content(null, false, $p)),
 			'logo' => $logo,
+			'logo_light' => $logo_light,
 			'highlights' => function_exists('get_field') ? (string) get_field('wv_produto_highlights', $p->ID) : '',
 			'primary_label' => function_exists('get_field') ? (string) get_field('wv_produto_primary_label', $p->ID) : '',
 			'primary_url' => function_exists('get_field') ? (string) get_field('wv_produto_primary_url', $p->ID) : '',
@@ -71,9 +79,14 @@ if (!$cards) {
 				<span class="produto-badge"><?php echo esc_html((string) $card['badge']); ?></span>
 				<?php endif; ?>
 				<div class="produto-card-inner">
-					<?php if (!empty($card['logo'])) : ?>
+					<?php if (!empty($card['logo']) || !empty($card['logo_light'])) : ?>
 					<div class="produto-brand">
-						<img src="<?php echo esc_url($card['logo']); ?>" alt="<?php echo esc_attr($card['title']); ?>" class="produto-logo" loading="lazy">
+						<?php if (!empty($card['logo_light']) && !empty($card['logo'])) : ?>
+						<img src="<?php echo esc_url($card['logo_light']); ?>" alt="<?php echo esc_attr($card['title']); ?>" class="produto-logo produto-logo--light" loading="lazy">
+						<img src="<?php echo esc_url($card['logo']); ?>" alt="" class="produto-logo produto-logo--dark" loading="lazy" aria-hidden="true">
+						<?php else : ?>
+						<img src="<?php echo esc_url(!empty($card['logo']) ? $card['logo'] : $card['logo_light']); ?>" alt="<?php echo esc_attr($card['title']); ?>" class="produto-logo" loading="lazy">
+						<?php endif; ?>
 					</div>
 					<?php endif; ?>
 					<?php if (!empty($card['featured'])) : ?>

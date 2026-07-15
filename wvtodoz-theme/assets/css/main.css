@@ -3969,8 +3969,9 @@ footer ul li a:hover {
     }
 
     [data-theme="light"] .produto-card--featured .produto-brand {
-        padding: 0.75rem 0.9rem;
+        padding: 0 0 1rem;
         max-width: 100%;
+        background: transparent;
     }
 
     /* Portfolio rail cards — tighter overlay + readable meta */
@@ -4831,13 +4832,37 @@ body.modal-open .wa-float {
         0 22px 48px -24px rgba(0, 0, 0, 0.22);
 }
 
-/* White product logos (Let's Work) need a dark brand chip on light cards */
+/* White product logos (Let's Work) — dual assets; no dark chip on light */
+.produto-logo--light {
+    display: none;
+}
+
+.produto-logo--dark {
+    display: block;
+}
+
+[data-theme="light"] .produto-card--featured .produto-logo--light {
+    display: block;
+}
+
+[data-theme="light"] .produto-card--featured .produto-logo--dark {
+    display: none;
+}
+
+[data-theme="dark"] .produto-card--featured .produto-logo--light {
+    display: none;
+}
+
+[data-theme="dark"] .produto-card--featured .produto-logo--dark {
+    display: block;
+}
+
 [data-theme="light"] .produto-card--featured .produto-brand {
-    background: #0a0a0a;
-    border-bottom-color: transparent;
-    border-radius: 1rem;
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.85rem;
+    background: transparent;
+    border-bottom-color: rgba(10, 10, 10, 0.08);
+    border-radius: 0;
+    padding: 0 0 1rem;
+    margin-bottom: 0.35rem;
 }
 
 [data-theme="light"] .produto-brand {

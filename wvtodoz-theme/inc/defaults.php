@@ -230,6 +230,7 @@ function wv_defaults(): array {
 				'subtitle' => 'Ponto com Biometria Facial',
 				'desc' => 'Reconhecimento facial e geolocalização para controle de jornada com precisão, segurança e conformidade jurídica.',
 				'logo' => $uri . '/assets/img/produtos/logo-letswork.png',
+				'logo_light' => $uri . '/assets/img/produtos/letswork-logo-light.webp',
 				'highlights' => "Biometria facial\nGeolocalização\nConformidade jurídica",
 				'primary_label' => 'Demonstração',
 				'primary_url' => 'https://www.letswork.com.br',
