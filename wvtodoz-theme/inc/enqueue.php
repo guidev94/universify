@@ -28,7 +28,7 @@ add_action('wp_enqueue_scripts', static function (): void {
 	wp_enqueue_script('wvtodoz-tailwind', 'https://cdn.tailwindcss.com', [], null, false);
 	wp_add_inline_script(
 		'wvtodoz-tailwind',
-		'tailwind.config={theme:{extend:{colors:{primary:"#0a0a0a",todoz:"#CFFF04",todozDark:"#A8D600"},fontFamily:{sans:[\'"DM Sans"\',\'system-ui\',\'sans-serif\'],display:[\'"Instrument Sans"\',\'system-ui\',\'sans-serif\']}}}};',
+		'tailwind.config={theme:{extend:{colors:{primary:"var(--wv-bg)",todoz:"#CFFF04",todozDark:"#A8D600"},fontFamily:{sans:[\'"DM Sans"\',\'system-ui\',\'sans-serif\'],display:[\'"Instrument Sans"\',\'system-ui\',\'sans-serif\']}}}};',
 		'after'
 	);
 
@@ -39,8 +39,9 @@ add_action('wp_enqueue_scripts', static function (): void {
 	wp_enqueue_script('wvtodoz-aos', 'https://unpkg.com/aos@2.3.1/dist/aos.js', [], '2.3.1', false);
 
 	$deps = ['wvtodoz-gsap', 'wvtodoz-scrolltrigger', 'wvtodoz-lenis', 'wvtodoz-aos'];
+	wp_enqueue_script('wvtodoz-theme', WVTODOZ_URI . '/assets/js/theme.js', [], $ver, true);
 	wp_enqueue_script('wvtodoz-site-utils', WVTODOZ_URI . '/assets/js/site-utils.js', $deps, $ver, true);
-	wp_enqueue_script('wvtodoz-main', WVTODOZ_URI . '/assets/js/main.js', ['wvtodoz-site-utils'], $ver, true);
+	wp_enqueue_script('wvtodoz-main', WVTODOZ_URI . '/assets/js/main.js', ['wvtodoz-site-utils', 'wvtodoz-theme'], $ver, true);
 	wp_enqueue_script('wvtodoz-animations', WVTODOZ_URI . '/assets/js/animations.js', ['wvtodoz-main'], $ver, true);
 	wp_enqueue_script('wvtodoz-components', WVTODOZ_URI . '/assets/js/components.js', ['wvtodoz-animations'], $ver, true);
 }, 20);
@@ -53,7 +54,7 @@ add_filter('script_loader_tag', static function (string $tag, string $handle, st
 }, 10, 3);
 
 add_action('wp_head', static function (): void {
-	echo '<meta name="theme-color" content="#0a0a0a">' . "\n";
+	echo '<meta name="theme-color" content="#f5f5f2">' . "\n";
 	$favicon = WVTODOZ_URI . '/assets/img/favicon.svg';
 	echo '<link rel="icon" href="' . esc_url($favicon) . '" type="image/svg+xml">' . "\n";
 	echo '<link rel="icon" href="' . esc_url(WVTODOZ_URI . '/assets/img/favicon-32.png') . '" type="image/png" sizes="32x32">' . "\n";

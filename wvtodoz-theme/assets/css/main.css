@@ -11,9 +11,13 @@ html.lenis {
     overscroll-behavior: contain;
 }
 
-/* Identidade Visual: Lima Neon Todoz */
-:root {
+/* Identidade Visual: Lima Neon Todoz
+   Light (white) is DEFAULT — dark via [data-theme="dark"] */
+:root,
+[data-theme="light"] {
+    color-scheme: light;
     --todoz: #CFFF04;
+    --todoz-ink: #0a0a0a;
     --section-pad-y: clamp(4.5rem, 8vw, 8rem);
     /* Typefaces — Instrument Sans (display) + DM Sans (body) */
     --font-display: "Instrument Sans", system-ui, sans-serif;
@@ -23,11 +27,11 @@ html.lenis {
     --type-label: 0.78rem;
     --type-eyebrow: 0.7rem;
     --type-chip: 0.72rem;
-    /* Body / lead — comfortable reading on dark */
+    /* Body / lead */
     --type-body: clamp(1.12rem, 1.5vw, 1.3rem);
     --type-body-sm: clamp(1.05rem, 1.3vw, 1.15rem);
-    --type-body-color: #d4d4da;
-    --type-body-muted: #b4b4bc;
+    --type-body-color: #3f3f46;
+    --type-body-muted: #71717a;
     /* Restrained display — less wall-of-caps aggression */
     --type-display: clamp(2.1rem, 5.5vw, 3.65rem);
     --headline-tracking: -0.025em;
@@ -36,6 +40,82 @@ html.lenis {
     --space-after-display: clamp(1.35rem, 3vw, 2rem);
     --space-after-title: 1.15rem;
     --space-section-gap: clamp(1.5rem, 3vw, 2.25rem);
+    /* Surfaces */
+    --wv-bg: #f5f5f2;
+    --wv-bg-deep: #ebebe6;
+    --wv-surface: #ffffff;
+    --wv-surface-2: #f0f0ec;
+    --wv-ink: #0a0a0a;
+    --wv-ink-soft: #18181b;
+    --wv-muted: #52525b;
+    --wv-border: rgba(10, 10, 10, 0.1);
+    --wv-border-strong: rgba(10, 10, 10, 0.16);
+    --wv-border-soft: rgba(10, 10, 10, 0.06);
+    --wv-header-scrolled: rgba(255, 255, 255, 0.94);
+    --wv-header-border: rgba(10, 10, 10, 0.08);
+    --wv-header-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.14);
+    --wv-nav: #52525b;
+    --wv-nav-scrolled: #27272a;
+    --wv-display: #0a0a0a;
+    --wv-display-glow: 0 0 28px rgba(140, 170, 0, 0.22);
+    --wv-card-bg: linear-gradient(160deg, #ffffff, #f7f7f4);
+    --wv-card-border: rgba(10, 10, 10, 0.08);
+    --wv-card-shadow: 0 16px 36px -28px rgba(0, 0, 0, 0.18), 0 0 40px -20px rgba(207, 255, 4, 0.08);
+    --wv-card-hover-shadow: 0 22px 48px -26px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(207, 255, 4, 0.08);
+    --wv-modal-bg: #ffffff;
+    --wv-modal-backdrop: rgba(10, 10, 10, 0.48);
+    --wv-modal-border: rgba(10, 10, 10, 0.1);
+    --wv-input-bg: rgba(10, 10, 10, 0.04);
+    --wv-mobile-menu-bg: #fafaf8;
+    --wv-mobile-menu-overlay: rgba(245, 245, 242, 0.92);
+    --wv-hero-veil-from: rgba(5, 5, 5, 0.62);
+    --wv-hero-veil-via: rgba(5, 5, 5, 0.12);
+    --wv-hero-veil-to: rgba(5, 5, 5, 0.68);
+    --wv-glass: rgba(10, 10, 10, 0.04);
+    --wv-glass-border: rgba(10, 10, 10, 0.1);
+    --wv-theme-meta: #f5f5f2;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --type-body-color: #d4d4da;
+    --type-body-muted: #b4b4bc;
+    --wv-bg: #0a0a0a;
+    --wv-bg-deep: #050505;
+    --wv-surface: #111111;
+    --wv-surface-2: #18181b;
+    --wv-ink: #ffffff;
+    --wv-ink-soft: #e4e4e7;
+    --wv-muted: #a1a1aa;
+    --wv-border: rgba(255, 255, 255, 0.1);
+    --wv-border-strong: rgba(255, 255, 255, 0.16);
+    --wv-border-soft: rgba(255, 255, 255, 0.06);
+    --wv-header-scrolled: rgba(8, 8, 8, 0.94);
+    --wv-header-border: rgba(207, 255, 4, 0.22);
+    --wv-header-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.85);
+    --wv-nav: #a1a1aa;
+    --wv-nav-scrolled: #e4e4e7;
+    --wv-display: #ffffff;
+    --wv-display-glow: 0 0 32px rgba(207, 255, 4, 0.38);
+    --wv-card-bg:
+        radial-gradient(ellipse 70% 55% at 50% -10%, rgba(207, 255, 4, 0.1), transparent 55%),
+        radial-gradient(ellipse 55% 45% at 78% 100%, rgba(207, 255, 4, 0.04), transparent 65%),
+        linear-gradient(160deg, rgba(26, 26, 28, 0.98), rgba(10, 10, 12, 0.96));
+    --wv-card-border: rgba(255, 255, 255, 0.09);
+    --wv-card-shadow: 0 16px 36px -28px rgba(0, 0, 0, 0.9), 0 0 40px -20px rgba(207, 255, 4, 0.12);
+    --wv-card-hover-shadow: 0 22px 48px -26px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(207, 255, 4, 0.05);
+    --wv-modal-bg: #18181b;
+    --wv-modal-backdrop: rgba(0, 0, 0, 0.94);
+    --wv-modal-border: rgba(255, 255, 255, 0.1);
+    --wv-input-bg: rgba(0, 0, 0, 0.5);
+    --wv-mobile-menu-bg: #18181b;
+    --wv-mobile-menu-overlay: rgba(0, 0, 0, 0.95);
+    --wv-hero-veil-from: rgba(10, 10, 10, 0.48);
+    --wv-hero-veil-via: rgba(10, 10, 10, 0.06);
+    --wv-hero-veil-to: rgba(10, 10, 10, 0.52);
+    --wv-glass: rgba(255, 255, 255, 0.05);
+    --wv-glass-border: rgba(255, 255, 255, 0.1);
+    --wv-theme-meta: #0a0a0a;
 }
 
 html {
@@ -45,8 +125,11 @@ html {
 body {
     overflow-x: hidden;
     font-family: var(--font-body);
+    background-color: var(--wv-bg);
+    color: var(--wv-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Off-canvas menu must not expand document scrollWidth while translated */
@@ -85,7 +168,7 @@ h1, h2, h3, h4,
 /* Section display titles — Cases gold standard (ALL CAPS, tight, lime accent + square period) */
 .section-display {
     margin: 0 0 var(--space-after-display);
-    color: #fff;
+    color: var(--wv-display);
     font-family: var(--font-display);
     font-size: clamp(2.55rem, 8.2vw, 5.75rem);
     font-weight: 800;
@@ -114,11 +197,11 @@ h1, h2, h3, h4,
 .section-display-accent {
     display: block;
     color: var(--todoz);
-    text-shadow: 0 0 32px rgba(207, 255, 4, 0.38);
+    text-shadow: var(--wv-display-glow);
 }
 
 .section-display--compact .section-display-accent {
-    text-shadow: 0 0 22px rgba(207, 255, 4, 0.28);
+    text-shadow: var(--wv-display-glow);
 }
 
 .section-display-dot {
@@ -254,24 +337,28 @@ h1, h2, h3, h4,
 #main-header.is-scrolled {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
-    background-color: rgba(8, 8, 8, 0.94) !important;
+    background-color: var(--wv-header-scrolled) !important;
     backdrop-filter: blur(18px) saturate(1.1);
     -webkit-backdrop-filter: blur(18px) saturate(1.1);
-    border-bottom: 1px solid rgba(207, 255, 4, 0.22) !important;
-    box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.85);
+    border-bottom: 1px solid var(--wv-header-border) !important;
+    box-shadow: var(--wv-header-shadow);
 }
 
-#main-header.is-scrolled nav a:not(.magnetic) {
-    color: #e4e4e7;
+#main-header.is-scrolled nav a:not(.magnetic):not(.theme-toggle) {
+    color: var(--wv-nav-scrolled);
 }
 
-#main-header.is-scrolled nav a:not(.magnetic):hover {
+#main-header.is-scrolled nav a:not(.magnetic):not(.theme-toggle):hover {
     color: var(--todoz);
 }
 
 #main-header.is-scrolled img {
     filter: none;
     opacity: 1;
+}
+
+[data-theme="light"] #main-header.is-scrolled img {
+    filter: brightness(0);
 }
 
 /* Continuous dark canvas — soft accents, no hard section seams.
@@ -281,7 +368,7 @@ h1, h2, h3, h4,
 .section-canvas {
     position: relative;
     isolation: isolate;
-    background-color: #0a0a0a;
+    background-color: var(--wv-bg);
     overflow: visible;
 }
 
@@ -350,8 +437,12 @@ h1, h2, h3, h4,
     margin-inline: auto;
     object-fit: contain;
     object-position: center;
-    filter: brightness(0) invert(1);
+    filter: brightness(0);
     transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+[data-theme="dark"] .clientes-logo__img {
+    filter: brightness(0) invert(1);
 }
 
 .clientes-logo:hover .clientes-logo__img,
@@ -957,10 +1048,16 @@ h1, h2, h3, h4,
     gap: 1.35rem;
     padding: 1.75rem 1.5rem;
     border-radius: 2.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(24, 24, 27, 0.45);
+    border: 1px solid var(--wv-card-border);
+    background: var(--wv-surface);
+    box-shadow: var(--wv-card-shadow);
     text-align: center;
     align-items: center;
+}
+
+[data-theme="dark"] .servicos-card {
+    background: rgba(24, 24, 27, 0.45);
+    box-shadow: none;
 }
 
 .servicos-card-icon {
@@ -999,7 +1096,7 @@ h1, h2, h3, h4,
 
 .servicos-card-title {
     margin: 0;
-    color: #fff;
+    color: var(--wv-display);
     font-family: var(--font-display);
     font-size: clamp(1.2rem, 1.85vw, 1.55rem);
     font-weight: 600;
@@ -2465,20 +2562,20 @@ html.content-revealed [data-reveal] {
     display: flex;
     flex-direction: column;
     border-radius: 1.5rem;
-    background:
-        radial-gradient(ellipse 70% 55% at 50% -10%, var(--glow-a), transparent 55%),
-        radial-gradient(ellipse 55% 45% at 78% 100%, rgba(207, 255, 4, 0.04), transparent 65%),
-        linear-gradient(160deg, rgba(26, 26, 28, 0.98), rgba(10, 10, 12, 0.96));
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: var(--wv-card-bg);
+    border: 1px solid var(--wv-card-border);
     overflow: visible;
-    box-shadow:
-        0 16px 36px -28px rgba(0, 0, 0, 0.9),
-        0 0 40px -20px rgba(207, 255, 4, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    box-shadow: var(--wv-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
     transition:
         border-color 0.35s ease,
         transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 0.35s ease;
+}
+
+[data-theme="dark"] .produto-card {
+    box-shadow:
+        var(--wv-card-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .produto-card[data-glow="soft"] {
@@ -2488,10 +2585,7 @@ html.content-revealed [data-reveal] {
 .produto-card:hover {
     border-color: rgba(207, 255, 4, 0.32);
     transform: translateY(-4px);
-    box-shadow:
-        0 22px 48px -26px rgba(0, 0, 0, 0.85),
-        0 0 0 1px rgba(207, 255, 4, 0.05),
-        0 14px 36px -28px rgba(207, 255, 4, 0.16);
+    box-shadow: var(--wv-card-hover-shadow), 0 14px 36px -28px rgba(207, 255, 4, 0.12);
 }
 
 .produto-card-inner {
@@ -2512,7 +2606,7 @@ html.content-revealed [data-reveal] {
     gap: 0.85rem;
     margin-bottom: 0.35rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--wv-border-soft);
 }
 
 .produto-logo {
@@ -2545,7 +2639,7 @@ html.content-revealed [data-reveal] {
 }
 
 .produto-title {
-    color: #fff;
+    color: var(--wv-display);
     font-size: 1.45rem;
     font-weight: 900;
     letter-spacing: -0.04em;
@@ -2564,7 +2658,7 @@ html.content-revealed [data-reveal] {
 }
 
 .produto-desc {
-    color: #a1a1aa;
+    color: var(--type-body-muted);
     font-size: 0.88rem;
     line-height: 1.55;
     margin: 0.1rem 0 0.85rem;
@@ -2603,14 +2697,15 @@ html.content-revealed [data-reveal] {
 }
 
 .produto-btn--ghost {
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--wv-glass);
+    color: var(--wv-ink);
+    border: 1px solid var(--wv-border);
 }
 
 .produto-btn--ghost:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--wv-glass);
+    border-color: var(--wv-border-strong);
+    filter: brightness(0.98);
 }
 
 .produto-badge {
@@ -3284,7 +3379,7 @@ body.modal-open {
 .site-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.94);
+    background: var(--wv-modal-backdrop);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     cursor: pointer;
@@ -3296,11 +3391,12 @@ body.modal-open {
     width: 100%;
     max-height: min(90vh, 920px);
     overflow: auto;
-    background: #18181b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--wv-modal-bg);
+    border: 1px solid var(--wv-modal-border);
     border-radius: 2rem;
-    box-shadow: 0 0 120px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 0 120px rgba(0, 0, 0, 0.35);
     pointer-events: auto;
+    color: var(--wv-ink);
 }
 
 .site-modal-panel--case {
@@ -3376,13 +3472,13 @@ body.modal-open {
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(to top, #18181b, transparent 45%);
+    background: linear-gradient(to top, var(--wv-modal-bg), transparent 45%);
     pointer-events: none;
 }
 
 @media (min-width: 768px) {
     .site-modal-media-fade {
-        background: linear-gradient(to right, transparent 55%, #18181b);
+        background: linear-gradient(to right, transparent 55%, var(--wv-modal-bg));
     }
 }
 
@@ -3392,7 +3488,7 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: #18181b;
+    background: var(--wv-modal-bg);
     min-height: 0;
 }
 
@@ -4012,4 +4108,269 @@ body.modal-open .wa-float {
     .aplicacoes-chip-pulse {
         animation: none !important;
     }
+}
+
+/* ========== Theme toggle + light/dark remaps ========== */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 1px solid var(--wv-border);
+    background: var(--wv-glass);
+    color: var(--wv-ink);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.theme-toggle:hover {
+    border-color: rgba(207, 255, 4, 0.45);
+    color: var(--todoz);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--todoz);
+    outline-offset: 3px;
+}
+
+.theme-toggle__sun,
+.theme-toggle__moon {
+    display: none;
+    pointer-events: none;
+}
+
+[data-theme="light"] .theme-toggle__moon,
+[data-theme="dark"] .theme-toggle__sun {
+    display: inline-block;
+}
+
+/* Over hero (transparent header): keep control readable */
+#main-header:not(.is-scrolled) .theme-toggle {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#main-header:not(.is-scrolled) .theme-toggle:hover {
+    border-color: rgba(207, 255, 4, 0.55);
+    color: var(--todoz);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+    .header-actions--mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 1023px) {
+    .header-actions--desktop {
+        display: none;
+    }
+}
+
+/* Hero stays cinematic — stronger veil on light for type contrast */
+[data-theme="light"] #hero {
+    color: #fff;
+}
+
+[data-theme="light"] #hero .hero-glass {
+    background: linear-gradient(
+        to bottom,
+        var(--wv-hero-veil-from),
+        var(--wv-hero-veil-via),
+        var(--wv-hero-veil-to)
+    ) !important;
+}
+
+[data-theme="light"] #hero .hero-display,
+[data-theme="light"] #hero .text-white,
+[data-theme="light"] #hero .hero-lead,
+[data-theme="light"] #hero .hero-eyebrow {
+    color: #fff;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] #hero .hero-badge {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Remap Tailwind dark-era utilities on light surfaces */
+[data-theme="light"] .bg-primary {
+    background-color: var(--wv-bg);
+}
+
+[data-theme="light"] main .text-white {
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] #hero .text-white,
+[data-theme="light"] #contato .text-white,
+[data-theme="light"] footer .text-white {
+    color: #fff;
+}
+
+[data-theme="light"] main .border-white\/10,
+[data-theme="light"] main .border-white\/5,
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/5 {
+    border-color: var(--wv-border);
+}
+
+[data-theme="light"] #hero .border-white\/10,
+[data-theme="light"] footer .border-white\/5,
+[data-theme="light"] #contato .border-white\/10 {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] main .bg-white\/5 {
+    background-color: var(--wv-glass);
+}
+
+[data-theme="light"] #hero .bg-white\/5 {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] #main-header nav a:not(.magnetic):not(.theme-toggle) {
+    color: var(--wv-nav);
+}
+
+[data-theme="light"] #main-header:not(.is-scrolled) nav a:not(.magnetic):not(.theme-toggle) {
+    color: rgba(228, 228, 231, 0.92);
+}
+
+[data-theme="light"] #main-header:not(.is-scrolled) nav a:not(.magnetic):not(.theme-toggle):hover {
+    color: var(--todoz);
+}
+
+/* Mobile menu — light surfaces */
+[data-theme="light"] #mobile-menu > .absolute.inset-0 {
+    background: var(--wv-mobile-menu-overlay) !important;
+}
+
+[data-theme="light"] #mobile-menu-content {
+    background: var(--wv-mobile-menu-bg) !important;
+    border-left-color: var(--wv-border) !important;
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] #mobile-menu-content img {
+    filter: brightness(0);
+}
+
+[data-theme="light"] #mobile-menu-content nav a {
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] #mobile-menu-content nav a:hover {
+    color: var(--todoz) !important;
+}
+
+/* Blog cards / bridge chrome (cases stay image overlays — white type) */
+[data-theme="light"] .blog-card,
+[data-theme="light"] .mobile-bridge-card {
+    background: var(--wv-surface);
+    border-color: var(--wv-card-border);
+    color: var(--wv-ink);
+    box-shadow: var(--wv-card-shadow);
+}
+
+[data-theme="light"] .mobile-bridge-title,
+[data-theme="light"] .mobile-bridge-lead {
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] .blog-card:hover {
+    background: var(--wv-surface);
+    border-color: rgba(207, 255, 4, 0.35);
+}
+
+[data-theme="light"] .produto-card--featured .produto-highlights li,
+[data-theme="light"] .produto-card--featured .produto-desc {
+    color: var(--type-body-color);
+}
+
+[data-theme="light"] .produto-card--featured .produto-logo {
+    filter: none;
+}
+
+[data-theme="light"] .blog-excerpt,
+[data-theme="light"] .text-zinc-400,
+[data-theme="light"] .text-zinc-500 {
+    color: var(--wv-muted);
+}
+
+[data-theme="light"] .site-modal .text-white {
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] .site-modal input,
+[data-theme="light"] .site-modal textarea {
+    background: var(--wv-input-bg) !important;
+    border-color: var(--wv-border) !important;
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] .site-modal .text-zinc-400 {
+    color: var(--wv-muted);
+}
+
+/* Featured produto card — soft lime wash on light */
+[data-theme="light"] .produto-card--featured {
+    background:
+        radial-gradient(ellipse 54% 44% at 26% 52%, rgba(207, 255, 4, 0.14), transparent 68%),
+        linear-gradient(165deg, #ffffff, #f4f7e8 58%);
+    border-color: rgba(168, 214, 0, 0.45);
+}
+
+[data-theme="light"] .produto-logo {
+    filter: none;
+}
+
+[data-theme="light"] .produto-card:hover .produto-logo {
+    filter: drop-shadow(0 0 10px rgba(207, 255, 4, 0.25));
+}
+
+/* Soften section lime glows on light */
+[data-theme="light"] #clientes::after,
+[data-theme="light"] #sobre::after {
+    opacity: 0.55;
+}
+
+[data-theme="light"] .text-glow {
+    text-shadow: 0 0 18px rgba(140, 170, 0, 0.28);
+}
+
+/* Blog post article chrome */
+[data-theme="light"] .prose p {
+    color: var(--type-body-color);
+}
+
+[data-theme="light"] .prose h2,
+[data-theme="light"] .prose blockquote {
+    color: var(--wv-ink);
+}
+
+/* Header on blog (always scrolled-style surface) */
+[data-theme="light"] #main-header.bg-primary\/80,
+[data-theme="light"] body:not(:has(#hero)) #main-header {
+    background-color: var(--wv-header-scrolled) !important;
+    border-bottom-color: var(--wv-header-border) !important;
+}
+
+[data-theme="light"] body:not(:has(#hero)) #main-header img {
+    filter: brightness(0);
 }

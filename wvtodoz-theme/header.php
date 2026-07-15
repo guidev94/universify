@@ -16,13 +16,24 @@ $d    = wv_defaults();
 $ig   = (string) wv_field('wv_social_instagram', $d['footer']['instagram']);
 $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 ?><!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?> data-theme="light">
 <head>
 	<meta charset="<?php bloginfo('charset'); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script>
+		(function () {
+			try {
+				var t = localStorage.getItem('wv-theme');
+				if (t !== 'light' && t !== 'dark') t = 'light';
+				document.documentElement.setAttribute('data-theme', t);
+			} catch (e) {
+				document.documentElement.setAttribute('data-theme', 'light');
+			}
+		})();
+	</script>
 	<?php wp_head(); ?>
 </head>
-<body <?php body_class('bg-primary text-white font-sans selection:bg-todoz selection:text-black overflow-x-hidden'); ?>>
+<body <?php body_class('bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden'); ?>>
 <?php wp_body_open(); ?>
 
 <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
@@ -30,7 +41,7 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 		<a href="<?php echo esc_url(home_url('/')); ?>" class="block w-40 md:w-56 overflow-hidden">
 			<img src="<?php echo esc_url($logo); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="w-full h-auto">
 		</a>
-		<nav class="hidden lg:flex items-center gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="<?php esc_attr_e('Principal', 'wvtodoz'); ?>">
+		<nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="<?php esc_attr_e('Principal', 'wvtodoz'); ?>">
 			<?php
 			$desktop_items = $nav;
 			if (has_nav_menu('primary')) {
@@ -54,19 +65,31 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 				);
 			}
 			?>
-			<a href="<?php echo esc_url($wa); ?>" target="_blank" rel="noopener noreferrer" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
-				<?php echo esc_html((string) wv_field('wv_contato_cta', 'FALE CONOSCO')); ?>
-				<div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
-					<i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
-					<i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
-				</div>
-			</a>
+			<div class="header-actions header-actions--desktop">
+				<button type="button" class="theme-toggle" data-theme-toggle aria-label="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>" title="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>">
+					<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
+					<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
+				</button>
+				<a href="<?php echo esc_url($wa); ?>" target="_blank" rel="noopener noreferrer" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
+					<?php echo esc_html((string) wv_field('wv_contato_cta', 'FALE CONOSCO')); ?>
+					<div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+						<i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
+						<i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
+					</div>
+				</a>
+			</div>
 		</nav>
-		<button type="button" id="mobile-menu-trigger" class="lg:hidden text-4xl text-todoz flex flex-col gap-1.5 items-end" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>">
-			<span class="w-8 h-1 bg-todoz rounded-full"></span>
-			<span class="w-5 h-1 bg-todoz rounded-full"></span>
-			<span class="w-8 h-1 bg-todoz rounded-full"></span>
-		</button>
+		<div class="header-actions header-actions--mobile lg:hidden">
+			<button type="button" class="theme-toggle" data-theme-toggle aria-label="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>" title="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>">
+				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
+				<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
+			</button>
+			<button type="button" id="mobile-menu-trigger" class="text-4xl text-todoz flex flex-col gap-1.5 items-end" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>">
+				<span class="w-8 h-1 bg-todoz rounded-full"></span>
+				<span class="w-5 h-1 bg-todoz rounded-full"></span>
+				<span class="w-8 h-1 bg-todoz rounded-full"></span>
+			</button>
+		</div>
 	</div>
 </header>
 

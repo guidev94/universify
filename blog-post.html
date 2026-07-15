@@ -1,8 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem("wv-theme");
+                if (t !== "light" && t !== "dark") t = "light";
+                document.documentElement.setAttribute("data-theme", t);
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "light");
+            }
+        })();
+    </script>
     <title>O Futuro das Linguagens de Programação | WV_Todoz Blog</title>
     
     <!-- Favicon -->
@@ -28,7 +39,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0a0a0a',
+                        primary: 'var(--wv-bg)',
                         todoz: '#CFFF04',
                         todozDark: '#A8D600',
                     },
@@ -42,26 +53,37 @@
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
     <style>
-        .prose p { color: #a1a1aa; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.125rem; }
-        .prose h2 { color: white; font-weight: 900; font-size: 2.25rem; margin-top: 3rem; margin-bottom: 1.5rem; letter-spacing: -0.04em; }
-        .prose blockquote { border-left: 4px solid #CFFF04; padding-left: 2rem; font-style: italic; font-size: 1.25rem; color: white; margin: 3rem 0; }
+        .prose p { color: var(--type-body-color); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.125rem; }
+        .prose h2 { color: var(--wv-display); font-weight: 900; font-size: 2.25rem; margin-top: 3rem; margin-bottom: 1.5rem; letter-spacing: -0.04em; }
+        .prose blockquote { border-left: 4px solid #CFFF04; padding-left: 2rem; font-style: italic; font-size: 1.25rem; color: var(--wv-ink); margin: 3rem 0; }
     </style>
+    <meta name="theme-color" content="#f5f5f2">
 </head>
-<body class="bg-primary text-white selection:bg-todoz selection:text-black overflow-x-hidden">
+<body class="bg-primary selection:bg-todoz selection:text-black overflow-x-hidden">
 
     <!-- Header (Sync with Home) -->
-    <header id="main-header" class="fixed top-0 w-full z-50 py-6 transition-all duration-500 bg-primary/80 backdrop-blur-xl border-b border-white/5">
+    <header id="main-header" class="fixed top-0 w-full z-50 py-6 transition-all duration-500 bg-primary/80 backdrop-blur-xl border-b border-white/5 is-scrolled">
         <div class="site-container flex justify-between items-center">
             <a href="index.html" class="block w-40 md:w-56">
                 <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="WV_Todoz Logo" class="w-full h-auto">
             </a>
-            <nav class="hidden lg:flex items-center gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+            <nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="Principal">
                 <a href="index.html" class="hover:text-todoz transition-colors">Home</a>
                 <a href="index.html#sobre" class="hover:text-todoz transition-colors">Quem Somos</a>
                 <a href="index.html#servicos" class="hover:text-todoz transition-colors">Serviços</a>
                 <a href="index.html#portfolio" class="hover:text-todoz transition-colors">Projetos</a>
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
+                    <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
+                    <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
+                </button>
                 <button type="button" class="open-modal px-8 py-3 bg-todoz/10 border border-todoz/30 rounded-full text-todoz hover:bg-todoz hover:text-black transition-all">Fale Conosco</button>
             </nav>
+            <div class="header-actions header-actions--mobile lg:hidden">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
+                    <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
+                    <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -202,6 +224,7 @@
         </div>
     </footer>
 
+    <script src="assets/js/theme.js"></script>
     <script src="assets/js/site-utils.js"></script>
     <script src="assets/js/main.js"></script>
     <script src="assets/js/animations.js"></script>
