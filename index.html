@@ -66,9 +66,10 @@
 
     <!-- Navegação -->
     <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
-        <div class="site-container flex justify-between items-center">
-            <a href="index.html" class="block w-40 md:w-56 overflow-hidden">
-                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="WV_Todoz Logo" class="w-full h-auto">
+        <div class="site-container flex justify-between items-center gap-3">
+            <a href="index.html" class="site-logo-link block w-36 sm:w-40 md:w-56 overflow-hidden shrink-0">
+                <img src="assets/img/logo-wv-light.svg" alt="WV_Todoz" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+                <img src="assets/img/logo-wv-dark.svg" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
             </a>
             <nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="Principal">
                 <a href="index.html" class="hover:text-todoz transition-colors">Home</a>
@@ -96,10 +97,10 @@
                     <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
                     <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
                 </button>
-                <button type="button" id="mobile-menu-trigger" class="text-4xl text-todoz flex flex-col gap-1.5 items-end" aria-label="Abrir menu">
-                    <span class="w-8 h-1 bg-todoz rounded-full"></span>
-                    <span class="w-5 h-1 bg-todoz rounded-full"></span>
-                    <span class="w-8 h-1 bg-todoz rounded-full"></span>
+                <button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="Abrir menu">
+                    <span class="w-7 h-0.5 bg-todoz rounded-full"></span>
+                    <span class="w-5 h-0.5 bg-todoz rounded-full"></span>
+                    <span class="w-7 h-0.5 bg-todoz rounded-full"></span>
                 </button>
             </div>
         </div>
@@ -111,7 +112,10 @@
         <div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
             <div class="space-y-12">
                 <div class="flex justify-between items-center">
-                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-32 h-auto">
+                    <span class="site-logo-link inline-block w-32">
+                        <img src="assets/img/logo-wv-light.svg" alt="WV_Todoz" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+                        <img src="assets/img/logo-wv-dark.svg" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
+                    </span>
                     <button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
                 </div>
                 <nav class="flex flex-col gap-6">
@@ -880,7 +884,9 @@
         <div class="site-container relative z-10 text-center md:text-left">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 mb-16 md:mb-24">
                 <div class="md:col-span-4">
-                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-40 md:w-48 mb-8 md:mb-10 mx-auto md:mx-0">
+                    <span class="site-logo-link site-logo-link--on-dark inline-block w-40 md:w-48 mb-8 md:mb-10 mx-auto md:mx-0">
+                        <img src="assets/img/logo-wv-dark.svg" alt="WV_Todoz" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async">
+                    </span>
                     <p class="footer-tagline text-zinc-500 leading-relaxed mb-8 md:mb-10 max-w-sm mx-auto md:mx-0">Criamos agentes, automações e integrações que tiram peso da operação e geram resultado no negócio.</p>
                     <div class="flex gap-6 text-zinc-400 text-3xl justify-center md:justify-start">
                         <a href="https://www.facebook.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>

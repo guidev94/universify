@@ -17,7 +17,9 @@ if (!defined('ABSPATH')) {
 function wv_defaults(): array {
 	$uri = WVTODOZ_URI;
 	return [
-		'logo' => 'https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png',
+		'logo' => WVTODOZ_URI . '/assets/img/logo-wv-dark.svg',
+		'logo_light' => WVTODOZ_URI . '/assets/img/logo-wv-light.svg',
+		'logo_dark' => WVTODOZ_URI . '/assets/img/logo-wv-dark.svg',
 		'whatsapp' => 'https://wa.me/551155311779',
 		'hero' => [
 			'badge' => 'Software house · IA',

@@ -46,6 +46,56 @@ function wv_logo_url(): string {
 	return (string) $d['logo'];
 }
 
+/** Light-surface wordmark: green WV_ + black TODOZ/tagline. */
+function wv_logo_light_url(): string {
+	return WVTODOZ_URI . '/assets/img/logo-wv-light.svg';
+}
+
+/** Dark-surface wordmark: green WV_ + white TODOZ/tagline. */
+function wv_logo_dark_url(): string {
+	return WVTODOZ_URI . '/assets/img/logo-wv-dark.svg';
+}
+
+/**
+ * Dual theme logos (CSS toggles .site-logo--light / --dark).
+ *
+ * @param array{class?:string,alt?:string,on_dark?:bool,width?:string} $args
+ */
+function wv_logo_markup(array $args = []): string {
+	$class   = $args['class'] ?? 'block w-40 md:w-56 overflow-hidden';
+	$alt     = $args['alt'] ?? get_bloginfo('name');
+	$on_dark = !empty($args['on_dark']);
+	$w       = $args['width'] ?? '1024';
+	$h       = $args['height'] ?? '394';
+	$light   = esc_url(wv_logo_light_url());
+	$dark    = esc_url(wv_logo_dark_url());
+	$alt_esc = esc_attr((string) $alt);
+	$cls     = esc_attr('site-logo-link ' . $class . ($on_dark ? ' site-logo-link--on-dark' : ''));
+
+	if ($on_dark) {
+		return sprintf(
+			'<span class="%s"><img src="%s" alt="%s" class="site-logo site-logo--dark w-full h-auto" width="%s" height="%s" decoding="async"></span>',
+			$cls,
+			$dark,
+			$alt_esc,
+			esc_attr($w),
+			esc_attr($h)
+		);
+	}
+
+	return sprintf(
+		'<span class="%s"><img src="%s" alt="%s" class="site-logo site-logo--light w-full h-auto" width="%s" height="%s" decoding="async"><img src="%s" alt="" class="site-logo site-logo--dark w-full h-auto" width="%s" height="%s" decoding="async" aria-hidden="true"></span>',
+		$cls,
+		$light,
+		$alt_esc,
+		esc_attr($w),
+		esc_attr($h),
+		$dark,
+		esc_attr($w),
+		esc_attr($h)
+	);
+}
+
 function wv_whatsapp_url(): string {
 	$d = wv_defaults();
 	$url = (string) wv_field('wv_whatsapp_url', $d['whatsapp']);

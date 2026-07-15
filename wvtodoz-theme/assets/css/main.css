@@ -367,19 +367,59 @@ h1, h2, h3, h4,
     opacity: 1;
 }
 
-/* Light: natural logo colors; Dark: all-black wordmark */
-[data-theme="light"] #main-header img,
-[data-theme="light"] #main-header.is-scrolled img,
-[data-theme="light"] #mobile-menu-content img,
-[data-theme="light"] body:not(:has(#hero)) #main-header img {
-    filter: none;
+/* Site logos — dual assets; never brightness() the brand wordmark */
+.site-logo-link {
+    position: relative;
+    line-height: 0;
 }
 
-[data-theme="dark"] #main-header img,
-[data-theme="dark"] #main-header.is-scrolled img,
-[data-theme="dark"] #mobile-menu-content img,
-[data-theme="dark"] body:not(:has(#hero)) #main-header img {
-    filter: brightness(0);
+.site-logo {
+    display: none;
+    width: 100%;
+    height: auto;
+    filter: none !important;
+}
+
+/* Default / dark surfaces: green WV_ + white TODOZ */
+.site-logo--dark {
+    display: block;
+}
+
+.site-logo--light {
+    display: none;
+}
+
+/*
+ * Light theme on light chrome (scrolled header, blog, light mobile menu):
+ * green WV_ + black TODOZ/tagline. Hero (transparent header) keeps dark logo.
+ */
+[data-theme="light"] #main-header.is-scrolled .site-logo--light,
+[data-theme="light"] body:not(:has(#hero)) #main-header .site-logo--light,
+[data-theme="light"] #mobile-menu-content .site-logo--light {
+    display: block;
+}
+
+[data-theme="light"] #main-header.is-scrolled .site-logo--dark,
+[data-theme="light"] body:not(:has(#hero)) #main-header .site-logo--dark,
+[data-theme="light"] #mobile-menu-content .site-logo--dark {
+    display: none;
+}
+
+/* Footer / forced dark bands always use the white wordmark */
+.site-logo-link--on-dark .site-logo--light {
+    display: none !important;
+}
+
+.site-logo-link--on-dark .site-logo--dark {
+    display: block !important;
+}
+
+[data-theme="dark"] .site-logo--light {
+    display: none;
+}
+
+[data-theme="dark"] .site-logo--dark {
+    display: block;
 }
 
 /* Continuous dark canvas — soft accents, no hard section seams.
@@ -3848,6 +3888,10 @@ footer ul li a:hover {
     }
 
     /* Product cards — centered stack on mobile */
+    .produtos-bento {
+        gap: 0.85rem;
+    }
+
     .produto-card-inner {
         align-items: center;
         text-align: center;
@@ -3870,11 +3914,14 @@ footer ul li a:hover {
     .produto-actions {
         justify-content: center;
         width: 100%;
+        flex-direction: column;
     }
 
     .produto-btn {
         flex: 1 1 auto;
-        min-width: 8.5rem;
+        width: 100%;
+        min-width: 0;
+        min-height: 2.85rem;
     }
 
     .produto-card--featured .produto-card-inner {
@@ -3919,6 +3966,11 @@ footer ul li a:hover {
 
     .produto-card--wide .produto-desc {
         max-width: none;
+    }
+
+    [data-theme="light"] .produto-card--featured .produto-brand {
+        padding: 0.75rem 0.9rem;
+        max-width: 100%;
     }
 
     /* Portfolio rail cards — tighter overlay + readable meta */
@@ -4269,6 +4321,20 @@ body.modal-open .wa-float {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.mobile-menu-trigger,
+#mobile-menu-trigger.mobile-menu-trigger {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
 }
 
 @media (min-width: 1024px) {
@@ -4280,6 +4346,37 @@ body.modal-open .wa-float {
 @media (max-width: 1023px) {
     .header-actions--desktop {
         display: none;
+    }
+
+    .header-actions--mobile {
+        gap: 0.5rem;
+    }
+
+    #main-header .site-container {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 430px) {
+    #main-header {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    #main-header .site-logo-link {
+        width: 8.75rem;
+        max-width: 42vw;
+    }
+
+    .header-actions--mobile {
+        gap: 0.35rem;
+    }
+
+    .theme-toggle {
+        width: 2.75rem;
+        height: 2.75rem;
+        min-width: 44px;
+        min-height: 44px;
     }
 }
 
@@ -4489,12 +4586,14 @@ body.modal-open .wa-float {
 [data-theme="light"] #main-header.is-scrolled .theme-toggle {
     color: var(--wv-ink);
     border-color: var(--wv-border);
-    background: var(--wv-glass);
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(10, 10, 10, 0.04);
 }
 
 [data-theme="light"] #main-header.is-scrolled .theme-toggle:hover {
-    color: var(--todoz);
-    border-color: rgba(207, 255, 4, 0.5);
+    color: #5a6b00;
+    border-color: rgba(90, 107, 0, 0.35);
+    background: rgba(207, 255, 4, 0.18);
 }
 
 [data-theme="light"] #main-header .magnetic.bg-todoz,
@@ -4675,50 +4774,70 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
-/* Produtos #produtos — light polish (dark keep scoped rules above) */
+/* Produtos #produtos — light bento (dark keep scoped rules above) */
 [data-theme="light"] #produtos.produtos-section,
 [data-theme="light"] .produtos-section {
     color: var(--wv-ink);
 }
 
+[data-theme="light"] #produtos .section-display,
+[data-theme="light"] #produtos .section-display-line {
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] #produtos .section-lead {
+    color: var(--type-body-color);
+}
+
 [data-theme="light"] .produtos-glow {
-    opacity: 0.7;
+    opacity: 0.45;
     background:
-        radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.14), transparent 72%),
-        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.08), transparent 70%);
+        radial-gradient(ellipse 48% 34% at 12% 28%, rgba(207, 255, 4, 0.1), transparent 72%),
+        radial-gradient(ellipse 36% 30% at 90% 76%, rgba(207, 255, 4, 0.06), transparent 70%);
 }
 
 [data-theme="light"] .produto-card {
-    background: var(--wv-card-bg);
-    border-color: var(--wv-card-border);
+    background: linear-gradient(160deg, #ffffff, #f7f7f4);
+    border-color: rgba(10, 10, 10, 0.1);
     color: var(--wv-ink);
-    box-shadow: var(--wv-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 14px 32px -26px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="light"] .produto-card:hover {
-    border-color: rgba(207, 255, 4, 0.42);
-    box-shadow: var(--wv-card-hover-shadow), 0 14px 36px -28px rgba(207, 255, 4, 0.18);
+    border-color: rgba(207, 255, 4, 0.45);
+    box-shadow:
+        0 20px 40px -24px rgba(0, 0, 0, 0.22),
+        0 0 0 1px rgba(207, 255, 4, 0.12);
+    transform: translateY(-3px);
 }
 
 [data-theme="light"] .produto-card--featured {
     background:
-        radial-gradient(ellipse 58% 48% at 76% 88%, rgba(207, 255, 4, 0.1), transparent 70%),
-        radial-gradient(ellipse 54% 44% at 26% 52%, rgba(207, 255, 4, 0.18), transparent 68%),
-        linear-gradient(165deg, #ffffff, #f2f6de 58%);
-    border-color: rgba(207, 255, 4, 0.42);
+        radial-gradient(ellipse 50% 40% at 78% 88%, rgba(207, 255, 4, 0.08), transparent 70%),
+        linear-gradient(165deg, #ffffff 0%, #f6f8ee 100%);
+    border-color: rgba(207, 255, 4, 0.38);
     box-shadow:
-        0 0 0 1px rgba(207, 255, 4, 0.16),
-        0 0 44px -16px rgba(207, 255, 4, 0.26),
-        var(--wv-card-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        0 0 0 1px rgba(207, 255, 4, 0.12),
+        0 18px 40px -28px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 [data-theme="light"] .produto-card--featured:hover {
-    border-color: rgba(207, 255, 4, 0.58);
+    border-color: rgba(207, 255, 4, 0.55);
     box-shadow:
-        0 0 0 1px rgba(207, 255, 4, 0.24),
-        0 0 56px -12px rgba(207, 255, 4, 0.32),
-        var(--wv-card-hover-shadow);
+        0 0 0 1px rgba(207, 255, 4, 0.2),
+        0 22px 48px -24px rgba(0, 0, 0, 0.22);
+}
+
+/* White product logos (Let's Work) need a dark brand chip on light cards */
+[data-theme="light"] .produto-card--featured .produto-brand {
+    background: #0a0a0a;
+    border-bottom-color: transparent;
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.85rem;
 }
 
 [data-theme="light"] .produto-brand {
@@ -4729,9 +4848,14 @@ body.modal-open .wa-float {
     filter: none;
 }
 
-[data-theme="light"] .produto-card:hover .produto-logo,
-[data-theme="light"] .produto-card--featured .produto-logo {
-    filter: drop-shadow(0 0 10px rgba(207, 255, 4, 0.28));
+[data-theme="light"] .produto-card:hover .produto-logo {
+    filter: none;
+    transform: scale(1.03);
+}
+
+[data-theme="light"] .produto-card--featured .produto-logo,
+[data-theme="light"] .produto-card--featured:hover .produto-logo {
+    filter: none;
 }
 
 [data-theme="light"] .produto-title,
@@ -4740,8 +4864,9 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .produto-subtitle {
-    color: var(--todoz);
-    text-shadow: var(--wv-display-glow);
+    color: #5a6b00;
+    text-shadow: none;
+    font-weight: 800;
 }
 
 [data-theme="light"] .produto-desc,
@@ -4750,36 +4875,40 @@ body.modal-open .wa-float {
     color: var(--type-body-color);
 }
 
+[data-theme="light"] .produto-card--featured .produto-highlights i {
+    color: #7a9000;
+}
+
 [data-theme="light"] .produto-btn--primary {
     background: var(--todoz);
     color: #0a0a0a;
     border-color: transparent;
-    box-shadow: 0 8px 20px -12px rgba(207, 255, 4, 0.55);
+    box-shadow: 0 8px 18px -12px rgba(90, 100, 0, 0.35);
 }
 
 [data-theme="light"] .produto-btn--primary:hover {
-    filter: brightness(1.04);
+    filter: brightness(1.03);
     background: var(--todoz);
     color: #0a0a0a;
 }
 
 [data-theme="light"] .produto-btn--ghost {
-    background: rgba(10, 10, 10, 0.04);
+    background: #fff;
     color: var(--wv-ink);
-    border-color: var(--wv-border-strong);
+    border-color: rgba(10, 10, 10, 0.18);
 }
 
 [data-theme="light"] .produto-btn--ghost:hover {
     filter: none;
-    background: rgba(207, 255, 4, 0.16);
-    border-color: rgba(207, 255, 4, 0.5);
+    background: rgba(207, 255, 4, 0.18);
+    border-color: rgba(90, 107, 0, 0.45);
     color: #0a0a0a;
 }
 
 [data-theme="light"] .produto-badge {
     background: var(--todoz);
     color: #0a0a0a;
-    box-shadow: 0 0 20px rgba(207, 255, 4, 0.45);
+    box-shadow: 0 6px 16px -8px rgba(90, 100, 0, 0.4);
 }
 
 /* Servicos cards — full light readability (body/list/btn were dark-theme colors) */

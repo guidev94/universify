@@ -37,9 +37,10 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 <?php wp_body_open(); ?>
 
 <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
-	<div class="site-container flex justify-between items-center">
-		<a href="<?php echo esc_url(home_url('/')); ?>" class="block w-40 md:w-56 overflow-hidden">
-			<img src="<?php echo esc_url($logo); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="w-full h-auto">
+	<div class="site-container flex justify-between items-center gap-3">
+		<a href="<?php echo esc_url(home_url('/')); ?>" class="site-logo-link block w-36 sm:w-40 md:w-56 overflow-hidden shrink-0">
+			<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+			<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
 		</a>
 		<nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="<?php esc_attr_e('Principal', 'wvtodoz'); ?>">
 			<?php
@@ -84,10 +85,10 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
 				<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
 			</button>
-			<button type="button" id="mobile-menu-trigger" class="text-4xl text-todoz flex flex-col gap-1.5 items-end" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>">
-				<span class="w-8 h-1 bg-todoz rounded-full"></span>
-				<span class="w-5 h-1 bg-todoz rounded-full"></span>
-				<span class="w-8 h-1 bg-todoz rounded-full"></span>
+			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>">
+				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
+				<span class="w-5 h-0.5 bg-todoz rounded-full"></span>
+				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
 			</button>
 		</div>
 	</div>
@@ -98,7 +99,10 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 	<div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
 		<div class="space-y-12">
 			<div class="flex justify-between items-center">
-				<img src="<?php echo esc_url($logo); ?>" alt="" class="w-32 h-auto">
+				<span class="site-logo-link inline-block w-32">
+					<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+					<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
+				</span>
 				<button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl" aria-label="<?php esc_attr_e('Fechar menu', 'wvtodoz'); ?>"><i class="ph ph-x-circle"></i></button>
 			</div>
 			<nav class="flex flex-col gap-6" aria-label="<?php esc_attr_e('Mobile', 'wvtodoz'); ?>">

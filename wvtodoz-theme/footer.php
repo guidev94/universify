@@ -33,7 +33,9 @@ $home  = home_url('/');
 	<div class="site-container relative z-10 text-center md:text-left">
 		<div class="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 mb-16 md:mb-24">
 			<div class="md:col-span-4">
-				<img src="<?php echo esc_url($logo); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="w-40 md:w-48 mb-8 md:mb-10 mx-auto md:mx-0">
+				<span class="site-logo-link site-logo-link--on-dark inline-block w-40 md:w-48 mb-8 md:mb-10 mx-auto md:mx-0">
+					<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async">
+				</span>
 				<p class="footer-tagline text-zinc-500 leading-relaxed mb-8 md:mb-10 max-w-sm mx-auto md:mx-0"><?php echo esc_html($tag); ?></p>
 				<div class="flex gap-6 text-zinc-400 text-3xl justify-center md:justify-start">
 					<a href="<?php echo esc_url($fb); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>
