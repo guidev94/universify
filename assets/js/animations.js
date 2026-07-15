@@ -1,6 +1,6 @@
 /**
  * Restored animation stack from classic era (8c3fdb9):
- * AOS entrances + GSAP cursor / portfolio pin / header.
+ * AOS entrances + GSAP portfolio pin / header.
  * Plus Lenis-compatible AOS (getBoundingClientRect driver).
  */
 gsap.registerPlugin(ScrollTrigger);
@@ -34,26 +34,6 @@ AOS.init({
 });
 
 driveAosWithLenis();
-
-const initCursor = () => {
-    const cursor = document.querySelector("#cursor");
-    if (!cursor) return;
-
-    window.addEventListener("mousemove", (e) => {
-        gsap.to(cursor, {
-            x: e.clientX,
-            y: e.clientY,
-            opacity: 1,
-            duration: 0.4,
-            ease: "power2.out"
-        });
-    });
-
-    document.querySelectorAll("a, button, .case-item, .produto-card, .service-card, .blog-card").forEach((el) => {
-        el.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 6, opacity: 0.15 }));
-        el.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, opacity: 1 }));
-    });
-};
 
 const initBlogAnimations = () => {};
 
@@ -274,7 +254,6 @@ const initMissaoStats = () => {
 
 window.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.add("js-ready");
-    initCursor();
     initPortfolioAnimations();
     initHeaderAnim();
     initMissaoStats();
