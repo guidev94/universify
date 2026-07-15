@@ -87,7 +87,7 @@ for ($i = 1; $i <= 4; $i++) {
 				<?php if ($variant === 'mobile') : ?>
 				<div class="servicos-card-top">
 					<div class="servicos-card-icon servicos-card-icon--sm" aria-hidden="true"><i class="ph <?php echo esc_attr($icon); ?>"></i></div>
-					<button type="button" class="open-modal magnetic servicos-card-icon-btn" aria-label="<?php esc_attr_e('Solicitar aplicativo mobile', 'wvtodoz'); ?>">
+					<button type="button" class="open-modal magnetic servicos-card-icon-btn" aria-label="<?php esc_attr_e('Falar sobre este serviço', 'wvtodoz'); ?>">
 						<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
 					</button>
 				</div>

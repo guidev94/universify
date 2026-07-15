@@ -19,7 +19,7 @@ $label_email = (string) wv_field('wv_modal_label_email', 'E-mail Corporativo');
 $label_msg = (string) wv_field('wv_modal_label_message', 'Conte seu desafio');
 $ph_name = (string) wv_field('wv_modal_placeholder_name', 'João Silva');
 $ph_email = (string) wv_field('wv_modal_placeholder_email', 'exemplo@empresa.com.br');
-$ph_msg = (string) wv_field('wv_modal_placeholder_message', 'Quero desenvolver um aplicativo mobile...');
+$ph_msg = (string) wv_field('wv_modal_placeholder_message', 'Quero criar um agente de IA para...');
 ?>
 <div id="case-modal" class="site-modal" aria-hidden="true" role="dialog" aria-modal="true">
 	<div class="site-modal-backdrop" data-modal-backdrop></div>

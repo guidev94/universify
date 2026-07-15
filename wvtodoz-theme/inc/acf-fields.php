@@ -30,12 +30,12 @@ add_action('acf/init', static function (): void {
 		'fields' => array_merge(
 			wv_acf_tab('tab_hero', 'Hero'),
 			[
-				wv_acf_text('wv_hero_badge', 'Badge', 'Software house'),
-				wv_acf_text('wv_hero_eyebrow', 'Eyebrow', 'Sites e aplicativos'),
+				wv_acf_text('wv_hero_badge', 'Badge', 'Software house · IA'),
+				wv_acf_text('wv_hero_eyebrow', 'Eyebrow', 'Agentes · Automações · Integrações'),
 				wv_acf_text('wv_hero_title_line', 'Título (linha)', 'Feito pra'),
-				wv_acf_text('wv_hero_title_accent', 'Título (destaque lima)', 'vender.'),
+				wv_acf_text('wv_hero_title_accent', 'Título (destaque lima)', 'operar.'),
 				wv_acf_textarea('wv_hero_lead', 'Lead'),
-				wv_acf_text('wv_hero_cta_primary', 'CTA primário — texto', 'Pedir orçamento'),
+				wv_acf_text('wv_hero_cta_primary', 'CTA primário — texto', 'Falar do projeto'),
 				wv_acf_url('wv_hero_cta_primary_url', 'CTA primário — URL'),
 				wv_acf_text('wv_hero_cta_secondary', 'CTA secundário — texto', 'Ver o que fazemos'),
 				[
@@ -81,11 +81,11 @@ add_action('acf/init', static function (): void {
 			[
 				wv_acf_text('wv_bridge_eyebrow', 'Eyebrow'),
 				wv_acf_textarea('wv_bridge_lead', 'Lead'),
-				wv_acf_text('wv_bridge_cta', 'CTA', 'Quero um app mobile'),
+				wv_acf_text('wv_bridge_cta', 'CTA', 'Quero conversar'),
 			],
 			wv_acf_tab('tab_servicos', 'Serviços'),
 			[
-				wv_acf_text('wv_servicos_eyebrow', 'Eyebrow', 'O que entregamos'),
+				wv_acf_text('wv_servicos_eyebrow', 'Eyebrow', 'Três frentes de IA'),
 				wv_acf_text('wv_servicos_title_line', 'Título (linha)', 'O que'),
 				wv_acf_text('wv_servicos_title_accent', 'Título (destaque)', 'fazemos'),
 				wv_acf_textarea('wv_servicos_intro', 'Introdução'),
@@ -128,7 +128,7 @@ add_action('acf/init', static function (): void {
 				wv_acf_text('wv_aplicacoes_b1', 'Benefício 1'),
 				wv_acf_text('wv_aplicacoes_b2', 'Benefício 2'),
 				wv_acf_text('wv_aplicacoes_b3', 'Benefício 3'),
-				wv_acf_text('wv_aplicacoes_cta', 'CTA', 'Quero reduzir o retrabalho'),
+				wv_acf_text('wv_aplicacoes_cta', 'CTA', 'Quero automatizar a operação'),
 			],
 			wv_acf_tab('tab_blog', 'Insights'),
 			[
@@ -166,7 +166,7 @@ add_action('acf/init', static function (): void {
 				wv_acf_text('wv_modal_label_message', 'Modal — label Mensagem', 'Conte seu desafio'),
 				wv_acf_text('wv_modal_placeholder_name', 'Modal — placeholder Nome', 'João Silva'),
 				wv_acf_text('wv_modal_placeholder_email', 'Modal — placeholder E-mail', 'exemplo@empresa.com.br'),
-				wv_acf_text('wv_modal_placeholder_message', 'Modal — placeholder Mensagem', 'Quero desenvolver um aplicativo mobile...'),
+				wv_acf_text('wv_modal_placeholder_message', 'Modal — placeholder Mensagem', 'Quero criar um agente de IA para...'),
 			]
 		),
 		'location' => $home_location,
@@ -225,7 +225,7 @@ add_action('acf/init', static function (): void {
 		'key' => 'group_wv_servico',
 		'title' => 'Serviço — detalhes',
 		'fields' => [
-			wv_acf_text('wv_servico_icon', 'Classe ícone Phosphor (ex.: ph-brain)', 'ph-app-window'),
+			wv_acf_text('wv_servico_icon', 'Classe ícone Phosphor (ex.: ph-robot)', 'ph-robot'),
 			wv_acf_textarea('wv_servico_title_html', 'Título HTML (span.text-todoz permitido)'),
 			wv_acf_textarea('wv_servico_bullets', 'Bullets (um por linha)'),
 			wv_acf_text('wv_servico_cta', 'Texto do CTA'),

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.0.0';
+const WV_SEED_VERSION = '1.1.0';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -238,7 +238,7 @@ function wv_run_seed(bool $force = false): bool {
 		'wv_modal_label_message'   => 'Conte seu desafio',
 		'wv_modal_placeholder_name'=> 'João Silva',
 		'wv_modal_placeholder_email' => 'exemplo@empresa.com.br',
-		'wv_modal_placeholder_message' => 'Quero desenvolver um aplicativo mobile...',
+		'wv_modal_placeholder_message' => 'Quero criar um agente de IA para...',
 	];
 
 	foreach ($process as $i => $step) {

@@ -1,10 +1,12 @@
 # State
 
 **Last updated:** 2026-07-15  
-**Session:** WordPress theme + ACF free (Spec-Driven → Execute)
+**Session:** Copy IA-first (agentes / automações / integrações)
 
 ## Decisions
 
+- Messaging comercial centra em **Criação de Agentes**, **Automações** e **Integração de Sistemas**; apps/sites como veículos de entrega.
+- Copy espelhada em `index.html` + `wvtodoz-theme/` (`defaults.php`, seed, ACF defaults).
 - Tema em `wvtodoz-theme/` na raiz do repo (zip-ready), não sob `wordpress/wp-content/`.
 - ACF free only: Home page field groups + CPTs para repetíveis (sem Options Page / Repeater).
 - Fallbacks em `inc/defaults.php` preservam copy/visual do HTML estático quando Admin ainda vazio.

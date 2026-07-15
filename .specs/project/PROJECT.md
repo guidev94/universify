@@ -1,7 +1,7 @@
 # WV_Todoz Site v2
 
-**Vision:** Landing page premium da software house WV_Todoz — escuro, accent lima (#CFFF04), GSAP/AOS/Lenis — posicionando a marca como parceira B2B de aplicativos, sistemas e inteligência artificial. Conteúdo gerenciável via WordPress + ACF free.
-**For:** Decisores de marketing, produto e TI em empresas que precisam de software sob medida e sistemas com IA; editores de conteúdo no WP Admin.
+**Vision:** Landing page premium da software house WV_Todoz (escuro, accent lima #CFFF04, GSAP/AOS/Lenis), posicionando a marca como parceira B2B de agentes de IA, automações e integrações de sistemas. Conteúdo gerenciável via WordPress + ACF free.
+**For:** Decisores de marketing, produto e TI em empresas que precisam aliviar operação com IA e software sob medida; editores de conteúdo no WP Admin.
 **Solves:** Site institucional genérico/desatualizado; e a dor de editar HTML estático sem CMS.
 
 ## Goals
