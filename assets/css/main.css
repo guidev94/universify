@@ -38,6 +38,10 @@ html.lenis {
     --space-section-gap: clamp(1.5rem, 3vw, 2.25rem);
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     overflow-x: hidden;
     font-family: var(--font-body);
@@ -704,8 +708,49 @@ h1, h2, h3, h4,
 }
 
 @media (max-width: 430px) {
+    .hero-inner {
+        padding-top: 5.25rem;
+        padding-bottom: 0.65rem;
+    }
+
+    .hero-display {
+        font-size: clamp(1.6rem, 8.2vw, 2rem);
+        line-height: 0.96;
+        padding-inline: 0.15rem;
+    }
+
+    .hero-lead {
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-cta {
+        letter-spacing: 0.09em;
+        padding: 0.85rem 1rem;
+        min-height: 2.85rem;
+    }
+
+    .hero-logos {
+        gap: 0.4rem;
+        margin-top: 0.95rem;
+        padding-top: 0.85rem;
+    }
+
+    .hero-logo img {
+        height: 1.1rem;
+    }
+
+    .hero-scroll-cue {
+        margin-top: 0.85rem;
+    }
+
     .missao-title {
         font-size: clamp(1.95rem, 9.2vw, 2.35rem);
+    }
+
+    /* Keep Missão CTA clear of overlapping bridge card */
+    #missao.missao-highlight {
+        padding-bottom: 6.25rem;
     }
 
     .mobile-bridge-card {
@@ -718,7 +763,7 @@ h1, h2, h3, h4,
     }
 
     .mobile-bridge-section {
-        margin-top: -1.5rem;
+        margin-top: -1.35rem;
     }
 }
 
@@ -2760,8 +2805,104 @@ html.content-revealed [data-reveal] {
     line-height: 1;
 }
 
+/* Hero section shell — clip video bleed, never clip stacked content */
+.hero-section {
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow-x: clip;
+    overflow-y: visible;
+}
+
+/* Hero composition — spacing + type owned here (not only Tailwind clamps) */
+.hero-inner {
+    padding-top: 9rem;
+    padding-bottom: 2rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.hero-badge {
+    margin-bottom: 2rem;
+}
+
+.hero-title {
+    margin-bottom: 2.5rem;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
 .hero-eyebrow {
     font-variant: normal;
+    font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+    letter-spacing: 0.32em;
+    margin-bottom: 1.35rem;
+}
+
+.hero-display {
+    font-size: clamp(2.85rem, 9.5vw, 7rem);
+    line-height: 0.9;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+    -webkit-hyphens: none;
+    max-width: 100%;
+}
+
+.hero-lead {
+    font-size: 1.25rem;
+    margin-bottom: 3rem;
+    padding-inline: 0.25rem;
+}
+
+.hero-ctas {
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.hero-cta {
+    width: 100%;
+    max-width: 20rem;
+    min-height: 3.35rem;
+    padding: 1.15rem 1.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+    .hero-ctas {
+        gap: 1.5rem;
+    }
+
+    .hero-cta {
+        width: auto;
+        min-width: 15rem;
+        max-width: none;
+        padding: 1.25rem 2.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .hero-inner {
+        padding-top: 9rem;
+        padding-bottom: 2rem;
+    }
+
+    .hero-title {
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-eyebrow {
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-lead {
+        margin-bottom: 3rem;
+    }
 }
 
 /* Glassmorphism Refined for Product Cards */
@@ -3155,6 +3296,64 @@ footer ul li a:hover {
         line-height: 1.1;
     }
 
+    /* Hero — fit first viewport on 375–430 without clipping/overflow */
+    #hero .site-container {
+        max-width: 100%;
+        padding-left: 1.15rem;
+        padding-right: 1.15rem;
+    }
+
+    .hero-inner {
+        padding-top: 5.75rem;
+        padding-bottom: 0.85rem;
+    }
+
+    .hero-badge {
+        margin-bottom: 1rem;
+        padding: 0.35rem 0.85rem;
+    }
+
+    .hero-title {
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .hero-eyebrow {
+        font-size: 0.62rem;
+        letter-spacing: 0.2em;
+        margin-bottom: 0.7rem;
+    }
+
+    .hero-display {
+        font-size: clamp(1.7rem, 8.6vw, 2.15rem);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+        padding-inline: 0.2rem;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .hero-lead {
+        font-size: 0.92rem;
+        line-height: 1.5;
+        margin-bottom: 1.15rem;
+        max-width: 21rem;
+    }
+
+    .hero-ctas {
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+
+    .hero-cta {
+        max-width: 100%;
+        min-height: 2.95rem;
+        padding: 0.9rem 1.15rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.11em;
+    }
+
     /* Hero readability — quieter glow, more video visible */
     #hero .hero-video {
         opacity: 0.18;
@@ -3180,20 +3379,30 @@ footer ul li a:hover {
     }
 
     .hero-logos {
-        gap: clamp(0.85rem, 3.2vw, 1.35rem);
-        margin-top: 1.75rem;
-        padding-top: 1.5rem;
+        gap: clamp(0.45rem, 2.4vw, 0.85rem);
+        margin-top: 1.1rem;
+        padding-top: 1rem;
         max-width: 100%;
     }
 
     .hero-logo img {
-        height: clamp(1.35rem, 7.5vw, 2.15rem);
+        height: clamp(1.05rem, 5.8vw, 1.55rem);
     }
 
     .hero-scroll-cue {
-        margin-top: 1.75rem;
-        gap: 0.65rem;
-        opacity: 0.38;
+        margin-top: 1rem;
+        gap: 0.4rem;
+        opacity: 0.35;
+    }
+
+    .hero-scroll-pill {
+        width: 1.15rem;
+        height: 1.85rem;
+    }
+
+    .hero-scroll-label {
+        font-size: 0.55rem;
+        letter-spacing: 0.28em;
     }
 
     /* Soften global lime glow copy on small screens */

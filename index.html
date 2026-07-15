@@ -115,9 +115,9 @@
 
     <main id="main-wrapper">
         <!-- Hero Section -->
-        <section id="hero" class="min-h-screen relative flex items-center justify-center overflow-hidden bg-[#050505]">
+        <section id="hero" class="hero-section relative flex items-center justify-center bg-[#050505]">
             <!-- Background Layer -->
-            <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 z-0 overflow-hidden">
                 <video autoplay muted loop playsinline preload="metadata" class="hero-video w-full h-full object-cover opacity-[0.28] filter grayscale brightness-[0.62]">
                     <source src="assets/video/hero.mp4" type="video/mp4">
                 </video>
@@ -130,37 +130,37 @@
             </div>
 
             <div class="site-container relative z-10">
-                <div class="max-w-5xl mx-auto flex flex-col items-center pt-28 md:pt-36 pb-6 md:pb-8">
+                <div class="hero-inner max-w-5xl mx-auto flex flex-col items-center">
                     <!-- Tech Badge -->
-                    <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 transition-all hover:border-todoz/40 group" data-aos="fade-down">
+                    <div class="hero-badge inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transition-all hover:border-todoz/40 group" data-aos="fade-down">
                         <span class="w-1.5 h-1.5 rounded-full bg-todoz animate-pulse shadow-[0_0_10px_#CFFF04]"></span>
                         <span class="text-white font-black text-[10px] tracking-[0.28em] uppercase">Software House</span>
                     </div>
 
-                    <h1 class="text-center mb-8 md:mb-10" data-aos="zoom-out" data-aos-delay="200">
-                        <span class="hero-eyebrow block text-zinc-400 text-[clamp(0.7rem,1.4vw,0.85rem)] font-semibold tracking-[0.32em] uppercase mb-5 md:mb-6">
-                            Do briefing ao app na
+                    <h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="200">
+                        <span class="hero-eyebrow block text-zinc-400 font-semibold uppercase">
+                            Apps, sistemas e IA
                         </span>
-                        <span class="block text-[clamp(2.75rem,9.5vw,7rem)] font-black leading-[0.88] tracking-tighter text-white uppercase italic">
-                            Mão do <br class="hidden sm:block">
+                        <span class="hero-display block font-black tracking-tighter text-white uppercase italic">
+                            Na mão do<br>
                             <span class="text-todoz text-glow not-italic">cliente.</span>
                         </span>
                     </h1>
 
                     <!-- Paragraph -->
-                    <p class="text-base md:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed mb-10 md:mb-12 text-center font-medium" data-aos="fade-up" data-aos-delay="400">
-                        Apps, sistemas e IA que saem do papel e entram no dia a dia — pra <span class="text-white">operar</span>, <span class="text-white">vender</span> e cortar retrabalho. Do Facíleme ao Let's Work.
+                    <p class="hero-lead text-zinc-400 max-w-xl mx-auto leading-relaxed text-center font-medium" data-aos="fade-up" data-aos-delay="400">
+                        Do briefing ao produto no ar — software pra <span class="text-white">operar</span>, <span class="text-white">vender</span> e cortar retrabalho. Do Facíleme ao Let's Work.
                     </p>
 
                     <!-- CTAs -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full mb-4" data-aos="fade-up" data-aos-delay="600">
-                        <a href="https://wa.me/551155311779" target="_blank" class="magnetic bg-todoz group relative px-8 sm:px-10 py-5 text-black font-black rounded-full text-xs uppercase tracking-widest flex items-center justify-center gap-4 w-full sm:w-auto sm:min-w-[240px] max-w-xs">
+                    <div class="hero-ctas flex flex-col sm:flex-row items-center justify-center w-full" data-aos="fade-up" data-aos-delay="600">
+                        <a href="https://wa.me/551155311779" target="_blank" class="hero-cta magnetic bg-todoz group relative text-black font-black rounded-full uppercase flex items-center justify-center gap-3">
                             Iniciar projeto
                             <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
                                 <i class="ph-fill ph-rocket-launch text-lg group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
                             </div>
                         </a>
-                        <button type="button" class="open-modal magnetic px-8 sm:px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 text-xs uppercase tracking-widest backdrop-blur-sm w-full sm:w-auto sm:min-w-[240px] max-w-xs">
+                        <button type="button" class="hero-cta open-modal magnetic bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 uppercase backdrop-blur-sm">
                             Nosso ecossistema
                         </button>
                     </div>
