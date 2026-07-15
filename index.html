@@ -118,13 +118,15 @@
         <section id="hero" class="hero-section relative flex items-center justify-center bg-[#050505]">
             <!-- Background Layer -->
             <div class="absolute inset-0 z-0 overflow-hidden">
-                <video autoplay muted loop playsinline preload="metadata" class="hero-video w-full h-full object-cover opacity-[0.28] filter grayscale brightness-[0.62]">
+                <video autoplay muted loop playsinline preload="metadata" class="hero-video w-full h-full object-cover opacity-[0.42] filter grayscale brightness-[0.78]">
                     <source src="assets/video/hero.mp4" type="video/mp4">
                 </video>
-                <!-- Dynamic Mesh Gradient — kept soft so video stays readable -->
-                <div class="hero-mesh absolute inset-0 opacity-[0.22] mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 42%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 44%);"></div>
-                <!-- Glass Overlay -->
-                <div class="hero-glass absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/25 to-primary/90"></div>
+                <!-- Dynamic Mesh Gradient — soft lime wash -->
+                <div class="hero-mesh absolute inset-0 opacity-[0.28] mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 42%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 44%);"></div>
+                <!-- Subtle lime ambient glow -->
+                <div class="hero-glow" aria-hidden="true"></div>
+                <!-- Glass Overlay — lighter so video + glow read through -->
+                <div class="hero-glass absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/12 to-primary/75"></div>
                 <!-- Noise Texture -->
                 <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
             </div>
@@ -137,23 +139,23 @@
                         <span class="text-white font-black text-[10px] tracking-[0.28em] uppercase">Software House</span>
                     </div>
 
-                    <h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="200">
+                    <h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="120">
                         <span class="hero-eyebrow block text-zinc-400 font-semibold uppercase">
-                            Apps, sistemas e IA
+                            Desenvolvimento de sites e apps
                         </span>
                         <span class="hero-display block font-black tracking-tighter text-white uppercase italic">
-                            Na mão do<br>
-                            <span class="text-todoz text-glow not-italic">cliente.</span>
+                            Do briefing<br>
+                            <span class="text-todoz text-glow not-italic">ao ar.</span>
                         </span>
                     </h1>
 
                     <!-- Paragraph -->
-                    <p class="hero-lead text-zinc-400 max-w-xl mx-auto leading-relaxed text-center font-medium" data-aos="fade-up" data-aos-delay="400">
-                        Do briefing ao produto no ar — apps, sistemas e IA para <span class="text-white">operar</span>, <span class="text-white">vender</span> e cortar retrabalho. Do Facíleme ao Let's Work.
+                    <p class="hero-lead text-zinc-400 max-w-xl mx-auto leading-relaxed text-center font-medium" data-aos="fade-up" data-aos-delay="220">
+                        Software house que entrega sites, aplicativos e sistemas sob medida — do UX ao deploy, com produto publicado pra <span class="text-white">operar</span> e <span class="text-white">vender</span>. Do Facíleme ao Let's Work.
                     </p>
 
                     <!-- CTAs -->
-                    <div class="hero-ctas flex flex-col sm:flex-row items-center justify-center w-full" data-aos="fade-up" data-aos-delay="600">
+                    <div class="hero-ctas flex flex-col sm:flex-row items-center justify-center w-full" data-aos="fade-up" data-aos-delay="320">
                         <a href="https://wa.me/551155311779" target="_blank" class="hero-cta magnetic bg-todoz group relative text-black font-black rounded-full uppercase flex items-center justify-center gap-3">
                             Iniciar projeto
                             <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
@@ -166,7 +168,7 @@
                     </div>
 
                     <!-- Product logos — evenly spaced; scroll cue sits below (not between logos) -->
-                    <div class="hero-logos" data-aos="fade-up" data-aos-delay="800">
+                    <div class="hero-logos" data-aos="fade-up" data-aos-delay="400">
                         <a href="#produtos" class="hero-logo" aria-label="Facíleme">
                             <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme" width="213" height="82" loading="lazy">
                         </a>
@@ -181,7 +183,7 @@
                         </a>
                     </div>
 
-                    <div class="hero-scroll-cue" aria-hidden="true" data-aos="fade-up" data-aos-delay="950">
+                    <div class="hero-scroll-cue" aria-hidden="true">
                         <div class="hero-scroll-pill">
                             <div class="hero-scroll-dot"></div>
                         </div>
