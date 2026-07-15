@@ -86,7 +86,7 @@ const initContactModal = () => {
     const modal = document.querySelector("#contact-modal");
     if (!modal) return;
 
-    const openBtns = document.querySelectorAll(".open-modal");
+    const openBtns = document.querySelectorAll("button.open-modal, a.open-modal");
     const closeBtn = document.querySelector("#close-modal");
     const openModal = () => openSiteModal(modal);
     const closeModal = () => closeSiteModal(modal);

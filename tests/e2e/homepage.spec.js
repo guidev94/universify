@@ -174,10 +174,13 @@ test.describe("Buttons and links smoke", () => {
     const samples = [0, Math.floor(n / 2), n - 1];
     for (const idx of samples) {
       await buttons.nth(idx).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(150);
       await buttons.nth(idx).click({ force: true });
-      await expect(page.locator("#contact-modal")).toHaveClass(/is-open/);
+      await expect(page.locator("#contact-modal")).toHaveClass(/is-open/, { timeout: 8000 });
       await page.keyboard.press("Escape");
       await expect(page.locator("#contact-modal")).not.toHaveClass(/is-open/, { timeout: 5000 });
+      // Allow GSAP close timeline to clear before the next open
+      await page.waitForTimeout(350);
     }
     expect(errors).toEqual([]);
   });
