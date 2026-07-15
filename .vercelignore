@@ -10,6 +10,6 @@ design-system
 *.log
 .DS_Store
 /hero.mp4
-index (copiar 1).html
-index (copiar 2).html
-Gemini_Generated_Image_hw7heehw7heehw7h.png
+index (copiar*).html
+Gemini_Generated_Image_*.png
+/Logotipos-*.png

@@ -6,9 +6,14 @@ blob-report/
 .vercel/
 *.log
 .DS_Store
+
+# Local design dumps — not used by the live site
 design-system/
+
 # Original 4K hero (~64MB) — deploy uses compressed assets/video/hero.mp4
 /hero.mp4
-index (copiar 1).html
-index (copiar 2).html
+
+# Duplicate HTML copies and AI/image dumps at repo root
+index (copiar*).html
 Gemini_Generated_Image_*.png
+/Logotipos-*.png
