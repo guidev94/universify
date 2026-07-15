@@ -317,6 +317,87 @@ h1, h2, h3, h4,
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 84%, transparent 100%);
 }
 
+/* Clientes logos — centered flex wrap (no awkward empty grid cell for 5 logos) */
+.clientes-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1.75rem 2rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    max-width: 56rem;
+    opacity: 0.6;
+}
+
+.clientes-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 1 auto;
+    width: min(42vw, 9.5rem);
+    height: 2.25rem;
+    margin: 0;
+}
+
+.clientes-logo__img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+    object-fit: contain;
+    object-position: center;
+    filter: brightness(0) invert(1);
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.clientes-logo:hover .clientes-logo__img,
+.clientes-logo:focus-within .clientes-logo__img {
+    filter: none;
+}
+
+@media (min-width: 640px) {
+    .clientes-logos {
+        gap: 2rem 2.5rem;
+    }
+
+    .clientes-logo {
+        width: 10.5rem;
+        height: 2.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .clientes-logos {
+        gap: 2.25rem 3rem;
+    }
+
+    .clientes-logo {
+        width: 11.5rem;
+        height: 3.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .clientes-logos {
+        /* Single centered row of 5 on desktop */
+        gap: 2.5rem 2.75rem;
+        max-width: 72rem;
+        flex-wrap: nowrap;
+    }
+
+    .clientes-logo {
+        width: 11rem;
+        height: 3.5rem;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 12rem;
+    }
+}
+
 /* Sobre — bilateral into clientes above and missao below (no z-index fight) */
 #sobre {
     background-color: transparent;
