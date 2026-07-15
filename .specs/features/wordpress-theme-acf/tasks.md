@@ -79,7 +79,7 @@
 ### T12: Commit + push
 - **What**: Commit theme, specs, backup; push to origin
 - **Done when**: Commit hash known; push status reported
-- **Status**: In progress
+- **Status**: Complete
 
 ---
 

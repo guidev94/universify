@@ -25,7 +25,7 @@
 - [x] Spec-Driven wordpress-theme-acf
 - [x] Backup static HTML
 - [x] Theme scaffold + ACF/CPT/templates
-- [ ] Commit + push
+- [x] Commit + push
 
 ## Deferred
 
