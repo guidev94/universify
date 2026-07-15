@@ -1,9 +1,11 @@
 # State
 
-**Last updated:** 2026-07-15  
+**Last updated:** 2026-07-15 (light contrast pass)  
 **Session:** Copy IA-first (agentes / automações / integrações)
 
 ## Decisions
+
+- Light theme contrast: portfolio/case meta/blog author remapped to ink on light canvas; dark bands (hero/footer/overlays) keep light type; lime `#CFFF04` kept with `--wv-display-glow` shadows.
 
 - Messaging comercial centra em **Criação de Agentes**, **Automações** e **Integração de Sistemas**; apps/sites como veículos de entrega.
 - Copy espelhada em `index.html` + `wvtodoz-theme/` (`defaults.php`, seed, ACF defaults).
