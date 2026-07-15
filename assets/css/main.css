@@ -3402,10 +3402,10 @@ footer ul li a:hover {
         letter-spacing: 0.11em;
     }
 
-    /* Hero readability — lighter veil so video + lime glow remain visible */
+    /* Hero readability — slight veil darken (~10%) for text contrast; keep lime glow */
     #hero .hero-video {
-        opacity: 0.5;
-        filter: grayscale(0.55) brightness(0.86);
+        opacity: 0.45;
+        filter: grayscale(0.55) brightness(0.77);
     }
 
     #hero .hero-mesh {
