@@ -18,14 +18,17 @@ $lead = (string) wv_field('wv_produtos_lead', $d['lead']);
 $cards = [];
 $posts = wv_query_posts('wv_produto');
 $light_logo_default = WVTODOZ_URI . '/assets/img/produtos/letswork-logo-light.webp';
+$light_logo_cdn = 'https://www.letswork.com.br/wp-content/themes/letswork2022/assets/img/logo.webp';
 if ($posts) {
 	foreach ($posts as $p) {
 		$logo = get_the_post_thumbnail_url($p, 'full') ?: '';
 		$featured = function_exists('get_field') ? (bool) get_field('wv_produto_featured', $p->ID) : false;
 		$title = get_the_title($p);
 		$logo_light = '';
+		$logo_light_fallback = '';
 		if ($featured && (stripos($title, "Let's Work") !== false || stripos($logo, 'letswork') !== false)) {
 			$logo_light = $light_logo_default;
+			$logo_light_fallback = $light_logo_cdn;
 		}
 		$cards[] = [
 			'featured' => $featured,
@@ -36,6 +39,7 @@ if ($posts) {
 			'desc' => wp_strip_all_tags(get_the_content(null, false, $p)),
 			'logo' => $logo,
 			'logo_light' => $logo_light,
+			'logo_light_fallback' => $logo_light_fallback,
 			'highlights' => function_exists('get_field') ? (string) get_field('wv_produto_highlights', $p->ID) : '',
 			'primary_label' => function_exists('get_field') ? (string) get_field('wv_produto_primary_label', $p->ID) : '',
 			'primary_url' => function_exists('get_field') ? (string) get_field('wv_produto_primary_url', $p->ID) : '',
@@ -82,7 +86,15 @@ if (!$cards) {
 					<?php if (!empty($card['logo']) || !empty($card['logo_light'])) : ?>
 					<div class="produto-brand">
 						<?php if (!empty($card['logo_light']) && !empty($card['logo'])) : ?>
-						<img src="<?php echo esc_url($card['logo_light']); ?>" alt="<?php echo esc_attr($card['title']); ?>" class="produto-logo produto-logo--light" loading="lazy">
+						<img
+							src="<?php echo esc_url($card['logo_light']); ?>"
+							alt="<?php echo esc_attr($card['title']); ?>"
+							class="produto-logo produto-logo--light"
+							loading="lazy"
+							<?php if (!empty($card['logo_light_fallback'])) : ?>
+							onerror="this.onerror=null;this.src='<?php echo esc_url($card['logo_light_fallback']); ?>'"
+							<?php endif; ?>
+						>
 						<img src="<?php echo esc_url($card['logo']); ?>" alt="" class="produto-logo produto-logo--dark" loading="lazy" aria-hidden="true">
 						<?php else : ?>
 						<img src="<?php echo esc_url(!empty($card['logo']) ? $card['logo'] : $card['logo_light']); ?>" alt="<?php echo esc_attr($card['title']); ?>" class="produto-logo" loading="lazy">
