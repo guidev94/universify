@@ -10,6 +10,11 @@ if (!defined('ABSPATH')) {
 }
 
 $d = wv_defaults()['mobile_bridge'];
+$line1 = (string) wv_field('wv_bridge_line1', $d['line1']);
+$line2_prefix = (string) wv_field('wv_bridge_line2_prefix', $d['line2_prefix']);
+$accent = (string) wv_field('wv_bridge_accent', $d['accent']);
+$line3 = (string) wv_field('wv_bridge_line3', $d['line3']);
+$line4 = (string) wv_field('wv_bridge_line4', $d['line4']);
 $eyebrow = (string) wv_field('wv_bridge_eyebrow', $d['eyebrow']);
 $lead = (string) wv_field('wv_bridge_lead', $d['lead']);
 $cta = (string) wv_field('wv_bridge_cta', $d['cta']);
@@ -20,10 +25,10 @@ $cta = (string) wv_field('wv_bridge_cta', $d['cta']);
 			<div class="mobile-bridge-grid">
 				<div class="mobile-bridge-headline">
 					<h3 class="mobile-bridge-title">
-						<span class="mobile-bridge-quote" aria-hidden="true">“</span>O mundo<br>
-						é <span class="mobile-bridge-accent">mobile,</span><br>
-						sua empresa<br>
-						deve ser.<span class="mobile-bridge-quote mobile-bridge-quote--close" aria-hidden="true">”</span>
+						<span class="mobile-bridge-quote" aria-hidden="true">“</span><?php echo esc_html($line1); ?><br>
+						<?php echo esc_html($line2_prefix); ?> <span class="mobile-bridge-accent"><?php echo esc_html($accent); ?></span><br>
+						<?php echo esc_html($line3); ?><br>
+						<?php echo esc_html($line4); ?><span class="mobile-bridge-quote mobile-bridge-quote--close" aria-hidden="true">”</span>
 					</h3>
 				</div>
 				<div class="mobile-bridge-copy">

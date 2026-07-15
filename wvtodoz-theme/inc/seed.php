@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.1.0';
+const WV_SEED_VERSION = '1.2.0';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -181,6 +181,11 @@ function wv_run_seed(bool $force = false): bool {
 		'wv_missao_product_a'      => $missao['product_a'],
 		'wv_missao_product_b'      => $missao['product_b'],
 		'wv_missao_cta'            => $missao['cta'],
+		'wv_bridge_line1'          => $bridge['line1'],
+		'wv_bridge_line2_prefix'   => $bridge['line2_prefix'],
+		'wv_bridge_accent'         => $bridge['accent'],
+		'wv_bridge_line3'          => $bridge['line3'],
+		'wv_bridge_line4'          => $bridge['line4'],
 		'wv_bridge_eyebrow'        => $bridge['eyebrow'],
 		'wv_bridge_lead'           => $bridge['lead'],
 		'wv_bridge_cta'            => $bridge['cta'],
@@ -431,12 +436,22 @@ function wv_seed_attach_acf_image(int $post_id, string $field, string $source, s
 }
 
 /**
- * Admin notice + import action.
+ * Admin notice when seed not done (or after theme switch prompt).
  */
 add_action('admin_notices', static function (): void {
-	if (!current_user_can('manage_options') || get_option(WV_SEED_OPTION)) {
+	if (!current_user_can('manage_options')) {
 		return;
 	}
+	$done = get_option(WV_SEED_OPTION);
+	$prompt = (bool) get_transient('wv_seed_prompt');
+	if ($done && !$prompt) {
+		return;
+	}
+	if ($done) {
+		delete_transient('wv_seed_prompt');
+		return;
+	}
+
 	$screen = function_exists('get_current_screen') ? get_current_screen() : null;
 	$allowed = ['dashboard', 'themes', 'appearance_page_wv-seed'];
 	if ($screen && !in_array($screen->id, $allowed, true) && $screen->base !== 'dashboard') {
@@ -448,6 +463,7 @@ add_action('admin_notices', static function (): void {
 	echo '<strong>' . esc_html__('WV Todoz:', 'wvtodoz') . '</strong> ';
 	echo esc_html__('Importe o conteúdo da landing (Home + Cases, Produtos, Clientes, Serviços e Insights) com um clique.', 'wvtodoz');
 	echo ' <a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</a>';
+	echo ' <a href="' . esc_url(admin_url('themes.php?page=wv-seed')) . '">' . esc_html__('Aparência → Importar WV', 'wvtodoz') . '</a>';
 	echo '</p></div>';
 });
 
@@ -458,8 +474,9 @@ add_action('admin_post_wv_import_content', static function (): void {
 	check_admin_referer('wv_import_content');
 	$force = isset($_GET['force']) && $_GET['force'] === '1';
 	$ok = wv_run_seed($force);
+	delete_transient('wv_seed_prompt');
 	$redirect = add_query_arg(
-		['wv_seed' => $ok ? 'ok' : 'fail'],
+		['page' => 'wv-seed', 'wv_seed' => $ok ? 'ok' : 'fail'],
 		admin_url('themes.php')
 	);
 	wp_safe_redirect($redirect);
@@ -479,7 +496,7 @@ add_action('admin_notices', static function (): void {
 });
 
 /**
- * Tools submenu — re-import anytime.
+ * Aparência → Importar WV — import / reimport anytime.
  */
 add_action('admin_menu', static function (): void {
 	add_theme_page(
@@ -495,10 +512,21 @@ add_action('admin_menu', static function (): void {
 			$url = wp_nonce_url(admin_url('admin-post.php?action=wv_import_content'), 'wv_import_content');
 			$force = wp_nonce_url(admin_url('admin-post.php?action=wv_import_content&force=1'), 'wv_import_content');
 			echo '<div class="wrap"><h1>' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</h1>';
-			echo '<p>' . esc_html__('Cria/atualiza a Front Page Home com campos ACF e popula Cases, Produtos, Clientes, Serviços e Insights a partir do conteúdo estático.', 'wvtodoz') . '</p>';
+			echo '<p>' . esc_html__('Cria/atualiza a Front Page Home com campos ACF e popula Cases, Produtos, Clientes, Serviços e Insights a partir do conteúdo estático atual (agentes, automações e integrações).', 'wvtodoz') . '</p>';
+			echo '<ol style="list-style:decimal;margin-left:1.25rem">';
+			echo '<li>' . esc_html__('Ative o plugin Advanced Custom Fields (free).', 'wvtodoz') . '</li>';
+			echo '<li>' . esc_html__('Clique em Importar (ou Reimportar para sobrescrever textos).', 'wvtodoz') . '</li>';
+			echo '<li>' . esc_html__('Edite a página Home (abas ACF) e os menus Cases / Produtos / Clientes / Serviços.', 'wvtodoz') . '</li>';
+			echo '</ol>';
+			echo '<p><strong>' . esc_html__('Nota:', 'wvtodoz') . '</strong> ' . esc_html__('Reimportar atualiza textos e CPTs. Imagens já anexadas (thumbnail / ACF image) não são baixadas de novo.', 'wvtodoz') . '</p>';
 			if ($done) {
-				echo '<p><em>' . esc_html__('Seed já executado.', 'wvtodoz') . '</em></p>';
-				echo '<p><a class="button" href="' . esc_url($force) . '">' . esc_html__('Reimportar / atualizar', 'wvtodoz') . '</a></p>';
+				$ver = is_array($done) && isset($done['version']) ? (string) $done['version'] : '';
+				echo '<p><em>' . esc_html__('Seed já executado.', 'wvtodoz');
+				if ($ver !== '') {
+					echo ' ' . esc_html(sprintf(/* translators: %s seed version */ __('Versão: %s', 'wvtodoz'), $ver));
+				}
+				echo '</em></p>';
+				echo '<p><a class="button button-primary" href="' . esc_url($force) . '">' . esc_html__('Reimportar / atualizar', 'wvtodoz') . '</a></p>';
 			} else {
 				echo '<p><a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</a></p>';
 			}

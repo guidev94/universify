@@ -79,6 +79,11 @@ add_action('acf/init', static function (): void {
 			],
 			wv_acf_tab('tab_bridge', 'Mobile Bridge'),
 			[
+				wv_acf_text('wv_bridge_line1', 'Headline linha 1', 'O mundo'),
+				wv_acf_text('wv_bridge_line2_prefix', 'Headline linha 2 (prefixo)', 'é'),
+				wv_acf_text('wv_bridge_accent', 'Headline destaque (lime)', 'mobile,'),
+				wv_acf_text('wv_bridge_line3', 'Headline linha 3', 'sua empresa'),
+				wv_acf_text('wv_bridge_line4', 'Headline linha 4', 'deve ser.'),
 				wv_acf_text('wv_bridge_eyebrow', 'Eyebrow'),
 				wv_acf_textarea('wv_bridge_lead', 'Lead'),
 				wv_acf_text('wv_bridge_cta', 'CTA', 'Quero conversar'),

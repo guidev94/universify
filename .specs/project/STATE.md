@@ -1,19 +1,16 @@
 # State
 
-**Last updated:** 2026-07-15 (light contrast pass)  
-**Session:** Copy IA-first (agentes / automações / integrações)
+**Last updated:** 2026-07-15 (theme readiness wrap-up)  
+**Session:** WP theme 100% + light logos + produtos/responsive
 
 ## Decisions
 
-- Light theme contrast: portfolio/case meta/blog author remapped to ink on light canvas; dark bands (hero/footer/overlays) keep light type; lime `#CFFF04` kept with `--wv-display-glow` shadows.
-
-- Messaging comercial centra em **Criação de Agentes**, **Automações** e **Integração de Sistemas**; apps/sites como veículos de entrega.
-- Copy espelhada em `index.html` + `wvtodoz-theme/` (`defaults.php`, seed, ACF defaults).
-- Tema em `wvtodoz-theme/` na raiz do repo (zip-ready), não sob `wordpress/wp-content/`.
-- ACF free only: Home page field groups + CPTs para repetíveis (sem Options Page / Repeater).
-- Fallbacks em `inc/defaults.php` preservam copy/visual do HTML estático quando Admin ainda vazio.
-- Backup em `backups/static-v3-20260715/` (originais não deletados).
-- Push `origin/master` (+ `origin/main` se tracking permitir, sem force).
+- Dual logos: `logo-wv-light.svg` (green WV_ + black TODOZ) / `logo-wv-dark.svg` (green + white); CSS toggle by theme + scrolled header.
+- Light `#produtos`: white cards, ink type, olive subtitles, dark chip for Let's Work logo.
+- Messaging: agentes / automações / integrações; seed v1.2.0 from `defaults.php`.
+- Tema em `wvtodoz-theme/` na raiz (zip-ready). ACF free + CPTs.
+- Admin: **Aparência → Importar WV**; footer produtos via CPT.
+- Push `origin/master` e `origin/main` (sem force).
 
 ## Blockers
 
@@ -22,13 +19,15 @@
 ## Lessons
 
 - ACF free: tabs + text/image/url/wysiwyg/true_false/select/file OK; Gallery/Repeater/Flexible/Options = Pro.
-- `get_field` deve ser guarded com `function_exists` para o tema não fatalar sem o plugin.
+- `get_field` / `wv_field` guarded; `wv_field` aceita `$post_id` opcional para CPT.
 
 ## Todos
 
 - [x] Spec-Driven wordpress-theme-acf
 - [x] Backup static HTML
 - [x] Theme scaffold + ACF/CPT/templates
+- [x] Light logos + produtos/responsive
+- [x] Seed/README readiness
 - [x] Commit + push
 
 ## Deferred

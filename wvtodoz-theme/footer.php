@@ -82,10 +82,38 @@ $home  = home_url('/');
 			<div class="md:col-span-3 uppercase">
 				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php esc_html_e('Produtos', 'wvtodoz'); ?></h5>
 				<ul class="space-y-4 text-zinc-500 font-bold text-sm">
-					<li><a href="https://www.facileme.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Store</a></li>
-					<li><a href="https://www.facilemeingresso.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Ingresso</a></li>
-					<li><a href="https://www.wvtodoz.com.br/facileme-cursos/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Cursos</a></li>
-					<li><a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Let's Work Facial</a></li>
+					<?php
+					$footer_products = [];
+					foreach (wv_query_posts('wv_produto') as $p) {
+						$url = (string) wv_field('wv_produto_primary_url', '', $p->ID);
+						if ($url === '') {
+							continue;
+						}
+						$footer_products[] = [
+							'label' => get_the_title($p),
+							'url'   => $url,
+						];
+					}
+					if (!$footer_products) {
+						foreach ($d['produtos_cards'] as $card) {
+							$url = (string) ($card['primary_url'] ?? '');
+							if ($url === '') {
+								continue;
+							}
+							$footer_products[] = [
+								'label' => (string) ($card['title'] ?? ''),
+								'url'   => $url,
+							];
+						}
+					}
+					foreach ($footer_products as $item) {
+						printf(
+							'<li><a href="%s" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">%s</a></li>',
+							esc_url($item['url']),
+							esc_html($item['label'])
+						);
+					}
+					?>
 				</ul>
 			</div>
 			<div class="md:col-span-3 uppercase">

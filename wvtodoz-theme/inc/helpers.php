@@ -18,16 +18,21 @@ function wv_home_id(): int {
 
 /**
  * Get ACF field from Front Page with fallback.
+ * Pass $post_id to read from another post (e.g. CPT).
  *
  * @param mixed $default
  * @return mixed
  */
-function wv_field(string $key, $default = '') {
+function wv_field(string $key, $default = '', ?int $post_id = null) {
 	if (!function_exists('get_field')) {
+		if ($post_id) {
+			$meta = get_post_meta($post_id, $key, true);
+			return ($meta === '' || $meta === false || $meta === null) ? $default : $meta;
+		}
 		return $default;
 	}
-	$post_id = wv_home_id();
-	$value = $post_id ? get_field($key, $post_id) : get_field($key);
+	$target = $post_id ?? wv_home_id();
+	$value = $target ? get_field($key, $target) : get_field($key);
 	if ($value === null || $value === false || $value === '') {
 		return $default;
 	}
