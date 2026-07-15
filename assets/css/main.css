@@ -1288,6 +1288,24 @@ h1, h2, h3, h4,
     hyphens: none;
 }
 
+.mobile-bridge-quote {
+    display: inline-block;
+    color: color-mix(in srgb, var(--todoz) 55%, transparent);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 0;
+    vertical-align: -0.15em;
+    margin-right: 0.02em;
+    user-select: none;
+    pointer-events: none;
+}
+
+.mobile-bridge-quote--close {
+    margin-right: 0;
+    margin-left: 0.06em;
+    vertical-align: -0.05em;
+}
+
 .mobile-bridge-accent {
     color: var(--todoz);
 }
