@@ -21,3 +21,4 @@ require_once WVTODOZ_DIR . '/inc/helpers.php';
 require_once WVTODOZ_DIR . '/inc/enqueue.php';
 require_once WVTODOZ_DIR . '/inc/cpt.php';
 require_once WVTODOZ_DIR . '/inc/acf-fields.php';
+require_once WVTODOZ_DIR . '/inc/seed.php';

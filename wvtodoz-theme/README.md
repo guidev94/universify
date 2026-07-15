@@ -13,20 +13,39 @@ Tema standalone da landing page WV_Todoz. Conteúdo editável no Admin via **ACF
 1. Copie a pasta `wvtodoz-theme/` para `wp-content/themes/wvtodoz-theme/` (ou zip a pasta e use Aparência → Temas → Adicionar).
 2. Ative o tema **WV Todoz**.
 3. Instale e ative o plugin **Advanced Custom Fields** (free).
-4. Crie uma Página chamada **Home** (conteúdo vazio).
-5. Em **Configurações → Leitura**:
-   - Marque “Uma página estática”
-   - Página inicial: **Home**
-6. (Opcional) Aparência → Personalizar → Identidade do site → Logo.
-7. (Opcional) Aparência → Menus → atribua menus a **Menu principal**, **Menu mobile**, **Menu rodapé**.
+4. Importe o conteúdo (recomendado — ver abaixo) **ou** configure a Home manualmente.
+5. (Opcional) Aparência → Personalizar → Identidade do site → Logo.
+6. (Opcional) Aparência → Menus → atribua menus a **Menu principal**, **Menu mobile**, **Menu rodapé**.
 
 Os grupos de campos ACF são registrados em PHP (`inc/acf-fields.php`) e aparecem automaticamente na página Home (Front Page).
+
+Thumbnail do tema: `screenshot.png` (1200×900) — aparece em Aparência → Temas.
+
+## Seed de conteúdo (recomendado)
+
+O tema inclui importador idempotente (`inc/seed.php`) que pré-carrega **todo o conteúdo atual do `index.html`** na Home + CPTs.
+
+### Como usar
+
+1. Ative o tema e o ACF free.
+2. No Admin, um aviso **“Importar conteúdo WV”** aparece no Dashboard / Aparência → Temas.
+3. Clique no botão **Importar conteúdo WV**.
+4. Alternativa: **Aparência → Importar WV** (reimportar com “Reimportar / atualizar” se necessário).
+
+### O que o seed faz
+
+- Cria/atualiza a página **Home** e define como Front Page (`Configurações → Leitura`)
+- Preenche todos os campos ACF da Home (hero, clientes title, sobre, missão, mobile-bridge, serviços/processo, portfólio, produtos intro, aplicações, blog intro, contato, footer, WhatsApp, strings de modais/CTAs)
+- Publica CPTs: **Cases**, **Produtos**, **Clientes**, **Serviços** (títulos, textos, imagens, ordem)
+- Publica 3 posts **Insights** com imagens locais do tema
+- Usa `update_field` quando ACF está ativo; senão `update_post_meta` com as mesmas keys
+- Marca a opção `wv_seed_done` para não repetir o aviso (reimportação forçada disponível na tela Importar WV)
 
 ## Onde editar o quê
 
 | Conteúdo | Onde |
 |----------|------|
-| Hero, Sobre, Missão, Mobile Bridge, intros, Aplicações, Contato, Footer, WhatsApp | Página **Home** → campos ACF (abas) |
+| Hero, Sobre, Missão, Mobile Bridge, intros, Aplicações, Contato, Footer, WhatsApp, modais | Página **Home** → campos ACF (abas) |
 | Cases do portfólio | CPT **Cases** |
 | Cards de produtos | CPT **Produtos** |
 | Logos de clientes | CPT **Clientes** (imagem destacada) |
@@ -46,31 +65,24 @@ Itens repetíveis usam **CPTs**. Passos do processo (4) e benefícios de aplica�
 
 Enquanto não houver posts nos CPTs, o tema renderiza **fallbacks** iguais ao HTML estático original.
 
-## Seed rápido (recomendado)
-
-1. Publique 5 **Cases** com imagem destacada + campos categoria/meta (ordem via Atributos da página → Ordem).
-2. Publique 4 **Produtos** com logo na imagem destacada.
-3. Publique logos em **Clientes**.
-4. Publique 5 **Serviços** com variante de layout (featured/tall/mobile/ia/produtos).
-5. Publique 3+ **Posts** com imagem destacada para a seção Insights.
-
 ## Estrutura
 
 ```
 wvtodoz-theme/
 ├── style.css
+├── screenshot.png
 ├── functions.php
 ├── front-page.php
 ├── header.php / footer.php
 ├── single.php / page.php / index.php
-├── inc/          # setup, enqueue, cpt, acf-fields, helpers, defaults
+├── inc/          # setup, enqueue, cpt, acf-fields, helpers, defaults, seed
 ├── template-parts/sections/
 └── assets/       # css, js, img, video (cópia do site estático)
 ```
 
 ## Stack front-end
 
-Mesma do site estático: Tailwind CDN, Phosphor Icons, GSAP + ScrollTrigger, Lenis, AOS, `assets/css/main.css`.
+Mesma do site estático: Tailwind CDN, Phosphor Icons, GSAP + ScrollTrigger, Lenis, AOS, `assets/css/main.css`. Tema claro é o padrão (toggle no header).
 
 ## Segurança
 
