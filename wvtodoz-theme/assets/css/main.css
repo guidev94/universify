@@ -60,15 +60,8 @@ html.lenis {
     --wv-nav: #52525b;
     --wv-nav-scrolled: #27272a;
     --wv-display: #0a0a0a;
-    /* Edge + glow so logo lime stays readable on light surfaces.
-       text-shadow has no spread radius — use 4-axis 1px offsets (not 0 0 0 1px). */
-    --wv-display-glow:
-        0 1px 0 rgba(10, 10, 10, 0.55),
-        0 -1px 0 rgba(10, 10, 10, 0.35),
-        1px 0 0 rgba(10, 10, 10, 0.35),
-        -1px 0 0 rgba(10, 10, 10, 0.35),
-        0 2px 4px rgba(10, 10, 10, 0.16),
-        0 0 28px rgba(207, 255, 4, 0.4);
+    /* No hard outline on cream — olive ink carries contrast; soft glow is optional elsewhere. */
+    --wv-display-glow: none;
     /* Tiny eyebrows/pills — dark olive ink (lime alone fails on white) */
     --wv-lime-label: #243000;
     --wv-lime-pill-bg: rgba(207, 255, 4, 0.4);
@@ -4767,12 +4760,11 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
-/* Lime Tailwind utility — logo green on light; readable link green for tiny chrome */
+/* Lime Tailwind utility on cream — olive ink, no stroke/halo (neon fails on light) */
 [data-theme="light"] .text-todoz {
-    color: var(--todoz) !important;
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.4),
-        0 0 18px rgba(207, 255, 4, 0.28);
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
 [data-theme="light"] #hero .text-todoz,
@@ -4803,13 +4795,16 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .portfolio-section .section-display-accent {
-    color: var(--todoz);
-    text-shadow: var(--wv-display-glow);
+    color: #CFFF04;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
 }
 
+/* Portfolio title accent spans — neon, no outline (eyebrows stay olive below) */
 [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
-    color: var(--todoz) !important;
-    text-shadow: var(--wv-display-glow);
+    color: #CFFF04 !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
 [data-theme="light"] .portfolio-section .text-zinc-400,
@@ -4955,14 +4950,14 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
-/* Large lime accents on light canvas — keep brand lime + strong outline */
+/* Cream-canvas large accents — brand neon, no outline (not olive) */
 [data-theme="light"] #clientes .text-todoz,
-[data-theme="light"] #sobre .text-todoz,
 [data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
 [data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
 [data-theme="light"] #produtos .text-todoz:not(.section-eyebrow) {
-    color: var(--todoz) !important;
-    text-shadow: var(--wv-display-glow);
+    color: #CFFF04 !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
 /*
@@ -5398,10 +5393,9 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .servicos-card-title .text-todoz {
-    color: var(--todoz) !important;
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.45),
-        0 0 16px rgba(207, 255, 4, 0.3);
+    color: #CFFF04 !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
 [data-theme="light"] .servicos-card-icon {
@@ -5451,10 +5445,8 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .servicos-inline-link {
-    color: var(--todoz);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.35),
-        0 0 14px rgba(207, 255, 4, 0.22);
+    color: var(--wv-lime-label);
+    text-shadow: none;
 }
 
 [data-theme="light"] .servicos-quote-link,
@@ -5521,23 +5513,25 @@ body.modal-open .wa-float {
     background: rgba(207, 255, 4, 0.12);
 }
 
+[data-theme="light"] .mobile-bridge-accent {
+    color: #CFFF04;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+}
+
+[data-theme="light"] .aplicacoes-cta {
+    color: var(--wv-lime-label);
+    border-color: rgba(36, 48, 0, 0.42);
+    background: transparent;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+}
+
 [data-theme="light"] .aplicacoes-cta:hover {
     background: var(--todoz);
     border-color: var(--todoz);
     color: #0a0a0a;
-}
-
-[data-theme="light"] .mobile-bridge-accent {
-    color: var(--todoz);
-    text-shadow: var(--wv-display-glow);
-}
-
-[data-theme="light"] .aplicacoes-cta {
-    color: var(--todoz);
-    border-color: rgba(207, 255, 4, 0.55);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.35),
-        0 0 14px rgba(207, 255, 4, 0.22);
+    text-shadow: none;
 }
 
 [data-theme="light"] .aplicacoes-chip-kicker {
@@ -5551,12 +5545,25 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .mobile-bridge-cta {
-    color: var(--wv-ink);
-    border-color: rgba(207, 255, 4, 0.55);
-    background: rgba(207, 255, 4, 0.16);
+    color: var(--wv-lime-label);
+    border-color: rgba(36, 48, 0, 0.42);
+    background: rgba(207, 255, 4, 0.18);
+    text-shadow: none;
+    -webkit-text-stroke: 0;
 }
 
 [data-theme="light"] .mobile-bridge-cta i {
+    color: var(--wv-lime-label);
+}
+
+[data-theme="light"] .mobile-bridge-cta:hover {
+    color: #0a0a0a;
+    border-color: var(--todoz);
+    background: var(--todoz);
+    text-shadow: none;
+}
+
+[data-theme="light"] .mobile-bridge-cta:hover i {
     color: #0a0a0a;
 }
 
@@ -5642,11 +5649,9 @@ body.modal-open .wa-float {
     opacity: 0.9;
 }
 
+/* Cream surfaces: no glow halo that reads as a dirty outline */
 [data-theme="light"] .text-glow {
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.4),
-        0 0 18px rgba(207, 255, 4, 0.28),
-        0 0 36px rgba(207, 255, 4, 0.14);
+    text-shadow: none;
 }
 
 [data-theme="light"] #hero .text-glow {
@@ -5655,19 +5660,35 @@ body.modal-open .wa-float {
         0 0 40px rgba(207, 255, 4, 0.18);
 }
 
-[data-theme="light"] .section-display-accent {
-    color: var(--todoz);
-    text-shadow: var(--wv-display-glow);
+/*
+ * Large display accents — KEEP brand neon #CFFF04; ONLY kill outline/stroke.
+ * Olive is for micro-labels / outline CTAs, not these titles.
+ */
+[data-theme="light"] .section-display-accent,
+[data-theme="light"] .portfolio-section .section-display-accent,
+[data-theme="light"] .mobile-bridge-accent {
+    color: #CFFF04 !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
+/* Large title greens in sections (not eyebrows / 10px micro labels) */
 [data-theme="light"] #clientes .text-todoz,
-[data-theme="light"] #sobre .text-todoz,
 [data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
 [data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
 [data-theme="light"] #produtos .text-todoz:not(.section-eyebrow),
-[data-theme="light"] .portfolio-section .section-display-accent,
 [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
-    text-shadow: var(--wv-display-glow);
+    color: #CFFF04 !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+/* Sobre micro stats ("Anos de Inovação") — olive for readability on cream */
+[data-theme="light"] #sobre .text-todoz.text-\[10px\],
+[data-theme="light"] #sobre span.text-\[10px\].text-todoz {
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
 /* Missão lime band — high-contrast ink (already dark); tighten footnotes */
@@ -5736,15 +5757,12 @@ body.modal-open .wa-float {
 }
 
 /*
- * Mobile light (≤767px) — last in cascade so it beats desktop lime+outline remaps.
- * Neon lime + 1px text-shadow “outline” washes out on cream phones.
+ * Mobile light (≤767px) — reinforce cream olive remaps (same as desktop).
  */
 @media (max-width: 767px) {
     :root,
     [data-theme="light"] {
-        --wv-display-glow:
-            0 1px 0 rgba(10, 10, 10, 0.5),
-            0 0 16px rgba(207, 255, 4, 0.26);
+        --wv-display-glow: none;
     }
 
     [data-theme="light"] #mobile-menu-content .mobile-menu-link,
@@ -5782,37 +5800,52 @@ body.modal-open .wa-float {
     }
 
     /*
-     * Large lime accents on cream — neon #CFFF04 + any outline/glow fails.
-     * Use dark olive ink (same family as eyebrows); keep neon for fills/CTAs.
+     * Large display accents — neon #CFFF04, no outline (same as desktop).
+     * Olive only for micro-labels / outline CTAs below.
      */
     [data-theme="light"] .section-display-accent,
     [data-theme="light"] .portfolio-section .section-display-accent,
     [data-theme="light"] .servicos-card-title .text-todoz,
-    [data-theme="light"] .servicos-card--featured .servicos-card-title .text-todoz,
     [data-theme="light"] .mobile-bridge-accent,
-    [data-theme="light"] .servicos-inline-link,
     [data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
     [data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
     [data-theme="light"] #produtos .text-todoz:not(.section-eyebrow),
     [data-theme="light"] #clientes .text-todoz,
-    [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow),
-    [data-theme="light"] .text-todoz:not(.section-eyebrow):not(.servicos-eyebrow):not(.aplicacoes-eyebrow):not(.mobile-bridge-eyebrow) {
-        color: #5a6b00 !important;
+    [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
+        color: #CFFF04 !important;
         text-shadow: none !important;
         -webkit-text-stroke: 0 !important;
     }
 
-    /* Hero / dark bands keep brand neon (exclude from olive remap above via section scope) */
+    /* Outline CTAs + inline links on cream — olive for contrast */
+    [data-theme="light"] .aplicacoes-cta,
+    [data-theme="light"] .mobile-bridge-cta,
+    [data-theme="light"] .mobile-bridge-cta i,
+    [data-theme="light"] .servicos-inline-link {
+        color: var(--wv-lime-label) !important;
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    /* Hero / dark bands / dark cards — neon + soft glow OK */
     [data-theme="light"] #hero .text-todoz,
     [data-theme="light"] #hero .text-glow,
     [data-theme="light"] #contato .text-todoz,
     [data-theme="light"] #missao .text-todoz,
     [data-theme="light"] footer .text-todoz,
     [data-theme="light"] .case-card .text-todoz,
+    [data-theme="light"] .servicos-card--featured .servicos-card-title .text-todoz,
     [data-theme="light"] .contato-cta-highlight.text-todoz {
         color: var(--todoz) !important;
         text-shadow: 0 0 18px rgba(207, 255, 4, 0.35) !important;
         -webkit-text-stroke: 0 !important;
+    }
+
+    [data-theme="light"] .mobile-bridge-cta:hover,
+    [data-theme="light"] .mobile-bridge-cta:hover i,
+    [data-theme="light"] .aplicacoes-cta:hover {
+        color: #0a0a0a !important;
+        text-shadow: none !important;
     }
 
     [data-theme="light"] .section-eyebrow,

@@ -131,6 +131,8 @@ function wv_defaults(): array {
 			'instagram' => 'https://www.instagram.com/wvtodoz',
 			'linkedin' => 'https://www.linkedin.com/company/wvtodoz',
 			'youtube' => 'https://www.youtube.com/@wvtodoz',
+			'privacy' => 'https://wa.me/551155311779?text=' . rawurlencode('Olá, gostaria de receber a Política de Privacidade.'),
+			'terms' => 'https://wa.me/551155311779?text=' . rawurlencode('Olá, gostaria de receber os Termos de Uso.'),
 		],
 		'modal' => [
 			'title' => 'VAMOS',
@@ -226,7 +228,7 @@ function wv_defaults(): array {
 			[
 				'featured' => true,
 				'badge' => 'Destaque',
-				'title' => "Let's Work",
+				'title' => "Let's Work Facial",
 				'subtitle' => 'Ponto com Biometria Facial',
 				'desc' => 'Reconhecimento facial e geolocalização para controle de jornada com precisão, segurança e conformidade jurídica.',
 				'logo' => $uri . '/assets/img/produtos/logo-letswork.png',

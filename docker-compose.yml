@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: wvtodoz_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - wvtodoz_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:6.4-php8.2-apache
+    container_name: wvtodoz_wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wvtodoz_wp_data:/var/www/html
+      - ./wvtodoz-theme:/var/www/html/wp-content/themes/wvtodoz-theme
+
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: wvtodoz_wpcli
+    depends_on:
+      - wordpress
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wvtodoz_wp_data:/var/www/html
+      - ./wvtodoz-theme:/var/www/html/wp-content/themes/wvtodoz-theme
+    entrypoint: ["wp"]
+    command: ["--info"]
+
+volumes:
+  wvtodoz_db_data:
+  wvtodoz_wp_data:
