@@ -335,3 +335,24 @@ function wv_default_nav_items(): array {
 		['label' => 'Contato', 'url' => wv_contato_url()],
 	];
 }
+
+/**
+ * Ensure Contato is present in header nav (defaults or WP menus).
+ *
+ * @param array<int, array{label:string,url:string}> $items
+ * @return array<int, array{label:string,url:string}>
+ */
+function wv_nav_ensure_contato(array $items): array {
+	foreach ($items as $item) {
+		$label = strtolower(trim((string) ($item['label'] ?? '')));
+		$url   = strtolower((string) ($item['url'] ?? ''));
+		if ($label === 'contato' || str_contains($url, '/contato')) {
+			return $items;
+		}
+	}
+	$items[] = [
+		'label' => __('Contato', 'wvtodoz'),
+		'url'   => wv_contato_url(),
+	];
+	return $items;
+}

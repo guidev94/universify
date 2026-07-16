@@ -70,6 +70,7 @@ $wv_header_class = 'fixed top-0 w-full z-[100] py-6 transition-all duration-500 
 					}
 				}
 			}
+			$desktop_items = wv_nav_ensure_contato($desktop_items);
 			foreach ($desktop_items as $item) {
 				printf(
 					'<a href="%s" class="hover:text-todoz transition-colors">%s</a>',
@@ -135,6 +136,7 @@ $wv_header_class = 'fixed top-0 w-full z-[100] py-6 transition-all duration-500 
 							}
 						}
 					}
+					$mobile_items = wv_nav_ensure_contato($mobile_items);
 					foreach ($mobile_items as $item) {
 						printf(
 							'<a href="%s" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">%s</a>',

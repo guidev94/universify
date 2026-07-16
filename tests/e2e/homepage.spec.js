@@ -172,6 +172,14 @@ test.describe("Buttons and links smoke", () => {
     await expect(page.locator(".wv-contato-channel--wa")).toBeVisible();
   });
 
+  test("header nav links to Contato", async ({ page }) => {
+    await page.goto("/index.html");
+    const desktop = page.locator('#main-header nav[aria-label="Principal"] a[href="contato.html"]');
+    await expect(desktop).toHaveText(/Contato/i);
+    const mobile = page.locator('#mobile-menu a.mobile-menu-link[href="contato.html"]');
+    await expect(mobile).toHaveText(/Contato/i);
+  });
+
   test("no open-modal button throws", async ({ page }) => {
     await page.goto("/index.html", { waitUntil: "networkidle" });
     const errors = [];
