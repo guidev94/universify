@@ -46,7 +46,8 @@ test.describe("WV homepage structure", () => {
 
   test("produtos has 4 product cards with logos", async ({ page }) => {
     await expect(page.locator("#produtos .produto-card")).toHaveCount(4);
-    await expect(page.locator("#produtos .produto-logo")).toHaveCount(4);
+    // Featured card ships light+dark logo variants (one aria-hidden)
+    await expect(page.locator("#produtos .produto-logo:not([aria-hidden='true'])")).toHaveCount(4);
   });
 });
 
@@ -56,11 +57,12 @@ test.describe("Contact modal", () => {
     await page.waitForFunction(() => window.__wvBooted === true);
   });
 
-  test("opens from NOSSO ECOSSISTEMA and closes on backdrop", async ({ page }) => {
+  test("opens from Agendar consultoria and closes on backdrop", async ({ page }) => {
     const modal = page.locator("#contact-modal");
     await expect(modal).not.toHaveClass(/is-open/);
 
-    await page.getByRole("button", { name: /NOSSO ECOSSISTEMA/i }).click();
+    await page.locator("#sobre").scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: /Agendar consultoria/i }).click();
     await expect(modal).toHaveClass(/is-open/);
     await expect(modal).toHaveAttribute("aria-hidden", "false");
     await expect(page.locator("html")).toHaveClass(/modal-open/);
@@ -82,7 +84,8 @@ test.describe("Contact modal", () => {
   });
 
   test("does not leave ghost overlay after close", async ({ page }) => {
-    await page.getByRole("button", { name: /NOSSO ECOSSISTEMA/i }).click();
+    await page.locator("#sobre").scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: /Agendar consultoria/i }).click();
     await expect(page.locator("#contact-modal")).toHaveClass(/is-open/);
     await page.locator("#close-modal").click();
     await expect(page.locator("#contact-modal")).not.toHaveClass(/is-open/, { timeout: 5000 });

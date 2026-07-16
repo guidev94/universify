@@ -4938,9 +4938,14 @@ body.modal-open .wa-float {
     background: rgba(207, 255, 4, 0.18);
 }
 
+/* Lime CTA fills — always near-black ink (never washed white/light grey) */
+[data-theme="light"] .magnetic.bg-todoz,
+[data-theme="light"] a.bg-todoz,
+[data-theme="light"] button.bg-todoz,
 [data-theme="light"] #main-header .magnetic.bg-todoz,
-[data-theme="light"] #mobile-menu-content .magnetic.bg-todoz {
-    color: #0a0a0a;
+[data-theme="light"] #mobile-menu-content .magnetic.bg-todoz,
+[data-theme="light"] #mobile-menu-content .mobile-menu-cta {
+    color: #0a0a0a !important;
 }
 
 [data-theme="light"] #clientes .text-white {
@@ -5033,25 +5038,64 @@ body.modal-open .wa-float {
 [data-theme="light"] #mobile-menu-content .mobile-menu-link,
 [data-theme="light"] #mobile-menu-content nav a {
     color: var(--wv-ink) !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
 }
 
+/*
+ * Light panel: neon lime (#CFFF04) fails on cream — use olive ink for
+ * hover/active/focus. No glow/outline stroke on menu chrome.
+ */
 [data-theme="light"] #mobile-menu-content .mobile-menu-link:hover,
-[data-theme="light"] #mobile-menu-content nav a:hover {
-    color: var(--todoz) !important;
+[data-theme="light"] #mobile-menu-content nav a:hover,
+[data-theme="light"] #mobile-menu-content .mobile-menu-link:active,
+[data-theme="light"] #mobile-menu-content nav a:active,
+[data-theme="light"] #mobile-menu-content .mobile-menu-link:focus-visible,
+[data-theme="light"] #mobile-menu-content nav a:focus-visible {
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
 }
 
 [data-theme="light"] #mobile-menu-content .mobile-menu-close,
 [data-theme="light"] #mobile-menu-content .text-zinc-400,
 [data-theme="light"] #mobile-menu-content .text-zinc-500 {
     color: var(--wv-muted) !important;
+    text-shadow: none !important;
 }
 
-[data-theme="light"] #mobile-menu-content .mobile-menu-close:hover {
-    color: var(--todoz) !important;
+[data-theme="light"] #mobile-menu-content .mobile-menu-close:hover,
+[data-theme="light"] #mobile-menu-content .mobile-menu-close:focus-visible,
+[data-theme="light"] #mobile-menu-content .mobile-menu-close:active,
+[data-theme="light"] #mobile-menu-content .mobile-menu-footer a:hover,
+[data-theme="light"] #mobile-menu-content .mobile-menu-footer a:focus-visible,
+[data-theme="light"] #mobile-menu-content .mobile-menu-footer a:active {
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
 }
 
 [data-theme="light"] #mobile-menu-content .mobile-menu-cta {
     color: #0a0a0a !important;
+    text-shadow: none !important;
+}
+
+/* Focus — underline/plate, not a neon ring that reads as text-stroke */
+#mobile-menu-content .mobile-menu-link:focus-visible,
+#mobile-menu-content .mobile-menu-close:focus-visible,
+#mobile-menu-content .mobile-menu-cta:focus-visible,
+#mobile-menu-content .mobile-menu-footer a:focus-visible {
+    outline: none;
+    box-shadow: inset 0 -3px 0 0 var(--todoz);
+}
+
+[data-theme="light"] #mobile-menu-content .mobile-menu-link:focus-visible,
+[data-theme="light"] #mobile-menu-content .mobile-menu-close:focus-visible,
+[data-theme="light"] #mobile-menu-content .mobile-menu-footer a:focus-visible {
+    box-shadow: inset 0 -3px 0 0 #5a6b00;
+}
+
+[data-theme="light"] #mobile-menu-content .mobile-menu-cta:focus-visible {
+    box-shadow: 0 0 0 3px rgba(90, 107, 0, 0.45);
+    border-radius: 1rem;
 }
 
 /* Blog cards / bridge chrome (cases stay image overlays — white type) */
@@ -5695,4 +5739,108 @@ body.modal-open .wa-float {
 
 [data-theme="light"] body:not(:has(#hero)) #main-header nav a:not(.magnetic):not(.theme-toggle) {
     color: var(--wv-nav-scrolled);
+}
+
+/*
+ * Mobile light (≤767px) — last in cascade so it beats desktop lime+outline remaps.
+ * Neon lime + 1px text-shadow “outline” washes out on cream phones.
+ */
+@media (max-width: 767px) {
+    :root,
+    [data-theme="light"] {
+        --wv-display-glow:
+            0 1px 0 rgba(10, 10, 10, 0.5),
+            0 0 16px rgba(207, 255, 4, 0.26);
+    }
+
+    [data-theme="light"] #mobile-menu-content .mobile-menu-link,
+    [data-theme="light"] #mobile-menu-content nav a,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-close,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-cta,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-footer a {
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    [data-theme="light"] #mobile-menu-content .mobile-menu-link:hover,
+    [data-theme="light"] #mobile-menu-content nav a:hover,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-link:active,
+    [data-theme="light"] #mobile-menu-content nav a:active,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-link:focus-visible,
+    [data-theme="light"] #mobile-menu-content nav a:focus-visible,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-close:hover,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-close:focus-visible,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-close:active,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-footer a:hover,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-footer a:focus-visible,
+    [data-theme="light"] #mobile-menu-content .mobile-menu-footer a:active {
+        color: var(--wv-lime-label) !important;
+        text-shadow: none !important;
+    }
+
+    /* Micro lime labels on cream canvas only (not dark footer / hero) */
+    [data-theme="light"] #sobre .text-todoz,
+    [data-theme="light"] .site-modal-body .text-todoz.text-\[10px\],
+    [data-theme="light"] #case-modal-category {
+        color: var(--wv-lime-label) !important;
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    /*
+     * Large lime accents on cream — neon #CFFF04 + any outline/glow fails.
+     * Use dark olive ink (same family as eyebrows); keep neon for fills/CTAs.
+     */
+    [data-theme="light"] .section-display-accent,
+    [data-theme="light"] .portfolio-section .section-display-accent,
+    [data-theme="light"] .servicos-card-title .text-todoz,
+    [data-theme="light"] .servicos-card--featured .servicos-card-title .text-todoz,
+    [data-theme="light"] .mobile-bridge-accent,
+    [data-theme="light"] .servicos-inline-link,
+    [data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
+    [data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
+    [data-theme="light"] #produtos .text-todoz:not(.section-eyebrow),
+    [data-theme="light"] #clientes .text-todoz,
+    [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow),
+    [data-theme="light"] .text-todoz:not(.section-eyebrow):not(.servicos-eyebrow):not(.aplicacoes-eyebrow):not(.mobile-bridge-eyebrow) {
+        color: #5a6b00 !important;
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    /* Hero / dark bands keep brand neon (exclude from olive remap above via section scope) */
+    [data-theme="light"] #hero .text-todoz,
+    [data-theme="light"] #hero .text-glow,
+    [data-theme="light"] #contato .text-todoz,
+    [data-theme="light"] #missao .text-todoz,
+    [data-theme="light"] footer .text-todoz,
+    [data-theme="light"] .case-card .text-todoz,
+    [data-theme="light"] .contato-cta-highlight.text-todoz {
+        color: var(--todoz) !important;
+        text-shadow: 0 0 18px rgba(207, 255, 4, 0.35) !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    [data-theme="light"] .section-eyebrow,
+    [data-theme="light"] .servicos-eyebrow,
+    [data-theme="light"] .aplicacoes-eyebrow,
+    [data-theme="light"] .mobile-bridge-eyebrow,
+    [data-theme="light"] .blog-tag {
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+
+    [data-theme="light"] #sobre a.magnetic.bg-white\/5:hover,
+    [data-theme="light"] main a.magnetic.border:hover,
+    [data-theme="light"] #blog a.magnetic.border:hover {
+        color: var(--wv-lime-label) !important;
+        text-shadow: none !important;
+    }
+
+    [data-theme="light"] .magnetic.bg-todoz,
+    [data-theme="light"] a.bg-todoz,
+    [data-theme="light"] button.bg-todoz {
+        color: #0a0a0a !important;
+        text-shadow: none !important;
+    }
 }
