@@ -60,11 +60,14 @@ html.lenis {
     --wv-nav: #52525b;
     --wv-nav-scrolled: #27272a;
     --wv-display: #0a0a0a;
-    /* Shadow/edge so logo lime stays readable on light surfaces */
+    /* Edge + glow so logo lime stays readable on light surfaces.
+       text-shadow has no spread radius — use 4-axis 1px offsets (not 0 0 0 1px). */
     --wv-display-glow:
-        0 1px 0 rgba(10, 10, 10, 0.65),
-        0 0 0 1px rgba(10, 10, 10, 0.22),
-        0 2px 4px rgba(10, 10, 10, 0.18),
+        0 1px 0 rgba(10, 10, 10, 0.55),
+        0 -1px 0 rgba(10, 10, 10, 0.35),
+        1px 0 0 rgba(10, 10, 10, 0.35),
+        -1px 0 0 rgba(10, 10, 10, 0.35),
+        0 2px 4px rgba(10, 10, 10, 0.16),
         0 0 28px rgba(207, 255, 4, 0.4);
     /* Tiny eyebrows/pills — dark olive ink (lime alone fails on white) */
     --wv-lime-label: #243000;
@@ -5654,11 +5657,7 @@ body.modal-open .wa-float {
 
 [data-theme="light"] .section-display-accent {
     color: var(--todoz);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.55),
-        0 0 0 1px rgba(10, 10, 10, 0.18),
-        0 0 22px rgba(207, 255, 4, 0.32),
-        0 0 44px rgba(207, 255, 4, 0.14);
+    text-shadow: var(--wv-display-glow);
 }
 
 [data-theme="light"] #clientes .text-todoz,
@@ -5668,11 +5667,7 @@ body.modal-open .wa-float {
 [data-theme="light"] #produtos .text-todoz:not(.section-eyebrow),
 [data-theme="light"] .portfolio-section .section-display-accent,
 [data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.55),
-        0 0 0 1px rgba(10, 10, 10, 0.18),
-        0 0 24px rgba(207, 255, 4, 0.3),
-        0 0 48px rgba(207, 255, 4, 0.12);
+    text-shadow: var(--wv-display-glow);
 }
 
 /* Missão lime band — high-contrast ink (already dark); tighten footnotes */
