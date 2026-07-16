@@ -5184,13 +5184,6 @@ body.modal-open .wa-float {
     color: var(--type-body-color);
 }
 
-[data-theme="light"] .produtos-glow {
-    opacity: 0.45;
-    background:
-        radial-gradient(ellipse 48% 34% at 12% 28%, rgba(207, 255, 4, 0.1), transparent 72%),
-        radial-gradient(ellipse 36% 30% at 90% 76%, rgba(207, 255, 4, 0.06), transparent 70%);
-}
-
 [data-theme="light"] .produto-card {
     background: linear-gradient(160deg, #ffffff, #f7f7f4);
     border-color: rgba(10, 10, 10, 0.1);
@@ -5532,25 +5525,111 @@ body.modal-open .wa-float {
         0 0 14px rgba(207, 255, 4, 0.45);
 }
 
-/* Soften section lime glows on light */
-[data-theme="light"] #clientes::after,
+/*
+ * Light theme — soft lime ambient (controlled, much lower than dark).
+ * Elliptical radials only; no hard washes / square patches. Dark mode untouched.
+ */
+[data-theme="light"] #clientes::after {
+    background:
+        radial-gradient(ellipse 70% 50% at 50% 40%, rgba(207, 255, 4, 0.028), transparent 68%),
+        radial-gradient(ellipse 45% 40% at 90% 70%, rgba(207, 255, 4, 0.018), transparent 62%);
+    opacity: 1;
+}
+
 [data-theme="light"] #sobre::after {
+    background:
+        radial-gradient(ellipse 72% 55% at 82% 22%, rgba(207, 255, 4, 0.045), transparent 64%),
+        radial-gradient(ellipse 60% 48% at 16% 88%, rgba(207, 255, 4, 0.055), transparent 58%),
+        radial-gradient(ellipse 50% 36% at 50% 100%, rgba(207, 255, 4, 0.035), transparent 70%);
+    opacity: 1;
+}
+
+[data-theme="light"] #mobile-bridge::after {
+    background:
+        radial-gradient(ellipse 55% 48% at 12% 55%, rgba(207, 255, 4, 0.03), transparent 68%),
+        radial-gradient(ellipse 70% 55% at 88% 70%, rgba(207, 255, 4, 0.032), transparent 68%);
+    opacity: 0.85;
+}
+
+[data-theme="light"] #servicos::after {
+    background:
+        radial-gradient(ellipse 75% 55% at 10% 28%, rgba(207, 255, 4, 0.042), transparent 66%),
+        radial-gradient(ellipse 48% 42% at 92% 72%, rgba(207, 255, 4, 0.022), transparent 62%);
+    opacity: 1;
+}
+
+[data-theme="light"] .portfolio-section::after {
+    background:
+        radial-gradient(ellipse 90% 48% at 12% 32%, rgba(207, 255, 4, 0.04), transparent 68%),
+        radial-gradient(ellipse 75% 42% at 88% 62%, rgba(207, 255, 4, 0.022), transparent 65%);
+    opacity: 1;
+}
+
+[data-theme="light"] #aplicacoes::after {
+    background:
+        radial-gradient(ellipse 75% 55% at 85% 28%, rgba(207, 255, 4, 0.038), transparent 62%),
+        radial-gradient(ellipse 48% 40% at 12% 72%, rgba(207, 255, 4, 0.022), transparent 58%);
+    opacity: 1;
+}
+
+[data-theme="light"] #blog::after {
+    background:
+        radial-gradient(ellipse 70% 55% at 18% 26%, rgba(207, 255, 4, 0.038), transparent 64%),
+        radial-gradient(ellipse 50% 45% at 88% 62%, rgba(207, 255, 4, 0.02), transparent 60%);
+    opacity: 1;
+}
+
+[data-theme="light"] .produtos-glow {
     opacity: 0.55;
+    background:
+        radial-gradient(ellipse 52% 38% at 14% 32%, rgba(207, 255, 4, 0.055), transparent 72%),
+        radial-gradient(ellipse 40% 34% at 92% 78%, rgba(207, 255, 4, 0.028), transparent 70%);
+}
+
+/* Hero — soft lime ambient only (no rectangular lime veil); glass veil stays for video text */
+[data-theme="light"] #hero .hero-glow {
+    background:
+        radial-gradient(ellipse 74% 50% at 50% 38%, rgba(207, 255, 4, 0.11), transparent 66%),
+        radial-gradient(ellipse 44% 34% at 78% 62%, rgba(207, 255, 4, 0.055), transparent 58%),
+        radial-gradient(ellipse 38% 30% at 18% 68%, rgba(207, 255, 4, 0.04), transparent 55%);
+    mix-blend-mode: soft-light;
+    opacity: 0.9;
 }
 
 [data-theme="light"] .text-glow {
     text-shadow:
         0 1px 0 rgba(10, 10, 10, 0.4),
-        0 0 22px rgba(207, 255, 4, 0.35);
+        0 0 18px rgba(207, 255, 4, 0.28),
+        0 0 36px rgba(207, 255, 4, 0.14);
 }
 
 [data-theme="light"] #hero .text-glow {
-    text-shadow: 0 0 28px rgba(207, 255, 4, 0.45);
+    text-shadow:
+        0 0 22px rgba(207, 255, 4, 0.38),
+        0 0 40px rgba(207, 255, 4, 0.18);
 }
 
 [data-theme="light"] .section-display-accent {
     color: var(--todoz);
-    text-shadow: var(--wv-display-glow);
+    text-shadow:
+        0 1px 0 rgba(10, 10, 10, 0.55),
+        0 0 0 1px rgba(10, 10, 10, 0.18),
+        0 0 22px rgba(207, 255, 4, 0.32),
+        0 0 44px rgba(207, 255, 4, 0.14);
+}
+
+[data-theme="light"] #clientes .text-todoz,
+[data-theme="light"] #sobre .text-todoz,
+[data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
+[data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
+[data-theme="light"] #produtos .text-todoz:not(.section-eyebrow),
+[data-theme="light"] .portfolio-section .section-display-accent,
+[data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
+    text-shadow:
+        0 1px 0 rgba(10, 10, 10, 0.55),
+        0 0 0 1px rgba(10, 10, 10, 0.18),
+        0 0 24px rgba(207, 255, 4, 0.3),
+        0 0 48px rgba(207, 255, 4, 0.12);
 }
 
 /* Missão lime band — high-contrast ink (already dark); tighten footnotes */
