@@ -1256,3 +1256,277 @@ body.wv-has-editor-chrome .acf-tab-wrap .acf-tab-button.wv-acf-tab-active {
 		grid-template-columns: 1fr;
 	}
 }
+
+/* ——— Branded post.php editor (Home + CPTs) ——— */
+body.wv-admin-editor #wpcontent,
+body.wv-admin-editor.wv-has-editor-chrome #wpcontent {
+	background:
+		radial-gradient(1200px 480px at 6% -12%, rgba(207, 255, 4, 0.2), transparent 55%),
+		radial-gradient(900px 360px at 100% 0%, rgba(10, 10, 10, 0.05), transparent 45%),
+		var(--wv-a-cream) !important;
+}
+
+body.wv-admin-editor #wpbody-content {
+	padding-bottom: 3rem;
+}
+
+body.wv-admin-editor .wrap {
+	margin-right: 20px;
+}
+
+body.wv-admin-editor .wv-editor-hide-noise,
+body.wv-admin-editor .wrap > h1.wp-heading-inline,
+body.wv-admin-editor .wrap > a.page-title-action,
+body.wv-admin-editor #screen-meta-links {
+	display: none !important;
+}
+
+body.wv-admin-editor #poststuff {
+	padding-top: 0.35rem;
+}
+
+body.wv-admin-editor #titlediv {
+	margin-bottom: 1rem;
+}
+
+body.wv-admin-editor #titlediv #title {
+	border-radius: 14px !important;
+	border: 1px solid var(--wv-a-border) !important;
+	padding: 0.85rem 1.1rem !important;
+	font-family: var(--wv-a-display) !important;
+	font-weight: 700 !important;
+	font-size: 1.35rem !important;
+	box-shadow: none !important;
+	background: #fff !important;
+}
+
+body.wv-admin-editor #titlediv #title:focus {
+	border-color: var(--wv-a-lime) !important;
+	outline: 3px solid rgba(207, 255, 4, 0.45) !important;
+	box-shadow: none !important;
+}
+
+/* Metabox cards */
+body.wv-admin-editor #poststuff .postbox {
+	border: 1px solid var(--wv-a-border) !important;
+	border-radius: 18px !important;
+	box-shadow: 0 16px 40px -32px rgba(0, 0, 0, 0.35) !important;
+	background: #fff !important;
+	overflow: hidden;
+	margin-bottom: 1.15rem;
+}
+
+body.wv-admin-editor #poststuff .postbox .postbox-header {
+	border-bottom: 1px solid var(--wv-a-border);
+	background: linear-gradient(180deg, #fff 0%, var(--wv-a-cream-deep) 100%);
+}
+
+body.wv-admin-editor #poststuff .postbox .postbox-header h2,
+body.wv-admin-editor #poststuff .postbox .hndle {
+	font-family: var(--wv-a-display) !important;
+	font-weight: 750 !important;
+	font-size: 0.95rem !important;
+	letter-spacing: 0.02em;
+	color: var(--wv-a-ink) !important;
+}
+
+/* Prefer ACF group prominence on Home (classic content box only) */
+body.wv-admin-home-editor #postdivrich {
+	display: none !important;
+}
+
+/* Soften Gutenberg canvas when present — keep toolbar/save intact */
+body.wv-admin-home-editor .editor-styles-wrapper,
+body.wv-admin-home-editor .block-editor-block-list__layout {
+	min-height: 0 !important;
+}
+
+body.wv-admin-home-editor .edit-post-visual-editor {
+	flex: 0 0 auto !important;
+	max-height: 220px;
+	overflow: auto;
+	border-radius: 14px;
+	border: 1px solid var(--wv-a-border);
+	margin-bottom: 1rem;
+	opacity: 0.85;
+}
+
+body.wv-admin-home-editor #postbox-container-1 .postbox:not(.acf-postbox),
+body.wv-admin-home-editor #side-sortables .postbox:not(.acf-postbox) {
+	opacity: 0.92;
+}
+
+body.wv-admin-editor .acf-postbox {
+	border: 1px solid rgba(10, 10, 10, 0.08) !important;
+	box-shadow:
+		0 0 0 1px rgba(207, 255, 4, 0.12),
+		0 22px 48px -34px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.wv-admin-editor .acf-postbox > .postbox-header {
+	background:
+		radial-gradient(480px 120px at 0% 0%, rgba(207, 255, 4, 0.22), transparent 60%),
+		linear-gradient(180deg, #161616 0%, #0a0a0a 100%) !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.wv-admin-editor .acf-postbox > .postbox-header h2,
+body.wv-admin-editor .acf-postbox > .postbox-header .hndle {
+	color: #fff !important;
+}
+
+body.wv-admin-editor .acf-postbox > .postbox-header .handle-actions .button-link,
+body.wv-admin-editor .acf-postbox > .postbox-header .toggle-indicator {
+	color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ACF tabs */
+body.wv-admin-editor .acf-tab-wrap,
+body.wv-admin-editor .acf-hl-tabs {
+	background: transparent !important;
+	border: 0 !important;
+	padding: 0.75rem 0.75rem 0 !important;
+}
+
+body.wv-admin-editor .acf-tab-group {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 0.4rem !important;
+	border: 0 !important;
+	margin: 0 0 0.75rem !important;
+	padding: 0 !important;
+}
+
+body.wv-admin-editor .acf-tab-group li {
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+}
+
+body.wv-admin-editor .acf-tab-button,
+body.wv-admin-editor .acf-tab-group a {
+	display: inline-flex !important;
+	align-items: center !important;
+	padding: 0.55rem 0.95rem !important;
+	border-radius: 999px !important;
+	border: 1px solid rgba(10, 10, 10, 0.1) !important;
+	background: #fff !important;
+	color: var(--wv-a-muted) !important;
+	font-family: var(--wv-a-body) !important;
+	font-weight: 700 !important;
+	font-size: 0.8rem !important;
+	letter-spacing: 0.04em !important;
+	text-transform: uppercase !important;
+	text-decoration: none !important;
+	box-shadow: none !important;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+body.wv-admin-editor .acf-tab-group li.active .acf-tab-button,
+body.wv-admin-editor .acf-tab-button.active,
+body.wv-admin-editor .acf-tab-button.wv-acf-tab-active,
+body.wv-admin-editor .acf-tab-group a.wv-acf-tab-active,
+body.wv-admin-editor .acf-tab-group li.active a {
+	background: var(--wv-a-lime) !important;
+	border-color: transparent !important;
+	color: var(--wv-a-ink) !important;
+}
+
+body.wv-admin-editor .acf-tab-button:hover,
+body.wv-admin-editor .acf-tab-group a:hover {
+	border-color: rgba(207, 255, 4, 0.7) !important;
+	color: var(--wv-a-ink) !important;
+}
+
+/* ACF fields */
+body.wv-admin-editor .acf-fields > .acf-field {
+	border-top-color: rgba(10, 10, 10, 0.06) !important;
+	padding: 1.1rem 1.25rem !important;
+}
+
+body.wv-admin-editor .acf-field .acf-label label {
+	font-family: var(--wv-a-display) !important;
+	font-weight: 700 !important;
+	font-size: 0.86rem !important;
+	color: var(--wv-a-ink) !important;
+}
+
+body.wv-admin-editor .acf-field input[type="text"],
+body.wv-admin-editor .acf-field input[type="email"],
+body.wv-admin-editor .acf-field input[type="url"],
+body.wv-admin-editor .acf-field input[type="number"],
+body.wv-admin-editor .acf-field textarea,
+body.wv-admin-editor .acf-field select {
+	border-radius: 12px !important;
+	border: 1px solid rgba(10, 10, 10, 0.12) !important;
+	padding: 0.65rem 0.85rem !important;
+	box-shadow: none !important;
+	background: #fafaf8 !important;
+}
+
+body.wv-admin-editor .acf-field input:focus,
+body.wv-admin-editor .acf-field textarea:focus,
+body.wv-admin-editor .acf-field select:focus {
+	border-color: var(--wv-a-lime) !important;
+	outline: 3px solid rgba(207, 255, 4, 0.4) !important;
+	background: #fff !important;
+}
+
+/* Publish box */
+body.wv-admin-editor #submitdiv .inside {
+	padding: 1rem !important;
+}
+
+body.wv-admin-editor #publish,
+body.wv-admin-editor input#publish,
+body.wv-admin-editor #submitdiv .button-primary {
+	background: var(--wv-a-lime) !important;
+	border-color: transparent !important;
+	color: var(--wv-a-ink) !important;
+	font-weight: 800 !important;
+	border-radius: 999px !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+	padding: 0.35rem 1.2rem !important;
+	height: auto !important;
+	line-height: 1.6 !important;
+}
+
+body.wv-admin-editor #publish:hover,
+body.wv-admin-editor input#publish:hover {
+	background: #d8ff3a !important;
+	color: var(--wv-a-ink) !important;
+}
+
+body.wv-admin-editor .misc-pub-section {
+	font-family: var(--wv-a-body);
+}
+
+/* Editor chrome refinements */
+.wv-editor-chrome__eyebrow {
+	margin: 0 0 0.35rem;
+	font-size: 0.66rem;
+	font-weight: 800;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--wv-a-lime);
+}
+
+.wv-editor-chrome__left {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 0;
+	flex: 1;
+}
+
+body.wv-admin-editor .wv-editor-chrome {
+	margin: 12px 20px 14px 2px;
+}
+
+@media (max-width: 782px) {
+	body.wv-admin-editor .wv-editor-chrome {
+		margin-right: 10px;
+	}
+}

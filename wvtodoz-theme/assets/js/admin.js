@@ -16,25 +16,88 @@
 
 	function findTabButton(fieldKey) {
 		if (!fieldKey) return null;
-		return (
-			document.querySelector('.acf-tab-button[data-key="' + fieldKey + '"]') ||
-			document.querySelector('a.acf-tab-button[data-key="' + fieldKey + '"]') ||
-			document.querySelector('.acf-tab-group a[data-key="' + fieldKey + '"]') ||
-			document.querySelector('.acf-hl-tab[data-key="' + fieldKey + '"]')
-		);
+		var selectors = [
+			'.acf-tab-button[data-key="' + fieldKey + '"]',
+			'a.acf-tab-button[data-key="' + fieldKey + '"]',
+			'.acf-tab-group li a[data-key="' + fieldKey + '"]',
+			'.acf-tab-group a[data-key="' + fieldKey + '"]',
+			'.acf-fields .acf-tab-wrap a[data-key="' + fieldKey + '"]',
+			'[data-key="' + fieldKey + '"].acf-tab-button',
+			'a[data-key="' + fieldKey + '"]',
+		];
+		for (var i = 0; i < selectors.length; i++) {
+			var el = document.querySelector(selectors[i]);
+			if (el) return el;
+		}
+		return null;
 	}
 
 	function findTabByLabel(label) {
 		if (!label) return null;
-		var buttons = document.querySelectorAll('.acf-tab-button, a.acf-tab-button, .acf-tab-group a');
-		var target = String(label).toLowerCase().trim();
+		var buttons = document.querySelectorAll(
+			'.acf-tab-button, a.acf-tab-button, .acf-tab-group a, .acf-tab-wrap a'
+		);
+		var target = String(label)
+			.toLowerCase()
+			.replace(/[\/|]/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim();
+		var aliases = {
+			sobre: ['sobre', 'quem somos'],
+			missao: ['missão', 'missao'],
+			bridge: ['mobile bridge', 'ponte mobile', 'bridge'],
+			servicos: ['serviços', 'servicos'],
+			portfolio: ['portfólio', 'portfolio'],
+			produtos: ['produtos'],
+			aplicacoes: ['aplicações', 'aplicacoes'],
+			blog: ['insights', 'blog'],
+			contato: ['contato', 'contato / footer', 'footer'],
+			hero: ['hero'],
+		};
+		var slug = cfg.tab || '';
+		var aliasList = aliases[slug] || [];
+
 		for (var i = 0; i < buttons.length; i++) {
-			var text = (buttons[i].textContent || '').toLowerCase().replace(/\s+/g, ' ').trim();
-			if (text === target || text.indexOf(target) !== -1) {
+			var text = (buttons[i].textContent || '')
+				.toLowerCase()
+				.replace(/\s+/g, ' ')
+				.trim();
+			if (!text) continue;
+			if (text === target || text.indexOf(target) !== -1 || target.indexOf(text) !== -1) {
 				return buttons[i];
+			}
+			for (var a = 0; a < aliasList.length; a++) {
+				if (text.indexOf(aliasList[a]) !== -1) return buttons[i];
 			}
 		}
 		return null;
+	}
+
+	function activateTabButton(btn) {
+		if (!btn) return false;
+		try {
+			if (window.acf && typeof window.acf.getField === 'function') {
+				/* prefer native click for ACF state */
+			}
+			btn.click();
+			if (window.jQuery) {
+				window.jQuery(btn).trigger('click');
+			}
+		} catch (e) {
+			btn.click();
+		}
+		try {
+			btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		} catch (err) {
+			/* ignore */
+		}
+		document.querySelectorAll('.wv-acf-tab-active').forEach(function (el) {
+			el.classList.remove('wv-acf-tab-active');
+		});
+		btn.classList.add('wv-acf-tab-active');
+		var li = btn.closest('li');
+		if (li) li.classList.add('active');
+		return true;
 	}
 
 	function clickAcfTab() {
@@ -50,20 +113,14 @@
 			btn = findTabByLabel(cfg.tabLabels[slug]);
 		}
 		if (!btn) return false;
-
-		btn.click();
-		try {
-			btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		} catch (e) {
-			/* ignore */
-		}
-		btn.classList.add('wv-acf-tab-active');
-		return true;
+		return activateTabButton(btn);
 	}
 
 	function injectEditorChrome() {
 		if (document.querySelector('.wv-editor-chrome')) return;
-		if (!cfg.isHomeEditor && !cfg.tab) return;
+		if (!cfg.isBrandedEditor && !cfg.isHomeEditor && !cfg.isCptEditor && !cfg.tab) return;
+
+		document.body.classList.add('wv-admin-editor', 'wv-has-editor-chrome');
 
 		var chrome = document.createElement('div');
 		chrome.className = 'wv-editor-chrome';
@@ -73,8 +130,9 @@
 		var left = document.createElement('div');
 		left.className = 'wv-editor-chrome__left';
 
-		var brand = document.createElement('div');
+		var brand = document.createElement('a');
 		brand.className = 'wv-editor-chrome__brand';
+		brand.href = cfg.panelUrl || '#';
 		if (cfg.logoUrl) {
 			var img = document.createElement('img');
 			img.className = 'wv-editor-chrome__logo';
@@ -89,14 +147,25 @@
 		}
 		left.appendChild(brand);
 
+		var eyebrow = document.createElement('p');
+		eyebrow.className = 'wv-editor-chrome__eyebrow';
+		eyebrow.textContent = 'WV_TODOZ · MANUTENÇÃO';
+		left.appendChild(eyebrow);
+
 		var title = document.createElement('h1');
 		title.className = 'wv-editor-chrome__title';
 		if (cfg.tab && cfg.tabLabel) {
-			title.textContent = (cfg.i18n && cfg.i18n.editing) || 'Editando: ';
+			title.appendChild(document.createTextNode((cfg.i18n && cfg.i18n.editing) || 'Editando: '));
 			var accent = document.createElement('span');
 			accent.className = 'wv-editor-chrome__accent';
 			accent.textContent = cfg.tabLabel;
 			title.appendChild(accent);
+		} else if (cfg.isCptEditor && cfg.cptLabel) {
+			title.appendChild(document.createTextNode((cfg.i18n && cfg.i18n.editing) || 'Editando: '));
+			var cptAccent = document.createElement('span');
+			cptAccent.className = 'wv-editor-chrome__accent';
+			cptAccent.textContent = cfg.cptLabel;
+			title.appendChild(cptAccent);
 		} else {
 			title.textContent = (cfg.i18n && cfg.i18n.editingHome) || 'Editando: Home';
 		}
@@ -116,8 +185,18 @@
 			var hub = document.createElement('a');
 			hub.className = 'wv-editor-chrome__btn wv-editor-chrome__btn--ghost';
 			hub.href = cfg.sectionHubUrl;
-			hub.textContent = (cfg.i18n && cfg.i18n.sectionHub) || 'Hub da seção';
+			hub.textContent = (cfg.i18n && cfg.i18n.sectionHub) || 'Voltar ao hub da seção';
 			actions.appendChild(hub);
+		}
+
+		if (cfg.viewUrl) {
+			var view = document.createElement('a');
+			view.className = 'wv-editor-chrome__btn wv-editor-chrome__btn--ghost';
+			view.href = cfg.viewUrl;
+			view.target = '_blank';
+			view.rel = 'noopener noreferrer';
+			view.textContent = (cfg.i18n && cfg.i18n.viewSite) || 'Ver no site';
+			actions.appendChild(view);
 		}
 
 		if (cfg.panelUrl) {
@@ -138,10 +217,14 @@
 			document.body.insertBefore(chrome, document.body.firstChild);
 		}
 
-		document.body.classList.add('wv-has-editor-chrome');
 		if (cfg.tab) {
 			document.body.classList.add('wv-editing-tab-' + cfg.tab);
 		}
+
+		// Soft-hide noisy WP chrome in branded editors
+		document.querySelectorAll('#post-body-content > .wp-heading-inline, #post-body-content > .page-title-action').forEach(function (el) {
+			el.classList.add('wv-editor-hide-noise');
+		});
 	}
 
 	function injectBanner() {
@@ -185,25 +268,38 @@
 	function focusTabWithRetry() {
 		if (!cfg.tab) return;
 		var attempts = 0;
-		var max = 50;
-		var timer = window.setInterval(function () {
-			attempts += 1;
-			if (clickAcfTab() || attempts >= max) {
-				window.clearInterval(timer);
-			}
-		}, 120);
+		var max = 80;
+		var done = false;
 
-		if (window.acf && typeof window.acf.addAction === 'function') {
-			window.acf.addAction('ready', function () {
-				clickAcfTab();
-			});
-			window.acf.addAction('append', function () {
-				clickAcfTab();
-			});
+		function tryFocus() {
+			if (done) return true;
+			if (clickAcfTab()) {
+				done = true;
+				return true;
+			}
+			return false;
 		}
 
-		window.setTimeout(clickAcfTab, 600);
-		window.setTimeout(clickAcfTab, 1400);
+		var timer = window.setInterval(function () {
+			attempts += 1;
+			if (tryFocus() || attempts >= max) {
+				window.clearInterval(timer);
+			}
+		}, 100);
+
+		if (window.acf && typeof window.acf.addAction === 'function') {
+			window.acf.addAction('ready', tryFocus);
+			window.acf.addAction('prepare', tryFocus);
+			window.acf.addAction('append', tryFocus);
+		}
+
+		[0, 200, 500, 900, 1500, 2500, 4000].forEach(function (ms) {
+			window.setTimeout(tryFocus, ms);
+		});
+
+		if (window.jQuery) {
+			window.jQuery(document).on('acf/setup_fields acf/ready', tryFocus);
+		}
 	}
 
 	/* ——— Icon picker ——— */
@@ -428,7 +524,10 @@
 			focusTabWithRetry();
 		}
 		if (window.acf && typeof window.acf.addAction === 'function') {
-			window.acf.addAction('ready', wireIconFields);
+			window.acf.addAction('ready', function () {
+				wireIconFields();
+				if (cfg.tab) clickAcfTab();
+			});
 			window.acf.addAction('append', wireIconFields);
 		}
 		window.setTimeout(wireIconFields, 400);
