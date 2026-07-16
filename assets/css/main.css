@@ -66,6 +66,10 @@ html.lenis {
         0 0 0 1px rgba(10, 10, 10, 0.22),
         0 2px 4px rgba(10, 10, 10, 0.18),
         0 0 28px rgba(207, 255, 4, 0.4);
+    /* Tiny eyebrows/pills — dark olive ink (lime alone fails on white) */
+    --wv-lime-label: #243000;
+    --wv-lime-pill-bg: rgba(207, 255, 4, 0.4);
+    --wv-lime-pill-border: rgba(36, 48, 0, 0.3);
     --wv-card-bg: linear-gradient(160deg, #ffffff, #f7f7f4);
     --wv-card-border: rgba(10, 10, 10, 0.08);
     --wv-card-shadow: 0 16px 36px -28px rgba(0, 0, 0, 0.18), 0 0 40px -20px rgba(207, 255, 4, 0.08);
@@ -145,6 +149,66 @@ body {
 /* Off-canvas menu must not expand document scrollWidth while translated */
 #mobile-menu {
     overflow: hidden;
+}
+
+#mobile-menu.is-open {
+    pointer-events: auto !important;
+    visibility: visible;
+}
+
+#mobile-menu .mobile-menu-backdrop {
+    z-index: 0;
+}
+
+#mobile-menu-content {
+    z-index: 1;
+    overflow: hidden;
+}
+
+#mobile-menu-content .mobile-menu-panel {
+    padding: 2.5rem 3rem;
+    box-sizing: border-box;
+}
+
+#mobile-menu-content .mobile-menu-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+#mobile-menu-content .mobile-menu-nav {
+    gap: 0.15rem;
+}
+
+#mobile-menu-content .mobile-menu-link,
+#mobile-menu-content nav a {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.4rem 0;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
+}
+
+#mobile-menu-content .mobile-menu-footer {
+    padding-top: 1.5rem;
+    margin-top: auto;
+}
+
+#mobile-menu-content .mobile-menu-cta {
+    min-height: 48px;
 }
 
 /* Sobre office — full color (never grayscale) */
@@ -975,9 +1039,11 @@ h1, h2, h3, h4,
     }
 
     .hero-display {
-        font-size: clamp(1.7rem, 8.4vw, 2.05rem);
-        line-height: 0.96;
-        padding-inline: 0.15rem;
+        font-size: clamp(1.08rem, 5.1vw, 1.52rem);
+        line-height: 1;
+        padding-inline: 0;
+        white-space: nowrap;
+        letter-spacing: -0.058em;
     }
 
     .hero-lead {
@@ -993,6 +1059,15 @@ h1, h2, h3, h4,
         white-space: normal;
         text-align: center;
         line-height: 1.2;
+    }
+
+    #mobile-menu-content .mobile-menu-panel {
+        padding: 1.25rem 1.1rem 1.75rem;
+    }
+
+    #mobile-menu-content .mobile-menu-link,
+    #mobile-menu-content nav a {
+        font-size: clamp(1.45rem, 7vw, 1.85rem);
     }
 
     .hero-logos {
@@ -1787,6 +1862,18 @@ h1, h2, h3, h4,
     font-weight: 700;
     letter-spacing: 0.28em;
     text-transform: uppercase;
+}
+
+/* Shared section eyebrow (portfolio / produtos / blog + theme) */
+.section-eyebrow {
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--todoz-accent);
+    font-size: 0.625rem;
+    font-weight: 900;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    line-height: 1.3;
 }
 
 .aplicacoes-copy .section-display {
@@ -3221,6 +3308,8 @@ html.content-revealed [data-reveal] {
     max-width: 100%;
 }
 
+/* Mobile (≤767px) sets display:none so title stays one line. */
+
 .hero-lead {
     font-size: 1.25rem;
     margin-bottom: 3rem;
@@ -3672,13 +3761,20 @@ footer ul li a:hover {
 /* ========== Mobile polish (≤767px) ========== */
 @media (max-width: 767px) {
     /* Avoid edge clipping on full-bleed mobile menu */
-    #mobile-menu-content {
-        padding: 2rem 1.5rem 2.5rem;
+    #mobile-menu-content .mobile-menu-panel {
+        padding: 1.5rem 1.25rem 2rem;
     }
 
+    #mobile-menu-content .mobile-menu-link,
     #mobile-menu-content nav a {
-        font-size: clamp(1.75rem, 8vw, 2.25rem);
+        font-size: clamp(1.55rem, 7.2vw, 2.05rem);
         line-height: 1.1;
+        min-height: 48px;
+        padding: 0.5rem 0;
+    }
+
+    #mobile-menu-content .mobile-menu-nav {
+        gap: 0.1rem;
     }
 
     /* Hero — fit first viewport on 375–430 without clipping/overflow */
@@ -3700,7 +3796,8 @@ footer ul li a:hover {
 
     .hero-title {
         margin-bottom: 1rem;
-        overflow: hidden;
+        overflow-x: clip;
+        overflow-y: visible;
     }
 
     .hero-eyebrow {
@@ -3709,14 +3806,21 @@ footer ul li a:hover {
         margin-bottom: 0.7rem;
     }
 
+    /* One line: "Feito pra operar." — scale type so it never overflows */
     .hero-display {
-        font-size: clamp(1.7rem, 8.6vw, 2.15rem);
-        line-height: 0.95;
-        letter-spacing: -0.05em;
-        padding-inline: 0.2rem;
+        font-size: clamp(1.12rem, 5.35vw, 1.68rem);
+        line-height: 1;
+        letter-spacing: -0.055em;
+        padding-inline: 0;
         box-sizing: border-box;
         max-width: 100%;
+        white-space: nowrap;
         overflow: hidden;
+        text-overflow: clip;
+    }
+
+    .hero-display-br {
+        display: none;
     }
 
     .hero-lead {
@@ -3729,6 +3833,8 @@ footer ul li a:hover {
     .hero-ctas {
         gap: 0.65rem;
         margin-bottom: 0;
+        width: 100%;
+        max-width: 22rem;
     }
 
     .hero-cta {
@@ -4517,7 +4623,7 @@ body.modal-open .wa-float {
     text-shadow: var(--wv-display-glow);
 }
 
-[data-theme="light"] .portfolio-section .text-todoz {
+[data-theme="light"] .portfolio-section .text-todoz:not(.section-eyebrow) {
     color: var(--todoz) !important;
     text-shadow: var(--wv-display-glow);
 }
@@ -4660,21 +4766,37 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
+/* Large lime accents on light canvas — keep brand lime + strong outline */
 [data-theme="light"] #clientes .text-todoz,
 [data-theme="light"] #sobre .text-todoz,
-[data-theme="light"] #aplicacoes .text-todoz,
-[data-theme="light"] #blog .text-todoz {
-    color: var(--todoz) !important;
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.4),
-        0 0 18px rgba(207, 255, 4, 0.28);
-}
-
-/* Produtos eyebrow — logo lime + display glow so tiny caps stay readable on light */
-[data-theme="light"] #produtos .text-todoz,
-[data-theme="light"] #produtos .produtos-header > span {
+[data-theme="light"] #aplicacoes .text-todoz:not(.section-eyebrow):not(.aplicacoes-eyebrow),
+[data-theme="light"] #blog .text-todoz:not(.section-eyebrow),
+[data-theme="light"] #produtos .text-todoz:not(.section-eyebrow) {
     color: var(--todoz) !important;
     text-shadow: var(--wv-display-glow);
+}
+
+/*
+ * Light theme: tiny eyebrows + tag pills — dark olive ink on soft lime.
+ * Neon #CFFF04 text alone is unreadable on white (TECNOLOGIA / Insights / etc.).
+ */
+[data-theme="light"] .section-eyebrow,
+[data-theme="light"] .servicos-eyebrow,
+[data-theme="light"] .aplicacoes-eyebrow,
+[data-theme="light"] .mobile-bridge-eyebrow,
+[data-theme="light"] #produtos .produtos-header > span,
+[data-theme="light"] .portfolio-section .section-eyebrow,
+[data-theme="light"] #blog .section-eyebrow,
+[data-theme="light"] #produtos .section-eyebrow {
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .blog-tag {
+    color: var(--wv-lime-label) !important;
+    text-shadow: none !important;
+    background: var(--wv-lime-pill-bg);
+    border-color: var(--wv-lime-pill-border);
 }
 
 [data-theme="light"] #mobile-menu-trigger {
@@ -4690,7 +4812,8 @@ body.modal-open .wa-float {
 }
 
 /* Mobile menu — light surfaces */
-[data-theme="light"] #mobile-menu > .absolute.inset-0 {
+[data-theme="light"] #mobile-menu > .absolute.inset-0,
+[data-theme="light"] #mobile-menu .mobile-menu-backdrop {
     background: var(--wv-mobile-menu-overlay) !important;
 }
 
@@ -4700,17 +4823,28 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
+[data-theme="light"] #mobile-menu-content .mobile-menu-link,
 [data-theme="light"] #mobile-menu-content nav a {
     color: var(--wv-ink) !important;
 }
 
+[data-theme="light"] #mobile-menu-content .mobile-menu-link:hover,
 [data-theme="light"] #mobile-menu-content nav a:hover {
     color: var(--todoz) !important;
 }
 
+[data-theme="light"] #mobile-menu-content .mobile-menu-close,
 [data-theme="light"] #mobile-menu-content .text-zinc-400,
 [data-theme="light"] #mobile-menu-content .text-zinc-500 {
     color: var(--wv-muted) !important;
+}
+
+[data-theme="light"] #mobile-menu-content .mobile-menu-close:hover {
+    color: var(--todoz) !important;
+}
+
+[data-theme="light"] #mobile-menu-content .mobile-menu-cta {
+    color: #0a0a0a !important;
 }
 
 /* Blog cards / bridge chrome (cases stay image overlays — white type) */
@@ -4752,14 +4886,7 @@ body.modal-open .wa-float {
     color: var(--wv-muted);
 }
 
-[data-theme="light"] .blog-tag {
-    color: var(--todoz);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.35),
-        0 0 12px rgba(207, 255, 4, 0.22);
-    background: rgba(207, 255, 4, 0.14);
-    border-color: rgba(207, 255, 4, 0.35);
-}
+/* blog-tag light styles set with section-eyebrow block above */
 
 [data-theme="light"] .blog-excerpt,
 [data-theme="light"] .text-zinc-400,
@@ -5083,13 +5210,10 @@ body.modal-open .wa-float {
         0 0 14px rgba(207, 255, 4, 0.22);
 }
 
-[data-theme="light"] .servicos-eyebrow,
 [data-theme="light"] .servicos-quote-link,
 [data-theme="light"] .servicos-process-num {
-    color: var(--todoz);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.35),
-        0 0 14px rgba(207, 255, 4, 0.22);
+    color: var(--wv-lime-label);
+    text-shadow: none;
 }
 
 [data-theme="light"] .servicos-header-note,
@@ -5156,13 +5280,9 @@ body.modal-open .wa-float {
     color: #0a0a0a;
 }
 
-[data-theme="light"] .aplicacoes-eyebrow,
-[data-theme="light"] .mobile-bridge-eyebrow,
 [data-theme="light"] .mobile-bridge-accent {
     color: var(--todoz);
-    text-shadow:
-        0 1px 0 rgba(10, 10, 10, 0.4),
-        0 0 16px rgba(207, 255, 4, 0.28);
+    text-shadow: var(--wv-display-glow);
 }
 
 [data-theme="light"] .aplicacoes-cta {
@@ -5174,7 +5294,8 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .aplicacoes-chip-kicker {
-    color: var(--todoz);
+    color: var(--wv-lime-label);
+    text-shadow: none;
 }
 
 [data-theme="light"] .mobile-bridge-quote {

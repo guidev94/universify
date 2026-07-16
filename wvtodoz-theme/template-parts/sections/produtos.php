@@ -57,7 +57,7 @@ if (!$cards) {
 	<div class="produtos-glow" aria-hidden="true"></div>
 	<div class="site-container relative z-10">
 		<div class="produtos-header text-center md:text-left mb-12 md:mb-16">
-			<span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-up"><?php echo esc_html($eyebrow); ?></span>
+			<span class="section-eyebrow text-todoz" data-aos="fade-up"><?php echo esc_html($eyebrow); ?></span>
 			<h2 class="section-display" data-aos="fade-up" data-aos-delay="50">
 				<span class="section-display-line"><?php echo esc_html($line); ?></span>
 				<span class="section-display-accent"><?php echo esc_html($accent); ?><span class="section-display-dot" aria-hidden="true"></span></span>

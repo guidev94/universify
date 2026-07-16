@@ -85,7 +85,7 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
 				<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
 			</button>
-			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>">
+			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>" aria-controls="mobile-menu" aria-expanded="false">
 				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
 				<span class="w-5 h-0.5 bg-todoz rounded-full"></span>
 				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
@@ -94,46 +94,48 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 	</div>
 </header>
 
-<div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
-	<div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
-	<div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
-		<div class="space-y-12">
-			<div class="flex justify-between items-center">
-				<span class="site-logo-link inline-block w-32">
-					<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
-					<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
-				</span>
-				<button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl" aria-label="<?php esc_attr_e('Fechar menu', 'wvtodoz'); ?>"><i class="ph ph-x-circle"></i></button>
-			</div>
-			<nav class="flex flex-col gap-6" aria-label="<?php esc_attr_e('Mobile', 'wvtodoz'); ?>">
-				<?php
-				$mobile_items = $nav;
-				if (has_nav_menu('mobile')) {
-					$locations = get_nav_menu_locations();
-					$menu_items = wp_get_nav_menu_items($locations['mobile'] ?? 0);
-					if (is_array($menu_items) && $menu_items) {
-						$mobile_items = [];
-						foreach ($menu_items as $mi) {
-							$mobile_items[] = ['label' => $mi->title, 'url' => $mi->url];
+<div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible" aria-hidden="true">
+	<div class="mobile-menu-backdrop absolute inset-0 bg-black/95 backdrop-blur-2xl" data-mobile-menu-dismiss></div>
+	<div id="mobile-menu-content" class="relative z-[1] h-full w-full max-w-none bg-zinc-900 border-l border-white/5 flex flex-col translate-x-full transition-transform duration-500 ease-expo">
+		<div class="mobile-menu-panel flex flex-col justify-between flex-1 min-h-0 overflow-y-auto overscroll-contain">
+			<div class="space-y-8 sm:space-y-12">
+				<div class="flex justify-between items-center gap-4">
+					<span class="site-logo-link inline-block w-28 sm:w-32 shrink-0">
+						<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+						<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
+					</span>
+					<button type="button" id="mobile-menu-close" class="mobile-menu-close text-zinc-500 hover:text-todoz transition-colors" aria-label="<?php esc_attr_e('Fechar menu', 'wvtodoz'); ?>"><i class="ph ph-x-circle" aria-hidden="true"></i></button>
+				</div>
+				<nav class="mobile-menu-nav flex flex-col" aria-label="<?php esc_attr_e('Mobile', 'wvtodoz'); ?>">
+					<?php
+					$mobile_items = $nav;
+					if (has_nav_menu('mobile')) {
+						$locations = get_nav_menu_locations();
+						$menu_items = wp_get_nav_menu_items($locations['mobile'] ?? 0);
+						if (is_array($menu_items) && $menu_items) {
+							$mobile_items = [];
+							foreach ($menu_items as $mi) {
+								$mobile_items[] = ['label' => $mi->title, 'url' => $mi->url];
+							}
 						}
 					}
-				}
-				foreach ($mobile_items as $item) {
-					printf(
-						'<a href="%s" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">%s</a>',
-						esc_url($item['url']),
-						esc_html($item['label'])
-					);
-				}
-				?>
-			</nav>
-		</div>
-		<div class="space-y-8">
-			<div class="flex gap-6 text-zinc-400 text-3xl">
-				<a href="<?php echo esc_url($ig); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
-				<a href="<?php echo esc_url($li); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+					foreach ($mobile_items as $item) {
+						printf(
+							'<a href="%s" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">%s</a>',
+							esc_url($item['url']),
+							esc_html($item['label'])
+						);
+					}
+					?>
+				</nav>
 			</div>
-			<a href="<?php echo esc_url($wa); ?>" class="w-full py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs"><?php echo esc_html((string) wv_field('wv_contato_cta', 'FALE CONOSCO')); ?></a>
+			<div class="mobile-menu-footer space-y-6 sm:space-y-8">
+				<div class="flex gap-6 text-zinc-400 text-3xl">
+					<a href="<?php echo esc_url($ig); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a>
+					<a href="<?php echo esc_url($li); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo" aria-hidden="true"></i></a>
+				</div>
+				<a href="<?php echo esc_url($wa); ?>" class="mobile-menu-cta w-full py-5 sm:py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs"><?php echo esc_html((string) wv_field('wv_contato_cta', 'FALE CONOSCO')); ?></a>
+			</div>
 		</div>
 	</div>
 </div>

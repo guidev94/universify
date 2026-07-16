@@ -39,7 +39,7 @@ if (!$cases) {
 	<div class="site-container mb-12 md:mb-20">
 		<div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 md:gap-10 text-center md:text-left">
 			<div>
-				<span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4"><?php echo esc_html($eyebrow); ?></span>
+				<span class="section-eyebrow text-todoz"><?php echo esc_html($eyebrow); ?></span>
 				<h2 class="section-display">
 					<span class="section-display-line"><?php echo esc_html($line); ?></span>
 					<span class="section-display-accent"><?php echo esc_html($accent); ?><span class="section-display-dot" aria-hidden="true"></span></span>

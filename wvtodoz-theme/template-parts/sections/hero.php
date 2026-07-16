@@ -43,8 +43,7 @@ $logos = wv_defaults()['hero_logos'];
 			<h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="120">
 				<span class="hero-eyebrow block text-zinc-400 font-semibold uppercase"><?php echo esc_html($eyebrow); ?></span>
 				<span class="hero-display block font-black tracking-tighter text-white uppercase italic">
-					<?php echo esc_html($line); ?><br>
-					<span class="text-todoz text-glow not-italic"><?php echo esc_html($accent); ?></span>
+					<?php echo esc_html($line); ?> <br class="hero-display-br" aria-hidden="true"><span class="text-todoz text-glow not-italic"><?php echo esc_html($accent); ?></span>
 				</span>
 			</h1>
 

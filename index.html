@@ -97,7 +97,7 @@
                     <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
                     <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
                 </button>
-                <button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="Abrir menu">
+                <button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="Abrir menu" aria-controls="mobile-menu" aria-expanded="false">
                     <span class="w-7 h-0.5 bg-todoz rounded-full"></span>
                     <span class="w-5 h-0.5 bg-todoz rounded-full"></span>
                     <span class="w-7 h-0.5 bg-todoz rounded-full"></span>
@@ -107,32 +107,34 @@
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
-        <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
-        <div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
-            <div class="space-y-12">
-                <div class="flex justify-between items-center">
-                    <span class="site-logo-link inline-block w-32">
-                        <img src="assets/img/logo-wv-light.svg" alt="WV_Todoz" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
-                        <img src="assets/img/logo-wv-dark.svg" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
-                    </span>
-                    <button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
+    <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible" aria-hidden="true">
+        <div class="mobile-menu-backdrop absolute inset-0 bg-black/95 backdrop-blur-2xl" data-mobile-menu-dismiss></div>
+        <div id="mobile-menu-content" class="relative z-[1] h-full w-full max-w-none bg-zinc-900 border-l border-white/5 flex flex-col translate-x-full transition-transform duration-500 ease-expo">
+            <div class="mobile-menu-panel flex flex-col justify-between flex-1 min-h-0 overflow-y-auto overscroll-contain">
+                <div class="space-y-8 sm:space-y-12">
+                    <div class="flex justify-between items-center gap-4">
+                        <span class="site-logo-link inline-block w-28 sm:w-32 shrink-0">
+                            <img src="assets/img/logo-wv-light.svg" alt="WV_Todoz" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
+                            <img src="assets/img/logo-wv-dark.svg" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
+                        </span>
+                        <button type="button" id="mobile-menu-close" class="mobile-menu-close text-zinc-500 hover:text-todoz transition-colors" aria-label="Fechar menu"><i class="ph ph-x-circle" aria-hidden="true"></i></button>
+                    </div>
+                    <nav class="mobile-menu-nav flex flex-col" aria-label="Mobile">
+                        <a href="index.html" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
+                        <a href="#sobre" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
+                        <a href="#servicos" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
+                        <a href="#produtos" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
+                        <a href="#aplicacoes" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Aplicações</a>
+                        <a href="#portfolio" class="mobile-menu-link text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
+                    </nav>
                 </div>
-                <nav class="flex flex-col gap-6">
-                    <a href="index.html" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
-                    <a href="#sobre" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
-                    <a href="#servicos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
-                    <a href="#produtos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
-                    <a href="#aplicacoes" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Aplicações</a>
-                    <a href="#portfolio" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
-                </nav>
-            </div>
-            <div class="space-y-8">
-                <div class="flex gap-6 text-zinc-400 text-3xl">
-                    <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
-                    <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                <div class="mobile-menu-footer space-y-6 sm:space-y-8">
+                    <div class="flex gap-6 text-zinc-400 text-3xl">
+                        <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo" aria-hidden="true"></i></a>
+                    </div>
+                    <a href="https://wa.me/551155311779" class="mobile-menu-cta w-full py-5 sm:py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs">FALE CONOSCO</a>
                 </div>
-                <a href="https://wa.me/551155311779" class="w-full py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs">FALE CONOSCO</a>
             </div>
         </div>
     </div>
@@ -168,8 +170,7 @@
                             Agentes · Automações · Integrações
                         </span>
                         <span class="hero-display block font-black tracking-tighter text-white uppercase italic">
-                            Feito pra<br>
-                            <span class="text-todoz text-glow not-italic">operar.</span>
+                            Feito pra <br class="hero-display-br" aria-hidden="true"><span class="text-todoz text-glow not-italic">operar.</span>
                         </span>
                     </h1>
 
@@ -504,7 +505,7 @@
             <div class="site-container mb-12 md:mb-20">
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 md:gap-10 text-center md:text-left">
                     <div>
-                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
+                        <span class="section-eyebrow text-todoz">Projetos Selecionados</span>
                         <h2 class="section-display">
                             <span class="section-display-line">Cases que</span>
                             <span class="section-display-accent">marcam<span class="section-display-dot" aria-hidden="true"></span></span>
@@ -667,7 +668,7 @@
             <div class="produtos-glow" aria-hidden="true"></div>
             <div class="site-container relative z-10">
                 <div class="produtos-header text-center md:text-left mb-12 md:mb-16">
-                    <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-up">Ecossistema</span>
+                    <span class="section-eyebrow text-todoz" data-aos="fade-up">Ecossistema</span>
                     <h2 class="section-display" data-aos="fade-up" data-aos-delay="50">
                         <span class="section-display-line">Produtos</span>
                         <span class="section-display-accent">proprietários<span class="section-display-dot" aria-hidden="true"></span></span>
@@ -794,7 +795,7 @@
             <div class="site-container">
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-16 gap-8 text-center md:text-left">
                     <div>
-                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Insights</span>
+                        <span class="section-eyebrow text-todoz">Insights</span>
                         <h2 class="section-display">
                             <span class="section-display-line">Conteúdo &amp;</span>
                             <span class="section-display-accent">inovação<span class="section-display-dot" aria-hidden="true"></span></span>

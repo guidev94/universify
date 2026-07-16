@@ -191,12 +191,26 @@ const initMobileMenu = () => {
     const menuContent = document.querySelector("#mobile-menu-content");
     const closeBtn = document.querySelector("#mobile-menu-close");
     const links = menu.querySelectorAll("nav a");
+    const dismissEls = menu.querySelectorAll("[data-mobile-menu-dismiss]");
+    let closing = false;
+
+    const setOpenState = (open) => {
+        menu.classList.toggle("is-open", open);
+        menu.setAttribute("aria-hidden", open ? "false" : "true");
+        if (trigger) {
+            trigger.setAttribute("aria-expanded", open ? "true" : "false");
+            trigger.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+        }
+    };
 
     const openMenu = () => {
+        if (closing || menu.classList.contains("is-open")) return;
         menu.classList.remove("invisible");
+        setOpenState(true);
         if (gsap) {
+            gsap.killTweensOf([menu, menuContent].filter(Boolean));
             gsap.to(menu, { opacity: 1, duration: 0.3, pointerEvents: "auto" });
-            gsap.to(menuContent, { x: 0, duration: 0.6, ease: "expo.out" });
+            gsap.to(menuContent, { x: 0, duration: 0.55, ease: "expo.out" });
         } else {
             menu.style.opacity = "1";
             menu.style.pointerEvents = "auto";
@@ -205,31 +219,100 @@ const initMobileMenu = () => {
         lockPageScroll();
     };
 
-    const closeMenu = () => {
+    const closeMenu = (onDone) => {
+        if (closing) return;
+        if (!menu.classList.contains("is-open")) {
+            if (typeof onDone === "function") onDone();
+            return;
+        }
+        closing = true;
+        setOpenState(false);
+
+        const finish = () => {
+            menu.classList.add("invisible");
+            menu.style.pointerEvents = "none";
+            unlockPageScroll();
+            closing = false;
+            if (typeof onDone === "function") onDone();
+        };
+
         if (gsap) {
-            gsap.to(menuContent, { x: "100%", duration: 0.5, ease: "expo.in" });
+            gsap.killTweensOf([menu, menuContent].filter(Boolean));
+            gsap.to(menuContent, { x: "100%", duration: 0.4, ease: "expo.in" });
             gsap.to(menu, {
                 opacity: 0,
-                duration: 0.4,
-                delay: 0.2,
-                onComplete: () => {
-                    menu.classList.add("invisible");
-                    unlockPageScroll();
-                }
+                duration: 0.3,
+                delay: 0.12,
+                pointerEvents: "none",
+                onComplete: finish
             });
         } else {
             if (menuContent) menuContent.style.transform = "translateX(100%)";
             menu.style.opacity = "0";
-            menu.classList.add("invisible");
-            unlockPageScroll();
+            finish();
         }
     };
 
-    if (trigger) trigger.addEventListener("click", openMenu);
-    if (closeBtn) closeBtn.addEventListener("click", closeMenu);
-    links.forEach((link) => link.addEventListener("click", closeMenu));
+    const resolveHash = (href) => {
+        if (!href) return "";
+        if (href.startsWith("#")) return href;
+        try {
+            const url = new URL(href, window.location.href);
+            const here = window.location.pathname.replace(/\/$/, "") || "/";
+            const there = url.pathname.replace(/\/$/, "") || "/";
+            const samePage = there === here || /(?:^|\/)index\.html?$/.test(url.pathname);
+            return samePage ? url.hash || "" : "";
+        } catch (_) {
+            return "";
+        }
+    };
+
+    const scrollToHash = (hash) => {
+        const target = document.querySelector(hash);
+        if (!target) return;
+        const header = document.querySelector("#main-header");
+        const offset = header ? -Math.ceil(header.getBoundingClientRect().height + 12) : -88;
+        const lenis = getLenis();
+        if (lenis) {
+            lenis.start();
+            lenis.scrollTo(target, { offset, immediate: false });
+        } else {
+            const top = target.getBoundingClientRect().top + window.pageYOffset + offset;
+            window.scrollTo({ top, behavior: "smooth" });
+        }
+        try {
+            history.pushState(null, "", hash);
+        } catch (_) {
+            /* ignore */
+        }
+    };
+
+    if (trigger) {
+        trigger.setAttribute("aria-controls", "mobile-menu");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.addEventListener("click", openMenu);
+    }
+    if (closeBtn) closeBtn.addEventListener("click", () => closeMenu());
+    dismissEls.forEach((el) => el.addEventListener("click", () => closeMenu()));
+
+    links.forEach((link) => {
+        link.addEventListener("click", (e) => {
+            const hash = resolveHash(link.getAttribute("href"));
+            if (hash && hash.length > 1 && document.querySelector(hash)) {
+                e.preventDefault();
+                closeMenu(() => scrollToHash(hash));
+                return;
+            }
+            closeMenu();
+        });
+    });
+
     menu.addEventListener("click", (e) => {
         if (e.target === menu) closeMenu();
+    });
+
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && menu.classList.contains("is-open")) closeMenu();
     });
 };
 
