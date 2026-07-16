@@ -90,19 +90,20 @@ const getUtmParam = (key) => {
     }
 };
 
-const fillLeadContext = (btn) => {
-    const typeInput = document.querySelector("#wv-lead-type");
-    const sectionInput = document.querySelector("#wv-lead-section");
-    const pageInput = document.querySelector("#wv-lead-source-page");
-    const titleInput = document.querySelector("#wv-lead-source-title");
-    const utmSource = document.querySelector("#wv-lead-utm-source");
-    const utmMedium = document.querySelector("#wv-lead-utm-medium");
-    const utmCampaign = document.querySelector("#wv-lead-utm-campaign");
+const fillLeadContext = (btn, form = null) => {
+    const root = form || document;
+    const typeInput = root.querySelector?.("#wv-lead-type") || root.querySelector?.('[name="type"]');
+    const sectionInput = root.querySelector?.("#wv-lead-section") || root.querySelector?.('[name="source_section"]');
+    const pageInput = root.querySelector?.("#wv-lead-source-page") || root.querySelector?.('[name="source_page"]');
+    const titleInput = root.querySelector?.("#wv-lead-source-title") || root.querySelector?.('[name="source_title"]');
+    const utmSource = root.querySelector?.("#wv-lead-utm-source") || root.querySelector?.('[name="utm_source"]');
+    const utmMedium = root.querySelector?.("#wv-lead-utm-medium") || root.querySelector?.('[name="utm_medium"]');
+    const utmCampaign = root.querySelector?.("#wv-lead-utm-campaign") || root.querySelector?.('[name="utm_campaign"]');
 
-    const type = btn?.getAttribute?.("data-wv-lead-type") || "contato";
-    const section = btn?.getAttribute?.("data-wv-section") || "";
-    if (typeInput) typeInput.value = type;
-    if (sectionInput) sectionInput.value = section;
+    const type = btn?.getAttribute?.("data-wv-lead-type") || typeInput?.value || "contato";
+    const section = btn?.getAttribute?.("data-wv-section") || sectionInput?.value || "";
+    if (typeInput && btn?.getAttribute?.("data-wv-lead-type")) typeInput.value = type;
+    if (sectionInput && btn?.getAttribute?.("data-wv-section")) sectionInput.value = section;
     if (pageInput) pageInput.value = window.location.href;
     if (titleInput) titleInput.value = document.title || "";
     if (utmSource) utmSource.value = getUtmParam("utm_source");
@@ -110,14 +111,118 @@ const fillLeadContext = (btn) => {
     if (utmCampaign) utmCampaign.value = getUtmParam("utm_campaign");
 };
 
+const bindLeadForm = (form, options = {}) => {
+    if (!form || form.dataset.wvLeadBound === "1") return;
+    form.dataset.wvLeadBound = "1";
+
+    const closeOnSuccess = options.closeOnSuccess !== false
+        && form.getAttribute("data-wv-close-on-success") !== "0";
+    const onSuccess = typeof options.onSuccess === "function" ? options.onSuccess : null;
+
+    fillLeadContext(null, form);
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        fillLeadContext(null, form);
+        const data = new FormData(form);
+        const feedback = form.querySelector(".wv-lead-feedback, #wv-lead-feedback");
+        const submitBtn = form.querySelector('[type="submit"]');
+        const cfg = window.wvLeads || {};
+        const labelDefault = submitBtn?.getAttribute("data-wv-submit-label") || submitBtn?.textContent || "Enviar";
+
+        if (feedback) {
+            feedback.hidden = false;
+            feedback.textContent = "";
+            feedback.style.color = "";
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = (cfg.i18n && cfg.i18n.sending) || "Enviando…";
+        }
+
+        let saved = false;
+        if (cfg.ajaxUrl && cfg.nonce) {
+            data.append("action", cfg.action || "wv_submit_lead");
+            data.append("nonce", cfg.nonce);
+            try {
+                const res = await fetch(cfg.ajaxUrl, {
+                    method: "POST",
+                    body: data,
+                    credentials: "same-origin"
+                });
+                const json = await res.json();
+                saved = Boolean(json && json.success);
+                if (feedback) {
+                    feedback.textContent = saved
+                        ? (json.data?.message || cfg.i18n?.success || "Enviado.")
+                        : (json.data?.message || cfg.i18n?.error || "Erro ao enviar.");
+                    feedback.style.color = saved ? "" : "#f87171";
+                }
+            } catch (err) {
+                if (feedback) {
+                    feedback.textContent = (cfg.i18n && cfg.i18n.error) || "Erro ao enviar.";
+                    feedback.style.color = "#f87171";
+                }
+            }
+        }
+
+        const buildMsg = utils.buildWhatsAppMessage || (({ nome, email, mensagem }) =>
+            `Olá WV_Todoz! Meu nome é ${nome}. E-mail: ${email}.\n\n${mensagem}`);
+        const buildUrl = utils.buildWhatsAppUrl || ((message, phone) =>
+            `https://wa.me/${phone || "551155311779"}?text=${encodeURIComponent(message)}`);
+        const shouldWa = cfg.openWhatsApp !== false;
+        if (shouldWa && (saved || !cfg.ajaxUrl)) {
+            const message = buildMsg({
+                nome: data.get("nome"),
+                email: data.get("email"),
+                mensagem: data.get("mensagem")
+            });
+            window.open(buildUrl(message, cfg.whatsappPhone), "_blank", "noopener,noreferrer");
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = labelDefault;
+        }
+
+        if (saved || !cfg.ajaxUrl) {
+            window.setTimeout(() => {
+                if (closeOnSuccess && onSuccess) onSuccess();
+                form.reset();
+                fillLeadContext(null, form);
+                if (feedback && closeOnSuccess) {
+                    feedback.hidden = true;
+                    feedback.textContent = "";
+                }
+            }, saved ? 700 : 0);
+        }
+    });
+};
+
+const initLeadForms = () => {
+    document.querySelectorAll("form.wv-lead-form, #contact-form, #contato-page-form").forEach((form) => {
+        const isModal = form.id === "contact-form";
+        bindLeadForm(form, {
+            closeOnSuccess: isModal,
+            onSuccess: isModal ? () => {
+                if (typeof window.closeContactModal === "function") window.closeContactModal();
+            } : null
+        });
+    });
+};
+
 const initContactModal = () => {
     const modal = document.querySelector("#contact-modal");
-    if (!modal) return;
+    if (!modal) {
+        initLeadForms();
+        return;
+    }
 
     const openBtns = document.querySelectorAll("button.open-modal, a.open-modal");
     const closeBtn = document.querySelector("#close-modal");
     const openModal = (btn) => {
-        fillLeadContext(btn);
+        const form = document.querySelector("#contact-form");
+        fillLeadContext(btn, form);
         openSiteModal(modal);
     };
     const closeModal = () => closeSiteModal(modal);
@@ -144,83 +249,7 @@ const initContactModal = () => {
     window.openContactModal = (btn) => openModal(btn || null);
     window.closeContactModal = closeModal;
 
-    const form = document.querySelector("#contact-form");
-    if (form) {
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const data = new FormData(form);
-            const feedback = document.querySelector("#wv-lead-feedback");
-            const submitBtn = form.querySelector('[type="submit"]');
-            const cfg = window.wvLeads || {};
-            const labelDefault = submitBtn?.getAttribute("data-wv-submit-label") || submitBtn?.textContent || "Enviar";
-
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.textContent = "";
-            }
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = (cfg.i18n && cfg.i18n.sending) || "Enviando…";
-            }
-
-            let saved = false;
-            if (cfg.ajaxUrl && cfg.nonce) {
-                data.append("action", cfg.action || "wv_submit_lead");
-                data.append("nonce", cfg.nonce);
-                try {
-                    const res = await fetch(cfg.ajaxUrl, {
-                        method: "POST",
-                        body: data,
-                        credentials: "same-origin"
-                    });
-                    const json = await res.json();
-                    saved = Boolean(json && json.success);
-                    if (feedback) {
-                        feedback.textContent = saved
-                            ? (json.data?.message || cfg.i18n?.success || "Enviado.")
-                            : (json.data?.message || cfg.i18n?.error || "Erro ao enviar.");
-                        feedback.style.color = saved ? "" : "#f87171";
-                    }
-                } catch (err) {
-                    if (feedback) {
-                        feedback.textContent = (cfg.i18n && cfg.i18n.error) || "Erro ao enviar.";
-                        feedback.style.color = "#f87171";
-                    }
-                }
-            }
-
-            const buildMsg = utils.buildWhatsAppMessage || (({ nome, email, mensagem }) =>
-                `Olá WV_Todoz! Meu nome é ${nome}. E-mail: ${email}.\n\n${mensagem}`);
-            const buildUrl = utils.buildWhatsAppUrl || ((message, phone) =>
-                `https://wa.me/${phone || "551155311779"}?text=${encodeURIComponent(message)}`);
-            const shouldWa = cfg.openWhatsApp !== false;
-            if (shouldWa && (saved || !cfg.ajaxUrl)) {
-                const message = buildMsg({
-                    nome: data.get("nome"),
-                    email: data.get("email"),
-                    mensagem: data.get("mensagem")
-                });
-                window.open(buildUrl(message, cfg.whatsappPhone), "_blank", "noopener,noreferrer");
-            }
-
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = labelDefault;
-            }
-
-            if (saved || !cfg.ajaxUrl) {
-                window.setTimeout(() => {
-                    closeModal();
-                    form.reset();
-                    if (feedback) {
-                        feedback.hidden = true;
-                        feedback.textContent = "";
-                    }
-                    fillLeadContext(null);
-                }, saved ? 700 : 0);
-            }
-        });
-    }
+    initLeadForms();
 };
 
 const initCaseModal = () => {

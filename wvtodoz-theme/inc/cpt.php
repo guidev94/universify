@@ -12,13 +12,16 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('init', static function (): void {
+	// show_in_menu false — edit screens stay reachable from WV Todoz hubs
+	// (admin.php?page=wvtodoz-*) via edit.php?post_type=… URLs.
 	$common = [
 		'public'             => true,
+		'show_ui'            => true,
+		'show_in_menu'       => false,
 		'show_in_rest'       => true,
 		'has_archive'        => false,
 		'show_in_nav_menus'  => false,
 		'publicly_queryable' => true,
-		'menu_position'      => 20,
 	];
 
 	register_post_type('wv_case', array_merge($common, [
@@ -29,9 +32,8 @@ add_action('init', static function (): void {
 			'edit_item'     => __('Editar case', 'wvtodoz'),
 			'menu_name'     => __('Cases', 'wvtodoz'),
 		],
-		'menu_icon'    => 'dashicons-portfolio',
-		'supports'     => ['title', 'editor', 'thumbnail', 'page-attributes', 'excerpt'],
-		'rewrite'      => ['slug' => 'cases'],
+		'supports' => ['title', 'editor', 'thumbnail', 'page-attributes', 'excerpt'],
+		'rewrite'  => ['slug' => 'cases'],
 	]));
 
 	register_post_type('wv_produto', array_merge($common, [
@@ -42,9 +44,8 @@ add_action('init', static function (): void {
 			'edit_item'     => __('Editar produto', 'wvtodoz'),
 			'menu_name'     => __('Produtos', 'wvtodoz'),
 		],
-		'menu_icon' => 'dashicons-products',
-		'supports'  => ['title', 'editor', 'thumbnail', 'page-attributes'],
-		'rewrite'   => ['slug' => 'produtos'],
+		'supports' => ['title', 'editor', 'thumbnail', 'page-attributes'],
+		'rewrite'  => ['slug' => 'produtos'],
 	]));
 
 	register_post_type('wv_cliente', array_merge($common, [
@@ -55,7 +56,6 @@ add_action('init', static function (): void {
 			'edit_item'     => __('Editar cliente', 'wvtodoz'),
 			'menu_name'     => __('Clientes', 'wvtodoz'),
 		],
-		'menu_icon'          => 'dashicons-groups',
 		'supports'           => ['title', 'thumbnail', 'page-attributes'],
 		'publicly_queryable' => false,
 		'rewrite'            => false,
@@ -69,7 +69,6 @@ add_action('init', static function (): void {
 			'edit_item'     => __('Editar serviço', 'wvtodoz'),
 			'menu_name'     => __('Serviços', 'wvtodoz'),
 		],
-		'menu_icon'          => 'dashicons-hammer',
 		'supports'           => ['title', 'editor', 'page-attributes'],
 		'publicly_queryable' => false,
 		'rewrite'            => false,

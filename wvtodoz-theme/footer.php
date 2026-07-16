@@ -71,13 +71,16 @@ $home  = home_url('/');
 				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php echo esc_html($nav_title); ?></h5>
 				<ul class="space-y-4 text-zinc-500 font-bold text-sm">
 					<?php
+					$insights_url = function_exists('wv_insights_url') ? wv_insights_url() : ($home . '#blog');
+					$contato_url = function_exists('wv_contato_url') ? wv_contato_url() : ($home . 'contato/');
 					$footer_nav = [
 						['Sobre Nós', $home . '#sobre'],
 						['Serviços', $home . '#servicos'],
 						['Produtos', $home . '#produtos'],
 						['Aplicações', $home . '#aplicacoes'],
 						['Projetos', $home . '#portfolio'],
-						['Insights', $home . '#blog'],
+						['Insights', $insights_url],
+						['Contato', $contato_url],
 					];
 					if (has_nav_menu('footer')) {
 						$locations = get_nav_menu_locations();

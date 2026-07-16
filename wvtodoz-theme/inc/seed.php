@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.4.0';
+const WV_SEED_VERSION = '1.5.2';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -141,6 +141,24 @@ function wv_run_seed(bool $force = false): bool {
 
 	update_option('show_on_front', 'page');
 	update_option('page_on_front', $home_id);
+
+	// Blog index (page_for_posts) so /insights/ lists posts with home.php
+	$blog_id = wv_seed_upsert_post('page', 'Insights', [
+		'post_content' => '',
+		'post_name'    => 'insights',
+	]);
+	if ($blog_id > 0) {
+		update_option('page_for_posts', $blog_id);
+	}
+
+	// Contato page — template page-contato.php (also slug-matched)
+	$contato_id = wv_seed_upsert_post('page', 'Contato', [
+		'post_content' => '',
+		'post_name'    => 'contato',
+	]);
+	if ($contato_id > 0) {
+		update_post_meta($contato_id, '_wp_page_template', 'page-contato.php');
+	}
 
 	$hero = $d['hero'];
 	$sobre = $d['sobre'];
@@ -468,7 +486,7 @@ add_action('admin_notices', static function (): void {
 	$url = wp_nonce_url(admin_url('admin-post.php?action=wv_import_content'), 'wv_import_content');
 	echo '<div class="notice notice-info"><p>';
 	echo '<strong>' . esc_html__('WV Todoz:', 'wvtodoz') . '</strong> ';
-	echo esc_html__('Importe o conteúdo da landing (Home + Cases, Produtos, Clientes, Serviços e Insights) com um clique.', 'wvtodoz');
+	echo esc_html__('Importe o conteúdo da landing (Home, Contato, Insights, Cases, Produtos, Clientes e Serviços) com um clique.', 'wvtodoz');
 	echo ' <a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</a>';
 	echo ' <a href="' . esc_url(admin_url('admin.php?page=wvtodoz-import')) . '">' . esc_html__('WV Todoz → Importar', 'wvtodoz') . '</a>';
 	echo '</p></div>';
@@ -490,21 +508,6 @@ add_action('admin_post_wv_import_content', static function (): void {
 	exit;
 });
 
-/**
- * Aparência → Importar WV — kept for discoverability; redirects to WV Todoz → Importar.
- */
-add_action('admin_menu', static function (): void {
-	add_theme_page(
-		__('Importar conteúdo WV', 'wvtodoz'),
-		__('Importar WV', 'wvtodoz'),
-		'manage_options',
-		'wv-seed',
-		static function (): void {
-			// Fallback if redirect filter misses.
-			echo '<div class="wrap"><p><a href="' . esc_url(admin_url('admin.php?page=wvtodoz-import')) . '">' . esc_html__('Abrir Importar conteúdo WV', 'wvtodoz') . '</a></p></div>';
-		}
-	);
-});
 /**
  * Prompt after theme switch if not seeded.
  */

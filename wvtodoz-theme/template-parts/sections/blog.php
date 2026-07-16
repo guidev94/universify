@@ -14,8 +14,7 @@ $eyebrow = (string) wv_field('wv_blog_eyebrow', $d['eyebrow']);
 $line = (string) wv_field('wv_blog_title_line', $d['title_line']);
 $accent = (string) wv_field('wv_blog_title_accent', $d['title_accent']);
 $cta = (string) wv_field('wv_blog_cta', $d['cta']);
-$posts_page = (int) get_option('page_for_posts');
-$default_blog_url = $posts_page > 0 ? (string) get_permalink($posts_page) : home_url('/');
+$default_blog_url = function_exists('wv_insights_url') ? wv_insights_url() : home_url('/');
 $cta_url = (string) wv_field('wv_blog_cta_url', $default_blog_url);
 
 $q = new WP_Query([

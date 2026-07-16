@@ -45,7 +45,7 @@ $ph_msg = (string) wv_field('wv_modal_placeholder_message', 'Quero criar um agen
 	<div class="site-modal-panel site-modal-panel--contact" data-modal-panel>
 		<button type="button" id="close-modal" class="site-modal-close" aria-label="<?php esc_attr_e('Fechar formulário', 'wvtodoz'); ?>"><i class="ph ph-x"></i></button>
 		<h2 class="text-4xl font-black mb-8 tracking-tighter text-left text-white uppercase"><?php echo esc_html($modal_t); ?> <span class="text-todoz text-glow uppercase"><?php echo esc_html($modal_a); ?></span></h2>
-		<form id="contact-form" class="space-y-6 text-left normal-case" novalidate>
+		<form id="contact-form" class="wv-lead-form space-y-6 text-left normal-case" novalidate>
 			<input type="hidden" name="type" id="wv-lead-type" value="contato">
 			<input type="hidden" name="source_section" id="wv-lead-section" value="">
 			<input type="hidden" name="source_page" id="wv-lead-source-page" value="">

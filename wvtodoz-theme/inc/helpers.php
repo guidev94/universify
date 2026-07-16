@@ -234,6 +234,41 @@ function wv_kses_title(string $html): string {
 }
 
 /**
+ * Permalink for Contato page (seeded slug `contato`).
+ */
+function wv_contato_url(): string {
+	$page = get_page_by_path('contato');
+	if ($page instanceof WP_Post) {
+		$url = get_permalink($page);
+		if (is_string($url) && $url !== '') {
+			return $url;
+		}
+	}
+	return home_url('/contato/');
+}
+
+/**
+ * Permalink for Insights / posts index.
+ */
+function wv_insights_url(): string {
+	$posts_page = (int) get_option('page_for_posts');
+	if ($posts_page > 0) {
+		$url = get_permalink($posts_page);
+		if (is_string($url) && $url !== '') {
+			return $url;
+		}
+	}
+	$page = get_page_by_path('insights');
+	if ($page instanceof WP_Post) {
+		$url = get_permalink($page);
+		if (is_string($url) && $url !== '') {
+			return $url;
+		}
+	}
+	return home_url('/#blog');
+}
+
+/**
  * Default nav items when no menu assigned.
  *
  * @return array<int, array{label:string,url:string}>
@@ -247,5 +282,6 @@ function wv_default_nav_items(): array {
 		['label' => 'Produtos', 'url' => $home . '#produtos'],
 		['label' => 'Aplicações', 'url' => $home . '#aplicacoes'],
 		['label' => 'Projetos', 'url' => $home . '#portfolio'],
+		['label' => 'Contato', 'url' => wv_contato_url()],
 	];
 }

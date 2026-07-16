@@ -371,11 +371,15 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
 });
 
 /**
- * Redirect legacy Aparência → Importar WV to the new panel page.
+ * Strip leftover top-level CPT menus (safety net if another plugin re-registers UI)
+ * and redirect legacy Aparência → Importar WV bookmarks to WV Todoz → Importar.
  */
 add_action('admin_menu', static function (): void {
-	// Keep seed.php theme page; we redirect visitors to the branded import screen.
-}, 20);
+	foreach (['wv_case', 'wv_produto', 'wv_cliente', 'wv_servico', 'wv_lead'] as $cpt) {
+		remove_menu_page('edit.php?post_type=' . $cpt);
+	}
+	remove_submenu_page('themes.php', 'wv-seed');
+}, 999);
 
 add_action('load-appearance_page_wv-seed', static function (): void {
 	if (!current_user_can('manage_options')) {

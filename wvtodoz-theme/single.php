@@ -9,8 +9,8 @@ get_header();
 
 $show_sidebar = !function_exists('wv_opt') || (int) wv_opt('flag_blog_sidebar', 1) === 1;
 $home = home_url('/');
-$posts_page = (int) get_option('page_for_posts');
-$blog_url = $posts_page > 0 ? (string) get_permalink($posts_page) : $home . '#blog';
+$blog_url = function_exists('wv_insights_url') ? wv_insights_url() : ($home . '#blog');
+$wa = function_exists('wv_whatsapp_url') ? wv_whatsapp_url() : 'https://wa.me/551155311779';
 ?>
 <main class="pt-40 pb-32">
 	<div class="site-container">
@@ -137,9 +137,13 @@ $blog_url = $posts_page > 0 ? (string) get_permalink($posts_page) : $home . '#bl
 				</div>
 
 				<div class="p-10 bg-todoz rounded-[3rem] text-black">
-					<h5 class="text-black font-black text-xs uppercase tracking-[0.3em] mb-4"><?php esc_html_e('Fale conosco', 'wvtodoz'); ?></h5>
-					<p class="font-bold text-sm mb-8 leading-tight"><?php esc_html_e('Quer transformar operação com IA? Vamos conversar.', 'wvtodoz'); ?></p>
-					<button type="button" class="open-modal w-full py-4 bg-black text-todoz font-black rounded-2xl text-[10px] uppercase tracking-widest" data-wv-section="blog" data-wv-lead-type="contato"><?php esc_html_e('Abrir contato', 'wvtodoz'); ?></button>
+					<h5 class="text-black font-black text-xs uppercase tracking-[0.3em] mb-4"><?php esc_html_e('Newsletter', 'wvtodoz'); ?></h5>
+					<p class="font-bold text-sm mb-8 leading-tight"><?php esc_html_e('Receba insights de tecnologia diretamente no seu e-mail.', 'wvtodoz'); ?></p>
+					<form action="<?php echo esc_url($wa); ?>" method="get" target="_blank" rel="noopener noreferrer" class="space-y-4" onsubmit="const e=this.querySelector('input[type=email]').value; this.querySelector('input[name=text]').value='Olá! Quero me inscrever na newsletter com o e-mail: '+e;">
+						<input type="hidden" name="text" value="">
+						<input type="email" required class="w-full bg-black/10 border border-black/10 rounded-2xl px-6 py-4 outline-none focus:border-black transition-all text-sm placeholder:text-black/40 text-black" placeholder="<?php esc_attr_e('Seu e-mail', 'wvtodoz'); ?>">
+						<button type="submit" class="w-full py-4 bg-black text-todoz font-black rounded-2xl text-[10px] uppercase tracking-widest"><?php esc_html_e('Inscrever-se', 'wvtodoz'); ?></button>
+					</form>
 				</div>
 			</aside>
 			<?php endif; ?>

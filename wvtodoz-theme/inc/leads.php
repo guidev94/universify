@@ -344,8 +344,14 @@ function wv_ajax_submit_lead(): void {
 add_action('wp_enqueue_scripts', static function (): void {
 	$opts = function_exists('wv_get_theme_options') ? wv_get_theme_options() : [];
 	$wa_digits = (string) ($opts['whatsapp'] ?? '551155311779');
+	// Path-absolute ajax URL so localhost vs 127.0.0.1 both work in Docker.
+	$ajax = (string) wp_parse_url(admin_url('admin-ajax.php'), PHP_URL_PATH);
+	if ($ajax === '') {
+		$ajax = '/wp-admin/admin-ajax.php';
+	}
+
 	wp_localize_script('wvtodoz-components', 'wvLeads', [
-		'ajaxUrl'       => admin_url('admin-ajax.php'),
+		'ajaxUrl'       => $ajax,
 		'nonce'         => wp_create_nonce('wv_lead_nonce'),
 		'action'        => 'wv_submit_lead',
 		'openWhatsApp'  => !empty($opts['flag_lead_whatsapp']),
