@@ -85,10 +85,10 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
 				<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
 			</button>
-			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger text-todoz flex flex-col gap-1.5 items-center justify-center" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>" aria-controls="mobile-menu" aria-expanded="false">
-				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
-				<span class="w-5 h-0.5 bg-todoz rounded-full"></span>
-				<span class="w-7 h-0.5 bg-todoz rounded-full"></span>
+			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>" aria-controls="mobile-menu" aria-expanded="false">
+				<span class="mobile-menu-trigger__bar" aria-hidden="true"></span>
+				<span class="mobile-menu-trigger__bar mobile-menu-trigger__bar--short" aria-hidden="true"></span>
+				<span class="mobile-menu-trigger__bar" aria-hidden="true"></span>
 			</button>
 		</div>
 	</div>
