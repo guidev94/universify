@@ -42,7 +42,13 @@ $show_toggle = !function_exists('wv_opt') || (int) wv_opt('flag_theme_toggle', 1
 <body <?php body_class('bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden'); ?>>
 <?php wp_body_open(); ?>
 
-<header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
+<?php
+// Pages without the home hero use scrolled chrome from first paint (avoids
+// light-mode white-on-wash theme toggle before animations.js runs).
+$wv_header_scrolled = !is_front_page();
+$wv_header_class = 'fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0' . ($wv_header_scrolled ? ' is-scrolled' : '');
+?>
+<header id="main-header" class="<?php echo esc_attr($wv_header_class); ?>">
 	<div class="site-container flex justify-between items-center gap-3">
 		<a href="<?php echo esc_url(home_url('/')); ?>" class="site-logo-link block w-36 sm:w-40 md:w-56 overflow-hidden shrink-0">
 			<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">

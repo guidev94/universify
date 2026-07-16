@@ -5745,15 +5745,58 @@ body.modal-open .wa-float {
     color: var(--wv-ink);
 }
 
-/* Header on blog (always scrolled-style surface) */
+/* Header on blog / internal pages (always scrolled-style surface) */
 [data-theme="light"] #main-header.bg-primary\/80,
 [data-theme="light"] body:not(:has(#hero)) #main-header {
     background-color: var(--wv-header-scrolled) !important;
     border-bottom-color: var(--wv-header-border) !important;
+    box-shadow: var(--wv-header-shadow);
 }
 
 [data-theme="light"] body:not(:has(#hero)) #main-header nav a:not(.magnetic):not(.theme-toggle) {
     color: var(--wv-nav-scrolled);
+}
+
+[data-theme="light"] body:not(:has(#hero)) #main-header nav a:not(.magnetic):not(.theme-toggle):hover {
+    color: var(--todoz);
+}
+
+/*
+ * Internal pages have no #hero — do NOT use transparent-hero toggle chrome
+ * (white moon on washed glass). Match scrolled light header controls.
+ */
+[data-theme="light"] body:not(:has(#hero)) #main-header .theme-toggle,
+[data-theme="light"] body:not(:has(#hero)) #main-header:not(.is-scrolled) .theme-toggle,
+[data-theme="light"] #main-header.bg-primary\/80 .theme-toggle {
+    color: var(--wv-ink);
+    border-color: var(--wv-border);
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(10, 10, 10, 0.04);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-theme="light"] body:not(:has(#hero)) #main-header .theme-toggle:hover,
+[data-theme="light"] body:not(:has(#hero)) #main-header:not(.is-scrolled) .theme-toggle:hover,
+[data-theme="light"] #main-header.bg-primary\/80 .theme-toggle:hover {
+    color: #5a6b00;
+    border-color: rgba(90, 107, 0, 0.35);
+    background: rgba(207, 255, 4, 0.18);
+}
+
+[data-theme="dark"] body:not(:has(#hero)) #main-header {
+    background-color: var(--wv-header-scrolled) !important;
+    border-bottom-color: var(--wv-header-border) !important;
+    box-shadow: var(--wv-header-shadow);
+}
+
+[data-theme="dark"] body:not(:has(#hero)) #main-header .theme-toggle,
+[data-theme="dark"] body:not(:has(#hero)) #main-header:not(.is-scrolled) .theme-toggle {
+    color: var(--wv-ink);
+    border-color: var(--wv-border);
+    background: var(--wv-glass);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 /*

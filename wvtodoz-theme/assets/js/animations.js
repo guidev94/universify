@@ -181,8 +181,14 @@ const initHeaderAnim = () => {
     const header = document.querySelector("#main-header");
     if (!header) return;
 
-    // Keep CSS class path (readable) + sync with Lenis/GSAP scroll
-    const setScrolled = (on) => header.classList.toggle("is-scrolled", Boolean(on));
+    // Internal pages (no #hero): always use scrolled chrome so light-mode
+    // toggle/logo/nav never inherit transparent-hero (white-on-wash) styles.
+    const internalChrome = !document.querySelector("#hero");
+    const setScrolled = (on) => header.classList.toggle("is-scrolled", Boolean(internalChrome || on));
+
+    if (internalChrome) {
+        setScrolled(true);
+    }
 
     ScrollTrigger.create({
         start: "top -100",
