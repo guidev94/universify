@@ -807,14 +807,15 @@ h1, h2, h3, h4,
     text-transform: none;
 }
 
-.missao-product--accent {
+.missao-product.missao-product--accent {
     display: inline-flex;
     align-items: center;
     margin-top: 0.1rem;
     padding: 0.4rem 0.7rem;
     border-radius: 0.3rem;
     background: #0a0a0a;
-    color: var(--todoz);
+    /* Explicit lime — must beat .missao-product { color: #0a0a0a } in mobile MQ */
+    color: #CFFF04;
     font-size: clamp(1.05rem, 1.8vw, 1.28rem);
     font-weight: 800;
     letter-spacing: -0.015em;
@@ -967,11 +968,13 @@ h1, h2, h3, h4,
         color: #0a0a0a;
     }
 
-    .missao-product--accent {
+    .missao-product.missao-product--accent {
         font-size: 0.72rem;
         padding: 0.28rem 0.5rem;
         margin-top: 0;
         max-width: 100%;
+        color: #CFFF04;
+        background: #0a0a0a;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
     }
 
@@ -1172,9 +1175,11 @@ h1, h2, h3, h4,
         font-size: 0.95rem;
     }
 
-    .missao-product--accent {
+    .missao-product.missao-product--accent {
         font-size: 0.8rem;
         padding: 0.32rem 0.6rem;
+        color: #CFFF04;
+        background: #0a0a0a;
     }
 
     .missao-stat--products dd {
@@ -2194,7 +2199,8 @@ h1, h2, h3, h4,
     font-weight: 800;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(207, 255, 4, 0.85);
+    /* Chip panel is always dark glass — solid brand lime in every theme */
+    color: #CFFF04;
 }
 
 .aplicacoes-chip-title {
@@ -5386,7 +5392,8 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .aplicacoes-chip-kicker {
-    color: var(--wv-lime-label);
+    /* Keep lime on dark glass — do not use --wv-lime-label (ink) here */
+    color: #CFFF04;
     text-shadow: none;
 }
 
