@@ -24,11 +24,18 @@ $q = new WP_Query([
 	'no_found_rows'  => true,
 ]);
 
-$fallback = [
-	['title' => 'O futuro da programação.', 'tag' => 'Tecnologia', 'excerpt' => 'Tendências que ditam o software de amanhã e como se preparar.', 'img' => WVTODOZ_URI . '/assets/img/blog/insight-tech.jpg', 'date' => '12 Abr 2026', 'url' => '#'],
-	['title' => 'Segmentação de Leads.', 'tag' => 'Inteligência', 'excerpt' => 'Trabalhando sua base de contatos com inteligência e conversão.', 'img' => WVTODOZ_URI . '/assets/img/blog/insight-data.jpg', 'date' => '08 Mar 2026', 'url' => '#'],
-	['title' => 'Revolução AI-First.', 'tag' => 'Inovação', 'excerpt' => 'IA no centro dos produtos digitais modernos e competitivos.', 'img' => WVTODOZ_URI . '/assets/img/blog/insight-ai.jpg', 'date' => '21 Fev 2026', 'url' => '#'],
-];
+$fallback = [];
+foreach ((array) (wv_defaults()['insights'] ?? []) as $insight) {
+	$img_rel = (string) ($insight['img'] ?? '');
+	$fallback[] = [
+		'title'   => (string) ($insight['title'] ?? ''),
+		'tag'     => (string) ($insight['tag'] ?? 'Insights'),
+		'excerpt' => (string) ($insight['excerpt'] ?? ''),
+		'img'     => $img_rel !== '' ? (WVTODOZ_URI . '/assets/' . ltrim($img_rel, '/')) : (string) ($insight['img_url'] ?? ''),
+		'date'    => !empty($insight['date']) ? date_i18n('d M Y', strtotime((string) $insight['date'])) : '',
+		'url'     => !empty($insight['slug']) ? home_url('/' . trim((string) $insight['slug'], '/') . '/') : '#',
+	];
+}
 ?>
 <section id="blog" class="section-canvas section-glow py-24 md:py-32">
 	<div class="site-container">

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.5.8';
+const WV_SEED_VERSION = '1.5.9';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -62,13 +62,17 @@ function wv_seed_upsert_post(string $post_type, string $title, array $args = [])
 /**
  * Attach a local theme asset (or remote URL) as featured image.
  */
-function wv_seed_set_thumbnail(int $post_id, string $source, string $filename = ''): void {
+function wv_seed_set_thumbnail(int $post_id, string $source, string $filename = '', bool $force = false): void {
 	if ($post_id <= 0 || $source === '') {
 		return;
 	}
 
-	if (has_post_thumbnail($post_id)) {
+	if (!$force && has_post_thumbnail($post_id)) {
 		return;
+	}
+
+	if ($force && has_post_thumbnail($post_id)) {
+		delete_post_thumbnail($post_id);
 	}
 
 	require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -367,51 +371,61 @@ function wv_run_seed(bool $force = false): bool {
 		wv_seed_set_field('wv_servico_link', $card['link'] ?? '', $id);
 	}
 
-	// --- Insight posts ---
-	$insights = [
-		[
-			'title'   => 'O futuro da programação.',
-			'excerpt' => 'Tendências que ditam o software de amanhã e como se preparar.',
-			'tag'     => 'Tecnologia',
-			'img'     => 'img/blog/insight-tech.jpg',
-			'date'    => '2026-04-12 10:00:00',
-		],
-		[
-			'title'   => 'Segmentação de Leads.',
-			'excerpt' => 'Trabalhando sua base de contatos com inteligência e conversão.',
-			'tag'     => 'Inteligência',
-			'img'     => 'img/blog/insight-data.jpg',
-			'date'    => '2026-03-08 10:00:00',
-		],
-		[
-			'title'   => 'Revolução AI-First.',
-			'excerpt' => 'IA no centro dos produtos digitais modernos e competitivos.',
-			'tag'     => 'Inovação',
-			'img'     => 'img/blog/insight-ai.jpg',
-			'date'    => '2026-02-21 10:00:00',
-		],
-	];
+	// --- Insight posts (production articles from wvtodoz.com.br) ---
+	wv_seed_purge_obsolete_posts([
+		'Hello world!',
+		'O futuro da programação.',
+		'Segmentação de Leads.',
+		'Revolução AI-First.',
+	]);
 
+	$insights = is_array($d['insights'] ?? null) ? $d['insights'] : [];
 	foreach ($insights as $insight) {
-		$id = wv_seed_upsert_post('post', $insight['title'], [
-			'post_excerpt' => $insight['excerpt'],
-			'post_content' => '<p>' . esc_html($insight['excerpt']) . '</p>',
-			'post_date'    => $insight['date'],
-		]);
+		$title = (string) ($insight['title'] ?? '');
+		if ($title === '') {
+			continue;
+		}
+		$content = (string) ($insight['content'] ?? '');
+		if ($content === '' && !empty($insight['excerpt'])) {
+			$content = '<p>' . esc_html((string) $insight['excerpt']) . '</p>';
+		}
+		$args = [
+			'post_excerpt' => (string) ($insight['excerpt'] ?? ''),
+			'post_content' => $content,
+			'post_date'    => (string) ($insight['date'] ?? current_time('mysql')),
+		];
+		if (!empty($insight['slug'])) {
+			$args['post_name'] = (string) $insight['slug'];
+		}
+		$id = wv_seed_upsert_post('post', $title, $args);
 		if ($id <= 0) {
 			continue;
 		}
-		$term = term_exists($insight['tag'], 'category');
+		$tag = (string) ($insight['tag'] ?? 'Tecnologia');
+		$term = term_exists($tag, 'category');
 		if (!$term) {
-			$term = wp_insert_term($insight['tag'], 'category');
+			$term = wp_insert_term($tag, 'category');
 		}
 		if (!is_wp_error($term)) {
 			$term_id = is_array($term) ? (int) $term['term_id'] : (int) $term;
 			wp_set_post_terms($id, [$term_id], 'category', false);
 		}
-		$asset = wv_seed_asset($insight['img']);
-		$source = $asset['path'] !== '' ? $asset['path'] : $asset['uri'];
-		wv_seed_set_thumbnail($id, $source, basename($insight['img']));
+
+		$img_rel = (string) ($insight['img'] ?? '');
+		$img_url = (string) ($insight['img_url'] ?? '');
+		$source = '';
+		$filename = '';
+		if ($img_rel !== '') {
+			$asset = wv_seed_asset($img_rel);
+			$source = $asset['path'] !== '' ? $asset['path'] : ($img_url !== '' ? $img_url : $asset['uri']);
+			$filename = basename($img_rel);
+		} elseif ($img_url !== '') {
+			$source = $img_url;
+			$filename = basename((string) parse_url($img_url, PHP_URL_PATH));
+		}
+		if ($source !== '') {
+			wv_seed_set_thumbnail($id, $source, $filename, $force);
+		}
 	}
 
 	update_option(WV_SEED_OPTION, [
@@ -421,6 +435,28 @@ function wv_run_seed(bool $force = false): bool {
 	]);
 
 	return true;
+}
+
+/**
+ * Permanently delete posts by exact title (sample / previous seed insights).
+ *
+ * @param list<string> $titles
+ */
+function wv_seed_purge_obsolete_posts(array $titles): void {
+	global $wpdb;
+	foreach ($titles as $title) {
+		$title = (string) $title;
+		if ($title === '') {
+			continue;
+		}
+		$ids = $wpdb->get_col($wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'post' AND post_status != 'trash'",
+			$title
+		));
+		foreach ($ids as $id) {
+			wp_delete_post((int) $id, true);
+		}
+	}
 }
 
 /**
