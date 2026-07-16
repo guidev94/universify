@@ -3354,32 +3354,11 @@ html.content-revealed [data-reveal] {
 /* Hero composition — spacing + type owned here (not only Tailwind clamps) */
 .hero-inner {
     position: relative;
-    isolation: isolate;
     padding-top: 9rem;
     padding-bottom: 2rem;
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-}
-
-/* Local copy-column veil — contrast without full-bleed video darkening */
-.hero-inner::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    pointer-events: none;
-    left: 50%;
-    top: 6%;
-    bottom: 14%;
-    width: min(100%, 44rem);
-    transform: translateX(-50%);
-    background: radial-gradient(
-        ellipse 78% 70% at 50% 42%,
-        rgba(5, 5, 5, 0.56) 0%,
-        rgba(5, 5, 5, 0.3) 44%,
-        rgba(5, 5, 5, 0.1) 68%,
-        transparent 78%
-    );
 }
 
 .hero-badge {
@@ -3419,15 +3398,27 @@ html.content-revealed [data-reveal] {
     padding-inline: 0.25rem;
 }
 
-/* Readability on dark video — scoped to #hero so light surfaces stay clean */
+/* Readability via soft text-shadow only — no local box/radial veil behind copy */
 #hero .hero-eyebrow {
-    color: rgba(228, 228, 231, 0.9);
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 0, 0, 0.3);
+    color: rgba(228, 228, 231, 0.92);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.55),
+        0 2px 18px rgba(0, 0, 0, 0.45),
+        0 0 36px rgba(0, 0, 0, 0.28);
+}
+
+#hero .hero-display {
+    text-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.4),
+        0 4px 28px rgba(0, 0, 0, 0.35);
 }
 
 #hero .hero-lead {
-    color: rgba(236, 236, 240, 0.94);
-    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5), 0 0 22px rgba(0, 0, 0, 0.28);
+    color: rgba(236, 236, 240, 0.95);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.5),
+        0 2px 16px rgba(0, 0, 0, 0.4),
+        0 0 32px rgba(0, 0, 0, 0.25);
 }
 
 /* Secondary CTA — thicker border + darker translucent fill */
@@ -3955,19 +3946,6 @@ footer ul li a:hover {
         line-height: 1.5;
         margin-bottom: 1.05rem;
         max-width: 20.5rem;
-    }
-
-    .hero-inner::before {
-        top: 4%;
-        bottom: 10%;
-        width: min(100%, 24rem);
-        background: radial-gradient(
-            ellipse 88% 74% at 50% 40%,
-            rgba(5, 5, 5, 0.62) 0%,
-            rgba(5, 5, 5, 0.34) 46%,
-            rgba(5, 5, 5, 0.1) 70%,
-            transparent 80%
-        );
     }
 
     .hero-ctas {

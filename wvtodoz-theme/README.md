@@ -29,7 +29,7 @@ Thumbnail: `screenshot.png` (aparece em Aparência → Temas).
 | Aviso no Dashboard / Temas | Botão **Importar conteúdo WV** se o seed ainda não rodou |
 | Reimportar / atualizar | Sobrescreve textos ACF + CPTs a partir de `inc/defaults.php` |
 
-O seed (`inc/seed.php` v1.2.0):
+O seed (`inc/seed.php` v1.3.0):
 
 - Cria/atualiza a página **Home** e define como Front Page
 - Preenche **todas as abas ACF** da Home
@@ -114,7 +114,11 @@ wvtodoz-theme/
 
 ## Stack front-end
 
-Tailwind CDN, Phosphor Icons, GSAP + ScrollTrigger, Lenis, AOS, `assets/css/main.css`. Tema claro é o padrão (toggle no header).
+Tailwind CDN, Phosphor Icons, GSAP + ScrollTrigger, Lenis, AOS, `assets/css/main.css`.
+
+**Tema claro (light) é o padrão:** `data-theme="light"` no `<html>`, snippet FOUC em `header.php` (fallback `light` se `localStorage` vazio/inválido), e `theme.js` com `DEFAULT_THEME = "light"` + chave `wv-theme`.
+
+Hero video: `assets/video/hero.mp4` (web-optimized ~2.3MB). Path igual no estático e no tema.
 
 ## Segurança
 
