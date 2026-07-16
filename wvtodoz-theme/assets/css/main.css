@@ -5564,9 +5564,8 @@ body.modal-open .wa-float {
 
 [data-theme="light"] .section-display-dot {
     background: #CFFF04;
-    box-shadow:
-        0 0 0 1px rgba(36, 48, 0, 0.35),
-        0 0 14px rgba(207, 255, 4, 0.45);
+    /* Soft glow only — no hard 1px ring (reads as muddy outline) */
+    box-shadow: 0 0 14px rgba(207, 255, 4, 0.45);
 }
 
 /*
@@ -5844,11 +5843,9 @@ body.modal-open .wa-float {
         text-shadow: none !important;
     }
 
-    /* Keep lime fill; swap muddy olive 1px stroke for near-black edge */
+    /* Keep lime fill; no hard stroke — soft glow only */
     [data-theme="light"] .section-display-dot {
         background: #CFFF04;
-        box-shadow:
-            0 0 0 1px rgba(10, 10, 10, 0.55),
-            0 0 14px rgba(207, 255, 4, 0.45);
+        box-shadow: 0 0 14px rgba(207, 255, 4, 0.45);
     }
 }
