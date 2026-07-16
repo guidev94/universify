@@ -5843,4 +5843,12 @@ body.modal-open .wa-float {
         color: #0a0a0a !important;
         text-shadow: none !important;
     }
+
+    /* Keep lime fill; swap muddy olive 1px stroke for near-black edge */
+    [data-theme="light"] .section-display-dot {
+        background: #CFFF04;
+        box-shadow:
+            0 0 0 1px rgba(10, 10, 10, 0.55),
+            0 0 14px rgba(207, 255, 4, 0.45);
+    }
 }
