@@ -1052,7 +1052,7 @@ h1, h2, h3, h4,
         padding: 1.15rem 1.25rem;
         font-size: 0.72rem;
         letter-spacing: 0.1em;
-        align-self: flex-start;
+        align-self: center;
     }
 
     #mobile-bridge::after {
