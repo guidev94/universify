@@ -35,7 +35,7 @@ $img = wv_image_url(wv_field('wv_sobre_image', null), $d['image']);
 					<div class="border-l-2 border-todoz pl-6 text-left"><span class="block text-4xl md:text-5xl font-black text-white mb-2"><?php echo esc_html($s2n); ?></span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black"><?php echo esc_html($s2l); ?></span></div>
 				</div>
 				<div class="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-center justify-center md:justify-start">
-					<button type="button" class="open-modal magnetic bg-todoz px-10 py-5 text-black font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest w-full sm:w-auto max-w-xs"><?php echo esc_html($cta1); ?></button>
+					<button type="button" class="open-modal magnetic bg-todoz px-10 py-5 text-black font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest w-full sm:w-auto max-w-xs" data-wv-section="sobre" data-wv-lead-type="contato"><?php echo esc_html($cta1); ?></button>
 					<a href="<?php echo esc_url(home_url('/#servicos')); ?>" class="magnetic px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest w-full sm:w-auto max-w-xs text-center hover:border-todoz/40 hover:text-todoz transition-colors"><?php echo esc_html($cta2); ?></a>
 				</div>
 			</div>

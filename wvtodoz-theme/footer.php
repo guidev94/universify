@@ -14,20 +14,24 @@ $logo  = wv_logo_url();
 $wa    = wv_whatsapp_url();
 $f     = $d['footer'];
 $tag   = (string) wv_field('wv_footer_tagline', $f['tagline']);
+$opt_tag = function_exists('wv_opt') ? (string) wv_opt('footer_tagline', '') : '';
+if ($opt_tag !== '') {
+	$tag = $opt_tag;
+}
+$footer_extra = function_exists('wv_opt') ? (string) wv_opt('footer_extra', '') : '';
 $addr  = (string) wv_field('wv_footer_address', $f['address']);
 $maps  = (string) wv_field('wv_footer_maps', $f['maps']);
 $nav_title = (string) wv_field('wv_footer_nav_title', __('Navegação', 'wvtodoz'));
 $products_title = (string) wv_field('wv_footer_products_title', __('Produtos', 'wvtodoz'));
 $copy  = (string) wv_field('wv_footer_copyright', $f['copyright']);
-$fb    = (string) wv_field('wv_social_facebook', $f['facebook']);
-$ig    = (string) wv_field('wv_social_instagram', $f['instagram']);
-$li    = (string) wv_field('wv_social_linkedin', $f['linkedin']);
-$yt    = (string) wv_field('wv_social_youtube', $f['youtube']);
+$fb    = wv_social_url('facebook', 'wv_social_facebook', (string) $f['facebook']);
+$ig    = wv_social_url('instagram', 'wv_social_instagram', (string) $f['instagram']);
+$li    = wv_social_url('linkedin', 'wv_social_linkedin', (string) $f['linkedin']);
+$yt    = wv_social_url('youtube', 'wv_social_youtube', (string) $f['youtube']);
 $priv  = (string) wv_field('wv_footer_privacy', $f['privacy'] ?? ($wa . '?text=' . rawurlencode('Olá, gostaria de receber a Política de Privacidade.')));
 $terms = (string) wv_field('wv_footer_terms', $f['terms'] ?? ($wa . '?text=' . rawurlencode('Olá, gostaria de receber os Termos de Uso.')));
 $tip   = (string) wv_field('wv_wa_float_label', 'Falar com Especialista');
-$modal_t = (string) wv_field('wv_modal_title', $d['modal']['title']);
-$modal_a = (string) wv_field('wv_modal_title_accent', $d['modal']['title_accent']);
+$show_wa_float = !function_exists('wv_opt') || (int) wv_opt('flag_wa_float', 1) === 1;
 $home  = home_url('/');
 ?>
 
@@ -39,6 +43,23 @@ $home  = home_url('/');
 					<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async">
 				</span>
 				<p class="footer-tagline text-zinc-500 leading-relaxed mb-8 md:mb-10 max-w-sm mx-auto md:mx-0"><?php echo esc_html($tag); ?></p>
+				<?php if ($footer_extra !== '') : ?>
+				<p class="text-zinc-600 text-sm leading-relaxed mb-8 max-w-sm mx-auto md:mx-0"><?php echo nl2br(esc_html($footer_extra)); ?></p>
+				<?php endif; ?>
+				<?php
+				$phone_display = wv_company_phone();
+				$email_display = wv_company_email();
+				if ($phone_display !== '' || $email_display !== '') :
+					?>
+				<p class="text-zinc-500 text-sm font-bold mb-8 space-y-1">
+					<?php if ($phone_display !== '') : ?>
+					<span class="block"><?php echo esc_html($phone_display); ?></span>
+					<?php endif; ?>
+					<?php if ($email_display !== '') : ?>
+					<a class="block hover:text-todoz" href="<?php echo esc_url('mailto:' . $email_display); ?>"><?php echo esc_html($email_display); ?></a>
+					<?php endif; ?>
+				</p>
+				<?php endif; ?>
 				<div class="flex gap-6 text-zinc-400 text-3xl justify-center md:justify-start">
 					<a href="<?php echo esc_url($fb); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>
 					<a href="<?php echo esc_url($ig); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
@@ -144,6 +165,7 @@ $home  = home_url('/');
 
 <?php get_template_part('template-parts/modals'); ?>
 
+<?php if ($show_wa_float) : ?>
 <a id="wa-float" href="<?php echo esc_url($wa); ?>" target="_blank" rel="noopener noreferrer" class="wa-float group" aria-label="<?php esc_attr_e('Falar no WhatsApp', 'wvtodoz'); ?>">
 	<div class="wa-float-glow" aria-hidden="true"></div>
 	<div class="wa-float-btn">
@@ -153,6 +175,7 @@ $home  = home_url('/');
 		<span class="flex items-center gap-3"><?php echo esc_html($tip); ?> <i class="ph ph-arrow-right text-todoz animate-bounce-x"></i></span>
 	</div>
 </a>
+<?php endif; ?>
 
 <?php wp_footer(); ?>
 </body>

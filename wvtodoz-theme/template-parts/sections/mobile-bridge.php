@@ -37,7 +37,7 @@ $cta = (string) wv_field('wv_bridge_cta', $d['cta']);
 						<span><?php echo esc_html($eyebrow); ?></span>
 					</div>
 					<p class="section-lead section-lead--bridge mobile-bridge-lead"><?php echo esc_html($lead); ?></p>
-					<button type="button" class="open-modal magnetic mobile-bridge-cta">
+					<button type="button" class="open-modal magnetic mobile-bridge-cta" data-wv-section="bridge" data-wv-lead-type="contato">
 						<?php echo esc_html($cta); ?>
 						<i class="ph ph-arrow-right" aria-hidden="true"></i>
 					</button>

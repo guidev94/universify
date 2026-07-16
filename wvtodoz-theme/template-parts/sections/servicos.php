@@ -64,7 +64,7 @@ for ($i = 1; $i <= 4; $i++) {
 			</div>
 			<div class="servicos-header-cta text-center md:text-right" data-aos="fade-up">
 				<p class="servicos-header-note"><?php echo esc_html($note); ?></p>
-				<button type="button" class="open-modal magnetic servicos-quote-link">
+				<button type="button" class="open-modal magnetic servicos-quote-link" data-wv-section="servicos" data-wv-lead-type="orcamento">
 					<?php echo esc_html($quote); ?>
 					<i class="ph ph-arrow-right" aria-hidden="true"></i>
 				</button>
@@ -87,7 +87,7 @@ for ($i = 1; $i <= 4; $i++) {
 				<?php if ($variant === 'mobile') : ?>
 				<div class="servicos-card-top">
 					<div class="servicos-card-icon servicos-card-icon--sm" aria-hidden="true"><i class="ph <?php echo esc_attr($icon); ?>"></i></div>
-					<button type="button" class="open-modal magnetic servicos-card-icon-btn" aria-label="<?php esc_attr_e('Falar sobre este serviço', 'wvtodoz'); ?>">
+					<button type="button" class="open-modal magnetic servicos-card-icon-btn" data-wv-section="servicos" data-wv-lead-type="orcamento" aria-label="<?php esc_attr_e('Falar sobre este serviço', 'wvtodoz'); ?>">
 						<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
 					</button>
 				</div>
@@ -113,7 +113,7 @@ for ($i = 1; $i <= 4; $i++) {
 					<i class="ph ph-arrow-right" aria-hidden="true"></i>
 				</a>
 				<?php elseif (!empty($card['cta'])) : ?>
-				<button type="button" class="open-modal magnetic servicos-card-btn <?php echo esc_attr((string) ($card['cta_class'] ?? '')); ?>"><?php echo esc_html((string) $card['cta']); ?></button>
+				<button type="button" class="open-modal magnetic servicos-card-btn <?php echo esc_attr((string) ($card['cta_class'] ?? '')); ?>" data-wv-section="servicos" data-wv-lead-type="orcamento"><?php echo esc_html((string) $card['cta']); ?></button>
 				<?php endif; ?>
 			</article>
 			<?php endforeach; ?>

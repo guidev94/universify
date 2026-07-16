@@ -53,11 +53,19 @@ function wv_logo_url(): string {
 
 /** Light-surface wordmark: green WV_ + black TODOZ/tagline. */
 function wv_logo_light_url(): string {
+	$custom = (string) (function_exists('wv_opt') ? wv_opt('logo_light', '') : '');
+	if ($custom !== '') {
+		return $custom;
+	}
 	return WVTODOZ_URI . '/assets/img/logo-wv-light.svg';
 }
 
 /** Dark-surface wordmark: green WV_ + white TODOZ/tagline. */
 function wv_logo_dark_url(): string {
+	$custom = (string) (function_exists('wv_opt') ? wv_opt('logo_dark', '') : '');
+	if ($custom !== '') {
+		return $custom;
+	}
 	return WVTODOZ_URI . '/assets/img/logo-wv-dark.svg';
 }
 
@@ -101,10 +109,59 @@ function wv_logo_markup(array $args = []): string {
 	);
 }
 
-function wv_whatsapp_url(): string {
+function wv_whatsapp_digits(): string {
+	$from_opt = function_exists('wv_opt') ? (string) wv_opt('whatsapp', '') : '';
+	if ($from_opt !== '') {
+		return preg_replace('/\D+/', '', $from_opt) ?: $from_opt;
+	}
 	$d = wv_defaults();
 	$url = (string) wv_field('wv_whatsapp_url', $d['whatsapp']);
-	return $url !== '' ? $url : (string) $d['whatsapp'];
+	$digits = preg_replace('/\D+/', '', $url) ?? '';
+	return $digits !== '' ? $digits : '551155311779';
+}
+
+function wv_whatsapp_url(string $text = ''): string {
+	$d = wv_defaults();
+	$acf_url = (string) wv_field('wv_whatsapp_url', '');
+	$base = $acf_url !== '' ? $acf_url : ('https://wa.me/' . wv_whatsapp_digits());
+	// Prefer theme option digits when ACF empty.
+	if ($acf_url === '' && function_exists('wv_opt')) {
+		$base = 'https://wa.me/' . wv_whatsapp_digits();
+	}
+	if ($text === '') {
+		return $base !== '' ? $base : (string) $d['whatsapp'];
+	}
+	$sep = str_contains($base, '?') ? '&' : '?';
+	return $base . $sep . 'text=' . rawurlencode($text);
+}
+
+function wv_company_email(): string {
+	return (string) (function_exists('wv_opt') ? wv_opt('email', 'contato@wvtodoz.com.br') : 'contato@wvtodoz.com.br');
+}
+
+function wv_company_phone(): string {
+	return (string) (function_exists('wv_opt') ? wv_opt('phone', '') : '');
+}
+
+/**
+ * Social URL from theme options, then ACF field, then default.
+ */
+function wv_social_url(string $network, string $acf_key, string $default = ''): string {
+	$map = [
+		'instagram' => 'social_instagram',
+		'linkedin'  => 'social_linkedin',
+		'facebook'  => 'social_facebook',
+		'youtube'   => 'social_youtube',
+	];
+	$opt_key = $map[$network] ?? '';
+	if ($opt_key !== '' && function_exists('wv_opt')) {
+		$from_opt = (string) wv_opt($opt_key, '');
+		if ($from_opt !== '') {
+			return $from_opt;
+		}
+	}
+	$from_acf = (string) wv_field($acf_key, $default);
+	return $from_acf !== '' ? $from_acf : $default;
 }
 
 /**

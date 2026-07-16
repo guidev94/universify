@@ -58,7 +58,7 @@ $logos = wv_defaults()['hero_logos'];
 						<i class="ph-fill ph-rocket-launch text-lg group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
 					</div>
 				</a>
-				<button type="button" class="hero-cta open-modal magnetic bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 uppercase backdrop-blur-sm">
+				<button type="button" class="hero-cta open-modal magnetic bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 uppercase backdrop-blur-sm" data-wv-section="hero" data-wv-lead-type="contato">
 					<?php echo esc_html($cta2); ?>
 				</button>
 			</div>

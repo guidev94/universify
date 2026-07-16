@@ -53,7 +53,7 @@ $cta = (string) wv_field('wv_aplicacoes_cta', $d['cta']);
 					<li><?php echo esc_html($b2); ?></li>
 					<li><?php echo esc_html($b3); ?></li>
 				</ul>
-				<button type="button" class="open-modal magnetic aplicacoes-cta"><?php echo esc_html($cta); ?></button>
+				<button type="button" class="open-modal magnetic aplicacoes-cta" data-wv-section="aplicacoes" data-wv-lead-type="contato"><?php echo esc_html($cta); ?></button>
 			</div>
 		</div>
 	</div>

@@ -120,6 +120,8 @@ function wv_admin_screen_slugs(): array {
 		'wvtodoz_page_wvtodoz-menus' => true,
 		'wvtodoz_page_wvtodoz-import' => true,
 		'wvtodoz_page_wvtodoz-ajuda' => true,
+		'wvtodoz_page_wvtodoz-aparencia' => true,
+		'wvtodoz_page_wvtodoz-leads' => true,
 	];
 	foreach (wv_admin_sections() as $section) {
 		$map['wvtodoz_page_' . $section['slug']] = true;
@@ -207,10 +209,39 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
 		'contato'    => __('Contato / Footer', 'wvtodoz'),
 	];
 
+	$is_home_editor = false;
+	$section_hub = admin_url('admin.php?page=wvtodoz');
+	if ($screen && $screen->base === 'post' && $screen->post_type === 'page') {
+		$home_id = wv_home_id();
+		$post_id = isset($_GET['post']) ? (int) $_GET['post'] : 0;
+		$is_home_editor = $home_id > 0 && $post_id === $home_id;
+	}
+	if ($tab !== '' && isset(wv_admin_sections()[$tab === 'blog' ? 'insights' : $tab])) {
+		$sec_key = $tab === 'blog' ? 'insights' : $tab;
+		$sec = wv_admin_sections()[$sec_key] ?? null;
+		if (is_array($sec)) {
+			$section_hub = admin_url('admin.php?page=' . $sec['slug']);
+		}
+	} elseif ($tab === 'bridge') {
+		$section_hub = admin_url('admin.php?page=wvtodoz-bridge');
+	}
+
+	$notice = '';
+	if ($tab !== '') {
+		$notice = sprintf(
+			/* translators: %s section name */
+			__('A aba ACF “%s” deve abrir automaticamente. Salve a página para publicar no site.', 'wvtodoz'),
+			$tab_labels[$tab] ?? $tab
+		);
+	} elseif ($is_home_editor) {
+		$notice = __('Você está editando a Home. Use as abas ACF ou volte ao painel WV Todoz para ir direto a uma seção.', 'wvtodoz');
+	}
+
 	wp_localize_script('wvtodoz-admin', 'wvAdmin', [
-		'tab'       => $tab,
-		'tabLabel'  => $tab_labels[$tab] ?? $tab,
-		'tabKeys'   => [
+		'tab'           => $tab,
+		'tabLabel'      => $tab_labels[$tab] ?? $tab,
+		'tabLabels'     => $tab_labels,
+		'tabKeys'       => [
 			'hero'       => 'field_tab_hero',
 			'sobre'      => 'field_tab_sobre',
 			'missao'     => 'field_tab_missao',
@@ -222,22 +253,24 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
 			'blog'       => 'field_tab_blog',
 			'contato'    => 'field_tab_contato',
 		],
-		'notice'    => $tab !== ''
-			? sprintf(
-				/* translators: %s section name */
-				__('Editando a seção “%s”. Use a aba ACF correspondente abaixo — ela deve abrir automaticamente.', 'wvtodoz'),
-				$tab_labels[$tab] ?? $tab
-			)
-			: '',
-		'panelUrl'  => admin_url('admin.php?page=wvtodoz'),
-		'icons'     => wv_admin_icon_catalog(),
-		'i18n'      => [
-			'back'       => __('← Painel WV Todoz', 'wvtodoz'),
-			'pickIcon'   => __('Escolher ícone', 'wvtodoz'),
-			'searchIcon' => __('Buscar ícone…', 'wvtodoz'),
-			'close'      => __('Fechar', 'wvtodoz'),
-			'noIcons'    => __('Nenhum ícone encontrado.', 'wvtodoz'),
-			'selected'   => __('Selecionado', 'wvtodoz'),
+		'notice'        => $notice,
+		'panelUrl'      => admin_url('admin.php?page=wvtodoz'),
+		'sectionHubUrl' => $section_hub,
+		'isHomeEditor'  => $is_home_editor,
+		'logoUrl'       => function_exists('wv_logo_dark_url')
+			? wv_logo_dark_url()
+			: (WVTODOZ_URI . '/assets/img/logo-wv-dark.svg'),
+		'icons'         => wv_admin_icon_catalog(),
+		'i18n'          => [
+			'back'        => __('← Painel WV Todoz', 'wvtodoz'),
+			'sectionHub'  => __('Hub da seção', 'wvtodoz'),
+			'editing'     => __('Editando: ', 'wvtodoz'),
+			'editingHome' => __('Editando: Home', 'wvtodoz'),
+			'pickIcon'    => __('Escolher ícone', 'wvtodoz'),
+			'searchIcon'  => __('Buscar ícone…', 'wvtodoz'),
+			'close'       => __('Fechar', 'wvtodoz'),
+			'noIcons'     => __('Nenhum ícone encontrado.', 'wvtodoz'),
+			'selected'    => __('Selecionado', 'wvtodoz'),
 		],
 	]);
 });

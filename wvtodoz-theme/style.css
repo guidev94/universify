@@ -4,7 +4,7 @@ Theme URI: https://www.wvtodoz.com.br/
 Author: WV_Todoz
 Author URI: https://www.wvtodoz.com.br/
 Description: Tema da landing page WV_Todoz. Software house focada em agentes de IA, automações e integrações. Conteúdo editável via ACF free + CPTs.
-Version: 1.4.0
+Version: 1.5.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 8.0
@@ -17,3 +17,27 @@ WV Todoz theme — styles live primarily in assets/css/main.css (enqueued).
 */
 
 /* Thin WP admin/editor safety only; front styles are in main.css */
+
+/* Blog single prose — mirrors blog-post.html */
+.prose-blog p {
+	color: var(--type-body-color, #a1a1aa);
+	line-height: 1.8;
+	margin-bottom: 1.5rem;
+	font-size: 1.125rem;
+}
+.prose-blog h2 {
+	color: var(--wv-display, #fff);
+	font-weight: 900;
+	font-size: 2.25rem;
+	margin-top: 3rem;
+	margin-bottom: 1.5rem;
+	letter-spacing: -0.04em;
+}
+.prose-blog blockquote {
+	border-left: 4px solid var(--todoz, #cfff04);
+	padding-left: 2rem;
+	font-style: italic;
+	font-size: 1.25rem;
+	color: var(--wv-ink, #fff);
+	margin: 3rem 0;
+}

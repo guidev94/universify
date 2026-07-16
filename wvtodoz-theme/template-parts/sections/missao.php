@@ -50,7 +50,7 @@ $count2 = (int) preg_replace('/\D/', '', $s2n) ?: 50;
 						<dd><?php echo esc_html($products_label); ?></dd>
 					</div>
 				</dl>
-				<button type="button" class="open-modal magnetic missao-cta">
+				<button type="button" class="open-modal magnetic missao-cta" data-wv-section="missao" data-wv-lead-type="contato">
 					<?php echo esc_html($cta); ?>
 					<i class="ph ph-arrow-right" aria-hidden="true"></i>
 				</button>

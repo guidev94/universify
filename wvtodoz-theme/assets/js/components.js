@@ -82,13 +82,44 @@ const closeSiteModal = (modal) => {
     tl.to(modal, { opacity: 0, duration: 0.3, ease: "power2.in" }, panel ? 0.05 : 0);
 };
 
+const getUtmParam = (key) => {
+    try {
+        return new URLSearchParams(window.location.search).get(key) || "";
+    } catch (e) {
+        return "";
+    }
+};
+
+const fillLeadContext = (btn) => {
+    const typeInput = document.querySelector("#wv-lead-type");
+    const sectionInput = document.querySelector("#wv-lead-section");
+    const pageInput = document.querySelector("#wv-lead-source-page");
+    const titleInput = document.querySelector("#wv-lead-source-title");
+    const utmSource = document.querySelector("#wv-lead-utm-source");
+    const utmMedium = document.querySelector("#wv-lead-utm-medium");
+    const utmCampaign = document.querySelector("#wv-lead-utm-campaign");
+
+    const type = btn?.getAttribute?.("data-wv-lead-type") || "contato";
+    const section = btn?.getAttribute?.("data-wv-section") || "";
+    if (typeInput) typeInput.value = type;
+    if (sectionInput) sectionInput.value = section;
+    if (pageInput) pageInput.value = window.location.href;
+    if (titleInput) titleInput.value = document.title || "";
+    if (utmSource) utmSource.value = getUtmParam("utm_source");
+    if (utmMedium) utmMedium.value = getUtmParam("utm_medium");
+    if (utmCampaign) utmCampaign.value = getUtmParam("utm_campaign");
+};
+
 const initContactModal = () => {
     const modal = document.querySelector("#contact-modal");
     if (!modal) return;
 
     const openBtns = document.querySelectorAll("button.open-modal, a.open-modal");
     const closeBtn = document.querySelector("#close-modal");
-    const openModal = () => openSiteModal(modal);
+    const openModal = (btn) => {
+        fillLeadContext(btn);
+        openSiteModal(modal);
+    };
     const closeModal = () => closeSiteModal(modal);
 
     openBtns.forEach((btn) => {
@@ -98,10 +129,10 @@ const initContactModal = () => {
             const caseModal = document.querySelector("#case-modal");
             if (caseModal?.classList.contains("is-open")) {
                 closeSiteModal(caseModal);
-                window.setTimeout(openModal, 340);
+                window.setTimeout(() => openModal(btn), 340);
                 return;
             }
-            openModal();
+            openModal(btn);
         });
     });
 
@@ -110,26 +141,84 @@ const initContactModal = () => {
         if (e.target === modal || e.target?.hasAttribute?.("data-modal-backdrop")) closeModal();
     });
 
-    window.openContactModal = openModal;
+    window.openContactModal = (btn) => openModal(btn || null);
     window.closeContactModal = closeModal;
 
     const form = document.querySelector("#contact-form");
     if (form) {
-        form.addEventListener("submit", (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const data = new FormData(form);
+            const feedback = document.querySelector("#wv-lead-feedback");
+            const submitBtn = form.querySelector('[type="submit"]');
+            const cfg = window.wvLeads || {};
+            const labelDefault = submitBtn?.getAttribute("data-wv-submit-label") || submitBtn?.textContent || "Enviar";
+
+            if (feedback) {
+                feedback.hidden = false;
+                feedback.textContent = "";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = (cfg.i18n && cfg.i18n.sending) || "Enviando…";
+            }
+
+            let saved = false;
+            if (cfg.ajaxUrl && cfg.nonce) {
+                data.append("action", cfg.action || "wv_submit_lead");
+                data.append("nonce", cfg.nonce);
+                try {
+                    const res = await fetch(cfg.ajaxUrl, {
+                        method: "POST",
+                        body: data,
+                        credentials: "same-origin"
+                    });
+                    const json = await res.json();
+                    saved = Boolean(json && json.success);
+                    if (feedback) {
+                        feedback.textContent = saved
+                            ? (json.data?.message || cfg.i18n?.success || "Enviado.")
+                            : (json.data?.message || cfg.i18n?.error || "Erro ao enviar.");
+                        feedback.style.color = saved ? "" : "#f87171";
+                    }
+                } catch (err) {
+                    if (feedback) {
+                        feedback.textContent = (cfg.i18n && cfg.i18n.error) || "Erro ao enviar.";
+                        feedback.style.color = "#f87171";
+                    }
+                }
+            }
+
             const buildMsg = utils.buildWhatsAppMessage || (({ nome, email, mensagem }) =>
                 `Olá WV_Todoz! Meu nome é ${nome}. E-mail: ${email}.\n\n${mensagem}`);
-            const buildUrl = utils.buildWhatsAppUrl || ((message) =>
-                `https://wa.me/551155311779?text=${encodeURIComponent(message)}`);
-            const message = buildMsg({
-                nome: data.get("nome"),
-                email: data.get("email"),
-                mensagem: data.get("mensagem")
-            });
-            window.open(buildUrl(message), "_blank", "noopener,noreferrer");
-            closeModal();
-            form.reset();
+            const buildUrl = utils.buildWhatsAppUrl || ((message, phone) =>
+                `https://wa.me/${phone || "551155311779"}?text=${encodeURIComponent(message)}`);
+            const shouldWa = cfg.openWhatsApp !== false;
+            if (shouldWa && (saved || !cfg.ajaxUrl)) {
+                const message = buildMsg({
+                    nome: data.get("nome"),
+                    email: data.get("email"),
+                    mensagem: data.get("mensagem")
+                });
+                window.open(buildUrl(message, cfg.whatsappPhone), "_blank", "noopener,noreferrer");
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = labelDefault;
+            }
+
+            if (saved || !cfg.ajaxUrl) {
+                window.setTimeout(() => {
+                    closeModal();
+                    form.reset();
+                    if (feedback) {
+                        feedback.hidden = true;
+                        feedback.textContent = "";
+                    }
+                    fillLeadContext(null);
+                }, saved ? 700 : 0);
+            }
         });
     }
 };
@@ -179,7 +268,7 @@ const initCaseModal = () => {
             e.preventDefault();
             e.stopPropagation();
             closeSiteModal(modal);
-            window.setTimeout(() => window.openContactModal?.(), 320);
+            window.setTimeout(() => window.openContactModal?.(similarBtn), 320);
         });
     }
 };

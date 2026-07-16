@@ -13,21 +13,27 @@ $logo = wv_logo_url();
 $wa   = wv_whatsapp_url();
 $nav  = wv_default_nav_items();
 $d    = wv_defaults();
-$ig   = (string) wv_field('wv_social_instagram', $d['footer']['instagram']);
-$li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
+$ig   = wv_social_url('instagram', 'wv_social_instagram', (string) $d['footer']['instagram']);
+$li   = wv_social_url('linkedin', 'wv_social_linkedin', (string) $d['footer']['linkedin']);
+$default_theme = function_exists('wv_opt') ? (string) wv_opt('default_theme', 'light') : 'light';
+if (!in_array($default_theme, ['light', 'dark'], true)) {
+	$default_theme = 'light';
+}
+$show_toggle = !function_exists('wv_opt') || (int) wv_opt('flag_theme_toggle', 1) === 1;
 ?><!DOCTYPE html>
-<html <?php language_attributes(); ?> data-theme="light">
+<html <?php language_attributes(); ?> data-theme="<?php echo esc_attr($default_theme); ?>">
 <head>
 	<meta charset="<?php bloginfo('charset'); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script>
 		(function () {
 			try {
+				var fallback = <?php echo wp_json_encode($default_theme); ?>;
 				var t = localStorage.getItem('wv-theme');
-				if (t !== 'light' && t !== 'dark') t = 'light';
+				if (t !== 'light' && t !== 'dark') t = fallback || 'light';
 				document.documentElement.setAttribute('data-theme', t);
 			} catch (e) {
-				document.documentElement.setAttribute('data-theme', 'light');
+				document.documentElement.setAttribute('data-theme', <?php echo wp_json_encode($default_theme); ?>);
 			}
 		})();
 	</script>
@@ -67,24 +73,28 @@ $li   = (string) wv_field('wv_social_linkedin', $d['footer']['linkedin']);
 			}
 			?>
 			<div class="header-actions header-actions--desktop">
+				<?php if ($show_toggle) : ?>
 				<button type="button" class="theme-toggle" data-theme-toggle aria-label="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>" title="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>">
 					<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
 					<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
 				</button>
-				<a href="<?php echo esc_url($wa); ?>" target="_blank" rel="noopener noreferrer" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
+				<?php endif; ?>
+				<button type="button" class="open-modal magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]" data-wv-section="header" data-wv-lead-type="contato">
 					<?php echo esc_html((string) wv_field('wv_contato_cta', 'FALE CONOSCO')); ?>
 					<div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
 						<i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
 						<i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
 					</div>
-				</a>
+				</button>
 			</div>
 		</nav>
 		<div class="header-actions header-actions--mobile lg:hidden">
+			<?php if ($show_toggle) : ?>
 			<button type="button" class="theme-toggle" data-theme-toggle aria-label="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>" title="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>">
 				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
 				<i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
 			</button>
+			<?php endif; ?>
 			<button type="button" id="mobile-menu-trigger" class="mobile-menu-trigger" aria-label="<?php esc_attr_e('Abrir menu', 'wvtodoz'); ?>" aria-controls="mobile-menu" aria-expanded="false">
 				<span class="mobile-menu-trigger__bar" aria-hidden="true"></span>
 				<span class="mobile-menu-trigger__bar mobile-menu-trigger__bar--short" aria-hidden="true"></span>

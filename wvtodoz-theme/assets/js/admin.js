@@ -1,5 +1,5 @@
 /**
- * WV Todoz admin — ACF tab focus, icon picker, confirms, editor banner.
+ * WV Todoz admin — ACF tab focus, icon picker, confirms, editor chrome.
  */
 (function () {
 	'use strict';
@@ -19,25 +19,135 @@
 		return (
 			document.querySelector('.acf-tab-button[data-key="' + fieldKey + '"]') ||
 			document.querySelector('a.acf-tab-button[data-key="' + fieldKey + '"]') ||
-			document.querySelector('.acf-tab-group a[data-key="' + fieldKey + '"]')
+			document.querySelector('.acf-tab-group a[data-key="' + fieldKey + '"]') ||
+			document.querySelector('.acf-hl-tab[data-key="' + fieldKey + '"]')
 		);
+	}
+
+	function findTabByLabel(label) {
+		if (!label) return null;
+		var buttons = document.querySelectorAll('.acf-tab-button, a.acf-tab-button, .acf-tab-group a');
+		var target = String(label).toLowerCase().trim();
+		for (var i = 0; i < buttons.length; i++) {
+			var text = (buttons[i].textContent || '').toLowerCase().replace(/\s+/g, ' ').trim();
+			if (text === target || text.indexOf(target) !== -1) {
+				return buttons[i];
+			}
+		}
+		return null;
 	}
 
 	function clickAcfTab() {
 		var slug = cfg.tab;
-		if (!slug || !cfg.tabKeys) return false;
-		var key = cfg.tabKeys[slug];
-		if (!key) return false;
-		var btn = findTabButton(key);
+		if (!slug) return false;
+
+		var key = cfg.tabKeys && cfg.tabKeys[slug];
+		var btn = key ? findTabButton(key) : null;
+		if (!btn && cfg.tabLabel) {
+			btn = findTabByLabel(cfg.tabLabel);
+		}
+		if (!btn && cfg.tabLabels && cfg.tabLabels[slug]) {
+			btn = findTabByLabel(cfg.tabLabels[slug]);
+		}
 		if (!btn) return false;
+
 		btn.click();
-		btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		try {
+			btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		} catch (e) {
+			/* ignore */
+		}
+		btn.classList.add('wv-acf-tab-active');
 		return true;
 	}
 
+	function injectEditorChrome() {
+		if (document.querySelector('.wv-editor-chrome')) return;
+		if (!cfg.isHomeEditor && !cfg.tab) return;
+
+		var chrome = document.createElement('div');
+		chrome.className = 'wv-editor-chrome';
+		chrome.setAttribute('role', 'region');
+		chrome.setAttribute('aria-label', 'WV Todoz');
+
+		var left = document.createElement('div');
+		left.className = 'wv-editor-chrome__left';
+
+		var brand = document.createElement('div');
+		brand.className = 'wv-editor-chrome__brand';
+		if (cfg.logoUrl) {
+			var img = document.createElement('img');
+			img.className = 'wv-editor-chrome__logo';
+			img.src = cfg.logoUrl;
+			img.alt = 'WV_Todoz';
+			img.width = 130;
+			img.height = 50;
+			img.decoding = 'async';
+			brand.appendChild(img);
+		} else {
+			brand.innerHTML = '<span class="wv-editor-chrome__mark">WV_</span><span>TODOZ</span>';
+		}
+		left.appendChild(brand);
+
+		var title = document.createElement('h1');
+		title.className = 'wv-editor-chrome__title';
+		if (cfg.tab && cfg.tabLabel) {
+			title.textContent = (cfg.i18n && cfg.i18n.editing) || 'Editando: ';
+			var accent = document.createElement('span');
+			accent.className = 'wv-editor-chrome__accent';
+			accent.textContent = cfg.tabLabel;
+			title.appendChild(accent);
+		} else {
+			title.textContent = (cfg.i18n && cfg.i18n.editingHome) || 'Editando: Home';
+		}
+		left.appendChild(title);
+
+		if (cfg.notice) {
+			var notice = document.createElement('p');
+			notice.className = 'wv-editor-chrome__notice';
+			notice.textContent = cfg.notice;
+			left.appendChild(notice);
+		}
+
+		var actions = document.createElement('div');
+		actions.className = 'wv-editor-chrome__actions';
+
+		if (cfg.sectionHubUrl) {
+			var hub = document.createElement('a');
+			hub.className = 'wv-editor-chrome__btn wv-editor-chrome__btn--ghost';
+			hub.href = cfg.sectionHubUrl;
+			hub.textContent = (cfg.i18n && cfg.i18n.sectionHub) || 'Hub da seção';
+			actions.appendChild(hub);
+		}
+
+		if (cfg.panelUrl) {
+			var back = document.createElement('a');
+			back.className = 'wv-editor-chrome__btn';
+			back.href = cfg.panelUrl;
+			back.textContent = (cfg.i18n && cfg.i18n.back) || '← Painel WV Todoz';
+			actions.appendChild(back);
+		}
+
+		chrome.appendChild(left);
+		chrome.appendChild(actions);
+
+		var wrap = document.querySelector('#post') || document.querySelector('.wrap');
+		if (wrap && wrap.parentNode) {
+			wrap.parentNode.insertBefore(chrome, wrap);
+		} else if (document.body) {
+			document.body.insertBefore(chrome, document.body.firstChild);
+		}
+
+		document.body.classList.add('wv-has-editor-chrome');
+		if (cfg.tab) {
+			document.body.classList.add('wv-editing-tab-' + cfg.tab);
+		}
+	}
+
 	function injectBanner() {
+		// Legacy thin banner only when chrome is unavailable
+		if (document.querySelector('.wv-editor-chrome') || document.querySelector('.wv-admin-banner')) return;
 		if (!cfg.notice) return;
-		if (document.querySelector('.wv-admin-banner')) return;
 
 		var banner = document.createElement('div');
 		banner.className = 'wv-admin-banner';
@@ -75,19 +185,25 @@
 	function focusTabWithRetry() {
 		if (!cfg.tab) return;
 		var attempts = 0;
-		var max = 40;
+		var max = 50;
 		var timer = window.setInterval(function () {
 			attempts += 1;
 			if (clickAcfTab() || attempts >= max) {
 				window.clearInterval(timer);
 			}
-		}, 150);
+		}, 120);
 
 		if (window.acf && typeof window.acf.addAction === 'function') {
 			window.acf.addAction('ready', function () {
 				clickAcfTab();
 			});
+			window.acf.addAction('append', function () {
+				clickAcfTab();
+			});
 		}
+
+		window.setTimeout(clickAcfTab, 600);
+		window.setTimeout(clickAcfTab, 1400);
 	}
 
 	/* ——— Icon picker ——— */
@@ -254,7 +370,8 @@
 
 		var preview = document.createElement('span');
 		preview.className = 'wv-icon-field__preview';
-		preview.innerHTML = '<i class="ph ' + normalizeIconClass(input.value) + ' wv-icon-field__preview-icon" aria-hidden="true"></i>';
+		preview.innerHTML =
+			'<i class="ph ' + normalizeIconClass(input.value) + ' wv-icon-field__preview-icon" aria-hidden="true"></i>';
 
 		var btn = document.createElement('button');
 		btn.type = 'button';
@@ -303,15 +420,17 @@
 		bindConfirms();
 		wireIconFields();
 		wireSectionIconButtons();
-		if (cfg.tab) {
+		injectEditorChrome();
+		if (!document.querySelector('.wv-editor-chrome')) {
 			injectBanner();
+		}
+		if (cfg.tab) {
 			focusTabWithRetry();
 		}
 		if (window.acf && typeof window.acf.addAction === 'function') {
 			window.acf.addAction('ready', wireIconFields);
 			window.acf.addAction('append', wireIconFields);
 		}
-		// Late ACF paint
 		window.setTimeout(wireIconFields, 400);
 		window.setTimeout(wireIconFields, 1200);
 	});

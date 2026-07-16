@@ -11,19 +11,70 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-function wv_admin_shell_open(string $title, string $subtitle = ''): void {
+/**
+ * Shared branded admin header (logo + title + optional actions).
+ *
+ * @param array<int, array{label:string,url:string,primary?:bool,danger?:bool,attrs?:string}> $actions
+ */
+function wv_admin_shell_open(string $title, string $subtitle = '', array $actions = []): void {
+	$logo = function_exists('wv_logo_dark_url')
+		? wv_logo_dark_url()
+		: (WVTODOZ_URI . '/assets/img/logo-wv-dark.svg');
+
+	if (!$actions) {
+		$actions = [
+			[
+				'label' => __('Ver site', 'wvtodoz'),
+				'url'   => home_url('/'),
+			],
+			[
+				'label'   => __('Importar', 'wvtodoz'),
+				'url'     => admin_url('admin.php?page=wvtodoz-import'),
+				'primary' => true,
+			],
+		];
+	}
+
 	echo '<div class="wrap wv-admin">';
 	echo '<header class="wv-admin__hero">';
-	echo '<div class="wv-admin__brand">';
-	echo '<span class="wv-admin__mark">WV_</span>';
-	echo '<span class="wv-admin__brand-name">TODOZ</span>';
-	echo '</div>';
+	echo '<div class="wv-admin__hero-main">';
+	echo '<a class="wv-admin__brand" href="' . esc_url(admin_url('admin.php?page=wvtodoz')) . '">';
+	printf(
+		'<img class="wv-admin__logo" src="%s" alt="%s" width="160" height="62" decoding="async">',
+		esc_url($logo),
+		esc_attr__('WV_Todoz', 'wvtodoz')
+	);
+	echo '</a>';
 	echo '<div class="wv-admin__hero-copy">';
+	echo '<p class="wv-admin__eyebrow">WV_TODOZ · ADMIN</p>';
 	echo '<h1 class="wv-admin__title">' . esc_html($title) . '</h1>';
 	if ($subtitle !== '') {
 		echo '<p class="wv-admin__subtitle">' . esc_html($subtitle) . '</p>';
 	}
-	echo '</div></header>';
+	echo '</div></div>';
+
+	if ($actions) {
+		echo '<div class="wv-admin__hero-actions">';
+		foreach ($actions as $action) {
+			$classes = ['wv-admin__hero-btn'];
+			if (!empty($action['primary'])) {
+				$classes[] = 'wv-admin__hero-btn--primary';
+			} else {
+				$classes[] = 'wv-admin__hero-btn--ghost';
+			}
+			$attrs = $action['attrs'] ?? '';
+			printf(
+				'<a class="%s" href="%s"%s>%s</a>',
+				esc_attr(implode(' ', $classes)),
+				esc_url((string) $action['url']),
+				$attrs !== '' ? ' ' . $attrs : '',
+				esc_html((string) $action['label'])
+			);
+		}
+		echo '</div>';
+	}
+
+	echo '</header>';
 	echo '<div class="wv-admin__body">';
 }
 

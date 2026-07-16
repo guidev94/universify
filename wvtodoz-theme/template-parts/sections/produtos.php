@@ -127,7 +127,7 @@ if (!$cards) {
 							<?php if (!empty($card['secondary_url']) && empty($card['secondary_modal'])) : ?>
 							<a href="<?php echo esc_url($card['secondary_url']); ?>" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--ghost"><?php echo esc_html($card['secondary_label']); ?></a>
 							<?php else : ?>
-							<button type="button" class="open-modal magnetic produto-btn produto-btn--ghost"><?php echo esc_html($card['secondary_label']); ?></button>
+							<button type="button" class="open-modal magnetic produto-btn produto-btn--ghost" data-wv-section="produtos" data-wv-lead-type="orcamento"><?php echo esc_html($card['secondary_label']); ?></button>
 							<?php endif; ?>
 						<?php endif; ?>
 					</div>
