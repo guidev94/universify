@@ -6015,3 +6015,181 @@ body.modal-open .wa-float {
 [data-theme="dark"] .wv-content-body {
     color: #d4d4d8;
 }
+
+/* —— Blog post meta, sidebar, newsletter, search/404 —— */
+.blog-post-meta__row {
+    width: 100%;
+}
+
+.blog-newsletter__form {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.75rem;
+}
+
+.blog-newsletter__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    background: rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    outline: none;
+    font-size: 0.875rem;
+    color: #0a0a0a;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.blog-newsletter__input::placeholder {
+    color: rgba(10, 10, 10, 0.45);
+}
+
+.blog-newsletter__input:focus {
+    border-color: #0a0a0a;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.blog-newsletter__btn {
+    flex: 0 0 auto;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    background: #0a0a0a;
+    color: var(--todoz);
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+
+.blog-newsletter__btn:hover {
+    filter: brightness(1.1);
+}
+
+@media (max-width: 420px) {
+    .blog-newsletter__form {
+        flex-direction: column;
+    }
+
+    .blog-newsletter__btn {
+        width: 100%;
+    }
+}
+
+.blog-widget__input {
+    background: var(--wv-input-bg, rgba(0, 0, 0, 0.5));
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.06));
+    color: var(--wv-ink, #fff);
+}
+
+.blog-widget__input::placeholder {
+    color: var(--type-body-muted, #71717a);
+}
+
+.wv-404__code {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 18vw, 10rem);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    color: var(--todoz);
+    margin: 0.5rem 0 1.25rem;
+    text-shadow: 0 0 40px rgba(207, 255, 4, 0.25);
+}
+
+.wv-404__lead {
+    color: var(--type-body-muted, #a1a1aa);
+}
+
+/* Light theme — blog sidebar widgets on cream */
+[data-theme="light"] .blog-widget {
+    background: var(--wv-surface) !important;
+    border-color: var(--wv-border) !important;
+    box-shadow: var(--wv-card-shadow);
+}
+
+[data-theme="light"] .blog-widget__title,
+[data-theme="light"] .blog-widget .text-white {
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] .blog-widget__input {
+    background: #f4f4f0 !important;
+    border-color: rgba(10, 10, 10, 0.12) !important;
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] .blog-widget__input::placeholder {
+    color: #71717a !important;
+}
+
+[data-theme="light"] .blog-widget__cat {
+    color: #52525b !important;
+}
+
+[data-theme="light"] .blog-widget__cat:hover {
+    color: #3f4a00 !important;
+}
+
+[data-theme="light"] .blog-widget__count {
+    background: rgba(10, 10, 10, 0.08) !important;
+    color: #3f3f46 !important;
+}
+
+[data-theme="light"] .blog-widget__recent-title {
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] .blog-widget__recent-date {
+    color: #71717a !important;
+}
+
+[data-theme="light"] .blog-widget__recent .border-white\/5,
+[data-theme="light"] .blog-sidebar .border-white\/5 {
+    border-color: rgba(10, 10, 10, 0.1) !important;
+}
+
+[data-theme="light"] .blog-post-meta {
+    border-color: rgba(10, 10, 10, 0.1) !important;
+}
+
+[data-theme="light"] .blog-post-meta__author,
+[data-theme="light"] .blog-post-meta .text-white {
+    color: var(--wv-ink) !important;
+}
+
+[data-theme="light"] .blog-post-tag {
+    background: rgba(10, 10, 10, 0.06) !important;
+    color: #52525b !important;
+}
+
+[data-theme="light"] .blog-newsletter__input {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(10, 10, 10, 0.14);
+}
+
+[data-theme="light"] .blog-newsletter__btn {
+    color: var(--todoz);
+}
+
+[data-theme="light"] .wv-404__lead,
+[data-theme="light"] .wv-empty-state .text-zinc-400 {
+    color: var(--type-body-color) !important;
+}
+
+[data-theme="light"] main .wv-empty-state a.border,
+[data-theme="light"] .wv-404 a.border {
+    border-color: rgba(10, 10, 10, 0.14);
+    color: var(--wv-ink);
+}
+
+[data-theme="dark"] .blog-widget__input {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
