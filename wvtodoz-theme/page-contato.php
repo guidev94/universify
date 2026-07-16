@@ -79,7 +79,7 @@ $submit = (string) wv_field('wv_modal_submit', 'Enviar Proposta');
 			</div>
 
 			<div class="lg:col-span-7" data-aos="fade-up" data-aos-delay="100">
-				<div class="p-8 md:p-12 bg-zinc-900/30 border border-white/5 rounded-[2.5rem] md:rounded-[3rem] backdrop-blur-xl">
+				<div class="wv-lead-card">
 					<form id="contato-page-form" class="wv-lead-form space-y-6 text-left" novalidate data-wv-close-on-success="0">
 						<input type="hidden" name="type" value="contato">
 						<input type="hidden" name="source_section" value="contato-page">
@@ -94,24 +94,24 @@ $submit = (string) wv_field('wv_modal_submit', 'Enviar Proposta');
 						</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 							<div class="space-y-2">
-								<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block" for="wv-page-nome"><?php echo esc_html($label_name); ?></label>
-								<input id="wv-page-nome" name="nome" type="text" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_name); ?>">
+								<label class="wv-lead-label" for="wv-page-nome"><?php echo esc_html($label_name); ?></label>
+								<input id="wv-page-nome" name="nome" type="text" required class="wv-lead-input" placeholder="<?php echo esc_attr($ph_name); ?>">
 							</div>
 							<div class="space-y-2">
-								<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block" for="wv-page-email"><?php echo esc_html($label_email); ?></label>
-								<input id="wv-page-email" name="email" type="email" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_email); ?>">
+								<label class="wv-lead-label" for="wv-page-email"><?php echo esc_html($label_email); ?></label>
+								<input id="wv-page-email" name="email" type="email" required class="wv-lead-input" placeholder="<?php echo esc_attr($ph_email); ?>">
 							</div>
 						</div>
 						<div class="space-y-2">
-							<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block" for="wv-page-phone"><?php echo esc_html($label_phone); ?></label>
-							<input id="wv-page-phone" name="telefone" type="tel" class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_phone); ?>">
+							<label class="wv-lead-label" for="wv-page-phone"><?php echo esc_html($label_phone); ?></label>
+							<input id="wv-page-phone" name="telefone" type="tel" class="wv-lead-input" placeholder="<?php echo esc_attr($ph_phone); ?>">
 						</div>
 						<div class="space-y-2">
-							<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block" for="wv-page-msg"><?php echo esc_html($label_msg); ?></label>
-							<textarea id="wv-page-msg" name="mensagem" rows="4" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white resize-none" placeholder="<?php echo esc_attr($ph_msg); ?>"></textarea>
+							<label class="wv-lead-label" for="wv-page-msg"><?php echo esc_html($label_msg); ?></label>
+							<textarea id="wv-page-msg" name="mensagem" rows="4" required class="wv-lead-input wv-lead-input--area" placeholder="<?php echo esc_attr($ph_msg); ?>"></textarea>
 						</div>
 						<p class="wv-lead-feedback text-sm text-todoz min-h-[1.25rem]" role="status" aria-live="polite" hidden></p>
-						<button type="submit" class="magnetic bg-todoz w-full py-5 text-black font-black rounded-full text-xs uppercase tracking-widest text-center" data-wv-submit-label="<?php echo esc_attr($submit); ?>"><?php echo esc_html($submit); ?></button>
+						<button type="submit" class="wv-lead-submit magnetic" data-wv-submit-label="<?php echo esc_attr($submit); ?>"><?php echo esc_html($submit); ?></button>
 					</form>
 				</div>
 			</div>

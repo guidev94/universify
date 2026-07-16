@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.5.2';
+const WV_SEED_VERSION = '1.5.3';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -160,6 +160,11 @@ function wv_run_seed(bool $force = false): bool {
 		update_post_meta($contato_id, '_wp_page_template', 'page-contato.php');
 	}
 
+	// Internal pages mirrored from production hubs (legal + key site sections)
+	$internal_pages = wv_seed_internal_pages();
+	$privacy_id = (int) ($internal_pages['politica-de-privacidade'] ?? 0);
+	$terms_id = (int) ($internal_pages['termos-de-uso'] ?? 0);
+
 	$hero = $d['hero'];
 	$sobre = $d['sobre'];
 	$missao = $d['missao'];
@@ -253,8 +258,8 @@ function wv_run_seed(bool $force = false): bool {
 		'wv_footer_nav_title'      => 'Navegação',
 		'wv_footer_products_title' => 'Produtos',
 		'wv_footer_copyright'      => $footer['copyright'],
-		'wv_footer_privacy'        => $footer['privacy'],
-		'wv_footer_terms'          => $footer['terms'],
+		'wv_footer_privacy'        => $privacy_id > 0 ? (string) get_permalink($privacy_id) : (string) $footer['privacy'],
+		'wv_footer_terms'          => $terms_id > 0 ? (string) get_permalink($terms_id) : (string) $footer['terms'],
 		'wv_social_facebook'       => $footer['facebook'],
 		'wv_social_instagram'      => $footer['instagram'],
 		'wv_social_linkedin'       => $footer['linkedin'],
@@ -507,6 +512,124 @@ add_action('admin_post_wv_import_content', static function (): void {
 	wp_safe_redirect($redirect);
 	exit;
 });
+
+/**
+ * Seed internal content pages present on production (hubs + legal).
+ *
+ * @return array<string, int> slug => post ID
+ */
+function wv_seed_internal_pages(): array {
+	$pages = [
+		'politica-de-privacidade' => [
+			'title'   => 'Política de Privacidade',
+			'content' => <<<'HTML'
+<p>Esta Política de Privacidade descreve como a WV Todoz coleta, usa e protege informações pessoais enviadas por meio do site, formulários de contato e canais digitais.</p>
+<h2>1. Dados que coletamos</h2>
+<p>Podemos receber nome, e-mail, telefone, mensagem e metadados de origem (página, seção e parâmetros UTM) quando você solicita contato ou orçamento.</p>
+<h2>2. Finalidade</h2>
+<p>Utilizamos os dados exclusivamente para responder solicitações, elaborar propostas comerciais, melhorar nossos serviços e cumprir obrigações legais.</p>
+<h2>3. Compartilhamento</h2>
+<p>Não vendemos dados pessoais. Podemos compartilhar informações com prestadores essenciais (hospedagem, e-mail, CRM) sob contrato de confidencialidade, ou quando exigido por lei.</p>
+<h2>4. Retenção e segurança</h2>
+<p>Mantemos os dados pelo tempo necessário ao atendimento e às obrigações legais, com medidas técnicas e organizacionais adequadas.</p>
+<h2>5. Seus direitos (LGPD)</h2>
+<p>Você pode solicitar acesso, correção, anonimização ou exclusão dos seus dados. Contato: <a href="mailto:contato@wvtodoz.com.br">contato@wvtodoz.com.br</a>.</p>
+<p><em>Texto placeholder — revise com assessoria jurídica antes de publicar em produção.</em></p>
+HTML,
+		],
+		'termos-de-uso' => [
+			'title'   => 'Termos de Uso',
+			'content' => <<<'HTML'
+<p>Ao utilizar este site e os canais da WV Todoz, você concorda com estes Termos de Uso.</p>
+<h2>1. Uso do site</h2>
+<p>O conteúdo é informado para apresentação da empresa, produtos e serviços. É proibido uso abusivo, scraping agressivo ou tentativa de comprometer a segurança da plataforma.</p>
+<h2>2. Propriedade intelectual</h2>
+<p>Marcas, textos, layouts e materiais pertencem à WV Todoz ou a licenciantes. Reprodução sem autorização prévia é vedada.</p>
+<h2>3. Propostas e serviços</h2>
+<p>Orçamentos e escopos são definidos em proposta comercial específica. Estes termos não substituem contratos de prestação de serviço.</p>
+<h2>4. Limitação</h2>
+<p>Empregamos esforços para manter informações atualizadas, sem garantia de disponibilidade ininterrupta do site.</p>
+<h2>5. Contato</h2>
+<p>Dúvidas: <a href="mailto:contato@wvtodoz.com.br">contato@wvtodoz.com.br</a> ou página <a href="/contato/">Contato</a>.</p>
+<p><em>Texto placeholder — revise com assessoria jurídica antes de publicar em produção.</em></p>
+HTML,
+		],
+		'servicos' => [
+			'title'   => 'Serviços',
+			'content' => <<<'HTML'
+<p>A WV Todoz desenvolve software, agentes de IA, automações e integrações que reduzem fricção operacional e geram resultado de negócio.</p>
+<h2>O que entregamos</h2>
+<ul>
+<li>Aplicações web e mobile sob medida</li>
+<li>Agentes e automações com IA</li>
+<li>Integrações entre sistemas, APIs e CRMs</li>
+<li>Produtos próprios (Let's Work, Facíleme e ecossistema)</li>
+</ul>
+<p>Quer detalhar um desafio? Vá para a <a href="/#servicos">seção Serviços na Home</a> ou fale conosco em <a href="/contato/">Contato</a>.</p>
+HTML,
+		],
+		'localizacao' => [
+			'title'   => 'Localização',
+			'content' => <<<'HTML'
+<p>Estamos no Brooklin, em São Paulo — SP.</p>
+<p><strong>Endereço</strong><br>Av. Morumbi, 8435 cj.104<br>Brooklin, São Paulo - SP<br>Brasil</p>
+<p><strong>Telefone</strong><br><a href="tel:1155311779">(11) 5531-1779</a></p>
+<p><a href="https://www.google.com/maps/search/?api=1&amp;query=Av.+Morumbi,+8435+Brooklin+S%C3%A3o+Paulo+SP" target="_blank" rel="noopener noreferrer">Ver no Google Maps</a></p>
+HTML,
+		],
+		'equipe' => [
+			'title'   => 'Equipe',
+			'content' => <<<'HTML'
+<p>Somos uma software house com time multidisciplinar em produto, engenharia, dados e design — focados em entregar sistemas que a operação realmente usa.</p>
+<p>Conheça nossa história e números na seção <a href="/#sobre">Quem Somos</a> da Home, ou fale com a gente em <a href="/contato/">Contato</a>.</p>
+HTML,
+		],
+		'vagas' => [
+			'title'   => 'Vagas',
+			'content' => <<<'HTML'
+<p>Quer fazer parte da WV Todoz? Buscamos pessoas curiosas, práticas e apaixonadas por produto digital.</p>
+<p>No momento, publique aqui as vagas abertas ou envie currículo e portfólio para <a href="mailto:contato@wvtodoz.com.br">contato@wvtodoz.com.br</a> com o assunto “Vagas”.</p>
+<p><em>Conteúdo editável — atualize as posições abertas pelo painel WordPress.</em></p>
+HTML,
+		],
+		'clientes' => [
+			'title'   => 'Clientes',
+			'content' => <<<'HTML'
+<p>Trabalhamos com empresas que precisam de software confiável, integrações sólidas e produtos digitais com impacto real.</p>
+<p>Veja a faixa de clientes e cases na Home: <a href="/#clientes">Clientes</a> e <a href="/#portfolio">Portfólio</a>.</p>
+HTML,
+		],
+		'marketing-digital' => [
+			'title'   => 'Marketing Digital',
+			'content' => <<<'HTML'
+<p>Além de engenharia, apoiamos estratégias digitais que convertem: landing pages, funis, conteúdo e integração com CRM e automação.</p>
+<p>Para um projeto completo de produto + aquisição, fale conosco em <a href="/contato/">Contato</a>.</p>
+HTML,
+		],
+	];
+
+	$ids = [];
+	foreach ($pages as $slug => $page) {
+		$id = wv_seed_upsert_post('page', $page['title'], [
+			'post_content' => $page['content'],
+			'post_name'    => $slug,
+			'post_status'  => 'publish',
+		]);
+		if ($id > 0) {
+			$ids[$slug] = $id;
+		}
+	}
+
+	// Retire sample/default WP pages that clutter the site
+	foreach (['sample-page', 'privacy-policy'] as $junk_slug) {
+		$junk = get_page_by_path($junk_slug);
+		if ($junk instanceof WP_Post) {
+			wp_delete_post((int) $junk->ID, true);
+		}
+	}
+
+	return $ids;
+}
 
 /**
  * Prompt after theme switch if not seeded.

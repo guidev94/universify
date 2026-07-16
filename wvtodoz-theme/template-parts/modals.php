@@ -59,24 +59,24 @@ $ph_msg = (string) wv_field('wv_modal_placeholder_message', 'Quero criar um agen
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
 				<div class="space-y-2 text-left">
-					<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left" for="wv-lead-nome"><?php echo esc_html($label_name); ?></label>
-					<input id="wv-lead-nome" name="nome" type="text" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_name); ?>">
+					<label class="wv-lead-label" for="wv-lead-nome"><?php echo esc_html($label_name); ?></label>
+					<input id="wv-lead-nome" name="nome" type="text" required class="wv-lead-input" placeholder="<?php echo esc_attr($ph_name); ?>">
 				</div>
 				<div class="space-y-2 text-left">
-					<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left" for="wv-lead-email"><?php echo esc_html($label_email); ?></label>
-					<input id="wv-lead-email" name="email" type="email" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_email); ?>">
+					<label class="wv-lead-label" for="wv-lead-email"><?php echo esc_html($label_email); ?></label>
+					<input id="wv-lead-email" name="email" type="email" required class="wv-lead-input" placeholder="<?php echo esc_attr($ph_email); ?>">
 				</div>
 			</div>
 			<div class="space-y-2 text-left">
-				<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left" for="wv-lead-phone"><?php echo esc_html($label_phone); ?></label>
-				<input id="wv-lead-phone" name="telefone" type="tel" class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="<?php echo esc_attr($ph_phone); ?>">
+				<label class="wv-lead-label" for="wv-lead-phone"><?php echo esc_html($label_phone); ?></label>
+				<input id="wv-lead-phone" name="telefone" type="tel" class="wv-lead-input" placeholder="<?php echo esc_attr($ph_phone); ?>">
 			</div>
 			<div class="space-y-2 text-left">
-				<label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left" for="wv-lead-msg"><?php echo esc_html($label_msg); ?></label>
-				<textarea id="wv-lead-msg" name="mensagem" rows="3" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white resize-none" placeholder="<?php echo esc_attr($ph_msg); ?>"></textarea>
+				<label class="wv-lead-label" for="wv-lead-msg"><?php echo esc_html($label_msg); ?></label>
+				<textarea id="wv-lead-msg" name="mensagem" rows="3" required class="wv-lead-input wv-lead-input--area" placeholder="<?php echo esc_attr($ph_msg); ?>"></textarea>
 			</div>
-			<p id="wv-lead-feedback" class="text-sm text-todoz min-h-[1.25rem]" role="status" aria-live="polite" hidden></p>
-			<button type="submit" class="magnetic bg-todoz w-full py-5 text-black font-black rounded-full text-xs uppercase tracking-widest text-center" data-wv-submit-label="<?php echo esc_attr($modal_submit); ?>"><?php echo esc_html($modal_submit); ?></button>
+			<p id="wv-lead-feedback" class="wv-lead-feedback text-sm text-todoz min-h-[1.25rem]" role="status" aria-live="polite" hidden></p>
+			<button type="submit" class="wv-lead-submit magnetic" data-wv-submit-label="<?php echo esc_attr($modal_submit); ?>"><?php echo esc_html($modal_submit); ?></button>
 		</form>
 	</div>
 </div>

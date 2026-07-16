@@ -234,17 +234,67 @@ function wv_kses_title(string $html): string {
 }
 
 /**
- * Permalink for Contato page (seeded slug `contato`).
+ * Whether a URL points outside this WordPress site.
  */
-function wv_contato_url(): string {
-	$page = get_page_by_path('contato');
+function wv_is_external_url(string $url): bool {
+	if ($url === '' || str_starts_with($url, '#') || str_starts_with($url, '/')) {
+		return false;
+	}
+	$home_host = (string) wp_parse_url(home_url('/'), PHP_URL_HOST);
+	$url_host = (string) wp_parse_url($url, PHP_URL_HOST);
+	if ($url_host === '') {
+		return false;
+	}
+	return strtolower($url_host) !== strtolower($home_host);
+}
+
+/**
+ * Permalink helper by page slug with fallback path.
+ */
+function wv_page_url(string $slug, string $fallback_path = ''): string {
+	$page = get_page_by_path($slug);
 	if ($page instanceof WP_Post) {
 		$url = get_permalink($page);
 		if (is_string($url) && $url !== '') {
 			return $url;
 		}
 	}
-	return home_url('/contato/');
+	$path = $fallback_path !== '' ? $fallback_path : '/' . trim($slug, '/') . '/';
+	return home_url($path);
+}
+
+/**
+ * Permalink for Contato page (seeded slug `contato`).
+ */
+function wv_contato_url(): string {
+	return wv_page_url('contato', '/contato/');
+}
+
+/**
+ * Privacy / Terms URLs — prefer seeded pages, then ACF, then fallback path.
+ */
+function wv_privacy_url(): string {
+	$from_field = (string) wv_field('wv_footer_privacy', '');
+	if ($from_field !== '' && !wv_is_external_url($from_field)) {
+		return $from_field;
+	}
+	$page = wv_page_url('politica-de-privacidade', '/politica-de-privacidade/');
+	if ($page !== '') {
+		return $page;
+	}
+	return $from_field !== '' ? $from_field : home_url('/politica-de-privacidade/');
+}
+
+function wv_terms_url(): string {
+	$from_field = (string) wv_field('wv_footer_terms', '');
+	if ($from_field !== '' && !wv_is_external_url($from_field)) {
+		return $from_field;
+	}
+	$page = wv_page_url('termos-de-uso', '/termos-de-uso/');
+	if ($page !== '') {
+		return $page;
+	}
+	return $from_field !== '' ? $from_field : home_url('/termos-de-uso/');
 }
 
 /**
@@ -278,7 +328,7 @@ function wv_default_nav_items(): array {
 	return [
 		['label' => 'Home', 'url' => $home],
 		['label' => 'Quem Somos', 'url' => $home . '#sobre'],
-		['label' => 'Serviços', 'url' => $home . '#servicos'],
+		['label' => 'Serviços', 'url' => wv_page_url('servicos', '/servicos/')],
 		['label' => 'Produtos', 'url' => $home . '#produtos'],
 		['label' => 'Aplicações', 'url' => $home . '#aplicacoes'],
 		['label' => 'Projetos', 'url' => $home . '#portfolio'],

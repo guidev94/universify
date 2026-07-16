@@ -131,8 +131,8 @@ function wv_defaults(): array {
 			'instagram' => 'https://www.instagram.com/wvtodoz',
 			'linkedin' => 'https://www.linkedin.com/company/wvtodoz',
 			'youtube' => 'https://www.youtube.com/@wvtodoz',
-			'privacy' => 'https://wa.me/551155311779?text=' . rawurlencode('Olá, gostaria de receber a Política de Privacidade.'),
-			'terms' => 'https://wa.me/551155311779?text=' . rawurlencode('Olá, gostaria de receber os Termos de Uso.'),
+			'privacy' => '',
+			'terms' => '',
 		],
 		'modal' => [
 			'title' => 'VAMOS',

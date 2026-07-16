@@ -73,14 +73,16 @@ $home  = home_url('/');
 					<?php
 					$insights_url = function_exists('wv_insights_url') ? wv_insights_url() : ($home . '#blog');
 					$contato_url = function_exists('wv_contato_url') ? wv_contato_url() : ($home . 'contato/');
+					$servicos_url = function_exists('wv_page_url') ? wv_page_url('servicos', '/servicos/') : ($home . '#servicos');
 					$footer_nav = [
 						['Sobre Nós', $home . '#sobre'],
-						['Serviços', $home . '#servicos'],
+						['Serviços', $servicos_url],
 						['Produtos', $home . '#produtos'],
 						['Aplicações', $home . '#aplicacoes'],
 						['Projetos', $home . '#portfolio'],
 						['Insights', $insights_url],
 						['Contato', $contato_url],
+						['Vagas', function_exists('wv_page_url') ? wv_page_url('vagas', '/vagas/') : ($home . 'vagas/')],
 					];
 					if (has_nav_menu('footer')) {
 						$locations = get_nav_menu_locations();
@@ -156,8 +158,14 @@ $home  = home_url('/');
 				<?php echo esc_html($copy); ?>
 			</div>
 			<div class="flex items-center gap-8 text-zinc-600 text-[10px] font-black uppercase tracking-widest">
-				<a href="<?php echo esc_url($priv); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors"><?php esc_html_e('Política de Privacidade', 'wvtodoz'); ?></a>
-				<a href="<?php echo esc_url($terms); ?>" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors"><?php esc_html_e('Termos de Uso', 'wvtodoz'); ?></a>
+				<?php
+				$priv_url = function_exists('wv_privacy_url') ? wv_privacy_url() : $priv;
+				$terms_url = function_exists('wv_terms_url') ? wv_terms_url() : $terms;
+				$priv_ext = function_exists('wv_is_external_url') && wv_is_external_url($priv_url);
+				$terms_ext = function_exists('wv_is_external_url') && wv_is_external_url($terms_url);
+				?>
+				<a href="<?php echo esc_url($priv_url); ?>" class="hover:text-white transition-colors"<?php echo $priv_ext ? ' target="_blank" rel="noopener noreferrer"' : ''; ?>><?php esc_html_e('Política de Privacidade', 'wvtodoz'); ?></a>
+				<a href="<?php echo esc_url($terms_url); ?>" class="hover:text-white transition-colors"<?php echo $terms_ext ? ' target="_blank" rel="noopener noreferrer"' : ''; ?>><?php esc_html_e('Termos de Uso', 'wvtodoz'); ?></a>
 			</div>
 		</div>
 	</div>
