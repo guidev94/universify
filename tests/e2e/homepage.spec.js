@@ -164,6 +164,14 @@ test.describe("Buttons and links smoke", () => {
     await expect(page.locator("body")).toBeVisible();
   });
 
+  test("contato page loads with form", async ({ page }) => {
+    await page.goto("/contato.html");
+    await expect(page).toHaveTitle(/Contato/i);
+    await expect(page.locator(".wv-contato-page")).toBeVisible();
+    await expect(page.locator("#contato-page-form")).toBeVisible();
+    await expect(page.locator(".wv-contato-channel--wa")).toBeVisible();
+  });
+
   test("no open-modal button throws", async ({ page }) => {
     await page.goto("/index.html", { waitUntil: "networkidle" });
     const errors = [];

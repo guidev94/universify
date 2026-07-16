@@ -173,10 +173,10 @@ function wv_internal_page_defaults(): array {
 	$wa = function_exists('wv_whatsapp_url') ? wv_whatsapp_url() : 'https://wa.me/551155311779';
 	return [
 		'contato' => [
-			'wv_page_eyebrow'       => 'Fale conosco',
+			'wv_page_eyebrow'       => 'Contato',
 			'wv_page_title_line'    => 'Vamos',
-			'wv_page_title_accent'  => 'conversar',
-			'wv_page_lead'          => 'Conte seu desafio. Retornamos com a melhor abordagem em software, IA e integrações.',
+			'wv_page_title_accent'  => 'conversar.',
+			'wv_page_lead'          => 'Conte o desafio do seu time. Em até um dia útil retornamos com a melhor abordagem em software, agentes de IA e integrações.',
 			'wv_page_body'          => '',
 			'wv_page_cta_before'    => 'Pronto para o',
 			'wv_page_cta_highlight' => 'próximo nível?',

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.5.5';
+const WV_SEED_VERSION = '1.5.6';
 
 /**
  * Set ACF field or post meta with the same key.
