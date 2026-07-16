@@ -97,7 +97,13 @@ function wv_admin_is_branded_editor(): bool {
 	if ($screen->post_type === 'page') {
 		$home_id = wv_home_id();
 		$post_id = isset($_GET['post']) ? (int) $_GET['post'] : 0;
-		return $home_id > 0 && $post_id === $home_id;
+		if ($home_id > 0 && $post_id === $home_id) {
+			return true;
+		}
+		if ($post_id > 0 && function_exists('wv_internal_page_templates')) {
+			$tpl = (string) get_page_template_slug($post_id);
+			return in_array($tpl, wv_internal_page_templates(), true);
+		}
 	}
 	return false;
 }
@@ -183,6 +189,7 @@ function wv_admin_screen_slugs(): array {
 		'wvtodoz_page_wvtodoz-ajuda' => true,
 		'wvtodoz_page_wvtodoz-aparencia' => true,
 		'wvtodoz_page_wvtodoz-leads' => true,
+		'wvtodoz_page_wvtodoz-paginas' => true,
 	];
 	foreach (wv_admin_sections() as $section) {
 		$map['wvtodoz_page_' . $section['slug']] = true;

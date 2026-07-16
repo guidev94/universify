@@ -1182,6 +1182,17 @@ body.wv-has-editor-chrome .acf-tab-wrap .acf-tab-button.wv-acf-tab-active {
 }
 
 /* Leads table */
+.wv-admin__grid--pages {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 1.25rem;
+}
+
+.wv-admin__preview {
+	margin: 0.75rem 0 0.35rem;
+	font-size: 0.95rem;
+}
+
 .wv-leads-table {
 	border-collapse: collapse;
 	width: 100%;

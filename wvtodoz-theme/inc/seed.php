@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.5.3';
+const WV_SEED_VERSION = '1.5.5';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -151,16 +151,15 @@ function wv_run_seed(bool $force = false): bool {
 		update_option('page_for_posts', $blog_id);
 	}
 
-	// Contato page — template page-contato.php (also slug-matched)
+	// Contato + remaining internal pages (templates + ACF)
 	$contato_id = wv_seed_upsert_post('page', 'Contato', [
 		'post_content' => '',
 		'post_name'    => 'contato',
 	]);
-	if ($contato_id > 0) {
-		update_post_meta($contato_id, '_wp_page_template', 'page-contato.php');
+	if ($contato_id > 0 && function_exists('wv_seed_apply_internal_page')) {
+		wv_seed_apply_internal_page($contato_id, 'contato');
 	}
 
-	// Internal pages mirrored from production hubs (legal + key site sections)
 	$internal_pages = wv_seed_internal_pages();
 	$privacy_id = (int) ($internal_pages['politica-de-privacidade'] ?? 0);
 	$terms_id = (int) ($internal_pages['termos-de-uso'] ?? 0);
@@ -617,6 +616,9 @@ HTML,
 		]);
 		if ($id > 0) {
 			$ids[$slug] = $id;
+			if (function_exists('wv_seed_apply_internal_page')) {
+				wv_seed_apply_internal_page($id, $slug, (string) $page['content']);
+			}
 		}
 	}
 

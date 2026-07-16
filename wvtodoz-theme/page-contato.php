@@ -8,12 +8,20 @@
 
 get_header();
 
+$ctx = wv_internal_page_context();
 $d = wv_defaults();
 $contato = $d['contato'];
-$before = (string) wv_field('wv_contato_title_before', $contato['title_before']);
-$highlight = (string) wv_field('wv_contato_title_highlight', $contato['title_highlight']);
-$phone = (string) wv_field('wv_contato_phone', $contato['phone']);
+
+// Page ACF first, then Home contact fields as fallback.
+$before = $ctx['title_line'] !== '' ? $ctx['title_line'] : (string) wv_field('wv_contato_title_before', $contato['title_before']);
+$highlight = $ctx['title_accent'] !== '' ? $ctx['title_accent'] : (string) wv_field('wv_contato_title_highlight', $contato['title_highlight']);
+$lead = $ctx['lead'] !== '' ? $ctx['lead'] : __('Conte seu desafio. Retornamos com a melhor abordagem em software, IA e integrações.', 'wvtodoz');
+$eyebrow = $ctx['eyebrow'] !== '' ? $ctx['eyebrow'] : __('Fale conosco', 'wvtodoz');
+$phone = (string) wv_page_field('wv_page_phone', (string) wv_field('wv_contato_phone', $contato['phone']), $ctx['page_id']);
 $tel = (string) wv_field('wv_contato_tel', $contato['tel']);
+if ($phone !== '' && preg_replace('/\D+/', '', $phone) !== '') {
+	$tel = preg_replace('/\D+/', '', $phone) ?: $tel;
+}
 $wa = wv_whatsapp_url();
 $email = wv_company_email();
 
@@ -27,24 +35,25 @@ $ph_phone = (string) wv_field('wv_modal_placeholder_phone', '(11) 99999-9999');
 $ph_msg = (string) wv_field('wv_modal_placeholder_message', 'Quero criar um agente de IA para...');
 $submit = (string) wv_field('wv_modal_submit', 'Enviar Proposta');
 ?>
-<main class="pt-40 pb-32 section-canvas">
+<main class="wv-internal-page pt-40 pb-32 section-canvas">
 	<div class="site-container">
-		<nav class="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 mb-12" data-aos="fade-right" aria-label="<?php esc_attr_e('Breadcrumb', 'wvtodoz'); ?>">
-			<a href="<?php echo esc_url(home_url('/')); ?>" class="hover:text-todoz"><?php esc_html_e('Home', 'wvtodoz'); ?></a>
-			<i class="ph ph-caret-right" aria-hidden="true"></i>
-			<span class="text-todoz/50"><?php esc_html_e('Contato', 'wvtodoz'); ?></span>
-		</nav>
+		<?php
+		get_template_part('template-parts/internal/hero', null, [
+			'eyebrow'      => $eyebrow,
+			'title_line'   => $before,
+			'title_accent' => $highlight,
+			'lead'         => $lead,
+			'breadcrumb'   => __('Contato', 'wvtodoz'),
+		]);
+		?>
 
 		<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 items-start">
 			<div class="lg:col-span-5" data-aos="fade-up">
-				<span class="section-eyebrow text-todoz"><?php esc_html_e('Fale conosco', 'wvtodoz'); ?></span>
-				<h1 class="section-display mb-8">
-					<span class="section-display-line"><?php echo esc_html($before); ?></span>
-					<span class="section-display-accent"><?php echo esc_html($highlight); ?><span class="section-display-dot" aria-hidden="true"></span></span>
-				</h1>
-				<p class="text-zinc-400 text-lg leading-relaxed mb-10 max-w-md">
-					<?php esc_html_e('Conte seu desafio. Retornamos com a melhor abordagem em software, IA e integrações.', 'wvtodoz'); ?>
-				</p>
+				<?php if ($ctx['body'] !== '') : ?>
+				<div class="wv-content-body prose prose-blog max-w-none mb-10">
+					<?php echo wp_kses_post($ctx['body']); ?>
+				</div>
+				<?php endif; ?>
 				<ul class="space-y-5 text-sm font-bold text-zinc-400">
 					<?php if ($phone !== '') : ?>
 					<li class="flex items-center gap-3">
@@ -63,19 +72,6 @@ $submit = (string) wv_field('wv_modal_submit', 'Enviar Proposta');
 						<a class="hover:text-todoz transition-colors" href="<?php echo esc_url($wa); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('WhatsApp', 'wvtodoz'); ?></a>
 					</li>
 				</ul>
-				<?php
-				while (have_posts()) :
-					the_post();
-					$content = trim((string) get_the_content());
-					if ($content !== '') :
-						?>
-				<div class="mt-12 prose prose-blog max-w-none text-zinc-400">
-						<?php the_content(); ?>
-				</div>
-						<?php
-					endif;
-				endwhile;
-				?>
 			</div>
 
 			<div class="lg:col-span-7" data-aos="fade-up" data-aos-delay="100">

@@ -6193,3 +6193,268 @@ body.modal-open .wa-float {
     border-color: rgba(255, 255, 255, 0.06);
     color: #fff;
 }
+
+/* —— Internal pages (Home visual language) —— */
+.wv-page-hero__lead {
+    margin-top: var(--space-after-display, 1.5rem);
+    max-width: 36rem;
+    font-size: var(--type-body, 1.15rem);
+    line-height: var(--lh-body, 1.72);
+    color: var(--type-body-muted, #a1a1aa);
+}
+
+.wv-info-panel {
+    padding: 2rem;
+    border-radius: 2rem;
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.08));
+    background: var(--wv-surface, rgba(24, 24, 27, 0.45));
+}
+
+.wv-info-panel__title {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--wv-ink, #fff);
+    margin-bottom: 1rem;
+}
+
+.wv-info-panel__text {
+    color: var(--type-body-muted, #a1a1aa);
+    font-weight: 600;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.wv-info-panel__meta {
+    color: var(--wv-muted, #71717a);
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.wv-map-frame {
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.08));
+    min-height: 22rem;
+    background: var(--wv-bg-deep, #111);
+}
+
+.wv-map-frame iframe {
+    display: block;
+    width: 100%;
+    height: min(28rem, 55vh);
+    border: 0;
+    filter: grayscale(0.2);
+}
+
+.wv-service-card,
+.wv-team-card,
+.wv-benefit-card {
+    padding: 1.75rem;
+    border-radius: 1.75rem;
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.08));
+    background: var(--wv-card-bg, rgba(24, 24, 27, 0.4));
+    box-shadow: var(--wv-card-shadow, none);
+}
+
+.wv-service-card__icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(207, 255, 4, 0.12);
+    color: var(--todoz);
+    font-size: 1.35rem;
+    margin-bottom: 1.25rem;
+}
+
+.wv-service-card__title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--wv-ink, #fff);
+    margin-bottom: 0.75rem;
+}
+
+.wv-service-card__desc {
+    color: var(--type-body-muted, #a1a1aa);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-bottom: 1rem;
+}
+
+.wv-service-card__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.wv-service-card__list li {
+    position: relative;
+    padding-left: 1.1rem;
+    color: var(--wv-muted, #a1a1aa);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.wv-service-card__list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--todoz);
+}
+
+.wv-service-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid rgba(207, 255, 4, 0.35);
+    color: var(--todoz);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.wv-team-card__avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 999px;
+    background: var(--todoz);
+    color: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    margin-bottom: 1.25rem;
+}
+
+.wv-team-card__name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--wv-ink, #fff);
+    margin-bottom: 0.35rem;
+}
+
+.wv-team-card__role {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--todoz);
+    margin-bottom: 0.75rem;
+}
+
+.wv-team-card__bio {
+    color: var(--type-body-muted, #a1a1aa);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.wv-benefit-card__index {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: var(--todoz);
+    margin-bottom: 0.75rem;
+}
+
+.wv-benefit-card__title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--wv-ink, #fff);
+    margin-bottom: 0.5rem;
+}
+
+.wv-benefit-card__text {
+    color: var(--type-body-muted, #a1a1aa);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.wv-clientes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .wv-clientes-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+}
+
+.wv-clientes-grid__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 6.5rem;
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.08));
+    background: var(--wv-surface, rgba(24, 24, 27, 0.35));
+}
+
+.wv-clientes-grid__item img {
+    max-height: 2.75rem;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    filter: grayscale(1) contrast(1.05);
+    opacity: 0.85;
+}
+
+.wv-page-figure {
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid var(--wv-border, rgba(255, 255, 255, 0.08));
+}
+
+.wv-page-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+[data-theme="light"] .wv-page-hero__lead {
+    color: var(--type-body-color);
+}
+
+[data-theme="light"] .wv-info-panel,
+[data-theme="light"] .wv-service-card,
+[data-theme="light"] .wv-team-card,
+[data-theme="light"] .wv-benefit-card,
+[data-theme="light"] .wv-clientes-grid__item {
+    background: var(--wv-surface);
+    border-color: var(--wv-border);
+}
+
+[data-theme="light"] .wv-service-card__title,
+[data-theme="light"] .wv-team-card__name,
+[data-theme="light"] .wv-benefit-card__title,
+[data-theme="light"] .wv-info-panel__title {
+    color: var(--wv-ink);
+}
+
+[data-theme="light"] .wv-clientes-grid__item img {
+    filter: none;
+    opacity: 1;
+}
+
+[data-theme="light"] .wv-admin__grid--pages {
+    /* no-op on front */
+}

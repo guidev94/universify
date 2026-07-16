@@ -283,6 +283,78 @@ add_action('acf/init', static function (): void {
 		],
 		'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'wv_servico']]],
 	]);
+
+	// Internal pages — shared hero / body / CTA (+ extras)
+	$page_locations = [];
+	foreach (['page-contato.php', 'page-servicos.php', 'page-legal.php', 'page-localizacao.php', 'page-equipe.php', 'page-vagas.php', 'page-clientes.php', 'page-marketing.php'] as $tpl) {
+		$page_locations[] = [[
+			'param'    => 'page_template',
+			'operator' => '==',
+			'value'    => $tpl,
+		]];
+	}
+
+	acf_add_local_field_group([
+		'key'    => 'group_wv_internal_pages',
+		'title'  => 'Página interna — WV Todoz',
+		'fields' => array_merge(
+			wv_acf_tab('tab_page_hero', 'Hero'),
+			[
+				wv_acf_text('wv_page_eyebrow', 'Eyebrow', 'WV Todoz'),
+				wv_acf_text('wv_page_title_line', 'Título (linha)'),
+				wv_acf_text('wv_page_title_accent', 'Título (destaque lima)'),
+				wv_acf_textarea('wv_page_lead', 'Lead'),
+			],
+			wv_acf_tab('tab_page_content', 'Conteúdo'),
+			[
+				wv_acf_wysiwyg('wv_page_body', 'Corpo da página'),
+				wv_acf_image('wv_page_image', 'Imagem (opcional)'),
+				wv_acf_textarea('wv_page_address', 'Endereço (Localização)'),
+				wv_acf_url('wv_page_maps_url', 'URL Google Maps'),
+				wv_acf_text('wv_page_phone', 'Telefone (exibição)'),
+				wv_acf_text('wv_page_team_1_name', 'Equipe 1 — nome'),
+				wv_acf_text('wv_page_team_1_role', 'Equipe 1 — cargo'),
+				wv_acf_textarea('wv_page_team_1_bio', 'Equipe 1 — bio'),
+				wv_acf_text('wv_page_team_2_name', 'Equipe 2 — nome'),
+				wv_acf_text('wv_page_team_2_role', 'Equipe 2 — cargo'),
+				wv_acf_textarea('wv_page_team_2_bio', 'Equipe 2 — bio'),
+				wv_acf_text('wv_page_team_3_name', 'Equipe 3 — nome'),
+				wv_acf_text('wv_page_team_3_role', 'Equipe 3 — cargo'),
+				wv_acf_textarea('wv_page_team_3_bio', 'Equipe 3 — bio'),
+				wv_acf_text('wv_page_team_4_name', 'Equipe 4 — nome'),
+				wv_acf_text('wv_page_team_4_role', 'Equipe 4 — cargo'),
+				wv_acf_textarea('wv_page_team_4_bio', 'Equipe 4 — bio'),
+				wv_acf_text('wv_page_b1_title', 'Benefício 1 — título'),
+				wv_acf_textarea('wv_page_b1_text', 'Benefício 1 — texto'),
+				wv_acf_text('wv_page_b2_title', 'Benefício 2 — título'),
+				wv_acf_textarea('wv_page_b2_text', 'Benefício 2 — texto'),
+				wv_acf_text('wv_page_b3_title', 'Benefício 3 — título'),
+				wv_acf_textarea('wv_page_b3_text', 'Benefício 3 — texto'),
+			],
+			wv_acf_tab('tab_page_cta', 'CTA'),
+			[
+				[
+					'key'           => 'field_wv_page_show_cta',
+					'label'         => 'Mostrar faixa CTA (lima)',
+					'name'          => 'wv_page_show_cta',
+					'type'          => 'true_false',
+					'default_value' => 0,
+					'ui'            => 1,
+				],
+				wv_acf_text('wv_page_cta_before', 'CTA — texto antes'),
+				wv_acf_text('wv_page_cta_highlight', 'CTA — destaque'),
+				wv_acf_text('wv_page_cta_label', 'CTA — botão', 'Fale conosco'),
+				wv_acf_url('wv_page_cta_url', 'CTA — URL'),
+			]
+		),
+		'location'              => $page_locations,
+		'menu_order'            => 0,
+		'position'              => 'normal',
+		'style'                 => 'default',
+		'label_placement'       => 'top',
+		'instruction_placement' => 'label',
+		'active'                => true,
+	]);
 });
 
 /** @return array<int, array<string, mixed>> */
