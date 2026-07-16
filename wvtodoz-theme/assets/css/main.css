@@ -891,7 +891,7 @@ h1, h2, h3, h4,
         padding: 1.15rem 1.35rem;
         font-size: 0.8rem;
         letter-spacing: 0.08em;
-        align-self: flex-start;
+        align-self: center;
     }
 
     /* Gentler overlap — intentional, not crushed */
@@ -3844,12 +3844,66 @@ footer ul li a:hover {
         padding: 1.15rem 1.35rem;
         font-size: 0.8rem;
         letter-spacing: 0.08em;
-        align-self: flex-start;
+        align-self: center;
+    }
+
+    /* Center section headers / CTAs on mobile; md+ keeps left via utilities + base rules */
+    .produtos-header .section-display,
+    .servicos-header-copy .section-display,
+    .portfolio-section .text-center .section-display,
+    #blog .text-center .section-display {
+        text-align: center;
+    }
+
+    .servicos-header-cta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .servicos-header-note {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    #missao .missao-main {
+        align-items: center;
+        text-align: center;
+        max-width: 100%;
+        margin-inline: auto;
+    }
+
+    #missao .missao-title,
+    #missao .missao-support,
+    #missao .missao-eyebrow {
+        text-align: center;
+    }
+
+    #missao .missao-aside {
+        align-items: center;
     }
 
     #aplicacoes .aplicacoes-copy {
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
+    }
+
+    #aplicacoes .aplicacoes-copy .section-display {
+        text-align: center;
+    }
+
+    #aplicacoes .aplicacoes-lead {
+        margin-inline: auto;
+    }
+
+    #aplicacoes .aplicacoes-benefits {
+        margin-inline: auto;
         text-align: left;
+    }
+
+    #aplicacoes .aplicacoes-cta {
+        align-self: center;
     }
 
     /* Section vertical rhythm — less dead air on phones */
@@ -4608,13 +4662,19 @@ body.modal-open .wa-float {
 
 [data-theme="light"] #clientes .text-todoz,
 [data-theme="light"] #sobre .text-todoz,
-[data-theme="light"] #produtos .text-todoz,
 [data-theme="light"] #aplicacoes .text-todoz,
 [data-theme="light"] #blog .text-todoz {
     color: var(--todoz) !important;
     text-shadow:
         0 1px 0 rgba(10, 10, 10, 0.4),
         0 0 18px rgba(207, 255, 4, 0.28);
+}
+
+/* Produtos eyebrow — logo lime + display glow so tiny caps stay readable on light */
+[data-theme="light"] #produtos .text-todoz,
+[data-theme="light"] #produtos .produtos-header > span {
+    color: var(--todoz) !important;
+    text-shadow: var(--wv-display-glow);
 }
 
 [data-theme="light"] #mobile-menu-trigger {
