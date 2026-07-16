@@ -912,40 +912,67 @@ h1, h2, h3, h4,
     }
 
     .missao-aside {
-        gap: 2rem;
+        gap: 1.65rem;
         width: 100%;
     }
 
+    /* Compact horizontal stats row — 11+ | 50+ | products */
     .missao-stats {
-        grid-template-columns: 1fr;
-        gap: 1.15rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
         max-width: none;
         width: 100%;
+        align-items: start;
     }
 
     .missao-stat,
     .missao-stat:first-child {
-        padding: 0.1rem 0 0.1rem 0.95rem;
-        border-left: 1.5px solid rgba(10, 10, 10, 0.28);
+        padding: 0.1rem 0.45rem;
+        border-left: none;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .missao-stat:not(:first-child) {
+        border-left: 1px solid rgba(10, 10, 10, 0.2);
+        padding-left: 0.55rem;
     }
 
     .missao-stat dt {
-        font-size: clamp(2.4rem, 11vw, 2.9rem);
+        margin-bottom: 0.3rem;
+        font-size: clamp(1.55rem, 6.8vw, 2rem);
+        letter-spacing: -0.03em;
     }
 
     .missao-stat dd {
-        font-size: 0.78rem;
-        letter-spacing: 0.07em;
+        font-size: 0.58rem;
+        letter-spacing: 0.055em;
+        line-height: 1.3;
+        /* Near-black on lime — readable, not washed olive */
+        color: rgba(10, 10, 10, 0.9);
+    }
+
+    .missao-stat--products {
+        align-items: center;
+    }
+
+    .missao-stat--products .missao-products {
+        align-items: center;
+        gap: 0.28rem;
+        margin-bottom: 0.35rem;
     }
 
     .missao-product {
-        font-size: 1.1rem;
+        font-size: 0.82rem;
+        color: #0a0a0a;
     }
 
     .missao-product--accent {
-        font-size: 1.12rem;
-        padding: 0.45rem 0.75rem;
+        font-size: 0.72rem;
+        padding: 0.28rem 0.5rem;
+        margin-top: 0;
         max-width: 100%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
     }
 
     .missao-cta {
@@ -1034,8 +1061,8 @@ h1, h2, h3, h4,
 
 @media (max-width: 430px) {
     .hero-inner {
-        padding-top: 5.25rem;
-        padding-bottom: 0.65rem;
+        padding-top: 5.1rem;
+        padding-bottom: 0.55rem;
     }
 
     .hero-display {
@@ -1047,18 +1074,25 @@ h1, h2, h3, h4,
     }
 
     .hero-lead {
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
+        font-size: 0.88rem;
+        line-height: 1.48;
+        margin-bottom: 0.95rem;
+        max-width: 20rem;
+    }
+
+    .hero-ctas {
+        gap: 0.55rem;
         max-width: 20.5rem;
     }
 
     .hero-cta {
         letter-spacing: 0.09em;
-        padding: 0.85rem 1rem;
-        min-height: 2.85rem;
+        padding: 0.82rem 0.95rem;
+        min-height: 2.8rem;
         white-space: normal;
         text-align: center;
         line-height: 1.2;
+        font-size: 0.66rem;
     }
 
     #mobile-menu-content .mobile-menu-panel {
@@ -1071,17 +1105,17 @@ h1, h2, h3, h4,
     }
 
     .hero-logos {
-        gap: 0.5rem;
-        margin-top: 1rem;
-        padding-top: 0.9rem;
+        gap: clamp(0.4rem, 2.2vw, 0.65rem);
+        margin-top: 0.95rem;
+        padding-top: 0.85rem;
     }
 
     .hero-logo img {
-        height: clamp(1.25rem, 6.4vw, 1.5rem);
+        height: clamp(1.15rem, 6vw, 1.42rem);
     }
 
     .hero-scroll-cue {
-        margin-top: 0.85rem;
+        margin-top: 0.75rem;
     }
 
     .missao-title {
@@ -1104,6 +1138,47 @@ h1, h2, h3, h4,
 
     .mobile-bridge-section {
         margin-top: -1.25rem;
+    }
+}
+
+/* Typical phones — 11+|50+ row, products centered below (3-col when wider) */
+@media (max-width: 390px) {
+    .missao-stats {
+        grid-template-columns: 1fr 1fr;
+        column-gap: 0;
+        row-gap: 0.95rem;
+    }
+
+    .missao-stat:not(:first-child) {
+        border-left: 1px solid rgba(10, 10, 10, 0.2);
+    }
+
+    .missao-stat--products {
+        grid-column: 1 / -1;
+        border-left: none;
+        padding: 0.85rem 0.25rem 0;
+        border-top: 1px solid rgba(10, 10, 10, 0.18);
+    }
+
+    .missao-stat--products .missao-products {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.4rem 0.55rem;
+    }
+
+    .missao-product {
+        font-size: 0.95rem;
+    }
+
+    .missao-product--accent {
+        font-size: 0.8rem;
+        padding: 0.32rem 0.6rem;
+    }
+
+    .missao-stat--products dd {
+        font-size: 0.62rem;
     }
 }
 
@@ -3780,30 +3855,31 @@ footer ul li a:hover {
     /* Hero — fit first viewport on 375–430 without clipping/overflow */
     #hero .site-container {
         max-width: 100%;
-        padding-left: 1.15rem;
-        padding-right: 1.15rem;
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
     }
 
     .hero-inner {
-        padding-top: 5.75rem;
-        padding-bottom: 0.85rem;
+        padding-top: 5.5rem;
+        padding-bottom: 0.75rem;
+        gap: 0;
     }
 
     .hero-badge {
-        margin-bottom: 1rem;
-        padding: 0.35rem 0.85rem;
+        margin-bottom: 0.9rem;
+        padding: 0.32rem 0.8rem;
     }
 
     .hero-title {
-        margin-bottom: 1rem;
+        margin-bottom: 0.9rem;
         overflow-x: clip;
         overflow-y: visible;
     }
 
     .hero-eyebrow {
-        font-size: 0.62rem;
-        letter-spacing: 0.2em;
-        margin-bottom: 0.7rem;
+        font-size: 0.6rem;
+        letter-spacing: 0.18em;
+        margin-bottom: 0.6rem;
     }
 
     /* One line: "Feito pra operar." — scale type so it never overflows */
@@ -3824,25 +3900,25 @@ footer ul li a:hover {
     }
 
     .hero-lead {
-        font-size: 0.92rem;
-        line-height: 1.5;
-        margin-bottom: 1.15rem;
-        max-width: 21rem;
+        font-size: 0.9rem;
+        line-height: 1.48;
+        margin-bottom: 1.05rem;
+        max-width: 20.5rem;
     }
 
     .hero-ctas {
-        gap: 0.65rem;
+        gap: 0.6rem;
         margin-bottom: 0;
         width: 100%;
-        max-width: 22rem;
+        max-width: 21.5rem;
     }
 
     .hero-cta {
         max-width: 100%;
-        min-height: 2.95rem;
-        padding: 0.9rem 1.15rem;
-        font-size: 0.68rem;
-        letter-spacing: 0.11em;
+        min-height: 2.9rem;
+        padding: 0.88rem 1.1rem;
+        font-size: 0.67rem;
+        letter-spacing: 0.1em;
     }
 
     /* Hero readability — slight veil darken (~10%) for text contrast; keep lime glow */
@@ -3876,20 +3952,25 @@ footer ul li a:hover {
     }
 
     .hero-logos {
-        gap: clamp(0.45rem, 2.4vw, 0.85rem);
-        margin-top: 1.1rem;
-        padding-top: 1rem;
+        gap: clamp(0.5rem, 2.6vw, 0.9rem);
+        margin-top: 1.05rem;
+        padding-top: 0.95rem;
         max-width: 100%;
+        justify-content: center;
+    }
+
+    .hero-logo {
+        opacity: 0.88;
     }
 
     .hero-logo img {
-        height: clamp(1.2rem, 6.2vw, 1.65rem);
+        height: clamp(1.18rem, 6vw, 1.55rem);
     }
 
     .hero-scroll-cue {
-        margin-top: 1rem;
-        gap: 0.4rem;
-        opacity: 0.35;
+        margin-top: 0.9rem;
+        gap: 0.35rem;
+        opacity: 0.32;
         animation-delay: 0.12s;
     }
 
