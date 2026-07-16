@@ -16,6 +16,8 @@ $f     = $d['footer'];
 $tag   = (string) wv_field('wv_footer_tagline', $f['tagline']);
 $addr  = (string) wv_field('wv_footer_address', $f['address']);
 $maps  = (string) wv_field('wv_footer_maps', $f['maps']);
+$nav_title = (string) wv_field('wv_footer_nav_title', __('Navegação', 'wvtodoz'));
+$products_title = (string) wv_field('wv_footer_products_title', __('Produtos', 'wvtodoz'));
 $copy  = (string) wv_field('wv_footer_copyright', $f['copyright']);
 $fb    = (string) wv_field('wv_social_facebook', $f['facebook']);
 $ig    = (string) wv_field('wv_social_instagram', $f['instagram']);
@@ -45,7 +47,7 @@ $home  = home_url('/');
 				</div>
 			</div>
 			<div class="md:col-span-2 uppercase">
-				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php esc_html_e('Navegação', 'wvtodoz'); ?></h5>
+				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php echo esc_html($nav_title); ?></h5>
 				<ul class="space-y-4 text-zinc-500 font-bold text-sm">
 					<?php
 					$footer_nav = [
@@ -80,7 +82,7 @@ $home  = home_url('/');
 				</ul>
 			</div>
 			<div class="md:col-span-3 uppercase">
-				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php esc_html_e('Produtos', 'wvtodoz'); ?></h5>
+				<h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8"><?php echo esc_html($products_title); ?></h5>
 				<ul class="space-y-4 text-zinc-500 font-bold text-sm">
 					<?php
 					$footer_products = [];

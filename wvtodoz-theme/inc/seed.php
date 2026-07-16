@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 const WV_SEED_OPTION = 'wv_seed_done';
-const WV_SEED_VERSION = '1.3.0';
+const WV_SEED_VERSION = '1.4.0';
 
 /**
  * Set ACF field or post meta with the same key.
@@ -180,6 +180,9 @@ function wv_run_seed(bool $force = false): bool {
 		'wv_missao_support'        => $missao['support'],
 		'wv_missao_product_a'      => $missao['product_a'],
 		'wv_missao_product_b'      => $missao['product_b'],
+		'wv_missao_stat1_label'    => 'anos de mercado',
+		'wv_missao_stat2_label'    => 'projetos entregues',
+		'wv_missao_products_label' => 'produtos próprios',
 		'wv_missao_cta'            => $missao['cta'],
 		'wv_bridge_line1'          => $bridge['line1'],
 		'wv_bridge_line2_prefix'   => $bridge['line2_prefix'],
@@ -229,6 +232,8 @@ function wv_run_seed(bool $force = false): bool {
 		'wv_footer_tagline'        => $footer['tagline'],
 		'wv_footer_address'        => $footer['address'],
 		'wv_footer_maps'           => $footer['maps'],
+		'wv_footer_nav_title'      => 'Navegação',
+		'wv_footer_products_title' => 'Produtos',
 		'wv_footer_copyright'      => $footer['copyright'],
 		'wv_footer_privacy'        => $footer['privacy'],
 		'wv_footer_terms'          => $footer['terms'],
@@ -455,7 +460,7 @@ add_action('admin_notices', static function (): void {
 	}
 
 	$screen = function_exists('get_current_screen') ? get_current_screen() : null;
-	$allowed = ['dashboard', 'themes', 'appearance_page_wv-seed'];
+	$allowed = ['dashboard', 'themes', 'toplevel_page_wvtodoz', 'wvtodoz_page_wvtodoz-import', 'appearance_page_wv-seed'];
 	if ($screen && !in_array($screen->id, $allowed, true) && $screen->base !== 'dashboard') {
 		return;
 	}
@@ -465,7 +470,7 @@ add_action('admin_notices', static function (): void {
 	echo '<strong>' . esc_html__('WV Todoz:', 'wvtodoz') . '</strong> ';
 	echo esc_html__('Importe o conteúdo da landing (Home + Cases, Produtos, Clientes, Serviços e Insights) com um clique.', 'wvtodoz');
 	echo ' <a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</a>';
-	echo ' <a href="' . esc_url(admin_url('themes.php?page=wv-seed')) . '">' . esc_html__('Aparência → Importar WV', 'wvtodoz') . '</a>';
+	echo ' <a href="' . esc_url(admin_url('admin.php?page=wvtodoz-import')) . '">' . esc_html__('WV Todoz → Importar', 'wvtodoz') . '</a>';
 	echo '</p></div>';
 });
 
@@ -478,27 +483,15 @@ add_action('admin_post_wv_import_content', static function (): void {
 	$ok = wv_run_seed($force);
 	delete_transient('wv_seed_prompt');
 	$redirect = add_query_arg(
-		['page' => 'wv-seed', 'wv_seed' => $ok ? 'ok' : 'fail'],
-		admin_url('themes.php')
+		['page' => 'wvtodoz-import', 'wv_seed' => $ok ? 'ok' : 'fail'],
+		admin_url('admin.php')
 	);
 	wp_safe_redirect($redirect);
 	exit;
 });
 
-add_action('admin_notices', static function (): void {
-	if (!current_user_can('manage_options') || !isset($_GET['wv_seed'])) {
-		return;
-	}
-	$status = sanitize_key((string) $_GET['wv_seed']);
-	if ($status === 'ok') {
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Conteúdo WV importado. Edite a página Home e os CPTs no Admin.', 'wvtodoz') . '</p></div>';
-	} elseif ($status === 'fail') {
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Falha ao importar conteúdo WV. Tente novamente.', 'wvtodoz') . '</p></div>';
-	}
-});
-
 /**
- * Aparência → Importar WV — import / reimport anytime.
+ * Aparência → Importar WV — kept for discoverability; redirects to WV Todoz → Importar.
  */
 add_action('admin_menu', static function (): void {
 	add_theme_page(
@@ -507,36 +500,11 @@ add_action('admin_menu', static function (): void {
 		'manage_options',
 		'wv-seed',
 		static function (): void {
-			if (!current_user_can('manage_options')) {
-				return;
-			}
-			$done = get_option(WV_SEED_OPTION);
-			$url = wp_nonce_url(admin_url('admin-post.php?action=wv_import_content'), 'wv_import_content');
-			$force = wp_nonce_url(admin_url('admin-post.php?action=wv_import_content&force=1'), 'wv_import_content');
-			echo '<div class="wrap"><h1>' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</h1>';
-			echo '<p>' . esc_html__('Cria/atualiza a Front Page Home com campos ACF e popula Cases, Produtos, Clientes, Serviços e Insights a partir do conteúdo estático atual (agentes, automações e integrações).', 'wvtodoz') . '</p>';
-			echo '<ol style="list-style:decimal;margin-left:1.25rem">';
-			echo '<li>' . esc_html__('Ative o plugin Advanced Custom Fields (free).', 'wvtodoz') . '</li>';
-			echo '<li>' . esc_html__('Clique em Importar (ou Reimportar para sobrescrever textos).', 'wvtodoz') . '</li>';
-			echo '<li>' . esc_html__('Edite a página Home (abas ACF) e os menus Cases / Produtos / Clientes / Serviços.', 'wvtodoz') . '</li>';
-			echo '</ol>';
-			echo '<p><strong>' . esc_html__('Nota:', 'wvtodoz') . '</strong> ' . esc_html__('Reimportar atualiza textos e CPTs. Imagens já anexadas (thumbnail / ACF image) não são baixadas de novo.', 'wvtodoz') . '</p>';
-			if ($done) {
-				$ver = is_array($done) && isset($done['version']) ? (string) $done['version'] : '';
-				echo '<p><em>' . esc_html__('Seed já executado.', 'wvtodoz');
-				if ($ver !== '') {
-					echo ' ' . esc_html(sprintf(/* translators: %s seed version */ __('Versão: %s', 'wvtodoz'), $ver));
-				}
-				echo '</em></p>';
-				echo '<p><a class="button button-primary" href="' . esc_url($force) . '">' . esc_html__('Reimportar / atualizar', 'wvtodoz') . '</a></p>';
-			} else {
-				echo '<p><a class="button button-primary" href="' . esc_url($url) . '">' . esc_html__('Importar conteúdo WV', 'wvtodoz') . '</a></p>';
-			}
-			echo '</div>';
+			// Fallback if redirect filter misses.
+			echo '<div class="wrap"><p><a href="' . esc_url(admin_url('admin.php?page=wvtodoz-import')) . '">' . esc_html__('Abrir Importar conteúdo WV', 'wvtodoz') . '</a></p></div>';
 		}
 	);
 });
-
 /**
  * Prompt after theme switch if not seeded.
  */

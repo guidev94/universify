@@ -1,6 +1,6 @@
 # WV Todoz — Tema WordPress (ACF Free)
 
-Tema standalone da landing page WV_Todoz. Conteúdo editável no Admin via **ACF free** + **Custom Post Types** (sem recursos Pro).
+Tema standalone da landing page WV_Todoz. Conteúdo editável no Admin via **painel WV Todoz** + **ACF free** + **Custom Post Types** (sem recursos Pro).
 
 Mensagem comercial atual: **agentes de IA**, **automações** e **integrações de sistemas**.
 
@@ -15,91 +15,98 @@ Mensagem comercial atual: **agentes de IA**, **automações** e **integrações 
 1. Copie `wvtodoz-theme/` → `wp-content/themes/wvtodoz-theme/` (ou zip a pasta e use Aparência → Temas → Adicionar).
 2. Ative o tema **WV Todoz**.
 3. Instale e ative o **ACF free**.
-4. Vá em **Aparência → Importar WV** e clique **Importar conteúdo WV** (recomendado).
+4. Vá em **WV Todoz → Importar conteúdo** e clique **Importar conteúdo WV** (recomendado).
 5. Confirme em **Configurações → Leitura** que a Front Page é a página **Home**.
-6. (Opcional) Aparência → Menus → atribua **Menu principal**, **Menu mobile**, **Menu rodapé**.
+6. (Opcional) **WV Todoz → Menus** (atalho para Aparência → Menus) e atribua **Menu principal**, **Menu mobile**, **Menu rodapé**.
 
 Thumbnail: `screenshot.png` (aparece em Aparência → Temas).
+
+## Painel WV Todoz (manutenção)
+
+Menu lateral **WV Todoz** — painel com a linguagem visual da home (lima `#CFFF04`, dark `#0a0a0a`, cream `#fafaf8`).
+
+| Página | Função |
+|--------|--------|
+| **Painel** | Status (tema, ACF, Front Page, seed) + atalhos + cards de todas as seções |
+| **Hero** … **Contato / Footer** | Uma página por seção: prévia, valores atuais, CTA de edição com `?wv_tab=`, Ver no site |
+| **Serviços / Portfólio / Produtos / Insights / Clientes** | Intro da Home + lista do CPT relacionado |
+| **Menus** | Atalho para menus do WP |
+| **Importar conteúdo** | Seed / reimport (com confirmação) |
+| **Ajuda** | Fluxo curto para editores |
+
+### Deep link de abas ACF
+
+Os botões **Editar …** abrem a Home com `?wv_tab=hero` (etc.). O JS do admin tenta clicar na aba ACF correspondente e mostra um banner de contexto.
+
+### Seletor de ícones (Phosphor)
+
+No editor de **Serviços** (`wv_servico_icon`) aparece o botão **Escolher ícone**:
+
+- Modal pesquisável com ícones usados no site + set popular
+- Preview ao vivo
+- Grava a classe no mesmo campo texto ACF (ex.: `ph-robot`)
+
+### Conteúdo HTML / visual
+
+| Campo | Tipo | Onde |
+|-------|------|------|
+| `wv_servico_title_html` | **Wysiwyg** (visual) | CPT Serviço |
+| `wv_clientes_title` | **Wysiwyg** (visual) | Home → aba Portfólio |
+
+As páginas de seção mostram prévia sanitizada — editores não precisam editar HTML cru.
 
 ## Importar conteúdo WV
 
 | Onde | O que faz |
 |------|-----------|
-| **Aparência → Importar WV** | Tela oficial de import / reimport |
-| Aviso no Dashboard / Temas | Botão **Importar conteúdo WV** se o seed ainda não rodou |
-| Reimportar / atualizar | Sobrescreve textos ACF + CPTs a partir de `inc/defaults.php` |
+| **WV Todoz → Importar conteúdo** | Tela oficial de import / reimport |
+| Aparência → Importar WV | Redireciona para o painel WV Todoz |
+| Aviso no Dashboard | Botão rápido se o seed ainda não rodou |
 
-O seed (`inc/seed.php` v1.3.0):
+O seed (`inc/seed.php` v1.4.0):
 
 - Cria/atualiza a página **Home** e define como Front Page
-- Preenche **todas as abas ACF** da Home
+- Preenche **todas as abas ACF** da Home (incl. rótulos da Missão e títulos do footer)
 - Publica CPTs: **Cases**, **Produtos**, **Clientes**, **Serviços**
 - Publica 3 posts **Insights**
-- **Não** rebaixa imagens já anexadas (thumbnail / ACF image) no reimport
+- **Não** rebaixa imagens já anexadas no reimport
 
 ## Onde editar cada seção
 
-### Página Home (abas ACF)
+Use **WV Todoz → [seção]** em vez de caçar páginas soltas.
 
-Abra **Páginas → Home** (a Front Page). Os campos aparecem em abas:
+### Página Home (abas ACF)
 
 | Aba | O que controla |
 |-----|----------------|
-| **Hero** | Badge, eyebrow, título, lead, CTAs, vídeo, toggle dos logos de produtos |
-| **Sobre** | Título, lead, stats, CTAs, imagem do escritório |
-| **Missão** | Eyebrow, título, apoio, produtos A/B, CTA |
-| **Mobile Bridge** | Headline (4 linhas + destaque lime), eyebrow, lead, CTA |
-| **Serviços** | Intro + 4 passos do processo (campos numerados) |
-| **Portfólio** | Intro dos cases + título HTML da faixa de clientes |
-| **Produtos** | Eyebrow / título / lead da seção `#produtos` |
-| **Aplicações** | Copy completa, chip, 3 benefícios, CTA, imagem |
+| **Hero** | Badge, eyebrow, título, lead, CTAs, vídeo, logos |
+| **Sobre** | Título, lead, stats, CTAs, imagem |
+| **Missão** | Copy, produtos A/B, rótulos dos stats, CTA |
+| **Mobile Bridge** | Headline + lead + CTA |
+| **Serviços** | Intro + 4 passos do processo |
+| **Portfólio** | Intro dos cases + título visual da faixa de clientes |
+| **Produtos** | Eyebrow / título / lead |
+| **Aplicações** | Copy, chip, benefícios, CTA, imagem |
 | **Insights** | Intro + CTA do blog |
-| **Contato / Footer** | Contato, WhatsApp, tagline, endereço, copyright, redes, modais |
-
-Cards de **serviços / produtos / cases / clientes** não ficam na Home — use os CPTs abaixo.
+| **Contato / Footer** | Contato, WhatsApp, tagline, colunas do rodapé, redes, modais |
 
 ### Custom Post Types
 
-| CPT (menu Admin) | Seção no site | Campos principais |
-|------------------|---------------|-------------------|
-| **Cases** | `#portfolio` | Título, imagem destacada, categoria, meta |
-| **Produtos** | `#produtos` + links do rodapé | Logo (imagem), subtítulo, highlights, badge, featured/wide, URLs dos botões |
-| **Clientes** | `#clientes` | Título + **imagem destacada** (logo) |
-| **Serviços** | `#servicos` | Ícone Phosphor, título HTML, bullets, CTA, variant, link |
-| **Posts** | `#blog` / single | Conteúdo nativo do WP |
+| CPT | Seção | Notas |
+|-----|-------|-------|
+| **Cases** | `#portfolio` | Imagem destacada + meta ACF |
+| **Produtos** | `#produtos` + footer | Logo, highlights, CTAs |
+| **Clientes** | `#clientes` | Imagem destacada = logo |
+| **Serviços** | `#servicos` | Ícone via picker, título visual, bullets |
+| **Posts** | `#blog` | Conteúdo nativo do WP |
 
 Ordem dos CPTs: **menu_order** (asc) depois data.
-
-Com CPT vazio, o tema usa fallbacks de `inc/defaults.php` (iguais ao `index.html`).
-
-### Logo e tema claro/escuro
-
-Arquivos no tema:
-
-- `assets/img/logo-wv-light.svg` — `WV_` verde `#CFFF04` + `TODOZ` / tagline **pretos** (header scrolled / páginas claras)
-- `assets/img/logo-wv-dark.svg` — `WV_` verde + wordmark **branco** (hero, dark theme, footer)
-
-O CSS troca `.site-logo--light` / `.site-logo--dark` conforme `data-theme` e `#main-header.is-scrolled`. Não use `brightness(0)` no wordmark.
-
-Logo custom (Personalizar → Identidade) ainda é lido por `wv_logo_url()` em contextos legados; o header/footer usam os SVGs dual-theme.
-
-### Menus
-
-| Local | Uso |
-|-------|-----|
-| Menu principal | Nav desktop |
-| Menu mobile | Overlay mobile |
-| Menu rodapé — Navegação | Coluna “Navegação” do footer |
-
-Sem menu atribuído, o tema usa links padrão (`#sobre`, `#servicos`, etc.).
-
-A coluna **Produtos** do footer lista automaticamente os CPT **Produtos** (URL primária).
 
 ## Limites ACF Free
 
 Este tema **não** usa Options Page, Repeater, Flexible, Gallery ou Clone (Pro).
 
-Itens repetíveis = **CPTs**. Passos do processo (4) e benefícios de aplicações (3) = **campos fixos** na Home.
+Itens repetíveis = **CPTs**. O painel custom (`inc/admin/`) substitui Options Page.
 
 ## Estrutura
 
@@ -107,18 +114,20 @@ Itens repetíveis = **CPTs**. Passos do processo (4) e benefícios de aplicaçõ
 wvtodoz-theme/
 ├── style.css / screenshot.png
 ├── front-page.php / header.php / footer.php
-├── inc/          # setup, enqueue, cpt, acf-fields, helpers, defaults, seed
+├── inc/
+│   ├── admin/          # Painel WV Todoz (seções, ícones, render)
+│   ├── acf-fields.php, cpt.php, seed.php, …
 ├── template-parts/sections/
-└── assets/       # css, js, img, video (espelho do site estático)
+└── assets/
+    ├── css/admin.css   # UI do painel
+    └── js/admin.js     # Abas ACF + icon picker
 ```
 
 ## Stack front-end
 
 Tailwind CDN, Phosphor Icons, GSAP + ScrollTrigger, Lenis, AOS, `assets/css/main.css`.
 
-**Tema claro (light) é o padrão:** `data-theme="light"` no `<html>`, snippet FOUC em `header.php` (fallback `light` se `localStorage` vazio/inválido), e `theme.js` com `DEFAULT_THEME = "light"` + chave `wv-theme`.
-
-Hero video: `assets/video/hero.mp4` (web-optimized ~2.3MB). Path igual no estático e no tema.
+**Tema claro (light) é o padrão.**
 
 ## Segurança
 

@@ -16,6 +16,9 @@ $support = (string) wv_field('wv_missao_support', $d['support']);
 $pa = (string) wv_field('wv_missao_product_a', $d['product_a']);
 $pb = (string) wv_field('wv_missao_product_b', $d['product_b']);
 $cta = (string) wv_field('wv_missao_cta', $d['cta']);
+$stat1_label = (string) wv_field('wv_missao_stat1_label', __('anos de mercado', 'wvtodoz'));
+$stat2_label = (string) wv_field('wv_missao_stat2_label', __('projetos entregues', 'wvtodoz'));
+$products_label = (string) wv_field('wv_missao_products_label', __('produtos próprios', 'wvtodoz'));
 $s1n = (string) wv_field('wv_sobre_stat1_n', '11+');
 $s2n = (string) wv_field('wv_sobre_stat2_n', '50+');
 $count1 = (int) preg_replace('/\D/', '', $s1n) ?: 11;
@@ -33,18 +36,18 @@ $count2 = (int) preg_replace('/\D/', '', $s2n) ?: 50;
 				<dl class="missao-stats">
 					<div class="missao-stat">
 						<dt><span class="missao-count" data-count="<?php echo esc_attr((string) $count1); ?>" data-suffix="+"><?php echo esc_html($s1n); ?></span></dt>
-						<dd><?php esc_html_e('anos de mercado', 'wvtodoz'); ?></dd>
+						<dd><?php echo esc_html($stat1_label); ?></dd>
 					</div>
 					<div class="missao-stat">
 						<dt><span class="missao-count" data-count="<?php echo esc_attr((string) $count2); ?>" data-suffix="+"><?php echo esc_html($s2n); ?></span></dt>
-						<dd><?php esc_html_e('projetos entregues', 'wvtodoz'); ?></dd>
+						<dd><?php echo esc_html($stat2_label); ?></dd>
 					</div>
 					<div class="missao-stat missao-stat--products">
 						<dt class="missao-products">
 							<span class="missao-product"><?php echo esc_html($pa); ?></span>
 							<span class="missao-product missao-product--accent"><?php echo esc_html($pb); ?></span>
 						</dt>
-						<dd><?php esc_html_e('produtos próprios', 'wvtodoz'); ?></dd>
+						<dd><?php echo esc_html($products_label); ?></dd>
 					</div>
 				</dl>
 				<button type="button" class="open-modal magnetic missao-cta">

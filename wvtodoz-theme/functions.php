@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('WVTODOZ_VERSION', '1.3.0');
+define('WVTODOZ_VERSION', '1.4.0');
 define('WVTODOZ_DIR', get_template_directory());
 define('WVTODOZ_URI', get_template_directory_uri());
 
@@ -22,3 +22,4 @@ require_once WVTODOZ_DIR . '/inc/enqueue.php';
 require_once WVTODOZ_DIR . '/inc/cpt.php';
 require_once WVTODOZ_DIR . '/inc/acf-fields.php';
 require_once WVTODOZ_DIR . '/inc/seed.php';
+require_once WVTODOZ_DIR . '/inc/admin/admin-panel.php';
