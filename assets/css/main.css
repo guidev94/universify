@@ -4784,12 +4784,23 @@ body.modal-open .wa-float {
 [data-theme="light"] .servicos-eyebrow,
 [data-theme="light"] .aplicacoes-eyebrow,
 [data-theme="light"] .mobile-bridge-eyebrow,
+[data-theme="light"] .mobile-bridge-eyebrow > span:not(.mobile-bridge-eyebrow-rule),
 [data-theme="light"] #produtos .produtos-header > span,
 [data-theme="light"] .portfolio-section .section-eyebrow,
 [data-theme="light"] #blog .section-eyebrow,
 [data-theme="light"] #produtos .section-eyebrow {
     color: var(--wv-lime-label) !important;
     text-shadow: none !important;
+}
+
+/* Accent traço beside bridge eyebrow — solid lime + dark edge so it reads on white */
+[data-theme="light"] .mobile-bridge-eyebrow-rule {
+    width: 2.5rem;
+    height: 2px;
+    background: #CFFF04 !important;
+    border: 1px solid rgba(36, 48, 0, 0.45);
+    box-shadow: 0 0 0 1px rgba(36, 48, 0, 0.12);
+    box-sizing: border-box;
 }
 
 [data-theme="light"] .blog-tag {
@@ -5313,7 +5324,15 @@ body.modal-open .wa-float {
 }
 
 [data-theme="light"] .aplicacoes-benefits li::before {
-    background: var(--todoz);
+    background: #CFFF04;
+    box-shadow: 0 0 0 1px rgba(36, 48, 0, 0.35);
+}
+
+[data-theme="light"] .section-display-dot {
+    background: #CFFF04;
+    box-shadow:
+        0 0 0 1px rgba(36, 48, 0, 0.35),
+        0 0 14px rgba(207, 255, 4, 0.45);
 }
 
 /* Soften section lime glows on light */
@@ -5335,11 +5354,6 @@ body.modal-open .wa-float {
 [data-theme="light"] .section-display-accent {
     color: var(--todoz);
     text-shadow: var(--wv-display-glow);
-}
-
-[data-theme="light"] .section-display-dot {
-    background: var(--todoz);
-    box-shadow: 0 0 14px rgba(207, 255, 4, 0.55);
 }
 
 /* Missão lime band — high-contrast ink (already dark); tighten footnotes */
