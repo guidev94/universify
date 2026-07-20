@@ -219,64 +219,79 @@
                 </div>
 
                 <aside class="hero-v2__right" id="heroFlowPanel" aria-label="Dor, solução e resultado por área">
-                    <div class="hero-story" id="heroFlow" data-story="atendimento">
-                        <div class="hero-story__tabs" role="tablist" aria-label="Área da dor">
-                            <button type="button" class="hero-story__tab is-active" role="tab" id="flowTabAtendimento" aria-selected="true" aria-controls="heroStoryStage" data-story="atendimento">Atendimento</button>
-                            <button type="button" class="hero-story__tab" role="tab" id="flowTabRh" aria-selected="false" aria-controls="heroStoryStage" data-story="rh" tabindex="-1">RH</button>
-                            <button type="button" class="hero-story__tab" role="tab" id="flowTabOperacao" aria-selected="false" aria-controls="heroStoryStage" data-story="operacao" tabindex="-1">Operação</button>
+                    <div class="hero-orbs" id="heroFlow" data-story="atendimento">
+                        <div class="hero-orbs__tabs" role="tablist" aria-label="Área da dor">
+                            <button type="button" class="hero-orbs__tab is-active" role="tab" id="flowTabAtendimento" aria-selected="true" aria-controls="heroOrbsBoard" data-story="atendimento">Atendimento</button>
+                            <button type="button" class="hero-orbs__tab" role="tab" id="flowTabRh" aria-selected="false" aria-controls="heroOrbsBoard" data-story="rh" tabindex="-1">RH</button>
+                            <button type="button" class="hero-orbs__tab" role="tab" id="flowTabOperacao" aria-selected="false" aria-controls="heroOrbsBoard" data-story="operacao" tabindex="-1">Operação</button>
                         </div>
 
-                        <div class="hero-story__stage" id="heroStoryStage" role="tabpanel" aria-labelledby="flowTabAtendimento">
-                            <div class="hero-story__grid">
-                                <ol class="hero-story__strip" id="heroStoryStrip">
-                                    <li class="hero-step hero-step--pain" data-step="pain">
-                                        <span class="hero-step__index" aria-hidden="true">01</span>
-                                        <div class="hero-step__body">
-                                            <span class="hero-step__label">Dor</span>
-                                            <h3 class="hero-step__title">WhatsApp sem resposta</h3>
-                                            <p class="hero-step__text">Lead esfria à noite</p>
-                                        </div>
-                                    </li>
-                                    <li class="hero-step hero-step--solution" data-step="solution">
-                                        <span class="hero-step__index" aria-hidden="true">02</span>
-                                        <div class="hero-step__body">
-                                            <span class="hero-step__label">Solução</span>
-                                            <h3 class="hero-step__title">Agente que vende 24/7</h3>
-                                            <p class="hero-step__text">Qualifica e resolve</p>
-                                            <div class="hero-step__chips">
-                                                <span class="hero-step__chip" data-chip="0">Agenda e confirma</span>
-                                                <span class="hero-step__chip" data-chip="1">CRM atualizado</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li class="hero-step hero-step--result" data-step="result">
-                                        <span class="hero-step__index" aria-hidden="true">03</span>
-                                        <div class="hero-step__body">
-                                            <span class="hero-step__label">Resultado</span>
-                                            <h3 class="hero-step__title">Mais vendas no ar</h3>
-                                            <p class="hero-step__text">Time livre pra fechar</p>
-                                            <p class="hero-step__metric">
-                                                <span class="hero-step__metric-value">24/7</span>
-                                                <span class="hero-step__metric-sep" aria-hidden="true">·</span>
-                                                <span class="hero-step__metric-label">sem fila, com venda</span>
-                                            </p>
-                                        </div>
-                                    </li>
-                                </ol>
+                        <div class="hero-orbs__canvas" id="heroOrbsCanvas">
+                            <div class="hero-orbs__dotgrid" aria-hidden="true"></div>
+                            <svg class="hero-orbs__wires" id="heroOrbsWires" aria-hidden="true"></svg>
 
-                                <div class="hero-story__panel">
-                                    <p class="hero-story__eyebrow">O que muda</p>
-                                    <h3 class="hero-story__panel-title">Atendimento que vende enquanto o time descansa</h3>
-                                    <ul class="hero-story__proof">
-                                        <li data-proof="0">Lead qualificado a qualquer hora</li>
-                                        <li data-proof="1">Vendedor foca no fechamento</li>
-                                    </ul>
-                                </div>
+                            <div class="hero-orbs__board" id="heroOrbsBoard" role="tabpanel" aria-labelledby="flowTabAtendimento">
+                                <article class="orb orb--pain" data-orb="pain">
+                                    <span class="orb__role">Dor</span>
+                                    <div class="orb__circle">
+                                        <span class="orb__icon" data-icon="pain" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h.01M12 10h.01M16 10h.01"/><path d="M21 11.5a8.4 8.4 0 0 1-1.7 5.1L21 21l-4.4-1.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+                                        </span>
+                                    </div>
+                                    <h3 class="orb__title">WhatsApp sem resposta</h3>
+                                    <p class="orb__sub">Lead esfria à noite</p>
+                                </article>
+
+                                <article class="orb orb--solution" data-orb="solution">
+                                    <span class="orb__role">IA</span>
+                                    <div class="orb__circle">
+                                        <span class="orb__icon" data-icon="solution" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="2"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><circle cx="9.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M12 3v2"/></svg>
+                                        </span>
+                                    </div>
+                                    <h3 class="orb__title">Agente que vende 24/7</h3>
+                                    <p class="orb__sub">Qualifica e resolve</p>
+                                </article>
+
+                                <article class="orb orb--action orb--action-a" data-orb="actionA">
+                                    <span class="orb__role">Ação</span>
+                                    <div class="orb__circle">
+                                        <span class="orb__icon" data-icon="actionA" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                                        </span>
+                                    </div>
+                                    <h3 class="orb__title">Agenda e confirma</h3>
+                                </article>
+
+                                <article class="orb orb--action orb--action-b" data-orb="actionB">
+                                    <span class="orb__role">Ação</span>
+                                    <div class="orb__circle">
+                                        <span class="orb__icon" data-icon="actionB" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10v10H4z"/><path d="M14 10h6v7h-6z"/><path d="M10 12h4"/></svg>
+                                        </span>
+                                    </div>
+                                    <h3 class="orb__title">CRM atualizado</h3>
+                                </article>
+
+                                <article class="orb orb--result" data-orb="result">
+                                    <span class="orb__role">Win</span>
+                                    <div class="orb__circle">
+                                        <span class="orb__icon" data-icon="result" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        </span>
+                                    </div>
+                                    <h3 class="orb__title">Mais vendas no ar</h3>
+                                    <p class="orb__sub">Time livre pra fechar</p>
+                                    <div class="orb__metric" id="heroOrbMetric">
+                                        <span class="orb__metric-value">24/7</span>
+                                        <span class="orb__metric-label">sem fila, com venda</span>
+                                    </div>
+                                </article>
                             </div>
 
-                            <p class="hero-story__caption" id="heroFlowChip">
-                                <span class="hero-story__caption-dot" aria-hidden="true"></span>
-                                <span class="hero-story__caption-text">Atendimento que converte</span>
+                            <p class="hero-orbs__caption" id="heroFlowChip">
+                                <span class="hero-orbs__caption-dot" aria-hidden="true"></span>
+                                <span class="hero-orbs__caption-text">Atendimento que converte</span>
                             </p>
                         </div>
                     </div>
