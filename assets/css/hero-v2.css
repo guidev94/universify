@@ -564,8 +564,8 @@
 #hero.hero-v2 .hero-orbs {
   position: relative;
   width: 100%;
-  max-width: 42rem;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   opacity: 0;
 }
 
@@ -1079,10 +1079,6 @@
 }
 
 @media (max-width: 1023px) {
-  #hero.hero-v2 .hero-orbs {
-    max-width: 34rem;
-  }
-
   #hero.hero-v2 .hero-orbs__canvas {
     min-height: 20rem;
   }
