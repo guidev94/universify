@@ -1,6 +1,6 @@
 /**
- * Hero v2 — GSAP entrance + multi-pain commercial workflow canvas.
- * Stories: Atendimento · RH · Operação. No particle field.
+ * Hero v2 — Three.js particle field + GSAP entrance + multi-pain workflow canvas.
+ * Stories: Atendimento · RH · Operação. Lime particles (additive, mouse parallax).
  * Respects prefers-reduced-motion.
  */
 (function () {
@@ -106,6 +106,12 @@
     listeners.push([target, type, fn, opts]);
   }
 
+  function raf(fn) {
+    var id = requestAnimationFrame(fn);
+    rafIds.push(id);
+    return id;
+  }
+
   function later(fn, ms) {
     var id = setTimeout(fn, ms);
     timeouts.push(id);
@@ -149,6 +155,138 @@
   }
 
   on(window, "pagehide", cleanup);
+
+  function isLightTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
+
+  /* ===== THREE.JS PARTICLE FIELD ===== */
+  function initThreeJS() {
+    if (reduced || typeof THREE === "undefined") return;
+
+    var canvas = document.getElementById("hero-canvas");
+    if (!canvas) return;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    var particleCount = window.innerWidth < 768 ? 400 : 800;
+    var positions = new Float32Array(particleCount * 3);
+    var velocities = [];
+    var i;
+
+    for (i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      velocities.push({
+        x: (Math.random() - 0.5) * 0.002,
+        y: (Math.random() - 0.5) * 0.002,
+        z: (Math.random() - 0.5) * 0.001,
+      });
+    }
+
+    var geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+    var material = new THREE.PointsMaterial({
+      color: 0xcfff04,
+      size: 0.03,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+
+    function applyParticleTheme() {
+      if (isLightTheme()) {
+        material.color.setHex(0x6b8f00);
+        material.opacity = 0.32;
+        material.size = 0.032;
+        material.blending = THREE.NormalBlending;
+      } else {
+        material.color.setHex(0xcfff04);
+        material.opacity = 0.6;
+        material.size = 0.03;
+        material.blending = THREE.AdditiveBlending;
+      }
+      material.needsUpdate = true;
+    }
+
+    applyParticleTheme();
+
+    var particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+    camera.position.z = 5;
+
+    var mouseX = 0;
+    var mouseY = 0;
+    var running = true;
+
+    function resizeParticles() {
+      var rect = hero.getBoundingClientRect();
+      var w = Math.max(1, rect.width || window.innerWidth);
+      var h = Math.max(1, rect.height || window.innerHeight);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    }
+
+    resizeParticles();
+    on(window, "resize", resizeParticles);
+    on(document, "mousemove", function (e) {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    if (window.MutationObserver) {
+      var themeObs = new MutationObserver(applyParticleTheme);
+      themeObs.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+      on(window, "pagehide", function () {
+        themeObs.disconnect();
+      });
+    }
+
+    function animate() {
+      if (!running) return;
+      raf(animate);
+
+      var posArray = geometry.attributes.position.array;
+      for (i = 0; i < particleCount; i++) {
+        posArray[i * 3] += velocities[i].x;
+        posArray[i * 3 + 1] += velocities[i].y;
+        posArray[i * 3 + 2] += velocities[i].z;
+        if (Math.abs(posArray[i * 3]) > 10) velocities[i].x *= -1;
+        if (Math.abs(posArray[i * 3 + 1]) > 10) velocities[i].y *= -1;
+        if (Math.abs(posArray[i * 3 + 2]) > 5) velocities[i].z *= -1;
+      }
+      geometry.attributes.position.needsUpdate = true;
+
+      camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.02;
+      camera.position.y += (-mouseY * 0.5 - camera.position.y) * 0.02;
+      camera.lookAt(scene.position);
+      particles.rotation.y += 0.0003;
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    on(window, "pagehide", function () {
+      running = false;
+      try {
+        geometry.dispose();
+        material.dispose();
+        renderer.dispose();
+      } catch (e) {
+        /* noop */
+      }
+    });
+  }
 
   function nodeCenter(boardRect, el) {
     var r = el.getBoundingClientRect();
@@ -699,6 +837,7 @@
   }
 
   function boot() {
+    initThreeJS();
     initFlowCanvas();
     initEntrance();
     requestAnimationFrame(function () {
