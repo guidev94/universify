@@ -528,10 +528,20 @@
         mu.hidden = !unit;
       }
       if (ml) ml.textContent = story.metricLabel;
+      if (!reduced) {
+        metric.classList.remove("is-refreshing");
+        void metric.offsetWidth;
+        metric.classList.add("is-refreshing");
+      }
     }
     if (chip) {
       var ct = chip.querySelector(".hero-flow__chip-text");
       if (ct) ct.textContent = story.chip;
+      if (!reduced) {
+        chip.classList.remove("is-refreshing");
+        void chip.offsetWidth;
+        chip.classList.add("is-refreshing");
+      }
     }
 
     document.querySelectorAll(".hero-flow__tab").forEach(function (tab) {
