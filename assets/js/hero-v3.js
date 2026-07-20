@@ -54,8 +54,8 @@
     industria: {
       tabId: "hv3-tab-industria",
       label: "Indústria — chão de fábrica no ERP",
-      caseMark: "WV",
-      caseText: "Integração sob medida · operação única",
+      caseMark: "Integração",
+      caseText: "Sob medida · operação única",
       tags: ["Automação", "ERP", "Estoque"],
       nodes: {
         pain: {
