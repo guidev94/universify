@@ -98,6 +98,7 @@
     },
   };
 
+  // Story order matches the canvas read path: Dor → Solução → Ações → Resultado
   var PULSE_SEQUENCE = ["lead", "ai", "auto", "integ", "result"];
 
   function on(target, type, fn, opts) {
@@ -158,13 +159,37 @@
   }
 
   function cubicPath(a, b) {
-    var dx = Math.abs(b.x - a.x);
-    var dy = Math.abs(b.y - a.y);
-    var c = Math.max(dx * 0.45, dy * 0.35, 28);
-    var c1x = a.x + (b.x >= a.x ? c : -c);
-    var c1y = a.y;
-    var c2x = b.x - (b.x >= a.x ? c : -c);
-    var c2y = b.y;
+    var dx = b.x - a.x;
+    var dy = b.y - a.y;
+    var absDx = Math.abs(dx);
+    var absDy = Math.abs(dy);
+    var c1x;
+    var c1y;
+    var c2x;
+    var c2y;
+
+    // Vertical branch (Solução → Ação): drop then settle — avoids tangled diagonals
+    if (absDy > absDx * 0.85 && absDy > 24) {
+      var drop = Math.max(absDy * 0.45, 24);
+      c1x = a.x;
+      c1y = a.y + (dy >= 0 ? drop : -drop);
+      c2x = b.x;
+      c2y = b.y - (dy >= 0 ? drop * 0.55 : -drop * 0.55);
+    } else if (absDy > 18 && absDx > 18) {
+      // Diagonal feed into Resultado: soft elbow, no cross over the spine
+      c1x = a.x + dx * 0.15;
+      c1y = a.y + dy * 0.65;
+      c2x = b.x - dx * 0.35;
+      c2y = b.y;
+    } else {
+      // Horizontal spine (Dor → Solução → Resultado)
+      var c = Math.max(absDx * 0.42, 28);
+      c1x = a.x + (dx >= 0 ? c : -c);
+      c1y = a.y;
+      c2x = b.x - (dx >= 0 ? c : -c);
+      c2y = b.y;
+    }
+
     return (
       "M " +
       a.x.toFixed(1) +
@@ -213,8 +238,10 @@
       byKey[node.getAttribute("data-node")] = node;
     });
 
+    // Spine Dor → Solução → Resultado; Ações branch under Solução then feed Resultado
     var pairs = [
       ["lead", "ai"],
+      ["ai", "result"],
       ["ai", "auto"],
       ["ai", "integ"],
       ["auto", "result"],
@@ -234,7 +261,13 @@
       path.setAttribute("d", cubicPath(a, b));
       path.setAttribute("data-from", pair[0]);
       path.setAttribute("data-to", pair[1]);
-      path.setAttribute("class", "hero-flow__edge");
+      var isSpine =
+        (pair[0] === "lead" && pair[1] === "ai") ||
+        (pair[0] === "ai" && pair[1] === "result");
+      path.setAttribute(
+        "class",
+        "hero-flow__edge" + (isSpine ? " hero-flow__edge--spine" : "")
+      );
       svg.appendChild(path);
     });
 
