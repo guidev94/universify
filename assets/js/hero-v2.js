@@ -1,6 +1,7 @@
 /**
- * Hero v2 — Three.js particles + GSAP entrance for workflow canvas.
- * Edge drawing, resize, AI running cycle; respects prefers-reduced-motion.
+ * Hero v2 — Three.js particle field + GSAP entrance + commercial workflow canvas.
+ * Restores original lime particles (additive, mouse parallax). No red glitch.
+ * Respects prefers-reduced-motion.
  */
 (function () {
   "use strict";
@@ -47,6 +48,10 @@
   }
 
   on(window, "pagehide", cleanup);
+
+  function isLightTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
 
   function nodeCenter(boardRect, el) {
     var r = el.getBoundingClientRect();
@@ -121,11 +126,37 @@
       var b = nodeCenter(canvasRect, to);
       var path = document.createElementNS(ns, "path");
       path.setAttribute("d", cubicPath(a, b));
+      path.setAttribute("data-from", pair[0]);
+      path.setAttribute("data-to", pair[1]);
       path.setAttribute(
         "class",
         pair[2] ? "hero-flow__edge hero-flow__edge--active" : "hero-flow__edge"
       );
       svg.appendChild(path);
+    });
+  }
+
+  function initNodeHover() {
+    var board = document.getElementById("heroFlowBoard");
+    var svg = document.getElementById("heroFlowEdges");
+    if (!board || !svg || reduced) return;
+
+    board.querySelectorAll(".flow-node[data-node]").forEach(function (node) {
+      on(node, "mouseenter", function () {
+        node.classList.add("is-hovered");
+        var key = node.getAttribute("data-node");
+        svg.querySelectorAll(".hero-flow__edge").forEach(function (edge) {
+          if (edge.getAttribute("data-from") === key || edge.getAttribute("data-to") === key) {
+            edge.classList.add("is-lit");
+          }
+        });
+      });
+      on(node, "mouseleave", function () {
+        node.classList.remove("is-hovered");
+        svg.querySelectorAll(".hero-flow__edge.is-lit").forEach(function (edge) {
+          edge.classList.remove("is-lit");
+        });
+      });
     });
   }
 
@@ -136,75 +167,81 @@
       resizeTimer = setTimeout(drawEdges, 80);
     });
 
-    if (reduced) return;
-
     var aiNode = hero.querySelector('.flow-node--ai[data-node="ai"]');
-    if (!aiNode) return;
-    var cycle = setInterval(function () {
-      aiNode.classList.toggle("is-running");
-    }, 2800);
-    intervals.push(cycle);
+    if (aiNode) aiNode.classList.add("is-running");
+
+    initNodeHover();
   }
 
+  /* ===== THREE.JS PARTICLE FIELD (original Hero v2) ===== */
   function initThreeJS() {
-    var canvas = document.getElementById("heroCanvas");
-    if (!canvas || typeof THREE === "undefined" || reduced) return;
+    if (reduced || typeof THREE === "undefined") return;
 
-    var running = true;
-    var renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    var canvas = document.getElementById("hero-canvas");
+    if (!canvas) return;
 
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 5;
+    var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-    var particleCount = 140;
-    var geometry = new THREE.BufferGeometry();
+    var particleCount = window.innerWidth < 768 ? 400 : 800;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
+
     for (i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 16;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+      positions[i * 3] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
       velocities.push({
-        x: (Math.random() - 0.5) * 0.004,
-        y: (Math.random() - 0.5) * 0.004,
-        z: (Math.random() - 0.5) * 0.002,
+        x: (Math.random() - 0.5) * 0.002,
+        y: (Math.random() - 0.5) * 0.002,
+        z: (Math.random() - 0.5) * 0.001,
       });
     }
+
+    var geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
     var material = new THREE.PointsMaterial({
-      size: 0.035,
-      transparent: true,
-      opacity: 0.55,
-      depthWrite: false,
       color: 0xcfff04,
+      size: 0.03,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
     });
 
     function applyParticleTheme() {
-      var light = document.documentElement.getAttribute("data-theme") === "light";
-      material.color.setHex(light ? 0x8fb800 : 0xcfff04);
-      material.opacity = light ? 0.35 : 0.55;
+      if (isLightTheme()) {
+        material.color.setHex(0x6b8f00);
+        material.opacity = 0.38;
+        material.size = 0.035;
+        material.blending = THREE.NormalBlending;
+      } else {
+        material.color.setHex(0xcfff04);
+        material.opacity = 0.6;
+        material.size = 0.03;
+        material.blending = THREE.AdditiveBlending;
+      }
+      material.needsUpdate = true;
     }
+
     applyParticleTheme();
 
     var particles = new THREE.Points(geometry, material);
     scene.add(particles);
+    camera.position.z = 5;
 
     var mouseX = 0;
     var mouseY = 0;
+    var running = true;
 
     function resize() {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
+      var rect = hero.getBoundingClientRect();
+      var w = Math.max(1, rect.width || window.innerWidth);
+      var h = Math.max(1, rect.height || window.innerHeight);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
@@ -352,15 +389,6 @@
     titleLines.forEach(function (line, i) {
       tl.to(line, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, i === 0 ? "-=0.2" : "-=0.5");
     });
-
-    tl.add(function () {
-      var accentLine = hero.querySelector(".glitch-text");
-      if (!accentLine) return;
-      accentLine.classList.add("active");
-      setTimeout(function () {
-        accentLine.classList.remove("active");
-      }, 400);
-    }, "-=0.3");
 
     tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.7 }, "-=0.4");
     tl.to("#heroStats", { opacity: 1, duration: 0.6 }, "-=0.3");

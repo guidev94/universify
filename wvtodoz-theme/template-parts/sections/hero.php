@@ -50,7 +50,7 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 
 			<h1 class="hero-v2__title" id="heroTitle">
 				<span class="hero-v2__title-line"><?php echo esc_html($line); ?></span>
-				<span class="hero-v2__title-line hero-v2__title-accent glitch-text" data-text="<?php echo esc_attr($accent); ?>"><?php echo esc_html($accent); ?></span>
+				<span class="hero-v2__title-line hero-v2__title-accent"><?php echo esc_html($accent); ?></span>
 			</h1>
 
 			<p class="hero-v2__subtitle" id="heroSubtitle">
@@ -95,28 +95,28 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 			<?php endif; ?>
 		</div>
 
-		<aside class="hero-v2__right" id="heroFlowPanel" aria-label="<?php echo esc_attr__('Fluxo de automação com IA', 'wvtodoz'); ?>">
+		<aside class="hero-v2__right" id="heroFlowPanel" aria-label="<?php echo esc_attr__('Do WhatsApp lotado à venda no ar', 'wvtodoz'); ?>">
 			<div class="hero-flow" id="heroFlow">
 				<div class="hero-flow__canvas">
 					<div class="hero-flow__dotgrid" aria-hidden="true"></div>
 					<svg class="hero-flow__edges" id="heroFlowEdges" aria-hidden="true"></svg>
 					<div class="hero-flow__board" id="heroFlowBoard">
-						<article class="flow-node flow-node--trigger" data-node="lead">
+						<article class="flow-node flow-node--pain" data-node="lead">
+							<span class="flow-node__tag"><?php echo esc_html__('Dor', 'wvtodoz'); ?></span>
 							<span class="flow-node__accent" aria-hidden="true"></span>
 							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M4 12h10"/>
-									<path d="M12 6l6 6-6 6"/>
-									<path d="M4 6v12"/>
+									<path d="M8 10h.01M12 10h.01M16 10h.01"/>
+									<path d="M21 11.5a8.4 8.4 0 0 1-1.7 5.1L21 21l-4.4-1.2A8.5 8.5 0 1 1 21 11.5z"/>
 								</svg>
 							</span>
 							<div class="flow-node__body">
-								<h3 class="flow-node__title"><?php echo esc_html__('Webhook', 'wvtodoz'); ?></h3>
-								<p class="flow-node__sub"><?php echo esc_html__('Lead / WhatsApp', 'wvtodoz'); ?></p>
+								<h3 class="flow-node__title"><?php echo esc_html__('WhatsApp lotado', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Lead esfria à noite', 'wvtodoz'); ?></p>
 							</div>
-							<span class="flow-node__status" aria-hidden="true"></span>
 						</article>
 						<article class="flow-node flow-node--ai is-running" data-node="ai">
+							<span class="flow-node__tag flow-node__tag--solution"><?php echo esc_html__('Solução', 'wvtodoz'); ?></span>
 							<span class="flow-node__accent" aria-hidden="true"></span>
 							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -128,40 +128,36 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 								</svg>
 							</span>
 							<div class="flow-node__body">
-								<h3 class="flow-node__title"><?php echo esc_html__('Agente IA', 'wvtodoz'); ?></h3>
-								<p class="flow-node__sub"><?php echo esc_html__('Atende e resolve', 'wvtodoz'); ?></p>
+								<h3 class="flow-node__title"><?php echo esc_html__('Agente atende 24/7', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Qualifica e resolve', 'wvtodoz'); ?></p>
 							</div>
-							<span class="flow-node__status" aria-hidden="true"></span>
 						</article>
 						<article class="flow-node flow-node--auto" data-node="auto">
 							<span class="flow-node__accent" aria-hidden="true"></span>
 							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-									<circle cx="12" cy="12" r="3"/>
-									<path d="M12 3v2.2M12 18.8V21M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M3 12h2.2M18.8 12H21M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>
+									<rect x="3" y="5" width="18" height="16" rx="2"/>
+									<path d="M3 10h18M8 3v4M16 3v4"/>
 								</svg>
 							</span>
 							<div class="flow-node__body">
-								<h3 class="flow-node__title"><?php echo esc_html__('Automação', 'wvtodoz'); ?></h3>
-								<p class="flow-node__sub"><?php echo esc_html__('Fluxo operacional', 'wvtodoz'); ?></p>
+								<h3 class="flow-node__title"><?php echo esc_html__('Agenda o pedido', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Sem planilha no meio', 'wvtodoz'); ?></p>
 							</div>
-							<span class="flow-node__status" aria-hidden="true"></span>
 						</article>
 						<article class="flow-node flow-node--integ" data-node="integ">
 							<span class="flow-node__accent" aria-hidden="true"></span>
 							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-									<circle cx="6" cy="12" r="2.75"/>
-									<circle cx="18" cy="6.5" r="2.75"/>
-									<circle cx="18" cy="17.5" r="2.75"/>
-									<path d="M8.6 10.8 15.2 7.4M8.6 13.2l6.6 3.4"/>
+									<path d="M4 7h10v10H4z"/>
+									<path d="M14 10h6v7h-6z"/>
+									<path d="M10 12h4"/>
 								</svg>
 							</span>
 							<div class="flow-node__body">
-								<h3 class="flow-node__title"><?php echo esc_html__('Integração', 'wvtodoz'); ?></h3>
-								<p class="flow-node__sub"><?php echo esc_html__('ERP / CRM', 'wvtodoz'); ?></p>
+								<h3 class="flow-node__title"><?php echo esc_html__('Cai no ERP/CRM', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Sem retrabalho manual', 'wvtodoz'); ?></p>
 							</div>
-							<span class="flow-node__status" aria-hidden="true"></span>
 						</article>
 						<article class="flow-node flow-node--result" data-node="result">
 							<span class="flow-node__accent" aria-hidden="true"></span>
@@ -171,15 +167,18 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 								</svg>
 							</span>
 							<div class="flow-node__body">
-								<h3 class="flow-node__title"><?php echo esc_html__('Resultado', 'wvtodoz'); ?></h3>
-								<p class="flow-node__sub"><?php echo esc_html__('Operação no ar', 'wvtodoz'); ?></p>
+								<h3 class="flow-node__title"><?php echo esc_html__('Venda no ar', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Time livre pra vender', 'wvtodoz'); ?></p>
 							</div>
-							<span class="flow-node__status" aria-hidden="true"></span>
 						</article>
+					</div>
+					<div class="hero-flow__metric" aria-hidden="true">
+						<span class="hero-flow__metric-value">24/7</span>
+						<span class="hero-flow__metric-label"><?php echo esc_html__('sem fila no atendimento', 'wvtodoz'); ?></span>
 					</div>
 					<div class="hero-flow__chip" aria-hidden="true">
 						<span class="hero-flow__chip-dot"></span>
-						<span><?php echo esc_html__('AI Solutions · ao vivo', 'wvtodoz'); ?></span>
+						<span><?php echo esc_html__('Operação comercial com IA', 'wvtodoz'); ?></span>
 					</div>
 				</div>
 			</div>
