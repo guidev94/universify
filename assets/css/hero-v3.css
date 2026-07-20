@@ -1,5 +1,5 @@
 /**
- * Hero v3 — Kinetic type + liquid glass Signal Stage.
+ * Hero v3 — Kinetic type + liquid glass stage.
  * VARIANCE 8 · MOTION 6 · DENSITY 4. Lime #CFFF04. No neon overload.
  * Scoped under #hero.hero-v3.
  */
@@ -281,7 +281,7 @@
   background: rgba(207, 255, 4, 0.05);
 }
 
-/* Signal Stage (dominant visual) */
+/* Delivery stage (dominant visual) */
 #hero.hero-v3 .hv3-stage-wrap {
   position: relative;
   width: 100%;
@@ -785,20 +785,52 @@
   color: rgba(10, 10, 10, 0.4);
 }
 
-[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) {
-  color: #121212;
+/* Header WV logo over hero — keep brand lime (#CFFF04), never wash out */
+body:has(#hero.hero-v3) #main-header .site-logo,
+body:has(#hero.hero-v3) #main-header .site-logo-link img {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
+[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) {
+  color: #121212;
+  background-color: transparent;
+}
+
+/* Light hero: dark wordmark (logo-wv-light) — same as Hero v2 / index2 */
 [data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) .site-logo--light {
-  display: none;
+  display: block;
 }
 
 [data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) .site-logo--dark {
-  display: block;
+  display: none;
 }
 
 [data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) nav a:not(.magnetic):not(.theme-toggle) {
   color: rgba(24, 24, 27, 0.62);
+}
+
+[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) nav a:not(.magnetic):not(.theme-toggle):hover {
+  color: #0a0a0a;
+}
+
+[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) .theme-toggle {
+  border-color: rgba(10, 10, 10, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  color: #3f3f46;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) .theme-toggle:hover {
+  border-color: #cfff04;
+  color: #0a0a0a;
+  background: rgba(207, 255, 4, 0.2);
+}
+
+[data-theme="light"] body:has(#hero.hero-v3) #main-header:not(.is-scrolled) #mobile-menu-trigger .mobile-menu-trigger__bar {
+  background-color: #cfff04;
+  box-shadow: none;
 }
 
 /* Reduced motion — full title/copy always visible, no clip hide */
