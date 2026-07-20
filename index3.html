@@ -63,7 +63,7 @@
         }
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/hero-v3.css?v=1.6.27">
+    <link rel="stylesheet" href="assets/css/hero-v3.css?v=1.6.29">
 </head>
 <body class="bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
 
@@ -182,16 +182,15 @@
                     </div>
                 </div>
 
-                <aside class="hv3-stage-wrap" id="hv3Stage" aria-label="Cenários WV por setor">
+                <aside class="hv3-stage-wrap" id="hv3Stage" aria-label="Canvas de automação WV por setor">
                     <div class="hv3-stage">
                         <div class="hv3-stage__inner">
-                            <div class="hv3-stage__grid" aria-hidden="true"></div>
                             <div class="hv3-stage__beam" aria-hidden="true"></div>
 
                             <header class="hv3-board__head">
                                 <p class="hv3-stage__label">
                                     <span class="hv3-stage__label-dot" aria-hidden="true"></span>
-                                    Cenários WV · dor → entrega
+                                    Canvas WV · dor → solução → resultado
                                 </p>
                                 <div class="hv3-board__brand" aria-hidden="true">
                                     <span class="hv3-board__mark">WV</span>
@@ -200,84 +199,50 @@
                             </header>
 
                             <div class="hv3-tabs" role="tablist" aria-label="Setores">
-                                <button type="button" class="hv3-tab is-active" role="tab" id="hv3-tab-comercio" aria-selected="true" aria-controls="hv3-panel-comercio" data-sector="comercio">Comércio</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-industria" aria-selected="false" aria-controls="hv3-panel-industria" data-sector="industria" tabindex="-1">Indústria</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-servicos" aria-selected="false" aria-controls="hv3-panel-servicos" data-sector="servicos" tabindex="-1">Serviços</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-saude" aria-selected="false" aria-controls="hv3-panel-saude" data-sector="saude" tabindex="-1">Saúde</button>
+                                <button type="button" class="hv3-tab is-active" role="tab" id="hv3-tab-comercio" aria-selected="true" aria-controls="hv3Board" data-sector="comercio">Comércio</button>
+                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-industria" aria-selected="false" aria-controls="hv3Board" data-sector="industria" tabindex="-1">Indústria</button>
+                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-servicos" aria-selected="false" aria-controls="hv3Board" data-sector="servicos" tabindex="-1">Serviços</button>
+                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-saude" aria-selected="false" aria-controls="hv3Board" data-sector="saude" tabindex="-1">Saúde</button>
                             </div>
 
-                            <div class="hv3-board">
-                                <article class="hv3-scene is-active" role="tabpanel" id="hv3-panel-comercio" aria-labelledby="hv3-tab-comercio" data-sector="comercio">
-                                    <div class="hv3-scene__pain">
-                                        <span class="hv3-scene__kicker">Dor</span>
-                                        <h3 class="hv3-scene__title">Lead esfria na fila do WhatsApp</h3>
-                                        <p class="hv3-scene__line">Enquanto o time responde, o pedido vai embora — ou o concorrente fecha.</p>
-                                    </div>
-                                    <div class="hv3-scene__move">
-                                        <span class="hv3-scene__kicker">O que a WV faz</span>
-                                        <p class="hv3-scene__line">Agente atende e qualifica 24/7; pedido e status entram no CRM/catálogo sem planilha.</p>
-                                        <p class="hv3-scene__weave"><span>Agente</span><span>Integração</span><span>CRM</span></p>
-                                    </div>
-                                    <div class="hv3-scene__win">
-                                        <span class="hv3-scene__kicker">Resultado</span>
-                                        <p class="hv3-scene__outcome">Venda no ar onde o cliente já está</p>
-                                        <p class="hv3-scene__case"><span class="hv3-scene__case-mark">Facíleme</span> Social commerce · catálogo + checkout</p>
-                                    </div>
-                                </article>
+                            <div class="hv3-canvas" id="hv3Canvas" data-sector="comercio">
+                                <div class="hv3-canvas__dotgrid" aria-hidden="true"></div>
+                                <svg class="hv3-canvas__wires" id="hv3Wires" aria-hidden="true"></svg>
 
-                                <article class="hv3-scene" role="tabpanel" id="hv3-panel-industria" aria-labelledby="hv3-tab-industria" data-sector="industria" hidden>
-                                    <div class="hv3-scene__pain">
-                                        <span class="hv3-scene__kicker">Dor</span>
-                                        <h3 class="hv3-scene__title">Chão de fábrica ainda aponta no papel</h3>
-                                        <p class="hv3-scene__line">Produção, estoque e ERP não conversam — retrabalho e atraso viram rotina.</p>
-                                    </div>
-                                    <div class="hv3-scene__move">
-                                        <span class="hv3-scene__kicker">O que a WV faz</span>
-                                        <p class="hv3-scene__line">Automação do apontamento + integração com ERP: um fluxo, uma verdade operacional.</p>
-                                        <p class="hv3-scene__weave"><span>Automação</span><span>Integração</span><span>ERP</span></p>
-                                    </div>
-                                    <div class="hv3-scene__win">
-                                        <span class="hv3-scene__kicker">Resultado</span>
-                                        <p class="hv3-scene__outcome">Operação única do chão ao sistema</p>
-                                        <p class="hv3-scene__case"><span class="hv3-scene__case-mark">WV</span> Integração sob medida · indústria</p>
-                                    </div>
-                                </article>
+                                <div class="hv3-canvas__board" id="hv3Board" role="tabpanel" aria-labelledby="hv3-tab-comercio">
+                                    <article class="hv3-node" data-node="pain">
+                                        <span class="hv3-node__role">01 · Dor</span>
+                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                        <h3 class="hv3-node__title">Lead esfria na fila do WhatsApp</h3>
+                                        <p class="hv3-node__sub">Pedido some enquanto o time responde</p>
+                                    </article>
 
-                                <article class="hv3-scene" role="tabpanel" id="hv3-panel-servicos" aria-labelledby="hv3-tab-servicos" data-sector="servicos" hidden>
-                                    <div class="hv3-scene__pain">
-                                        <span class="hv3-scene__kicker">Dor</span>
-                                        <h3 class="hv3-scene__title">Agenda e atendimento no modo incêndio</h3>
-                                        <p class="hv3-scene__line">Time apaga fila o dia inteiro — e o fechamento fica para “quando sobrar tempo”.</p>
-                                    </div>
-                                    <div class="hv3-scene__move">
-                                        <span class="hv3-scene__kicker">O que a WV faz</span>
-                                        <p class="hv3-scene__line">Agente tria e agenda; automação cuida do follow-up e libera o comercial para vender.</p>
-                                        <p class="hv3-scene__weave"><span>Agente</span><span>Automação</span><span>Fluxo</span></p>
-                                    </div>
-                                    <div class="hv3-scene__win">
-                                        <span class="hv3-scene__kicker">Resultado</span>
-                                        <p class="hv3-scene__outcome">Time no fechamento, não na fila</p>
-                                        <p class="hv3-scene__case"><span class="hv3-scene__case-mark">WV</span> Fluxo comercial · serviços</p>
-                                    </div>
-                                </article>
+                                    <article class="hv3-node hv3-node--solve" data-node="solve">
+                                        <span class="hv3-node__role">02 · Solução WV</span>
+                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                        <h3 class="hv3-node__title">Agente + CRM no mesmo fluxo</h3>
+                                        <p class="hv3-node__sub">Atende, qualifica e registra sem planilha</p>
+                                    </article>
 
-                                <article class="hv3-scene" role="tabpanel" id="hv3-panel-saude" aria-labelledby="hv3-tab-saude" data-sector="saude" hidden>
-                                    <div class="hv3-scene__pain">
-                                        <span class="hv3-scene__kicker">Dor</span>
-                                        <h3 class="hv3-scene__title">Ponto e jornada manuais atrasam a folha</h3>
-                                        <p class="hv3-scene__line">Assinatura e planilha geram risco, retrabalho e discussão na hora do pagamento.</p>
-                                    </div>
-                                    <div class="hv3-scene__move">
-                                        <span class="hv3-scene__kicker">O que a WV faz</span>
-                                        <p class="hv3-scene__line">Let's Work registra com facial e geolocalização — jornada auditável sem papel.</p>
-                                        <p class="hv3-scene__weave"><span>Produto WV</span><span>Biometria</span><span>Jornada</span></p>
-                                    </div>
-                                    <div class="hv3-scene__win">
-                                        <span class="hv3-scene__kicker">Resultado</span>
-                                        <p class="hv3-scene__outcome">Folha em dia, jornada auditável</p>
-                                        <p class="hv3-scene__case"><span class="hv3-scene__case-mark">Let's Work</span> Facial · ponto · RH/ops</p>
-                                    </div>
-                                </article>
+                                    <article class="hv3-node hv3-node--action" data-node="action">
+                                        <span class="hv3-node__role">Ação</span>
+                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                        <h3 class="hv3-node__title">Integra catálogo e checkout</h3>
+                                        <p class="hv3-node__sub">Pedido entra onde a venda acontece</p>
+                                    </article>
+
+                                    <article class="hv3-node hv3-node--win" data-node="win">
+                                        <span class="hv3-node__role">03 · Resultado</span>
+                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                        <h3 class="hv3-node__title">Venda no ar onde o cliente já está</h3>
+                                        <p class="hv3-node__sub">Canal ativo, conversão contínua</p>
+                                    </article>
+                                </div>
+
+                                <p class="hv3-canvas__case" id="hv3CaseChip">
+                                    <span class="hv3-canvas__case-mark">Facíleme</span>
+                                    <span class="hv3-canvas__case-text">Social commerce · catálogo + checkout</span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -1071,7 +1036,7 @@
         </div>
     </a>
 
-    <script src="assets/js/hero-v3.js?v=1.6.27"></script>
+    <script src="assets/js/hero-v3.js?v=1.6.29"></script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/site-utils.js"></script>
     <script src="assets/js/main.js"></script>
