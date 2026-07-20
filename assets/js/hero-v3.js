@@ -1,6 +1,6 @@
 /**
  * Hero v3 — entrance + magnetic CTAs + open-flow sector canvas.
- * 3 tabs auto-cycle. Dor → Solução → Resultado + wire pulse.
+ * Auto-cycle tabs; within each tab, pulse Dor → Solução → Resultado.
  */
 (function () {
   "use strict";
@@ -15,7 +15,8 @@
 
   var PULSE = ["pain", "solve", "win"];
   var SECTOR_ORDER = ["comercio", "industria", "servicos"];
-  var CYCLE_MS = 6000;
+  var STEP_MS = 2000;
+  var CYCLE_MS = STEP_MS * PULSE.length;
 
   var pulseIndex = 0;
   var pulseTimer = null;
@@ -25,6 +26,8 @@
   var switching = false;
   var cyclePaused = false;
   var cycleArmed = false;
+  var pendingAdvance = null;
+  var activeSector = "comercio";
 
   var SECTORS = {
     comercio: {
@@ -98,11 +101,6 @@
 
   function qa(sel) {
     return hero.querySelectorAll(sel);
-  }
-
-  function currentSector() {
-    var canvas = document.getElementById("hv3Canvas");
-    return (canvas && canvas.getAttribute("data-sector")) || "comercio";
   }
 
   function initMagnetic() {
@@ -192,7 +190,6 @@
       ["pain", "solve"],
       ["solve", "win"],
     ];
-
     var ns = "http://www.w3.org/2000/svg";
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
@@ -215,17 +212,13 @@
   function startWireFlow() {
     var svg = document.getElementById("hv3Wires");
     if (!svg || typeof gsap === "undefined") return;
-
     var wires = svg.querySelectorAll(".hv3-canvas__wire");
     if (!wires.length) return;
-
     if (wireFlowTween) wireFlowTween.kill();
-
     if (reduced) {
       gsap.set(wires, { strokeDashoffset: 0 });
       return;
     }
-
     gsap.set(wires, { strokeDashoffset: 0 });
     wireFlowTween = gsap.to(wires, {
       strokeDashoffset: -24,
@@ -252,11 +245,7 @@
     board.querySelectorAll(".hv3-node").forEach(function (node) {
       var match = node.getAttribute("data-node") === key;
       node.classList.toggle("is-running", match);
-      if (match && !reduced) {
-        node.classList.remove("is-pulse");
-        void node.offsetWidth;
-        node.classList.add("is-pulse");
-      }
+      node.classList.toggle("is-pulse", match && !reduced);
     });
     updateWirePulse(key);
   }
@@ -270,22 +259,25 @@
 
   function startPulse() {
     stopPulse();
-    if (reduced) {
-      setRunningNode("win");
-      return;
-    }
     pulseIndex = 0;
     setRunningNode(PULSE[0]);
+    if (reduced) return;
+
     pulseTimer = window.setInterval(function () {
+      if (cyclePaused || switching) return;
       pulseIndex = (pulseIndex + 1) % PULSE.length;
       setRunningNode(PULSE[pulseIndex]);
-    }, 1400);
+    }, STEP_MS);
   }
 
   function resetProgressBars() {
     qa(".hv3-tab__progress").forEach(function (bar) {
-      if (typeof gsap !== "undefined") gsap.killTweensOf(bar);
-      bar.style.transform = "scaleX(0)";
+      if (typeof gsap !== "undefined") {
+        gsap.killTweensOf(bar);
+        gsap.set(bar, { scaleX: 0 });
+      } else {
+        bar.style.transform = "scaleX(0)";
+      }
     });
     if (progressTween) {
       progressTween.kill();
@@ -293,24 +285,46 @@
     }
   }
 
+  function nextSectorKey(fromKey) {
+    var i = SECTOR_ORDER.indexOf(fromKey);
+    if (i < 0) i = 0;
+    return SECTOR_ORDER[(i + 1) % SECTOR_ORDER.length];
+  }
+
+  function advanceFrom(sectorKey) {
+    switchSector(nextSectorKey(sectorKey), false, true);
+  }
+
   function startTabProgress(sectorKey) {
     resetProgressBars();
-    if (reduced || typeof gsap === "undefined" || cyclePaused) return;
+    pendingAdvance = null;
+    if (reduced || !cycleArmed) return;
 
-    var tab = document.getElementById(SECTORS[sectorKey].tabId);
+    var sector = SECTORS[sectorKey];
+    var tab = sector && document.getElementById(sector.tabId);
     var bar = tab && tab.querySelector(".hv3-tab__progress");
     if (!bar) return;
+
+    if (typeof gsap === "undefined") {
+      window.setTimeout(function () {
+        if (!cyclePaused) advanceFrom(sectorKey);
+        else pendingAdvance = sectorKey;
+      }, CYCLE_MS);
+      return;
+    }
 
     gsap.set(bar, { scaleX: 0 });
     progressTween = gsap.to(bar, {
       scaleX: 1,
       duration: CYCLE_MS / 1000,
       ease: "none",
+      paused: cyclePaused,
       onComplete: function () {
-        if (cyclePaused || switching) return;
-        var i = SECTOR_ORDER.indexOf(sectorKey);
-        var next = SECTOR_ORDER[(i + 1) % SECTOR_ORDER.length];
-        switchSector(next, false, true);
+        if (cyclePaused || switching) {
+          pendingAdvance = sectorKey;
+          return;
+        }
+        advanceFrom(sectorKey);
       },
     });
   }
@@ -321,19 +335,30 @@
   }
 
   function resumeCycle() {
-    cyclePaused = false;
     if (!cycleArmed) return;
+    cyclePaused = false;
+
+    if (pendingAdvance) {
+      var from = pendingAdvance;
+      pendingAdvance = null;
+      advanceFrom(from);
+      return;
+    }
+
     if (progressTween && progressTween.paused()) {
       progressTween.resume();
       return;
     }
-    startTabProgress(currentSector());
+
+    if (!progressTween && !switching) {
+      startTabProgress(activeSector);
+    }
   }
 
   function armAutoCycle() {
     if (reduced) return;
     cycleArmed = true;
-    startTabProgress(currentSector());
+    startTabProgress(activeSector);
   }
 
   function swapCopy(sectorKey) {
@@ -389,32 +414,34 @@
       tab.setAttribute("aria-selected", on ? "true" : "false");
       tab.tabIndex = on ? 0 : -1;
     });
+
+    activeSector = sectorKey;
   }
 
   function switchSector(sectorKey, focusTab, fromAuto) {
     if (!SECTORS[sectorKey] || switching) return;
-    if (currentSector() === sectorKey && !fromAuto) {
-      if (fromAuto) startTabProgress(sectorKey);
-      return;
-    }
-    if (currentSector() === sectorKey) {
-      startTabProgress(sectorKey);
+
+    if (activeSector === sectorKey) {
+      if (fromAuto || cycleArmed) startTabProgress(sectorKey);
+      if (!pulseTimer) startPulse();
       return;
     }
 
     stopPulse();
     resetProgressBars();
+    pendingAdvance = null;
 
     var sector = SECTORS[sectorKey];
     var board = document.getElementById("hv3Board");
-    var chip = document.getElementById("hv3CaseChip");
-    var tagsEl = document.getElementById("hv3SolveTags");
 
     function afterSwap() {
       switching = false;
-      drawWires();
-      startPulse();
-      if (cycleArmed && !cyclePaused) startTabProgress(sectorKey);
+      requestAnimationFrame(function () {
+        drawWires();
+        startPulse();
+        if (cycleArmed && !cyclePaused) startTabProgress(sectorKey);
+        else if (cycleArmed && cyclePaused) pendingAdvance = sectorKey;
+      });
       if (focusTab) {
         var t = document.getElementById(sector.tabId);
         if (t) t.focus();
@@ -429,14 +456,13 @@
 
     switching = true;
     var parts = board.querySelectorAll(".hv3-node");
-    var extras = [chip, tagsEl].filter(Boolean);
 
     gsap
       .timeline({ onComplete: afterSwap })
-      .to([parts, extras], {
+      .to(parts, {
         opacity: 0,
         y: 8,
-        duration: 0.2,
+        duration: 0.18,
         ease: "power2.in",
         stagger: 0.03,
       })
@@ -444,9 +470,9 @@
         swapCopy(sectorKey);
       })
       .fromTo(
-        [parts, extras],
-        { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.42, stagger: 0.05, ease: "power3.out" }
+        parts,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.38, stagger: 0.05, ease: "power3.out" }
       );
   }
 
@@ -486,26 +512,17 @@
     stage.addEventListener("focusout", function (e) {
       if (!stage.contains(e.relatedTarget)) resumeCycle();
     });
-  }
 
-  function initNodeHover() {
-    if (reduced || coarse || typeof gsap === "undefined") return;
-    qa(".hv3-node").forEach(function (node) {
-      node.addEventListener("pointerenter", function () {
-        gsap.to(node, { y: -3, duration: 0.35, ease: "power3.out", overwrite: "auto" });
-      });
-      node.addEventListener("pointerleave", function () {
-        gsap.to(node, { y: 0, duration: 0.4, ease: "power3.out", overwrite: "auto" });
-      });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) pauseCycle();
+      else resumeCycle();
     });
   }
 
   function initResize() {
     window.addEventListener("resize", function () {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(function () {
-        drawWires();
-      }, 120);
+      resizeTimer = window.setTimeout(drawWires, 120);
     });
   }
 
@@ -539,7 +556,7 @@
     gsap.set(parts, { opacity: 0, y: 18 });
     if (head) gsap.set(head, { opacity: 0, y: 10 });
     if (tabs) gsap.set(tabs, { opacity: 0, y: 10 });
-    if (nodes.length) gsap.set(nodes, { opacity: 0, y: 16, scale: 0.97 });
+    if (nodes.length) gsap.set(nodes, { opacity: 0, y: 14 });
     if (scroll) gsap.set(scroll, { opacity: 0 });
 
     var tl = gsap.timeline({
@@ -548,7 +565,7 @@
         gsap.set(parts, { opacity: 1, y: 0 });
         if (head) gsap.set(head, { opacity: 1, y: 0 });
         if (tabs) gsap.set(tabs, { opacity: 1, y: 0 });
-        if (nodes.length) gsap.set(nodes, { opacity: 1, y: 0, scale: 1 });
+        if (nodes.length) gsap.set(nodes, { clearProps: "opacity,y" });
         drawWires();
         startPulse();
         armAutoCycle();
@@ -569,11 +586,7 @@
     if (head) tl.to(head, { opacity: 1, y: 0, duration: 0.4 }, "-=0.4");
     if (tabs) tl.to(tabs, { opacity: 1, y: 0, duration: 0.4 }, "-=0.28");
     if (nodes.length) {
-      tl.to(
-        nodes,
-        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: "power3.out" },
-        "-=0.2"
-      );
+      tl.to(nodes, { opacity: 1, y: 0, duration: 0.45, stagger: 0.07 }, "-=0.2");
     }
     if (scroll) tl.to(scroll, { opacity: 0.85, duration: 0.45 }, "-=0.2");
   }
@@ -582,7 +595,6 @@
     initMagnetic();
     initSectorTabs();
     initCyclePause();
-    initNodeHover();
     initResize();
     initEntrance();
   }
