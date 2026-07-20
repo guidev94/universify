@@ -723,15 +723,62 @@
     });
   }
 
+  /** Magnetic / spring CTA hover — transform + opacity only (GSAP). */
+  function initMagneticCtas() {
+    var ctas = hero.querySelectorAll(".hero-v2__cta[data-magnetic], .hero-v2__cta.magnetic");
+    if (!ctas.length) return;
+
+    ctas.forEach(function (btn) {
+      if (reduced || typeof gsap === "undefined" || window.matchMedia("(pointer: coarse)").matches) {
+        return;
+      }
+
+      var xTo = gsap.quickTo(btn, "x", { duration: 0.45, ease: "power3.out" });
+      var yTo = gsap.quickTo(btn, "y", { duration: 0.45, ease: "power3.out" });
+      var scaleTo = gsap.quickTo(btn, "scale", { duration: 0.35, ease: "power3.out" });
+
+      function onMove(e) {
+        var rect = btn.getBoundingClientRect();
+        var relX = e.clientX - (rect.left + rect.width / 2);
+        var relY = e.clientY - (rect.top + rect.height / 2);
+        xTo(relX * 0.22);
+        yTo(relY * 0.28);
+      }
+
+      function onEnter() {
+        scaleTo(1.035);
+      }
+
+      function onLeave() {
+        xTo(0);
+        yTo(0);
+        scaleTo(1);
+      }
+
+      function onDown() {
+        scaleTo(0.97);
+      }
+
+      function onUp() {
+        scaleTo(1.035);
+      }
+
+      on(btn, "pointermove", onMove);
+      on(btn, "pointerenter", onEnter);
+      on(btn, "pointerleave", onLeave);
+      on(btn, "pointerdown", onDown);
+      on(btn, "pointerup", onUp);
+    });
+  }
+
   function initEntrance() {
-    var logos = hero.querySelector("#heroLogos");
     var scrollCue = hero.querySelector("#scrollCue");
     var flowRoot = hero.querySelector("#heroFlow");
 
     if (typeof gsap === "undefined") {
       hero
         .querySelectorAll(
-          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay, .hero-orbs__tabs"
+          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__proof, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay, .hero-orbs__tabs"
         )
         .forEach(function (el) {
           el.style.opacity = "1";
@@ -751,6 +798,7 @@
           ".hero-v2__eyebrow",
           ".hero-v2__title-line",
           ".hero-v2__subtitle",
+          ".hero-v2__proof",
           ".hero-v2__stats",
           ".hero-v2__ctas",
           "#heroLogos",
@@ -770,8 +818,10 @@
       return;
     }
 
+    var proof = hero.querySelector("#heroProof");
+
     if (scrollCue) gsap.set(scrollCue, { xPercent: -50, opacity: 0 });
-    if (logos) gsap.set(logos, { opacity: 0, y: 16 });
+    if (proof) gsap.set(proof, { opacity: 0, y: 14 });
     if (flowRoot) gsap.set(flowRoot, { opacity: 0 });
     gsap.set(".orb, .hero-orbs__caption", { opacity: 0, scale: 0.88 });
     gsap.set(".hero-orbs__tabs", { opacity: 0, y: 8 });
@@ -793,10 +843,9 @@
     });
 
     tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.75 }, "-=0.42");
-    tl.to("#heroStats", { opacity: 1, duration: 0.65 }, "-=0.32");
-    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.65 }, "-=0.22");
-    if (logos) {
-      tl.to(logos, { opacity: 1, y: 0, duration: 0.75 }, "-=0.28");
+    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.65 }, "-=0.28");
+    if (proof) {
+      tl.to(proof, { opacity: 1, y: 0, duration: 0.7 }, "-=0.18");
     }
 
     if (flowRoot) {
@@ -833,6 +882,7 @@
   function boot() {
     initThreeJS();
     initOrbs();
+    initMagneticCtas();
     initEntrance();
     requestAnimationFrame(function () {
       requestAnimationFrame(drawWires);
