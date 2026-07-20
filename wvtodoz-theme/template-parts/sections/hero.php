@@ -19,6 +19,8 @@ $lead = (string) wv_field('wv_hero_lead', $d['lead']);
 $cta1 = (string) wv_field('wv_hero_cta_primary', $d['cta_primary']);
 $cta1_url = (string) wv_field('wv_hero_cta_primary_url', wv_whatsapp_url());
 $cta2 = (string) wv_field('wv_hero_cta_secondary', $d['cta_secondary']);
+$show_logos = wv_field('wv_hero_show_logos', true);
+$logos = wv_defaults()['hero_logos'];
 
 $stat1_n = (string) wv_field('wv_sobre_stat1_n', $sobre['stat1_n']);
 $stat1_l = (string) wv_field('wv_sobre_stat1_l', $sobre['stat1_l']);
@@ -81,6 +83,16 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 					<span><?php echo esc_html($cta2); ?></span>
 				</button>
 			</div>
+
+			<?php if ($show_logos) : ?>
+			<div class="hero-v2__logos hero-logos" id="heroLogos">
+				<?php foreach ($logos as $logo) : ?>
+				<a href="<?php echo esc_url(home_url('/#produtos')); ?>" class="hero-logo" aria-label="<?php echo esc_attr($logo['alt']); ?>">
+					<img src="<?php echo esc_url($logo['src']); ?>" alt="<?php echo esc_attr($logo['alt']); ?>" width="<?php echo esc_attr((string) $logo['w']); ?>" height="<?php echo esc_attr((string) $logo['h']); ?>" loading="lazy">
+				</a>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
 		</div>
 
 		<div class="hero-v2__right" aria-hidden="true">
@@ -117,9 +129,11 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 		</div>
 	</div>
 
-	<div class="scroll-cue" id="scrollCue" aria-hidden="true">
-		<div class="scroll-cue__line"></div>
-		<span class="scroll-cue__text">Scroll</span>
+	<div class="hero-scroll-cue" id="scrollCue" aria-hidden="true">
+		<div class="hero-scroll-pill">
+			<div class="hero-scroll-dot"></div>
+		</div>
+		<span class="hero-scroll-label">Scroll</span>
 	</div>
 
 	<div class="hero-v2__marquee" id="heroMarquee" aria-hidden="true">

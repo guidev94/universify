@@ -295,12 +295,15 @@
   }
 
   function initEntrance() {
+    var logos = hero.querySelector("#heroLogos");
+    var scrollCue = hero.querySelector("#scrollCue");
+
     if (typeof gsap === "undefined") {
       hero.querySelectorAll(
-        ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, .neural-container, .scroll-cue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
+        ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, .neural-container, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
       ).forEach(function (el) {
         el.style.opacity = "1";
-        el.style.transform = "none";
+        if (el.id !== "scrollCue") el.style.transform = "none";
       });
       animateStats();
       drawConnections();
@@ -318,17 +321,21 @@
           ".hero-v2__subtitle",
           ".hero-v2__stats",
           ".hero-v2__ctas",
+          "#heroLogos",
           ".neural-container",
-          ".scroll-cue",
           ".hero-v2__marquee",
           ".ambient-orb",
           ".grid-overlay",
         ],
         { opacity: 1, y: 0, clearProps: "transform" }
       );
+      if (scrollCue) gsap.set(scrollCue, { opacity: 0.85, xPercent: -50 });
       drawConnections();
       return;
     }
+
+    if (scrollCue) gsap.set(scrollCue, { xPercent: -50, opacity: 0 });
+    if (logos) gsap.set(logos, { opacity: 0, y: 16 });
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -354,8 +361,13 @@
     tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.7 }, "-=0.4");
     tl.to("#heroStats", { opacity: 1, duration: 0.6 }, "-=0.3");
     tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.6 }, "-=0.2");
+    if (logos) {
+      tl.to(logos, { opacity: 1, y: 0, duration: 0.7 }, "-=0.25");
+    }
     tl.to("#neuralContainer", { opacity: 1, duration: 1.2, ease: "power2.out" }, "-=1");
-    tl.to("#scrollCue", { opacity: 1, duration: 0.6 }, "-=0.5");
+    if (scrollCue) {
+      tl.to(scrollCue, { opacity: 0.85, duration: 0.6 }, "-=0.5");
+    }
     tl.to("#heroMarquee", { opacity: 1, duration: 0.8 }, "-=0.3");
 
     animateStats();
