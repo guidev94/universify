@@ -43,6 +43,18 @@
 
   on(window, "pagehide", cleanup);
 
+  function isLightTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light";
+  }
+
+  function getOrbitRadius() {
+    var w = window.innerWidth;
+    if (w >= 1280) return 195;
+    if (w >= 1024) return 175;
+    if (w >= 768) return 135;
+    return 118;
+  }
+
   /* ===== THREE.JS PARTICLE FIELD ===== */
   function initThreeJS() {
     if (reduced || typeof THREE === "undefined") return;
@@ -83,6 +95,23 @@
       sizeAttenuation: true,
     });
 
+    function applyParticleTheme() {
+      if (isLightTheme()) {
+        material.color.setHex(0x6b8f00);
+        material.opacity = 0.38;
+        material.size = 0.035;
+        material.blending = THREE.NormalBlending;
+      } else {
+        material.color.setHex(0xcfff04);
+        material.opacity = 0.6;
+        material.size = 0.03;
+        material.blending = THREE.AdditiveBlending;
+      }
+      material.needsUpdate = true;
+    }
+
+    applyParticleTheme();
+
     var particles = new THREE.Points(geometry, material);
     scene.add(particles);
     camera.position.z = 5;
@@ -106,6 +135,17 @@
       mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
     });
+
+    if (window.MutationObserver) {
+      var themeObs = new MutationObserver(applyParticleTheme);
+      themeObs.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+      on(window, "pagehide", function () {
+        themeObs.disconnect();
+      });
+    }
 
     function animate() {
       if (!running) return;
@@ -173,7 +213,7 @@
     if (!svg || !centralOrb || !container || !nodes.length) return;
 
     var angle = 0;
-    var orbitRadius = window.innerWidth >= 1024 ? 140 : 110;
+    var orbitRadius = getOrbitRadius();
     var orbiting = !reduced && window.innerWidth >= 1024;
 
     function updateConnections() {
@@ -187,7 +227,7 @@
         var nodeY = nodeRect.top + nodeRect.height / 2 - containerRect.top;
         var midX = (centerX + nodeX) / 2;
         var midY = (centerY + nodeY) / 2;
-        var offset = 20;
+        var offset = 24;
         paths +=
           '<path class="connection-line" d="M' +
           centerX +
@@ -231,7 +271,8 @@
 
     placeStatic();
     on(window, "resize", function () {
-      orbitRadius = window.innerWidth >= 1024 ? 140 : 110;
+      orbitRadius = getOrbitRadius();
+      orbiting = !reduced && window.innerWidth >= 1024;
       if (!orbiting) placeStatic();
       else updateConnections();
     });
@@ -250,7 +291,7 @@
       packet.className = "data-packet";
       container.appendChild(packet);
       var startAngle = Math.random() * Math.PI * 2;
-      var startRadius = 140;
+      var startRadius = getOrbitRadius();
       var endRadius = 0;
       var duration = 2000 + Math.random() * 1000;
       var startTime = Date.now();

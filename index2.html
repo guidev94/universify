@@ -46,35 +46,15 @@
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/hero-v2.css">
     <style>
-        /* Preview page: keep focus on hero */
+        /* Hero-only preview: full viewport, no utility chrome */
         body.index2-preview {
-            background: #050505;
+            margin: 0;
+            background: var(--wv-bg, #050505);
+            overflow-x: hidden;
+        }
+        body.index2-preview #main-wrapper {
             min-height: 100vh;
-        }
-        .index2-footer {
-            position: relative;
-            z-index: 5;
-            padding: 3rem 1.5rem 4rem;
-            text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            background: #050505;
-        }
-        .index2-footer a {
-            color: #CFFF04;
-            font-weight: 700;
-            text-decoration: none;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-        }
-        .index2-footer a:hover { text-decoration: underline; }
-        .index2-footer p {
-            color: rgba(255,255,255,0.35);
-            font-size: 0.85rem;
-            margin: 0 0 1rem;
-            font-family: "JetBrains Mono", monospace;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            min-height: 100dvh;
         }
     </style>
 </head>
@@ -295,10 +275,6 @@
             </div>
         </section>
 
-        <div class="index2-footer">
-            <p>Hero v2 preview · logo WV real · header do site</p>
-            <a href="index.html">← Voltar para a Home completa</a>
-        </div>
     </main>
 
     <script src="assets/js/theme.js"></script>
