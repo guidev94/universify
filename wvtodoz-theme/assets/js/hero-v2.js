@@ -49,10 +49,11 @@
 
   function getOrbitRadius() {
     var w = window.innerWidth;
-    if (w >= 1280) return 195;
-    if (w >= 1024) return 175;
-    if (w >= 768) return 135;
-    return 118;
+    /* Slightly larger orbits leave room for always-visible labels */
+    if (w >= 1280) return 205;
+    if (w >= 1024) return 185;
+    if (w >= 768) return 142;
+    return 122;
   }
 
   /* ===== THREE.JS PARTICLE FIELD ===== */
