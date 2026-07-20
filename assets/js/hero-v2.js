@@ -56,7 +56,8 @@
       tabId: "flowTabAtendimento",
       panelLabel: "Do WhatsApp lotado à venda no ar",
       metricValue: "24/7",
-      metricLabel: "atende, qualifica e vende",
+      metricUnit: "",
+      metricLabel: "sem fila, com venda",
       chip: "Atendimento que converte",
       nodes: {
         lead: { title: "WhatsApp sem resposta", sub: "Lead esfria à noite", icon: "chat" },
@@ -70,8 +71,9 @@
       label: "RH",
       tabId: "flowTabRh",
       panelLabel: "Do ponto manual à folha e gestão em dia",
-      metricValue: "Em dia",
-      metricLabel: "folha e jornada sob controle",
+      metricValue: "100%",
+      metricUnit: "",
+      metricLabel: "folha e jornada em dia",
       chip: "RH que escala com IA",
       nodes: {
         lead: { title: "Ponto na planilha", sub: "RH apaga incêndio no Zap", icon: "clock" },
@@ -85,8 +87,9 @@
       label: "Operação",
       tabId: "flowTabOperacao",
       panelLabel: "Do Excel desalinhado à operação única",
-      metricValue: "1 fluxo",
-      metricLabel: "times alinhados de ponta a ponta",
+      metricValue: "1",
+      metricUnit: "fluxo",
+      metricLabel: "do lead à operação",
       chip: "Operação sem planilha",
       nodes: {
         lead: { title: "Tudo no Excel", sub: "Times desalinhados", icon: "sheet" },
@@ -516,8 +519,14 @@
 
     if (metric) {
       var mv = metric.querySelector(".hero-flow__metric-value");
+      var mu = metric.querySelector(".hero-flow__metric-unit");
       var ml = metric.querySelector(".hero-flow__metric-label");
       if (mv) mv.textContent = story.metricValue;
+      if (mu) {
+        var unit = story.metricUnit || "";
+        mu.textContent = unit;
+        mu.hidden = !unit;
+      }
       if (ml) ml.textContent = story.metricLabel;
     }
     if (chip) {
