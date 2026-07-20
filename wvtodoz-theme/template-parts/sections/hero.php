@@ -39,7 +39,7 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 	<div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
 	<div class="vignette" aria-hidden="true"></div>
 
-	<div class="hero-v2__content">
+	<div class="hero-v2__content site-container">
 		<div class="hero-v2__left">
 			<div class="ai-badge" id="aiBadge">
 				<span class="ai-badge__dot" aria-hidden="true"></span>
