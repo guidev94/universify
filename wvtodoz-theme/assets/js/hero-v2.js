@@ -1,6 +1,6 @@
 /**
- * Hero v2 — Three.js particles + GSAP entrance for value-stack panel.
- * Isolated resize/cleanup; respects prefers-reduced-motion.
+ * Hero v2 — Three.js particles + GSAP entrance for workflow canvas.
+ * Edge drawing, resize, AI running cycle; respects prefers-reduced-motion.
  */
 (function () {
   "use strict";
@@ -14,6 +14,7 @@
   var rafIds = [];
   var intervals = [];
   var listeners = [];
+  var resizeTimer = null;
 
   function on(target, type, fn, opts) {
     target.addEventListener(type, fn, opts);
@@ -39,83 +40,171 @@
       entry[0].removeEventListener(entry[1], entry[2], entry[3]);
     });
     listeners = [];
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
+      resizeTimer = null;
+    }
   }
 
   on(window, "pagehide", cleanup);
 
-  function isLightTheme() {
-    return document.documentElement.getAttribute("data-theme") === "light";
+  function nodeCenter(boardRect, el) {
+    var r = el.getBoundingClientRect();
+    return {
+      x: r.left - boardRect.left + r.width / 2,
+      y: r.top - boardRect.top + r.height / 2,
+    };
   }
 
-  /* ===== THREE.JS PARTICLE FIELD ===== */
-  function initThreeJS() {
-    if (reduced || typeof THREE === "undefined") return;
+  function cubicPath(a, b) {
+    var dx = Math.abs(b.x - a.x);
+    var dy = Math.abs(b.y - a.y);
+    var c = Math.max(dx * 0.45, dy * 0.35, 28);
+    var c1x = a.x + (b.x >= a.x ? c : -c);
+    var c1y = a.y;
+    var c2x = b.x - (b.x >= a.x ? c : -c);
+    var c2y = b.y;
+    return (
+      "M " +
+      a.x.toFixed(1) +
+      " " +
+      a.y.toFixed(1) +
+      " C " +
+      c1x.toFixed(1) +
+      " " +
+      c1y.toFixed(1) +
+      ", " +
+      c2x.toFixed(1) +
+      " " +
+      c2y.toFixed(1) +
+      ", " +
+      b.x.toFixed(1) +
+      " " +
+      b.y.toFixed(1)
+    );
+  }
 
-    var canvas = document.getElementById("hero-canvas");
-    if (!canvas) return;
+  function drawEdges() {
+    var board = document.getElementById("heroFlowBoard");
+    var svg = document.getElementById("heroFlowEdges");
+    var canvas = board && board.closest(".hero-flow__canvas");
+    if (!board || !svg || !canvas) return;
+
+    var canvasRect = canvas.getBoundingClientRect();
+    var w = canvas.clientWidth;
+    var h = canvas.clientHeight;
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    svg.setAttribute("width", String(w));
+    svg.setAttribute("height", String(h));
+
+    var byKey = {};
+    board.querySelectorAll(".flow-node[data-node]").forEach(function (node) {
+      byKey[node.getAttribute("data-node")] = node;
+    });
+
+    var pairs = [
+      ["lead", "ai", true],
+      ["ai", "auto", false],
+      ["ai", "integ", false],
+      ["auto", "result", false],
+      ["integ", "result", true],
+    ];
+
+    var ns = "http://www.w3.org/2000/svg";
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    pairs.forEach(function (pair) {
+      var from = byKey[pair[0]];
+      var to = byKey[pair[1]];
+      if (!from || !to) return;
+      var a = nodeCenter(canvasRect, from);
+      var b = nodeCenter(canvasRect, to);
+      var path = document.createElementNS(ns, "path");
+      path.setAttribute("d", cubicPath(a, b));
+      path.setAttribute(
+        "class",
+        pair[2] ? "hero-flow__edge hero-flow__edge--active" : "hero-flow__edge"
+      );
+      svg.appendChild(path);
+    });
+  }
+
+  function initFlowCanvas() {
+    drawEdges();
+    on(window, "resize", function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawEdges, 80);
+    });
+
+    if (reduced) return;
+
+    var aiNode = hero.querySelector('.flow-node--ai[data-node="ai"]');
+    if (!aiNode) return;
+    var cycle = setInterval(function () {
+      aiNode.classList.toggle("is-running");
+    }, 2800);
+    intervals.push(cycle);
+  }
+
+  function initThreeJS() {
+    var canvas = document.getElementById("heroCanvas");
+    if (!canvas || typeof THREE === "undefined" || reduced) return;
+
+    var running = true;
+    var renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
 
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 5;
 
-    var particleCount = window.innerWidth < 768 ? 280 : isLightTheme() ? 420 : 700;
+    var particleCount = 140;
+    var geometry = new THREE.BufferGeometry();
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
-
     for (i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      positions[i * 3] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
       velocities.push({
-        x: (Math.random() - 0.5) * 0.002,
-        y: (Math.random() - 0.5) * 0.002,
-        z: (Math.random() - 0.5) * 0.001,
+        x: (Math.random() - 0.5) * 0.004,
+        y: (Math.random() - 0.5) * 0.004,
+        z: (Math.random() - 0.5) * 0.002,
       });
     }
-
-    var geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
     var material = new THREE.PointsMaterial({
-      color: 0xcfff04,
-      size: 0.03,
+      size: 0.035,
       transparent: true,
       opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-      sizeAttenuation: true,
+      depthWrite: false,
+      color: 0xcfff04,
     });
 
     function applyParticleTheme() {
-      if (isLightTheme()) {
-        material.color.setHex(0x6b8f00);
-        material.opacity = 0.22;
-        material.size = 0.032;
-        material.blending = THREE.NormalBlending;
-      } else {
-        material.color.setHex(0xcfff04);
-        material.opacity = 0.55;
-        material.size = 0.03;
-        material.blending = THREE.AdditiveBlending;
-      }
-      material.needsUpdate = true;
+      var light = document.documentElement.getAttribute("data-theme") === "light";
+      material.color.setHex(light ? 0x8fb800 : 0xcfff04);
+      material.opacity = light ? 0.35 : 0.55;
     }
-
     applyParticleTheme();
 
     var particles = new THREE.Points(geometry, material);
     scene.add(particles);
-    camera.position.z = 5;
 
     var mouseX = 0;
     var mouseY = 0;
-    var running = true;
 
     function resize() {
-      var rect = hero.getBoundingClientRect();
-      var w = Math.max(1, rect.width || window.innerWidth);
-      var h = Math.max(1, rect.height || window.innerHeight);
+      var w = window.innerWidth;
+      var h = window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
@@ -197,25 +286,29 @@
     });
   }
 
-  function revealValuePanelFallback() {
-    hero.querySelectorAll("#heroValue, .hero-value__card, .hero-value__pillar").forEach(function (el) {
+  function revealFlowFallback() {
+    hero.querySelectorAll("#heroFlow, .flow-node").forEach(function (el) {
       el.style.opacity = "1";
       el.style.transform = "none";
     });
+    drawEdges();
   }
 
   function initEntrance() {
     var logos = hero.querySelector("#heroLogos");
     var scrollCue = hero.querySelector("#scrollCue");
-    var valueRoot = hero.querySelector("#heroValue");
+    var flowRoot = hero.querySelector("#heroFlow");
 
     if (typeof gsap === "undefined") {
-      hero.querySelectorAll(
-        ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroValue, .hero-value__card, .hero-value__pillar, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
-      ).forEach(function (el) {
-        el.style.opacity = "1";
-        if (el.id !== "scrollCue") el.style.transform = "none";
-      });
+      hero
+        .querySelectorAll(
+          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .flow-node, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
+        )
+        .forEach(function (el) {
+          el.style.opacity = "1";
+          if (el.id !== "scrollCue") el.style.transform = "none";
+        });
+      drawEdges();
       animateStats();
       return;
     }
@@ -230,9 +323,8 @@
           ".hero-v2__stats",
           ".hero-v2__ctas",
           "#heroLogos",
-          "#heroValue",
-          ".hero-value__card",
-          ".hero-value__pillar",
+          "#heroFlow",
+          ".flow-node",
           ".hero-v2__marquee",
           ".ambient-orb",
           ".grid-overlay",
@@ -240,14 +332,14 @@
         { opacity: 1, y: 0, clearProps: "transform" }
       );
       if (scrollCue) gsap.set(scrollCue, { opacity: 0.85, xPercent: -50 });
+      drawEdges();
       return;
     }
 
     if (scrollCue) gsap.set(scrollCue, { xPercent: -50, opacity: 0 });
     if (logos) gsap.set(logos, { opacity: 0, y: 16 });
-    if (valueRoot) gsap.set(valueRoot, { opacity: 0 });
-    gsap.set(".hero-value__card", { opacity: 0, y: 22 });
-    gsap.set(".hero-value__pillar", { opacity: 0, y: 14 });
+    if (flowRoot) gsap.set(flowRoot, { opacity: 0 });
+    gsap.set(".flow-node", { opacity: 0, y: 16 });
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -277,20 +369,23 @@
       tl.to(logos, { opacity: 1, y: 0, duration: 0.7 }, "-=0.25");
     }
 
-    if (valueRoot) {
-      tl.to("#heroValue", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.85");
+    if (flowRoot) {
+      tl.to("#heroFlow", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.85");
       tl.to(
-        ".hero-value__card",
-        { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" },
+        ".flow-node",
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          stagger: 0.08,
+          ease: "power2.out",
+          onComplete: drawEdges,
+        },
         "-=0.35"
       );
-      tl.to(
-        ".hero-value__pillar",
-        { opacity: 1, y: 0, duration: 0.55, stagger: 0.1, ease: "power2.out" },
-        "-=0.4"
-      );
+      tl.add(drawEdges, "-=0.2");
     } else {
-      revealValuePanelFallback();
+      revealFlowFallback();
     }
 
     if (scrollCue) {
@@ -303,7 +398,11 @@
 
   function boot() {
     initThreeJS();
+    initFlowCanvas();
     initEntrance();
+    requestAnimationFrame(function () {
+      requestAnimationFrame(drawEdges);
+    });
   }
 
   if (document.readyState === "loading") {

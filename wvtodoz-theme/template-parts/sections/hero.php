@@ -95,20 +95,30 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 			<?php endif; ?>
 		</div>
 
-		<aside class="hero-v2__right" id="heroValuePanel" aria-label="<?php echo esc_attr__('Como a WV entrega valor com IA', 'wvtodoz'); ?>">
-			<div class="hero-value" id="heroValue">
-				<div class="hero-value__glow" aria-hidden="true"></div>
-				<div class="hero-value__card">
-					<div class="hero-value__top">
-						<span class="hero-value__brand" aria-hidden="true">WV</span>
-						<span class="hero-value__kicker"><?php echo esc_html__('AI Solutions', 'wvtodoz'); ?></span>
-					</div>
-					<h2 class="hero-value__headline"><?php echo esc_html__('Operação com IA, do agente à integração', 'wvtodoz'); ?></h2>
-					<p class="hero-value__outcome"><?php echo esc_html__('Menos trabalho manual. Mais resultado no fluxo do negócio.', 'wvtodoz'); ?></p>
-
-					<ul class="hero-value__pillars">
-						<li class="hero-value__pillar">
-							<span class="hero-value__icon" aria-hidden="true">
+		<aside class="hero-v2__right" id="heroFlowPanel" aria-label="<?php echo esc_attr__('Fluxo de automação com IA', 'wvtodoz'); ?>">
+			<div class="hero-flow" id="heroFlow">
+				<div class="hero-flow__canvas">
+					<div class="hero-flow__dotgrid" aria-hidden="true"></div>
+					<svg class="hero-flow__edges" id="heroFlowEdges" aria-hidden="true"></svg>
+					<div class="hero-flow__board" id="heroFlowBoard">
+						<article class="flow-node flow-node--trigger" data-node="lead">
+							<span class="flow-node__accent" aria-hidden="true"></span>
+							<span class="flow-node__icon" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M4 12h10"/>
+									<path d="M12 6l6 6-6 6"/>
+									<path d="M4 6v12"/>
+								</svg>
+							</span>
+							<div class="flow-node__body">
+								<h3 class="flow-node__title"><?php echo esc_html__('Webhook', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Lead / WhatsApp', 'wvtodoz'); ?></p>
+							</div>
+							<span class="flow-node__status" aria-hidden="true"></span>
+						</article>
+						<article class="flow-node flow-node--ai is-running" data-node="ai">
+							<span class="flow-node__accent" aria-hidden="true"></span>
+							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
 									<rect x="5" y="9" width="14" height="10" rx="2"/>
 									<path d="M9 9V7a3 3 0 0 1 6 0v2"/>
@@ -117,25 +127,29 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 									<path d="M12 3v2"/>
 								</svg>
 							</span>
-							<div class="hero-value__pillar-body">
-								<h3 class="hero-value__pillar-title"><?php echo esc_html__('Agentes', 'wvtodoz'); ?></h3>
-								<p class="hero-value__pillar-text"><?php echo esc_html__('Atendem, triam e resolvem 24/7', 'wvtodoz'); ?></p>
+							<div class="flow-node__body">
+								<h3 class="flow-node__title"><?php echo esc_html__('Agente IA', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Atende e resolve', 'wvtodoz'); ?></p>
 							</div>
-						</li>
-						<li class="hero-value__pillar">
-							<span class="hero-value__icon" aria-hidden="true">
+							<span class="flow-node__status" aria-hidden="true"></span>
+						</article>
+						<article class="flow-node flow-node--auto" data-node="auto">
+							<span class="flow-node__accent" aria-hidden="true"></span>
+							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
 									<circle cx="12" cy="12" r="3"/>
 									<path d="M12 3v2.2M12 18.8V21M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M3 12h2.2M18.8 12H21M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>
 								</svg>
 							</span>
-							<div class="hero-value__pillar-body">
-								<h3 class="hero-value__pillar-title"><?php echo esc_html__('Automações', 'wvtodoz'); ?></h3>
-								<p class="hero-value__pillar-text"><?php echo esc_html__('Tiram o manual do fluxo operacional', 'wvtodoz'); ?></p>
+							<div class="flow-node__body">
+								<h3 class="flow-node__title"><?php echo esc_html__('Automação', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Fluxo operacional', 'wvtodoz'); ?></p>
 							</div>
-						</li>
-						<li class="hero-value__pillar">
-							<span class="hero-value__icon" aria-hidden="true">
+							<span class="flow-node__status" aria-hidden="true"></span>
+						</article>
+						<article class="flow-node flow-node--integ" data-node="integ">
+							<span class="flow-node__accent" aria-hidden="true"></span>
+							<span class="flow-node__icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
 									<circle cx="6" cy="12" r="2.75"/>
 									<circle cx="18" cy="6.5" r="2.75"/>
@@ -143,31 +157,29 @@ $stat3_l = __('Produtos Próprios', 'wvtodoz');
 									<path d="M8.6 10.8 15.2 7.4M8.6 13.2l6.6 3.4"/>
 								</svg>
 							</span>
-							<div class="hero-value__pillar-body">
-								<h3 class="hero-value__pillar-title"><?php echo esc_html__('Integrações', 'wvtodoz'); ?></h3>
-								<p class="hero-value__pillar-text"><?php echo esc_html__('Conectam ERPs, CRMs e canais sem fricção', 'wvtodoz'); ?></p>
+							<div class="flow-node__body">
+								<h3 class="flow-node__title"><?php echo esc_html__('Integração', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('ERP / CRM', 'wvtodoz'); ?></p>
 							</div>
-						</li>
-					</ul>
-
-					<div class="hero-value__pipeline" aria-hidden="true">
-						<div class="hero-value__pipeline-steps">
-							<span><?php echo esc_html__('Entrada', 'wvtodoz'); ?></span>
-							<span class="hero-value__pipeline-sep"></span>
-							<span><?php echo esc_html__('Agente', 'wvtodoz'); ?></span>
-							<span class="hero-value__pipeline-sep"></span>
-							<span><?php echo esc_html__('Automação', 'wvtodoz'); ?></span>
-							<span class="hero-value__pipeline-sep"></span>
-							<span><?php echo esc_html__('Sistema', 'wvtodoz'); ?></span>
-						</div>
-						<div class="hero-value__pipeline-track">
-							<span class="hero-value__pipeline-fill"></span>
-						</div>
+							<span class="flow-node__status" aria-hidden="true"></span>
+						</article>
+						<article class="flow-node flow-node--result" data-node="result">
+							<span class="flow-node__accent" aria-hidden="true"></span>
+							<span class="flow-node__icon" aria-hidden="true">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M20 6 9 17l-5-5"/>
+								</svg>
+							</span>
+							<div class="flow-node__body">
+								<h3 class="flow-node__title"><?php echo esc_html__('Resultado', 'wvtodoz'); ?></h3>
+								<p class="flow-node__sub"><?php echo esc_html__('Operação no ar', 'wvtodoz'); ?></p>
+							</div>
+							<span class="flow-node__status" aria-hidden="true"></span>
+						</article>
 					</div>
-
-					<div class="hero-value__metric">
-						<span class="hero-value__metric-dot" aria-hidden="true"></span>
-						<span><?php echo esc_html__('Fluxo contínuo · resultado mensurável', 'wvtodoz'); ?></span>
+					<div class="hero-flow__chip" aria-hidden="true">
+						<span class="hero-flow__chip-dot"></span>
+						<span><?php echo esc_html__('AI Solutions · ao vivo', 'wvtodoz'); ?></span>
 					</div>
 				</div>
 			</div>
