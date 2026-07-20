@@ -197,7 +197,8 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-    var particleCount = window.innerWidth < 768 ? 320 : 620;
+    /* Density 4: atmosphere, not a particle storm */
+    var particleCount = window.innerWidth < 768 ? 160 : 320;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
@@ -207,9 +208,9 @@
       positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
       velocities.push({
-        x: (Math.random() - 0.5) * 0.002,
-        y: (Math.random() - 0.5) * 0.002,
-        z: (Math.random() - 0.5) * 0.001,
+        x: (Math.random() - 0.5) * 0.0016,
+        y: (Math.random() - 0.5) * 0.0016,
+        z: (Math.random() - 0.5) * 0.0008,
       });
     }
 
@@ -219,10 +220,10 @@
     var circleMap = createCircleTexture();
     var material = new THREE.PointsMaterial({
       color: 0xcfff04,
-      size: 0.055,
+      size: 0.048,
       map: circleMap || undefined,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.32,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
@@ -231,13 +232,13 @@
     function applyParticleTheme() {
       if (isLightTheme()) {
         material.color.setHex(0x7a9a00);
-        material.opacity = 0.28;
-        material.size = 0.05;
+        material.opacity = 0.16;
+        material.size = 0.042;
         material.blending = THREE.NormalBlending;
       } else {
         material.color.setHex(0xcfff04);
-        material.opacity = 0.55;
-        material.size = 0.055;
+        material.opacity = 0.32;
+        material.size = 0.048;
         material.blending = THREE.AdditiveBlending;
       }
       material.needsUpdate = true;
@@ -542,9 +543,9 @@
     gsap.to(parts, {
       opacity: 1,
       scale: 1,
-      duration: 0.42,
-      stagger: 0.07,
-      ease: "power2.out",
+      duration: 0.48,
+      stagger: 0.08,
+      ease: "back.out(1.15)",
       onComplete: finish,
     });
     later(finish, 1200);
@@ -777,34 +778,38 @@
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.to(".ambient-orb", { opacity: 1, duration: 1.5, delay: 0.15 });
-    tl.to("#gridOverlay", { opacity: 1, duration: 1 }, "-=1");
-    tl.to("#aiBadge", { opacity: 1, y: 0, duration: 0.6 }, "-=0.6");
-    tl.to("#heroEyebrow", { opacity: 1, duration: 0.6 }, "-=0.3");
+    tl.to(".ambient-orb", { opacity: 0.85, duration: 1.6, delay: 0.15 });
+    tl.to("#gridOverlay", { opacity: 0.7, duration: 1.1 }, "-=1");
+    tl.to("#aiBadge", { opacity: 1, y: 0, duration: 0.65 }, "-=0.55");
+    tl.to("#heroEyebrow", { opacity: 1, duration: 0.65 }, "-=0.35");
 
     var titleLines = hero.querySelectorAll(".hero-v2__title-line");
     titleLines.forEach(function (line, i) {
-      tl.to(line, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, i === 0 ? "-=0.2" : "-=0.5");
+      tl.to(
+        line,
+        { opacity: 1, y: 0, duration: 0.85, ease: "power4.out" },
+        i === 0 ? "-=0.2" : "-=0.52"
+      );
     });
 
-    tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.7 }, "-=0.4");
-    tl.to("#heroStats", { opacity: 1, duration: 0.6 }, "-=0.3");
-    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.6 }, "-=0.2");
+    tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.75 }, "-=0.42");
+    tl.to("#heroStats", { opacity: 1, duration: 0.65 }, "-=0.32");
+    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.65 }, "-=0.22");
     if (logos) {
-      tl.to(logos, { opacity: 1, y: 0, duration: 0.7 }, "-=0.25");
+      tl.to(logos, { opacity: 1, y: 0, duration: 0.75 }, "-=0.28");
     }
 
     if (flowRoot) {
-      tl.to("#heroFlow", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.85");
-      tl.to(".hero-orbs__tabs", { opacity: 1, y: 0, duration: 0.4 }, "-=0.35");
+      tl.to("#heroFlow", { opacity: 1, duration: 0.55, ease: "power2.out" }, "-=0.85");
+      tl.to(".hero-orbs__tabs", { opacity: 1, y: 0, duration: 0.45 }, "-=0.35");
       tl.to(
         ".orb, .hero-orbs__caption",
         {
           opacity: 1,
           scale: 1,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "power2.out",
+          duration: 0.55,
+          stagger: 0.09,
+          ease: "back.out(1.15)",
           onComplete: function () {
             clearOrbInlineMotion();
             drawWires();
