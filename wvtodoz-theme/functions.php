@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('WVTODOZ_VERSION', '1.6.9');
+define('WVTODOZ_VERSION', '1.6.10');
 define('WVTODOZ_DIR', get_template_directory());
 define('WVTODOZ_URI', get_template_directory_uri());
 

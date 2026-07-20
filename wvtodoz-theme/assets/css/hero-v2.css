@@ -218,7 +218,7 @@
 #hero.hero-v2 .hero-v2__left {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1.35rem;
 }
 
 #hero.hero-v2 .ai-badge {
@@ -267,30 +267,34 @@
 
 #hero.hero-v2 .hero-v2__eyebrow {
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.72);
   opacity: 0;
-  margin: 0;
+  margin: 0 0 0.15rem;
 }
 
 #hero.hero-v2 .hero-v2__title {
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(2.5rem, 5.5vw, 5rem);
-  line-height: 0.95;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   text-transform: uppercase;
   color: #fff;
-  margin: 0;
+  margin: 0.15rem 0 0.35rem;
 }
 
 #hero.hero-v2 .hero-v2__title-line {
   display: block;
   opacity: 0;
   transform: translateY(60px);
+}
+
+#hero.hero-v2 .hero-v2__title-line + .hero-v2__title-line {
+  margin-top: 0.08em;
 }
 
 #hero.hero-v2 .hero-v2__title-accent {
@@ -320,14 +324,14 @@
 
 #hero.hero-v2 .hero-v2__subtitle {
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-size: clamp(1.02rem, 1.85vw, 1.22rem);
   font-weight: 400;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.5);
-  max-width: 520px;
+  line-height: 1.72;
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 34rem;
   opacity: 0;
   transform: translateY(30px);
-  margin: 0;
+  margin: 0.15rem 0 0;
 }
 
 #hero.hero-v2 .hero-v2__stats {
@@ -354,11 +358,11 @@
 
 #hero.hero-v2 .hero-v2__stat-label {
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.58);
 }
 
 #hero.hero-v2 .hero-v2__ctas {
@@ -1127,7 +1131,7 @@
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__eyebrow {
-  color: var(--hv2-ink-muted);
+  color: #3f3f46;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__title {
@@ -1144,7 +1148,7 @@
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__subtitle {
-  color: var(--hv2-ink-soft);
+  color: #1a1a1a;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__stat-num {
@@ -1152,7 +1156,7 @@
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__stat-label {
-  color: var(--hv2-ink-muted);
+  color: #52525b;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__cta--primary {
