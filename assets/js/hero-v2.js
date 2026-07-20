@@ -1,6 +1,6 @@
 /**
- * Hero v2 — Three.js particle field + GSAP entrance + multi-pain workflow canvas.
- * Stories: Atendimento · RH · Operação. Lime particles (additive, mouse parallax).
+ * Hero v2 — Three.js soft-circle particles + GSAP + multi-pain workflow canvas.
+ * Stories: Atendimento · RH · Operação. Round lime sprites, mouse parallax.
  * Respects prefers-reduced-motion.
  */
 (function () {
@@ -56,14 +56,14 @@
       tabId: "flowTabAtendimento",
       panelLabel: "Do WhatsApp lotado à venda no ar",
       metricValue: "24/7",
-      metricLabel: "sem fila no atendimento",
-      chip: "Operação comercial com IA",
+      metricLabel: "atende, qualifica e vende",
+      chip: "Atendimento que converte",
       nodes: {
-        lead: { title: "WhatsApp lotado", sub: "Lead esfria à noite", icon: "chat" },
-        ai: { title: "Agente atende 24/7", sub: "Qualifica e resolve", icon: "bot" },
-        auto: { title: "Agenda o pedido", sub: "Sem planilha no meio", icon: "calendar" },
-        integ: { title: "Atualiza o CRM", sub: "Sem retrabalho manual", icon: "sync" },
-        result: { title: "Venda no ar", sub: "Time livre pra vender", icon: "check" },
+        lead: { title: "WhatsApp sem resposta", sub: "Lead esfria à noite", icon: "chat" },
+        ai: { title: "Agente que vende 24/7", sub: "Qualifica e resolve", icon: "bot" },
+        auto: { title: "Agenda e confirma", sub: "Sem planilha no meio", icon: "calendar" },
+        integ: { title: "CRM sempre atualizado", sub: "Zero retrabalho", icon: "sync" },
+        result: { title: "Mais vendas no ar", sub: "Time livre pra fechar", icon: "check" },
       },
     },
     rh: {
@@ -71,14 +71,14 @@
       tabId: "flowTabRh",
       panelLabel: "Do ponto manual à folha e gestão em dia",
       metricValue: "Em dia",
-      metricLabel: "folha e jornada sem caos",
-      chip: "RH e pessoas com IA",
+      metricLabel: "folha e jornada sob controle",
+      chip: "RH que escala com IA",
       nodes: {
-        lead: { title: "Ponto e jornada manuais", sub: "Planilha e WhatsApp do RH", icon: "clock" },
-        ai: { title: "Automação de ponto", sub: "Marca, valida e alerta", icon: "bot" },
-        auto: { title: "Integra folha e sistemas", sub: "Dados no lugar certo", icon: "sync" },
-        integ: { title: "Visão única do time", sub: "Gestão sem retrabalho", icon: "users" },
-        result: { title: "Folha e gestão em dia", sub: "RH focado em gente", icon: "check" },
+        lead: { title: "Ponto na planilha", sub: "RH apaga incêndio no Zap", icon: "clock" },
+        ai: { title: "Ponto inteligente", sub: "Marca, valida e alerta", icon: "bot" },
+        auto: { title: "Folha integrada", sub: "Dados no lugar certo", icon: "sync" },
+        integ: { title: "Time sob controle", sub: "Gestão sem retrabalho", icon: "users" },
+        result: { title: "Folha em dia, RH livre", sub: "Foco em pessoas", icon: "check" },
       },
     },
     operacao: {
@@ -86,14 +86,14 @@
       tabId: "flowTabOperacao",
       panelLabel: "Do Excel desalinhado à operação única",
       metricValue: "1 fluxo",
-      metricLabel: "times na mesma página",
-      chip: "Negócios e ops com IA",
+      metricLabel: "times alinhados de ponta a ponta",
+      chip: "Operação sem planilha",
       nodes: {
-        lead: { title: "Processo no Excel", sub: "Times desalinhados", icon: "sheet" },
-        ai: { title: "Automação do fluxo", sub: "Um caminho só", icon: "flow" },
-        auto: { title: "Integra sistemas e times", sub: "Sem cópia manual", icon: "sync" },
-        integ: { title: "Status em tempo real", sub: "Todos veem o mesmo", icon: "alert" },
-        result: { title: "Operação única", sub: "Menos retrabalho, mais entrega", icon: "check" },
+        lead: { title: "Tudo no Excel", sub: "Times desalinhados", icon: "sheet" },
+        ai: { title: "Fluxo automatizado", sub: "Um caminho só", icon: "flow" },
+        auto: { title: "Sistemas conectados", sub: "Sem cópia manual", icon: "sync" },
+        integ: { title: "Visão em tempo real", sub: "Todos na mesma página", icon: "alert" },
+        result: { title: "Operação que entrega", sub: "Menos caos, mais resultado", icon: "check" },
       },
     },
   };
@@ -160,6 +160,26 @@
     return document.documentElement.getAttribute("data-theme") === "light";
   }
 
+  /* Soft round sprite — avoids default square PointsMaterial pixels */
+  function createCircleTexture() {
+    var size = 64;
+    var c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    var ctx = c.getContext("2d");
+    if (!ctx) return null;
+    var g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.28, "rgba(255,255,255,0.9)");
+    g.addColorStop(0.55, "rgba(255,255,255,0.35)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
   /* ===== THREE.JS PARTICLE FIELD ===== */
   function initThreeJS() {
     if (reduced || typeof THREE === "undefined") return;
@@ -172,7 +192,7 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-    var particleCount = window.innerWidth < 768 ? 400 : 800;
+    var particleCount = window.innerWidth < 768 ? 320 : 620;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
@@ -191,25 +211,28 @@
     var geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
+    var circleMap = createCircleTexture();
     var material = new THREE.PointsMaterial({
       color: 0xcfff04,
-      size: 0.03,
+      size: 0.055,
+      map: circleMap || undefined,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
+      depthWrite: false,
       sizeAttenuation: true,
     });
 
     function applyParticleTheme() {
       if (isLightTheme()) {
-        material.color.setHex(0x6b8f00);
-        material.opacity = 0.32;
-        material.size = 0.032;
+        material.color.setHex(0x7a9a00);
+        material.opacity = 0.28;
+        material.size = 0.05;
         material.blending = THREE.NormalBlending;
       } else {
         material.color.setHex(0xcfff04);
-        material.opacity = 0.6;
-        material.size = 0.03;
+        material.opacity = 0.55;
+        material.size = 0.055;
         material.blending = THREE.AdditiveBlending;
       }
       material.needsUpdate = true;
@@ -281,6 +304,7 @@
       try {
         geometry.dispose();
         material.dispose();
+        if (circleMap) circleMap.dispose();
         renderer.dispose();
       } catch (e) {
         /* noop */
