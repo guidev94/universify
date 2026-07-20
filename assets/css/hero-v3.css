@@ -281,11 +281,11 @@
   background: rgba(207, 255, 4, 0.05);
 }
 
-/* Delivery stage (dominant visual) */
+/* Delivery stage — open on page atmosphere (no nested app window) */
 #hero.hero-v3 .hv3-stage-wrap {
   position: relative;
   width: 100%;
-  min-height: clamp(24rem, 52vh, 34rem);
+  min-height: clamp(22rem, 48vh, 30rem);
 }
 
 #hero.hero-v3 .hv3-stage {
@@ -293,66 +293,11 @@
   width: 100%;
   height: 100%;
   min-height: inherit;
-  border-radius: 2rem;
-  padding: 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  box-shadow:
-    0 30px 70px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  overflow: hidden;
-}
-
-#hero.hero-v3 .hv3-stage__inner {
-  position: relative;
-  border-radius: calc(2rem - 0.55rem);
-  min-height: clamp(22rem, 48vh, 31rem);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    radial-gradient(ellipse 60% 45% at 70% 20%, rgba(207, 255, 4, 0.08) 0%, transparent 55%),
-    linear-gradient(165deg, #1a1a1a 0%, #141414 55%, #101010 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  padding: clamp(1.25rem, 3vw, 2rem);
-}
-
-#hero.hero-v3 .hv3-stage__grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse 75% 70% at 55% 45%, #000 20%, transparent 85%);
-  opacity: 0.7;
-}
-
-#hero.hero-v3 .hv3-stage__beam {
-  position: absolute;
-  top: -20%;
-  right: 8%;
-  width: 42%;
-  height: 140%;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(207, 255, 4, 0.1), transparent 70%);
-  transform: rotate(18deg);
-  opacity: 0.55;
-  animation: hv3-beam 10s var(--hv3-ease) infinite alternate;
-}
-
-@keyframes hv3-beam {
-  from {
-    transform: rotate(16deg) translateY(0);
-    opacity: 0.4;
-  }
-  to {
-    transform: rotate(20deg) translateY(3%);
-    opacity: 0.65;
-  }
+  padding: 0.15rem 0 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 #hero.hero-v3 .hv3-board__head {
@@ -421,78 +366,87 @@
   color: rgba(255, 255, 255, 0.42);
 }
 
-/* Sector tabs — segmented, not pill spam */
+/* Sector tabs — 3 slots + auto-cycle progress */
 #hero.hero-v3 .hv3-tabs {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  margin-bottom: 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.85rem;
-  background: rgba(0, 0, 0, 0.28);
-  overflow: hidden;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
 }
 
 #hero.hero-v3 .hv3-tab {
+  position: relative;
   appearance: none;
-  border: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.55);
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.7rem 0.4rem;
+  padding: 0.72rem 0.5rem 0.85rem;
   cursor: pointer;
+  overflow: hidden;
   transition:
     color 0.3s var(--hv3-ease),
-    background-color 0.3s var(--hv3-ease);
+    background-color 0.3s var(--hv3-ease),
+    border-color 0.3s var(--hv3-ease);
 }
 
-#hero.hero-v3 .hv3-tab:last-child {
-  border-right: 0;
+#hero.hero-v3 .hv3-tab__label {
+  position: relative;
+  z-index: 1;
+}
+
+#hero.hero-v3 .hv3-tab__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(207, 255, 4, 0.25);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
 }
 
 #hero.hero-v3 .hv3-tab:hover {
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.88);
+  border-color: rgba(207, 255, 4, 0.28);
+  background: rgba(207, 255, 4, 0.05);
 }
 
 #hero.hero-v3 .hv3-tab.is-active,
 #hero.hero-v3 .hv3-tab[aria-selected="true"] {
   color: #111;
   background: var(--hv3-lime);
+  border-color: var(--hv3-lime);
+}
+
+#hero.hero-v3 .hv3-tab.is-active .hv3-tab__progress {
+  background: rgba(17, 17, 17, 0.35);
 }
 
 #hero.hero-v3 .hv3-tab:focus-visible {
   outline: 2px solid var(--hv3-lime);
-  outline-offset: -2px;
+  outline-offset: 2px;
   z-index: 1;
 }
 
-/* Canvas automation board */
-#hero.hero-v3 .hv3-canvas {
-  position: relative;
-  z-index: 2;
-  min-height: clamp(17.5rem, 38vh, 22rem);
-  border-radius: 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.22);
-  overflow: hidden;
-}
-
+/* Open flow on page — soft dots only, no slab */
 #hero.hero-v3 .hv3-canvas__dotgrid {
   position: absolute;
-  inset: 0;
+  inset: 2.5rem 0 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
-  background-size: 18px 18px;
-  mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 15%, transparent 88%);
-  opacity: 0.55;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: radial-gradient(ellipse 78% 70% at 50% 48%, #000 12%, transparent 86%);
+  opacity: 0.4;
 }
 
 #hero.hero-v3 .hv3-canvas__wires {
@@ -529,10 +483,9 @@
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: minmax(7.5rem, 1fr) auto;
-  gap: 0.65rem 0.75rem;
-  padding: 1rem 0.9rem 0.55rem;
-  min-height: inherit;
+  gap: 0.75rem 1rem;
+  padding: 0.35rem 0 0;
+  min-height: clamp(14rem, 32vh, 18rem);
 }
 
 #hero.hero-v3 .hv3-node {
@@ -545,10 +498,10 @@
   padding: 0.85rem 0.8rem 0.9rem;
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(18, 18, 18, 0.72);
+  background: rgba(255, 255, 255, 0.045);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 12px 28px rgba(0, 0, 0, 0.22);
+    0 12px 28px rgba(0, 0, 0, 0.16);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   cursor: default;
@@ -561,30 +514,18 @@
 
 #hero.hero-v3 .hv3-node[data-node="pain"] {
   grid-column: 1;
-  grid-row: 1;
 }
 
 #hero.hero-v3 .hv3-node[data-node="solve"] {
   grid-column: 2;
-  grid-row: 1;
   border-color: rgba(207, 255, 4, 0.22);
 }
 
 #hero.hero-v3 .hv3-node[data-node="win"] {
   grid-column: 3;
-  grid-row: 1;
   background:
-    linear-gradient(165deg, rgba(207, 255, 4, 0.14) 0%, rgba(18, 18, 18, 0.78) 58%);
+    linear-gradient(165deg, rgba(207, 255, 4, 0.14) 0%, rgba(18, 18, 18, 0.55) 58%);
   border-color: rgba(207, 255, 4, 0.3);
-}
-
-#hero.hero-v3 .hv3-node[data-node="action"] {
-  grid-column: 2;
-  grid-row: 2;
-  max-width: 100%;
-  justify-self: center;
-  width: min(100%, 12.5rem);
-  padding: 0.7rem 0.75rem 0.75rem;
 }
 
 #hero.hero-v3 .hv3-node:hover {
@@ -687,28 +628,49 @@
   color: rgba(255, 255, 255, 0.52);
 }
 
-#hero.hero-v3 .hv3-canvas__case {
-  position: relative;
-  z-index: 2;
+#hero.hero-v3 .hv3-node__tags {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.55rem;
-  margin: 0;
-  padding: 0.55rem 1rem 0.9rem;
+  gap: 0.3rem 0.5rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(207, 255, 4, 0.82);
+}
+
+#hero.hero-v3 .hv3-node__tags span {
+  position: relative;
+  padding-right: 0.5rem;
+}
+
+#hero.hero-v3 .hv3-node__tags span:not(:last-child)::after {
+  content: "·";
+  position: absolute;
+  right: 0;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+#hero.hero-v3 .hv3-node__case {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.45rem;
+  margin: 0.55rem 0 0;
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.7rem;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.52);
 }
 
-#hero.hero-v3 .hv3-canvas__case-mark {
+#hero.hero-v3 .hv3-node__case-mark {
   font-weight: 800;
-  color: var(--hv3-lime);
+  color: #f4f4f5;
   letter-spacing: -0.01em;
 }
 
-#hero.hero-v3 .hv3-canvas__case-text {
+#hero.hero-v3 .hv3-node__case-text {
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -776,42 +738,20 @@
   }
 
   #hero.hero-v3 .hv3-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  #hero.hero-v3 .hv3-tab:nth-child(2) {
-    border-right: 0;
-  }
-
-  #hero.hero-v3 .hv3-tab:nth-child(1),
-  #hero.hero-v3 .hv3-tab:nth-child(2) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  #hero.hero-v3 .hv3-canvas {
-    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
   }
 
   #hero.hero-v3 .hv3-canvas__board {
     grid-template-columns: 1fr;
-    grid-template-rows: none;
     gap: 0.55rem;
-    padding: 0.85rem 0.75rem 0.4rem;
+    min-height: 0;
   }
 
   #hero.hero-v3 .hv3-node[data-node="pain"],
   #hero.hero-v3 .hv3-node[data-node="solve"],
-  #hero.hero-v3 .hv3-node[data-node="action"],
   #hero.hero-v3 .hv3-node[data-node="win"] {
     grid-column: 1;
-    grid-row: auto;
-    width: 100%;
-    max-width: none;
-    justify-self: stretch;
-  }
-
-  #hero.hero-v3 .hv3-stage__inner {
-    padding-bottom: 1.35rem;
   }
 
   #hero.hero-v3 .hv3-scroll {
@@ -891,21 +831,9 @@
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-stage {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(10, 10, 10, 0.08);
-  box-shadow:
-    0 28px 64px rgba(55, 55, 48, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-}
-
-[data-theme="light"] #hero.hero-v3 .hv3-stage__inner {
-  background:
-    radial-gradient(ellipse 60% 45% at 70% 20%, rgba(207, 255, 4, 0.14) 0%, transparent 55%),
-    linear-gradient(165deg, #ffffff 0%, #fbfbf8 55%, #f3f2ed 100%);
-  border-color: rgba(10, 10, 10, 0.08);
-  box-shadow:
-    inset 0 1px 0 #fff,
-    inset 0 -1px 0 rgba(10, 10, 10, 0.03);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-stage__label {
@@ -920,35 +848,32 @@
   color: #71717a;
 }
 
-[data-theme="light"] #hero.hero-v3 .hv3-tabs {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(10, 10, 10, 0.08);
-}
-
 [data-theme="light"] #hero.hero-v3 .hv3-tab {
   color: #71717a;
-  border-right-color: rgba(10, 10, 10, 0.08);
+  border-color: rgba(10, 10, 10, 0.1);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-tab:hover {
   color: #18181b;
-  background: rgba(10, 10, 10, 0.03);
+  background: rgba(207, 255, 4, 0.12);
+  border-color: rgba(168, 214, 0, 0.35);
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-tab.is-active,
 [data-theme="light"] #hero.hero-v3 .hv3-tab[aria-selected="true"] {
   color: #111;
   background: var(--hv3-lime);
+  border-color: var(--hv3-lime);
 }
 
-[data-theme="light"] #hero.hero-v3 .hv3-canvas {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(10, 10, 10, 0.08);
+[data-theme="light"] #hero.hero-v3 .hv3-tab.is-active .hv3-tab__progress {
+  background: rgba(17, 17, 17, 0.28);
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-canvas__dotgrid {
-  background-image: radial-gradient(rgba(10, 10, 10, 0.12) 1px, transparent 1px);
-  opacity: 0.45;
+  background-image: radial-gradient(rgba(10, 10, 10, 0.1) 1px, transparent 1px);
+  opacity: 0.38;
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-canvas__wire {
@@ -965,17 +890,17 @@
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-node {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.72);
   border-color: rgba(10, 10, 10, 0.08);
   box-shadow:
-    0 12px 28px rgba(55, 55, 48, 0.08),
+    0 12px 28px rgba(55, 55, 48, 0.07),
     inset 0 1px 0 #fff;
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-node[data-node="win"] {
   background:
-    linear-gradient(165deg, rgba(207, 255, 4, 0.24) 0%, rgba(255, 255, 255, 0.92) 58%);
-  border-color: rgba(168, 214, 0, 0.42);
+    linear-gradient(165deg, rgba(207, 255, 4, 0.22) 0%, rgba(255, 255, 255, 0.82) 58%);
+  border-color: rgba(168, 214, 0, 0.4);
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-node__role {
@@ -991,12 +916,20 @@
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-node__sub,
-[data-theme="light"] #hero.hero-v3 .hv3-canvas__case-text {
+[data-theme="light"] #hero.hero-v3 .hv3-node__case-text {
   color: #52525b;
 }
 
-[data-theme="light"] #hero.hero-v3 .hv3-canvas__case-mark {
+[data-theme="light"] #hero.hero-v3 .hv3-node__case-mark {
+  color: #121212;
+}
+
+[data-theme="light"] #hero.hero-v3 .hv3-node__tags {
   color: #5f7a00;
+}
+
+[data-theme="light"] #hero.hero-v3 .hv3-node__tags span:not(:last-child)::after {
+  color: rgba(10, 10, 10, 0.25);
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-node__hub {
@@ -1006,13 +939,6 @@
 
 [data-theme="light"] #hero.hero-v3 .hv3-node__hub-core {
   background: #6b8a00;
-}
-
-@media (max-width: 1023px) {
-  [data-theme="light"] #hero.hero-v3 .hv3-tab:nth-child(1),
-  [data-theme="light"] #hero.hero-v3 .hv3-tab:nth-child(2) {
-    border-bottom-color: rgba(10, 10, 10, 0.08);
-  }
 }
 
 [data-theme="light"] #hero.hero-v3 .hv3-title__accent {
@@ -1080,7 +1006,6 @@ body:has(#hero.hero-v3) #main-header .site-logo-link img {
 /* Reduced motion — full title/copy always visible, no clip hide */
 @media (prefers-reduced-motion: reduce) {
   #hero.hero-v3 .hv3-mesh::before,
-  #hero.hero-v3 .hv3-stage__beam,
   #hero.hero-v3 .hv3-scroll__dot {
     animation: none !important;
   }
@@ -1093,11 +1018,13 @@ body:has(#hero.hero-v3) #main-header .site-logo-link img {
   #hero.hero-v3 .hv3-stage-wrap,
   #hero.hero-v3 .hv3-board__head,
   #hero.hero-v3 .hv3-tabs,
-  #hero.hero-v3 .hv3-canvas,
   #hero.hero-v3 .hv3-node,
-  #hero.hero-v3 .hv3-canvas__case,
   #hero.hero-v3 .hv3-scroll {
     opacity: 1 !important;
+    transform: none !important;
+  }
+
+  #hero.hero-v3 .hv3-tab__progress {
     transform: none !important;
   }
 

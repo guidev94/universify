@@ -1,6 +1,6 @@
 /**
- * Hero v3 — entrance + magnetic CTAs + sector automation canvas.
- * Dor → Solução → Ação → Resultado. Curved wires + sequential pulse.
+ * Hero v3 — entrance + magnetic CTAs + open-flow sector canvas.
+ * 3 tabs auto-cycle. Dor → Solução → Resultado + wire pulse.
  */
 (function () {
   "use strict";
@@ -13,12 +13,18 @@
   var coarse =
     window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
-  var PULSE = ["pain", "solve", "action", "win"];
+  var PULSE = ["pain", "solve", "win"];
+  var SECTOR_ORDER = ["comercio", "industria", "servicos"];
+  var CYCLE_MS = 6000;
+
   var pulseIndex = 0;
   var pulseTimer = null;
   var wireFlowTween = null;
+  var progressTween = null;
   var resizeTimer = null;
   var switching = false;
+  var cyclePaused = false;
+  var cycleArmed = false;
 
   var SECTORS = {
     comercio: {
@@ -26,22 +32,19 @@
       label: "Comércio — fila no WhatsApp vira venda",
       caseMark: "Facíleme",
       caseText: "Social commerce · catálogo + checkout",
+      tags: ["Agente", "WhatsApp", "CRM"],
       nodes: {
         pain: {
           title: "Lead esfria na fila do WhatsApp",
-          sub: "Pedido some enquanto o time responde",
+          sub: "Pedido some enquanto o time responde — ou o concorrente fecha.",
         },
         solve: {
           title: "Agente + CRM no mesmo fluxo",
-          sub: "Atende, qualifica e registra sem planilha",
-        },
-        action: {
-          title: "Integra catálogo e checkout",
-          sub: "Pedido entra onde a venda acontece",
+          sub: "Atende e qualifica 24/7; pedido e status entram sem planilha.",
         },
         win: {
           title: "Venda no ar onde o cliente já está",
-          sub: "Canal ativo, conversão contínua",
+          sub: "",
         },
       },
     },
@@ -49,71 +52,41 @@
       tabId: "hv3-tab-industria",
       label: "Indústria — chão de fábrica no ERP",
       caseMark: "WV",
-      caseText: "Integração sob medida · indústria",
+      caseText: "Integração sob medida · operação única",
+      tags: ["Automação", "ERP", "Estoque"],
       nodes: {
         pain: {
           title: "Chão de fábrica ainda aponta no papel",
-          sub: "Produção e ERP não conversam",
+          sub: "Produção, estoque e ERP não conversam — retrabalho vira rotina.",
         },
         solve: {
           title: "Automação + integração ERP",
-          sub: "Um fluxo, uma verdade operacional",
-        },
-        action: {
-          title: "Sincroniza estoque e apontamento",
-          sub: "Do chão ao sistema sem retrabalho",
+          sub: "Apontamento vira fluxo: um caminho, uma verdade operacional.",
         },
         win: {
           title: "Operação única do chão ao sistema",
-          sub: "Menos atraso, mais controle",
+          sub: "",
         },
       },
     },
     servicos: {
       tabId: "hv3-tab-servicos",
-      label: "Serviços — time no fechamento",
-      caseMark: "WV",
-      caseText: "Fluxo comercial · serviços",
-      nodes: {
-        pain: {
-          title: "Agenda e atendimento no modo incêndio",
-          sub: "Fila come o dia; fechamento fica pra depois",
-        },
-        solve: {
-          title: "Agente tria + fluxo de follow-up",
-          sub: "Agenda e pós-atendimento no piloto",
-        },
-        action: {
-          title: "Prioriza e alimenta o CRM",
-          sub: "Comercial só pega o que fecha",
-        },
-        win: {
-          title: "Time no fechamento, não na fila",
-          sub: "Atendimento que gera receita",
-        },
-      },
-    },
-    saude: {
-      tabId: "hv3-tab-saude",
-      label: "Saúde / RH — jornada auditável",
+      label: "Serviços & Saúde — agenda e jornada sob controle",
       caseMark: "Let's Work",
-      caseText: "Facial · ponto · RH/ops",
+      caseText: "Facial · ponto · folha em dia",
+      tags: ["Agente", "WhatsApp", "Folha"],
       nodes: {
         pain: {
-          title: "Ponto e jornada manuais atrasam a folha",
-          sub: "Planilha gera risco e retrabalho",
+          title: "Agenda caótica e jornada no improviso",
+          sub: "Time apaga fila o dia todo — ponto e folha ainda vão na planilha.",
         },
         solve: {
-          title: "Let's Work facial + geo",
-          sub: "Registro biométrico sem papel",
-        },
-        action: {
-          title: "Audita jornada em tempo real",
-          sub: "Conformidade sem planilha",
+          title: "Agente no atendimento + Let's Work na jornada",
+          sub: "Tria e agenda no WhatsApp; facial e geo fecham a folha sem papel.",
         },
         win: {
-          title: "Folha em dia, jornada auditável",
-          sub: "RH opera com precisão",
+          title: "Time no fechamento, folha em dia",
+          sub: "",
         },
       },
     },
@@ -125,6 +98,11 @@
 
   function qa(sel) {
     return hero.querySelectorAll(sel);
+  }
+
+  function currentSector() {
+    var canvas = document.getElementById("hv3Canvas");
+    return (canvas && canvas.getAttribute("data-sector")) || "comercio";
   }
 
   function initMagnetic() {
@@ -168,21 +146,8 @@
 
   function cubicPath(a, b) {
     var dx = b.x - a.x;
-    var dy = b.y - a.y;
-    var absDx = Math.abs(dx);
-    var absDy = Math.abs(dy);
-    var c1;
-    var c2;
-
-    if (absDy > absDx * 0.7) {
-      /* mostly vertical branch */
-      c1 = { x: a.x, y: a.y + dy * 0.45 };
-      c2 = { x: b.x, y: b.y - dy * 0.45 };
-    } else {
-      c1 = { x: a.x + dx * 0.42, y: a.y };
-      c2 = { x: b.x - dx * 0.42, y: b.y };
-    }
-
+    var c1 = { x: a.x + dx * 0.42, y: a.y };
+    var c2 = { x: b.x - dx * 0.42, y: b.y };
     return (
       "M" +
       a.x.toFixed(1) +
@@ -224,9 +189,8 @@
     });
 
     var pairs = [
-      ["pain", "solve", true],
-      ["solve", "win", true],
-      ["solve", "action", false],
+      ["pain", "solve"],
+      ["solve", "win"],
     ];
 
     var ns = "http://www.w3.org/2000/svg";
@@ -240,10 +204,7 @@
       path.setAttribute("d", cubicPath(nodeAnchor(canvasRect, from), nodeAnchor(canvasRect, to)));
       path.setAttribute("data-from", pair[0]);
       path.setAttribute("data-to", pair[1]);
-      path.setAttribute(
-        "class",
-        "hv3-canvas__wire" + (pair[2] ? " hv3-canvas__wire--spine" : "")
-      );
+      path.setAttribute("class", "hv3-canvas__wire hv3-canvas__wire--spine");
       svg.appendChild(path);
     });
 
@@ -321,80 +282,169 @@
     }, 1400);
   }
 
-  function switchSector(sectorKey, focusTab) {
-    if (!SECTORS[sectorKey] || switching) return;
+  function resetProgressBars() {
+    qa(".hv3-tab__progress").forEach(function (bar) {
+      if (typeof gsap !== "undefined") gsap.killTweensOf(bar);
+      bar.style.transform = "scaleX(0)";
+    });
+    if (progressTween) {
+      progressTween.kill();
+      progressTween = null;
+    }
+  }
+
+  function startTabProgress(sectorKey) {
+    resetProgressBars();
+    if (reduced || typeof gsap === "undefined" || cyclePaused) return;
+
+    var tab = document.getElementById(SECTORS[sectorKey].tabId);
+    var bar = tab && tab.querySelector(".hv3-tab__progress");
+    if (!bar) return;
+
+    gsap.set(bar, { scaleX: 0 });
+    progressTween = gsap.to(bar, {
+      scaleX: 1,
+      duration: CYCLE_MS / 1000,
+      ease: "none",
+      onComplete: function () {
+        if (cyclePaused || switching) return;
+        var i = SECTOR_ORDER.indexOf(sectorKey);
+        var next = SECTOR_ORDER[(i + 1) % SECTOR_ORDER.length];
+        switchSector(next, false, true);
+      },
+    });
+  }
+
+  function pauseCycle() {
+    cyclePaused = true;
+    if (progressTween) progressTween.pause();
+  }
+
+  function resumeCycle() {
+    cyclePaused = false;
+    if (!cycleArmed) return;
+    if (progressTween && progressTween.paused()) {
+      progressTween.resume();
+      return;
+    }
+    startTabProgress(currentSector());
+  }
+
+  function armAutoCycle() {
+    if (reduced) return;
+    cycleArmed = true;
+    startTabProgress(currentSector());
+  }
+
+  function swapCopy(sectorKey) {
+    var sector = SECTORS[sectorKey];
+    if (!sector) return;
+
     var canvas = document.getElementById("hv3Canvas");
-    if (canvas && canvas.getAttribute("data-sector") === sectorKey) return;
+    var board = document.getElementById("hv3Board");
+    var chip = document.getElementById("hv3CaseChip");
+    var tagsEl = document.getElementById("hv3SolveTags");
+    var stage = document.getElementById("hv3Stage");
+
+    Object.keys(sector.nodes).forEach(function (key) {
+      var node = board && board.querySelector('.hv3-node[data-node="' + key + '"]');
+      if (!node) return;
+      var data = sector.nodes[key];
+      var title = node.querySelector(".hv3-node__title");
+      var sub = node.querySelector(".hv3-node__sub");
+      if (title) title.textContent = data.title;
+      if (sub) {
+        if (data.sub) {
+          sub.textContent = data.sub;
+          sub.hidden = false;
+        } else {
+          sub.textContent = "";
+          sub.hidden = true;
+        }
+      }
+    });
+
+    if (tagsEl && sector.tags) {
+      tagsEl.innerHTML = sector.tags
+        .map(function (t) {
+          return "<span>" + t + "</span>";
+        })
+        .join("");
+    }
+
+    if (chip) {
+      var mark = chip.querySelector(".hv3-node__case-mark");
+      var text = chip.querySelector(".hv3-node__case-text");
+      if (mark) mark.textContent = sector.caseMark;
+      if (text) text.textContent = sector.caseText;
+    }
+
+    if (canvas) canvas.setAttribute("data-sector", sectorKey);
+    if (stage) stage.setAttribute("aria-label", sector.label);
+    if (board) board.setAttribute("aria-labelledby", sector.tabId);
+
+    qa(".hv3-tab").forEach(function (tab) {
+      var on = tab.getAttribute("data-sector") === sectorKey;
+      tab.classList.toggle("is-active", on);
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+      tab.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  function switchSector(sectorKey, focusTab, fromAuto) {
+    if (!SECTORS[sectorKey] || switching) return;
+    if (currentSector() === sectorKey && !fromAuto) {
+      if (fromAuto) startTabProgress(sectorKey);
+      return;
+    }
+    if (currentSector() === sectorKey) {
+      startTabProgress(sectorKey);
+      return;
+    }
 
     stopPulse();
+    resetProgressBars();
 
     var sector = SECTORS[sectorKey];
     var board = document.getElementById("hv3Board");
     var chip = document.getElementById("hv3CaseChip");
+    var tagsEl = document.getElementById("hv3SolveTags");
 
-    function swapCopy() {
-      Object.keys(sector.nodes).forEach(function (key) {
-        var node = board && board.querySelector('.hv3-node[data-node="' + key + '"]');
-        if (!node) return;
-        var data = sector.nodes[key];
-        var title = node.querySelector(".hv3-node__title");
-        var sub = node.querySelector(".hv3-node__sub");
-        if (title) title.textContent = data.title;
-        if (sub) sub.textContent = data.sub;
-      });
-      if (chip) {
-        var mark = chip.querySelector(".hv3-canvas__case-mark");
-        var text = chip.querySelector(".hv3-canvas__case-text");
-        if (mark) mark.textContent = sector.caseMark;
-        if (text) text.textContent = sector.caseText;
-      }
-      if (canvas) canvas.setAttribute("data-sector", sectorKey);
-      var stage = document.getElementById("hv3Stage");
-      if (stage) stage.setAttribute("aria-label", sector.label);
-      if (board) board.setAttribute("aria-labelledby", sector.tabId);
-      qa(".hv3-tab").forEach(function (tab) {
-        var on = tab.getAttribute("data-sector") === sectorKey;
-        tab.classList.toggle("is-active", on);
-        tab.setAttribute("aria-selected", on ? "true" : "false");
-        tab.tabIndex = on ? 0 : -1;
-      });
-    }
-
-    if (typeof gsap === "undefined" || reduced || !board) {
-      swapCopy();
+    function afterSwap() {
+      switching = false;
       drawWires();
       startPulse();
+      if (cycleArmed && !cyclePaused) startTabProgress(sectorKey);
       if (focusTab) {
         var t = document.getElementById(sector.tabId);
         if (t) t.focus();
       }
+    }
+
+    if (typeof gsap === "undefined" || reduced || !board) {
+      swapCopy(sectorKey);
+      afterSwap();
       return;
     }
 
     switching = true;
     var parts = board.querySelectorAll(".hv3-node");
+    var extras = [chip, tagsEl].filter(Boolean);
+
     gsap
-      .timeline({
-        onComplete: function () {
-          switching = false;
-          drawWires();
-          startPulse();
-          if (focusTab) {
-            var t = document.getElementById(sector.tabId);
-            if (t) t.focus();
-          }
-        },
-      })
-      .to([parts, chip], {
+      .timeline({ onComplete: afterSwap })
+      .to([parts, extras], {
         opacity: 0,
         y: 8,
         duration: 0.2,
         ease: "power2.in",
-        stagger: 0.025,
+        stagger: 0.03,
       })
-      .add(swapCopy)
+      .add(function () {
+        swapCopy(sectorKey);
+      })
       .fromTo(
-        [parts, chip],
+        [parts, extras],
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.42, stagger: 0.05, ease: "power3.out" }
       );
@@ -407,7 +457,7 @@
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         var sector = tab.getAttribute("data-sector");
-        if (sector) switchSector(sector, false);
+        if (sector) switchSector(sector, false, false);
       });
 
       tab.addEventListener("keydown", function (e) {
@@ -421,8 +471,20 @@
         else if (e.key === "End") next = tabs.length - 1;
         if (next < 0) return;
         e.preventDefault();
-        switchSector(tabs[next].getAttribute("data-sector"), true);
+        switchSector(tabs[next].getAttribute("data-sector"), true, false);
       });
+    });
+  }
+
+  function initCyclePause() {
+    var stage = document.getElementById("hv3Stage");
+    if (!stage || reduced) return;
+
+    stage.addEventListener("pointerenter", pauseCycle);
+    stage.addEventListener("pointerleave", resumeCycle);
+    stage.addEventListener("focusin", pauseCycle);
+    stage.addEventListener("focusout", function (e) {
+      if (!stage.contains(e.relatedTarget)) resumeCycle();
     });
   }
 
@@ -451,6 +513,7 @@
     if (typeof gsap === "undefined" || reduced) {
       drawWires();
       startPulse();
+      armAutoCycle();
       return;
     }
 
@@ -462,7 +525,6 @@
     var head = q(".hv3-board__head");
     var tabs = q(".hv3-tabs");
     var nodes = qa(".hv3-node");
-    var chip = q(".hv3-canvas__case");
     var scroll = q(".hv3-scroll");
 
     var parts = [];
@@ -478,7 +540,6 @@
     if (head) gsap.set(head, { opacity: 0, y: 10 });
     if (tabs) gsap.set(tabs, { opacity: 0, y: 10 });
     if (nodes.length) gsap.set(nodes, { opacity: 0, y: 16, scale: 0.97 });
-    if (chip) gsap.set(chip, { opacity: 0, y: 10 });
     if (scroll) gsap.set(scroll, { opacity: 0 });
 
     var tl = gsap.timeline({
@@ -488,9 +549,9 @@
         if (head) gsap.set(head, { opacity: 1, y: 0 });
         if (tabs) gsap.set(tabs, { opacity: 1, y: 0 });
         if (nodes.length) gsap.set(nodes, { opacity: 1, y: 0, scale: 1 });
-        if (chip) gsap.set(chip, { opacity: 1, y: 0 });
         drawWires();
         startPulse();
+        armAutoCycle();
       },
     });
 
@@ -514,13 +575,13 @@
         "-=0.2"
       );
     }
-    if (chip) tl.to(chip, { opacity: 1, y: 0, duration: 0.4 }, "-=0.25");
     if (scroll) tl.to(scroll, { opacity: 0.85, duration: 0.45 }, "-=0.2");
   }
 
   function boot() {
     initMagnetic();
     initSectorTabs();
+    initCyclePause();
     initNodeHover();
     initResize();
     initEntrance();

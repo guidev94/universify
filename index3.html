@@ -63,7 +63,7 @@
         }
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/hero-v3.css?v=1.6.29">
+    <link rel="stylesheet" href="assets/css/hero-v3.css?v=1.6.30">
 </head>
 <body class="bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
 
@@ -182,68 +182,62 @@
                     </div>
                 </div>
 
-                <aside class="hv3-stage-wrap" id="hv3Stage" aria-label="Canvas de automação WV por setor">
-                    <div class="hv3-stage">
-                        <div class="hv3-stage__inner">
-                            <div class="hv3-stage__beam" aria-hidden="true"></div>
-
-                            <header class="hv3-board__head">
-                                <p class="hv3-stage__label">
-                                    <span class="hv3-stage__label-dot" aria-hidden="true"></span>
-                                    Canvas WV · dor → solução → resultado
-                                </p>
-                                <div class="hv3-board__brand" aria-hidden="true">
-                                    <span class="hv3-board__mark">WV</span>
-                                    <span class="hv3-board__name">Todoz</span>
-                                </div>
-                            </header>
-
-                            <div class="hv3-tabs" role="tablist" aria-label="Setores">
-                                <button type="button" class="hv3-tab is-active" role="tab" id="hv3-tab-comercio" aria-selected="true" aria-controls="hv3Board" data-sector="comercio">Comércio</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-industria" aria-selected="false" aria-controls="hv3Board" data-sector="industria" tabindex="-1">Indústria</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-servicos" aria-selected="false" aria-controls="hv3Board" data-sector="servicos" tabindex="-1">Serviços</button>
-                                <button type="button" class="hv3-tab" role="tab" id="hv3-tab-saude" aria-selected="false" aria-controls="hv3Board" data-sector="saude" tabindex="-1">Saúde</button>
+                <aside class="hv3-stage-wrap" id="hv3Stage" aria-label="Fluxo WV por setor">
+                    <div class="hv3-stage" id="hv3Canvas" data-sector="comercio">
+                        <header class="hv3-board__head">
+                            <p class="hv3-stage__label">
+                                <span class="hv3-stage__label-dot" aria-hidden="true"></span>
+                                Fluxo WV · dor → solução → resultado
+                            </p>
+                            <div class="hv3-board__brand" aria-hidden="true">
+                                <span class="hv3-board__mark">WV</span>
+                                <span class="hv3-board__name">Todoz</span>
                             </div>
+                        </header>
 
-                            <div class="hv3-canvas" id="hv3Canvas" data-sector="comercio">
-                                <div class="hv3-canvas__dotgrid" aria-hidden="true"></div>
-                                <svg class="hv3-canvas__wires" id="hv3Wires" aria-hidden="true"></svg>
+                        <div class="hv3-tabs" role="tablist" aria-label="Setores">
+                            <button type="button" class="hv3-tab is-active" role="tab" id="hv3-tab-comercio" aria-selected="true" aria-controls="hv3Board" data-sector="comercio">
+                                <span class="hv3-tab__label">Comércio</span>
+                                <span class="hv3-tab__progress" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" class="hv3-tab" role="tab" id="hv3-tab-industria" aria-selected="false" aria-controls="hv3Board" data-sector="industria" tabindex="-1">
+                                <span class="hv3-tab__label">Indústria</span>
+                                <span class="hv3-tab__progress" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" class="hv3-tab" role="tab" id="hv3-tab-servicos" aria-selected="false" aria-controls="hv3Board" data-sector="servicos" tabindex="-1">
+                                <span class="hv3-tab__label">Serviços &amp; Saúde</span>
+                                <span class="hv3-tab__progress" aria-hidden="true"></span>
+                            </button>
+                        </div>
 
-                                <div class="hv3-canvas__board" id="hv3Board" role="tabpanel" aria-labelledby="hv3-tab-comercio">
-                                    <article class="hv3-node" data-node="pain">
-                                        <span class="hv3-node__role">01 · Dor</span>
-                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
-                                        <h3 class="hv3-node__title">Lead esfria na fila do WhatsApp</h3>
-                                        <p class="hv3-node__sub">Pedido some enquanto o time responde</p>
-                                    </article>
+                        <div class="hv3-canvas__dotgrid" aria-hidden="true"></div>
+                        <svg class="hv3-canvas__wires" id="hv3Wires" aria-hidden="true"></svg>
 
-                                    <article class="hv3-node hv3-node--solve" data-node="solve">
-                                        <span class="hv3-node__role">02 · Solução WV</span>
-                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
-                                        <h3 class="hv3-node__title">Agente + CRM no mesmo fluxo</h3>
-                                        <p class="hv3-node__sub">Atende, qualifica e registra sem planilha</p>
-                                    </article>
+                        <div class="hv3-canvas__board" id="hv3Board" role="tabpanel" aria-labelledby="hv3-tab-comercio">
+                            <article class="hv3-node" data-node="pain">
+                                <span class="hv3-node__role">01 · Dor</span>
+                                <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                <h3 class="hv3-node__title">Lead esfria na fila do WhatsApp</h3>
+                                <p class="hv3-node__sub">Pedido some enquanto o time responde — ou o concorrente fecha.</p>
+                            </article>
 
-                                    <article class="hv3-node hv3-node--action" data-node="action">
-                                        <span class="hv3-node__role">Ação</span>
-                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
-                                        <h3 class="hv3-node__title">Integra catálogo e checkout</h3>
-                                        <p class="hv3-node__sub">Pedido entra onde a venda acontece</p>
-                                    </article>
+                            <article class="hv3-node hv3-node--solve" data-node="solve">
+                                <span class="hv3-node__role">02 · Solução WV</span>
+                                <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                <h3 class="hv3-node__title">Agente + CRM no mesmo fluxo</h3>
+                                <p class="hv3-node__sub">Atende e qualifica 24/7; pedido e status entram sem planilha.</p>
+                                <p class="hv3-node__tags" id="hv3SolveTags"><span>Agente</span><span>WhatsApp</span><span>CRM</span></p>
+                            </article>
 
-                                    <article class="hv3-node hv3-node--win" data-node="win">
-                                        <span class="hv3-node__role">03 · Resultado</span>
-                                        <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
-                                        <h3 class="hv3-node__title">Venda no ar onde o cliente já está</h3>
-                                        <p class="hv3-node__sub">Canal ativo, conversão contínua</p>
-                                    </article>
-                                </div>
-
-                                <p class="hv3-canvas__case" id="hv3CaseChip">
-                                    <span class="hv3-canvas__case-mark">Facíleme</span>
-                                    <span class="hv3-canvas__case-text">Social commerce · catálogo + checkout</span>
+                            <article class="hv3-node hv3-node--win" data-node="win">
+                                <span class="hv3-node__role">03 · Resultado</span>
+                                <div class="hv3-node__hub" aria-hidden="true"><span class="hv3-node__hub-core"></span></div>
+                                <h3 class="hv3-node__title">Venda no ar onde o cliente já está</h3>
+                                <p class="hv3-node__case" id="hv3CaseChip">
+                                    <span class="hv3-node__case-mark">Facíleme</span>
+                                    <span class="hv3-node__case-text">Social commerce · catálogo + checkout</span>
                                 </p>
-                            </div>
+                            </article>
                         </div>
                     </div>
                 </aside>
@@ -1036,7 +1030,7 @@
         </div>
     </a>
 
-    <script src="assets/js/hero-v3.js?v=1.6.29"></script>
+    <script src="assets/js/hero-v3.js?v=1.6.30"></script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/site-utils.js"></script>
     <script src="assets/js/main.js"></script>
