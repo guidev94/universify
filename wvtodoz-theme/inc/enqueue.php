@@ -16,15 +16,14 @@ add_action('wp_enqueue_scripts', static function (): void {
 
 	wp_enqueue_style(
 		'wvtodoz-fonts',
-		'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap',
 		[],
 		null
 	);
 
 	wp_enqueue_style('wvtodoz-aos', 'https://unpkg.com/aos@2.3.1/dist/aos.css', [], '2.3.1');
 	wp_enqueue_style('wvtodoz-main', WVTODOZ_URI . '/assets/css/main.css', ['wvtodoz-fonts', 'wvtodoz-aos'], $ver);
-	wp_enqueue_style('wvtodoz-hero-v2', WVTODOZ_URI . '/assets/css/hero-v2.css', ['wvtodoz-main'], $ver);
-	wp_enqueue_style('wvtodoz-style', get_stylesheet_uri(), ['wvtodoz-hero-v2'], $ver);
+	wp_enqueue_style('wvtodoz-style', get_stylesheet_uri(), ['wvtodoz-main'], $ver);
 
 	wp_enqueue_script('wvtodoz-tailwind', 'https://cdn.tailwindcss.com', [], null, false);
 	wp_add_inline_script(
@@ -36,15 +35,13 @@ add_action('wp_enqueue_scripts', static function (): void {
 	wp_enqueue_script('wvtodoz-phosphor', 'https://unpkg.com/@phosphor-icons/web', [], null, false);
 	wp_enqueue_script('wvtodoz-gsap', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js', [], '3.12.5', false);
 	wp_enqueue_script('wvtodoz-scrolltrigger', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js', ['wvtodoz-gsap'], '3.12.5', false);
-	wp_enqueue_script('wvtodoz-three', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', [], 'r128', false);
 	wp_enqueue_script('wvtodoz-lenis', 'https://unpkg.com/lenis@1.1.20/dist/lenis.min.js', [], '1.1.20', false);
 	wp_enqueue_script('wvtodoz-aos', 'https://unpkg.com/aos@2.3.1/dist/aos.js', [], '2.3.1', false);
 
 	$deps = ['wvtodoz-gsap', 'wvtodoz-scrolltrigger', 'wvtodoz-lenis', 'wvtodoz-aos'];
 	wp_enqueue_script('wvtodoz-theme', WVTODOZ_URI . '/assets/js/theme.js', [], $ver, true);
 	wp_enqueue_script('wvtodoz-site-utils', WVTODOZ_URI . '/assets/js/site-utils.js', $deps, $ver, true);
-	wp_enqueue_script('wvtodoz-hero-v2', WVTODOZ_URI . '/assets/js/hero-v2.js', ['wvtodoz-gsap', 'wvtodoz-three'], $ver, true);
-	wp_enqueue_script('wvtodoz-main', WVTODOZ_URI . '/assets/js/main.js', ['wvtodoz-site-utils', 'wvtodoz-theme', 'wvtodoz-hero-v2'], $ver, true);
+	wp_enqueue_script('wvtodoz-main', WVTODOZ_URI . '/assets/js/main.js', ['wvtodoz-site-utils', 'wvtodoz-theme'], $ver, true);
 	wp_enqueue_script('wvtodoz-animations', WVTODOZ_URI . '/assets/js/animations.js', ['wvtodoz-main'], $ver, true);
 	wp_enqueue_script('wvtodoz-components', WVTODOZ_URI . '/assets/js/components.js', ['wvtodoz-animations'], $ver, true);
 }, 20);

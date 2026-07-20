@@ -34,13 +34,12 @@
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" sizes="180x180">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
@@ -62,7 +61,6 @@
         }
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/hero-v2.css">
 </head>
 <body class="bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
 
@@ -144,63 +142,60 @@
     </div>
 
     <main id="main-wrapper">
-        <!-- Hero Section v2 -->
-        <section id="hero" class="hero-section hero-v2" aria-label="Hero">
-            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section relative flex items-center justify-center bg-[#050505]">
+            <!-- Background Layer -->
+            <div class="absolute inset-0 z-0 overflow-hidden">
+                <video autoplay muted loop playsinline preload="metadata" class="hero-video w-full h-full object-cover opacity-[0.52] filter grayscale-[0.55] brightness-[0.83]">
+                    <source src="assets/video/hero.mp4" type="video/mp4">
+                </video>
+                <!-- Dynamic Mesh Gradient — soft lime wash -->
+                <div class="hero-mesh absolute inset-0 opacity-[0.34] mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 42%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 44%);"></div>
+                <!-- Subtle lime ambient glow -->
+                <div class="hero-glow" aria-hidden="true"></div>
+                <!-- Glass Overlay — lighter so video + glow read through -->
+                <div class="hero-glass absolute inset-0 bg-gradient-to-b from-primary/48 via-primary/6 to-primary/52"></div>
+                <!-- Noise Texture -->
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+            </div>
 
-            <div class="ambient-orb ambient-orb--1" aria-hidden="true"></div>
-            <div class="ambient-orb ambient-orb--2" aria-hidden="true"></div>
-            <div class="ambient-orb ambient-orb--3" aria-hidden="true"></div>
-            <div class="scanlines" aria-hidden="true"></div>
-            <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
-            <div class="vignette" aria-hidden="true"></div>
-
-            <div class="hero-v2__content site-container">
-                <div class="hero-v2__left">
-                    <div class="ai-badge" id="aiBadge">
-                        <span class="ai-badge__dot" aria-hidden="true"></span>
-                        <span class="ai-badge__text">Software house · IA</span>
+            <div class="site-container relative z-10">
+                <div class="hero-inner max-w-5xl mx-auto flex flex-col items-center">
+                    <!-- Tech Badge -->
+                    <div class="hero-badge inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transition-all hover:border-todoz/40 group" data-aos="fade-down">
+                        <span class="w-1.5 h-1.5 rounded-full bg-todoz animate-pulse shadow-[0_0_10px_#CFFF04]"></span>
+                        <span class="text-white font-black text-[10px] tracking-[0.28em] uppercase">Software house · IA</span>
                     </div>
 
-                    <p class="hero-v2__eyebrow" id="heroEyebrow">Agentes · Automações · Integrações</p>
-
-                    <h1 class="hero-v2__title" id="heroTitle">
-                        <span class="hero-v2__title-line">Feito pra</span>
-                        <span class="hero-v2__title-line hero-v2__title-accent">operar.</span>
+                    <h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="120">
+                        <span class="hero-eyebrow block text-zinc-400 font-semibold uppercase">
+                            Agentes · Automações · Integrações
+                        </span>
+                        <span class="hero-display block font-black tracking-tighter text-white uppercase italic">
+                            Feito pra <br class="hero-display-br" aria-hidden="true"><span class="text-todoz text-glow not-italic">operar.</span>
+                        </span>
                     </h1>
 
-                    <p class="hero-v2__subtitle" id="heroSubtitle">
+                    <!-- Paragraph -->
+                    <p class="hero-lead text-zinc-400 max-w-xl mx-auto leading-relaxed text-center font-medium" data-aos="fade-up" data-aos-delay="220">
                         Somos a WV Todoz. Software house que cria agentes de IA, automações e integrações de sistemas para comércio, indústria, serviços, saúde e o que mais o seu setor exigir.
                     </p>
 
-                    <div class="hero-v2__stats" id="heroStats">
-                        <div class="hero-v2__stat">
-                            <span class="hero-v2__stat-num">11+</span>
-                            <span class="hero-v2__stat-label">Anos de Inovação</span>
-                        </div>
-                        <div class="hero-v2__stat">
-                            <span class="hero-v2__stat-num">50+</span>
-                            <span class="hero-v2__stat-label">Projetos Entregues</span>
-                        </div>
-                        <div class="hero-v2__stat">
-                            <span class="hero-v2__stat-num">4</span>
-                            <span class="hero-v2__stat-label">Produtos Próprios</span>
-                        </div>
-                    </div>
-
-                    <div class="hero-v2__ctas" id="heroCtas">
-                        <a href="https://wa.me/551155311779" target="_blank" rel="noopener noreferrer" class="hero-v2__cta hero-v2__cta--primary magnetic">
-                            <span>Falar do projeto</span>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 8h10M9 4l4 4-4 4"/>
-                            </svg>
+                    <!-- CTAs -->
+                    <div class="hero-ctas flex flex-col sm:flex-row items-center justify-center w-full" data-aos="fade-up" data-aos-delay="320">
+                        <a href="https://wa.me/551155311779" target="_blank" class="hero-cta magnetic bg-todoz group relative text-black font-black rounded-full uppercase flex items-center justify-center gap-3">
+                            Falar do projeto
+                            <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                                <i class="ph-fill ph-rocket-launch text-lg group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            </div>
                         </a>
-                        <button type="button" class="hero-v2__cta hero-v2__cta--ghost open-modal" data-wv-section="hero" data-wv-lead-type="contato">
-                            <span>Ver o que fazemos</span>
+                        <button type="button" class="hero-cta open-modal magnetic bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 uppercase backdrop-blur-sm" data-wv-section="hero" data-wv-lead-type="contato">
+                            Ver o que fazemos
                         </button>
                     </div>
 
-                    <div class="hero-v2__logos hero-logos" id="heroLogos">
+                    <!-- Product logos — evenly spaced; scroll cue sits below (not between logos) -->
+                    <div class="hero-logos" data-aos="fade-up" data-aos-delay="400">
                         <a href="#produtos" class="hero-logo" aria-label="Facíleme">
                             <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme" width="213" height="82" loading="lazy">
                         </a>
@@ -215,126 +210,16 @@
                         </a>
                     </div>
 
-                </div>
-
-                <aside class="hero-v2__right" id="heroFlowPanel" aria-label="Do WhatsApp lotado à venda no ar">
-                    <div class="hero-flow" id="heroFlow">
-                        <div class="hero-flow__canvas">
-                            <div class="hero-flow__dotgrid" aria-hidden="true"></div>
-                            <svg class="hero-flow__edges" id="heroFlowEdges" aria-hidden="true"></svg>
-                            <div class="hero-flow__board" id="heroFlowBoard">
-                                <article class="flow-node flow-node--pain" data-node="lead">
-                                    <span class="flow-node__tag">Dor</span>
-                                    <span class="flow-node__accent" aria-hidden="true"></span>
-                                    <span class="flow-node__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M8 10h.01M12 10h.01M16 10h.01"/>
-                                            <path d="M21 11.5a8.4 8.4 0 0 1-1.7 5.1L21 21l-4.4-1.2A8.5 8.5 0 1 1 21 11.5z"/>
-                                        </svg>
-                                    </span>
-                                    <div class="flow-node__body">
-                                        <h3 class="flow-node__title">WhatsApp lotado</h3>
-                                        <p class="flow-node__sub">Lead esfria à noite</p>
-                                    </div>
-                                </article>
-                                <article class="flow-node flow-node--ai is-running" data-node="ai">
-                                    <span class="flow-node__tag flow-node__tag--solution">Solução</span>
-                                    <span class="flow-node__accent" aria-hidden="true"></span>
-                                    <span class="flow-node__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="5" y="9" width="14" height="10" rx="2"/>
-                                            <path d="M9 9V7a3 3 0 0 1 6 0v2"/>
-                                            <circle cx="9.5" cy="14" r="1" fill="currentColor" stroke="none"/>
-                                            <circle cx="14.5" cy="14" r="1" fill="currentColor" stroke="none"/>
-                                            <path d="M12 3v2"/>
-                                        </svg>
-                                    </span>
-                                    <div class="flow-node__body">
-                                        <h3 class="flow-node__title">Agente atende 24/7</h3>
-                                        <p class="flow-node__sub">Qualifica e resolve</p>
-                                    </div>
-                                </article>
-                                <article class="flow-node flow-node--auto" data-node="auto">
-                                    <span class="flow-node__accent" aria-hidden="true"></span>
-                                    <span class="flow-node__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="5" width="18" height="16" rx="2"/>
-                                            <path d="M3 10h18M8 3v4M16 3v4"/>
-                                        </svg>
-                                    </span>
-                                    <div class="flow-node__body">
-                                        <h3 class="flow-node__title">Agenda o pedido</h3>
-                                        <p class="flow-node__sub">Sem planilha no meio</p>
-                                    </div>
-                                </article>
-                                <article class="flow-node flow-node--integ" data-node="integ">
-                                    <span class="flow-node__accent" aria-hidden="true"></span>
-                                    <span class="flow-node__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M4 7h10v10H4z"/>
-                                            <path d="M14 10h6v7h-6z"/>
-                                            <path d="M10 12h4"/>
-                                        </svg>
-                                    </span>
-                                    <div class="flow-node__body">
-                                        <h3 class="flow-node__title">Cai no ERP/CRM</h3>
-                                        <p class="flow-node__sub">Sem retrabalho manual</p>
-                                    </div>
-                                </article>
-                                <article class="flow-node flow-node--result" data-node="result">
-                                    <span class="flow-node__accent" aria-hidden="true"></span>
-                                    <span class="flow-node__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 6 9 17l-5-5"/>
-                                        </svg>
-                                    </span>
-                                    <div class="flow-node__body">
-                                        <h3 class="flow-node__title">Venda no ar</h3>
-                                        <p class="flow-node__sub">Time livre pra vender</p>
-                                    </div>
-                                </article>
-                            </div>
-                            <div class="hero-flow__metric" aria-hidden="true">
-                                <span class="hero-flow__metric-value">24/7</span>
-                                <span class="hero-flow__metric-label">sem fila no atendimento</span>
-                            </div>
-                            <div class="hero-flow__chip" aria-hidden="true">
-                                <span class="hero-flow__chip-dot"></span>
-                                <span>Operação comercial com IA</span>
-                            </div>
+                    <div class="hero-scroll-cue" aria-hidden="true">
+                        <div class="hero-scroll-pill">
+                            <div class="hero-scroll-dot"></div>
                         </div>
+                        <span class="hero-scroll-label">Scroll</span>
                     </div>
-                </aside>
-            </div>
-
-            <div class="hero-scroll-cue" id="scrollCue" aria-hidden="true">
-                <div class="hero-scroll-pill">
-                    <div class="hero-scroll-dot"></div>
-                </div>
-                <span class="hero-scroll-label">Scroll</span>
-            </div>
-
-            <div class="hero-v2__marquee" id="heroMarquee" aria-hidden="true">
-                <div class="marquee-track">
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Agentes de IA</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Automações Inteligentes</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Integração de Sistemas</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Machine Learning</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Processamento de Linguagem Natural</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Computer Vision</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Predição e Analytics</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Chatbots Avançados</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Agentes de IA</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Automações Inteligentes</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Integração de Sistemas</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Machine Learning</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Processamento de Linguagem Natural</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Computer Vision</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Predição e Analytics</div>
-                    <div class="marquee-item"><span class="marquee-item__dot"></span>Chatbots Avançados</div>
                 </div>
             </div>
         </section>
+
 
         <!-- Clientes -->
         <section id="clientes" class="section-canvas section-glow py-24">
@@ -1115,7 +1000,6 @@
         </div>
     </a>
 
-    <script src="assets/js/hero-v2.js"></script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/site-utils.js"></script>
     <script src="assets/js/main.js"></script>
