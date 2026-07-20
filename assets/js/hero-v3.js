@@ -82,6 +82,7 @@
     var subtitle = q(".hv3-subtitle");
     var ctas = q(".hv3-ctas");
     var stage = q(".hv3-stage-wrap");
+    var sectors = q(".hv3-sectors");
     var rails = qa(".hv3-rail");
     var proof = q(".hv3-proof");
     var scroll = q(".hv3-scroll");
@@ -94,6 +95,7 @@
     if (subtitle) parts.push(subtitle);
     if (ctas) parts.push(ctas);
     if (stage) parts.push(stage);
+    if (sectors) parts.push(sectors);
     rails.forEach(function (el) {
       parts.push(el);
     });
@@ -121,6 +123,7 @@
     if (subtitle) tl.to(subtitle, { opacity: 1, y: 0, duration: 0.55 }, "-=0.3");
     if (ctas) tl.to(ctas, { opacity: 1, y: 0, duration: 0.55 }, "-=0.3");
     if (stage) tl.to(stage, { opacity: 1, y: 0, duration: 0.65 }, "-=0.45");
+    if (sectors) tl.to(sectors, { opacity: 1, y: 0, duration: 0.45 }, "-=0.45");
     if (rails.length) {
       tl.to(rails, { opacity: 1, y: 0, duration: 0.55, stagger: 0.08 }, "-=0.4");
     }
