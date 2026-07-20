@@ -1,6 +1,7 @@
 /**
- * Hero v2 — cinematic void hero + commercial pain→solution workflow canvas.
+ * Hero v2 — commercial pain→solution workflow canvas on the shared page bg.
  * Lime accent only (no red glitch). Scoped under #hero.hero-v2.
+ * Body --wv-bg is the only full-bleed page paint (light + dark).
  */
 
 #hero.hero-v2 {
@@ -29,16 +30,20 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--hv2-void);
+  background: transparent;
   color: #fff;
   box-sizing: border-box;
 }
 
-/* Reset conflicting legacy hero chrome when v2 is active */
+/* Kill legacy / alternate hero atmospheres — body --wv-bg is the only page paint */
 #hero.hero-v2 .hero-video,
 #hero.hero-v2 .hero-mesh,
 #hero.hero-v2 .hero-glow,
-#hero.hero-v2 .hero-glass {
+#hero.hero-v2 .hero-glass,
+#hero.hero-v2 .ambient-orb,
+#hero.hero-v2 .scanlines,
+#hero.hero-v2 .vignette,
+#hero.hero-v2 .grid-overlay {
   display: none !important;
 }
 
@@ -1148,7 +1153,11 @@
   z-index: 20;
   padding: 1.35rem 0 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: linear-gradient(to top, rgba(5, 5, 5, 0.96), rgba(5, 5, 5, 0.55) 55%, transparent);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--wv-bg, transparent) 88%, transparent),
+    transparent
+  );
   overflow: hidden;
   opacity: 0;
 }
@@ -1292,10 +1301,8 @@
 
 }
 
-/* ===== LIGHT THEME — cream / white Hero v2 ===== */
+/* Light theme — tokens only; no alternate hero surface */
 [data-theme="light"] #hero.hero-v2 {
-  --hv2-cream: #f5f5f2;
-  --hv2-cream-deep: #ebebe6;
   --hv2-ink: #0a0a0a;
   --hv2-ink-soft: #3f3f46;
   --hv2-ink-muted: #71717a;
@@ -1308,49 +1315,8 @@
   --hv2-shadow: 0 24px 60px rgba(10, 10, 10, 0.08), 0 8px 20px rgba(10, 10, 10, 0.05);
   --hv2-accent-soft: rgba(207, 255, 4, 0.16);
 
-  background:
-    radial-gradient(ellipse 80% 60% at 78% 42%, rgba(207, 255, 4, 0.1) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 12% 80%, rgba(168, 214, 0, 0.07) 0%, transparent 50%),
-    linear-gradient(165deg, var(--hv2-cream) 0%, #fafaf7 45%, var(--hv2-cream-deep) 100%);
+  background: transparent;
   color: var(--hv2-ink);
-}
-
-[data-theme="light"] #hero.hero-v2 .ambient-orb--1 {
-  background: radial-gradient(circle, rgba(207, 255, 4, 0.22) 0%, transparent 70%);
-}
-
-[data-theme="light"] #hero.hero-v2 .ambient-orb--2 {
-  background: radial-gradient(circle, rgba(168, 214, 0, 0.14) 0%, transparent 70%);
-}
-
-[data-theme="light"] #hero.hero-v2 .ambient-orb--3 {
-  background: radial-gradient(circle, rgba(207, 255, 4, 0.12) 0%, transparent 70%);
-}
-
-[data-theme="light"] #hero.hero-v2 .scanlines {
-  opacity: 0.018;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(10, 10, 10, 0.03) 2px,
-    rgba(10, 10, 10, 0.03) 4px
-  );
-}
-
-[data-theme="light"] #hero.hero-v2 .vignette {
-  background: radial-gradient(
-    ellipse at center,
-    transparent 0%,
-    transparent 55%,
-    rgba(235, 235, 230, 0.65) 100%
-  );
-}
-
-[data-theme="light"] #hero.hero-v2 .grid-overlay {
-  background-image:
-    linear-gradient(rgba(10, 10, 10, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
 }
 
 [data-theme="light"] #hero.hero-v2 .ai-badge {
@@ -1704,7 +1670,6 @@
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__marquee {
   border-top-color: rgba(10, 10, 10, 0.08);
-  background: linear-gradient(to top, rgba(245, 245, 242, 0.97), rgba(245, 245, 242, 0.55) 50%, transparent);
 }
 
 [data-theme="light"] #hero.hero-v2 .marquee-item {
