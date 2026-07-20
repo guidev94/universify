@@ -1,5 +1,5 @@
 /**
- * Hero v2 — Three.js particles, neural orbit, GSAP entrance.
+ * Hero v2 — Three.js particles + GSAP entrance for value-stack panel.
  * Isolated resize/cleanup; respects prefers-reduced-motion.
  */
 (function () {
@@ -47,15 +47,6 @@
     return document.documentElement.getAttribute("data-theme") === "light";
   }
 
-  function getOrbitRadius() {
-    var w = window.innerWidth;
-    /* Slightly larger orbits leave room for always-visible labels */
-    if (w >= 1280) return 205;
-    if (w >= 1024) return 185;
-    if (w >= 768) return 142;
-    return 122;
-  }
-
   /* ===== THREE.JS PARTICLE FIELD ===== */
   function initThreeJS() {
     if (reduced || typeof THREE === "undefined") return;
@@ -68,7 +59,7 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-    var particleCount = window.innerWidth < 768 ? 400 : 800;
+    var particleCount = window.innerWidth < 768 ? 280 : isLightTheme() ? 420 : 700;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
@@ -91,7 +82,7 @@
       color: 0xcfff04,
       size: 0.03,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
       sizeAttenuation: true,
     });
@@ -99,12 +90,12 @@
     function applyParticleTheme() {
       if (isLightTheme()) {
         material.color.setHex(0x6b8f00);
-        material.opacity = 0.38;
-        material.size = 0.035;
+        material.opacity = 0.22;
+        material.size = 0.032;
         material.blending = THREE.NormalBlending;
       } else {
         material.color.setHex(0xcfff04);
-        material.opacity = 0.6;
+        material.opacity = 0.55;
         material.size = 0.03;
         material.blending = THREE.AdditiveBlending;
       }
@@ -206,151 +197,26 @@
     });
   }
 
-  function drawConnections() {
-    var svg = document.getElementById("connectionsSvg");
-    var centralOrb = document.getElementById("centralOrb");
-    var nodes = hero.querySelectorAll(".satellite-node");
-    var container = document.getElementById("neuralContainer");
-    if (!svg || !centralOrb || !container || !nodes.length) return;
-
-    var angle = 0;
-    var orbitRadius = getOrbitRadius();
-    var orbiting = !reduced && window.innerWidth >= 1024;
-
-    function updateConnections() {
-      var containerRect = container.getBoundingClientRect();
-      var centerX = containerRect.width / 2;
-      var centerY = containerRect.height / 2;
-      var paths = "";
-      nodes.forEach(function (node) {
-        var nodeRect = node.getBoundingClientRect();
-        var nodeX = nodeRect.left + nodeRect.width / 2 - containerRect.left;
-        var nodeY = nodeRect.top + nodeRect.height / 2 - containerRect.top;
-        var midX = (centerX + nodeX) / 2;
-        var midY = (centerY + nodeY) / 2;
-        var offset = 24;
-        paths +=
-          '<path class="connection-line" d="M' +
-          centerX +
-          "," +
-          centerY +
-          " Q" +
-          (midX + offset) +
-          "," +
-          (midY - offset) +
-          " " +
-          nodeX +
-          "," +
-          nodeY +
-          '"/>';
-      });
-      svg.innerHTML = paths;
-    }
-
-    function placeStatic() {
-      nodes.forEach(function (node, i) {
-        var nodeAngle = i * ((Math.PI * 2) / nodes.length) - Math.PI / 2;
-        var x = Math.cos(nodeAngle) * orbitRadius;
-        var y = Math.sin(nodeAngle) * orbitRadius;
-        node.style.transform = "translate(" + x + "px, " + y + "px)";
-      });
-      updateConnections();
-    }
-
-    function orbitNodes() {
-      if (!orbiting) return;
-      angle += 0.003;
-      nodes.forEach(function (node, i) {
-        var nodeAngle = angle + i * ((Math.PI * 2) / nodes.length);
-        var x = Math.cos(nodeAngle) * orbitRadius;
-        var y = Math.sin(nodeAngle) * orbitRadius;
-        node.style.transform = "translate(" + x + "px, " + y + "px)";
-      });
-      updateConnections();
-      raf(orbitNodes);
-    }
-
-    placeStatic();
-    on(window, "resize", function () {
-      orbitRadius = getOrbitRadius();
-      orbiting = !reduced && window.innerWidth >= 1024;
-      if (!orbiting) placeStatic();
-      else updateConnections();
-    });
-
-    if (orbiting) orbitNodes();
-  }
-
-  function animateDataPackets() {
-    if (reduced) return;
-    var container = document.getElementById("neuralContainer");
-    if (!container) return;
-
-    function createPacket() {
-      if (window.innerWidth < 1024) return;
-      var packet = document.createElement("div");
-      packet.className = "data-packet";
-      container.appendChild(packet);
-      var startAngle = Math.random() * Math.PI * 2;
-      var startRadius = getOrbitRadius();
-      var endRadius = 0;
-      var duration = 2000 + Math.random() * 1000;
-      var startTime = Date.now();
-      var centerX = container.offsetWidth / 2;
-      var centerY = container.offsetHeight / 2;
-
-      function updatePacket() {
-        var elapsed = Date.now() - startTime;
-        var progress = Math.min(elapsed / duration, 1);
-        var easeProgress = 1 - Math.pow(1 - progress, 3);
-        var currentRadius = startRadius + (endRadius - startRadius) * easeProgress;
-        var x = centerX + Math.cos(startAngle) * currentRadius - 2;
-        var y = centerY + Math.sin(startAngle) * currentRadius - 2;
-        packet.style.left = x + "px";
-        packet.style.top = y + "px";
-        packet.style.opacity = String(1 - easeProgress);
-        if (progress < 1) raf(updatePacket);
-        else packet.remove();
-      }
-      raf(updatePacket);
-    }
-
-    intervals.push(setInterval(createPacket, 800));
-  }
-
-  function initParallax() {
-    if (reduced) return;
-    var neuralContainer = document.getElementById("neuralContainer");
-    var centralOrb = document.getElementById("centralOrb");
-
-    on(document, "mousemove", function (e) {
-      var x = (e.clientX / window.innerWidth - 0.5) * 2;
-      var y = (e.clientY / window.innerHeight - 0.5) * 2;
-      if (neuralContainer) {
-        neuralContainer.style.transform = "translate(" + x * 10 + "px, " + y * 10 + "px)";
-      }
-      if (centralOrb) {
-        centralOrb.style.transform =
-          "translate(calc(-50% + " + x * 5 + "px), calc(-50% + " + y * 5 + "px))";
-      }
+  function revealValuePanelFallback() {
+    hero.querySelectorAll("#heroValue, .hero-value__card, .hero-value__pillar").forEach(function (el) {
+      el.style.opacity = "1";
+      el.style.transform = "none";
     });
   }
 
   function initEntrance() {
     var logos = hero.querySelector("#heroLogos");
     var scrollCue = hero.querySelector("#scrollCue");
+    var valueRoot = hero.querySelector("#heroValue");
 
     if (typeof gsap === "undefined") {
       hero.querySelectorAll(
-        ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, .neural-container, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
+        ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroValue, .hero-value__card, .hero-value__pillar, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay"
       ).forEach(function (el) {
         el.style.opacity = "1";
         if (el.id !== "scrollCue") el.style.transform = "none";
       });
       animateStats();
-      drawConnections();
-      animateDataPackets();
-      initParallax();
       return;
     }
 
@@ -364,7 +230,9 @@
           ".hero-v2__stats",
           ".hero-v2__ctas",
           "#heroLogos",
-          ".neural-container",
+          "#heroValue",
+          ".hero-value__card",
+          ".hero-value__pillar",
           ".hero-v2__marquee",
           ".ambient-orb",
           ".grid-overlay",
@@ -372,12 +240,14 @@
         { opacity: 1, y: 0, clearProps: "transform" }
       );
       if (scrollCue) gsap.set(scrollCue, { opacity: 0.85, xPercent: -50 });
-      drawConnections();
       return;
     }
 
     if (scrollCue) gsap.set(scrollCue, { xPercent: -50, opacity: 0 });
     if (logos) gsap.set(logos, { opacity: 0, y: 16 });
+    if (valueRoot) gsap.set(valueRoot, { opacity: 0 });
+    gsap.set(".hero-value__card", { opacity: 0, y: 22 });
+    gsap.set(".hero-value__pillar", { opacity: 0, y: 14 });
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -406,16 +276,29 @@
     if (logos) {
       tl.to(logos, { opacity: 1, y: 0, duration: 0.7 }, "-=0.25");
     }
-    tl.to("#neuralContainer", { opacity: 1, duration: 1.2, ease: "power2.out" }, "-=1");
+
+    if (valueRoot) {
+      tl.to("#heroValue", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.85");
+      tl.to(
+        ".hero-value__card",
+        { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" },
+        "-=0.35"
+      );
+      tl.to(
+        ".hero-value__pillar",
+        { opacity: 1, y: 0, duration: 0.55, stagger: 0.1, ease: "power2.out" },
+        "-=0.4"
+      );
+    } else {
+      revealValuePanelFallback();
+    }
+
     if (scrollCue) {
       tl.to(scrollCue, { opacity: 0.85, duration: 0.6 }, "-=0.5");
     }
     tl.to("#heroMarquee", { opacity: 1, duration: 0.8 }, "-=0.3");
 
     animateStats();
-    drawConnections();
-    animateDataPackets();
-    initParallax();
   }
 
   function boot() {
