@@ -19,9 +19,11 @@
   var resizeTimer = null;
   var storyCycleTimer = null;
   var pulseTimer = null;
+  var edgeDrawTimer = null;
   var currentStory = "atendimento";
   var pulseIndex = 0;
   var storyChanging = false;
+  var flowReady = false;
 
   var STORY_ORDER = ["atendimento", "rh", "operacao"];
 
@@ -110,6 +112,7 @@
   }
 
   function cleanup() {
+    flowReady = false;
     rafIds.forEach(function (id) {
       cancelAnimationFrame(id);
     });
@@ -127,8 +130,12 @@
       storyCycleTimer = null;
     }
     if (pulseTimer) {
-      clearInterval(pulseTimer);
+      clearTimeout(pulseTimer);
       pulseTimer = null;
+    }
+    if (edgeDrawTimer) {
+      clearTimeout(edgeDrawTimer);
+      edgeDrawTimer = null;
     }
     listeners.forEach(function (entry) {
       entry[0].removeEventListener(entry[1], entry[2], entry[3]);
@@ -178,6 +185,14 @@
     );
   }
 
+  function scheduleEdges() {
+    if (edgeDrawTimer) clearTimeout(edgeDrawTimer);
+    edgeDrawTimer = setTimeout(function () {
+      edgeDrawTimer = null;
+      drawEdges();
+    }, 32);
+  }
+
   function drawEdges() {
     var board = document.getElementById("heroFlowBoard");
     var svg = document.getElementById("heroFlowEdges");
@@ -187,6 +202,8 @@
     var canvasRect = canvas.getBoundingClientRect();
     var w = canvas.clientWidth;
     var h = canvas.clientHeight;
+    if (w < 2 || h < 2) return;
+
     svg.setAttribute("viewBox", "0 0 " + w + " " + h);
     svg.setAttribute("width", String(w));
     svg.setAttribute("height", String(h));
@@ -197,11 +214,11 @@
     });
 
     var pairs = [
-      ["lead", "ai", true],
-      ["ai", "auto", false],
-      ["ai", "integ", false],
-      ["auto", "result", false],
-      ["integ", "result", true],
+      ["lead", "ai"],
+      ["ai", "auto"],
+      ["ai", "integ"],
+      ["auto", "result"],
+      ["integ", "result"],
     ];
 
     var ns = "http://www.w3.org/2000/svg";
@@ -217,14 +234,11 @@
       path.setAttribute("d", cubicPath(a, b));
       path.setAttribute("data-from", pair[0]);
       path.setAttribute("data-to", pair[1]);
-      path.setAttribute(
-        "class",
-        pair[2] ? "hero-flow__edge hero-flow__edge--active" : "hero-flow__edge"
-      );
+      path.setAttribute("class", "hero-flow__edge");
       svg.appendChild(path);
     });
 
-    updateEdgePulse(PULSE_SEQUENCE[pulseIndex] || "ai");
+    updateEdgePulse(PULSE_SEQUENCE[pulseIndex] || "lead");
   }
 
   function updateEdgePulse(activeKey) {
@@ -239,13 +253,44 @@
     });
   }
 
+  function restartNodePulse(node) {
+    if (!node || reduced) return;
+    node.classList.remove("is-running");
+    // Force style recalc so CSS animation restarts cleanly on each step
+    void node.offsetWidth;
+    node.classList.add("is-running");
+  }
+
   function setRunningNode(key) {
     var board = document.getElementById("heroFlowBoard");
     if (!board) return;
     board.querySelectorAll(".flow-node").forEach(function (node) {
-      node.classList.toggle("is-running", node.getAttribute("data-node") === key);
+      var match = node.getAttribute("data-node") === key;
+      if (match) {
+        restartNodePulse(node);
+      } else {
+        node.classList.remove("is-running");
+      }
     });
     updateEdgePulse(key);
+  }
+
+  function markNodesReady(ready) {
+    hero.querySelectorAll("#heroFlowBoard .flow-node").forEach(function (node) {
+      node.classList.toggle("is-ready", !!ready);
+      if (ready) {
+        node.style.opacity = "";
+        node.style.transform = "";
+      }
+    });
+  }
+
+  function clearNodeInlineMotion() {
+    if (typeof gsap !== "undefined") {
+      gsap.killTweensOf("#heroFlowBoard .flow-node");
+      gsap.set("#heroFlowBoard .flow-node", { clearProps: "transform,opacity" });
+    }
+    markNodesReady(true);
   }
 
   function applyStoryContent(storyKey) {
@@ -295,60 +340,62 @@
 
   function revealStoryNodes(onDone) {
     var nodes = hero.querySelectorAll("#heroFlowBoard .flow-node");
-    if (!nodes.length) {
+    var doneOnce = false;
+    var finish = function () {
+      if (doneOnce) return;
+      doneOnce = true;
+      clearNodeInlineMotion();
+      drawEdges();
       if (onDone) onDone();
+    };
+
+    if (!nodes.length) {
+      finish();
       return;
     }
 
     if (reduced || typeof gsap === "undefined") {
-      nodes.forEach(function (n) {
-        n.style.opacity = "1";
-        n.style.transform = "none";
-      });
-      drawEdges();
-      pulseIndex = 0;
-      setRunningNode(PULSE_SEQUENCE[0]);
-      if (onDone) onDone();
+      finish();
       return;
     }
 
+    markNodesReady(false);
+    gsap.killTweensOf(nodes);
     gsap.set(nodes, { opacity: 0, y: 14 });
     gsap.to(nodes, {
       opacity: 1,
       y: 0,
-      duration: 0.45,
-      stagger: 0.1,
+      duration: 0.42,
+      stagger: 0.09,
       ease: "power2.out",
-      onUpdate: drawEdges,
-      onComplete: function () {
-        drawEdges();
-        pulseIndex = 0;
-        setRunningNode(PULSE_SEQUENCE[0]);
-        if (onDone) onDone();
-      },
+      onComplete: finish,
     });
+    // Safety: never leave storyChanging true if GSAP stalls
+    later(finish, 1200);
   }
 
   function switchStory(storyKey, opts) {
     opts = opts || {};
-    if (!STORIES[storyKey] || storyKey === currentStory && !opts.force) return;
+    if (!STORIES[storyKey] || (storyKey === currentStory && !opts.force)) return;
     if (storyChanging) return;
     storyChanging = true;
 
     var canvas = hero.querySelector(".hero-flow__canvas");
+    var nodes = hero.querySelectorAll("#heroFlowBoard .flow-node");
+    var applied = false;
+    stopPulseCycle();
+
     var finish = function () {
+      if (applied) return;
+      applied = true;
       applyStoryContent(storyKey);
       currentStory = storyKey;
-      later(function () {
-        if (canvas) canvas.classList.remove("is-switching");
-        revealStoryNodes(function () {
-          storyChanging = false;
-          if (!opts.skipRestartPulse) startPulseCycle();
-        });
-      }, reduced ? 0 : 40);
+      if (canvas) canvas.classList.remove("is-switching");
+      revealStoryNodes(function () {
+        storyChanging = false;
+        if (!opts.skipRestartPulse) startPulseCycle();
+      });
     };
-
-    stopPulseCycle();
 
     if (reduced || typeof gsap === "undefined") {
       finish();
@@ -356,36 +403,47 @@
     }
 
     if (canvas) canvas.classList.add("is-switching");
-    var nodes = hero.querySelectorAll("#heroFlowBoard .flow-node");
+    gsap.killTweensOf(nodes);
     gsap.to(nodes, {
       opacity: 0,
-      y: -10,
-      duration: 0.22,
-      stagger: 0.03,
+      y: -8,
+      duration: 0.18,
+      stagger: 0.02,
       ease: "power2.in",
       onComplete: finish,
     });
+    later(finish, 700);
   }
 
   function startPulseCycle() {
     stopPulseCycle();
+    pulseIndex = 0;
+    flowReady = true;
+
     if (reduced) {
       setRunningNode("ai");
       return;
     }
-    pulseIndex = 0;
-    setRunningNode(PULSE_SEQUENCE[pulseIndex]);
-    pulseTimer = setInterval(function () {
+
+    var step = function () {
+      if (!flowReady) return;
+      var key = PULSE_SEQUENCE[pulseIndex];
+      setRunningNode(key);
       pulseIndex = (pulseIndex + 1) % PULSE_SEQUENCE.length;
-      setRunningNode(PULSE_SEQUENCE[pulseIndex]);
-    }, 1600);
+      pulseTimer = setTimeout(step, 1400);
+    };
+    step();
   }
 
   function stopPulseCycle() {
+    flowReady = false;
     if (pulseTimer) {
-      clearInterval(pulseTimer);
+      clearTimeout(pulseTimer);
       pulseTimer = null;
     }
+    hero.querySelectorAll("#heroFlowBoard .flow-node.is-running").forEach(function (node) {
+      node.classList.remove("is-running");
+    });
   }
 
   function startStoryAutoCycle() {
@@ -460,10 +518,10 @@
 
   function initFlowCanvas() {
     applyStoryContent(currentStory);
-    drawEdges();
+    scheduleEdges();
     on(window, "resize", function () {
       if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(drawEdges, 80);
+      resizeTimer = setTimeout(drawEdges, 100);
     });
     initNodeHover();
     initTabs();
@@ -582,8 +640,11 @@
           duration: 0.55,
           stagger: 0.1,
           ease: "power2.out",
-          onUpdate: drawEdges,
           onComplete: function () {
+            clearNodeInlineMotion();
+            hero.querySelectorAll("#heroFlowBoard .flow-node").forEach(function (n) {
+              n.style.opacity = "1";
+            });
             drawEdges();
             startPulseCycle();
             startStoryAutoCycle();
@@ -591,7 +652,7 @@
         },
         "-=0.25"
       );
-      tl.add(drawEdges, "-=0.2");
+      tl.add(scheduleEdges, "-=0.15");
     } else {
       revealFlowFallback();
     }
