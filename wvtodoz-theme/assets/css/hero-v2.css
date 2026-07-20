@@ -570,14 +570,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.18rem;
+  gap: 0.15rem;
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto 1rem;
-  padding: 0.22rem;
-  border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.04);
+  margin: 0 auto 1.05rem;
+  padding: 0.2rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   opacity: 0;
 }
 
@@ -586,20 +587,24 @@
   border: 0;
   margin: 0;
   cursor: pointer;
-  padding: 0.48rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.5rem 1.05rem;
+  border-radius: 0.55rem;
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.76rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.5);
   background: transparent;
-  transition: color 0.22s ease, background 0.22s ease, transform 0.2s ease;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.2s ease;
   white-space: nowrap;
 }
 
 #hero.hero-v2 .hero-orbs__tab:hover {
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 #hero.hero-v2 .hero-orbs__tab:active {
@@ -607,26 +612,28 @@
 }
 
 #hero.hero-v2 .hero-orbs__tab:focus-visible {
-  outline: 2px solid rgba(207, 255, 4, 0.55);
+  outline: 2px solid rgba(207, 255, 4, 0.5);
   outline-offset: 2px;
 }
 
 #hero.hero-v2 .hero-orbs__tab.is-active {
   color: #0a0a0a;
   font-weight: 700;
-  background: rgba(207, 255, 4, 0.92);
+  background: rgba(207, 255, 4, 0.9);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 4px 12px rgba(207, 255, 4, 0.18);
 }
 
 #hero.hero-v2 .hero-orbs__canvas {
   position: relative;
-  border-radius: 1.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background:
-    radial-gradient(ellipse 55% 40% at 78% 18%, rgba(207, 255, 4, 0.07) 0%, transparent 55%),
-    linear-gradient(165deg, #111111 0%, #0c0c0c 55%, #090909 100%);
+    radial-gradient(ellipse 50% 38% at 76% 16%, rgba(207, 255, 4, 0.09) 0%, transparent 58%),
+    linear-gradient(168deg, #161616 0%, #101010 48%, #0b0b0b 100%);
   box-shadow:
-    0 28px 64px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 32px 72px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
   overflow: hidden;
   min-height: clamp(22rem, 42vh, 28rem);
   transition: opacity 0.28s ease;
@@ -641,9 +648,10 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
   background-size: 18px 18px;
-  opacity: 0.32;
+  opacity: 0.28;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 35%, transparent 85%);
 }
 
 #hero.hero-v2 .hero-orbs__wires {
@@ -658,22 +666,23 @@
 
 #hero.hero-v2 .hero-orbs__wire {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1.6;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1.55;
   stroke-linecap: round;
-  stroke-dasharray: 5 10;
-  animation: hv2-wireFlow 2s linear infinite;
+  stroke-dasharray: 5 11;
+  animation: hv2-wireFlow 2.1s linear infinite;
 }
 
 #hero.hero-v2 .hero-orbs__wire--spine {
-  stroke: rgba(255, 255, 255, 0.28);
-  stroke-width: 1.9;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1.85;
 }
 
 #hero.hero-v2 .hero-orbs__wire.is-lit {
-  stroke: rgba(207, 255, 4, 0.8);
-  stroke-width: 2.1;
-  animation-duration: 1.2s;
+  stroke: rgba(207, 255, 4, 0.72);
+  stroke-width: 2;
+  animation-duration: 1.15s;
+  filter: drop-shadow(0 0 4px rgba(207, 255, 4, 0.25));
 }
 
 @keyframes hv2-wireFlow {
@@ -688,9 +697,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: clamp(0.85rem, 2vw, 1.5rem);
-  row-gap: clamp(1.75rem, 3.5vw, 2.5rem);
-  padding: clamp(1.75rem, 3vw, 2.4rem) clamp(1.1rem, 2.2vw, 1.75rem) 3.4rem;
+  column-gap: clamp(0.95rem, 2.2vw, 1.65rem);
+  row-gap: clamp(2rem, 3.8vw, 2.75rem);
+  padding: clamp(1.85rem, 3.2vw, 2.55rem) clamp(1.15rem, 2.3vw, 1.85rem) 3.55rem;
   min-height: inherit;
   align-content: center;
   justify-items: center;
@@ -702,8 +711,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.45rem;
-  max-width: 8.5rem;
+  gap: 0.32rem;
+  max-width: 8.75rem;
   opacity: 0;
   transform: scale(0.88);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -717,8 +726,13 @@
 
 #hero.hero-v2 .orb.is-hovered,
 #hero.hero-v2 .orb:hover {
-  transform: translateY(-4px) scale(1.03);
+  transform: translateY(-5px) scale(1.035);
   z-index: 4;
+}
+
+#hero.hero-v2 .orb.is-hovered .orb__circle,
+#hero.hero-v2 .orb:hover .orb__circle {
+  transform: scale(1.04);
 }
 
 #hero.hero-v2 .orb__role {
@@ -727,7 +741,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.52);
   line-height: 1;
 }
 
@@ -738,23 +752,27 @@
   justify-content: center;
   width: 4.25rem;
   height: 4.25rem;
+  margin: 0.12rem 0 0.38rem;
   border-radius: 50%;
-  background: rgba(22, 22, 22, 0.95);
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(160deg, rgba(38, 38, 38, 0.98) 0%, rgba(18, 18, 18, 0.98) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 28px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.25);
   transition:
     border-color 0.28s ease,
     box-shadow 0.28s ease,
-    transform 0.28s ease;
+    transform 0.28s ease,
+    background 0.28s ease;
 }
 
 #hero.hero-v2 .orb__icon {
   display: flex;
   width: 1.35rem;
   height: 1.35rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 #hero.hero-v2 .orb__icon svg {
@@ -766,9 +784,9 @@
   margin: 0;
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.96);
   line-height: 1.25;
 }
 
@@ -776,8 +794,8 @@
   margin: 0;
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.68rem;
-  line-height: 1.3;
-  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 #hero.hero-v2 .orb--pain {
@@ -787,25 +805,34 @@
 }
 
 #hero.hero-v2 .orb--pain .orb__role {
-  color: #e08b84;
+  color: #f0a39c;
 }
 
 #hero.hero-v2 .orb--pain .orb__circle {
-  border-color: rgba(224, 139, 132, 0.55);
+  border-color: rgba(232, 148, 140, 0.65);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    0 0 0 4px rgba(224, 139, 132, 0.08);
+    0 12px 28px rgba(0, 0, 0, 0.42),
+    0 0 0 4px rgba(224, 139, 132, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 #hero.hero-v2 .orb--pain .orb__icon {
-  color: #e08b84;
+  color: #f0a39c;
+}
+
+#hero.hero-v2 .orb--pain.is-hovered .orb__circle,
+#hero.hero-v2 .orb--pain:hover .orb__circle {
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.48),
+    0 0 0 5px rgba(224, 139, 132, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 #hero.hero-v2 .orb--solution {
   grid-column: 2 / 4;
   grid-row: 1;
   align-self: center;
-  max-width: 10rem;
+  max-width: 10.25rem;
   z-index: 2;
 }
 
@@ -814,14 +841,16 @@
 }
 
 #hero.hero-v2 .orb--solution .orb__circle {
-  width: 5.5rem;
-  height: 5.5rem;
-  border-color: rgba(207, 255, 4, 0.55);
-  background: rgba(24, 28, 12, 0.98);
+  width: 5.55rem;
+  height: 5.55rem;
+  border-color: rgba(207, 255, 4, 0.58);
+  background:
+    linear-gradient(155deg, rgba(36, 42, 16, 0.98) 0%, rgba(18, 22, 10, 0.99) 100%);
   box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 6px rgba(207, 255, 4, 0.1),
-    0 0 36px rgba(207, 255, 4, 0.12);
+    0 16px 36px rgba(0, 0, 0, 0.45),
+    0 0 0 5px rgba(207, 255, 4, 0.1),
+    0 0 28px rgba(207, 255, 4, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 #hero.hero-v2 .orb--solution .orb__icon {
@@ -831,53 +860,71 @@
 }
 
 #hero.hero-v2 .orb--solution .orb__title {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+}
+
+#hero.hero-v2 .orb--solution.is-hovered .orb__circle,
+#hero.hero-v2 .orb--solution:hover .orb__circle {
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 6px rgba(207, 255, 4, 0.14),
+    0 0 36px rgba(207, 255, 4, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 #hero.hero-v2 .orb--action {
   grid-row: 2;
   align-self: start;
-  max-width: 7.25rem;
+  max-width: 7.35rem;
 }
 
 #hero.hero-v2 .orb--action-a {
   grid-column: 2;
   justify-self: end;
-  margin-right: 0.35rem;
+  margin-right: 0.4rem;
 }
 
 #hero.hero-v2 .orb--action-b {
   grid-column: 3;
   justify-self: start;
-  margin-left: 0.35rem;
+  margin-left: 0.4rem;
 }
 
 #hero.hero-v2 .orb--action .orb__circle {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-color: rgba(255, 255, 255, 0.14);
+  width: 3.55rem;
+  height: 3.55rem;
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 #hero.hero-v2 .orb--action .orb__icon {
   width: 1.15rem;
   height: 1.15rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 #hero.hero-v2 .orb--action .orb__title {
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 #hero.hero-v2 .orb--action .orb__role {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+#hero.hero-v2 .orb--action.is-hovered .orb__circle,
+#hero.hero-v2 .orb--action:hover .orb__circle {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 4px rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 #hero.hero-v2 .orb--result {
   grid-column: 4;
   grid-row: 1;
   align-self: center;
-  max-width: 9rem;
+  max-width: 9.25rem;
 }
 
 #hero.hero-v2 .orb--result .orb__role {
@@ -885,17 +932,28 @@
 }
 
 #hero.hero-v2 .orb--result .orb__circle {
-  width: 4.75rem;
-  height: 4.75rem;
-  border-color: rgba(207, 255, 4, 0.5);
-  background: rgba(20, 26, 12, 0.98);
+  width: 4.8rem;
+  height: 4.8rem;
+  border-color: rgba(207, 255, 4, 0.52);
+  background:
+    linear-gradient(155deg, rgba(30, 38, 16, 0.98) 0%, rgba(16, 20, 10, 0.99) 100%);
   box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.38),
-    0 0 0 5px rgba(207, 255, 4, 0.1);
+    0 14px 30px rgba(0, 0, 0, 0.42),
+    0 0 0 4px rgba(207, 255, 4, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 #hero.hero-v2 .orb--result .orb__icon {
   color: var(--hv2-todoz);
+}
+
+#hero.hero-v2 .orb--result.is-hovered .orb__circle,
+#hero.hero-v2 .orb--result:hover .orb__circle {
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.48),
+    0 0 0 5px rgba(207, 255, 4, 0.16),
+    0 0 24px rgba(207, 255, 4, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Metric satellite — attached under Resultado, never overlaying other orbs */
@@ -903,19 +961,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.12rem;
-  margin-top: 0.35rem;
-  padding: 0.35rem 0.55rem;
+  gap: 0.14rem;
+  margin-top: 0.45rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  background: rgba(207, 255, 4, 0.1);
-  border: 1px solid rgba(207, 255, 4, 0.28);
+  background: rgba(12, 14, 8, 0.85);
+  border: 1px solid rgba(207, 255, 4, 0.32);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(207, 255, 4, 0.08);
   max-width: 100%;
 }
 
 #hero.hero-v2 .orb__metric-value {
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   letter-spacing: -0.02em;
   color: var(--hv2-todoz);
   line-height: 1;
@@ -925,14 +984,14 @@
 #hero.hero-v2 .orb__metric-label {
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.58rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.72);
+  font-weight: 550;
+  color: rgba(255, 255, 255, 0.78);
   line-height: 1.2;
   text-align: center;
 }
 
 #hero.hero-v2 .orb.is-running .orb__circle {
-  border-color: rgba(207, 255, 4, 0.7);
+  border-color: rgba(207, 255, 4, 0.72);
 }
 
 #hero.hero-v2 .orb.is-pulse .orb__circle {
@@ -943,14 +1002,16 @@
   0%,
   100% {
     box-shadow:
-      0 10px 24px rgba(0, 0, 0, 0.35),
-      0 0 0 4px rgba(207, 255, 4, 0.08);
+      0 12px 28px rgba(0, 0, 0, 0.42),
+      0 0 0 4px rgba(207, 255, 4, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   50% {
     box-shadow:
-      0 12px 28px rgba(0, 0, 0, 0.4),
-      0 0 0 8px rgba(207, 255, 4, 0.16),
-      0 0 28px rgba(207, 255, 4, 0.2);
+      0 14px 32px rgba(0, 0, 0, 0.48),
+      0 0 0 7px rgba(207, 255, 4, 0.14),
+      0 0 22px rgba(207, 255, 4, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -962,31 +1023,40 @@
   0%,
   100% {
     box-shadow:
-      0 14px 32px rgba(0, 0, 0, 0.4),
-      0 0 0 6px rgba(207, 255, 4, 0.1),
-      0 0 36px rgba(207, 255, 4, 0.12);
+      0 16px 36px rgba(0, 0, 0, 0.45),
+      0 0 0 5px rgba(207, 255, 4, 0.1),
+      0 0 28px rgba(207, 255, 4, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   50% {
     box-shadow:
-      0 16px 36px rgba(0, 0, 0, 0.45),
-      0 0 0 10px rgba(207, 255, 4, 0.18),
-      0 0 48px rgba(207, 255, 4, 0.22);
+      0 18px 40px rgba(0, 0, 0, 0.5),
+      0 0 0 8px rgba(207, 255, 4, 0.15),
+      0 0 36px rgba(207, 255, 4, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 }
 
 #hero.hero-v2 .hero-orbs__caption {
   position: absolute;
-  left: 1.15rem;
-  bottom: 1rem;
+  left: 1.1rem;
+  bottom: 0.95rem;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   margin: 0;
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.74rem;
-  font-weight: 550;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(8, 8, 8, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   opacity: 0;
 }
 
@@ -999,6 +1069,7 @@
   height: 0.4rem;
   border-radius: 9999px;
   background: var(--hv2-todoz);
+  box-shadow: 0 0 8px rgba(207, 255, 4, 0.45);
   flex-shrink: 0;
 }
 
@@ -1014,16 +1085,16 @@
 
 @media (max-width: 767px) {
   #hero.hero-v2 .hero-orbs__tab {
-    padding: 0.4rem 0.7rem;
+    padding: 0.42rem 0.72rem;
     font-size: 0.7rem;
   }
 
   #hero.hero-v2 .hero-orbs__board {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto auto auto;
-    row-gap: 1.35rem;
-    column-gap: 0.85rem;
-    padding: 1.35rem 0.9rem 3rem;
+    row-gap: 1.5rem;
+    column-gap: 0.9rem;
+    padding: 1.4rem 0.95rem 3.15rem;
   }
 
   #hero.hero-v2 .orb--pain {
@@ -1056,14 +1127,15 @@
   }
 
   #hero.hero-v2 .orb--solution .orb__circle {
-    width: 5rem;
-    height: 5rem;
+    width: 5.1rem;
+    height: 5.1rem;
   }
 
   #hero.hero-v2 .hero-orbs__caption {
-    left: 0.85rem;
-    bottom: 0.75rem;
-    font-size: 0.68rem;
+    left: 0.8rem;
+    bottom: 0.7rem;
+    font-size: 0.66rem;
+    padding: 0.32rem 0.62rem;
   }
 }
 
@@ -1369,68 +1441,87 @@
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__tabs {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(40, 36, 28, 0.1);
-  box-shadow: 0 4px 14px rgba(40, 36, 28, 0.05);
+  background: #ffffff;
+  border-color: rgba(28, 25, 20, 0.12);
+  box-shadow:
+    0 8px 22px rgba(40, 36, 28, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__tab {
-  color: rgba(24, 24, 27, 0.48);
+  color: rgba(24, 24, 27, 0.52);
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__tab:hover {
-  color: rgba(24, 24, 27, 0.8);
-  background: rgba(40, 36, 28, 0.04);
+  color: rgba(17, 17, 17, 0.88);
+  background: rgba(40, 36, 28, 0.045);
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__tab.is-active {
-  color: #111111;
-  background: rgba(207, 255, 4, 0.65);
+  color: #141414;
+  background: #d8e86a;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 2px 6px rgba(90, 110, 0, 0.12);
+}
+
+[data-theme="light"] #hero.hero-v2 .hero-orbs__tab:focus-visible {
+  outline-color: rgba(107, 143, 0, 0.55);
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__canvas {
   background:
-    radial-gradient(ellipse 55% 40% at 80% 12%, rgba(207, 255, 4, 0.12) 0%, transparent 52%),
-    linear-gradient(160deg, #fbf9f3 0%, #f5f1e8 45%, #ece7dc 100%);
-  border-color: rgba(40, 36, 28, 0.09);
+    radial-gradient(ellipse 48% 36% at 78% 10%, rgba(207, 255, 4, 0.1) 0%, transparent 55%),
+    linear-gradient(168deg, #ffffff 0%, #faf8f2 42%, #f3efe6 100%);
+  border-color: rgba(28, 25, 20, 0.14);
   box-shadow:
-    0 28px 64px rgba(40, 36, 28, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 28px 56px rgba(40, 36, 28, 0.12),
+    0 8px 20px rgba(40, 36, 28, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__dotgrid {
-  background-image: radial-gradient(rgba(40, 36, 28, 0.1) 1px, transparent 1px);
-  opacity: 0.5;
+  background-image: radial-gradient(rgba(40, 36, 28, 0.14) 1px, transparent 1px);
+  opacity: 0.42;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__wire {
-  stroke: rgba(40, 36, 28, 0.18);
+  stroke: rgba(40, 36, 28, 0.26);
+  stroke-width: 1.65;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__wire--spine {
-  stroke: rgba(40, 36, 28, 0.28);
+  stroke: rgba(40, 36, 28, 0.36);
+  stroke-width: 1.9;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__wire.is-lit {
-  stroke: rgba(107, 143, 0, 0.75);
-}
-
-[data-theme="light"] #hero.hero-v2 .orb__circle {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(40, 36, 28, 0.12);
-  box-shadow: 0 10px 22px rgba(40, 36, 28, 0.08);
-}
-
-[data-theme="light"] #hero.hero-v2 .orb__title {
-  color: #111111;
-}
-
-[data-theme="light"] #hero.hero-v2 .orb__sub {
-  color: #52525b;
+  stroke: rgba(107, 143, 0, 0.78);
+  filter: drop-shadow(0 0 3px rgba(143, 184, 0, 0.28));
 }
 
 [data-theme="light"] #hero.hero-v2 .orb__role {
-  color: rgba(24, 24, 27, 0.45);
+  color: rgba(24, 24, 27, 0.55);
+}
+
+[data-theme="light"] #hero.hero-v2 .orb__circle {
+  background: #ffffff;
+  border-color: rgba(40, 36, 28, 0.14);
+  box-shadow:
+    0 10px 22px rgba(40, 36, 28, 0.1),
+    0 2px 6px rgba(40, 36, 28, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+[data-theme="light"] #hero.hero-v2 .orb__title {
+  color: #0a0a0a;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb__sub {
+  color: #3f3f46;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb__icon {
+  color: #3f3f46;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--pain .orb__role,
@@ -1439,69 +1530,167 @@
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--pain .orb__circle {
-  border-color: rgba(196, 95, 86, 0.45);
+  background: #ffffff;
+  border-color: rgba(196, 95, 86, 0.55);
   box-shadow:
-    0 10px 22px rgba(40, 36, 28, 0.08),
-    0 0 0 4px rgba(196, 95, 86, 0.08);
+    0 10px 22px rgba(40, 36, 28, 0.1),
+    0 0 0 4px rgba(196, 95, 86, 0.1),
+    inset 0 1px 0 #fff;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb--pain.is-hovered .orb__circle,
+[data-theme="light"] #hero.hero-v2 .orb--pain:hover .orb__circle {
+  box-shadow:
+    0 14px 28px rgba(40, 36, 28, 0.12),
+    0 0 0 5px rgba(196, 95, 86, 0.16),
+    inset 0 1px 0 #fff;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--solution .orb__role,
 [data-theme="light"] #hero.hero-v2 .orb--solution .orb__icon {
-  color: #5c7a00;
+  color: #4f6a00;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--solution .orb__circle {
-  background: #fcfff0;
-  border-color: rgba(143, 184, 0, 0.5);
+  background: #ffffff;
+  border-color: rgba(143, 184, 0, 0.58);
   box-shadow:
-    0 14px 28px rgba(40, 36, 28, 0.1),
-    0 0 0 6px rgba(207, 255, 4, 0.14);
+    0 14px 28px rgba(40, 36, 28, 0.11),
+    0 0 0 5px rgba(207, 255, 4, 0.16),
+    0 0 22px rgba(207, 255, 4, 0.18),
+    inset 0 1px 0 #fff;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb--solution.is-hovered .orb__circle,
+[data-theme="light"] #hero.hero-v2 .orb--solution:hover .orb__circle {
+  box-shadow:
+    0 16px 32px rgba(40, 36, 28, 0.13),
+    0 0 0 6px rgba(207, 255, 4, 0.2),
+    0 0 28px rgba(207, 255, 4, 0.22),
+    inset 0 1px 0 #fff;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--action .orb__circle {
   background: #ffffff;
+  border-color: rgba(40, 36, 28, 0.14);
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--action .orb__title {
-  color: #27272a;
+  color: #18181b;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--action .orb__icon {
   color: #52525b;
 }
 
+[data-theme="light"] #hero.hero-v2 .orb--action .orb__role {
+  color: rgba(24, 24, 27, 0.48);
+}
+
+[data-theme="light"] #hero.hero-v2 .orb--action.is-hovered .orb__circle,
+[data-theme="light"] #hero.hero-v2 .orb--action:hover .orb__circle {
+  border-color: rgba(40, 36, 28, 0.22);
+  box-shadow:
+    0 12px 24px rgba(40, 36, 28, 0.12),
+    0 0 0 4px rgba(40, 36, 28, 0.05),
+    inset 0 1px 0 #fff;
+}
+
 [data-theme="light"] #hero.hero-v2 .orb--result .orb__role,
 [data-theme="light"] #hero.hero-v2 .orb--result .orb__icon {
-  color: #4a6400;
+  color: #3f5600;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb--result .orb__circle {
-  background: linear-gradient(145deg, #ffffff 0%, #f5fce6 100%);
-  border-color: rgba(143, 184, 0, 0.5);
+  background: #ffffff;
+  border-color: rgba(143, 184, 0, 0.55);
   box-shadow:
-    0 12px 26px rgba(40, 36, 28, 0.09),
-    0 0 0 5px rgba(207, 255, 4, 0.14);
+    0 12px 26px rgba(40, 36, 28, 0.1),
+    0 0 0 4px rgba(207, 255, 4, 0.14),
+    inset 0 1px 0 #fff;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb--result.is-hovered .orb__circle,
+[data-theme="light"] #hero.hero-v2 .orb--result:hover .orb__circle {
+  box-shadow:
+    0 14px 30px rgba(40, 36, 28, 0.12),
+    0 0 0 5px rgba(207, 255, 4, 0.2),
+    0 0 18px rgba(207, 255, 4, 0.16),
+    inset 0 1px 0 #fff;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb__metric {
-  background: rgba(207, 255, 4, 0.18);
-  border-color: rgba(143, 184, 0, 0.32);
+  background: #ffffff;
+  border-color: rgba(107, 143, 0, 0.35);
+  box-shadow:
+    0 6px 16px rgba(40, 36, 28, 0.08),
+    inset 0 1px 0 #fff;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb__metric-value {
-  color: #4a6400;
+  color: #3f5600;
 }
 
 [data-theme="light"] #hero.hero-v2 .orb__metric-label {
   color: #3f3f46;
+  font-weight: 550;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__caption {
-  color: #52525b;
+  color: #3f3f46;
+  background: #ffffff;
+  border-color: rgba(28, 25, 20, 0.12);
+  box-shadow: 0 6px 16px rgba(40, 36, 28, 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-orbs__caption-dot {
-  background: #8fb800;
+  background: #6b8f00;
+  box-shadow: 0 0 0 3px rgba(207, 255, 4, 0.22);
+}
+
+[data-theme="light"] #hero.hero-v2 .orb.is-pulse .orb__circle {
+  animation-name: hv2-orbPulseLight;
+}
+
+[data-theme="light"] #hero.hero-v2 .orb--solution.is-pulse .orb__circle {
+  animation-name: hv2-orbPulseHeroLight;
+}
+
+@keyframes hv2-orbPulseLight {
+  0%,
+  100% {
+    box-shadow:
+      0 10px 22px rgba(40, 36, 28, 0.1),
+      0 0 0 4px rgba(207, 255, 4, 0.1),
+      inset 0 1px 0 #fff;
+  }
+  50% {
+    box-shadow:
+      0 14px 28px rgba(40, 36, 28, 0.12),
+      0 0 0 7px rgba(207, 255, 4, 0.18),
+      0 0 18px rgba(207, 255, 4, 0.16),
+      inset 0 1px 0 #fff;
+  }
+}
+
+@keyframes hv2-orbPulseHeroLight {
+  0%,
+  100% {
+    box-shadow:
+      0 14px 28px rgba(40, 36, 28, 0.11),
+      0 0 0 5px rgba(207, 255, 4, 0.16),
+      0 0 22px rgba(207, 255, 4, 0.18),
+      inset 0 1px 0 #fff;
+  }
+  50% {
+    box-shadow:
+      0 16px 32px rgba(40, 36, 28, 0.13),
+      0 0 0 8px rgba(207, 255, 4, 0.22),
+      0 0 28px rgba(207, 255, 4, 0.2),
+      inset 0 1px 0 #fff;
+  }
 }
 
 [data-theme="light"] #hero.hero-v2 .hero-v2__marquee {
