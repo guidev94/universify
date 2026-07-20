@@ -600,9 +600,9 @@
   z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 0.85rem 0.75rem;
-  padding: clamp(1.1rem, 2.2vw, 1.6rem);
+  grid-template-rows: auto auto auto auto;
+  gap: 0.95rem 0.75rem;
+  padding: clamp(1.15rem, 2.2vw, 1.65rem) clamp(1.1rem, 2.2vw, 1.6rem) 2.75rem;
   min-height: inherit;
   align-content: center;
 }
@@ -693,8 +693,7 @@
 
 #hero.hero-v2 .flow-node--ai {
   grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
+  grid-row: 2;
   justify-self: center;
   color: var(--hv2-todoz);
   max-width: 10.5rem;
@@ -706,23 +705,23 @@
 }
 
 #hero.hero-v2 .flow-node--auto {
-  grid-column: 3;
-  grid-row: 1;
+  grid-column: 1;
+  grid-row: 3;
   color: #f0b429;
-  justify-self: end;
+  justify-self: start;
 }
 
 #hero.hero-v2 .flow-node--integ {
   grid-column: 3;
-  grid-row: 2;
+  grid-row: 3;
   color: #6ea8ff;
   justify-self: end;
 }
 
 #hero.hero-v2 .flow-node--result {
-  grid-column: 2 / span 2;
-  grid-row: 3;
-  justify-self: end;
+  grid-column: 2;
+  grid-row: 4;
+  justify-self: center;
   color: #3dd68c;
   max-width: 10.5rem;
 }
