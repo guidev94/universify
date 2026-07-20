@@ -197,8 +197,7 @@
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-    /* Density 4: atmosphere, not a particle storm */
-    var particleCount = window.innerWidth < 768 ? 160 : 320;
+    var particleCount = window.innerWidth < 768 ? 320 : 620;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
@@ -208,9 +207,9 @@
       positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
       velocities.push({
-        x: (Math.random() - 0.5) * 0.0016,
-        y: (Math.random() - 0.5) * 0.0016,
-        z: (Math.random() - 0.5) * 0.0008,
+        x: (Math.random() - 0.5) * 0.002,
+        y: (Math.random() - 0.5) * 0.002,
+        z: (Math.random() - 0.5) * 0.001,
       });
     }
 
@@ -220,10 +219,10 @@
     var circleMap = createCircleTexture();
     var material = new THREE.PointsMaterial({
       color: 0xcfff04,
-      size: 0.048,
+      size: 0.055,
       map: circleMap || undefined,
       transparent: true,
-      opacity: 0.32,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
@@ -232,13 +231,13 @@
     function applyParticleTheme() {
       if (isLightTheme()) {
         material.color.setHex(0x7a9a00);
-        material.opacity = 0.16;
-        material.size = 0.042;
+        material.opacity = 0.28;
+        material.size = 0.05;
         material.blending = THREE.NormalBlending;
       } else {
         material.color.setHex(0xcfff04);
-        material.opacity = 0.32;
-        material.size = 0.048;
+        material.opacity = 0.55;
+        material.size = 0.055;
         material.blending = THREE.AdditiveBlending;
       }
       material.needsUpdate = true;
@@ -543,9 +542,9 @@
     gsap.to(parts, {
       opacity: 1,
       scale: 1,
-      duration: 0.48,
-      stagger: 0.08,
-      ease: "back.out(1.15)",
+      duration: 0.42,
+      stagger: 0.07,
+      ease: "power2.out",
       onComplete: finish,
     });
     later(finish, 1200);
@@ -723,62 +722,15 @@
     });
   }
 
-  /** Magnetic / spring CTA hover — transform + opacity only (GSAP). */
-  function initMagneticCtas() {
-    var ctas = hero.querySelectorAll(".hero-v2__cta[data-magnetic], .hero-v2__cta.magnetic");
-    if (!ctas.length) return;
-
-    ctas.forEach(function (btn) {
-      if (reduced || typeof gsap === "undefined" || window.matchMedia("(pointer: coarse)").matches) {
-        return;
-      }
-
-      var xTo = gsap.quickTo(btn, "x", { duration: 0.45, ease: "power3.out" });
-      var yTo = gsap.quickTo(btn, "y", { duration: 0.45, ease: "power3.out" });
-      var scaleTo = gsap.quickTo(btn, "scale", { duration: 0.35, ease: "power3.out" });
-
-      function onMove(e) {
-        var rect = btn.getBoundingClientRect();
-        var relX = e.clientX - (rect.left + rect.width / 2);
-        var relY = e.clientY - (rect.top + rect.height / 2);
-        xTo(relX * 0.22);
-        yTo(relY * 0.28);
-      }
-
-      function onEnter() {
-        scaleTo(1.035);
-      }
-
-      function onLeave() {
-        xTo(0);
-        yTo(0);
-        scaleTo(1);
-      }
-
-      function onDown() {
-        scaleTo(0.97);
-      }
-
-      function onUp() {
-        scaleTo(1.035);
-      }
-
-      on(btn, "pointermove", onMove);
-      on(btn, "pointerenter", onEnter);
-      on(btn, "pointerleave", onLeave);
-      on(btn, "pointerdown", onDown);
-      on(btn, "pointerup", onUp);
-    });
-  }
-
   function initEntrance() {
+    var logos = hero.querySelector("#heroLogos");
     var scrollCue = hero.querySelector("#scrollCue");
     var flowRoot = hero.querySelector("#heroFlow");
 
     if (typeof gsap === "undefined") {
       hero
         .querySelectorAll(
-          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__proof, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay, .hero-orbs__tabs"
+          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay, .hero-orbs__tabs"
         )
         .forEach(function (el) {
           el.style.opacity = "1";
@@ -798,7 +750,6 @@
           ".hero-v2__eyebrow",
           ".hero-v2__title-line",
           ".hero-v2__subtitle",
-          ".hero-v2__proof",
           ".hero-v2__stats",
           ".hero-v2__ctas",
           "#heroLogos",
@@ -818,47 +769,42 @@
       return;
     }
 
-    var proof = hero.querySelector("#heroProof");
-
     if (scrollCue) gsap.set(scrollCue, { xPercent: -50, opacity: 0 });
-    if (proof) gsap.set(proof, { opacity: 0, y: 14 });
+    if (logos) gsap.set(logos, { opacity: 0, y: 16 });
     if (flowRoot) gsap.set(flowRoot, { opacity: 0 });
     gsap.set(".orb, .hero-orbs__caption", { opacity: 0, scale: 0.88 });
     gsap.set(".hero-orbs__tabs", { opacity: 0, y: 8 });
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.to(".ambient-orb", { opacity: 0.85, duration: 1.6, delay: 0.15 });
-    tl.to("#gridOverlay", { opacity: 0.7, duration: 1.1 }, "-=1");
-    tl.to("#aiBadge", { opacity: 1, y: 0, duration: 0.65 }, "-=0.55");
-    tl.to("#heroEyebrow", { opacity: 1, duration: 0.65 }, "-=0.35");
+    tl.to(".ambient-orb", { opacity: 1, duration: 1.5, delay: 0.15 });
+    tl.to("#gridOverlay", { opacity: 1, duration: 1 }, "-=1");
+    tl.to("#aiBadge", { opacity: 1, y: 0, duration: 0.6 }, "-=0.6");
+    tl.to("#heroEyebrow", { opacity: 1, duration: 0.6 }, "-=0.3");
 
     var titleLines = hero.querySelectorAll(".hero-v2__title-line");
     titleLines.forEach(function (line, i) {
-      tl.to(
-        line,
-        { opacity: 1, y: 0, duration: 0.85, ease: "power4.out" },
-        i === 0 ? "-=0.2" : "-=0.52"
-      );
+      tl.to(line, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }, i === 0 ? "-=0.2" : "-=0.5");
     });
 
-    tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.75 }, "-=0.42");
-    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.65 }, "-=0.28");
-    if (proof) {
-      tl.to(proof, { opacity: 1, y: 0, duration: 0.7 }, "-=0.18");
+    tl.to("#heroSubtitle", { opacity: 1, y: 0, duration: 0.7 }, "-=0.4");
+    tl.to("#heroStats", { opacity: 1, duration: 0.6 }, "-=0.3");
+    tl.to("#heroCtas", { opacity: 1, y: 0, duration: 0.6 }, "-=0.2");
+    if (logos) {
+      tl.to(logos, { opacity: 1, y: 0, duration: 0.7 }, "-=0.25");
     }
 
     if (flowRoot) {
-      tl.to("#heroFlow", { opacity: 1, duration: 0.55, ease: "power2.out" }, "-=0.85");
-      tl.to(".hero-orbs__tabs", { opacity: 1, y: 0, duration: 0.45 }, "-=0.35");
+      tl.to("#heroFlow", { opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.85");
+      tl.to(".hero-orbs__tabs", { opacity: 1, y: 0, duration: 0.4 }, "-=0.35");
       tl.to(
         ".orb, .hero-orbs__caption",
         {
           opacity: 1,
           scale: 1,
-          duration: 0.55,
-          stagger: 0.09,
-          ease: "back.out(1.15)",
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power2.out",
           onComplete: function () {
             clearOrbInlineMotion();
             drawWires();
@@ -882,7 +828,6 @@
   function boot() {
     initThreeJS();
     initOrbs();
-    initMagneticCtas();
     initEntrance();
     requestAnimationFrame(function () {
       requestAnimationFrame(drawWires);
