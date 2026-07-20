@@ -1187,6 +1187,15 @@
   filter: none;
 }
 
+/* Let's Work: dark-friendly PNG on dark; brand webp on light (same dual-asset pattern as produtos) */
+[data-theme="light"] #hero.hero-v2 .hero-logo .produto-logo--light {
+  display: block;
+}
+
+[data-theme="light"] #hero.hero-v2 .hero-logo .produto-logo--dark {
+  display: none;
+}
+
 [data-theme="light"] #hero.hero-v2 .hero-logo:hover {
   opacity: 1;
   filter: none;
