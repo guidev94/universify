@@ -595,7 +595,7 @@
   padding: 0.5rem 1.05rem;
   border-radius: 0.55rem;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.5);
   background: transparent;
@@ -717,7 +717,7 @@
   align-items: center;
   text-align: center;
   gap: 0.32rem;
-  max-width: 8.75rem;
+  max-width: 9.5rem;
   opacity: 0;
   transform: scale(0.88);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -742,7 +742,7 @@
 
 #hero.hero-v2 .orb__role {
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -789,7 +789,7 @@
   margin: 0;
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-weight: 700;
-  font-size: 0.84rem;
+  font-size: 0.95rem;
   letter-spacing: -0.02em;
   color: rgba(255, 255, 255, 0.96);
   line-height: 1.25;
@@ -798,7 +798,7 @@
 #hero.hero-v2 .orb__sub {
   margin: 0;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.58);
 }
@@ -865,7 +865,7 @@
 }
 
 #hero.hero-v2 .orb--solution .orb__title {
-  font-size: 0.92rem;
+  font-size: 1.02rem;
 }
 
 #hero.hero-v2 .orb--solution.is-hovered .orb__circle,
@@ -908,7 +908,7 @@
 }
 
 #hero.hero-v2 .orb--action .orb__title {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.88);
 }
 
@@ -929,7 +929,7 @@
   grid-column: 4;
   grid-row: 1;
   align-self: center;
-  max-width: 9.25rem;
+  max-width: 10rem;
 }
 
 #hero.hero-v2 .orb--result .orb__role {
@@ -979,7 +979,7 @@
 #hero.hero-v2 .orb__metric-value {
   font-family: "Instrument Sans", system-ui, sans-serif;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   letter-spacing: -0.02em;
   color: #CFFF04;
   line-height: 1;
@@ -988,7 +988,7 @@
 
 #hero.hero-v2 .orb__metric-label {
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 550;
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.2;
@@ -1051,10 +1051,10 @@
   align-items: center;
   gap: 0.45rem;
   margin: 0;
-  padding: 0.38rem 0.75rem;
+  padding: 0.42rem 0.82rem;
   border-radius: 999px;
   font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.72);
   background: rgba(8, 8, 8, 0.72);
@@ -1087,7 +1087,7 @@
 @media (max-width: 767px) {
   #hero.hero-v2 .hero-orbs__tab {
     padding: 0.42rem 0.72rem;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
   }
 
   #hero.hero-v2 .hero-orbs__board {
@@ -1135,8 +1135,8 @@
   #hero.hero-v2 .hero-orbs__caption {
     left: 0.8rem;
     bottom: 0.7rem;
-    font-size: 0.66rem;
-    padding: 0.32rem 0.62rem;
+    font-size: 0.76rem;
+    padding: 0.36rem 0.7rem;
   }
 }
 
