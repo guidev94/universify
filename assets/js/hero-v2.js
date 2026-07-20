@@ -17,6 +17,7 @@
   var timeouts = [];
   var listeners = [];
   var storyCycleTimer = null;
+  var storyResumeTimer = null;
   var pulseTimer = null;
   var edgeDrawTimer = null;
   var resizeTimer = null;
@@ -24,6 +25,7 @@
   var pulseIndex = 0;
   var storyChanging = false;
   var flowReady = false;
+  var storyAutoPaused = false;
 
   var STORY_ORDER = ["atendimento", "rh", "operacao"];
   var PULSE_SEQUENCE = ["pain", "solution", "actionA", "actionB", "result"];
@@ -142,6 +144,10 @@
     if (storyCycleTimer) {
       clearInterval(storyCycleTimer);
       storyCycleTimer = null;
+    }
+    if (storyResumeTimer) {
+      clearTimeout(storyResumeTimer);
+      storyResumeTimer = null;
     }
     if (pulseTimer) {
       clearTimeout(pulseTimer);
@@ -621,21 +627,56 @@
     });
   }
 
-  function startStoryAutoCycle() {
+  function stopStoryAutoCycle() {
     if (storyCycleTimer) {
       clearInterval(storyCycleTimer);
       storyCycleTimer = null;
     }
-    if (reduced) return;
+  }
+
+  function startStoryAutoCycle() {
+    stopStoryAutoCycle();
+    if (reduced || storyAutoPaused) return;
     storyCycleTimer = setInterval(function () {
-      if (storyChanging) return;
+      if (storyChanging || storyAutoPaused) return;
       var idx = STORY_ORDER.indexOf(currentStory);
       switchStory(STORY_ORDER[(idx + 1) % STORY_ORDER.length]);
     }, 9000);
   }
 
+  function pauseStoryAutoCycle(opts) {
+    opts = opts || {};
+    storyAutoPaused = true;
+    stopStoryAutoCycle();
+    if (storyResumeTimer) {
+      clearTimeout(storyResumeTimer);
+      storyResumeTimer = null;
+    }
+    if (opts.resumeMs) {
+      storyResumeTimer = setTimeout(function () {
+        storyResumeTimer = null;
+        storyAutoPaused = false;
+        startStoryAutoCycle();
+      }, opts.resumeMs);
+    }
+  }
+
   function resetStoryAutoCycle() {
-    startStoryAutoCycle();
+    /* Manual tab change: pause briefly so the chosen story can be read */
+    pauseStoryAutoCycle({ resumeMs: 14000 });
+  }
+
+  function initTouchPause() {
+    var flow = document.getElementById("heroFlow");
+    if (!flow || reduced) return;
+
+    var onInteract = function () {
+      pauseStoryAutoCycle({ resumeMs: 16000 });
+    };
+
+    on(flow, "pointerdown", onInteract, { passive: true });
+    on(flow, "touchstart", onInteract, { passive: true });
+    on(flow, "focusin", onInteract);
   }
 
   function initOrbHover() {
@@ -696,8 +737,30 @@
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(drawWires, 100);
     });
+    on(window, "orientationchange", function () {
+      later(function () {
+        drawWires();
+      }, 180);
+    });
+    if (window.visualViewport) {
+      on(window.visualViewport, "resize", function () {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(drawWires, 120);
+      });
+    }
+    var canvas = document.getElementById("heroOrbsCanvas");
+    if (canvas && typeof ResizeObserver !== "undefined") {
+      var ro = new ResizeObserver(function () {
+        scheduleWires();
+      });
+      ro.observe(canvas);
+      on(window, "pagehide", function () {
+        ro.disconnect();
+      });
+    }
     initOrbHover();
     initTabs();
+    initTouchPause();
   }
 
   function animateStats() {
