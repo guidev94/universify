@@ -1,5 +1,6 @@
 /**
- * Hero v2 — soft-circle particles + orb automation canvas (n8n-inspired).
+ * Hero v2 — site-wide soft-circle particles + orb automation canvas (n8n-inspired).
+ * Particles: fixed full-viewport layer behind content (#hero-canvas.site-particles).
  * Dor → Solução → Ações → Resultado. Curved wires + execution pulse.
  * Stories: Atendimento · RH · Operação. Respects prefers-reduced-motion.
  */
@@ -198,20 +199,35 @@
     var canvas = document.getElementById("hero-canvas");
     if (!canvas) return;
 
+    if (!canvas.classList.contains("site-particles")) {
+      canvas.classList.add("site-particles");
+    }
+
+    var isMobile = window.innerWidth < 768;
+    var isTablet = !isMobile && window.innerWidth < 1100;
+    var particleCount = isMobile ? 180 : isTablet ? 360 : 520;
+    var maxPixelRatio = isMobile ? 1.25 : 1.75;
+    var frameSkip = isMobile ? 1 : 0; /* mobile: render every other raf (~30fps) */
+
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    var renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: !isMobile,
+      powerPreference: "low-power",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPixelRatio));
+    renderer.setClearColor(0x000000, 0);
 
-    var particleCount = window.innerWidth < 768 ? 320 : 620;
     var positions = new Float32Array(particleCount * 3);
     var velocities = [];
     var i;
 
     for (i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      positions[i * 3] = (Math.random() - 0.5) * 22;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 22;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
       velocities.push({
         x: (Math.random() - 0.5) * 0.002,
         y: (Math.random() - 0.5) * 0.002,
@@ -237,12 +253,12 @@
     function applyParticleTheme() {
       if (isLightTheme()) {
         material.color.setHex(0x7a9a00);
-        material.opacity = 0.28;
-        material.size = 0.05;
+        material.opacity = 0.22;
+        material.size = 0.048;
         material.blending = THREE.NormalBlending;
       } else {
         material.color.setHex(0xcfff04);
-        material.opacity = 0.55;
+        material.opacity = 0.48;
         material.size = 0.055;
         material.blending = THREE.AdditiveBlending;
       }
@@ -258,11 +274,12 @@
     var mouseX = 0;
     var mouseY = 0;
     var running = true;
+    var visible = !document.hidden;
+    var frame = 0;
 
     function resizeParticles() {
-      var rect = hero.getBoundingClientRect();
-      var w = Math.max(1, rect.width || window.innerWidth);
-      var h = Math.max(1, rect.height || window.innerHeight);
+      var w = Math.max(1, window.innerWidth);
+      var h = Math.max(1, window.innerHeight);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
@@ -273,6 +290,11 @@
     on(document, "mousemove", function (e) {
       mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    on(document, "visibilitychange", function () {
+      visible = !document.hidden;
+      if (visible && running) animate();
     });
 
     if (window.MutationObserver) {
@@ -287,17 +309,20 @@
     }
 
     function animate() {
-      if (!running) return;
+      if (!running || !visible) return;
       raf(animate);
+
+      frame += 1;
+      if (frameSkip && frame % (frameSkip + 1) !== 0) return;
 
       var posArray = geometry.attributes.position.array;
       for (i = 0; i < particleCount; i++) {
         posArray[i * 3] += velocities[i].x;
         posArray[i * 3 + 1] += velocities[i].y;
         posArray[i * 3 + 2] += velocities[i].z;
-        if (Math.abs(posArray[i * 3]) > 10) velocities[i].x *= -1;
-        if (Math.abs(posArray[i * 3 + 1]) > 10) velocities[i].y *= -1;
-        if (Math.abs(posArray[i * 3 + 2]) > 5) velocities[i].z *= -1;
+        if (Math.abs(posArray[i * 3]) > 11) velocities[i].x *= -1;
+        if (Math.abs(posArray[i * 3 + 1]) > 11) velocities[i].y *= -1;
+        if (Math.abs(posArray[i * 3 + 2]) > 6) velocities[i].z *= -1;
       }
       geometry.attributes.position.needsUpdate = true;
 

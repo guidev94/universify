@@ -47,14 +47,25 @@
   display: none !important;
 }
 
-#hero.hero-v2 #hero-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+/*
+ * Site-wide particle field — fixed viewport layer behind page content.
+ * Canvas lives outside #hero so overflow:hidden on the hero cannot clip it.
+ */
+#hero-canvas.site-particles {
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  display: block;
+}
+
+/* Keep interactive content above the ambient particle layer */
+body:has(#hero.hero-v2) #main-wrapper,
+body:has(#hero.hero-v2) footer {
+  position: relative;
+  z-index: 1;
 }
 
 #hero.hero-v2 .ambient-orb {
@@ -1087,12 +1098,6 @@
     /* Keep both axes clipped — splitting x/y makes `visible` compute to `auto`
        and lets the marquee inflate body/main scrollWidth on mobile. */
     overflow: hidden;
-  }
-
-  #hero.hero-v2 #hero-canvas {
-    position: absolute;
-    inset: 0;
-    height: 100%;
   }
 
   #hero.hero-v2 .hero-v2__content {

@@ -63,9 +63,12 @@
         }
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/hero-v2.css?v=1.6.33">
+    <link rel="stylesheet" href="assets/css/hero-v2.css?v=1.6.34">
 </head>
 <body class="bg-primary font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
+
+    <!-- Site-wide ambient particles (Hero v2 aesthetic) — behind all content -->
+    <canvas id="hero-canvas" class="site-particles" aria-hidden="true"></canvas>
 
     <!-- Navegação -->
     <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
@@ -146,8 +149,6 @@
     <main id="main-wrapper">
         <!-- Hero Section v2 -->
         <section id="hero" class="hero-section hero-v2" aria-label="Hero">
-            <canvas id="hero-canvas" aria-hidden="true"></canvas>
-
             <div class="hero-v2__content site-container">
                 <div class="hero-v2__left">
                     <div class="ai-badge" id="aiBadge">
@@ -1103,7 +1104,7 @@
         </div>
     </a>
 
-    <script src="assets/js/hero-v2.js?v=1.6.33"></script>
+    <script src="assets/js/hero-v2.js?v=1.6.34"></script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/site-utils.js"></script>
     <script src="assets/js/main.js"></script>
