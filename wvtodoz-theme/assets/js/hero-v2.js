@@ -1,6 +1,6 @@
 /**
- * Hero v2 — site-wide soft-circle particles + orb automation canvas (n8n-inspired).
- * Particles: fixed full-viewport layer behind content (#hero-canvas.site-particles).
+ * Hero v2 — site-wide ambient glows + soft-circle particles + orb automation canvas.
+ * Atmosphere: .site-ambient (glows) → #hero-canvas.site-particles → content.
  * Dor → Solução → Ações → Resultado. Curved wires + execution pulse.
  * Stories: Atendimento · RH · Operação. Respects prefers-reduced-motion.
  */
@@ -818,12 +818,15 @@
     if (typeof gsap === "undefined") {
       hero
         .querySelectorAll(
-          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .ambient-orb, .grid-overlay, .hero-orbs__tabs"
+          ".ai-badge, .hero-v2__eyebrow, .hero-v2__title-line, .hero-v2__subtitle, .hero-v2__stats, .hero-v2__ctas, #heroLogos, #heroFlow, .orb, .hero-orbs__caption, #scrollCue, .hero-v2__marquee, .hero-orbs__tabs"
         )
         .forEach(function (el) {
           el.style.opacity = "1";
           if (el.id !== "scrollCue") el.style.transform = "none";
         });
+      document.querySelectorAll(".site-ambient .ambient-orb").forEach(function (el) {
+        el.style.opacity = "1";
+      });
       drawWires();
       animateStats();
       startPulseCycle();
@@ -845,8 +848,7 @@
           ".orb",
           ".hero-orbs__caption",
           ".hero-v2__marquee",
-          ".ambient-orb",
-          ".grid-overlay",
+          ".site-ambient .ambient-orb",
           ".hero-orbs__tabs",
         ],
         { opacity: 1, y: 0, clearProps: "transform" }
@@ -865,8 +867,7 @@
 
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.to(".ambient-orb", { opacity: 1, duration: 1.5, delay: 0.15 });
-    tl.to("#gridOverlay", { opacity: 1, duration: 1 }, "-=1");
+    tl.to(".site-ambient .ambient-orb", { opacity: 1, duration: 1.5, delay: 0.15 });
     tl.to("#aiBadge", { opacity: 1, y: 0, duration: 0.6 }, "-=0.6");
     tl.to("#heroEyebrow", { opacity: 1, duration: 0.6 }, "-=0.3");
 

@@ -1,7 +1,7 @@
 /**
  * Hero v2 — commercial pain→solution workflow canvas on the shared page bg.
  * Lime accent only (no red glitch). Scoped under #hero.hero-v2.
- * Body --wv-bg is the only full-bleed page paint (light + dark).
+ * Body --wv-bg is the base paint; site-ambient glows + particles add depth.
  */
 
 #hero.hero-v2 {
@@ -35,16 +35,76 @@
   box-sizing: border-box;
 }
 
-/* Kill legacy / alternate hero atmospheres — body --wv-bg is the only page paint */
+/* Kill legacy / alternate hero atmospheres — keep site-ambient glows separate */
 #hero.hero-v2 .hero-video,
 #hero.hero-v2 .hero-mesh,
 #hero.hero-v2 .hero-glow,
 #hero.hero-v2 .hero-glass,
-#hero.hero-v2 .ambient-orb,
 #hero.hero-v2 .scanlines,
 #hero.hero-v2 .vignette,
 #hero.hero-v2 .grid-overlay {
   display: none !important;
+}
+
+/*
+ * Site-wide atmosphere stack (behind content, pointer-events none):
+ * body --wv-bg → .site-ambient (glows) → #hero-canvas.site-particles → content
+ * Both fixed layers sit at z-index 0; DOM order puts particles above glows.
+ */
+.site-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.site-ambient__wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 74% 50% at 50% 18%, rgba(207, 255, 4, 0.1), transparent 64%),
+    radial-gradient(ellipse 44% 34% at 82% 58%, rgba(207, 255, 4, 0.055), transparent 58%),
+    radial-gradient(ellipse 38% 30% at 14% 72%, rgba(168, 214, 0, 0.045), transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0.85;
+}
+
+.site-ambient .ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.site-ambient .ambient-orb--1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(207, 255, 4, 0.12) 0%, transparent 70%);
+  top: -10%;
+  right: -5%;
+  animation: hv2-orbFloat1 20s ease-in-out infinite;
+}
+
+.site-ambient .ambient-orb--2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(207, 255, 4, 0.06) 0%, transparent 70%);
+  bottom: -15%;
+  left: -10%;
+  animation: hv2-orbFloat2 25s ease-in-out infinite;
+}
+
+.site-ambient .ambient-orb--3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(168, 214, 0, 0.08) 0%, transparent 70%);
+  top: 40%;
+  left: 30%;
+  animation: hv2-orbFloat3 18s ease-in-out infinite;
 }
 
 /*
@@ -61,47 +121,11 @@
   display: block;
 }
 
-/* Keep interactive content above the ambient particle layer */
+/* Keep interactive content above the ambient glow + particle layers */
 body:has(#hero.hero-v2) #main-wrapper,
 body:has(#hero.hero-v2) footer {
   position: relative;
   z-index: 1;
-}
-
-#hero.hero-v2 .ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-}
-
-#hero.hero-v2 .ambient-orb--1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(207, 255, 4, 0.12) 0%, transparent 70%);
-  top: -10%;
-  right: -5%;
-  animation: hv2-orbFloat1 20s ease-in-out infinite;
-}
-
-#hero.hero-v2 .ambient-orb--2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(207, 255, 4, 0.06) 0%, transparent 70%);
-  bottom: -15%;
-  left: -10%;
-  animation: hv2-orbFloat2 25s ease-in-out infinite;
-}
-
-#hero.hero-v2 .ambient-orb--3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(168, 214, 0, 0.08) 0%, transparent 70%);
-  top: 40%;
-  left: 30%;
-  animation: hv2-orbFloat3 18s ease-in-out infinite;
 }
 
 @keyframes hv2-orbFloat1 {
@@ -1606,7 +1630,7 @@ body:has(#hero.hero-v2) footer {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  #hero.hero-v2 .ambient-orb,
+  .site-ambient .ambient-orb,
   #hero.hero-v2 .ai-badge__dot,
   #hero.hero-v2 .marquee-track,
   #hero.hero-v2 .hero-scroll-dot,
@@ -1645,8 +1669,12 @@ body:has(#hero.hero-v2) footer {
   #hero.hero-v2 .hero-orbs__caption,
   #hero.hero-v2 .hero-v2__marquee,
   #hero.hero-v2 .hero-scroll-cue,
-  #hero.hero-v2 .ambient-orb,
   #hero.hero-v2 .grid-overlay {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .site-ambient .ambient-orb {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -1664,7 +1692,28 @@ body:has(#hero.hero-v2) footer {
 
 }
 
-/* Light theme — tokens only; no alternate hero surface */
+/* Light theme — tokens + slightly stronger ambient lime for cream surfaces */
+[data-theme="light"] .site-ambient__wash {
+  background:
+    radial-gradient(ellipse 74% 50% at 50% 18%, rgba(207, 255, 4, 0.12), transparent 66%),
+    radial-gradient(ellipse 44% 34% at 82% 58%, rgba(207, 255, 4, 0.06), transparent 58%),
+    radial-gradient(ellipse 38% 30% at 14% 72%, rgba(168, 214, 0, 0.05), transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0.9;
+}
+
+[data-theme="light"] .site-ambient .ambient-orb--1 {
+  background: radial-gradient(circle, rgba(207, 255, 4, 0.22) 0%, transparent 70%);
+}
+
+[data-theme="light"] .site-ambient .ambient-orb--2 {
+  background: radial-gradient(circle, rgba(168, 214, 0, 0.14) 0%, transparent 70%);
+}
+
+[data-theme="light"] .site-ambient .ambient-orb--3 {
+  background: radial-gradient(circle, rgba(207, 255, 4, 0.12) 0%, transparent 70%);
+}
+
 [data-theme="light"] #hero.hero-v2 {
   --hv2-ink: #0a0a0a;
   --hv2-ink-soft: #3f3f46;
