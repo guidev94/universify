@@ -330,7 +330,6 @@ function wv_default_nav_items(): array {
 		['label' => 'Quem Somos', 'url' => $home . '#sobre'],
 		['label' => 'Serviços', 'url' => wv_page_url('servicos', '/servicos/')],
 		['label' => 'Produtos', 'url' => $home . '#produtos'],
-		['label' => 'Aplicações', 'url' => $home . '#aplicacoes'],
 		['label' => 'Projetos', 'url' => $home . '#portfolio'],
 		['label' => 'Contato', 'url' => wv_contato_url()],
 	];

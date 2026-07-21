@@ -50,11 +50,11 @@ $wv_header_class = 'fixed top-0 w-full z-[100] py-6 transition-all duration-500 
 ?>
 <header id="main-header" class="<?php echo esc_attr($wv_header_class); ?>">
 	<div class="site-container flex justify-between items-center gap-3">
-		<a href="<?php echo esc_url(home_url('/')); ?>" class="site-logo-link block w-36 sm:w-40 md:w-56 overflow-hidden shrink-0">
+		<a href="<?php echo esc_url(home_url('/')); ?>" class="site-logo-link block w-32 sm:w-36 md:w-44 xl:w-56 overflow-hidden shrink-0">
 			<img src="<?php echo esc_url(wv_logo_light_url()); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
 			<img src="<?php echo esc_url(wv_logo_dark_url()); ?>" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
 		</a>
-		<nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="<?php esc_attr_e('Principal', 'wvtodoz'); ?>">
+		<nav class="hidden xl:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="<?php esc_attr_e('Principal', 'wvtodoz'); ?>">
 			<?php
 			$desktop_items = $nav;
 			if (has_nav_menu('primary')) {
@@ -95,7 +95,7 @@ $wv_header_class = 'fixed top-0 w-full z-[100] py-6 transition-all duration-500 
 				</button>
 			</div>
 		</nav>
-		<div class="header-actions header-actions--mobile lg:hidden">
+		<div class="header-actions header-actions--mobile xl:hidden">
 			<?php if ($show_toggle) : ?>
 			<button type="button" class="theme-toggle" data-theme-toggle aria-label="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>" title="<?php esc_attr_e('Ativar tema escuro', 'wvtodoz'); ?>">
 				<i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>

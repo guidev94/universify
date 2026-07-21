@@ -12,7 +12,7 @@ export const REQUIRED_SECTION_IDS = [
   "aplicacoes"
 ];
 
-export const NAV_HASHES = ["#sobre", "#servicos", "#produtos", "#aplicacoes", "#portfolio", "#blog"];
+export const NAV_HASHES = ["#sobre", "#servicos", "#produtos", "#portfolio", "#blog"];
 
 export function buildWhatsAppMessage({ nome = "", email = "", mensagem = "" } = {}) {
   const safeNome = String(nome).trim();
