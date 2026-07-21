@@ -58,7 +58,6 @@ test.describe("Header + Hero v2 responsive", () => {
       const desktopNav = page.locator('#main-header .site-container > nav[aria-label="Principal"]');
       const mobileActions = page.locator("#main-header .header-actions--mobile");
       const hamburger = page.locator("#mobile-menu-trigger");
-      const themeToggle = page.locator("#main-header [data-theme-toggle]").first();
 
       // Aplicações removed from nav
       await expect(page.locator('#main-header a[href="#aplicacoes"]')).toHaveCount(0);
@@ -68,7 +67,7 @@ test.describe("Header + Hero v2 responsive", () => {
         await expect(desktopNav).toBeHidden();
         await expect(mobileActions).toBeVisible();
         await expect(hamburger).toBeVisible();
-        await expect(themeToggle).toBeVisible();
+        await expect(mobileActions.locator("[data-theme-toggle]")).toBeVisible();
 
         const logoBox = await page.locator("#main-header .site-logo-link").boundingBox();
         const actionsBox = await mobileActions.boundingBox();
@@ -81,7 +80,9 @@ test.describe("Header + Hero v2 responsive", () => {
         await expect(desktopNav).toBeVisible();
         await expect(mobileActions).toBeHidden();
         await expect(page.locator("#main-header .header-actions--desktop")).toBeVisible();
-        await expect(page.getByRole("link", { name: /FALE CONOSCO/i })).toBeVisible();
+        await expect(
+          page.locator("#main-header .header-actions--desktop a.magnetic.bg-todoz")
+        ).toBeVisible();
 
         const wrap = await desktopNav.evaluate((nav) => {
           return [...nav.querySelectorAll(":scope > a")].map((a) => ({
