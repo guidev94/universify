@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+/** Hamburger below lg (1024); desktop chrome from notebooks up. */
+const DESKTOP_NAV_MIN = 1024;
+
 const VIEWPORTS = [
   { name: "390", width: 390, height: 844 },
   { name: "640", width: 640, height: 900 },
@@ -7,7 +10,9 @@ const VIEWPORTS = [
   { name: "900", width: 900, height: 1024 },
   { name: "1024", width: 1024, height: 768 },
   { name: "1100", width: 1100, height: 800 },
-  { name: "1280", width: 1280, height: 800 }
+  { name: "1280", width: 1280, height: 800 },
+  { name: "1366", width: 1366, height: 768 },
+  { name: "1440", width: 1440, height: 900 }
 ];
 
 /** Header + hero shell must not spill past the viewport (marquees/tracks excluded). */
@@ -63,7 +68,7 @@ test.describe("Header + Hero v2 responsive", () => {
       await expect(page.locator('#main-header a[href="#aplicacoes"]')).toHaveCount(0);
       await expect(page.locator('#mobile-menu a[href="#aplicacoes"]')).toHaveCount(0);
 
-      if (vp.width < 1280) {
+      if (vp.width < DESKTOP_NAV_MIN) {
         await expect(desktopNav).toBeHidden();
         await expect(mobileActions).toBeVisible();
         await expect(hamburger).toBeVisible();
@@ -83,19 +88,69 @@ test.describe("Header + Hero v2 responsive", () => {
         await expect(
           page.locator("#main-header .header-actions--desktop a.magnetic.bg-todoz")
         ).toBeVisible();
+        await expect(
+          page.locator("#main-header .header-actions--desktop [data-theme-toggle]")
+        ).toBeVisible();
 
-        const wrap = await desktopNav.evaluate((nav) => {
-          return [...nav.querySelectorAll(":scope > a")].map((a) => ({
-            text: a.textContent.trim(),
-            whiteSpace: getComputedStyle(a).whiteSpace,
-            height: a.getBoundingClientRect().height,
-            lineHeight: parseFloat(getComputedStyle(a).lineHeight) || 0
-          }));
+        const chrome = await desktopNav.evaluate((nav) => {
+          const links = [...nav.querySelectorAll(":scope > a")].map((a) => {
+            const cs = getComputedStyle(a);
+            const h = a.getBoundingClientRect().height;
+            const lh = parseFloat(cs.lineHeight) || 0;
+            return {
+              text: a.textContent.trim(),
+              whiteSpace: cs.whiteSpace,
+              height: h,
+              lineHeight: lh,
+              fontSize: parseFloat(cs.fontSize) || 0
+            };
+          });
+          const logo = document.querySelector("#main-header .site-logo-link");
+          return {
+            links,
+            logoW: logo ? logo.getBoundingClientRect().width : 0,
+            navGap: getComputedStyle(nav).gap
+          };
         });
-        for (const item of wrap) {
+
+        for (const item of chrome.links) {
           expect(item.whiteSpace, item.text).toBe("nowrap");
           if (item.lineHeight > 0) {
             expect(item.height, item.text).toBeLessThanOrEqual(item.lineHeight * 1.65 + 4);
+          }
+          // Notebook+ must stay near the large-desktop type scale (no 10px crush)
+          expect(item.fontSize, item.text).toBeGreaterThanOrEqual(10.75);
+        }
+
+        expect(chrome.logoW).toBeGreaterThanOrEqual(160);
+
+        // Logo left · nav centered · actions right
+        const layout = await page.evaluate(() => {
+          const container = document.querySelector("#main-header .site-container");
+          const logo = document.querySelector("#main-header .site-logo-link");
+          const nav = document.querySelector('#main-header .site-container > nav[aria-label="Principal"]');
+          const actions = document.querySelector("#main-header .header-actions--desktop");
+          const cr = container.getBoundingClientRect();
+          const lr = logo.getBoundingClientRect();
+          const nr = nav.getBoundingClientRect();
+          const ar = actions.getBoundingClientRect();
+          const mid = cr.left + cr.width / 2;
+          const navMid = nr.left + nr.width / 2;
+          return {
+            grid: getComputedStyle(container).gridTemplateColumns,
+            logoLeftOfNav: lr.right <= nr.left + 1,
+            navLeftOfActions: nr.right <= ar.left + 1,
+            navCenterOffset: Math.abs(navMid - mid)
+          };
+        });
+        expect(layout.grid.split(" ").length).toBeGreaterThanOrEqual(3);
+        expect(layout.logoLeftOfNav).toBe(true);
+        expect(layout.navLeftOfActions).toBe(true);
+        expect(layout.navCenterOffset).toBeLessThanOrEqual(24);
+
+        if (vp.width >= 1280) {
+          for (const item of chrome.links) {
+            expect(item.fontSize, item.text).toBeGreaterThanOrEqual(11.5);
           }
         }
       }
@@ -114,11 +169,11 @@ test.describe("Header + Hero v2 responsive", () => {
     });
   }
 
-  test("shared header hamburger on index.html @ 1024", async ({ page }) => {
+  test("shared header desktop nav on index.html @ 1024", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto("/index.html", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("#mobile-menu-trigger")).toBeVisible();
-    await expect(page.locator('#main-header .site-container > nav[aria-label="Principal"]')).toBeHidden();
+    await expect(page.locator('#main-header .site-container > nav[aria-label="Principal"]')).toBeVisible();
+    await expect(page.locator("#main-header .header-actions--mobile")).toBeHidden();
     await expect(page.locator('#main-header a[href="#aplicacoes"]')).toHaveCount(0);
     await expect(page.locator('#mobile-menu a[href="#aplicacoes"]')).toHaveCount(0);
   });

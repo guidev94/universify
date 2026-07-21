@@ -70,32 +70,33 @@
     <!-- Navegação -->
     <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
         <div class="site-container flex justify-between items-center gap-3">
-            <a href="index.html" class="site-logo-link block w-32 sm:w-36 md:w-44 xl:w-56 overflow-hidden shrink-0">
+            <a href="index.html" class="site-logo-link block w-32 sm:w-36 md:w-44 lg:w-48 xl:w-56 overflow-hidden shrink-0">
                 <img src="assets/img/logo-wv-light.svg" alt="WV_Todoz" class="site-logo site-logo--light w-full h-auto" width="1024" height="394" decoding="async">
                 <img src="assets/img/logo-wv-dark.svg" alt="" class="site-logo site-logo--dark w-full h-auto" width="1024" height="394" decoding="async" aria-hidden="true">
             </a>
-            <nav class="hidden xl:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="Principal">
+            <nav class="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400" aria-label="Principal">
                 <a href="index.html" class="hover:text-todoz transition-colors">Home</a>
                 <a href="#sobre" class="hover:text-todoz transition-colors">Quem Somos</a>
                 <a href="#servicos" class="hover:text-todoz transition-colors">Serviços</a>
                 <a href="#produtos" class="hover:text-todoz transition-colors">Produtos</a>
                 <a href="#portfolio" class="hover:text-todoz transition-colors">Projetos</a>
                 <a href="contato.html" class="hover:text-todoz transition-colors">Contato</a>
-                <div class="header-actions header-actions--desktop">
-                    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
-                        <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
-                        <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
-                    </button>
-                    <a href="https://wa.me/551155311779" target="_blank" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
-                        FALE CONOSCO 
-                        <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
-                            <i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
-                            <i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
-                        </div>
-                    </a>
-                </div>
             </nav>
-            <div class="header-actions header-actions--mobile xl:hidden">
+            <div class="header-actions header-actions--desktop hidden lg:flex">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
+                    <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
+                    <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
+                </button>
+                <a href="https://wa.me/551155311779" target="_blank" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
+                    FALE CONOSCO 
+                    <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                        <i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
+                        <i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="header-actions header-actions--mobile lg:hidden">
                 <button type="button" class="theme-toggle" data-theme-toggle aria-label="Ativar tema escuro" title="Ativar tema escuro">
                     <i class="ph-bold ph-moon theme-toggle__moon" aria-hidden="true"></i>
                     <i class="ph-bold ph-sun theme-toggle__sun" aria-hidden="true"></i>
