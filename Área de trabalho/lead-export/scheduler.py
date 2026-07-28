@@ -276,7 +276,7 @@ class ParallelScheduler:
             conn.close()
 
     def _auto_crawl(self):
-        keywords = Keyword.get_for_autocrawl(limit=3)
+        keywords = Keyword.get_for_autocrawl(limit=5)
         if not keywords:
             logger.info("[scheduler:crawl] no keywords for auto-crawl")
             return
@@ -467,6 +467,8 @@ class ParallelScheduler:
         leads = []
         fetch_qty = quantity * 2
 
+        from crawler.public_data_crawler import PublicDataCrawler
+        
         sources = {
             "duckduckgo": lambda: DuckDuckGoCrawler().crawl(keyword, fetch_qty),
             "website": lambda: WebsiteCrawler().crawl(keyword, fetch_qty),
@@ -476,6 +478,8 @@ class ParallelScheduler:
             "niche": lambda: NicheCrawler().crawl(keyword, location, fetch_qty),
             "yellowpages": lambda: YellowPagesCrawler().crawl(keyword, location, fetch_qty),
             "linkedin": lambda: self._crawl_linkedin_dork(keyword, location, quantity),
+            "instagram": lambda: self._crawl_instagram_dork(keyword, location, quantity),
+            "public_data": lambda: PublicDataCrawler().crawl(keyword, location, quantity // 2),
         }
 
         try:
@@ -573,6 +577,24 @@ class ParallelScheduler:
                 "website": url,
                 "source": "linkedin",
                 "category": "Decision Maker",
+                "email": "",
+                "phone": ""
+            })
+        return leads
+
+    def _crawl_instagram_dork(self, keyword, location, quantity):
+        from crawler.search_engine import SearchEngine
+        se = SearchEngine()
+        profiles = se.search_instagram(keyword, location, num_results=quantity)
+        leads = []
+        for url in profiles:
+            # Tenta extrair um nome do handle
+            handle = url.rstrip("/").split("/")[-1]
+            leads.append({
+                "name": handle.replace(".", " ").replace("_", " ").title(),
+                "website": url,
+                "source": "instagram_dork",
+                "category": "Social Lead",
                 "email": "",
                 "phone": ""
             })

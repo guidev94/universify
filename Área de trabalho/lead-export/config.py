@@ -14,3 +14,7 @@ class Config:
     MAX_LEADS_PER_CRAWL = 1000
     SCHEDULER_CRAWL_INTERVAL = int(os.getenv("SCHEDULER_CRAWL_INTERVAL", "10800"))
     SCHEDULER_VERIFY_INTERVAL = int(os.getenv("SCHEDULER_VERIFY_INTERVAL", "3600"))
+    
+    # Advanced Scraper Settings
+    PROXY_LIST = os.getenv("PROXY_LIST", "").split(",") if os.getenv("PROXY_LIST") else []
+    GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")

@@ -31,6 +31,7 @@ def calculate_score(lead):
     score = 0
     is_br_domain = False
     is_foreign = False
+    pitch_hooks = []
 
     website = lead.get("website", "").lower()
     if website:
@@ -70,25 +71,39 @@ def calculate_score(lead):
         if lead.get("whatsapp", "").startswith("55"):
             score += 10
 
+    # BONUS FOR TECH SALES OPPORTUNITIES (Sites, Apps, Systems)
     if not has_website:
-        # Leads without website might be good targets for web agencies, 
-        # but let's make sure they have other contact info
-        if has_phone or has_whatsapp:
-            score += 25 # Increased bonus for no site (Pure opportunity)
+        # Leads without website are GOLD for site sales
+        score += 40 
+        pitch_hooks.append("Sem site oficial (oportunidade site/presença digital)")
     elif lead.get("site_quality") == "poor":
-        score += 20 # Increased bonus for poor quality site
+        # Bad sites are GOLD for redesign sales
+        score += 35
+        pitch_hooks.append("Site antigo ou lento (oportunidade redesign)")
     elif lead.get("ssl_valid") == 0 and lead.get("site_verified"):
-        score += 10
+        # Security issues are a great hook for sales
+        score += 20
+        pitch_hooks.append("Site não seguro/sem SSL (gancho de segurança)")
     
-    # Extra points for modern tech users (likely to spend on new services)
-    if lead.get("has_ads"):
-        score += 15
-    if lead.get("has_pixel"):
-        score += 10
+    # Systems & Integrations Opportunities
+    # If they have ads but a poor site, they are wasting money -> HIGH PRIORITY
+    if lead.get("has_ads") and (not has_website or lead.get("site_quality") == "poor"):
+        score += 25
+        pitch_hooks.append("Investe em anúncios mas tem site ruim (alta urgência)")
 
+    # High-value sectors that need SYSTEMS and INTEGRATIONS
+    systems_sectors = ["logística", "indústria", "distribuidor", "clínica", "hospital", "transportadora", "atacadista", "fábrica"]
+    name_cat = (lead.get("name", "") + " " + lead.get("category", "")).lower()
+    if any(sector in name_cat for sector in systems_sectors):
+        score += 20
+        pitch_hooks.append(f"Setor {lead.get('category', 'estratégico')} (demanda por sistemas/integrações)")
+        # Extra points if it's a sector that needs complex systems
+        if "logística" in name_cat or "indústria" in name_cat:
+            score += 15
 
     if has_instagram and not has_website:
         score += 10
+        pitch_hooks.append("Possui apenas Instagram (venda de landing page)")
 
     if lead.get("category") and len(lead.get("category", "")) > 2:
         score += 10
@@ -107,4 +122,5 @@ def calculate_score(lead):
     else:
         tier = "cold"
 
-    return score, tier
+    pitch_hook = " | ".join(pitch_hooks) if pitch_hooks else "Lead padrão"
+    return score, tier, pitch_hook

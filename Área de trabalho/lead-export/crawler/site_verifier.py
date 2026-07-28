@@ -93,7 +93,7 @@ class SiteVerifier:
                         "has_pixel": tech_data["has_pixel"],
                         "has_ads": tech_data["has_ads"]
                     })
-                    new_score, new_tier = calculate_score(lead_data)
+                    new_score, new_tier, pitch_hook = calculate_score(lead_data)
                     
                     # Update all fields in one go
                     conn.execute(
@@ -109,11 +109,12 @@ class SiteVerifier:
                            tech_score = ?,
                            score = ?,
                            tier = ?,
+                           pitch_hook = ?,
                            updated_at = datetime('now', 'localtime')
                            WHERE id = ?""",
                         (1 if site_ok else 0, ssl_valid, tech_data["quality"], tech_data["cms"], 
                          tech_data["has_pixel"], tech_data["has_analytics"], tech_data["has_ads"], 
-                         tech_data["ads_platforms"], tech_data["score"], new_score, new_tier, lead["id"])
+                         tech_data["ads_platforms"], tech_data["score"], new_score, new_tier, pitch_hook, lead["id"])
                     )
                 
                 conn.commit()
@@ -172,6 +173,28 @@ class SiteVerifier:
         if 'analytics.tiktok.com' in html:
             ads_platforms.append("TikTok Ads")
         
+        # CRM & Sales Tools Detection
+        crms = []
+        if 'pipedrive.com' in html or 'pipedrive-assets' in html:
+            crms.append("Pipedrive")
+        if 'hubspot.com' in html or 'hs-scripts' in html:
+            crms.append("HubSpot")
+        if 'salesforce.com' in html:
+            crms.append("Salesforce")
+        if 'rdstation' in html or 'rd-js-station' in html:
+            crms.append("RD Station CRM")
+            
+        if crms:
+            tech_score += 20 # Business that invests in sales
+            
+        # B2B & High Value indicators
+        b2b_keywords = ["atacadista", "distribuidor", "indústria", "soluções b2b", "corporativo", "revenda", "parceiros"]
+        if any(kw in html for kw in b2b_keywords):
+            tech_score += 15
+            
+        if 'trabalhe conosco' in html or 'vagas' in html:
+            tech_score += 10 # Company is growing
+            
         has_ads = 1 if ads_platforms else 0
         ads_platforms_str = ", ".join(ads_platforms)
 

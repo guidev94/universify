@@ -1,0 +1,25 @@
+[Unit]
+Description=LeadHunter - Sistema Profissional de Leads
+After=network.target
+
+[Service]
+User=programador05
+WorkingDirectory=/home/programador05/Área de trabalho/lead-export
+Environment=PATH=/home/programador05/Área de trabalho/lead-export/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/programador05/Área de trabalho/lead-export/venv/bin/gunicorn app:app \
+    --bind 0.0.0.0:5000 \
+    --workers 2 \
+    --threads 4 \
+    --timeout 300 \
+    --graceful-timeout 30 \
+    --keep-alive 30 \
+    --access-logfile /home/programador05/Área de trabalho/lead-export/server_output.log \
+    --error-logfile /home/programador05/Área de trabalho/lead-export/server_error.log
+
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/programador05/Área de trabalho/lead-export/server_output.log
+StandardError=append:/home/programador05/Área de trabalho/lead-export/server_error.log
+
+[Install]
+WantedBy=multi-user.target

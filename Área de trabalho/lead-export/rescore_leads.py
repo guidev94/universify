@@ -25,10 +25,10 @@ def rescore_all():
             to_delete.append(lead_data["id"])
             continue
             
-        score, tier = calculate_score(lead_data)
+        score, tier, pitch_hook = calculate_score(lead_data)
         
-        if score != lead_data["score"] or tier != lead_data["tier"]:
-            updated_list.append((score, tier, lead_data["id"]))
+        if score != lead_data["score"] or tier != lead_data["tier"] or pitch_hook != lead_data.get("pitch_hook"):
+            updated_list.append((score, tier, pitch_hook, lead_data["id"]))
     
     print(f"Processando mudanças no banco...")
     conn = get_connection()
@@ -38,10 +38,10 @@ def rescore_all():
         conn.execute("DELETE FROM leads WHERE id = ?", (lid,))
     
     # Process updates
-    for score, tier, lid in updated_list:
+    for score, tier, pitch_hook, lid in updated_list:
         conn.execute(
-            "UPDATE leads SET score = ?, tier = ?, updated_at = datetime('now', 'localtime') WHERE id = ?",
-            (score, tier, lid)
+            "UPDATE leads SET score = ?, tier = ?, pitch_hook = ?, updated_at = datetime('now', 'localtime') WHERE id = ?",
+            (score, tier, pitch_hook, lid)
         )
     
     conn.commit()

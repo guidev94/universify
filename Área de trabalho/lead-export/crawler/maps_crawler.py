@@ -21,7 +21,87 @@ class MapsCrawler:
 
     def crawl(self, query, location, quantity, on_progress=None):
         logger.info(f"[maps] iniciando busca: '{query}' em '{location}'")
+        
+        # Priority 1: Google Places API (Professional)
+        from config import Config
+        if Config.GOOGLE_PLACES_API_KEY:
+            try:
+                leads = self._crawl_api(query, location, quantity, on_progress)
+                if leads:
+                    logger.info(f"[maps:api] retornou {len(leads)} leads")
+                    return leads
+            except Exception as e:
+                logger.error(f"[maps:api] falha na API: {e}")
+        
+        # Fallback: Selenium Scraping
         return self._crawl_scrape(query, location, quantity, on_progress)
+
+    def _crawl_api(self, query, location, quantity, on_progress):
+        from config import Config
+        api_key = Config.GOOGLE_PLACES_API_KEY
+        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+        
+        params = {
+            "query": f"{query} {location}",
+            "key": api_key,
+            "language": "pt-BR"
+        }
+        
+        leads = []
+        next_page_token = None
+        
+        while len(leads) < quantity:
+            if next_page_token:
+                params["pagetoken"] = next_page_token
+                time.sleep(2) # Google requirements
+                
+            response = requests.get(search_url, params=params)
+            data = response.json()
+            
+            if data.get("status") != "OK":
+                break
+                
+            for place in data.get("results", []):
+                if len(leads) >= quantity: break
+                
+                place_id = place.get("place_id")
+                detail = self._get_place_details(place_id, api_key)
+                
+                if detail:
+                    leads.append(detail)
+                    if on_progress: on_progress(len(leads))
+            
+            next_page_token = data.get("next_page_token")
+            if not next_page_token: break
+            
+        return leads
+
+    def _get_place_details(self, place_id, api_key):
+        url = "https://maps.googleapis.com/maps/api/place/details/json"
+        params = {
+            "place_id": place_id,
+            "fields": "name,formatted_phone_number,website,types,international_phone_number",
+            "key": api_key,
+            "language": "pt-BR"
+        }
+        
+        try:
+            response = requests.get(url, params=params)
+            data = response.json().get("result", {})
+            
+            if not data: return None
+            
+            phone = data.get("formatted_phone_number") or data.get("international_phone_number", "")
+            return {
+                "name": data.get("name"),
+                "phone": phone,
+                "whatsapp": phone,
+                "website": data.get("website", ""),
+                "source": "google_maps_api",
+                "category": data.get("types", ["business"])[0]
+            }
+        except:
+            return None
 
     def _crawl_scrape(self, query, location, quantity, on_progress):
         leads = []

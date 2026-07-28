@@ -43,15 +43,28 @@ class SearchEngine:
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
         ]
         self.session.headers["User-Agent"] = random.choice(ua_list)
         self.session.cookies.clear()
+        
+        # Proxy Rotation Logic
+        from config import Config
+        if Config.PROXY_LIST:
+            proxy = random.choice(Config.PROXY_LIST)
+            self.session.proxies = {"http": proxy, "https": proxy}
+            
         # Add Jitter to delay
         self.current_delay = self.delay * random.uniform(0.8, 2.5)
 
     def search_linkedin(self, keyword, location="", num_results=10):
-        query = f'site:linkedin.com/in/ "{keyword}" "{location}"'
-        # Try Bing first for LinkedIn as it's more stable
+        # Dork mais poderosa para achar decisores reais
+        query = f'site:linkedin.com/in/ "{keyword}" "{location}" (CEO OR "Sócio" OR "Diretor" OR "Fundador")'
+        return self._search_bing(query, num_results)
+
+    def search_instagram(self, keyword, location="", num_results=20):
+        # Dork para achar perfis comerciais com contato exposto
+        query = f'site:instagram.com "{keyword}" "{location}" (contato OR whatsapp OR "bit.ly" OR "linktr.ee")'
         return self._search_bing(query, num_results)
 
     def search(self, query, num_results=30):
@@ -59,18 +72,18 @@ class SearchEngine:
         from concurrent.futures import ThreadPoolExecutor
         
         all_urls = []
-        # Adicionando Google Dorks para encontrar leads específicos
-        dorks = [
-            f'"{query}" contact',
-            f'"{query}" "whatsapp"',
-            f'"{query}" "telefone"',
-            f'"{query}" "contato"',
-            f'"{query}" "fale conosco"',
+        # Dorks focadas em Venda de Sites e Sistemas (Acha quem NÃO tem site ou tem site antigo)
+        dork_variations = [
+            f'"{query}" "contato" -site:www', # Tenta achar menções sem site oficial
+            f'"{query}" site:instagram.com "whatsapp"', # Perfis comerciais
+            f'"{query}" site:facebook.com "contato"',
+            f'"{query}" "index of" "wp-content"', # Acha sites WordPress (potencial de redesign)
+            f'"{query}" "desenvolvido por" "2015..2020"', # Sites antigos
         ]
         
-        # Embaralha dorks para variar resultados
         import random
-        active_query = f"{query} {random.choice(dorks)}" if random.random() > 0.5 else query
+        # Usamos dorks em paralelo para maximizar fontes
+        active_queries = [query] + random.sample(dork_variations, 2)
 
         engines = [
             ("bing", self._search_bing),
@@ -85,14 +98,15 @@ class SearchEngine:
 
         target_per_engine = max(15, int(num_results / len(healthy_engines)) + 10)
 
-        with ThreadPoolExecutor(max_workers=len(healthy_engines)) as executor:
-            future_to_engine = {
-                executor.submit(fn, active_query, target_per_engine): name 
-                for name, fn in healthy_engines
-            }
+        with ThreadPoolExecutor(max_workers=len(healthy_engines) * len(active_queries)) as executor:
+            future_to_engine = {}
+            for q in active_queries:
+                for name, fn in healthy_engines:
+                    future_to_engine[executor.submit(fn, q, target_per_engine)] = f"{name}:{q[:10]}"
             
             for future in future_to_engine:
                 name = future_to_engine[future]
+
                 try:
                     urls = future.result(timeout=35)
                     if urls:

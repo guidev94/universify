@@ -37,6 +37,7 @@ class Lead:
                     merged_whatsapp = new_whatsapp if not merged_whatsapp else merged_whatsapp
 
                 best_score = max(new_score, existing["score"] or 0)
+                score, tier, pitch_hook = calculate_score(data)
 
                 # Campaign logic: if existing lead is unassigned, assign it to the new campaign
                 new_campaign = data.get("campaign", "")
@@ -49,26 +50,27 @@ class Lead:
                     campaign_params = [new_campaign]
 
                 conn.execute(
-                    f"""UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?,
+                    f"""UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?, pitch_hook = ?,
                        updated_at = datetime('now', 'localtime'){campaign_sql} WHERE id = ?""",
-                    [merged_email, merged_phone, merged_whatsapp, best_score] + campaign_params + [existing["id"]],
+                    [merged_email, merged_phone, merged_whatsapp, best_score, pitch_hook] + campaign_params + [existing["id"]],
                 )
                 if should_close:
                     conn.commit()
                 return existing["id"]
 
+            score, tier, pitch_hook = calculate_score(data)
             conn.execute(
                 """INSERT INTO leads (name, email, phone, whatsapp, website, category, source,
-                   score, tier, site_verified, ssl_valid, crawl_job_id, dedup_hash, campaign, location)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   score, tier, site_verified, ssl_valid, crawl_job_id, dedup_hash, campaign, location, pitch_hook)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     data["name"], data.get("email", ""), data.get("phone", ""),
                     data.get("whatsapp", ""), data.get("website", ""),
                     data.get("category", ""), data.get("source", ""),
-                    data.get("score", 0), data.get("tier", "cold"),
+                    score, tier,
                     data.get("site_verified", 0), data.get("ssl_valid", 0),
                     crawl_job_id, dedup_hash, data.get("campaign", ""),
-                    data.get("location", ""),
+                    data.get("location", ""), pitch_hook
                 ),
             )
             if should_close:

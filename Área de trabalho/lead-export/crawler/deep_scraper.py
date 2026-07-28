@@ -71,11 +71,20 @@ class DeepContactScraper:
         return None
 
     def _extract_info(self, html, store):
-        from crawler.utils import extract_emails_from_text, extract_phones_from_text
+        from crawler.utils import extract_emails_from_text, extract_phones_from_text, extract_whatsapp_from_html
         
         # Emails and Phones
         store["emails"].update(extract_emails_from_text(html))
         store["phones"].update(extract_phones_from_text(html))
+        
+        # WhatsApp Direct
+        wa = extract_whatsapp_from_html(html)
+        if wa: store["phones"].add(wa)
+        
+        # CNPJ Detection
+        cnpj_match = re.search(r"\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}", html)
+        if cnpj_match:
+            store["cnpj"] = cnpj_match.group()
         
         # Try to find names after keywords like "Sócio", "Fundador", "CEO"
         soup = BeautifulSoup(html, "lxml")
@@ -111,6 +120,9 @@ class DeepContactScraper:
                 "email": ";".join(list(new_emails)[:5]),
                 "phone": ";".join(list(new_phones)[:5]),
             }
+            
+            if data.get("cnpj"):
+                updates["cnpj"] = data["cnpj"]
             
             if data["possible_owners"]:
                 detected = "; ".join(data["possible_owners"][:3])
