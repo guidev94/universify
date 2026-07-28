@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WV_Todoz | Software House — Sites e Aplicativos</title>
+    <meta name="description" content="Software house que faz sites e aplicativos sob medida. Prazo, qualidade e entrega no ar.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="canonical" href="https://www.wvtodoz.com.br/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="WV_Todoz">
+    <meta property="og:title" content="WV_Todoz | Software House — Sites e Aplicativos">
+    <meta property="og:description" content="Software house que faz sites e aplicativos sob medida. Prazo, qualidade e entrega no ar.">
+    <meta property="og:url" content="https://www.wvtodoz.com.br/">
+    <meta property="og:image" content="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WV_Todoz | Software House — Sites e Aplicativos">
+    <meta name="twitter:description" content="Software house que faz sites e aplicativos sob medida. Prazo, qualidade e entrega no ar.">
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/img/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="shortcut icon" href="assets/img/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" sizes="180x180">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=Instrument+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a0a0a',
+                        todoz: '#CFFF04',
+                        todozDark: '#A8D600',
+                    },
+                    fontFamily: {
+                        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                        display: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-primary text-white font-sans selection:bg-todoz selection:text-black overflow-x-hidden">
+
+    <!-- Navegação -->
+    <header id="main-header" class="fixed top-0 w-full z-[100] py-6 transition-all duration-500 border-b border-white/0">
+        <div class="site-container flex justify-between items-center">
+            <a href="index.html" class="block w-40 md:w-56 overflow-hidden">
+                <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="WV_Todoz Logo" class="w-full h-auto">
+            </a>
+            <nav class="hidden lg:flex items-center gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                <a href="index.html" class="hover:text-todoz transition-colors">Home</a>
+                <a href="#sobre" class="hover:text-todoz transition-colors">Quem Somos</a>
+                <a href="#servicos" class="hover:text-todoz transition-colors">Serviços</a>
+                <a href="#produtos" class="hover:text-todoz transition-colors">Produtos</a>
+                <a href="#aplicacoes" class="hover:text-todoz transition-colors">Aplicações</a>
+                <a href="#portfolio" class="hover:text-todoz transition-colors">Projetos</a>
+                <a href="https://wa.me/551155311779" target="_blank" class="magnetic bg-todoz px-8 py-3 text-black font-black rounded-full flex items-center justify-center gap-3 group/header-btn min-w-[160px]">
+                    FALE CONOSCO 
+                    <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                        <i class="ph-bold ph-whatsapp-logo text-lg absolute group-hover/header-btn:-translate-y-full transition-transform duration-300"></i>
+                        <i class="ph-bold ph-arrow-right text-lg absolute translate-y-full group-hover/header-btn:translate-y-0 transition-transform duration-300"></i>
+                    </div>
+                </a>
+            </nav>
+            <button type="button" id="mobile-menu-trigger" class="lg:hidden text-4xl text-todoz flex flex-col gap-1.5 items-end">
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+                <span class="w-5 h-1 bg-todoz rounded-full"></span>
+                <span class="w-8 h-1 bg-todoz rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 z-[200] pointer-events-none opacity-0 invisible">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl"></div>
+        <div id="mobile-menu-content" class="relative h-full w-full max-w-none bg-zinc-900 border-l border-white/5 p-12 flex flex-col justify-between translate-x-full transition-transform duration-500 ease-expo">
+            <div class="space-y-12">
+                <div class="flex justify-between items-center">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-32 h-auto">
+                    <button type="button" id="mobile-menu-close" class="text-zinc-500 hover:text-todoz transition-colors text-4xl"><i class="ph ph-x-circle"></i></button>
+                </div>
+                <nav class="flex flex-col gap-6">
+                    <a href="index.html" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Home</a>
+                    <a href="#sobre" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Quem Somos</a>
+                    <a href="#servicos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Serviços</a>
+                    <a href="#produtos" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Produtos</a>
+                    <a href="#aplicacoes" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Aplicações</a>
+                    <a href="#portfolio" class="text-4xl font-black text-white uppercase tracking-tighter hover:text-todoz transition-colors">Projetos</a>
+                </nav>
+            </div>
+            <div class="space-y-8">
+                <div class="flex gap-6 text-zinc-400 text-3xl">
+                    <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
+                    <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                </div>
+                <a href="https://wa.me/551155311779" class="w-full py-6 bg-todoz text-black font-black rounded-2xl text-center block uppercase tracking-widest text-xs">FALE CONOSCO</a>
+            </div>
+        </div>
+    </div>
+
+    <main id="main-wrapper">
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section relative flex items-center justify-center bg-[#050505]">
+            <!-- Background Layer -->
+            <div class="absolute inset-0 z-0 overflow-hidden">
+                <video autoplay muted loop playsinline preload="metadata" class="hero-video w-full h-full object-cover opacity-[0.52] filter grayscale-[0.55] brightness-[0.83]">
+                    <source src="assets/video/hero.mp4" type="video/mp4">
+                </video>
+                <!-- Dynamic Mesh Gradient — soft lime wash -->
+                <div class="hero-mesh absolute inset-0 opacity-[0.34] mix-blend-soft-light" style="background: radial-gradient(circle at 20% 30%, #CFFF04 0%, transparent 42%), radial-gradient(circle at 80% 70%, #CFFF04 0%, transparent 44%);"></div>
+                <!-- Subtle lime ambient glow -->
+                <div class="hero-glow" aria-hidden="true"></div>
+                <!-- Glass Overlay — lighter so video + glow read through -->
+                <div class="hero-glass absolute inset-0 bg-gradient-to-b from-primary/48 via-primary/6 to-primary/52"></div>
+                <!-- Noise Texture -->
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+            </div>
+
+            <div class="site-container relative z-10">
+                <div class="hero-inner max-w-5xl mx-auto flex flex-col items-center">
+                    <!-- Tech Badge -->
+                    <div class="hero-badge inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transition-all hover:border-todoz/40 group" data-aos="fade-down">
+                        <span class="w-1.5 h-1.5 rounded-full bg-todoz animate-pulse shadow-[0_0_10px_#CFFF04]"></span>
+                        <span class="text-white font-black text-[10px] tracking-[0.28em] uppercase">Software house</span>
+                    </div>
+
+                    <h1 class="hero-title text-center" data-aos="zoom-out" data-aos-delay="120">
+                        <span class="hero-eyebrow block text-zinc-400 font-semibold uppercase">
+                            Sites e aplicativos
+                        </span>
+                        <span class="hero-display block font-black tracking-tighter text-white uppercase italic">
+                            Feito pra<br>
+                            <span class="text-todoz text-glow not-italic">vender.</span>
+                        </span>
+                    </h1>
+
+                    <!-- Paragraph -->
+                    <p class="hero-lead text-zinc-400 max-w-xl mx-auto leading-relaxed text-center font-medium" data-aos="fade-up" data-aos-delay="220">
+                        Somos a WV Todoz. Software house que entrega site e app com prazo, qualidade e gente de verdade do outro lado.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="hero-ctas flex flex-col sm:flex-row items-center justify-center w-full" data-aos="fade-up" data-aos-delay="320">
+                        <a href="https://wa.me/551155311779" target="_blank" class="hero-cta magnetic bg-todoz group relative text-black font-black rounded-full uppercase flex items-center justify-center gap-3">
+                            Pedir orçamento
+                            <div class="relative w-5 h-5 flex items-center justify-center overflow-hidden">
+                                <i class="ph-fill ph-rocket-launch text-lg group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            </div>
+                        </a>
+                        <button type="button" class="hero-cta open-modal magnetic bg-white/5 border border-white/10 text-white font-black rounded-full hover:bg-white/10 uppercase backdrop-blur-sm">
+                            Ver o que fazemos
+                        </button>
+                    </div>
+
+                    <!-- Product logos — evenly spaced; scroll cue sits below (not between logos) -->
+                    <div class="hero-logos" data-aos="fade-up" data-aos-delay="400">
+                        <a href="#produtos" class="hero-logo" aria-label="Facíleme">
+                            <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme" width="213" height="82" loading="lazy">
+                        </a>
+                        <a href="#produtos" class="hero-logo" aria-label="Facíleme Ingresso">
+                            <img src="assets/img/produtos/logo-ingresso.png" alt="Facíleme Ingresso" width="214" height="88" loading="lazy">
+                        </a>
+                        <a href="#produtos" class="hero-logo" aria-label="Facíleme Cursos">
+                            <img src="assets/img/produtos/logo-cursos.png" alt="Facíleme Cursos" width="282" height="82" loading="lazy">
+                        </a>
+                        <a href="#produtos" class="hero-logo" aria-label="Let's Work">
+                            <img src="assets/img/produtos/logo-letswork.png" alt="Let's Work" width="234" height="106" loading="lazy">
+                        </a>
+                    </div>
+
+                    <div class="hero-scroll-cue" aria-hidden="true">
+                        <div class="hero-scroll-pill">
+                            <div class="hero-scroll-dot"></div>
+                        </div>
+                        <span class="hero-scroll-label">Scroll</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clientes -->
+        <section id="clientes" class="section-canvas section-glow py-24">
+            <div class="site-container text-center">
+                <h3 class="text-xs md:text-lg font-bold uppercase tracking-[0.2em] text-white mb-16 max-w-4xl mx-auto leading-relaxed" data-aos="fade-up">Marcas que <span class="text-todoz text-glow">confiam</span> na WV_Todoz.</h3>
+                <ul class="clientes-logos" aria-label="Marcas clientes">
+                    <li class="clientes-logo" data-aos="fade-up">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/cocacola-o59hfslv8qxu40yqaxmr2w7jin97vldnnypm21lrk2.png" alt="Coca-Cola" width="180" height="56" loading="lazy" decoding="async" class="clientes-logo__img">
+                    </li>
+                    <li class="clientes-logo" data-aos="fade-up" data-aos-delay="100">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/pagueseguro-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="PagSeguro" width="180" height="56" loading="lazy" decoding="async" class="clientes-logo__img">
+                    </li>
+                    <li class="clientes-logo" data-aos="fade-up" data-aos-delay="200">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/syngenta-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="Syngenta" width="180" height="56" loading="lazy" decoding="async" class="clientes-logo__img">
+                    </li>
+                    <li class="clientes-logo" data-aos="fade-up" data-aos-delay="300">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/elementor/thumbs/wmware-o59hfuhjmf0er8vzzyg07vqgpezyazl4c80l0liz7m.png" alt="VMware" width="180" height="56" loading="lazy" decoding="async" class="clientes-logo__img">
+                    </li>
+                    <li class="clientes-logo" data-aos="fade-up" data-aos-delay="400">
+                        <img src="assets/img/clientes/logo-confirp.png" alt="Confirp" width="286" height="109" loading="lazy" decoding="async" class="clientes-logo__img">
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Sobre -->
+        <section id="sobre" class="section-canvas section-glow py-32 relative">
+            <div class="site-container">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-24 items-center">
+                    <div data-aos="fade-right" class="text-center md:text-left">
+                        <h2 class="section-display text-center md:text-left">
+                            <span class="section-display-line">Seja Todoz</span>
+                            <span class="section-display-accent">com a gente<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
+                        <p class="section-lead mb-8 max-w-xl mx-auto md:mx-0">Parceiros de quem precisa de software de verdade: apps, sistemas e inteligência artificial com a energia da WV_Todoz. Do primeiro alinhamento ao produto no ar, a gente caminha junto.</p>
+                        <div class="grid grid-cols-2 gap-8 md:gap-12 mb-12 max-w-md mx-auto md:mx-0 md:max-w-none">
+                            <div class="border-l-2 border-todoz pl-6 text-left"><span class="block text-4xl md:text-5xl font-black text-white mb-2">11+</span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Anos de Inovação</span></div>
+                            <div class="border-l-2 border-todoz pl-6 text-left"><span class="block text-4xl md:text-5xl font-black text-white mb-2">50+</span><span class="text-[10px] text-todoz uppercase tracking-[0.3em] font-black">Projetos Entregues</span></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-center justify-center md:justify-start">
+                            <button type="button" class="open-modal magnetic bg-todoz px-10 py-5 text-black font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest w-full sm:w-auto max-w-xs">Agendar consultoria</button>
+                            <a href="#servicos" class="magnetic px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full text-[10px] md:text-xs uppercase tracking-widest w-full sm:w-auto max-w-xs text-center hover:border-todoz/40 hover:text-todoz transition-colors">Ver o que fazemos</a>
+                        </div>
+                    </div>
+                    <div class="relative" data-aos="fade-left">
+                        <div class="relative z-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group"><img src="assets/img/office.png" alt="Escritório WV_Todoz — Seja Todoz com a gente" class="sobre-office-img w-full h-full object-cover transition-transform duration-1000 scale-100 group-hover:scale-105"></div>
+                        <div class="absolute -bottom-8 left-0 w-40 h-40 md:w-48 md:h-48 bg-todoz/20 rounded-full blur-[80px] -z-10 pointer-events-none" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Missão — featured lime highlight (contrasts surrounding dark sections) -->
+        <section id="missao" class="missao-highlight relative overflow-hidden">
+            <div class="site-container relative z-10">
+                <div class="missao-panel" data-aos="fade-up">
+                    <div class="missao-main">
+                        <p class="missao-eyebrow">Missão</p>
+                        <h2 class="missao-title">Do briefing ao produto no ar.</h2>
+                        <p class="missao-support">
+                            A WV_Todoz é a software house que faz a sua empresa e as suas ideias acontecerem, transformarem e aparecerem — com apps, sistemas e IA feitos para resultado de verdade.
+                        </p>
+                    </div>
+
+                    <div class="missao-aside">
+                        <dl class="missao-stats">
+                            <div class="missao-stat">
+                                <dt>
+                                    <span class="missao-count" data-count="11" data-suffix="+">11+</span>
+                                </dt>
+                                <dd>anos de mercado</dd>
+                            </div>
+                            <div class="missao-stat">
+                                <dt>
+                                    <span class="missao-count" data-count="50" data-suffix="+">50+</span>
+                                </dt>
+                                <dd>projetos entregues</dd>
+                            </div>
+                            <div class="missao-stat missao-stat--products">
+                                <dt class="missao-products">
+                                    <span class="missao-product">Facíleme</span>
+                                    <span class="missao-product missao-product--accent">Let's Work</span>
+                                </dt>
+                                <dd>produtos próprios</dd>
+                            </div>
+                        </dl>
+                        <button type="button" class="open-modal magnetic missao-cta">
+                            Conversar com a WV_Todoz
+                            <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile bridge — entre missão e serviços -->
+        <section id="mobile-bridge" class="section-canvas mobile-bridge-section">
+            <div class="site-container">
+                <div class="mobile-bridge-card" data-aos="zoom-in-up">
+                    <div class="mobile-bridge-grid">
+                        <div class="mobile-bridge-headline">
+                            <h3 class="mobile-bridge-title">
+                                <span class="mobile-bridge-quote" aria-hidden="true">“</span>O mundo<br>
+                                é <span class="mobile-bridge-accent">mobile,</span><br>
+                                sua empresa<br>
+                                deve ser.<span class="mobile-bridge-quote mobile-bridge-quote--close" aria-hidden="true">”</span>
+                            </h3>
+                        </div>
+                        <div class="mobile-bridge-copy">
+                            <div class="mobile-bridge-eyebrow">
+                                <span class="mobile-bridge-eyebrow-rule" aria-hidden="true"></span>
+                                <span>Apps que vendem e operam</span>
+                            </div>
+                            <p class="section-lead section-lead--bridge mobile-bridge-lead">
+                                Cliente e time vivem no celular. Desenvolvemos aplicativos para iPhone e Android que carregam a marca, agilizam a operação e acompanham o ritmo do negócio, com a mesma exigência de uma software house.
+                            </p>
+                            <button type="button" class="open-modal magnetic mobile-bridge-cta">
+                                Quero um app mobile
+                                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Serviços -->
+        <section id="servicos" class="section-canvas section-glow servicos-section relative">
+            <div class="site-container">
+                <div class="servicos-header" data-aos="fade-up">
+                    <div class="servicos-header-copy text-center md:text-left">
+                        <span class="servicos-eyebrow">O que entregamos</span>
+                        <h2 class="section-display">
+                            <span class="section-display-line">O que</span>
+                            <span class="section-display-accent">fazemos<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
+                        <p class="servicos-intro">
+                            Ajudamos empresas a transformar ideia em software que funciona no dia a dia: apps, sistemas e inteligência a serviço de vendas, operação e relacionamento com o cliente. Do primeiro alinhamento à evolução depois do lançamento.
+                        </p>
+                    </div>
+                    <div class="servicos-header-cta text-center md:text-right" data-aos="fade-up">
+                        <p class="servicos-header-note">Tecnologia pensada para o seu negócio, não para impressionar com jargão.</p>
+                        <button type="button" class="open-modal magnetic servicos-quote-link">
+                            Solicitar orçamento
+                            <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="servicos-grid">
+                    <article class="service-card servicos-card servicos-card--featured" data-aos="fade-up">
+                        <div class="servicos-card-icon" aria-hidden="true">
+                            <i class="ph ph-app-window"></i>
+                        </div>
+                        <div class="servicos-card-body">
+                            <h3 class="servicos-card-title">Aplicativos &amp; <span class="text-todoz">plataformas.</span></h3>
+                            <p class="servicos-card-desc">
+                                Criamos apps e plataformas digitais que aproximam a marca do cliente e organizam a operação por trás. Experiência clara, rápida e preparada para crescer com a demanda.
+                            </p>
+                            <ul class="servicos-card-list">
+                                <li>Jornadas pensadas para converter e fidelizar</li>
+                                <li>Interfaces modernas, leves e fáceis de usar</li>
+                                <li>Conexão com CRM, pagamentos e sistemas da empresa</li>
+                            </ul>
+                        </div>
+                        <button type="button" class="open-modal magnetic servicos-card-btn">Quero saber mais</button>
+                    </article>
+
+                    <article class="service-card servicos-card servicos-card--tall" data-aos="fade-up" data-aos-delay="100">
+                        <div class="servicos-card-icon" aria-hidden="true">
+                            <i class="ph ph-terminal-window"></i>
+                        </div>
+                        <div class="servicos-card-body">
+                            <h3 class="servicos-card-title">Sistemas web <span class="text-todoz">sob medida.</span></h3>
+                            <p class="servicos-card-desc">
+                                Sistemas feitos sob medida para a rotina da sua empresa: menos planilha, mais controle, mais segurança. Painéis, fluxos e automações que acompanham o crescimento do negócio.
+                            </p>
+                            <ul class="servicos-card-list">
+                                <li>Ambiente estável e seguro na nuvem</li>
+                                <li>Painéis claros para gestão e operação</li>
+                                <li>Automações que reduzem trabalho manual</li>
+                                <li>Experiência pensada para o time que usa todo dia</li>
+                            </ul>
+                        </div>
+                        <button type="button" class="open-modal magnetic servicos-card-btn servicos-card-btn--accent">Falar com especialista</button>
+                    </article>
+
+                    <article class="service-card servicos-card servicos-card--mobile" data-aos="fade-up" data-aos-delay="150">
+                        <div class="servicos-card-top">
+                            <div class="servicos-card-icon servicos-card-icon--sm" aria-hidden="true">
+                                <i class="ph ph-device-mobile"></i>
+                            </div>
+                            <button type="button" class="open-modal magnetic servicos-card-icon-btn" aria-label="Solicitar aplicativo mobile">
+                                <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="servicos-card-body">
+                            <h3 class="servicos-card-title servicos-card-title--sm">Apps para <span class="text-todoz">celular.</span></h3>
+                            <p class="servicos-card-desc">
+                                Seu cliente vive no celular. Desenvolvemos aplicativos para iPhone e Android com a cara da sua marca, rápidos de usar e prontos para gerar presença, vendas e relacionamento no bolso dele.
+                            </p>
+                            <ul class="servicos-card-list">
+                                <li>Presença forte onde o cliente realmente está</li>
+                                <li>Navegação simples, rápida e segura</li>
+                                <li>Publicação e acompanhamento após o lançamento</li>
+                            </ul>
+                        </div>
+                        <button type="button" class="open-modal magnetic servicos-card-btn">Solicitar app mobile</button>
+                    </article>
+
+                    <article class="service-card servicos-card servicos-card--ia" data-aos="fade-up" data-aos-delay="200">
+                        <div class="servicos-card-icon servicos-card-icon--sm" aria-hidden="true">
+                            <i class="ph ph-brain"></i>
+                        </div>
+                        <div class="servicos-card-body">
+                            <h3 class="servicos-card-title servicos-card-title--sm">Inteligência <span class="text-todoz">no negócio.</span></h3>
+                            <p class="servicos-card-desc">
+                                Usamos inteligência artificial para tirar peso da operação e acelerar decisões. Menos tarefa repetitiva, mais tempo para o que gera resultado.
+                            </p>
+                            <ul class="servicos-card-list">
+                                <li>Automação de rotinas e atendimento</li>
+                                <li>Assistentes que apoiam o time no dia a dia</li>
+                                <li>Análises que ajudam a prever e priorizar</li>
+                            </ul>
+                        </div>
+                        <button type="button" class="open-modal magnetic servicos-card-btn">Explorar com IA</button>
+                    </article>
+
+                    <article class="service-card servicos-card servicos-card--produtos" data-aos="fade-up" data-aos-delay="250">
+                        <div class="servicos-card-icon servicos-card-icon--sm" aria-hidden="true">
+                            <i class="ph ph-cube"></i>
+                        </div>
+                        <div class="servicos-card-body">
+                            <h3 class="servicos-card-title servicos-card-title--sm">Produtos <span class="text-todoz">próprios.</span></h3>
+                            <p class="servicos-card-desc">
+                                Facíleme e Let's Work nasceram da mesma exigência que levamos aos projetos dos clientes: produto vivo, melhoria contínua e foco no resultado de quem usa.
+                            </p>
+                            <ul class="servicos-card-list">
+                                <li>Soluções já testadas no mercado</li>
+                                <li>Mesmo padrão de qualidade dos projetos sob medida</li>
+                                <li>Evolução constante com base no uso real</li>
+                            </ul>
+                        </div>
+                        <a href="#produtos" class="servicos-inline-link">
+                            Conhecer os produtos
+                            <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </article>
+                </div>
+
+                <ol class="servicos-process" data-aos="fade-up">
+                    <li class="servicos-process-step">
+                        <span class="servicos-process-num">01</span>
+                        <div>
+                            <h4 class="servicos-process-title">Entendimento</h4>
+                            <p class="servicos-process-desc">Conversamos sobre o negócio, os gargalos e o que precisa mudar de verdade.</p>
+                        </div>
+                    </li>
+                    <li class="servicos-process-step">
+                        <span class="servicos-process-num">02</span>
+                        <div>
+                            <h4 class="servicos-process-title">Planejamento</h4>
+                            <p class="servicos-process-desc">Definimos o caminho, as prioridades e a base para o projeto crescer sem susto.</p>
+                        </div>
+                    </li>
+                    <li class="servicos-process-step">
+                        <span class="servicos-process-num">03</span>
+                        <div>
+                            <h4 class="servicos-process-title">Construção</h4>
+                            <p class="servicos-process-desc">Desenvolvemos com ritmo e critério, sempre alinhados ao resultado que importa para você.</p>
+                        </div>
+                    </li>
+                    <li class="servicos-process-step">
+                        <span class="servicos-process-num">04</span>
+                        <div>
+                            <h4 class="servicos-process-title">Evolução</h4>
+                            <p class="servicos-process-desc">Depois do lançamento, acompanhamos, ajustamos e expandimos o que já está no ar.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Portfólio (Cases que Marcam) — faixa horizontal -->
+        <section id="portfolio" class="portfolio-section">
+            <div class="site-container mb-12 md:mb-20">
+                <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 md:gap-10 text-center md:text-left">
+                    <div>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Projetos Selecionados</span>
+                        <h2 class="section-display">
+                            <span class="section-display-line">Cases que</span>
+                            <span class="section-display-accent">marcam<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
+                        <p class="text-zinc-500 mt-5 max-w-xl mx-auto md:mx-0 text-sm md:text-base">Deslize os cards no celular. No desktop, role a página e passe o mouse para colorir.</p>
+                    </div>
+                    <div class="pb-2">
+                        <a href="#portfolio" class="magnetic px-10 py-4 border border-white/10 rounded-full font-bold uppercase tracking-widest text-xs text-white inline-block hover:border-todoz/40 hover:text-todoz transition-colors">Explorar Todos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="portfolio-rail" class="portfolio-rail" data-lenis-prevent>
+                <div id="portfolio-horizontal" class="portfolio-track">
+                <!-- Case 01 — Let's Work -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Let's Work Facial"
+                     data-case-category="AI / Mobile"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg"
+                     data-case-desc="Sistema de ponto eletrônico com reconhecimento facial e geolocalização. Processamento de imagem nativo em tempo real para controle de jornada seguro, preciso e auditável.">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Lets-work-1024x576.jpg" alt="Let's Work Facial" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">AI / Mobile</span>
+                                <h4>Let's Work Facial</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Let's Work Facial">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Biometria facial</strong>
+                            <p>Registro de ponto com reconhecimento facial e geolocalização em tempo real.</p>
+                        </div>
+                        <span class="case-index">01</span>
+                    </div>
+                </article>
+
+                <!-- Case 02 — Pullman -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Pullman App"
+                     data-case-category="Marketing Digital"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg"
+                     data-case-desc="Aplicativo interativo para a Pullman com foco em engajamento de marca e utilidade para o consumidor. Interface premium, jornada fluida e arquitetura mobile preparada para escala.">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Pullman-1-1024x576.jpg" alt="Pullman App" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Marketing Digital</span>
+                                <h4>Pullman App</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Pullman App">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Brand experience</strong>
+                            <p>App mobile premium que aproxima a marca do consumidor com jornada fluida.</p>
+                        </div>
+                        <span class="case-index">02</span>
+                    </div>
+                </article>
+
+                <!-- Case 03 — Mega Senha -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Mega Senha Quiz"
+                     data-case-category="Social Gaming"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg"
+                     data-case-desc="Do sucesso da TV para uma experiência digital interativa. Quiz do Mega Senha no Facebook com milhares de jogadores simultâneos, gamificação e compartilhamento social em escala.">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/mega-senha-2-1024x576.jpg" alt="Mega Senha Quiz" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Social Gaming</span>
+                                <h4>Mega Senha Quiz</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Mega Senha Quiz">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Gamificação social</strong>
+                            <p>Quiz interativo com milhares de jogadores simultâneos e alto engajamento.</p>
+                        </div>
+                        <span class="case-index">03</span>
+                    </div>
+                </article>
+
+                <!-- Case 04 — Facíleme -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Facíleme Store"
+                     data-case-category="Social Commerce"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg"
+                     data-case-desc="Ecossistema completo de lojas virtuais para venda direta nas redes sociais. Catálogo, checkout simplificado e conversão onde o público já está conectado.">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/facileme-social-commerce-1024x576.jpg" alt="Facíleme Store" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Social Commerce</span>
+                                <h4>Facíleme Store</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Facíleme Store">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Venda nas redes</strong>
+                            <p>Loja virtual integrada ao social, do catálogo até o checkout simplificado.</p>
+                        </div>
+                        <span class="case-index">04</span>
+                    </div>
+                </article>
+
+                <!-- Case 05 — Syngenta -->
+                <article class="case-item open-case cursor-pointer"
+                     data-case-title="Syngenta Wi-Fi"
+                     data-case-category="Enterprise"
+                     data-case-img="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg"
+                     data-case-desc="Gestão inteligente de Wi-Fi para hotéis e eventos de grande porte. Controle de acesso, monitoramento de performance e operação estável sob alta demanda.">
+                    <div class="case-media">
+                        <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/04/Sy-2-1024x576.jpg" alt="Syngenta Wi-Fi" class="case-media-img">
+                        <div class="case-media-overlay"></div>
+                        <div class="case-card-content">
+                            <div class="case-card-copy">
+                                <span class="case-tag">Enterprise</span>
+                                <h4>Syngenta Wi-Fi</h4>
+                            </div>
+                            <button type="button" class="case-open-btn" aria-label="Abrir case Syngenta Wi-Fi">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="case-meta">
+                        <div class="case-meta-text">
+                            <strong>Conectividade</strong>
+                            <p>Gestão de Wi-Fi corporativo com controle de acesso e monitoramento.</p>
+                        </div>
+                        <span class="case-index">05</span>
+                    </div>
+                </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Produtos — bento assimétrico do ecossistema WV -->
+        <section id="produtos" class="produtos-section">
+            <div class="produtos-glow" aria-hidden="true"></div>
+            <div class="site-container relative z-10">
+                <div class="produtos-header text-center md:text-left mb-12 md:mb-16">
+                    <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4" data-aos="fade-up">Ecossistema</span>
+                    <h2 class="section-display" data-aos="fade-up" data-aos-delay="50">
+                        <span class="section-display-line">Produtos</span>
+                        <span class="section-display-accent">proprietários<span class="section-display-dot" aria-hidden="true"></span></span>
+                    </h2>
+                    <p class="section-lead mt-6 max-w-2xl mx-auto md:mx-0" data-aos="fade-up" data-aos-delay="100">As mesmas plataformas do site WV_Todoz: social commerce, eventos, cursos e ponto com biometria facial.</p>
+                </div>
+
+                <div class="produtos-bento">
+                    <article class="produto-card produto-card--featured" data-glow="lime" data-aos="fade-up">
+                        <span class="produto-badge">Destaque</span>
+                        <div class="produto-card-inner">
+                            <div class="produto-brand">
+                                <img src="assets/img/produtos/logo-letswork.png" alt="Let's Work" class="produto-logo" width="234" height="106" loading="lazy">
+                            </div>
+                            <div class="produto-main">
+                                <h3 class="produto-title">Let's Work</h3>
+                                <p class="produto-subtitle">Ponto com Biometria Facial</p>
+                                <p class="produto-desc">Reconhecimento facial e geolocalização para controle de jornada com precisão, segurança e conformidade jurídica.</p>
+                                <ul class="produto-highlights">
+                                    <li><i class="ph ph-check-circle" aria-hidden="true"></i> Biometria facial</li>
+                                    <li><i class="ph ph-check-circle" aria-hidden="true"></i> Geolocalização</li>
+                                    <li><i class="ph ph-check-circle" aria-hidden="true"></i> Conformidade jurídica</li>
+                                </ul>
+                            </div>
+                            <div class="produto-actions">
+                                <a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--primary">Demonstração</a>
+                                <button type="button" class="open-modal magnetic produto-btn produto-btn--ghost">Especialista</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="produto-card produto-card--wide" data-glow="soft" data-aos="fade-up" data-aos-delay="80">
+                        <div class="produto-card-inner">
+                            <div class="produto-brand">
+                                <img src="assets/img/produtos/logo-facileme.png" alt="Facíleme Store" class="produto-logo" width="213" height="82" loading="lazy">
+                            </div>
+                            <h3 class="produto-title">Facíleme Store</h3>
+                            <p class="produto-subtitle">Social Commerce</p>
+                            <p class="produto-desc">Lojas virtuais para venda e revenda de produtos e serviços nas redes sociais, com checkout simplificado e alta conversão.</p>
+                            <div class="produto-actions">
+                                <a href="https://www.facileme.com.br/" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--primary">Loja Virtual</a>
+                                <button type="button" class="open-modal magnetic produto-btn produto-btn--ghost">Falar conosco</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="produto-card" data-glow="soft" data-aos="fade-up" data-aos-delay="120">
+                        <div class="produto-card-inner">
+                            <div class="produto-brand">
+                                <img src="assets/img/produtos/logo-ingresso.png" alt="Facíleme Ingresso" class="produto-logo" width="214" height="88" loading="lazy">
+                            </div>
+                            <h3 class="produto-title">Facíleme Ingresso</h3>
+                            <p class="produto-subtitle">Eventos &amp; Tickets</p>
+                            <p class="produto-desc">Venda e divulgação de eventos com poucos cliques — controle de ingressos e presença onde o público já está conectado.</p>
+                            <div class="produto-actions">
+                                <a href="https://www.facilemeingresso.com.br/" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--primary">Ver produto</a>
+                                <a href="https://www.wvtodoz.com.br/facileme-ingresso/" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--ghost">Saiba mais</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="produto-card" data-glow="soft" data-aos="fade-up" data-aos-delay="160">
+                        <div class="produto-card-inner">
+                            <div class="produto-brand">
+                                <img src="assets/img/produtos/logo-cursos.png" alt="Facíleme Cursos" class="produto-logo" width="282" height="82" loading="lazy">
+                            </div>
+                            <h3 class="produto-title">Facíleme Cursos</h3>
+                            <p class="produto-subtitle">Educação Digital</p>
+                            <p class="produto-desc">Plataforma para hospedar, divulgar e vender cursos de forma descomplicada — do catálogo à matrícula.</p>
+                            <div class="produto-actions">
+                                <a href="https://www.wvtodoz.com.br/facileme-cursos/" target="_blank" rel="noopener noreferrer" class="magnetic produto-btn produto-btn--primary">Ver produto</a>
+                                <button type="button" class="open-modal magnetic produto-btn produto-btn--ghost">Consultar</button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aplicações e Sistema com IA -->
+        <section id="aplicacoes" class="section-canvas section-glow py-20 md:py-24">
+            <div class="site-container">
+                <div class="aplicacoes-layout">
+                    <div class="aplicacoes-media-wrap relative" data-aos="fade-right">
+                        <div class="aplicacoes-media group">
+                            <img src="assets/img/aplicacoes-ia.jpg" alt="Aplicações e sistemas com inteligência artificial" width="1400" height="1400" loading="lazy" decoding="async" class="aplicacoes-media-img">
+                            <div class="aplicacoes-media-veil" aria-hidden="true"></div>
+                            <div class="aplicacoes-media-grid" aria-hidden="true"></div>
+                            <div class="aplicacoes-media-nodes" aria-hidden="true"></div>
+                            <div class="aplicacoes-media-rim" aria-hidden="true"></div>
+
+                            <div class="aplicacoes-chip">
+                                <span class="aplicacoes-chip-pulse" aria-hidden="true"></span>
+                                <div class="aplicacoes-chip-copy">
+                                    <span class="aplicacoes-chip-kicker">Menos retrabalho</span>
+                                    <span class="aplicacoes-chip-title">Mais resultado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aplicacoes-copy" data-aos="fade-left">
+                        <span class="aplicacoes-eyebrow">Quando o manual trava o crescimento</span>
+                        <h2 class="section-display">
+                            <span class="section-display-line">Pare de perder</span>
+                            <span class="section-display-accent">tempo<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
+                        <p class="section-lead aplicacoes-lead">
+                            Processos manuais atrasam decisão, geram erro e exigem mais gente do que o negócio precisa. A gente coloca inteligência artificial dentro das suas aplicações e sistemas para a rotina fluir, o time respirar e a empresa crescer sem engolir retrabalho.
+                        </p>
+                        <ul class="aplicacoes-benefits">
+                            <li>Tarefas repetitivas deixam de consumir o dia do time</li>
+                            <li>Decisões mais rápidas, com informação na hora certa</li>
+                            <li>Escala a operação sem depender só de contratar mais gente</li>
+                        </ul>
+                        <button type="button" class="open-modal magnetic aplicacoes-cta">Quero reduzir o retrabalho</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog -->
+        <section id="blog" class="section-canvas section-glow py-24 md:py-32">
+            <div class="site-container">
+                <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-16 gap-8 text-center md:text-left">
+                    <div>
+                        <span class="text-todoz text-[10px] font-black tracking-[0.4em] uppercase block mb-4">Insights</span>
+                        <h2 class="section-display">
+                            <span class="section-display-line">Conteúdo &amp;</span>
+                            <span class="section-display-accent">inovação<span class="section-display-dot" aria-hidden="true"></span></span>
+                        </h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up">
+                        <div class="blog-card-media">
+                            <img src="assets/img/blog/insight-tech.jpg" alt="O futuro da programação" width="1200" height="675" loading="lazy" decoding="async" class="blog-card-image">
+                            <div class="blog-card-media-veil" aria-hidden="true"></div>
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Tecnologia</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">O futuro da programação.</h4>
+                            <p class="blog-excerpt mb-6 text-left">Tendências que ditam o software de amanhã e como se preparar.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 12 Abr 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up" data-aos-delay="100">
+                        <div class="blog-card-media">
+                            <img src="assets/img/blog/insight-data.jpg" alt="Segmentação de Leads" width="1200" height="675" loading="lazy" decoding="async" class="blog-card-image">
+                            <div class="blog-card-media-veil" aria-hidden="true"></div>
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Inteligência</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">Segmentação de Leads.</h4>
+                            <p class="blog-excerpt mb-6 text-left">Trabalhando sua base de contatos com inteligência e conversão.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 08 Mar 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="blog-post.html" class="blog-card group cursor-pointer text-left block" data-aos="fade-up" data-aos-delay="200">
+                        <div class="blog-card-media">
+                            <img src="assets/img/blog/insight-ai.jpg" alt="Revolução AI-First" width="1200" height="675" loading="lazy" decoding="async" class="blog-card-image">
+                            <div class="blog-card-media-veil" aria-hidden="true"></div>
+                        </div>
+                        <div class="blog-card-body">
+                            <span class="blog-tag">Inovação</span>
+                            <h4 class="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-todoz transition-colors text-left leading-snug">Revolução AI-First.</h4>
+                            <p class="blog-excerpt mb-6 text-left">IA no centro dos produtos digitais modernos e competitivos.</p>
+                            <div class="blog-author">
+                                <div class="blog-author-left">
+                                    <div class="blog-author-avatar" aria-hidden="true">WV</div>
+                                    <span class="blog-author-name"><i class="ph ph-user"></i> WV_Todoz</span>
+                                </div>
+                                <span class="blog-author-meta"><i class="ph ph-calendar-blank"></i> 21 Fev 2026</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="text-center">
+                    <a href="blog-post.html" class="magnetic inline-block px-12 py-5 border border-white/10 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:border-todoz/40 hover:text-todoz transition-colors">Ver Blog Completo</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section id="contato" class="contato-cta py-24 md:py-36 bg-todoz flex items-center justify-center text-center relative overflow-hidden">
+            <div class="site-container relative z-10" data-reveal>
+                <h2 class="contato-cta-title text-black font-black leading-[0.9] mb-10 md:mb-14 tracking-tighter uppercase text-center">
+                    Pronto para o <br>
+                    <span class="contato-cta-highlight bg-black text-todoz px-4 sm:px-6 md:px-8 inline-block mt-2 text-glow">Próximo Nível?</span>
+                </h2>
+                <div class="contato-cta-actions">
+                    <a href="tel:1155311779" class="contato-cta-phone">(11) 5531-1779</a>
+                    <a href="https://wa.me/551155311779" target="_blank" class="magnetic contato-cta-btn">FALE CONOSCO <i class="ph-bold ph-whatsapp-logo"></i></a>
+                </div>
+            </div>
+            <div class="contato-watermark" aria-hidden="true">
+                <span>TODOZ</span>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-32 bg-black relative overflow-hidden border-t border-white/5">
+        <div class="site-container relative z-10 text-center md:text-left">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 mb-16 md:mb-24">
+                <div class="md:col-span-4">
+                    <img src="https://www.wvtodoz.com.br/wp-content/uploads/2019/03/Logotipos-WV-TODOZ-todoz-branco-1024x394.png" alt="Logo" class="w-40 md:w-48 mb-8 md:mb-10 mx-auto md:mx-0">
+                    <p class="footer-tagline text-zinc-500 leading-relaxed mb-8 md:mb-10 max-w-sm mx-auto md:mx-0">Criamos software que tira a ideia do papel e gera resultado no negócio.</p>
+                    <div class="flex gap-6 text-zinc-400 text-3xl justify-center md:justify-start">
+                        <a href="https://www.facebook.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Facebook"><i class="ph ph-facebook-logo"></i></a>
+                        <a href="https://www.instagram.com/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
+                        <a href="https://www.linkedin.com/company/wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
+                        <a href="https://www.youtube.com/@wvtodoz" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all" aria-label="YouTube"><i class="ph ph-youtube-logo"></i></a>
+                    </div>
+                </div>
+                <div class="md:col-span-2 uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8">Navegação</h5>
+                    <ul class="space-y-4 text-zinc-500 font-bold text-sm">
+                        <li><a href="#sobre" class="hover:text-todoz transition-all">Sobre Nós</a></li>
+                        <li><a href="#servicos" class="hover:text-todoz transition-all">Serviços</a></li>
+                        <li><a href="#produtos" class="hover:text-todoz transition-all">Produtos</a></li>
+                        <li><a href="#aplicacoes" class="hover:text-todoz transition-all">Aplicações</a></li>
+                        <li><a href="#portfolio" class="hover:text-todoz transition-all">Projetos</a></li>
+                        <li><a href="#blog" class="hover:text-todoz transition-all">Insights</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3 uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8">Produtos</h5>
+                    <ul class="space-y-4 text-zinc-500 font-bold text-sm">
+                        <li><a href="https://www.facileme.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Store</a></li>
+                        <li><a href="https://www.facilemeingresso.com.br/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Ingresso</a></li>
+                        <li><a href="https://www.wvtodoz.com.br/facileme-cursos/" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Facíleme Cursos</a></li>
+                        <li><a href="https://www.letswork.com.br" target="_blank" rel="noopener noreferrer" class="hover:text-todoz transition-all">Let's Work Facial</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3 uppercase">
+                    <h5 class="text-white font-black text-xs uppercase tracking-[0.3em] mb-6 md:mb-8">Localização</h5>
+                    <p class="text-zinc-500 leading-relaxed font-bold text-sm max-w-xs mx-auto md:mx-0">
+                        Av. Morumbi, 8435 cj.104 <br>
+                        Brooklin, São Paulo - SP <br>
+                        Brasil
+                    </p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Av.+Morumbi,+8435+Brooklin+S%C3%A3o+Paulo+SP" target="_blank" rel="noopener noreferrer" class="inline-block mt-6 text-todoz text-[10px] font-black uppercase tracking-widest border-b border-todoz/30 pb-1">Ver no Google Maps</a>
+                </div>
+            </div>
+            
+            <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] uppercase">
+                    © 2026 WV_TODOZ — AGÊNCIA INTERATIVA
+                </div>
+                <div class="flex items-center gap-8 text-zinc-600 text-[10px] font-black uppercase tracking-widest uppercase">
+                    <a href="https://wa.me/551155311779?text=Ol%C3%A1%2C%20gostaria%20de%20receber%20a%20Pol%C3%ADtica%20de%20Privacidade." target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Política de Privacidade</a>
+                    <a href="https://wa.me/551155311779?text=Ol%C3%A1%2C%20gostaria%20de%20receber%20os%20Termos%20de%20Uso." target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Termos de Uso</a>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 right-0 pointer-events-none select-none opacity-5 translate-y-1/4 translate-x-1/4 uppercase overflow-hidden max-w-[50vw]" aria-hidden="true">
+            <span class="text-[min(40rem,55vw)] font-black text-white leading-none tracking-tighter italic">Z</span>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="case-modal" class="site-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="site-modal-backdrop" data-modal-backdrop></div>
+        <div class="site-modal-panel site-modal-panel--case" data-modal-panel>
+            <button type="button" id="close-case-modal" class="site-modal-close" aria-label="Fechar case"><i class="ph ph-x-circle"></i></button>
+            <div class="site-modal-media">
+                <img id="case-modal-img" src="" alt="">
+                <div class="site-modal-media-fade"></div>
+            </div>
+            <div class="site-modal-body">
+                <span id="case-modal-category" class="text-todoz text-[10px] font-black uppercase tracking-[0.5em] mb-6 block text-left">Categoria</span>
+                <h2 id="case-modal-title" class="text-4xl md:text-6xl font-black mb-8 tracking-tighter leading-[0.9] text-white text-left uppercase">Título</h2>
+                <p id="case-modal-desc" class="text-zinc-400 text-lg leading-relaxed mb-10 text-left normal-case">Descrição detalhada do projeto.</p>
+                <button type="button" class="open-modal-from-case magnetic bg-todoz px-10 py-6 text-black font-black rounded-full text-xs uppercase tracking-widest">SOLICITAR PROJETO SIMILAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="site-modal site-modal--contact" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="site-modal-backdrop" data-modal-backdrop></div>
+        <div class="site-modal-panel site-modal-panel--contact" data-modal-panel>
+            <button type="button" id="close-modal" class="site-modal-close" aria-label="Fechar formulário"><i class="ph ph-x"></i></button>
+            <h2 class="text-4xl font-black mb-8 tracking-tighter text-left text-white uppercase">VAMOS <span class="text-todoz text-glow uppercase">CONVERSAR.</span></h2>
+            <form id="contact-form" class="space-y-6 text-left normal-case">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">Nome Completo</label>
+                        <input name="nome" type="text" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="João Silva">
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">E-mail Corporativo</label>
+                        <input name="email" type="email" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white" placeholder="exemplo@empresa.com.br">
+                    </div>
+                </div>
+                <div class="space-y-2 text-left">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400 block text-left">Conte seu desafio</label>
+                    <textarea name="mensagem" rows="3" required class="w-full bg-black/50 border border-white/5 rounded-2xl px-6 py-4 outline-none focus:border-todoz transition-all text-sm text-white resize-none" placeholder="Quero desenvolver um aplicativo mobile..."></textarea>
+                </div>
+                <button type="submit" class="magnetic bg-todoz w-full py-5 text-black font-black rounded-full text-xs uppercase tracking-widest text-center">Enviar Proposta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- WhatsApp Floating Button — below modals/menus; CSS clears CTAs on mobile -->
+    <a id="wa-float" href="https://wa.me/551155311779" target="_blank" rel="noopener noreferrer" class="wa-float group" aria-label="Falar no WhatsApp">
+        <div class="wa-float-glow" aria-hidden="true"></div>
+        <div class="wa-float-btn">
+            <i class="ph-bold ph-whatsapp-logo"></i>
+        </div>
+        <div class="wa-float-tip" aria-hidden="true">
+            <span class="flex items-center gap-3">Falar com Especialista <i class="ph ph-arrow-right text-todoz animate-bounce-x"></i></span>
+        </div>
+    </a>
+
+    <script src="assets/js/site-utils.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/animations.js"></script>
+    <script src="assets/js/components.js"></script>
+</body>
+</html>

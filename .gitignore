@@ -1,0 +1,19 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+.vercel/
+*.log
+.DS_Store
+
+# Local design dumps — not used by the live site
+design-system/
+
+# Original 4K hero (~64MB) — deploy uses compressed assets/video/hero.mp4
+/hero.mp4
+
+# Duplicate HTML copies and AI/image dumps at repo root
+index (copiar*).html
+Gemini_Generated_Image_*.png
+/Logotipos-*.png
