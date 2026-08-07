@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>M. PIETRO | Brindes que encantam e Personalizados de Alto Padrão</title>
+    <title>M. PIETRO | Brindes Corporativos e Itens Personalizados Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -19,9 +19,10 @@
         body { font-family: 'Outfit', sans-serif; scroll-behavior: smooth; background: #fff; color: #09090b; margin: 0; padding: 0; }
         
         .glass-nav { 
-            background: rgba(255, 255, 255, 0.8); 
+            background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(24px); 
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
         }
         
         .hero-luxe {
@@ -34,23 +35,31 @@
             padding-top: 80px;
         }
 
+        .hero-mesh {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(at 100% 0%, rgba(194, 161, 120, 0.08) 0px, transparent 50%);
+            pointer-events: none;
+        }
+
         .premium-card {
             background: #fff;
             border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 2rem;
-            padding: 1.25rem;
+            border-radius: 2.5rem;
+            padding: 1.5rem;
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         .premium-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-12px);
             box-shadow: 0 40px 100px -20px rgba(0,0,0,0.1);
+            border-color: rgba(0,0,0,0.1);
         }
 
         .img-box {
-            background: #fcfcfc;
+            background: #f9f9f9;
             border-radius: 1.5rem;
             aspect-ratio: 1/1;
             display: flex;
@@ -58,16 +67,17 @@
             justify-content: center;
             overflow: hidden;
             margin-bottom: 1.5rem;
-            padding: 1.5rem;
+            padding: 2rem;
+            position: relative;
         }
 
         .category-item {
-            border-radius: 2.5rem;
+            border-radius: 3rem;
             overflow: hidden;
             position: relative;
             aspect-ratio: 1/1.2;
             cursor: pointer;
-            transition: all 0.6s ease;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .category-item:hover { transform: translateY(-10px); }
         .category-item img { transition: transform 1.2s ease; }
@@ -82,10 +92,11 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             background: #f4f4f5;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
             white-space: nowrap;
         }
-        .cat-pill.active { background: #000; color: #fff; }
+        .cat-pill.active { background: #000; color: #fff; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2); }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .reveal { opacity: 0; transform: translateY(30px); }
@@ -94,7 +105,7 @@
         .italic-accent { font-style: italic; color: var(--brand-gold); }
         
         .modal-content-scroll { max-height: 80vh; overflow-y: auto; scrollbar-width: thin; }
-        .thumb-gallery { border: 2px solid transparent; transition: all 0.3s ease; border-radius: 1rem; }
+        .thumb-gallery { border: 2px solid transparent; transition: all 0.3s ease; border-radius: 1rem; cursor: pointer; }
         .thumb-gallery.active { border-color: #000; transform: scale(1.05); }
 
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
@@ -109,16 +120,16 @@
             <div class="flex items-center gap-4 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
                 <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-xl group-hover:rotate-12 transition-transform">M</div>
                 <div class="hidden md:flex flex-col leading-none border-l border-zinc-200 pl-5 text-zinc-950">
-                    <span class="font-black tracking-tighter text-xl uppercase">M. PIETRO</span>
-                    <span class="text-[9px] uppercase tracking-[0.4em] text-zinc-400 font-bold">Presentes de Impacto</span>
+                    <span class="font-black tracking-tighter text-xl uppercase text-zinc-950">M. PIETRO</span>
+                    <span class="text-[9px] uppercase tracking-[0.4em] text-zinc-400 font-bold">Brindes & Personalizados</span>
                 </div>
             </div>
             
             <div class="hidden lg:flex items-center gap-14 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
                 <a href="index.html" class="hover:text-black transition-colors text-black underline underline-offset-8 decoration-2">Início</a>
-                <a href="catalogo.html" class="hover:text-black transition-colors">Produtos</a>
-                <a href="sobre.html" class="hover:text-black transition-colors">A Empresa</a>
-                <a href="contato.html" class="hover:text-black transition-colors">Orçamento</a>
+                <a href="catalogo.html" class="hover:text-black transition-colors">Catálogo</a>
+                <a href="sobre.html" class="hover:text-black transition-colors">Curadoria</a>
+                <a href="contato.html" class="hover:text-black transition-colors text-black border border-black/10 px-6 py-3 rounded-full hover:bg-black hover:text-white transition-all">Contato</a>
             </div>
 
             <div class="flex items-center gap-8">
@@ -132,21 +143,22 @@
 
     <!-- Hero -->
     <section class="hero-luxe">
+        <div class="hero-mesh"></div>
         <div class="section-bleed grid lg:grid-cols-12 gap-16 items-center w-full relative z-10">
             <div class="lg:col-span-7 reveal initial" style="opacity:1; transform:translateY(0)">
                 <div class="inline-flex items-center gap-3 px-4 py-2 bg-white rounded-full text-[10px] font-black text-zinc-400 mb-10 uppercase tracking-[0.3em] shadow-sm border border-zinc-100">
                     <span class="w-2 h-2 rounded-full bg-zinc-950 animate-pulse"></span>
-                    Seleção de Presentes 2026
+                    Curadoria Especializada 2026
                 </div>
                 <h1 class="text-7xl md:text-9xl xl:text-[110px] font-black tracking-tighter leading-[0.8] mb-12 text-zinc-950 text-balance">
                     Brindes que <br> <span class="italic-accent">contam história.</span>
                 </h1>
-                <p class="text-xl text-zinc-600 max-w-lg mb-16 leading-relaxed font-medium">
-                    Muito mais que um objeto, uma forma de agradecer e marcar presença. Curadoria de itens únicos e personalização impecável para quem valoriza cada detalhe da sua marca.
+                <p class="text-xl text-zinc-500 max-w-lg mb-16 leading-relaxed font-medium">
+                    Muito mais que um objeto, uma forma de marcar presença. Curadoria exclusiva e personalização impecável para quem valoriza cada detalhe da sua marca.
                 </p>
                 <div class="flex flex-wrap items-center gap-10">
                     <a href="#catalogo" class="bg-black text-white px-16 py-8 rounded-full font-black uppercase tracking-widest text-xs shadow-2xl hover:-translate-y-1 transition-all">Explorar Catálogo</a>
-                    <a href="#orcamento-final" class="text-black font-black uppercase tracking-widest text-[10px] hover:opacity-50 transition-opacity border-b-2 border-zinc-200 pb-2">Solicitar Orçamento</a>
+                    <a href="#orcamento" class="text-black font-black uppercase tracking-widest text-[10px] hover:opacity-50 transition-opacity border-b-2 border-zinc-200 pb-2">Solicitar Orçamento</a>
                 </div>
             </div>
             <div class="lg:col-span-5 relative hidden lg:block reveal delay-300 initial" style="opacity:1; transform:translateY(0)">
@@ -159,7 +171,7 @@
         </div>
     </section>
 
-    <!-- Linhas que Definem o Mercado -->
+    <!-- Linhas que Inspiram -->
     <section class="py-40 bg-white overflow-hidden">
         <div class="section-bleed">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-32 reveal">
@@ -167,44 +179,40 @@
                     <h2 class="text-[11px] font-black text-zinc-300 uppercase tracking-[0.6em] mb-8">Especialidades</h2>
                     <h3 class="text-6xl md:text-8xl font-black tracking-tighter leading-none text-balance">Linhas que <br> inspiram o mercado.</h3>
                 </div>
-                <a href="catalogo.html" class="text-xs font-black uppercase tracking-widest border-b-2 border-black pb-2 hover:opacity-50 transition-opacity">Ver Catálogo Completo</a>
+                <a href="catalogo.html" class="text-xs font-black uppercase tracking-widest border-b-2 border-black pb-2 hover:opacity-50 transition-opacity">Catálogo Completo</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 reveal delay-200">
-                <!-- Bebidas -->
                 <div class="category-item group shadow-xl" onclick="window.location.href='catalogo.html?cat=Bebidas'">
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors z-10"></div>
                     <img src="https://brindes-com-amor.lovable.app/assets/cat-bebidas-B4aq-e--.jpg" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20">
-                        <h4 class="text-3xl font-black text-white tracking-tighter uppercase italic">Bebidas</h4>
-                        <p class="text-white/80 text-xs font-bold mt-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">Garrafas e Térmicos</p>
+                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20 text-white">
+                        <h4 class="text-3xl font-black tracking-tighter uppercase italic leading-none">Bebidas</h4>
+                        <p class="text-white/80 text-xs font-bold mt-4 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Garrafas e Térmicos</p>
                     </div>
                 </div>
-                <!-- Tecnologia -->
                 <div class="category-item group shadow-xl lg:translate-y-12" onclick="window.location.href='catalogo.html?cat=Tecnologia'">
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors z-10"></div>
                     <img src="https://brindes-com-amor.lovable.app/assets/cat-tech-CtOWTZup.jpg" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20">
-                        <h4 class="text-3xl font-black text-white tracking-tighter uppercase italic">Tech</h4>
-                        <p class="text-white/80 text-xs font-bold mt-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">Gadgets e Acessórios</p>
+                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20 text-white">
+                        <h4 class="text-3xl font-black tracking-tighter uppercase italic leading-none">Tech</h4>
+                        <p class="text-white/80 text-xs font-bold mt-4 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Gadgets e Acessórios</p>
                     </div>
                 </div>
-                <!-- Bolsas -->
-                <div class="category-item group shadow-xl" onclick="window.location.href='catalogo.html?cat=Mochilas, Pastas & Sacolas'">
-                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors z-10"></div>
-                    <img src="https://brindes-com-amor.lovable.app/assets/cat-bolsas-D3W3zWv5.jpg" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20">
-                        <h4 class="text-3xl font-black text-white tracking-tighter uppercase italic">Lifestyle</h4>
-                        <p class="text-white/80 text-xs font-bold mt-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">Mochilas e Bolsas</p>
-                    </div>
-                </div>
-                <!-- Escritorio -->
-                <div class="category-item group shadow-xl lg:translate-y-12" onclick="window.location.href='catalogo.html?cat=Escritório'">
+                <div class="category-item group shadow-xl" onclick="window.location.href='catalogo.html?cat=Escritório'">
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors z-10"></div>
                     <img src="https://brindes-com-amor.lovable.app/assets/cat-escritorio-2o2PcM_h.jpg" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20">
-                        <h4 class="text-3xl font-black text-white tracking-tighter uppercase italic">Escritório</h4>
-                        <p class="text-white/80 text-xs font-bold mt-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">Papelaria Premium</p>
+                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20 text-white">
+                        <h4 class="text-3xl font-black tracking-tighter uppercase italic leading-none">Escritório</h4>
+                        <p class="text-white/80 text-xs font-bold mt-4 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Papelaria de Alto Padrão</p>
+                    </div>
+                </div>
+                <div class="category-item group shadow-xl lg:translate-y-12" onclick="window.location.href='catalogo.html?cat=Mochilas, Pastas & Sacolas'">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors z-10"></div>
+                    <img src="https://brindes-com-amor.lovable.app/assets/cat-bolsas-D3W3zWv5.jpg" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 p-10 flex flex-col justify-end z-20 text-white">
+                        <h4 class="text-3xl font-black tracking-tighter uppercase italic leading-none">Lifestyle</h4>
+                        <p class="text-white/80 text-xs font-bold mt-4 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">Bolsas e Mochilas</p>
                     </div>
                 </div>
             </div>
@@ -216,7 +224,7 @@
         <div class="section-bleed">
             <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-32 reveal">
                 <div class="max-w-2xl">
-                    <h2 class="text-[11px] font-black text-zinc-300 uppercase tracking-[0.6em] mb-8">Catálogo</h2>
+                    <h2 class="text-[11px] font-black text-zinc-300 uppercase tracking-[0.6em] mb-8">Curadoria</h2>
                     <h3 class="text-6xl md:text-8xl font-black tracking-tighter leading-none">Presentes que <br> encantam.</h3>
                 </div>
                 <div class="flex flex-col gap-10 items-end w-full lg:w-auto">
@@ -224,13 +232,13 @@
                         <input type="text" id="searchInput" placeholder="O que você procura?" class="w-full bg-white border-none rounded-3xl px-12 py-8 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all shadow-xl shadow-black/[0.03]">
                         <svg class="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-200" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196 7.5 7.5 0 0010.607 10.607z"></path></svg>
                     </div>
-                    <div id="categoryContainer" class="flex gap-3 overflow-x-auto no-scrollbar max-w-[100vw] md:max-w-[600px] -mr-12 pr-12">
-                        <button onclick="setCategory('', this)" class="cat-pill active">Todas as Categorias</button>
+                    <div id="categoryContainer" class="flex gap-3 overflow-x-auto no-scrollbar max-w-[100vw] md:max-w-[700px] -mr-12 pr-12">
+                        <button onclick="setCategory('', this)" class="cat-pill active">Todas Categorias</button>
                     </div>
                 </div>
             </div>
 
-            <div id="loader" class="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            <div id="loader" class="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="space-y-6"><div class="aspect-square rounded-[3rem] skeleton"></div><div class="h-4 w-2/3 skeleton rounded-full mx-auto"></div></div>
                 <div class="space-y-6"><div class="aspect-square rounded-[3rem] skeleton"></div><div class="h-4 w-2/3 skeleton rounded-full mx-auto"></div></div>
             </div>
@@ -245,66 +253,72 @@
         </div>
     </section>
 
-    <!-- Branding Authority Section -->
+    <!-- Authority Section -->
     <section class="py-40 bg-zinc-950 rounded-[80px] md:rounded-[120px] mx-4 mb-10 overflow-hidden relative">
-        <div class="absolute inset-0 opacity-20">
-            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover">
-        </div>
+        <div class="absolute inset-0 opacity-20"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover"></div>
         <div class="section-bleed relative z-10 grid lg:grid-cols-2 gap-24 items-center">
             <div class="reveal">
-                <h2 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.6em] mb-10">Autoridade em Branding</h2>
-                <h3 class="text-6xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-16 text-white text-balance">Sua marca <br> em evidência.</h3>
+                <h2 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.6em] mb-10">Autoridade</h2>
+                <h3 class="text-6xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-16 text-white text-balance">Sua marca <br> em destaque.</h3>
                 <div class="space-y-12">
                     <div class="flex gap-10 group">
                         <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">01</div>
                         <div>
-                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Cuidado com os Detalhes</h4>
-                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Não entregamos apenas brindes, entregamos formas de agradecer. Cada item é pensado para manter sua marca presente no dia a dia de quem é importante para você.</p>
+                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Autoridade em Branding</h4>
+                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Muito além de objetos: criamos conexões emocionais. Nossa curadoria seleciona apenas itens que realmente agregam valor à sua marca no cotidiano do seu cliente.</p>
                         </div>
                     </div>
                     <div class="flex gap-10 group">
                         <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">02</div>
                         <div>
-                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Qualidade Garantida</h4>
-                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Unimos o design europeu moderno com a agilidade da personalização brasileira. Resultado impecável em cada gravação, bordado ou impressão.</p>
+                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Personalização de Elite</h4>
+                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Garantimos a fidelidade total da sua identidade visual através de tecnologia avançada de gravação a laser, bordado HD e impressão UV digital.</p>
+                        </div>
+                    </div>
+                </div>
+
+                    </div>
+                    <div class="flex gap-10 group">
+                        <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">02</div>
+                        <div>
+                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Qualidade Impecável</h4>
+                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Personalização feita com as melhores técnicas do mercado: Laser, Bordado de alta definição e Impressão UV Digital.</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="relative reveal delay-300">
                 <div class="rounded-[64px] overflow-hidden shadow-2xl border-[12px] border-white/5 bg-white/5 backdrop-blur-sm p-4">
-                    <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover rounded-[48px]" alt="M. Pietro Branding">
+                    <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover rounded-[48px]">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact / Quote Form (Replacement for Newsletter) -->
-    <section id="orcamento-final" class="py-40 bg-white">
-        <div class="section-bleed">
-            <div class="grid lg:grid-cols-2 gap-24 items-center">
-                <div class="reveal">
-                    <h2 class="text-[11px] font-black text-zinc-300 uppercase tracking-[0.6em] mb-10">Solicitar Orçamento</h2>
-                    <h3 class="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-12">Vamos criar algo <br> incrível juntos?</h3>
-                    <p class="text-xl text-zinc-500 font-medium leading-relaxed max-w-lg">Nossa equipe de consultores está pronta para ajudar você a escolher a melhor seleção de brindes para sua empresa ou evento.</p>
-                </div>
-                <div class="bg-zinc-50 p-12 lg:p-20 rounded-[80px] reveal delay-300">
-                    <form id="quoteForm" class="space-y-10">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">Nome Completo</label>
-                            <input type="text" required placeholder="Como deseja ser chamado?" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all shadow-sm">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">E-mail Corporativo</label>
-                            <input type="email" required placeholder="seuemail@empresa.com.br" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all shadow-sm">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">Produto de Interesse (Opcional)</label>
-                            <input type="text" id="interestProduct" placeholder="Digite o nome ou SKU se já souber" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all shadow-sm">
-                        </div>
-                        <button type="submit" class="w-full bg-black text-white py-10 rounded-[40px] font-black uppercase tracking-widest text-xs hover:bg-zinc-800 transition-all shadow-2xl">Enviar Pedido de Contato</button>
-                    </form>
-                </div>
+    <!-- Quote Form Section -->
+    <section id="orcamento" class="py-40 bg-white">
+        <div class="section-bleed grid lg:grid-cols-2 gap-24 items-center">
+            <div class="reveal">
+                <h2 class="text-[11px] font-black text-zinc-300 uppercase tracking-[0.6em] mb-10">Orçamento</h2>
+                <h3 class="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-12">Vamos criar algo <br> extraordinário?</h3>
+                <p class="text-xl text-zinc-500 font-medium leading-relaxed max-w-lg">Fale com um de nossos consultores agora mesmo e descubra como podemos elevar o patamar dos seus brindes corporativos.</p>
+            </div>
+            <div class="bg-zinc-50 p-12 lg:p-20 rounded-[80px] reveal delay-300 shadow-sm border border-zinc-100">
+                <form id="quoteForm" class="space-y-10">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">Nome Completo</label>
+                        <input type="text" required placeholder="Como podemos te chamar?" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">E-mail Comercial</label>
+                        <input type="email" required placeholder="seuemail@empresa.com.br" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-4">Item de Interesse (Opcional)</label>
+                        <input type="text" id="interestProduct" placeholder="Digite o nome ou referência do produto" class="w-full bg-white border-none rounded-3xl px-10 py-7 text-sm font-semibold outline-none focus:ring-2 focus:ring-black transition-all">
+                    </div>
+                    <button type="submit" class="w-full bg-black text-white py-10 rounded-[40px] font-black uppercase tracking-widest text-xs hover:bg-zinc-800 transition-all shadow-xl">Solicitar Atendimento</button>
+                </form>
             </div>
         </div>
     </section>
@@ -315,28 +329,28 @@
             <div class="grid lg:grid-cols-12 gap-16 mb-40">
                 <div class="lg:col-span-5">
                     <div class="flex items-center gap-4 mb-12">
-                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-black font-black text-2xl">M</div>
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-black font-black text-xl">M</div>
                         <span class="font-black tracking-tighter text-2xl uppercase">M. PIETRO</span>
                     </div>
-                    <h4 class="text-5xl font-black tracking-tighter leading-none mb-12 text-balance opacity-80">Brindes de alto padrão para <br> marcas que buscam conexão.</h4>
+                    <h4 class="text-4xl font-black tracking-tighter leading-tight mb-12 text-balance opacity-80 text-zinc-400">Transformando presentes em <br> <span class="text-white">conexões reais entre <br> marcas e pessoas.</span></h4>
                 </div>
-                <div class="lg:col-span-2 lg:col-start-7">
-                    <h5 class="text-[10px] font-black uppercase tracking-[0.4em] mb-12 text-zinc-600">Explore</h5>
+            <div class="lg:col-span-2 lg:col-start-7">
+                    <h5 class="text-[10px] font-black uppercase tracking-[0.4em] mb-12 text-zinc-600">Navegação</h5>
                     <ul class="space-y-8 text-sm font-bold text-zinc-400">
                         <li><a href="index.html" class="hover:text-white">Início</a></li>
-                        <li><a href="catalogo.html" class="hover:text-white">Produtos</a></li>
+                        <li><a href="catalogo.html" class="hover:text-white">Catálogo</a></li>
                         <li><a href="sobre.html" class="hover:text-white">A Empresa</a></li>
-                        <li><a href="contato.html" class="hover:text-white">Falar com Consultor</a></li>
+                        <li><a href="contato.html" class="hover:text-white text-white italic">Solicitar Orçamento</a></li>
                     </ul>
                 </div>
                 <div class="lg:col-span-4">
-                    <h5 class="text-[10px] font-black uppercase tracking-[0.4em] mb-12 text-zinc-600">Localização</h5>
-                    <p class="text-zinc-500 font-medium text-lg mb-4">São Paulo - SP</p>
-                    <p class="text-zinc-500 font-medium text-lg">Atendimento Nacional</p>
+                    <h5 class="text-[10px] font-black uppercase tracking-[0.4em] mb-12 text-zinc-600 font-bold">Atendimento</h5>
+                    <p class="text-zinc-500 font-medium text-lg mb-6">São Paulo - SP</p>
+                    <p class="text-zinc-500 font-medium text-lg mb-10">Enviamos para todo o Brasil com segurança e agilidade.</p>
                 </div>
             </div>
-            <div class="pt-20 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-10 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700">
-                <div>© 2026 M. PIETRO BRINDES PREMIUM.</div>
+            <div class="pt-20 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800">
+                <div>© 2026 M. PIETRO BRINDES E PERSONALIZADOS.</div>
                 <div class="flex gap-14 items-center">
                     <a href="#" class="hover:text-white transition-colors">PRIVACIDADE</a>
                     <a href="#" class="hover:text-white transition-colors">TERMOS</a>
@@ -348,12 +362,12 @@
     <!-- Product Modal -->
     <div id="productModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-xl" onclick="closeModal()"></div>
-        <div class="bg-white w-full max-w-6xl rounded-[80px] overflow-hidden relative z-10 flex flex-col md:flex-row max-h-[92vh] shadow-2xl border border-white/10">
+        <div class="bg-white w-full max-w-6xl rounded-[80px] overflow-hidden relative z-10 flex flex-col md:flex-row max-h-[95vh] shadow-2xl border border-white/10">
             <button onclick="closeModal()" class="absolute top-10 right-10 z-20 bg-zinc-50 hover:bg-zinc-100 w-16 h-16 rounded-full flex items-center justify-center transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div class="md:w-1/2 bg-[#f9f9f9] p-12 lg:p-20 flex flex-col items-center justify-center">
-                <div class="relative w-full h-auto max-h-[60%] mb-12 group/main flex items-center justify-center">
+                <div class="relative w-full h-auto max-h-[60%] mb-12 flex items-center justify-center">
                     <img id="modalImg" src="" alt="" class="w-full h-full object-contain mix-blend-multiply transition-all duration-700 scale-110">
                 </div>
                 <div id="modalGallery" class="flex gap-4 overflow-x-auto no-scrollbar max-w-full px-4 py-2"></div>
@@ -361,34 +375,34 @@
             <div class="md:w-1/2 p-16 lg:p-24 modal-content-scroll no-scrollbar">
                 <div id="modalSub" class="text-[11px] font-black uppercase tracking-[0.5em] text-zinc-300 mb-8 uppercase"></div>
                 <h2 id="modalTitle" class="text-3xl lg:text-5xl font-black tracking-tighter mb-8 leading-[1.1] text-zinc-950 uppercase italic"></h2>
-                <div id="modalSku" class="inline-block bg-zinc-50 px-8 py-4 rounded-3xl text-[10px] font-black mb-12 text-zinc-950 border border-zinc-50 uppercase tracking-widest"></div>
-                <p id="modalDesc" class="text-lg lg:text-xl text-zinc-500 leading-relaxed mb-16 font-medium text-balance"></p>
-                <div class="space-y-16">
+                <div id="modalSku" class="inline-block bg-zinc-50 px-8 py-4 rounded-3xl text-[10px] font-black mb-14 text-zinc-950 border border-zinc-100 uppercase tracking-widest"></div>
+                <p id="modalDesc" class="text-lg lg:text-xl text-zinc-500 leading-relaxed mb-16 font-medium"></p>
+                <div class="space-y-12">
                     <div>
-                        <label class="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-300 mb-8 block font-bold">Quantidade Estimada</label>
-                        <div class="flex items-center gap-10">
+                        <label class="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-300 mb-8 block font-bold text-center lg:text-left">Quantidade Estimada</label>
+                        <div class="flex items-center justify-center lg:justify-start gap-10">
                             <button onclick="updateQty(-50)" class="w-20 h-20 rounded-[35px] border-2 border-zinc-100 flex items-center justify-center hover:border-black transition-all font-black text-3xl">-</button>
                             <input type="number" id="qtyInput" value="100" min="1" class="w-32 h-20 text-center bg-zinc-50 rounded-[35px] font-black border-none outline-none focus:ring-2 focus:ring-black text-3xl">
                             <button onclick="updateQty(50)" class="w-20 h-20 rounded-[35px] border-2 border-zinc-100 flex items-center justify-center hover:border-black transition-all font-black text-3xl">+</button>
                         </div>
                     </div>
                     <div class="flex flex-col gap-4">
-                        <button id="addToCartBtn" class="w-full bg-black text-white py-10 rounded-[50px] font-black uppercase tracking-[0.3em] text-xs hover:bg-zinc-800 transition-all shadow-2xl">Adicionar ao Orçamento</button>
-                        <button onclick="openQuoteFormWithProduct()" class="w-full border-2 border-black/5 text-black py-10 rounded-[50px] font-black uppercase tracking-[0.3em] text-xs hover:bg-zinc-50 transition-all">Tirar Dúvida Direta</button>
+                        <button id="addToCartBtn" class="w-full bg-black text-white py-12 rounded-[50px] font-black uppercase tracking-[0.3em] text-xs hover:bg-zinc-800 transition-all shadow-2xl">Salvar no Orçamento</button>
+                        <button onclick="openQuoteFormWithProduct()" class="w-full border-2 border-black/5 text-black py-12 rounded-[50px] font-black uppercase tracking-[0.3em] text-xs hover:bg-zinc-50 transition-all italic">Falar com Consultor sobre este item</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar Cart -->
-    <div id="cartSidebar" class="fixed inset-y-0 right-0 z-[300] w-full max-w-xl bg-white shadow-[-50px_0_100px_rgba(0,0,0,0.1)] translate-x-full transition-transform duration-1000 flex flex-col">
+    <!-- Sidebar Orçamento -->
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 z-[300] w-full max-w-xl bg-white shadow-[-50px_0_150px_rgba(0,0,0,0.2)] translate-x-full transition-transform duration-1000 flex flex-col">
         <div class="p-16 border-b border-zinc-50 flex items-center justify-between">
-            <h3 class="text-4xl font-black tracking-tighter uppercase italic text-zinc-100">Draft</h3>
+            <h3 class="text-5xl font-black tracking-tighter uppercase italic text-zinc-100">Rascunho</h3>
             <button onclick="toggleCart()" class="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
         </div>
         <div id="cartItems" class="flex-1 overflow-y-auto p-16 space-y-16 no-scrollbar"></div>
-        <div class="p-16 border-t border-zinc-50"><button onclick="sendToWhatsApp()" class="w-full bg-black text-white py-12 rounded-[50px] font-black uppercase tracking-widest text-[11px] shadow-2xl">Solicitar Orçamento no WhatsApp</button></div>
+        <div class="p-16 border-t border-zinc-50"><button onclick="sendToWhatsApp()" class="w-full bg-black text-white py-12 rounded-[50px] font-black uppercase tracking-widest text-[11px] shadow-2xl italic">Solicitar Orçamento no WhatsApp</button></div>
     </div>
 
     <script>
@@ -409,7 +423,7 @@
 
         async function fetchApi(endpoint, params = {}) {
             try {
-                const url = new URL('api/proxy.php', window.location.href);
+                const url = new URL('/api', window.location.origin);
                 url.searchParams.set('endpoint', endpoint);
                 for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
                 const res = await fetch(url);
@@ -475,7 +489,7 @@
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-32 text-center text-zinc-300 font-bold uppercase tracking-[0.4em] opacity-40">Nenhum brinde encontrado</div>';
+                grid.innerHTML = '<div class="col-span-full py-32 text-center text-zinc-100 font-black uppercase tracking-[0.4em] text-4xl opacity-20 italic">Sem Itens</div>';
                 document.getElementById('loadMore').style.display = 'none';
                 return;
             }
@@ -498,7 +512,7 @@
                     </div>
                     <div>
                         <div class="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-300 mb-4 uppercase">${subType || 'Seleção Especial'}</div>
-                        <h4 class="font-black text-xl lg:text-2xl tracking-tighter text-zinc-950 mb-8 line-clamp-1 group-hover:text-zinc-500 transition-colors uppercase leading-none text-balance">${name}</h4>
+                        <h4 class="font-black text-base lg:text-lg tracking-tighter text-zinc-950 mb-8 line-clamp-1 group-hover:text-zinc-500 transition-colors uppercase leading-none text-balance">${name}</h4>
                         <div class="flex items-center justify-between pt-6 border-t border-zinc-50">
                             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-950 font-mono">REF: ${ref}</span>
                             <div class="w-14 h-14 bg-zinc-50 rounded-full flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15"></path></svg></div>
@@ -529,9 +543,9 @@
             
             document.getElementById('modalImg').src = img;
             document.getElementById('modalTitle').textContent = name;
-            document.getElementById('modalSub').textContent = getProp(p, 'sub_type') || 'Linha Especial';
+            document.getElementById('modalSub').textContent = getProp(p, 'sub_type') || 'Coleção Premium';
             document.getElementById('modalSku').textContent = 'REF: ' + ref;
-            document.getElementById('modalDesc').textContent = desc || 'Um presente de alta percepção de valor, ideal para fidelizar seus clientes e marcar presença de forma elegante.';
+            document.getElementById('modalDesc').textContent = desc || 'Um presente de alta percepção de valor para sua marca.';
             
             const gallery = document.getElementById('modalGallery');
             gallery.innerHTML = '';
@@ -573,11 +587,11 @@
             if (b) { b.textContent = cart.length; b.classList.toggle('hidden', cart.length === 0); }
             const c = document.getElementById('cartItems');
             if (!c) return;
-            c.innerHTML = cart.length === 0 ? '<div class="h-full flex items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-30">Draft</div>' : '';
+            c.innerHTML = cart.length === 0 ? '<div class="h-full flex flex-col items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-30">Vazio</div>' : '';
             cart.forEach((item, idx) => {
                 const d = document.createElement('div');
                 d.className = 'flex items-center gap-10 animate-fade-in';
-                d.innerHTML = `<div class="w-24 h-24 bg-zinc-50 rounded-[40px] overflow-hidden flex-shrink-0 border border-zinc-100 p-6 flex items-center justify-center"><img src="${item.img}" class="w-full h-full object-contain mix-blend-multiply"></div><div class="flex-1"><h4 class="text-sm font-black text-zinc-950 mb-2 uppercase leading-none">${item.name}</h4><div class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">${item.id} • ${item.qty} UN</div></div><button onclick="removeFromCart(${idx})" class="text-zinc-200 hover:text-red-500 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`;
+                d.innerHTML = `<div class="w-32 h-32 bg-zinc-50 rounded-[40px] overflow-hidden flex-shrink-0 border border-zinc-100 p-8 flex items-center justify-center"><img src="${item.img}" class="w-full h-full object-contain mix-blend-multiply"></div><div class="flex-1"><h4 class="text-lg font-black text-zinc-950 mb-3 uppercase leading-none">${item.name}</h4><div class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">${item.id} • ${item.qty} UNIDADES</div></div><button onclick="removeFromCart(${idx})" class="text-zinc-200 hover:text-red-500 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`;
                 c.appendChild(d);
             });
         }
@@ -588,7 +602,7 @@
             if (currentProduct) {
                 document.getElementById('interestProduct').value = `${getProp(currentProduct, 'name')} (REF: ${getProp(currentProduct, 'prod_reference')})`;
                 closeModal();
-                document.getElementById('orcamento-final').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('orcamento').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -613,7 +627,7 @@
 
         function sendToWhatsApp() {
             if (cart.length === 0) return;
-            let t = "Olá M. Pietro! Gostaria de um orçamento para brindes corporativos:\n\n";
+            let t = "Olá M. Pietro! Gostaria de um orçamento para brindes:\n\n";
             cart.forEach(it => t += `• ${it.name} (${it.id}) - Qtd: ${it.qty}\n`);
             window.open(`https://wa.me/5511987654321?text=${encodeURIComponent(t)}`);
         }
