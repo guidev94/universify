@@ -143,14 +143,16 @@
         }
 
         async function fetchApi(endpoint, params = {}) {
-            const baseUrl = window.location.href.split('/').slice(0,-1).join('/') + '/';
-            const url = new URL('api/proxy.php', baseUrl);
-            url.searchParams.set('endpoint', endpoint);
-            for (const [key, value] of Object.entries(params)) {
-                url.searchParams.set(key, value);
-            }
-            const res = await fetch(url);
-            return await res.json();
+            try {
+                const url = new URL('/api', window.location.origin);
+                url.searchParams.set('endpoint', endpoint);
+                for (const [key, value] of Object.entries(params)) {
+                    url.searchParams.set(key, value);
+                }
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('API Error');
+                return await res.json();
+            } catch (e) { console.error('Fetch error:', e); return null; }
         }
 
         async function init() {

@@ -198,12 +198,16 @@
         }
 
         async function fetchApi(endpoint, params = {}) {
-            const url = new URL('/api', window.location.origin);
-            url.searchParams.set('endpoint', endpoint);
-            for(const [k,v] of Object.entries(params)) url.searchParams.set(k, v);
-            const res = await fetch(url);
-            return await res.json();
+            try {
+                const url = new URL('/api', window.location.origin);
+                url.searchParams.set('endpoint', endpoint);
+                for(const [k,v] of Object.entries(params)) url.searchParams.set(k, v);
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('API Error');
+                return await res.json();
+            } catch (e) { console.error('Fetch error:', e); return null; }
         }
+
 
         async function loadCategories() {
             const cats = await fetchApi('categories');

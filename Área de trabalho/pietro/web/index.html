@@ -253,47 +253,38 @@
         </div>
     </section>
 
-    <!-- Authority Section -->
-    <section class="py-40 bg-zinc-950 rounded-[80px] md:rounded-[120px] mx-4 mb-10 overflow-hidden relative">
-        <div class="absolute inset-0 opacity-20"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover"></div>
-        <div class="section-bleed relative z-10 grid lg:grid-cols-2 gap-24 items-center">
+    <!-- Autoridade Branding Section -->
+    <section class="py-24 bg-zinc-950 rounded-[60px] md:rounded-[100px] mx-4 mb-20 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover">
+        </div>
+        <div class="section-bleed relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div class="reveal">
-                <h2 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.6em] mb-10">Autoridade</h2>
-                <h3 class="text-6xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-16 text-white text-balance">Sua marca <br> em destaque.</h3>
-                <div class="space-y-12">
-                    <div class="flex gap-10 group">
-                        <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">01</div>
-                        <div>
-                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Autoridade em Branding</h4>
-                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Muito além de objetos: criamos conexões emocionais. Nossa curadoria seleciona apenas itens que realmente agregam valor à sua marca no cotidiano do seu cliente.</p>
-                        </div>
+                <h2 class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.5em] mb-6">Branding de Elite</h2>
+                <h3 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-tight mb-12 text-white">Sua marca em <br> <span class="italic text-zinc-400 font-medium">evidência real.</span></h3>
+                
+                <div class="grid sm:grid-cols-2 gap-8">
+                    <div class="group">
+                        <div class="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center font-black italic text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all mb-4">01</div>
+                        <h4 class="text-lg font-black text-white mb-2 uppercase tracking-tight">Fidelização</h4>
+                        <p class="text-zinc-400 font-medium leading-relaxed text-sm">Brindes selecionados que mantêm sua marca presente no cotidiano do seu cliente de forma útil e elegante.</p>
                     </div>
-                    <div class="flex gap-10 group">
-                        <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">02</div>
-                        <div>
-                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Personalização de Elite</h4>
-                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Garantimos a fidelidade total da sua identidade visual através de tecnologia avançada de gravação a laser, bordado HD e impressão UV digital.</p>
-                        </div>
-                    </div>
-                </div>
-
-                    </div>
-                    <div class="flex gap-10 group">
-                        <div class="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-[30px] flex items-center justify-center flex-shrink-0 font-black italic text-xl text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all duration-500">02</div>
-                        <div>
-                            <h4 class="text-2xl font-black mb-4 uppercase text-white tracking-tight">Qualidade Impecável</h4>
-                            <p class="text-zinc-400 font-medium leading-relaxed text-lg text-balance">Personalização feita com as melhores técnicas do mercado: Laser, Bordado de alta definição e Impressão UV Digital.</p>
-                        </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center font-black italic text-white border border-white/10 group-hover:bg-white group-hover:text-black transition-all mb-4">02</div>
+                        <h4 class="text-lg font-black text-white mb-2 uppercase tracking-tight">Acabamento</h4>
+                        <p class="text-zinc-400 font-medium leading-relaxed text-sm">Tecnologia avançada de gravação a laser e impressão UV para garantir a perfeição da sua identidade visual.</p>
                     </div>
                 </div>
             </div>
+            
             <div class="relative reveal delay-300">
-                <div class="rounded-[64px] overflow-hidden shadow-2xl border-[12px] border-white/5 bg-white/5 backdrop-blur-sm p-4">
-                    <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover rounded-[48px]">
+                <div class="rounded-[48px] overflow-hidden shadow-2xl border-[8px] border-white/5 bg-white/5 backdrop-blur-sm p-3">
+                    <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover rounded-[36px]" alt="Branding M. Pietro">
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Quote Form Section -->
     <section id="orcamento" class="py-40 bg-white">
@@ -423,13 +414,26 @@
 
         async function fetchApi(endpoint, params = {}) {
             try {
+                // Determine the base path for API calls
                 const url = new URL('/api', window.location.origin);
                 url.searchParams.set('endpoint', endpoint);
                 for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+                
                 const res = await fetch(url);
+                if (!res.ok) throw new Error('API Error');
                 return await res.json();
-            } catch (e) { return null; }
+            } catch (e) { 
+                console.error('Fetch error:', e);
+                // Fallback for non-Vercel local development if /api rewrite is not active
+                try {
+                    const fallbackUrl = new URL('api/proxy.js', window.location.href);
+                    // This wouldn't work directly in browser without a build step or specific server support
+                    // So we stick to /api and ensure server.js handles it.
+                } catch(err) {}
+                return null; 
+            }
         }
+
 
         async function init() {
             updateCartUI();
