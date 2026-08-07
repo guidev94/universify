@@ -587,7 +587,7 @@
             if (b) { b.textContent = cart.length; b.classList.toggle('hidden', cart.length === 0); }
             const c = document.getElementById('cartItems');
             if (!c) return;
-            c.innerHTML = cart.length === 0 ? '<div class="h-full flex flex-col items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-30">Vazio</div>' : '';
+            c.innerHTML = cart.length === 0 ? '<div class="h-full flex flex-col items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-30">Carrinho</div>' : '';
             cart.forEach((item, idx) => {
                 const d = document.createElement('div');
                 d.className = 'flex items-center gap-10 animate-fade-in';

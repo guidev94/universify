@@ -176,7 +176,7 @@
     <!-- Cart Sidebar -->
         <div id="cartSidebar" class="fixed inset-y-0 right-0 z-[300] w-full max-w-lg bg-white shadow-[-50px_0_100px_rgba(0,0,0,0.1)] translate-x-full transition-transform duration-700 flex flex-col">
         <div class="p-12 border-b border-zinc-100 flex items-center justify-between">
-            <h3 class="text-4xl font-black tracking-tighter uppercase italic text-zinc-200 italic">Rascunho</h3>
+            <h3 class="text-4xl font-black tracking-tighter uppercase italic text-zinc-200 italic">Meu Carrinho</h3>
             <button onclick="toggleCart()" class="w-12 h-12 bg-zinc-50 rounded-full flex items-center justify-center hover:bg-zinc-100 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
         </div>
         <div id="cartItems" class="flex-1 overflow-y-auto p-12 space-y-12 no-scrollbar"></div>
@@ -273,7 +273,7 @@
             if (b) { b.textContent = cart.length; b.classList.toggle('hidden', cart.length === 0); }
             const c = document.getElementById('cartItems');
             if (!c) return;
-            c.innerHTML = cart.length === 0 ? '<div class="h-full flex flex-col items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-10">Vazio</div>' : '';
+            c.innerHTML = cart.length === 0 ? '<div class="h-full flex flex-col items-center justify-center text-zinc-100 font-black uppercase tracking-widest text-4xl italic opacity-10">Carrinho</div>' : '';
             cart.forEach((item, idx) => {
                 const d = document.createElement('div');
                 d.className = 'flex items-center gap-10 animate-fade-in';
