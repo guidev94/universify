@@ -1,0 +1,242 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceCreatives{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.creatives.title'|trans }}{% endblock %}
+
+{% block content %}
+{{ includeStylesheet('plugins/MauticAdsIntelligenceBundle/Assets/css/creative-studio.css?adsVersion=0.1.9') }}
+{{ includeScript('plugins/MauticAdsIntelligenceBundle/Assets/js/creative-studio.js?adsVersion=0.1.10') }}
+
+{% set acsEndpoints = {
+    conversations: path('mautic_ads_intelligence_creatives_conversations'),
+    create: path('mautic_ads_intelligence_creatives_conversations_create'),
+    conversation: path('mautic_ads_intelligence_creatives_conversation', {id: 0})|replace({'/0': '/__ID__'}),
+    delete: path('mautic_ads_intelligence_creatives_conversation_delete', {id: 0})|replace({'/0': '/__ID__'}),
+    messages: path('mautic_ads_intelligence_creatives_messages', {id: 0})|replace({'/0': '/__ID__'}),
+    messagesStream: path('mautic_ads_intelligence_creatives_messages_stream', {id: 0})|replace({'/0': '/__ID__'}),
+    replay: path('mautic_ads_intelligence_creatives_message_replay', {id: 0})|replace({'/0': '/__ID__'}),
+    replayStream: path('mautic_ads_intelligence_creatives_message_replay_stream', {id: 0})|replace({'/0': '/__ID__'}),
+    settings: path('mautic_ads_intelligence_settings')
+} %}
+{% set acsI18n = {
+    newChat: 'mautic.ads_intelligence.creatives.new_chat'|trans,
+    emptyTitle: 'mautic.ads_intelligence.creatives.empty_title'|trans,
+    emptyHelp: 'mautic.ads_intelligence.creatives.empty_help'|trans,
+    promptPlaceholder: 'mautic.ads_intelligence.creatives.prompt_placeholder'|trans,
+    mode: 'mautic.ads_intelligence.creatives.mode'|trans,
+    modeText: 'mautic.ads_intelligence.creatives.mode.text'|trans,
+    modeImage: 'mautic.ads_intelligence.creatives.mode.image'|trans,
+    modeVideo: 'mautic.ads_intelligence.creatives.mode.video'|trans,
+    model: 'mautic.ads_intelligence.creatives.model'|trans,
+    extendVideo: 'mautic.ads_intelligence.creatives.extend_video'|trans,
+    attachImage: 'mautic.ads_intelligence.creatives.attach_image'|trans,
+    aspectRatio: 'mautic.ads_intelligence.creatives.aspect_ratio'|trans,
+    send: 'mautic.ads_intelligence.creatives.send'|trans,
+    download: 'mautic.ads_intelligence.creatives.download'|trans,
+    saveAsset: 'mautic.ads_intelligence.creatives.save_asset'|trans,
+    assetUrl: 'mautic.ads_intelligence.creatives.asset_url'|trans,
+    copyUrl: 'mautic.ads_intelligence.creatives.copy_url'|trans,
+    delete: 'mautic.ads_intelligence.creatives.delete'|trans,
+    replay: 'mautic.ads_intelligence.creatives.replay'|trans,
+    generating: 'mautic.ads_intelligence.creatives.generating'|trans,
+    generatingVideo: 'mautic.ads_intelligence.creatives.generating_video'|trans,
+    geminiMissing: 'mautic.ads_intelligence.creatives.gemini_missing'|trans,
+    noConversations: 'mautic.ads_intelligence.creatives.no_conversations'|trans,
+    error: 'mautic.ads_intelligence.creatives.error'|trans
+} %}
+
+<script type="application/json" id="acs-models-json">{{ modelsByMode|json_encode|raw }}</script>
+<script type="application/json" id="acs-endpoints-json">{{ acsEndpoints|json_encode|raw }}</script>
+<script type="application/json" id="acs-i18n-json">{{ acsI18n|json_encode|raw }}</script>
+
+<div
+    id="ads-creative-studio"
+    class="ads-creative-studio"
+    data-csrf="{{ csrf_token('ads_intelligence_creatives') }}"
+    data-configured="{{ geminiSettings.configured ? '1' : '0' }}"
+>
+    {% if not geminiSettings.configured %}
+        <div class="alert alert-warning ads-creative-studio__banner">
+            {{ 'mautic.ads_intelligence.creatives.gemini_missing'|trans }}
+            <a href="{{ path('mautic_ads_intelligence_settings') }}">{{ 'mautic.ads_intelligence.settings'|trans }}</a>
+        </div>
+    {% endif %}
+
+    <div class="ads-creative-studio__shell">
+        <aside class="ads-creative-studio__sidebar">
+            <div class="ads-creative-studio__brand">
+                <span class="ads-creative-studio__spark" aria-hidden="true"></span>
+                <strong>{{ 'mautic.ads_intelligence.creatives.title'|trans }}</strong>
+                <a
+                    href="{{ path('mautic_ads_intelligence_settings') }}"
+                    class="ads-creative-studio__settings-link"
+                    title="{{ 'mautic.ads_intelligence.settings'|trans }}"
+                    aria-label="{{ 'mautic.ads_intelligence.settings'|trans }}"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M19.4 13.5c.06-.49.06-.99 0-1.5l1.74-1.35-1.8-3.12-2.05.83a7.33 7.33 0 0 0-1.3-.75L15.68 5.4h-3.6l-.31 2.21c-.46.19-.9.44-1.3.75l-2.05-.83-1.8 3.12L8.36 12a6.1 6.1 0 0 0 0 1.5l-1.74 1.35 1.8 3.12 2.05-.83c.4.31.84.56 1.3.75l.31 2.21h3.6l.31-2.21c.46-.19.9-.44 1.3-.75l2.05.83 1.8-3.12-1.74-1.35Z" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
+            <button type="button" class="ads-creative-studio__new" id="acs-new-chat">
+                <span aria-hidden="true">+</span>
+                {{ 'mautic.ads_intelligence.creatives.new_chat'|trans }}
+            </button>
+            <div class="ads-creative-studio__conv-list" id="acs-conversation-list">
+                <div class="ads-creative-studio__empty-list">{{ 'mautic.ads_intelligence.creatives.no_conversations'|trans }}</div>
+            </div>
+        </aside>
+
+        <section class="ads-creative-studio__main">
+            <div class="ads-creative-studio__messages" id="acs-messages">
+                <div class="ads-creative-studio__welcome" id="acs-welcome">
+                    <div class="ads-creative-studio__welcome-mark" aria-hidden="true"></div>
+                    <h3 id="acs-chat-title">{{ 'mautic.ads_intelligence.creatives.empty_title'|trans }}</h3>
+                    <p>{{ 'mautic.ads_intelligence.creatives.empty_help'|trans }}</p>
+                </div>
+            </div>
+
+            <footer class="ads-creative-studio__composer">
+                <div class="ads-creative-studio__composer-inner">
+                    <div class="ads-creative-studio__chips">
+                        <div class="ads-creative-studio__mode-pills" role="tablist" aria-label="{{ 'mautic.ads_intelligence.creatives.mode'|trans }}">
+                            <button type="button" class="acs-mode-pill is-active" data-mode="text">{{ 'mautic.ads_intelligence.creatives.mode.text'|trans }}</button>
+                            <button type="button" class="acs-mode-pill" data-mode="image">{{ 'mautic.ads_intelligence.creatives.mode.image'|trans }}</button>
+                            <button type="button" class="acs-mode-pill" data-mode="video">{{ 'mautic.ads_intelligence.creatives.mode.video'|trans }}</button>
+                        </div>
+
+                        <label class="acs-pill-select" title="{{ 'mautic.ads_intelligence.creatives.model'|trans }}">
+                            <span>{{ 'mautic.ads_intelligence.creatives.model'|trans }}</span>
+                            <select id="acs-model" class="not-chosen">
+                                {% for item in modelsByMode.text|default([]) %}
+                                    <option value="{{ item.id }}" data-mode="text">{{ item.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <label class="acs-pill-select ads-creative-studio__field--video" title="{{ 'mautic.ads_intelligence.creatives.aspect_ratio'|trans }}">
+                            <span>{{ 'mautic.ads_intelligence.creatives.aspect_ratio'|trans }}</span>
+                            <select id="acs-aspect" class="not-chosen">
+                                <option value="16:9">16:9</option>
+                                <option value="9:16">9:16</option>
+                            </select>
+                        </label>
+
+                        <label class="acs-chip-toggle ads-creative-studio__field--video" id="acs-extend-wrap">
+                            <input type="checkbox" id="acs-extend">
+                            <span>{{ 'mautic.ads_intelligence.creatives.extend_video'|trans }}</span>
+                        </label>
+                    </div>
+
+                    <div class="ads-creative-studio__attach-preview" id="acs-reference-preview" hidden>
+                        <img id="acs-reference-thumb" alt="">
+                        <div>
+                            <strong>{{ 'mautic.ads_intelligence.creatives.attach_image'|trans }}</strong>
+                            <small id="acs-reference-name"></small>
+                        </div>
+                        <button type="button" class="acs-icon-btn acs-icon-btn--danger" id="acs-reference-clear" title="{{ 'mautic.ads_intelligence.creatives.delete'|trans }}">&times;</button>
+                    </div>
+
+                    <input
+                        type="file"
+                        id="acs-reference"
+                        class="acs-file-input"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        tabindex="-1"
+                        aria-hidden="true"
+                    >
+                    <select id="acs-mode" class="acs-visually-hidden not-chosen" tabindex="-1" aria-hidden="true">
+                        <option value="text" selected>{{ 'mautic.ads_intelligence.creatives.mode.text'|trans }}</option>
+                        <option value="image">{{ 'mautic.ads_intelligence.creatives.mode.image'|trans }}</option>
+                        <option value="video">{{ 'mautic.ads_intelligence.creatives.mode.video'|trans }}</option>
+                    </select>
+
+                    <div class="ads-creative-studio__prompt-shell">
+                        <button
+                            type="button"
+                            class="acs-icon-btn ads-creative-studio__field--video"
+                            id="acs-attach-row"
+                            title="{{ 'mautic.ads_intelligence.creatives.attach_image'|trans }}"
+                            aria-label="{{ 'mautic.ads_intelligence.creatives.attach_image'|trans }}"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+
+                        <textarea
+                            id="acs-prompt"
+                            rows="1"
+                            placeholder="{{ 'mautic.ads_intelligence.creatives.prompt_placeholder'|trans }}"
+                        ></textarea>
+
+                        <button type="button" class="acs-send" id="acs-send" {% if not geminiSettings.configured %}disabled{% endif %} title="{{ 'mautic.ads_intelligence.creatives.send'|trans }}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a1 1 0 00-1.39 1.15l1.7 6.5a1 1 0 00.8.73L13 12l-8.49.02a1 1 0 00-.8.73l-1.7 6.5a1 1 0 001.39 1.15z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="ads-creative-studio__status" id="acs-status" hidden></div>
+                </div>
+            </footer>
+        </section>
+    </div>
+</div>
+
+<script>
+(function () {
+    var models = {{ modelsByMode|json_encode|raw }};
+    var modeEl = document.getElementById('acs-mode');
+    var modelEl = document.getElementById('acs-model');
+    var root = document.getElementById('ads-creative-studio');
+    if (!modeEl || !modelEl || !root) {
+        return;
+    }
+
+    function syncModePills() {
+        var mode = modeEl.value || 'text';
+        root.querySelectorAll('.acs-mode-pill').forEach(function (pill) {
+            pill.classList.toggle('is-active', pill.getAttribute('data-mode') === mode);
+        });
+    }
+
+    function fillModels() {
+        var mode = modeEl.value || 'text';
+        var list = (models && models[mode]) ? models[mode] : [];
+        while (modelEl.firstChild) {
+            modelEl.removeChild(modelEl.firstChild);
+        }
+        list.forEach(function (item, index) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.label;
+            if (index === 0) {
+                opt.selected = true;
+            }
+            modelEl.appendChild(opt);
+        });
+        root.classList.toggle('is-video-mode', mode === 'video');
+        syncModePills();
+    }
+
+    root.querySelectorAll('.acs-mode-pill').forEach(function (pill) {
+        pill.addEventListener('click', function () {
+            modeEl.value = pill.getAttribute('data-mode');
+            modeEl.dispatchEvent(new Event('change', { bubbles: true }));
+            fillModels();
+        });
+    });
+
+    modeEl.addEventListener('change', fillModels);
+    if (typeof window.AdsCreativeStudio === 'undefined') {
+        fillModels();
+    } else if (typeof window.AdsCreativeStudio.init === 'function') {
+        window.AdsCreativeStudio.init();
+        fillModels();
+    }
+})();
+</script>
+{% endblock %}

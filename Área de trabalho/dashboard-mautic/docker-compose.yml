@@ -1,6 +1,6 @@
 services:
   mautic_db:
-    image: mysql:8.0
+    image: mysql:8.4
     container_name: mautic_db
     restart: unless-stopped
     environment:
@@ -19,7 +19,7 @@ services:
       retries: 5
 
   mautic:
-    image: mautic/mautic:5-apache
+    image: mautic/mautic:latest
     container_name: mautic
     restart: unless-stopped
     depends_on:

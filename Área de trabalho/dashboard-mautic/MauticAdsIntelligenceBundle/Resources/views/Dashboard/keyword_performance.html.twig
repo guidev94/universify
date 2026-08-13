@@ -1,0 +1,286 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceKeywordPerformance{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.keyword_performance.search_title'|trans }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Reset Mautic UI */
+    .page-header { display: none !important; }
+    #app-content { background-color: #f8f9fa !important; }
+    
+    :root {
+        --g-blue: #1a73e8;
+        --g-gray: #5f6368;
+        --g-line: #dadce0;
+        --g-bg: #f8f9fa;
+        --g-text: #3c4043;
+        --g-font: 'Google Sans', 'Roboto', sans-serif;
+    }
+
+    .ads-main-wrapper {
+        background-color: var(--g-bg);
+        margin: -20px;
+        min-height: 100vh;
+        font-family: var(--g-font);
+        color: var(--g-text);
+    }
+
+    /* Fixed Pixel Perfect Header */
+    .ads-header-main {
+        background: transparent !important;
+        border-bottom: 1px solid var(--g-line);
+        padding: 0 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 64px;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,.3);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .logo-divider { 
+        padding-right: 25px; 
+        border-right: 1px solid var(--g-line); 
+        height: 32px; 
+        display: flex; 
+        align-items: center; 
+        min-width: 140px; 
+    }
+    .header-page-title { font-size: 20px; font-weight: 400; color: #3c4043; margin: 0; white-space: nowrap; }
+
+    .header-right { display: flex; align-items: center; height: 100%; }
+    .date-display-box { display: flex; align-items: center; gap: 10px; padding: 0 24px; height: 100%; font-size: 13px; cursor: pointer; color: #3c4043; }
+
+    /* Improved Filter Bar - NO BACKGROUNDS */
+    .ads-filters-bar {
+        background: transparent !important;
+        border-bottom: 1px solid var(--g-line);
+        padding: 8px 24px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .filter-wrapper {
+        position: relative;
+        min-width: 190px;
+        flex: 1;
+        border: 1px solid var(--g-line);
+        border-radius: 4px;
+        padding: 4px 12px;
+        height: 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: transparent !important; /* TRANSPARENTE */
+    }
+    .filter-wrapper:hover { border-color: #bdc1c6; }
+    .filter-wrapper:focus-within { border-color: var(--g-blue); border-width: 2px; padding: 3px 11px; }
+
+    .filter-wrapper label { font-size: 10px; font-weight: 600; color: var(--g-gray); margin: 0; text-transform: uppercase; }
+    .filter-wrapper select { border: none !important; background: transparent !important; font-size: 14px; width: 100%; padding: 0; color: var(--g-text); cursor: pointer; appearance: none; outline: none; }
+
+    .body-padding { padding: 0 24px 24px 24px; }
+    .row-charts-google { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+    .google-card {
+        background: transparent !important;
+        border: 1px solid var(--g-line);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,.3);
+        overflow: hidden;
+    }
+
+    .google-card-header { padding: 16px 24px; border-bottom: 1px solid var(--g-line); display: flex; justify-content: space-between; align-items: center; }
+    .google-card-header h3 { margin: 0; font-size: 16px; font-weight: 500; }
+
+    .chart-container-inner { padding: 20px; height: 320px; }
+
+    .table-scroll-wrapper { max-height: 480px; overflow-y: auto; }
+    .table-ads-google { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .table-ads-google thead th {
+        position: sticky; top: 0; background: transparent !important; z-index: 10; font-size: 12px; font-weight: 600;
+        color: var(--google-gray); padding: 14px 24px; border-bottom: 1px solid var(--google-line) !important;
+        text-align: left;
+    }
+    .table-ads-google tbody td { 
+        padding: 12px 24px; 
+        font-size: 13px; 
+        border-bottom: 1px solid #f1f3f4; 
+        color: var(--g-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .table-ads-google tbody tr:hover { background-color: #f8f9fa; }
+    .heatmap-cell { font-weight: 600; text-align: right; }
+    .text-right { text-align: right; }
+    
+    .pagination-footer-google { padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; font-size: 12px; color: var(--g-gray); border-top: 1px solid var(--g-line); }
+</style>
+
+<div class="ads-main-wrapper">
+    <div class="ads-header-main">
+        <div class="header-left-side">
+            <div class="logo-divider">
+                <svg width="110" height="28" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#4285F4" d="M12.4 17.5L5.6 5.8c-.4-.7-.1-1.6.6-2l2.3-1.3c.7-.4 1.6-.1 2 .6l6.8 11.7c.4.7.1 1.6-.6 2l-2.3 1.3c-.7.4-1.6.1-2-.6z"/>
+                    <path fill="#FBBC04" d="M22.2 12.1l-6.8-11.7c-.4-.7-1.3-.9-2-.6L11 1.2c-.7.4-.9 1.3-.6 2l6.8 11.7c.4.7 1.3.9 2 .6l2.4-1.4c.7-.4.9-1.3.6-2z"/>
+                    <circle fill="#34A853" cx="12.4" cy="17.5" r="3.1"/>
+                    <text x="35" y="21" font-family="Arial" font-size="17" font-weight="bold" fill="#5f6368">Google</text>
+                    <text x="91" y="21" font-family="Arial" font-size="17" fill="#5f6368">Ads</text>
+                </svg>
+            </div>
+            <h2 class="header-page-title">Search Performance Dashboard - Keyword Performance</h2>
+        </div>
+        <div class="header-right-side">
+            <div class="date-display-box">14 de jul. de 2026 - 12 de ago. de 2026 <i class="ri-arrow-down-s-line"></i></div>
+        </div>
+    </div>
+
+    <div class="ads-filters-bar">
+        <form id="ads-filters-form" method="get" class="d-flex ai-center gap-md" style="flex-grow: 1;">
+            <div class="filter-wrapper">
+                <label>Canal</label>
+                <select name="channel" onchange="this.form.submit()">
+                    <option value="">All Channels</option>
+                    <option value="google" {% if app.request.query.get('channel') == 'google' %}selected{% endif %}>Google Ads</option>
+                    <option value="microsoft" {% if app.request.query.get('channel') == 'microsoft' %}selected{% endif %}>Bing Ads</option>
+                </select>
+            </div>
+            <div class="filter-wrapper">
+                <label>Account</label>
+                <select name="account_id" onchange="this.form.submit()">
+                    <option value="">All Accounts</option>
+                    {% for account in accounts %}<option value="{{ account.id }}" {% if app.request.query.get('account_id') == account.id %}selected{% endif %}>{{ account.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="filter-wrapper">
+                <label>Campanha</label>
+                <select name="campaign_id" onchange="this.form.submit()">
+                    <option value="">All Campaigns</option>
+                    {% for campaign in campaigns %}<option value="{{ campaign.id }}" {% if app.request.query.get('campaign_id') == campaign.id %}selected{% endif %}>{{ campaign.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="filter-wrapper"><label>Ad Group</label><select disabled><option>All</option></select></div>
+            <div class="filter-wrapper"><label>Device</label><select disabled><option>All</option></select></div>
+        </form>
+        <button type="button" class="btn btn-link p-0" onclick="exportToCSV('keyword-performance')">
+            <i class="ri-download-line ri-lg" style="color:var(--google-gray)"></i>
+        </button>
+    </div>
+
+    <div class="body-padding">
+        <div class="row-charts-google">
+            <div class="google-card">
+                <div class="google-card-header"><h3>Avg CPC (By Quality Score)</h3></div>
+                <div class="chart-container-inner"><canvas id="avg-cpc-chart-canvas"></canvas></div>
+            </div>
+            <div class="google-card">
+                <div class="google-card-header"><h3>Clicks, Cost (By Keyword Match Type)</h3></div>
+                <div class="chart-container-inner"><canvas id="match-type-chart-canvas"></canvas></div>
+            </div>
+        </div>
+
+        <div class="google-card">
+            <div class="google-card-header"><h3>Keyword Performance Overview</h3></div>
+            <div class="table-container">
+                <table class="table-google" id="keyword-table">
+                    <thead>
+                        <tr>
+                            <th style="width:200px">Pesquisar palavra-chave</th>
+                            <th style="width:100px">Quality score</th>
+                            <th style="width:140px">Tipo de correspondência</th>
+                            <th style="width:140px">Status da rede</th>
+                            <th style="width:100px">Estado</th>
+                            <th>Campanha</th>
+                            <th class="text-right" style="width:100px">Cliques</th>
+                            <th class="text-right" style="width:120px">Impressões</th>
+                            <th class="text-right" style="width:80px">CTR</th>
+                            <th class="text-right" style="width:120px">Custo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in tableData %}
+                        <tr>
+                            <td>{{ row.keyword }}</td>
+                            <td>{{ row.qs|default('null') }}</td>
+                            <td>{{ row.match }}</td>
+                            <td>{{ row.status }}</td>
+                            <td>{{ row.state }}</td>
+                            <td title="{{ row.campaign }}">{{ row.campaign }}</td>
+                            {% set intensity = row.clicks / 450 %}
+                            <td class="heatmap-cell" style="background-color: rgba(255, 193, 7, {{ intensity > 1 ? 1 : (intensity < 0.05 ? 0 : intensity) }});">
+                                {{ row.clicks|number_format(0, ',', '.') }}
+                            </td>
+                            <td class="text-right">{{ row.impressions|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">{{ row.ctr }}</td>
+                            <td class="text-right">{{ row.cost }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-footer-google">
+                <span>1 - {{ tableData|length }} / {{ tableData|length }}</span>
+                <div class="d-flex gap-md ml-md"><i class="ri-arrow-left-s-line"></i> <i class="ri-arrow-right-s-line"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function exportToCSV(f) {
+        let c = [["Keyword","Quality Score","Match Type","Status","State","Campaign","Clicks","Impressions","CTR","Cost"]];
+        mQuery("#keyword-table tbody tr").each((i,r)=>{
+            let l=[]; mQuery(r).find("td").each((j,d)=>l.push('"'+mQuery(d).text().trim()+'"')); c.push(l.join(","));
+        });
+        let b = new Blob([c.join("\n")], {type:"text/csv"}), a = document.createElement("a");
+        a.href=URL.createObjectURL(b); a.download=f+".csv"; a.click();
+    }
+    mQuery(document).ready(function() {
+        if (typeof Chart !== 'undefined') {
+            new Chart(document.getElementById('avg-cpc-chart-canvas').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: {{ cpcData.labels|json_encode|raw }},
+                    datasets: [{ data: {{ cpcData.data|json_encode|raw }}, backgroundColor: '#12B5CB', barThickness: 25 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    legend: { display: false },
+                    scales: {
+                        yAxes: [{ gridLines: { color: '#f1f3f4', drawBorder: false }, ticks: { beginAtZero: true, fontColor: '#70757a', callback: v => 'R$ ' + v.toFixed(2) } }],
+                        xAxes: [{ gridLines: { display: false }, ticks: { fontColor: '#70757a' } }]
+                    }
+                }
+            });
+            new Chart(document.getElementById('match-type-chart-canvas').getContext('2d'), {
+                type: 'horizontalBar',
+                data: {
+                    labels: {{ matchTypeData.labels|json_encode|raw }},
+                    datasets: [
+                        { label: 'Cliques', data: {{ matchTypeData.clicks|json_encode|raw }}, backgroundColor: '#4285F4' },
+                        { label: 'Custo', data: {{ matchTypeData.cost|json_encode|raw }}, backgroundColor: '#12B5CB' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    legend: { position: 'top', align: 'end', labels: { boxWidth: 12, fontColor: '#5f6368' } },
+                    scales: {
+                        xAxes: [{ gridLines: { color: '#f1f3f4', drawBorder: false }, ticks: { beginAtZero: true, fontColor: '#70757a' } }],
+                        yAxes: [{ gridLines: { display: false }, ticks: { fontColor: '#70757a' } }]
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

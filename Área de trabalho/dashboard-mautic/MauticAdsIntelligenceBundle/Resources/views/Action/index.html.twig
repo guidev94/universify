@@ -1,0 +1,68 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceActions{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.actions.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-actions">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ 'mautic.ads_intelligence.actions.list'|trans }}</h3>
+        </div>
+        <div class="panel-body">
+            {% if actions is empty %}
+                <p class="text-muted text-center">{{ 'mautic.ads_intelligence.overview.no_data'|trans }}</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ 'mautic.ads_intelligence.column.action_type'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.provider'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.target'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.old_value'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.new_value'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.status'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.created_at'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.actions'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for action in actions %}
+                                <tr>
+                                    <td>{{ action.actionType }}</td>
+                                    <td>{{ action.provider }}</td>
+                                    <td>{{ action.targetType }}: {{ action.targetExternalId }}</td>
+                                    <td>{{ action.oldValue }}</td>
+                                    <td>{{ action.newValue }}</td>
+                                    <td>{{ action.status }}</td>
+                                    <td>{{ action.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {% if action.status == 'pending' %}
+                                            <button class="btn btn-xs btn-success"
+                                                    data-href="{{ path('mautic_ads_intelligence_action_approve', {id: action.id}) }}">
+                                                {{ 'mautic.ads_intelligence.action.approve'|trans }}
+                                            </button>
+                                            <button class="btn btn-xs btn-danger"
+                                                    data-href="{{ path('mautic_ads_intelligence_action_reject', {id: action.id}) }}">
+                                                {{ 'mautic.ads_intelligence.action.reject'|trans }}
+                                            </button>
+                                        {% endif %}
+                                        {% if action.status == 'approved' %}
+                                            <button class="btn btn-xs btn-primary"
+                                                    data-href="{{ path('mautic_ads_intelligence_action_execute', {id: action.id}) }}">
+                                                {{ 'mautic.ads_intelligence.action.execute'|trans }}
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

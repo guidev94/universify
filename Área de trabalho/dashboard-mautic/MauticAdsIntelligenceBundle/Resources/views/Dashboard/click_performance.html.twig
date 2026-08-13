@@ -1,0 +1,299 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceClickPerformance{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.click_performance.search_title'|trans }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Reset absoluto e ocultação de UI nativa */
+    #app-content .page-header, .page-header { display: none !important; }
+    #app-content { background-color: #f8f9fa !important; }
+    
+    :root {
+        --g-blue: #1a73e8;
+        --g-gray: #5f6368;
+        --g-line: #dadce0;
+        --g-bg: #f8f9fa;
+        --g-text: #3c4043;
+        --g-font: 'Google Sans', 'Roboto', sans-serif;
+    }
+
+    .ads-main-wrapper {
+        background-color: var(--g-bg);
+        margin: -20px;
+        min-height: 100vh;
+        font-family: var(--g-font);
+        color: var(--g-text);
+    }
+
+    /* Professional Header Pixel Perfect */
+    .ads-header-main {
+        background: #fff;
+        border-bottom: 1px solid var(--g-line);
+        padding: 0 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 64px;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,.3);
+    }
+
+    .header-left-side { display: flex; align-items: center; gap: 20px; }
+    .logo-container { 
+        padding-right: 20px; 
+        border-right: 1px solid var(--g-line); 
+        height: 32px; 
+        display: flex; 
+        align-items: center; 
+        width: 140px; /* FIXED WIDTH FOR LOGO */
+    }
+    .header-page-title { font-size: 20px; font-weight: 400; color: #3c4043; margin: 0; white-space: nowrap; }
+
+    .header-right-side { display: flex; align-items: center; height: 100%; }
+    .data-selector-link {
+        display: flex; align-items: center; gap: 14px; padding: 0 24px; height: 100%;
+        border-right: 1px solid var(--g-line); cursor: pointer;
+    }
+    .data-info-text { line-height: 1.2; }
+    .data-info-text strong { font-size: 13px; font-weight: 500; color: #3c4043; }
+    .data-info-text small { font-size: 11px; color: var(--g-gray); display: block; }
+
+    .date-display-box { display: flex; align-items: center; gap: 10px; padding: 0 24px; height: 100%; font-size: 13px; cursor: pointer; }
+
+    /* Expanded Filter Bar - Pixel Perfect */
+    .ads-filters-bar {
+        background: #fff;
+        border-bottom: 1px solid var(--g-line);
+        padding: 12px 24px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 24px; /* SPACE BELOW TITLE/FILTERS */
+    }
+
+    .google-field-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 190px;
+        max-width: 280px;
+        border: 1px solid var(--g-line);
+        border-radius: 4px;
+        padding: 4px 12px;
+        height: 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: transparent !important; /* TRANSPARENT BACKGROUND */
+    }
+    .google-field-wrapper:hover { border-color: #bdc1c6; }
+    .google-field-wrapper:focus-within { border-color: var(--g-blue); border-width: 2px; padding: 3px 11px; }
+
+    .google-field-wrapper label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--g-gray);
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .google-field-wrapper select {
+        border: none !important;
+        background: transparent !important; /* NO GRAY BACKGROUND */
+        font-size: 14px;
+        width: 100%;
+        padding: 0;
+        color: var(--g-text);
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .dashboard-body-inner { padding: 0 24px 24px 24px; }
+    .google-report-card {
+        background: #fff;
+        border: 1px solid var(--g-line);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,.3);
+        overflow: hidden;
+    }
+    .report-card-header { padding: 16px 24px; border-bottom: 1px solid var(--g-line); font-size: 16px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+
+    .chart-box-google { padding: 20px; height: 420px; }
+
+    .table-scroll-google { max-height: 500px; overflow-y: auto; }
+    .google-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    .google-table thead th {
+        position: sticky; top: 0; background: #fff; z-index: 10;
+        font-size: 12px; font-weight: 600; color: var(--g-gray);
+        padding: 14px 24px; border-bottom: 1px solid var(--g-line) !important;
+    }
+    .google-table tbody td { padding: 12px 24px; font-size: 13px; border-bottom: 1px solid #f1f3f4; color: var(--g-text); white-space: nowrap; }
+    .google-table tbody tr:hover { background-color: #f8f9fa; }
+    .text-right { text-align: right; }
+
+    .custom-chart-legend { display: flex; gap: 24px; margin-bottom: 15px; }
+    .legend-circle-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--g-gray); }
+    .circle-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid; }
+</style>
+
+<div class="ads-main-wrapper">
+    <div class="ads-header-main">
+        <div class="header-left-side">
+            <div class="logo-container">
+                <svg width="110" height="28" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#4285F4" d="M12.4 17.5L5.6 5.8c-.4-.7-.1-1.6.6-2l2.3-1.3c.7-.4 1.6-.1 2 .6l6.8 11.7c.4.7.1 1.6-.6 2l-2.3 1.3c-.7.4-1.6.1-2-.6z"/>
+                    <path fill="#FBBC04" d="M22.2 12.1l-6.8-11.7c-.4-.7-1.3-.9-2-.6L11 1.2c-.7.4-.9 1.3-.6 2l6.8 11.7c.4.7 1.3.9 2 .6l2.4-1.4c.7-.4.9-1.3.6-2z"/>
+                    <circle fill="#34A853" cx="12.4" cy="17.5" r="3.1"/>
+                    <text x="35" y="21" font-family="Arial" font-size="18" font-weight="bold" fill="#5f6368">Google</text>
+                    <text x="92" y="21" font-family="Arial" font-size="18" fill="#5f6368">Ads</text>
+                </svg>
+            </div>
+            <h2 class="header-page-title">Search Performance Dashboard - Click Performance</h2>
+        </div>
+        <div class="header-right">
+            <div class="data-selector-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 20H22L12 2Z" fill="#FBBC04"/></svg>
+                <div class="data-info-text">
+                    <strong>Dados padrão</strong>
+                    <small>Clique para selecionar seus dados</small>
+                </div>
+                <i class="ri-arrow-down-s-line"></i>
+            </div>
+            <div class="date-display-box">
+                14 de jul. de 2026 - 12 de ago. de 2026 <i class="ri-arrow-down-s-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="ads-filters-bar">
+        <form id="ads-filters-form" method="get" class="d-flex ai-center gap-md" style="flex-grow: 1;">
+            <div class="google-field-wrapper">
+                <label>Canal</label>
+                <select name="channel" onchange="this.form.submit()">
+                    <option value="">All Channels</option>
+                    <option value="google" {% if app.request.query.get('channel') == 'google' %}selected{% endif %}>Google Ads</option>
+                    <option value="microsoft" {% if app.request.query.get('channel') == 'microsoft' %}selected{% endif %}>Bing Ads</option>
+                </select>
+            </div>
+            <div class="google-field-wrapper">
+                <label>Account</label>
+                <select name="account_id" onchange="this.form.submit()">
+                    <option value="">All Accounts</option>
+                    {% for account in accounts %}
+                    <option value="{{ account.id }}" {% if app.request.query.get('account_id') == account.id %}selected{% endif %}>{{ account.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="google-field-wrapper">
+                <label>Campanha</label>
+                <select name="campaign_id" onchange="this.form.submit()">
+                    <option value="">All Campaigns</option>
+                    {% for campaign in campaigns %}
+                    <option value="{{ campaign.id }}" {% if app.request.query.get('campaign_id') == campaign.id %}selected{% endif %}>{{ campaign.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="google-field-wrapper"><label>Ad Group</label><select disabled><option>All</option></select></div>
+            <div class="google-field-wrapper"><label>Device</label><select disabled><option>All</option></select></div>
+        </form>
+        <div class="d-flex ai-center gap-md pl-md">
+            <a href="javascript:void(0)" onclick="exportToCSV('click-performance')"><i class="ri-download-line ri-xl" style="color:var(--g-gray)"></i></a>
+        </div>
+    </div>
+
+    <div class="dashboard-body-inner">
+        <div class="google-report-card">
+            <div class="report-card-header">
+                <h3>Impressions Vs Clicks (By Day)</h3>
+                <div class="d-flex gap-md color-muted"><i class="ri-arrow-up-down-line"></i><i class="ri-filter-3-line"></i></div>
+            </div>
+            <div class="chart-box-google">
+                <div class="custom-chart-legend">
+                    <div class="legend-circle-item"><div class="circle-dot" style="border-color: #4285F4"></div> Impressões</div>
+                    <div class="legend-circle-item"><div class="circle-dot" style="border-color: #12B5CB"></div> Cliques</div>
+                </div>
+                <canvas id="performance-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="google-report-card">
+            <div class="report-card-header"><h3>Performance of Clicks, Impressions & Conversions by Day</h3></div>
+            <div class="table-scroll-google">
+                <table class="google-table" id="performance-table">
+                    <thead>
+                        <tr>
+                            <th style="width:140px">Dia <i class="ri-arrow-down-s-fill"></i></th>
+                            <th>Campanha</th>
+                            <th class="text-right" style="width:100px">Cliques</th>
+                            <th class="text-right" style="width:120px">Impressões</th>
+                            <th class="text-right" style="width:80px">CTR</th>
+                            <th class="text-right" style="width:110px">Conversions</th>
+                            <th class="text-right" style="width:120px">Custo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in tableData %}
+                        <tr>
+                            <td>{{ row.date }}</td>
+                            <td title="{{ row.campaign }}">{{ row.campaign }}</td>
+                            <td class="text-right">{{ row.clicks|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">{{ row.impressions|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">{{ row.ctr }}</td>
+                            <td class="text-right">{{ row.conversions }}</td>
+                            <td class="text-right">{{ row.cost }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-footer-google" style="padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; border-top: 1px solid var(--g-line);">
+                <span>1 - {{ tableData|length }} / {{ tableData|length }}</span>
+                <div class="d-flex gap-md ml-md"><i class="ri-arrow-left-s-line"></i> <i class="ri-arrow-right-s-line"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function exportToCSV(f) {
+        let c = [["Dia","Campanha","Cliques","Impressões","CTR","Conversions","Custo"]];
+        mQuery("#performance-table tbody tr").each((i,r)=>{
+            let l=[]; mQuery(r).find("td").each((j,d)=>l.push('"'+mQuery(d).text().trim()+'"')); c.push(l.join(","));
+        });
+        let b = new Blob([c.join("\n")], {type:"text/csv"}), a = document.createElement("a");
+        a.href=URL.createObjectURL(b); a.download=f+".csv"; a.click();
+    }
+    mQuery(document).ready(function() {
+        if (typeof Chart !== 'undefined') {
+            new Chart(document.getElementById('performance-chart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: {{ chartData.labels|json_encode|raw }},
+                    datasets: [
+                        { label: 'Impressões', data: {{ chartData.datasets[0].data|json_encode|raw }}, borderColor: '#4285F4', backgroundColor: 'rgba(66, 133, 244, 0.05)', yAxisID: 'y1', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Cliques', data: {{ chartData.datasets[1].data|json_encode|raw }}, borderColor: '#12B5CB', yAxisID: 'y2', fill: false, tension: 0.4, pointRadius: 0, borderWidth: 2 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    legend: { display: false },
+                    scales: {
+                        yAxes: [
+                            { id: 'y1', type: 'linear', position: 'left', gridLines: { color: '#f1f3f4', drawBorder: false }, ticks: { beginAtZero: true, fontColor: '#70757a', callback: v => v >= 1000 ? (v/1000)+' mil' : v } },
+                            { id: 'y2', type: 'linear', position: 'right', gridLines: { display: false }, ticks: { beginAtZero: true, fontColor: '#70757a' } }
+                        ],
+                        xAxes: [{ gridLines: { display: false }, ticks: { fontColor: '#70757a', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } }]
+                    },
+                    tooltips: { mode: 'index', intersect: false, backgroundColor: '#fff', titleFontColor: '#3c4043', bodyFontColor: '#3c4043', borderColor: '#dadce0', borderWidth: 1 }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

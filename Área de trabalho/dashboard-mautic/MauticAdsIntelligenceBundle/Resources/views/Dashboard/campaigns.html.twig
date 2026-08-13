@@ -1,0 +1,555 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceCampaigns{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.campaigns.title'|trans }}{% endblock %}
+
+{% block content %}
+<style>
+    .ads-ai-campaigns {
+        --ads-ai-ink: #161616;
+        --ads-ai-muted: #6f6f6f;
+        --ads-ai-line: #e0e0e0;
+        --ads-ai-soft: #f4f4f4;
+        --ads-ai-blue: #0f62fe;
+        --ads-ai-red: #da1e28;
+        --ads-ai-green: #198038;
+    }
+
+    .ads-ai-campaigns .ai-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 48%, #f7f3ee 100%);
+        border: 1px solid var(--ads-ai-line);
+        border-radius: 2px;
+        margin-bottom: 18px;
+        padding: 22px 24px;
+    }
+
+    .ads-ai-campaigns .ai-hero h2 {
+        color: var(--ads-ai-ink);
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1.2;
+        margin: 0 0 6px;
+    }
+
+    .ads-ai-campaigns .ai-hero p {
+        color: var(--ads-ai-muted);
+        margin: 0;
+        max-width: 720px;
+    }
+
+    .ads-ai-campaigns .ai-toolbar {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+    }
+
+    .ads-ai-campaigns .ai-create-panel,
+    .ads-ai-campaigns .ai-campaign-card {
+        background: #fff;
+        border: 1px solid var(--ads-ai-line);
+        border-radius: 2px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, .03);
+        margin-bottom: 16px;
+    }
+
+    .ads-ai-campaigns .ai-create-panel {
+        padding: 18px;
+    }
+
+    .ads-ai-campaigns .ai-section-title {
+        color: var(--ads-ai-ink);
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0 0 14px;
+    }
+
+    .ads-ai-campaigns .ai-campaign-card {
+        overflow: hidden;
+    }
+
+    .ads-ai-campaigns .ai-card-header {
+        align-items: flex-start;
+        background: #fff;
+        border-bottom: 1px solid var(--ads-ai-line);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        padding: 18px 20px;
+    }
+
+    .ads-ai-campaigns .ai-card-title {
+        color: var(--ads-ai-ink);
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 7px;
+    }
+
+    .ads-ai-campaigns .ai-meta-row {
+        align-items: center;
+        color: var(--ads-ai-muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        line-height: 1.4;
+    }
+
+    .ads-ai-campaigns .ai-pill {
+        align-items: center;
+        background: var(--ads-ai-soft);
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: #393939;
+        display: inline-flex;
+        font-size: 12px;
+        gap: 5px;
+        line-height: 1;
+        padding: 6px 9px;
+    }
+
+    .ads-ai-campaigns .ai-pill-blue {
+        background: #edf5ff;
+        color: #0043ce;
+    }
+
+    .ads-ai-campaigns .ai-pill-green {
+        background: #defbe6;
+        color: #0e6027;
+    }
+
+    .ads-ai-campaigns .ai-pill-red {
+        background: #fff1f1;
+        color: #a2191f;
+    }
+
+    .ads-ai-campaigns .ai-card-body {
+        display: grid;
+        gap: 0;
+        grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.5fr);
+    }
+
+    .ads-ai-campaigns .ai-actions {
+        background: #fafafa;
+        border-right: 1px solid var(--ads-ai-line);
+        padding: 18px 20px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-board {
+        display: grid;
+        gap: 0;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .ads-ai-campaigns .ai-keyword-column {
+        min-width: 0;
+        padding: 18px 20px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-column + .ai-keyword-column {
+        border-left: 1px solid var(--ads-ai-line);
+    }
+
+    .ads-ai-campaigns .ai-column-title {
+        align-items: center;
+        display: flex;
+        font-size: 13px;
+        font-weight: 600;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+    }
+
+    .ads-ai-campaigns .ai-term-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 330px;
+        overflow: auto;
+        padding-right: 4px;
+    }
+
+    .ads-ai-campaigns .ai-term {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--ads-ai-line);
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+        min-height: 38px;
+        padding: 8px 10px;
+    }
+
+    .ads-ai-campaigns .ai-term-text {
+        color: var(--ads-ai-ink);
+        font-size: 13px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ads-ai-campaigns .ai-term-meta {
+        color: var(--ads-ai-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .ads-ai-campaigns .ai-empty {
+        align-items: center;
+        background: #fafafa;
+        border: 1px dashed #c6c6c6;
+        color: var(--ads-ai-muted);
+        display: flex;
+        justify-content: center;
+        min-height: 76px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .ads-ai-campaigns .ai-form-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .ads-ai-campaigns .ai-form-card {
+        background: #fff;
+        border: 1px solid var(--ads-ai-line);
+        padding: 14px;
+    }
+
+    .ads-ai-campaigns .ai-form-card.danger {
+        border-left: 3px solid var(--ads-ai-red);
+    }
+
+    .ads-ai-campaigns .ai-form-card.success {
+        border-left: 3px solid var(--ads-ai-green);
+    }
+
+    .ads-ai-campaigns .ai-form-card h4 {
+        color: var(--ads-ai-ink);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .04em;
+        margin: 0 0 12px;
+        text-transform: uppercase;
+    }
+
+    .ads-ai-campaigns .ai-keyword-field {
+        margin-bottom: 10px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-controls {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-controls .match-select {
+        flex: 0 0 118px;
+    }
+
+    .ads-ai-campaigns .ai-match-fixed {
+        align-items: center;
+        background: #f4f4f4;
+        border-bottom: 1px solid #8d8d8d;
+        color: var(--ads-ai-muted);
+        display: inline-flex;
+        flex: 0 0 118px;
+        font-size: 13px;
+        height: 36px;
+        padding: 0 12px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-controls .adgroup-select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ads-ai-campaigns .ai-keyword-field .form-control,
+    .ads-ai-campaigns .ai-keyword-controls .form-control,
+    .ads-ai-campaigns .ai-keyword-controls .btn {
+        height: 36px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-field .form-control,
+    .ads-ai-campaigns .ai-keyword-controls .form-control {
+        background-color: #f4f4f4;
+        border: 1px solid transparent;
+        border-bottom-color: #8d8d8d;
+        border-radius: 0;
+        box-shadow: none;
+        font-size: 13px;
+    }
+
+    .ads-ai-campaigns .ai-keyword-field .form-control:focus,
+    .ads-ai-campaigns .ai-keyword-controls .form-control:focus {
+        background-color: #fff;
+        border-color: var(--ads-ai-blue);
+        box-shadow: inset 0 0 0 1px var(--ads-ai-blue);
+    }
+
+    .ads-ai-campaigns .ai-keyword-controls .btn {
+        align-items: center;
+        display: inline-flex;
+        font-weight: 600;
+        justify-content: center;
+        min-width: 88px;
+        padding: 6px 12px;
+        white-space: nowrap;
+    }
+
+    .ads-ai-campaigns .ai-inline-delete {
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 1180px) {
+        .ads-ai-campaigns .ai-card-body,
+        .ads-ai-campaigns .ai-keyword-board {
+            grid-template-columns: 1fr;
+        }
+
+        .ads-ai-campaigns .ai-actions,
+        .ads-ai-campaigns .ai-keyword-column + .ai-keyword-column {
+            border-left: 0;
+            border-right: 0;
+            border-top: 1px solid var(--ads-ai-line);
+        }
+    }
+
+    @media (max-width: 767px) {
+        .ads-ai-campaigns .ai-toolbar,
+        .ads-ai-campaigns .ai-card-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .ads-ai-campaigns .ai-keyword-controls {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .ads-ai-campaigns .ai-keyword-controls .match-select,
+        .ads-ai-campaigns .ai-keyword-controls .adgroup-select,
+        .ads-ai-campaigns .ai-keyword-controls .btn {
+            flex: 0 0 auto;
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="ads-ai-campaigns">
+    <div class="ai-hero">
+        <div class="ai-toolbar">
+            <div>
+                <h2>{{ 'mautic.ads_intelligence.campaigns.title'|trans }}</h2>
+                <p>{{ 'mautic.ads_intelligence.campaigns.workspace_help'|trans }}</p>
+            </div>
+            <form method="post" action="{{ path('mautic_ads_intelligence_campaigns_sync') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_sync_campaigns') }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-refresh-line"></i> {{ 'mautic.ads_intelligence.campaigns.sync'|trans }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="ai-create-panel">
+        <h3 class="ai-section-title">{{ 'mautic.ads_intelligence.campaigns.create_paused'|trans }}</h3>
+        <form method="post" action="{{ path('mautic_ads_intelligence_campaigns_create') }}" class="row">
+            <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_create_campaign') }}">
+
+            <div class="col-md-4">
+                <div class="form-group mb-0">
+                    <label for="account_id">{{ 'mautic.ads_intelligence.accounts.title'|trans }}</label>
+                    <select id="account_id" name="account_id" class="form-control" required>
+                        {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }} ({{ account.externalAccountId }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group mb-0">
+                    <label for="campaign_name">{{ 'mautic.ads_intelligence.column.campaign'|trans }}</label>
+                    <input id="campaign_name" name="name" type="text" class="form-control" required placeholder="{{ 'mautic.ads_intelligence.campaigns.name_placeholder'|trans }}">
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group mb-0">
+                    <label for="daily_budget">{{ 'mautic.ads_intelligence.campaigns.daily_budget'|trans }}</label>
+                    <input id="daily_budget" name="daily_budget" type="number" class="form-control" min="1" step="0.01" required value="10.00">
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group mb-0">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-success btn-block" {% if accounts is empty %}disabled{% endif %}>
+                        <i class="ri-add-line"></i> {{ 'mautic.ads_intelligence.campaigns.create'|trans }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-12 mt-sm">
+                <p class="text-muted small mb-0">{{ 'mautic.ads_intelligence.campaigns.create_help'|trans }}</p>
+            </div>
+        </form>
+    </div>
+
+    {% if campaigns is empty %}
+        <div class="ai-empty">
+            {{ 'mautic.ads_intelligence.overview.no_data'|trans }}
+        </div>
+    {% else %}
+        {% for campaign in campaigns %}
+            {% set keywords = campaignKeywords[campaign.id] is defined ? campaignKeywords[campaign.id] : {'positive': [], 'negative': []} %}
+            {% set adGroups = campaignAdGroups[campaign.id] is defined ? campaignAdGroups[campaign.id] : [] %}
+            {% set positiveKeywordsUnavailableMessage = campaign.channelType|lower == 'performancemax'
+                ? 'mautic.ads_intelligence.keywords.positive_unsupported_campaign_type'
+                : 'mautic.ads_intelligence.keywords.positive_requires_adgroup'
+            %}
+
+            <article class="ai-campaign-card">
+                <header class="ai-card-header">
+                    <div>
+                        <h3 class="ai-card-title">{{ campaign.name }}</h3>
+                        <div class="ai-meta-row">
+                            <span class="ai-pill ai-pill-blue">{{ campaign.provider|capitalize }}</span>
+                            <span class="ai-pill">ID {{ campaign.externalCampaignId }}</span>
+                            <span class="ai-pill">{{ campaign.channelType ?: '-' }}</span>
+                            <span class="ai-pill {{ campaign.status == 'enabled' ? 'ai-pill-green' : (campaign.status == 'removed' ? 'ai-pill-red' : '') }}">{{ campaign.status ?: '-' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="ai-meta-row">
+                        <span class="ai-pill">{{ 'mautic.ads_intelligence.column.budget'|trans }}: {{ campaign.budgetAmount is not null ? campaign.budgetAmount|number_format(2, ',', '.') : '-' }}</span>
+                        <span class="ai-pill">{{ 'mautic.ads_intelligence.column.budget_type'|trans }}: {{ campaign.budgetType ?: '-' }}</span>
+                    </div>
+                </header>
+
+                <div class="ai-card-body">
+                    <aside class="ai-actions">
+                        {% if campaign.provider in ['google', 'microsoft'] %}
+                            <div class="ai-form-stack">
+                                <form method="post" action="{{ path('mautic_ads_intelligence_keyword_create', {campaignId: campaign.id}) }}" class="ai-form-card danger">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_create_keyword_' ~ campaign.id) }}">
+                                    <input type="hidden" name="keyword_type" value="negative">
+                                    <h4>{{ 'mautic.ads_intelligence.keywords.add_negative'|trans }}</h4>
+                                    <div class="ai-keyword-field">
+                                        <input name="keyword_text" type="text" class="form-control" placeholder="{{ 'mautic.ads_intelligence.keywords.negative_placeholder'|trans }}" required>
+                                    </div>
+                                    <div class="ai-keyword-controls">
+                                        {% if campaign.provider == 'microsoft' %}
+                                            <input type="hidden" name="match_type" value="PHRASE">
+                                            <span class="ai-match-fixed">{{ 'mautic.ads_intelligence.keywords.match.phrase'|trans }}</span>
+                                        {% else %}
+                                            <select name="match_type" class="form-control">
+                                                <option value="BROAD">{{ 'mautic.ads_intelligence.keywords.match.broad'|trans }}</option>
+                                                <option value="PHRASE">{{ 'mautic.ads_intelligence.keywords.match.phrase'|trans }}</option>
+                                                <option value="EXACT">{{ 'mautic.ads_intelligence.keywords.match.exact'|trans }}</option>
+                                            </select>
+                                        {% endif %}
+                                        <button type="submit" class="btn btn-danger">{{ 'mautic.ads_intelligence.keywords.add_negative_short'|trans }}</button>
+                                    </div>
+                                </form>
+
+                                <form method="post" action="{{ path('mautic_ads_intelligence_keyword_create', {campaignId: campaign.id}) }}" class="ai-form-card success">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_create_keyword_' ~ campaign.id) }}">
+                                    <input type="hidden" name="keyword_type" value="positive">
+                                     <h4>{{ 'mautic.ads_intelligence.keywords.add_positive'|trans }}</h4>
+                                     <div class="ai-keyword-field">
+                                         <input name="keyword_text" type="text" class="form-control" placeholder="{{ 'mautic.ads_intelligence.keywords.positive_placeholder'|trans }}" required{% if adGroups is empty and (campaign.provider != 'microsoft' or campaign.channelType|lower == 'performancemax') %} disabled{% endif %}>
+                                     </div>
+                                     <div class="ai-keyword-controls">
+                                         {% if adGroups is not empty %}
+                                             <select name="adgroup_id" class="form-control adgroup-select">
+                                                 {% for adGroup in adGroups %}
+                                                     <option value="{{ adGroup.id }}">{{ adGroup.name }}</option>
+                                                 {% endfor %}
+                                             </select>
+                                         {% else %}
+                                             {% if campaign.provider == 'microsoft' and campaign.channelType|lower != 'performancemax' %}
+                                                 <input type="text" name="new_adgroup_name" class="form-control adgroup-select" placeholder="{{ 'mautic.ads_intelligence.keywords.new_adgroup_placeholder'|trans }}" required>
+                                             {% else %}
+                                                 <input type="text" class="form-control adgroup-select" value="{{ positiveKeywordsUnavailableMessage|trans }}" disabled>
+                                             {% endif %}
+                                         {% endif %}
+                                         {% if campaign.provider == 'microsoft' %}
+                                             <input type="hidden" name="match_type" value="PHRASE">
+                                             <span class="ai-match-fixed">{{ 'mautic.ads_intelligence.keywords.match.phrase'|trans }}</span>
+                                         {% else %}
+                                             <select name="match_type" class="form-control match-select"{% if adGroups is empty %} disabled{% endif %}>
+                                                 <option value="BROAD">{{ 'mautic.ads_intelligence.keywords.match.broad'|trans }}</option>
+                                                 <option value="PHRASE">{{ 'mautic.ads_intelligence.keywords.match.phrase'|trans }}</option>
+                                                 <option value="EXACT">{{ 'mautic.ads_intelligence.keywords.match.exact'|trans }}</option>
+                                             </select>
+                                         {% endif %}
+                                         <button type="submit" class="btn btn-success"{% if adGroups is empty and (campaign.provider != 'microsoft' or campaign.channelType|lower == 'performancemax') %} disabled{% endif %}>{{ 'mautic.ads_intelligence.keywords.add_positive_short'|trans }}</button>
+                                     </div>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="ai-empty">{{ 'mautic.ads_intelligence.keywords.unsupported_provider'|trans }}</div>
+                        {% endif %}
+                    </aside>
+
+                    <section class="ai-keyword-board">
+                        <div class="ai-keyword-column">
+                            <div class="ai-column-title">
+                                <span>{{ 'mautic.ads_intelligence.column.keywords'|trans }}</span>
+                                <span class="ai-pill">{{ keywords.positive|length }}</span>
+                            </div>
+
+                            {% if keywords.positive is empty %}
+                                <div class="ai-empty">-</div>
+                            {% else %}
+                                <div class="ai-term-list">
+                                    {% for keyword in keywords.positive %}
+                                        <div class="ai-term">
+                                            <span class="ai-term-text" title="{{ keyword.keywordText }}">{{ keyword.keywordText }}</span>
+                                            <span class="ai-term-meta">{{ keyword.matchType ? ('mautic.ads_intelligence.keywords.match.' ~ keyword.matchType)|trans : '-' }}</span>
+                                            <form method="post" action="{{ path('mautic_ads_intelligence_keyword_delete', {keywordId: keyword.id}) }}" class="ai-inline-delete">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_delete_keyword_' ~ keyword.id) }}">
+                                                <button type="submit" class="btn btn-link btn-xs text-danger">{{ 'mautic.ads_intelligence.action.remove'|trans }}</button>
+                                            </form>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="ai-keyword-column">
+                            <div class="ai-column-title">
+                                <span>{{ 'mautic.ads_intelligence.column.negative_keywords'|trans }}</span>
+                                <span class="ai-pill ai-pill-red">{{ keywords.negative|length }}</span>
+                            </div>
+
+                            {% if keywords.negative is empty %}
+                                <div class="ai-empty">-</div>
+                            {% else %}
+                                <div class="ai-term-list">
+                                    {% for keyword in keywords.negative %}
+                                        <div class="ai-term">
+                                            <span class="ai-term-text" title="{{ keyword.keywordText }}">{{ keyword.keywordText }}</span>
+                                            <span class="ai-term-meta">{{ keyword.matchType ? ('mautic.ads_intelligence.keywords.match.' ~ keyword.matchType)|trans : '-' }}</span>
+                                            <form method="post" action="{{ path('mautic_ads_intelligence_keyword_delete', {keywordId: keyword.id}) }}" class="ai-inline-delete">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_delete_keyword_' ~ keyword.id) }}">
+                                                <button type="submit" class="btn btn-link btn-xs text-danger">{{ 'mautic.ads_intelligence.action.remove'|trans }}</button>
+                                            </form>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </section>
+                </div>
+            </article>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

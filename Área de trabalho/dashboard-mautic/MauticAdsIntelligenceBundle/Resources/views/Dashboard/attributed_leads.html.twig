@@ -1,0 +1,40 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceAttributedLeads{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.attributed_leads.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-attributed-leads">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ 'mautic.ads_intelligence.attributed_leads.list'|trans }}</h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>{{ 'mautic.ads_intelligence.column.lead'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.channel'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.campaign'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.keyword'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.stage'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.score'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.revenue'|trans }}</th>
+                            <th>{{ 'mautic.ads_intelligence.column.date'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                {{ 'mautic.ads_intelligence.overview.no_data'|trans }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

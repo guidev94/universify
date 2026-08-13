@@ -1,0 +1,250 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceOfflineConversions{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.offline_conversions.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-offline-conversions">
+    <div class="alert alert-warning">
+        <strong>{{ 'mautic.ads_intelligence.offline_conversions.safety_title'|trans }}</strong><br>
+        {{ 'mautic.ads_intelligence.offline_conversions.safety_body'|trans }}
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">{{ 'mautic.ads_intelligence.offline_conversions.settings'|trans }}</h3>
+                </div>
+                <div class="panel-body">
+                    <form method="post" action="{{ path('mautic_ads_intelligence_offline_conversions_save') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_offline_conversions') }}">
+
+                        <div class="form-group">
+                            <label>{{ 'mautic.ads_intelligence.offline_conversions.converted_tags'|trans }}</label>
+                            <select name="tag_ids[]" class="form-control" multiple size="8">
+                                {% for tag in tags %}
+                                    <option value="{{ tag.id }}"{% if tag.id in settings.tag_ids %} selected{% endif %}>{{ tag.tag }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="help-block">{{ 'mautic.ads_intelligence.offline_conversions.converted_tags_help'|trans }}</span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="conversion_value">{{ 'mautic.ads_intelligence.offline_conversions.value'|trans }}</label>
+                                    <input id="conversion_value" name="conversion_value" type="number" step="0.01" class="form-control" value="{{ settings.conversion_value }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="currency">{{ 'mautic.ads_intelligence.offline_conversions.currency'|trans }}</label>
+                                    <input id="currency" name="currency" type="text" class="form-control" value="{{ settings.currency }}" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="conversion_name">{{ 'mautic.ads_intelligence.offline_conversions.conversion_name'|trans }}</label>
+                            {% if microsoftConversionGoals is not empty %}
+                                <select id="conversion_name" name="conversion_name" class="form-control">
+                                    <option value="">{{ 'mautic.core.form.chooseone'|trans }}</option>
+                                    {% for goal in microsoftConversionGoals %}
+                                        <option value="{{ goal.name }}"{% if goal.name == settings.conversion_name %} selected{% endif %}>
+                                            {{ goal.account }} - {{ goal.name }} ({{ goal.status }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <input id="conversion_name" name="conversion_name" type="text" class="form-control" value="{{ settings.conversion_name }}">
+                            {% endif %}
+                            <span class="help-block">{{ 'mautic.ads_intelligence.offline_conversions.conversion_name_help'|trans }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="google_conversion_action">{{ 'mautic.ads_intelligence.offline_conversions.google_conversion_action'|trans }}</label>
+                            {% if googleConversionActions is not empty %}
+                                <select id="google_conversion_action" name="google_conversion_action" class="form-control">
+                                    <option value="">{{ 'mautic.core.form.chooseone'|trans }}</option>
+                                    {% for action in googleConversionActions %}
+                                        <option value="{{ action.resourceName }}"{% if action.resourceName == settings.google_conversion_action %} selected{% endif %}>
+                                            {{ action.account }} - {{ action.name }} ({{ action.category }}, {{ action.status }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <input id="google_conversion_action" name="google_conversion_action" type="text" class="form-control" value="{{ settings.google_conversion_action }}" placeholder="customers/1234567890/conversionActions/987654321">
+                            {% endif %}
+                            <span class="help-block">{{ 'mautic.ads_intelligence.offline_conversions.google_conversion_action_help'|trans }}</span>
+                        </div>
+
+                        <hr>
+
+                        <h4>{{ 'mautic.ads_intelligence.offline_conversions.csv_feed_title'|trans }}</h4>
+                        <p class="text-muted">{{ 'mautic.ads_intelligence.offline_conversions.csv_feed_help'|trans }}</p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="google_feed_url">{{ 'mautic.ads_intelligence.offline_conversions.google_feed_url'|trans }}</label>
+                                    <input id="google_feed_url" type="text" class="form-control" value="{{ url('mautic_ads_intelligence_offline_conversions_google_feed') }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="bing_feed_url">{{ 'mautic.ads_intelligence.offline_conversions.bing_feed_url'|trans }}</label>
+                                    <input id="bing_feed_url" type="text" class="form-control" value="{{ url('mautic_ads_intelligence_offline_conversions_bing_feed') }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="help-block">{{ 'mautic.ads_intelligence.offline_conversions.csv_feed_url_help'|trans }}</p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="bing_feed_username">{{ 'mautic.ads_intelligence.offline_conversions.csv_feed_username'|trans }}</label>
+                                    <input id="bing_feed_username" name="bing_feed_username" type="text" class="form-control" value="{{ settings.bing_feed_username }}" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="bing_feed_password">{{ 'mautic.ads_intelligence.offline_conversions.csv_feed_password'|trans }}</label>
+                                    <input id="bing_feed_password" name="bing_feed_password" type="password" class="form-control" value="" autocomplete="new-password">
+                                    <span class="help-block">
+                                        {% if settings.bing_feed_password_configured %}
+                                            {{ 'mautic.ads_intelligence.offline_conversions.csv_feed_password_configured'|trans }}
+                                        {% else %}
+                                            {{ 'mautic.ads_intelligence.offline_conversions.csv_feed_password_help'|trans }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">{{ 'mautic.core.form.save'|trans }}</button>
+                    </form>
+                </div>
+            </div>
+
+            {% if googleAccounts is not empty %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ 'mautic.ads_intelligence.offline_conversions.create_action_title'|trans }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-muted">{{ 'mautic.ads_intelligence.offline_conversions.create_action_help'|trans }}</p>
+                        <form method="post" action="{{ path('mautic_ads_intelligence_offline_conversions_create_action') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_offline_conversions_create_action') }}">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label for="account_id">{{ 'mautic.ads_intelligence.offline_conversions.create_action_account'|trans }}</label>
+                                        <select id="account_id" name="account_id" class="form-control">
+                                            {% for account in googleAccounts %}
+                                                <option value="{{ account.id }}">{{ account.name }} ({{ account.externalAccountId }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label for="action_name">{{ 'mautic.ads_intelligence.offline_conversions.create_action_name'|trans }}</label>
+                                        <input id="action_name" name="action_name" type="text" class="form-control" value="Oportunidade/Cliente CRM">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" class="btn btn-default btn-block">
+                                            {{ 'mautic.ads_intelligence.offline_conversions.create_action_button'|trans }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if microsoftAccounts is not empty %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ 'mautic.ads_intelligence.offline_conversions.create_ms_action_title'|trans }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-muted">{{ 'mautic.ads_intelligence.offline_conversions.create_ms_action_help'|trans }}</p>
+                        <form method="post" action="{{ path('mautic_ads_intelligence_offline_conversions_create_ms_action') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_offline_conversions_create_ms_action') }}">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label for="ms_account_id">{{ 'mautic.ads_intelligence.offline_conversions.create_ms_action_account'|trans }}</label>
+                                        <select id="ms_account_id" name="account_id" class="form-control">
+                                            {% for account in microsoftAccounts %}
+                                                <option value="{{ account.id }}">{{ account.name }} ({{ account.externalAccountId }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label for="ms_action_name">{{ 'mautic.ads_intelligence.offline_conversions.create_action_name'|trans }}</label>
+                                        <input id="ms_action_name" name="action_name" type="text" class="form-control" value="Oportunidade/Cliente CRM">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="submit" class="btn btn-default btn-block">
+                                            {{ 'mautic.ads_intelligence.offline_conversions.create_action_button'|trans }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">{{ 'mautic.ads_intelligence.offline_conversions.queue'|trans }}</h3>
+                </div>
+                <div class="panel-body">
+                    <p><strong>{{ 'mautic.ads_intelligence.status.pending'|trans }}:</strong> {{ summary.pending }}</p>
+                    <p><strong>{{ 'mautic.ads_intelligence.status.sent'|trans }}:</strong> {{ summary.sent }}</p>
+                    <p><strong>{{ 'mautic.ads_intelligence.status.failed'|trans }}:</strong> {{ summary.failed }}</p>
+
+                    <form method="post" action="{{ path('mautic_ads_intelligence_offline_conversions_enqueue') }}" class="mb-sm">
+                        <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_offline_conversions_enqueue') }}">
+                        <button type="submit" class="btn btn-default btn-block">
+                            {{ 'mautic.ads_intelligence.offline_conversions.enqueue'|trans }}
+                        </button>
+                    </form>
+
+                    <form method="post" action="{{ path('mautic_ads_intelligence_offline_conversions_sync') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_offline_conversions_sync') }}">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            {{ 'mautic.ads_intelligence.offline_conversions.send'|trans }}
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <p class="text-muted small">{{ 'mautic.ads_intelligence.offline_conversions.download_help'|trans }}</p>
+                    <a href="{{ path('mautic_ads_intelligence_offline_conversions_download', {'provider': 'google'}) }}" class="btn btn-default btn-block">
+                        {{ 'mautic.ads_intelligence.offline_conversions.download_google'|trans }}
+                    </a>
+                    <a href="{{ path('mautic_ads_intelligence_offline_conversions_download', {'provider': 'microsoft'}) }}" class="btn btn-default btn-block">
+                        {{ 'mautic.ads_intelligence.offline_conversions.download_bing'|trans }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

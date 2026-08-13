@@ -1,0 +1,51 @@
+<div
+    id="ads-no-interest-reason-{{ lead.id }}"
+    class="pa-sm"
+    data-segments-title="{{ 'mautic.lead.lead.lists'|trans|e('html_attr') }}"
+    hidden
+>
+    {% set content %}
+        <div class="d-flex jc-space-between">
+            <span class="fw-b ellipsis mb-md">{{ 'mautic.ads_intelligence.no_interest.panel_title'|trans }}</span>
+            <i class="ri-user-unfollow-line" aria-hidden="true"></i>
+        </div>
+        <p class="text-secondary mb-0">{{ reason|purify|nl2br }}</p>
+    {% endset %}
+
+    {% include '@MauticCore/Components/tile.html.twig' with {
+        'type': 'base',
+        'content': content
+    } %}
+</div>
+
+<script>
+(function () {
+    var panel = document.getElementById('ads-no-interest-reason-{{ lead.id }}');
+    if (!panel) {
+        return;
+    }
+
+    var sidebar = document.querySelector('.col-md-3.bdr-l');
+    if (!sidebar) {
+        panel.hidden = false;
+        return;
+    }
+
+    var segmentsTitle = panel.getAttribute('data-segments-title');
+    var segmentBlock = null;
+    sidebar.querySelectorAll('.pa-sm').forEach(function (block) {
+        var title = block.querySelector('.fw-b.ellipsis');
+        if (title && title.textContent.trim() === segmentsTitle) {
+            segmentBlock = block;
+        }
+    });
+
+    if (segmentBlock) {
+        segmentBlock.insertAdjacentElement('afterend', panel);
+    } else {
+        sidebar.appendChild(panel);
+    }
+
+    panel.hidden = false;
+})();
+</script>

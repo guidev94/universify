@@ -1,0 +1,140 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceSettings{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.settings.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-settings">
+    <div class="alert alert-info">
+        <strong>{{ 'mautic.ads_intelligence.settings.account_config_moved_title'|trans }}</strong><br>
+        {{ 'mautic.ads_intelligence.settings.account_config_moved_body'|trans }}
+    </div>
+
+    <form method="post" action="{{ path('mautic_ads_intelligence_settings_save') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('ads_intelligence_settings') }}">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ 'mautic.ads_intelligence.settings.gemini_ai'|trans }}</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-group">
+                            <label for="gemini_api_key">{{ 'mautic.ads_intelligence.settings.gemini_api_key'|trans }}</label>
+                            <input id="gemini_api_key" name="gemini_api_key" type="password" class="form-control" autocomplete="off" maxlength="512" placeholder="{{ geminiSettings.hasApiKey ? geminiSettings.maskedApiKey : 'AIza...' }}">
+                            <span class="help-block">
+                                {% if geminiSettings.hasApiKey %}
+                                    {{ 'mautic.ads_intelligence.settings.gemini_api_key_saved'|trans({'%key%': geminiSettings.maskedApiKey}) }}
+                                {% else %}
+                                    {{ 'mautic.ads_intelligence.settings.gemini_api_key_help'|trans }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gemini_model">{{ 'mautic.ads_intelligence.settings.gemini_model'|trans }}</label>
+                            <input id="gemini_model" name="gemini_model" type="text" class="form-control" maxlength="128" value="{{ geminiSettings.model }}" placeholder="gemini-3.6-flash">
+                            <span class="help-block">{{ 'mautic.ads_intelligence.settings.gemini_model_help'|trans }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="well">
+                            <h4>{{ 'mautic.ads_intelligence.settings.gemini_status'|trans }}</h4>
+                            {% if geminiSettings.configured %}
+                                <span class="label label-success">{{ 'mautic.ads_intelligence.settings.configured'|trans }}</span>
+                            {% else %}
+                                <span class="label label-warning">{{ 'mautic.ads_intelligence.settings.not_configured'|trans }}</span>
+                            {% endif %}
+                            <p class="mt-md text-muted">{{ 'mautic.ads_intelligence.settings.gemini_usage_help'|trans }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ 'mautic.ads_intelligence.settings.system_prompts'|trans }}</h3>
+            </div>
+            <div class="panel-body">
+                <p class="text-muted">{{ 'mautic.ads_intelligence.settings.system_prompts_help'|trans }}</p>
+
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#creative-system-prompt-text" aria-controls="creative-system-prompt-text" role="tab" data-toggle="tab">
+                            <span class="fa fa-align-left" aria-hidden="true"></span>
+                            {{ 'mautic.ads_intelligence.settings.prompt_text'|trans }}
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#creative-system-prompt-image" aria-controls="creative-system-prompt-image" role="tab" data-toggle="tab">
+                            <span class="fa fa-image" aria-hidden="true"></span>
+                            {{ 'mautic.ads_intelligence.settings.prompt_image'|trans }}
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#creative-system-prompt-video" aria-controls="creative-system-prompt-video" role="tab" data-toggle="tab">
+                            <span class="fa fa-video-camera" aria-hidden="true"></span>
+                            {{ 'mautic.ads_intelligence.settings.prompt_video'|trans }}
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content pa-md">
+                    {% set promptTabs = {
+                        'text': {
+                            'label': 'mautic.ads_intelligence.settings.prompt_text_label',
+                            'help': 'mautic.ads_intelligence.settings.prompt_text_help'
+                        },
+                        'image': {
+                            'label': 'mautic.ads_intelligence.settings.prompt_image_label',
+                            'help': 'mautic.ads_intelligence.settings.prompt_image_help'
+                        },
+                        'video': {
+                            'label': 'mautic.ads_intelligence.settings.prompt_video_label',
+                            'help': 'mautic.ads_intelligence.settings.prompt_video_help'
+                        }
+                    } %}
+
+                    {% for mode, promptTab in promptTabs %}
+                        <div role="tabpanel" class="tab-pane{% if mode == 'text' %} active{% endif %}" id="creative-system-prompt-{{ mode }}">
+                            <div class="form-group">
+                                <label for="creative_system_prompt_{{ mode }}">
+                                    {{ promptTab.label|trans }}
+                                    {% if geminiSettings.systemPromptIsDefault[mode] %}
+                                        <span class="label label-info ml-sm">{{ 'mautic.ads_intelligence.settings.prompt_default'|trans }}</span>
+                                    {% else %}
+                                        <span class="label label-primary ml-sm">{{ 'mautic.ads_intelligence.settings.prompt_custom'|trans }}</span>
+                                    {% endif %}
+                                </label>
+                                <textarea
+                                    id="creative_system_prompt_{{ mode }}"
+                                    name="creative_system_prompt_{{ mode }}"
+                                    class="form-control"
+                                    rows="18"
+                                    maxlength="{{ systemPromptMaxLength }}"
+                                    spellcheck="true"
+                                    aria-describedby="creative_system_prompt_{{ mode }}_help"
+                                >{{ geminiSettings.systemPrompts[mode] }}</textarea>
+                                <span id="creative_system_prompt_{{ mode }}_help" class="help-block">
+                                    {{ promptTab.help|trans }}
+                                    {{ 'mautic.ads_intelligence.settings.prompt_reset_help'|trans }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-lg">
+            <button type="submit" class="btn btn-primary">
+                {{ 'mautic.core.form.save'|trans }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

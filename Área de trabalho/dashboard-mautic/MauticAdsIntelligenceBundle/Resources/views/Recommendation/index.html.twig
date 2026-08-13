@@ -1,0 +1,62 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceRecommendations{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.recommendations.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-recommendations">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ 'mautic.ads_intelligence.recommendations.list'|trans }}</h3>
+        </div>
+        <div class="panel-body">
+            {% if recommendations is empty %}
+                <p class="text-muted text-center">{{ 'mautic.ads_intelligence.overview.no_data'|trans }}</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>{{ 'mautic.ads_intelligence.column.title'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.type'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.provider'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.risk'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.confidence'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.status'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.created_at'|trans }}</th>
+                                <th>{{ 'mautic.ads_intelligence.column.actions'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in recommendations %}
+                                <tr>
+                                    <td>{{ rec.title }}</td>
+                                    <td>{{ rec.recommendationType }}</td>
+                                    <td>{{ rec.provider }}</td>
+                                    <td>{{ rec.riskLevel }}</td>
+                                    <td>{{ rec.confidenceScore }}</td>
+                                    <td>{{ rec.status }}</td>
+                                    <td>{{ rec.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {% if rec.status == 'pending' %}
+                                            <button class="btn btn-xs btn-success"
+                                                    data-href="{{ path('mautic_ads_intelligence_recommendation_approve', {id: rec.id}) }}">
+                                                {{ 'mautic.ads_intelligence.action.approve'|trans }}
+                                            </button>
+                                            <button class="btn btn-xs btn-danger"
+                                                    data-href="{{ path('mautic_ads_intelligence_recommendation_reject', {id: rec.id}) }}">
+                                                {{ 'mautic.ads_intelligence.action.reject'|trans }}
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

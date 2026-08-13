@@ -1,0 +1,92 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent %}adsIntelligenceOverview{% endblock %}
+
+{% block headerTitle %}{{ 'mautic.ads_intelligence.overview.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="ads-intelligence-overview">
+
+    {# KPIs Row #}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.investment'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.revenue'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.roas'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.cac'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.leads'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.hot_leads'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.opportunities'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    <h4>{{ 'mautic.ads_intelligence.kpi.customers'|trans }}</h4>
+                    <p class="lead text-muted">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Growth towards goal #}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ 'mautic.ads_intelligence.overview.goal_progress'|trans }}</h3>
+        </div>
+        <div class="panel-body">
+            <p class="text-muted">{{ 'mautic.ads_intelligence.overview.no_data'|trans }}</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
