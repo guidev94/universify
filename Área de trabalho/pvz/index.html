@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants vs Zombies: Fusion RH Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0; padding: 0; background: #000;
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh; overflow: hidden; font-family: 'Bungee', cursive;
+        }
+        #container {
+            width: 900px; height: 600px;
+            overflow: hidden; position: relative;
+            background: #1a1a1a; border: 4px solid #3e2723;
+        }
+        #bg {
+            position: absolute; top: 0; left: 0;
+            width: 1400px; height: 600px; transition: left 1s;
+        }
+        .card {
+            z-index: 100; position: absolute;
+            top: 5px; cursor: pointer; transition: transform 0.2s;
+        }
+        .card:hover { transform: scale(1.1); }
+        
+        #score-panel {
+            position: absolute; top: 0; left: 10px; z-index: 110;
+            width: 150px; height: 80px;
+            background: url('https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/SeedBank.png') no-repeat;
+            background-size: contain;
+        }
+        #score {
+            position: absolute; top: 60px; left: 35px;
+            font-size: 18px; color: black; font-weight: bold;
+        }
+        #user-hud {
+            position: absolute; top: 10px; right: 10px; z-index: 200;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+            color: #fff; font-size: 12px; border: 2px solid #5d4037;
+        }
+        #game-over-overlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: #f44336; text-align: center;
+        }
+        .btn {
+            background: #8d6e63; color: white; border: none;
+            padding: 10px 20px; font-family: 'Bungee'; cursor: pointer;
+            margin-top: 20px; border-radius: 5px; border-bottom: 4px solid #3e2723;
+        }
+        .btn:active { border-bottom-width: 0; transform: translateY(4px); }
+        
+        #seed-chooser {
+            position: absolute; top: 10px; left: 80px; display: flex; gap: 5px;
+        }
+        .seed-slot {
+            width: 50px; height: 70px; background: #3e2723; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .cooldown {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: rgba(0,0,0,0.6); transition: height 0.1s linear;
+        }
+    </style>
+</head>
+<body ondragstart="return false">
+    <div id="container">
+        <img id="bg" src="https://cdn.jsdelivr.net/gh/marblexu/PythonPlantsVsZombies@master/resources/graphics/Items/Background/Background_0.jpg" alt="">
+        
+        <div id="score-panel">
+            <div id="score">50</div>
+        </div>
+
+        <div id="seed-chooser">
+            <div class="seed-slot" onclick="dragPlant('peashooter')">
+                <div id="cd-peashooter" class="cooldown"></div>
+                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png" width="50" alt="">
+            </div>
+            <div class="seed-slot" onclick="dragPlant('sunflower')">
+                <div id="cd-sunflower" class="cooldown"></div>
+                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png" width="50" alt="">
+            </div>
+            <div class="seed-slot" onclick="dragPlant('wallnut')">
+                <div id="cd-wallnut" class="cooldown"></div>
+                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png" width="50" alt="">
+            </div>
+        </div>
+
+        <div id="user-hud">
+            Jogador: <span id="user-name">...</span> | Nível: <span id="user-level">1</span>
+        </div>
+
+        <div id="game-over-overlay">
+            <h1>OS ZUMBIS COMERAM SEUS CÉREBROS!</h1>
+            <button class="btn" onclick="location.reload()">RECOMECAR</button>
+        </div>
+    </div>
+
+    <script src="sprites.js"></script>
+    <script>
+        // CONFIGURAÇÕES E ESTADO
+        var plants = [];
+        var zombies = [];
+        var bullets = [];
+        var suns = [];
+        var sunPoints = 50;
+        var gameRunning = true;
+        var userData = { name: "Filho", level: 1 };
+        
+        var container = document.getElementById('container');
+        var scoreDiv = document.getElementById('score');
+
+        // INICIALIZAÇÃO
+        window.onload = function () {
+            loadSession();
+            startGameLoop();
+        }
+
+        function loadSession() {
+            let saved = localStorage.getItem('pvz_fusion_save');
+            if (saved) {
+                userData = JSON.parse(saved);
+            } else {
+                let name = prompt("Bem-vindo ao PVZ Fusion! Qual o seu nome?", "Jogador");
+                userData.name = name || "Jogador";
+                saveSession();
+            }
+            document.getElementById('user-name').innerText = userData.name;
+            document.getElementById('user-level').innerText = userData.level;
+        }
+
+        function saveSession() {
+            localStorage.setItem('pvz_fusion_save', JSON.stringify(userData));
+        }
+
+        function startGameLoop() {
+            setInterval(() => {
+                if (!gameRunning) return;
+                
+                // Spawn de Zumbis
+                if (Math.random() < 0.003 + (userData.level * 0.001)) {
+                    zombies.push(createZombie(zombies.length, gameOver));
+                }
+
+                // Step das Entidades
+                zombies.forEach(z => {
+                    // Verificar se está comendo planta
+                    let target = plants.find(p => p.route === z.route && Math.abs(parseInt(p.style.left) - parseInt(z.style.left)) < 30);
+                    if (target) {
+                        target.blood -= 0.1;
+                        if (target.blood <= 0) {
+                            clearInterval(target.timer);
+                            container.removeChild(target);
+                            plants = plants.filter(p => p !== target);
+                        }
+                    } else {
+                        z.step();
+                    }
+                });
+                
+                bullets.forEach((b, i) => b.step());
+                suns.forEach(s => s.step());
+
+                // Colisão Balas
+                checkCollisions();
+                
+                // Update UI
+                scoreDiv.innerText = sunPoints;
+            }, 20);
+        }
+
+        function dragPlant(type) {
+            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
+            if (sunPoints < costs[type]) return;
+
+            // Criar planta temporária para seguir mouse
+            let p;
+            if (type === 'wallnut') p = createNut(7, plantPlaced);
+            else p = createPeashooter(type === 'peashooter' ? 1 : 3, plantPlaced);
+            
+            p.plantType = type;
+        }
+
+        function plantPlaced(plant) {
+            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
+            
+            // Lógica de FUSÃO
+            // Verificar se há planta no mesmo local
+            let gx = parseInt(plant.style.left);
+            let gy = parseInt(plant.style.top);
+            
+            let existingIdx = plants.findIndex(p => 
+                Math.abs(parseInt(p.style.left) - gx) < 20 && 
+                Math.abs(parseInt(p.style.top) - gy) < 20
+            );
+
+            if (existingIdx !== -1) {
+                let existing = plants[existingIdx];
+                // Se for Sunflower + Peashooter -> SunPea
+                if ((existing.plantType === 'sunflower' && plant.plantType === 'peashooter') ||
+                    (existing.plantType === 'peashooter' && plant.plantType === 'sunflower')) {
+                    
+                    container.removeChild(existing);
+                    plants.splice(existingIdx, 1);
+                    
+                    // Transformar planta atual em SunPea
+                    plant.src = 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png';
+                    plant.plantType = 'sunpea';
+                    plant.style.width = '60px';
+                    plant.isFusion = true;
+                } else {
+                    // Não pode plantar em cima de outra se não houver receita
+                    container.removeChild(plant);
+                    return;
+                }
+            }
+
+            sunPoints -= costs[plant.plantType] || 50;
+            plants.push(plant);
+            
+            // Adicionar lógica de ação
+            plant.timer = setInterval(() => {
+                if (!gameRunning) return;
+                action(plant);
+            }, 3000);
+        }
+
+        function action(plant) {
+            if (plant.plantType === 'sunflower' || plant.plantType === 'sunpea') {
+                suns.push(createSun(plant, suns.length, s => {
+                    container.removeChild(s);
+                    suns = suns.filter(item => item !== s);
+                    sunPoints += 25;
+                }));
+            }
+            if (plant.plantType === 'peashooter' || plant.plantType === 'sunpea') {
+                // Atirar se houver zumbi na linha
+                if (zombies.some(z => z.route === plant.route && parseInt(z.style.left) > parseInt(plant.style.left))) {
+                    bullets.push(createBullet(plant, bullets.length, b => {
+                        container.removeChild(b);
+                        bullets = bullets.filter(item => item !== b);
+                    }));
+                }
+            }
+        }
+
+        var zombiesKilled = 0;
+
+        function checkCollisions() {
+            for (let b of bullets) {
+                for (let z of zombies) {
+                    if (z.route === b.route && Math.abs(parseInt(z.style.left) - parseInt(b.style.left)) < 30) {
+                        z.blood -= 1;
+                        container.removeChild(b);
+                        bullets = bullets.filter(item => item !== b);
+                        if (z.blood <= 0) {
+                            z.src = 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif';
+                            zombiesKilled++;
+                            checkWin();
+                            setTimeout(() => {
+                                try { container.removeChild(z); } catch(e) {}
+                                zombies = zombies.filter(item => item !== z);
+                            }, 2000);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        function checkWin() {
+            if (zombiesKilled >= 10 + (userData.level * 2)) {
+                userData.level++;
+                saveSession();
+                alert("Nível " + (userData.level - 1) + " completo! Salvando seu progresso...");
+                location.reload();
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('game-over-overlay').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
