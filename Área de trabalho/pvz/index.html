@@ -7,284 +7,421 @@
     <title>Plants vs Zombies: Fusion RH Web</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
     <style>
-        body, html {
-            margin: 0; padding: 0; background: #000;
-            display: flex; align-items: center; justify-content: center;
-            height: 100vh; overflow: hidden; font-family: 'Bungee', cursive;
-        }
-        #container {
-            width: 900px; height: 600px;
-            overflow: hidden; position: relative;
-            background: #1a1a1a; border: 4px solid #3e2723;
-        }
-        #bg {
-            position: absolute; top: 0; left: 0;
-            width: 1400px; height: 600px; transition: left 1s;
-        }
-        .card {
-            z-index: 100; position: absolute;
-            top: 5px; cursor: pointer; transition: transform 0.2s;
-        }
-        .card:hover { transform: scale(1.1); }
+        body, html { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Bungee', cursive; }
+        #game-container { position: relative; width: 900px; height: 600px; border: 6px solid #3e2723; background: #1a1a1a; box-shadow: 0 0 50px rgba(0,0,0,1); overflow: hidden; }
         
-        #score-panel {
-            position: absolute; top: 0; left: 10px; z-index: 110;
-            width: 150px; height: 80px;
-            background: url('https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/SeedBank.png') no-repeat;
-            background-size: contain;
+        #bg { position: absolute; top: 0; left: 0; width: 1400px; height: 600px; }
+
+        /* Name Overlay */
+        #name-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 2000;
         }
-        #score {
-            position: absolute; top: 60px; left: 35px;
-            font-size: 18px; color: black; font-weight: bold;
+        .wood-box {
+            background: #5d4037; border: 8px solid #3e2723; border-radius: 20px; padding: 40px;
+            text-align: center; box-shadow: 0 20px 0 #2b1b17;
         }
-        #user-hud {
-            position: absolute; top: 10px; right: 10px; z-index: 200;
-            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
-            color: #fff; font-size: 12px; border: 2px solid #5d4037;
+        .wood-box h2 { color: #f4d03f; font-size: 32px; text-shadow: 3px 3px #000; margin-bottom: 30px; }
+        .wood-box input {
+            background: #3e2723; border: 4px solid #edc9af; border-radius: 10px;
+            padding: 15px; color: #fff; font-family: 'Bungee'; font-size: 20px;
+            text-align: center; width: 300px; outline: none; margin-bottom: 20px;
         }
-        #game-over-overlay {
-            display: none; position: absolute; inset: 0;
-            background: rgba(0,0,0,0.8); z-index: 1000;
-            flex-direction: column; align-items: center; justify-content: center;
-            color: #f44336; text-align: center;
+        .btn-start {
+            background: #4caf50; color: white; border: none; padding: 15px 40px;
+            font-family: 'Bungee'; font-size: 24px; border-radius: 10px;
+            cursor: pointer; border-bottom: 6px solid #2e7d32; transition: all 0.1s;
         }
-        .btn {
-            background: #8d6e63; color: white; border: none;
-            padding: 10px 20px; font-family: 'Bungee'; cursor: pointer;
-            margin-top: 20px; border-radius: 5px; border-bottom: 4px solid #3e2723;
+        .btn-start:active { transform: translateY(4px); border-bottom-width: 0; }
+
+        /* HUD */
+        #seed-bank {
+            position: absolute; top: 0; left: 10px; z-index: 1000;
+            width: 450px; height: 85px; background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Screen/SeedBank.png') no-repeat;
+            background-size: contain; display: flex; align-items: flex-start; padding-top: 5px;
         }
-        .btn:active { border-bottom-width: 0; transform: translateY(4px); }
-        
-        #seed-chooser {
-            position: absolute; top: 10px; left: 80px; display: flex; gap: 5px;
+        #sun-count {
+            position: absolute; top: 60px; left: 32px; width: 75px;
+            text-align: center; font-size: 18px; color: #000; font-weight: bold;
         }
+        #seed-chooser { margin-left: 110px; display: flex; gap: 2px; }
         .seed-slot {
-            width: 50px; height: 70px; background: #3e2723; border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
+            width: 50px; height: 70px; cursor: pointer; position: relative;
+            background: rgba(0,0,0,0.2); border-radius: 2px;
         }
+        .seed-slot img { width: 100%; height: 100%; object-fit: contain; }
         .cooldown {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: rgba(0,0,0,0.6); transition: height 0.1s linear;
+            background: rgba(0,0,0,0.7); pointer-events: none; z-index: 5;
+        }
+
+        #user-hud {
+            position: absolute; top: 10px; right: 110px; z-index: 1000;
+            background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 20px;
+            color: #f4d03f; font-size: 12px; border: 2px solid #edc9af;
+        }
+        
+        #shovel-bank {
+            position: absolute; top: 0; left: 470px; z-index: 1000;
+            width: 70px; height: 80px; background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/ShovelBank.png') no-repeat;
+            background-size: contain; display: flex; align-items: center; justify-content: center;
+        }
+        #shovel { width: 50px; cursor: pointer; }
+
+        /* Game Over */
+        #game-over-overlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(0,0,0,0.9); z-index: 5000;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: #f44336; text-align: center;
         }
     </style>
 </head>
 <body ondragstart="return false">
-    <div id="container">
-        <img id="bg" src="https://cdn.jsdelivr.net/gh/marblexu/PythonPlantsVsZombies@master/resources/graphics/Items/Background/Background_0.jpg" alt="">
-        
-        <div id="score-panel">
-            <div id="score">50</div>
+    <div id="game-container">
+        <div id="name-overlay">
+            <div class="wood-box">
+                <h2>BEM-VINDO AO PVZ FUSION</h2>
+                <input type="text" id="player-name-input" placeholder="SEU NOME" maxlength="12">
+                <br>
+                <button class="btn-start" onclick="confirmName()">PRONTO!</button>
+            </div>
         </div>
 
-        <div id="seed-chooser">
-            <div class="seed-slot" onclick="dragPlant('peashooter')">
-                <div id="cd-peashooter" class="cooldown"></div>
-                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png" width="50" alt="">
+        <img id="bg" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Background/Background_0.jpg" alt="">
+
+        <div id="seed-bank">
+            <div id="sun-count">50</div>
+            <div id="seed-chooser">
+                <div class="seed-slot" onclick="pickPlant('peashooter')">
+                    <div id="cd-peashooter" class="cooldown"></div>
+                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png">
+                </div>
+                <div class="seed-slot" onclick="pickPlant('sunflower')">
+                    <div id="cd-sunflower" class="cooldown"></div>
+                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png">
+                </div>
+                <div class="seed-slot" onclick="pickPlant('wallnut')">
+                    <div id="cd-wallnut" class="cooldown"></div>
+                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png">
+                </div>
             </div>
-            <div class="seed-slot" onclick="dragPlant('sunflower')">
-                <div id="cd-sunflower" class="cooldown"></div>
-                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png" width="50" alt="">
-            </div>
-            <div class="seed-slot" onclick="dragPlant('wallnut')">
-                <div id="cd-wallnut" class="cooldown"></div>
-                <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png" width="50" alt="">
-            </div>
+        </div>
+
+        <div id="shovel-bank">
+            <img id="shovel" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/Shovel_0.png" onclick="pickPlant('shovel')">
         </div>
 
         <div id="user-hud">
-            Jogador: <span id="user-name">...</span> | Nível: <span id="user-level">1</span>
+            JOGADOR: <span id="username-display">...</span> | NÍVEL: <span id="level-display">1</span>
         </div>
+
+        <div id="entities-layer"></div>
 
         <div id="game-over-overlay">
             <h1>OS ZUMBIS COMERAM SEUS CÉREBROS!</h1>
-            <button class="btn" onclick="location.reload()">RECOMECAR</button>
+            <button class="btn-start" onclick="location.reload()">RECOMECAR</button>
         </div>
     </div>
 
-    <script src="sprites.js"></script>
+    <!-- Audio -->
+    <audio id="snd-points" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/points.mp3"></audio>
+    <audio id="snd-plant" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/plant1.mp3"></audio>
+    <audio id="snd-shoot" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/firepea.mp3"></audio>
+    <audio id="snd-chomp" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/chomp.mp3"></audio>
+    <audio id="snd-lose" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/losemusic.mp3"></audio>
+
     <script>
         // CONFIGURAÇÕES E ESTADO
-        var plants = [];
-        var zombies = [];
-        var bullets = [];
-        var suns = [];
-        var sunPoints = 50;
-        var gameRunning = true;
-        var userData = { name: "Filho", level: 1 };
-        
-        var container = document.getElementById('container');
-        var scoreDiv = document.getElementById('score');
+        const GRID = { rows: 5, cols: 9, sx: 140, sy: 100, cw: 82, ch: 100 };
+        const ASSETS = {
+            peashooter: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/Peashooter/Peashooter.gif',
+            sunflower: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/SunFlower/SunFlower.gif',
+            wallnut: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/WallNut/WallNut.gif',
+            sunpea: 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png',
+            zombie: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/Zombie.gif',
+            zombie_die: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif',
+            sun: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/Sun.gif',
+            bullet: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/PB00.gif'
+        };
+
+        let state = {
+            sun: 100,
+            level: 1,
+            playerName: '',
+            gameRunning: false,
+            plants: [],
+            zombies: [],
+            bullets: [],
+            suns: [],
+            dragging: null,
+            zombiesKilled: 0
+        };
+
+        const container = document.getElementById('game-container');
+        const entitiesLayer = document.getElementById('entities-layer');
+        const sunDisplay = document.getElementById('sun-count');
+
+        // AUDIO HELPERS
+        function playSnd(id) {
+            const el = document.getElementById(id);
+            if (el) { el.currentTime = 0; el.play().catch(()=>{}); }
+        }
 
         // INICIALIZAÇÃO
-        window.onload = function () {
-            loadSession();
+        window.onload = function() {
+            let saved = localStorage.getItem('pvz_fusion_save');
+            if (saved) {
+                let data = JSON.parse(saved);
+                state.playerName = data.name;
+                state.level = data.level;
+                document.getElementById('name-overlay').style.display = 'none';
+                initGame();
+            }
+        };
+
+        function confirmName() {
+            const name = document.getElementById('player-name-input').value || "Jogador";
+            state.playerName = name;
+            localStorage.setItem('pvz_fusion_save', JSON.stringify({ name, level: 1 }));
+            document.getElementById('name-overlay').style.display = 'none';
+            playSnd('snd-plant');
+            initGame();
+        }
+
+        function initGame() {
+            document.getElementById('username-display').innerText = state.playerName.toUpperCase();
+            document.getElementById('level-display').innerText = state.level;
+            state.gameRunning = true;
             startGameLoop();
         }
 
-        function loadSession() {
-            let saved = localStorage.getItem('pvz_fusion_save');
-            if (saved) {
-                userData = JSON.parse(saved);
-            } else {
-                let name = prompt("Bem-vindo ao PVZ Fusion! Qual o seu nome?", "Jogador");
-                userData.name = name || "Jogador";
-                saveSession();
-            }
-            document.getElementById('user-name').innerText = userData.name;
-            document.getElementById('user-level').innerText = userData.level;
+        function pickPlant(type) {
+            if (!state.gameRunning) return;
+            const costs = { peashooter: 100, sunflower: 50, wallnut: 50, shovel: 0 };
+            if (type !== 'shovel' && state.sun < costs[type]) return;
+
+            if (state.dragging) entitiesLayer.removeChild(state.dragging.visual);
+
+            const visual = document.createElement('img');
+            visual.src = type === 'shovel' ? document.getElementById('shovel').src : ASSETS[type];
+            visual.style.position = 'absolute';
+            visual.style.zIndex = '5000';
+            visual.style.pointerEvents = 'none';
+            visual.style.opacity = '0.7';
+            if (type === 'sunpea') visual.style.width = '60px';
+            else visual.style.width = '70px';
+
+            entitiesLayer.appendChild(visual);
+            state.dragging = { type, visual };
+
+            document.onmousemove = (e) => {
+                const rect = container.getBoundingClientRect();
+                visual.style.left = (e.clientX - rect.left - 35) + 'px';
+                visual.style.top = (e.clientY - rect.top - 35) + 'px';
+            };
+
+            document.onmousedown = (e) => {
+                if (e.button === 0) {
+                    const rect = container.getBoundingClientRect();
+                    const gx = Math.floor((e.clientX - rect.left - GRID.sx) / GRID.cw);
+                    const gy = Math.floor((e.clientY - rect.top - GRID.sy) / GRID.ch);
+
+                    if (gx >= 0 && gx < GRID.cols && gy >= 0 && gy < GRID.rows) {
+                        handleGridClick(gx, gy);
+                    }
+                    
+                    entitiesLayer.removeChild(visual);
+                    state.dragging = null;
+                    document.onmousemove = null;
+                    document.onmousedown = null;
+                }
+            };
         }
 
-        function saveSession() {
-            localStorage.setItem('pvz_fusion_save', JSON.stringify(userData));
+        function handleGridClick(gx, gy) {
+            const existingIdx = state.plants.findIndex(p => p.gx === gx && p.gy === gy);
+            const existing = state.plants[existingIdx];
+
+            if (state.dragging.type === 'shovel') {
+                if (existing) {
+                    entitiesLayer.removeChild(existing.el);
+                    clearInterval(existing.timer);
+                    state.plants.splice(existingIdx, 1);
+                }
+                return;
+            }
+
+            const type = state.dragging.type;
+            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
+            
+            if (existing) {
+                // FUSION
+                if ((existing.type === 'sunflower' && type === 'peashooter') || 
+                    (existing.type === 'peashooter' && type === 'sunflower')) {
+                    state.sun -= costs[type];
+                    entitiesLayer.removeChild(existing.el);
+                    clearInterval(existing.timer);
+                    state.plants.splice(existingIdx, 1);
+                    createPlant('sunpea', gx, gy);
+                    playSnd('snd-plant');
+                }
+            } else {
+                state.sun -= costs[type];
+                createPlant(type, gx, gy);
+                playSnd('snd-plant');
+            }
+        }
+
+        function createPlant(type, gx, gy) {
+            const el = document.createElement('img');
+            el.src = ASSETS[type];
+            el.style.position = 'absolute';
+            el.style.left = (GRID.sx + gx * GRID.cw) + 'px';
+            el.style.top = (GRID.sy + gy * GRID.ch) + 'px';
+            el.style.zIndex = 100 + gy;
+            if (type === 'sunpea') el.style.width = '60px';
+            else el.style.width = '75px';
+            
+            entitiesLayer.appendChild(el);
+
+            const plant = {
+                type, gx, gy, el, hp: type === 'wallnut' ? 400 : 100,
+                timer: setInterval(() => plantAction(plant), 3000)
+            };
+            state.plants.push(plant);
+        }
+
+        function plantAction(p) {
+            if (!state.gameRunning) return;
+            if (p.type === 'sunflower' || p.type === 'sunpea') {
+                spawnSun(p.gx, p.gy);
+            }
+            if (p.type === 'peashooter' || p.type === 'sunpea') {
+                if (state.zombies.some(z => z.gy === p.gy && z.x > (GRID.sx + p.gx * GRID.cw))) {
+                    spawnBullet(p.gx, p.gy);
+                }
+            }
+        }
+
+        function spawnSun(gx, gy) {
+            const el = document.createElement('img');
+            el.src = ASSETS.sun;
+            el.style.position = 'absolute';
+            el.style.left = (GRID.sx + gx * GRID.cw + 20) + 'px';
+            el.style.top = (GRID.sy + gy * GRID.ch) + 'px';
+            el.style.zIndex = 2000;
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                playSnd('snd-points');
+                state.sun += 25;
+                entitiesLayer.removeChild(el);
+                state.suns = state.suns.filter(s => s.el !== el);
+            };
+            entitiesLayer.appendChild(el);
+            state.suns.push({ el, y: GRID.sy + gy * GRID.ch, targetY: GRID.sy + gy * GRID.ch + 40 });
+        }
+
+        function spawnBullet(gx, gy) {
+            playSnd('snd-shoot');
+            const el = document.createElement('img');
+            el.src = ASSETS.bullet;
+            el.style.position = 'absolute';
+            el.style.left = (GRID.sx + gx * GRID.cw + 40) + 'px';
+            el.style.top = (GRID.sy + gy * GRID.ch + 10) + 'px';
+            el.style.zIndex = 500;
+            entitiesLayer.appendChild(el);
+            state.bullets.push({ el, x: GRID.sx + gx * GRID.cw + 40, gy });
+        }
+
+        function spawnZombie() {
+            const gy = Math.floor(Math.random() * 5);
+            const el = document.createElement('img');
+            el.src = ASSETS.zombie;
+            el.style.position = 'absolute';
+            el.style.left = '900px';
+            el.style.top = (GRID.sy + gy * GRID.ch - 20) + 'px';
+            el.style.zIndex = 1000 + gy;
+            entitiesLayer.appendChild(el);
+            state.zombies.push({ el, x: 900, gy, hp: 10 });
         }
 
         function startGameLoop() {
             setInterval(() => {
-                if (!gameRunning) return;
-                
-                // Spawn de Zumbis
-                if (Math.random() < 0.003 + (userData.level * 0.001)) {
-                    zombies.push(createZombie(zombies.length, gameOver));
-                }
+                if (!state.gameRunning) return;
 
-                // Step das Entidades
-                zombies.forEach(z => {
-                    // Verificar se está comendo planta
-                    let target = plants.find(p => p.route === z.route && Math.abs(parseInt(p.style.left) - parseInt(z.style.left)) < 30);
+                // Spawn
+                if (Math.random() < 0.003 + (state.level * 0.001)) spawnZombie();
+
+                // Move Zombies
+                state.zombies.forEach(z => {
+                    let target = state.plants.find(p => p.gy === z.gy && Math.abs((GRID.sx + p.gx * GRID.cw) - z.x) < 40);
                     if (target) {
-                        target.blood -= 0.1;
-                        if (target.blood <= 0) {
+                        target.hp -= 0.5;
+                        if (Math.random() < 0.1) playSnd('snd-chomp');
+                        if (target.hp <= 0) {
+                            entitiesLayer.removeChild(target.el);
                             clearInterval(target.timer);
-                            container.removeChild(target);
-                            plants = plants.filter(p => p !== target);
+                            state.plants = state.plants.filter(p => p !== target);
                         }
                     } else {
-                        z.step();
+                        z.x -= 0.5;
+                        z.el.style.left = z.x + 'px';
+                    }
+                    if (z.x < 50) gameOver();
+                });
+
+                // Move Bullets
+                state.bullets.forEach((b, bi) => {
+                    b.x += 6;
+                    b.el.style.left = b.x + 'px';
+                    
+                    let hit = state.zombies.find(z => z.gy === b.gy && Math.abs(z.x - b.x) < 30);
+                    if (hit) {
+                        hit.hp -= 2;
+                        entitiesLayer.removeChild(b.el);
+                        state.bullets.splice(bi, 1);
+                        if (hit.hp <= 0) {
+                            hit.el.src = ASSETS.zombie_die;
+                            state.zombiesKilled++;
+                            setTimeout(() => {
+                                try { entitiesLayer.removeChild(hit.el); } catch(e){}
+                                state.zombies = state.zombies.filter(z => z !== hit);
+                            }, 2000);
+                            checkWin();
+                        }
+                    }
+                    if (b.x > 900) {
+                        entitiesLayer.removeChild(b.el);
+                        state.bullets.splice(bi, 1);
                     }
                 });
-                
-                bullets.forEach((b, i) => b.step());
-                suns.forEach(s => s.step());
 
-                // Colisão Balas
-                checkCollisions();
-                
-                // Update UI
-                scoreDiv.innerText = sunPoints;
+                // Sun
+                state.suns.forEach(s => {
+                    if (parseFloat(s.el.style.top) < s.targetY) {
+                        s.el.style.top = (parseFloat(s.el.style.top) + 1) + 'px';
+                    }
+                });
+
+                sunDisplay.innerText = state.sun;
             }, 20);
         }
 
-        function dragPlant(type) {
-            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
-            if (sunPoints < costs[type]) return;
-
-            // Criar planta temporária para seguir mouse
-            let p;
-            if (type === 'wallnut') p = createNut(7, plantPlaced);
-            else p = createPeashooter(type === 'peashooter' ? 1 : 3, plantPlaced);
-            
-            p.plantType = type;
-        }
-
-        function plantPlaced(plant) {
-            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
-            
-            // Lógica de FUSÃO
-            // Verificar se há planta no mesmo local
-            let gx = parseInt(plant.style.left);
-            let gy = parseInt(plant.style.top);
-            
-            let existingIdx = plants.findIndex(p => 
-                Math.abs(parseInt(p.style.left) - gx) < 20 && 
-                Math.abs(parseInt(p.style.top) - gy) < 20
-            );
-
-            if (existingIdx !== -1) {
-                let existing = plants[existingIdx];
-                // Se for Sunflower + Peashooter -> SunPea
-                if ((existing.plantType === 'sunflower' && plant.plantType === 'peashooter') ||
-                    (existing.plantType === 'peashooter' && plant.plantType === 'sunflower')) {
-                    
-                    container.removeChild(existing);
-                    plants.splice(existingIdx, 1);
-                    
-                    // Transformar planta atual em SunPea
-                    plant.src = 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png';
-                    plant.plantType = 'sunpea';
-                    plant.style.width = '60px';
-                    plant.isFusion = true;
-                } else {
-                    // Não pode plantar em cima de outra se não houver receita
-                    container.removeChild(plant);
-                    return;
-                }
-            }
-
-            sunPoints -= costs[plant.plantType] || 50;
-            plants.push(plant);
-            
-            // Adicionar lógica de ação
-            plant.timer = setInterval(() => {
-                if (!gameRunning) return;
-                action(plant);
-            }, 3000);
-        }
-
-        function action(plant) {
-            if (plant.plantType === 'sunflower' || plant.plantType === 'sunpea') {
-                suns.push(createSun(plant, suns.length, s => {
-                    container.removeChild(s);
-                    suns = suns.filter(item => item !== s);
-                    sunPoints += 25;
-                }));
-            }
-            if (plant.plantType === 'peashooter' || plant.plantType === 'sunpea') {
-                // Atirar se houver zumbi na linha
-                if (zombies.some(z => z.route === plant.route && parseInt(z.style.left) > parseInt(plant.style.left))) {
-                    bullets.push(createBullet(plant, bullets.length, b => {
-                        container.removeChild(b);
-                        bullets = bullets.filter(item => item !== b);
-                    }));
-                }
-            }
-        }
-
-        var zombiesKilled = 0;
-
-        function checkCollisions() {
-            for (let b of bullets) {
-                for (let z of zombies) {
-                    if (z.route === b.route && Math.abs(parseInt(z.style.left) - parseInt(b.style.left)) < 30) {
-                        z.blood -= 1;
-                        container.removeChild(b);
-                        bullets = bullets.filter(item => item !== b);
-                        if (z.blood <= 0) {
-                            z.src = 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif';
-                            zombiesKilled++;
-                            checkWin();
-                            setTimeout(() => {
-                                try { container.removeChild(z); } catch(e) {}
-                                zombies = zombies.filter(item => item !== z);
-                            }, 2000);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
         function checkWin() {
-            if (zombiesKilled >= 10 + (userData.level * 2)) {
-                userData.level++;
-                saveSession();
-                alert("Nível " + (userData.level - 1) + " completo! Salvando seu progresso...");
+            if (state.zombiesKilled >= 5 + state.level * 2) {
+                state.gameRunning = false;
+                state.level++;
+                localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: state.playerName, level: state.level }));
+                alert("Nível Completo! Avançando para o Nível " + state.level);
                 location.reload();
             }
         }
 
         function gameOver() {
-            gameRunning = false;
+            state.gameRunning = false;
+            playSnd('snd-lose');
             document.getElementById('game-over-overlay').style.display = 'flex';
         }
     </script>
