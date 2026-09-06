@@ -2,427 +2,408 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plants vs Zombies: Fusion RH Web</title>
+    <title>PVZ: Fusion RH - Elite Web Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Bungee', cursive; }
-        #game-container { position: relative; width: 900px; height: 600px; border: 6px solid #3e2723; background: #1a1a1a; box-shadow: 0 0 50px rgba(0,0,0,1); overflow: hidden; }
+        #game-view { position: relative; width: 900px; height: 600px; border: 4px solid #3e2723; background: #1a1a1a; overflow: hidden; }
         
-        #bg { position: absolute; top: 0; left: 0; width: 1400px; height: 600px; }
+        #bg { position: absolute; inset: 0; width: 1400px; height: 600px; z-index: 1; }
 
-        /* Name Overlay */
+        /* Full Screen Name UI */
         #name-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000;
+            z-index: 5000; transition: opacity 0.5s;
         }
-        .wood-box {
-            background: #5d4037; border: 8px solid #3e2723; border-radius: 20px; padding: 40px;
-            text-align: center; box-shadow: 0 20px 0 #2b1b17;
+        .wood-panel {
+            background: #5d4037 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            border: 10px solid #3e2723; border-radius: 30px; padding: 60px;
+            text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5);
+            transform: scale(0.9); opacity: 0;
         }
-        .wood-box h2 { color: #f4d03f; font-size: 32px; text-shadow: 3px 3px #000; margin-bottom: 30px; }
-        .wood-box input {
-            background: #3e2723; border: 4px solid #edc9af; border-radius: 10px;
-            padding: 15px; color: #fff; font-family: 'Bungee'; font-size: 20px;
-            text-align: center; width: 300px; outline: none; margin-bottom: 20px;
+        .wood-panel h1 { color: #f4d03f; font-size: 42px; text-shadow: 4px 4px #000; margin-bottom: 40px; }
+        .wood-panel input {
+            background: #2b1b17; border: 5px solid #edc9af; border-radius: 15px;
+            padding: 20px; color: #fff; font-family: 'Bungee'; font-size: 24px;
+            text-align: center; width: 350px; outline: none; margin-bottom: 30px;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
         }
-        .btn-start {
-            background: #4caf50; color: white; border: none; padding: 15px 40px;
-            font-family: 'Bungee'; font-size: 24px; border-radius: 10px;
-            cursor: pointer; border-bottom: 6px solid #2e7d32; transition: all 0.1s;
+        .btn-green {
+            background: #4caf50; color: white; border: none; padding: 20px 60px;
+            font-family: 'Bungee'; font-size: 28px; border-radius: 15px;
+            cursor: pointer; border-bottom: 8px solid #2e7d32; transition: all 0.1s;
+            text-shadow: 2px 2px #000;
         }
-        .btn-start:active { transform: translateY(4px); border-bottom-width: 0; }
+        .btn-green:hover { background: #66bb6a; }
+        .btn-green:active { transform: translateY(6px); border-bottom-width: 0; }
 
-        /* HUD */
+        /* HUD & UI */
+        #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
         #seed-bank {
-            position: absolute; top: 0; left: 10px; z-index: 1000;
-            width: 450px; height: 85px; background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Screen/SeedBank.png') no-repeat;
-            background-size: contain; display: flex; align-items: flex-start; padding-top: 5px;
+            position: absolute; top: 0; left: 10px; width: 450px; height: 90px;
+            background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Screen/SeedBank.png') no-repeat;
+            background-size: contain; pointer-events: auto;
         }
-        #sun-count {
-            position: absolute; top: 60px; left: 32px; width: 75px;
-            text-align: center; font-size: 18px; color: #000; font-weight: bold;
-        }
-        #seed-chooser { margin-left: 110px; display: flex; gap: 2px; }
-        .seed-slot {
-            width: 50px; height: 70px; cursor: pointer; position: relative;
-            background: rgba(0,0,0,0.2); border-radius: 2px;
-        }
-        .seed-slot img { width: 100%; height: 100%; object-fit: contain; }
-        .cooldown {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: rgba(0,0,0,0.7); pointer-events: none; z-index: 5;
-        }
-
-        #user-hud {
-            position: absolute; top: 10px; right: 110px; z-index: 1000;
-            background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 20px;
-            color: #f4d03f; font-size: 12px; border: 2px solid #edc9af;
-        }
+        #sun-val { position: absolute; top: 62px; left: 32px; width: 75px; text-align: center; font-size: 20px; color: #000; font-weight: 900; }
+        #seeds { margin-left: 110px; display: flex; gap: 4px; padding-top: 8px; }
+        .seed { width: 52px; height: 75px; cursor: pointer; position: relative; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.3); }
+        .seed img { width: 100%; height: 100%; object-fit: contain; }
+        .cd-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: rgba(0,0,0,0.7); z-index: 10; }
         
         #shovel-bank {
-            position: absolute; top: 0; left: 470px; z-index: 1000;
-            width: 70px; height: 80px; background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/ShovelBank.png') no-repeat;
-            background-size: contain; display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 0; left: 470px; width: 75px; height: 85px;
+            background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/ShovelBank.png') no-repeat;
+            background-size: contain; pointer-events: auto; display: flex; align-items: center; justify-content: center;
         }
-        #shovel { width: 50px; cursor: pointer; }
+        #shovel-icon { width: 55px; cursor: pointer; transition: transform 0.2s; }
+        #shovel-icon:hover { transform: rotate(-15deg); }
 
-        /* Game Over */
-        #game-over-overlay {
-            display: none; position: absolute; inset: 0;
-            background: rgba(0,0,0,0.9); z-index: 5000;
-            flex-direction: column; align-items: center; justify-content: center;
-            color: #f44336; text-align: center;
+        #player-label {
+            position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.85); 
+            padding: 8px 25px; border-radius: 25px; color: #f4d03f; font-size: 14px;
+            border: 3px solid #edc9af; text-shadow: 2px 2px #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
+
+        #game-over {
+            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 10000; flex-direction: column; align-items: center; justify-content: center;
+            color: #f44336; text-shadow: 4px 4px #000;
+        }
+
+        /* Entities */
+        .entity { position: absolute; transform-origin: bottom center; }
+        .bullet { position: absolute; width: 20px; height: 20px; z-index: 500; }
+        .sun { position: absolute; width: 70px; height: 70px; z-index: 2000; cursor: pointer; }
+        .zombie { position: absolute; width: 166px; height: 144px; transform: scale(0.8); }
     </style>
 </head>
-<body ondragstart="return false">
-    <div id="game-container">
+<body>
+    <div id="game-view">
+        <!-- Full Screen Name UI -->
         <div id="name-overlay">
-            <div class="wood-box">
-                <h2>BEM-VINDO AO PVZ FUSION</h2>
-                <input type="text" id="player-name-input" placeholder="SEU NOME" maxlength="12">
+            <div class="wood-panel" id="ui-panel">
+                <h1>QUEM VAI DEFENDER O JARDIM?</h1>
+                <input type="text" id="name-input" placeholder="DIGITE SEU NOME" maxlength="12">
                 <br>
-                <button class="btn-start" onclick="confirmName()">PRONTO!</button>
+                <button class="btn-green" onclick="startGame()">VAMOS NESSA!</button>
             </div>
         </div>
 
-        <img id="bg" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Background/Background_0.jpg" alt="">
+        <img id="bg" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies@master/resources/graphics/Items/Background/Background_1.jpg">
 
-        <div id="seed-bank">
-            <div id="sun-count">50</div>
-            <div id="seed-chooser">
-                <div class="seed-slot" onclick="pickPlant('peashooter')">
-                    <div id="cd-peashooter" class="cooldown"></div>
-                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png">
-                </div>
-                <div class="seed-slot" onclick="pickPlant('sunflower')">
-                    <div id="cd-sunflower" class="cooldown"></div>
-                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png">
-                </div>
-                <div class="seed-slot" onclick="pickPlant('wallnut')">
-                    <div id="cd-wallnut" class="cooldown"></div>
-                    <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png">
+        <div id="hud">
+            <div id="seed-bank">
+                <div id="sun-val">100</div>
+                <div id="seeds">
+                    <div class="seed" onclick="selectPlant('sunflower')">
+                        <div id="cd-sunflower" class="cd-overlay"></div>
+                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png">
+                    </div>
+                    <div class="seed" onclick="selectPlant('peashooter')">
+                        <div id="cd-peashooter" class="cd-overlay"></div>
+                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png">
+                    </div>
+                    <div class="seed" onclick="selectPlant('wallnut')">
+                        <div id="cd-wallnut" class="cd-overlay"></div>
+                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png">
+                    </div>
                 </div>
             </div>
+            <div id="shovel-bank">
+                <img id="shovel-icon" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/Shovel_0.png" onclick="selectPlant('shovel')">
+            </div>
+            <div id="player-label">JOGADOR: <span id="p-name">...</span> | LVL: <span id="p-lvl">1</span></div>
         </div>
 
-        <div id="shovel-bank">
-            <img id="shovel" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/Shovel_0.png" onclick="pickPlant('shovel')">
-        </div>
+        <div id="game-layer" style="position: absolute; inset: 0; z-index: 10;"></div>
 
-        <div id="user-hud">
-            JOGADOR: <span id="username-display">...</span> | NÍVEL: <span id="level-display">1</span>
-        </div>
-
-        <div id="entities-layer"></div>
-
-        <div id="game-over-overlay">
-            <h1>OS ZUMBIS COMERAM SEUS CÉREBROS!</h1>
-            <button class="btn-start" onclick="location.reload()">RECOMECAR</button>
+        <div id="game-over">
+            <h1 style="font-size: 60px;">FIM DE JOGO</h1>
+            <p style="font-size: 24px; color: #fff;">OS ZUMBIS INVADIRAM SUA CASA!</p>
+            <button class="btn-green" style="margin-top: 40px;" onclick="location.reload()">TENTAR NOVAMENTE</button>
         </div>
     </div>
 
-    <!-- Audio -->
-    <audio id="snd-points" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/points.mp3"></audio>
-    <audio id="snd-plant" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/plant1.mp3"></audio>
-    <audio id="snd-shoot" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/firepea.mp3"></audio>
-    <audio id="snd-chomp" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/chomp.mp3"></audio>
-    <audio id="snd-lose" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/losemusic.mp3"></audio>
+    <!-- Sounds -->
+    <audio id="s-sun" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/points.mp3"></audio>
+    <audio id="s-plant" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/plant1.mp3"></audio>
+    <audio id="s-shoot" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/firepea.mp3"></audio>
+    <audio id="s-chomp" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/chomp.mp3"></audio>
+    <audio id="s-lose" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/losemusic.mp3"></audio>
+    <audio id="s-ready" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/readysetplant.mp3"></audio>
 
     <script>
-        // CONFIGURAÇÕES E ESTADO
-        const GRID = { rows: 5, cols: 9, sx: 140, sy: 100, cw: 82, ch: 100 };
-        const ASSETS = {
-            peashooter: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/Peashooter/Peashooter.gif',
-            sunflower: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/SunFlower/SunFlower.gif',
-            wallnut: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/WallNut/WallNut.gif',
-            sunpea: 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png',
-            zombie: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/Zombie.gif',
-            zombie_die: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif',
-            sun: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/Sun.gif',
-            bullet: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/PB00.gif'
+        const CONFIG = {
+            grid: { rows: 5, cols: 9, sx: 130, sy: 100, cw: 82, ch: 100 },
+            costs: { sunflower: 50, peashooter: 100, wallnut: 50, shovel: 0 },
+            assets: {
+                sunflower: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/SunFlower/SunFlower.gif',
+                peashooter: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/Peashooter/Peashooter.gif',
+                wallnut: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/WallNut/WallNut.gif',
+                sunpea: 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png',
+                zombie: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/Zombie.gif',
+                z_eat: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieAttack.gif',
+                z_die: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif',
+                sun: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/Sun.gif',
+                bullet: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/PB00.gif'
+            }
         };
 
-        let state = {
+        let game = {
+            running: false,
             sun: 100,
             level: 1,
-            playerName: '',
-            gameRunning: false,
+            name: '',
             plants: [],
             zombies: [],
             bullets: [],
             suns: [],
             dragging: null,
-            zombiesKilled: 0
+            killed: 0
         };
 
-        const container = document.getElementById('game-container');
-        const entitiesLayer = document.getElementById('entities-layer');
-        const sunDisplay = document.getElementById('sun-count');
+        const view = document.getElementById('game-view');
+        const layer = document.getElementById('game-layer');
 
-        // AUDIO HELPERS
-        function playSnd(id) {
-            const el = document.getElementById(id);
-            if (el) { el.currentTime = 0; el.play().catch(()=>{}); }
-        }
-
-        // INICIALIZAÇÃO
-        window.onload = function() {
-            let saved = localStorage.getItem('pvz_fusion_save');
+        window.onload = () => {
+            gsap.to("#ui-panel", { scale: 1, opacity: 1, duration: 0.8, ease: "back.out" });
+            const saved = localStorage.getItem('pvz_fusion_save');
             if (saved) {
-                let data = JSON.parse(saved);
-                state.playerName = data.name;
-                state.level = data.level;
-                document.getElementById('name-overlay').style.display = 'none';
-                initGame();
+                const data = JSON.parse(saved);
+                document.getElementById('name-input').value = data.name;
+                game.level = data.level;
             }
         };
 
-        function confirmName() {
-            const name = document.getElementById('player-name-input').value || "Jogador";
-            state.playerName = name;
-            localStorage.setItem('pvz_fusion_save', JSON.stringify({ name, level: 1 }));
-            document.getElementById('name-overlay').style.display = 'none';
-            playSnd('snd-plant');
-            initGame();
+        function play(id) {
+            const a = document.getElementById('s-' + id);
+            if (a) { a.currentTime = 0; a.play().catch(()=>{}); }
         }
 
-        function initGame() {
-            document.getElementById('username-display').innerText = state.playerName.toUpperCase();
-            document.getElementById('level-display').innerText = state.level;
-            state.gameRunning = true;
-            startGameLoop();
+        function startGame() {
+            game.name = document.getElementById('name-input').value || "GUERREIRO";
+            localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: game.name, level: game.level }));
+            
+            document.getElementById('p-name').innerText = game.name.toUpperCase();
+            document.getElementById('p-lvl').innerText = game.level;
+
+            gsap.to("#name-overlay", { opacity: 0, duration: 0.5, onComplete: () => {
+                document.getElementById('name-overlay').style.display = 'none';
+                play('ready');
+                game.running = true;
+                runEngine();
+            }});
         }
 
-        function pickPlant(type) {
-            if (!state.gameRunning) return;
-            const costs = { peashooter: 100, sunflower: 50, wallnut: 50, shovel: 0 };
-            if (type !== 'shovel' && state.sun < costs[type]) return;
+        function selectPlant(type) {
+            if (!game.running || (type !== 'shovel' && game.sun < CONFIG.costs[type])) return;
 
-            if (state.dragging) entitiesLayer.removeChild(state.dragging.visual);
+            if (game.dragging) layer.removeChild(game.dragging.el);
 
-            const visual = document.createElement('img');
-            visual.src = type === 'shovel' ? document.getElementById('shovel').src : ASSETS[type];
-            visual.style.position = 'absolute';
-            visual.style.zIndex = '5000';
-            visual.style.pointerEvents = 'none';
-            visual.style.opacity = '0.7';
-            if (type === 'sunpea') visual.style.width = '60px';
-            else visual.style.width = '70px';
+            const el = document.createElement('img');
+            el.src = type === 'shovel' ? document.getElementById('shovel-icon').src : CONFIG.assets[type];
+            el.className = 'entity';
+            el.style.zIndex = 5000;
+            el.style.opacity = 0.7;
+            el.style.pointerEvents = 'none';
+            el.style.width = type === 'sunpea' ? '60px' : '75px';
 
-            entitiesLayer.appendChild(visual);
-            state.dragging = { type, visual };
+            layer.appendChild(el);
+            game.dragging = { type, el };
 
             document.onmousemove = (e) => {
-                const rect = container.getBoundingClientRect();
-                visual.style.left = (e.clientX - rect.left - 35) + 'px';
-                visual.style.top = (e.clientY - rect.top - 35) + 'px';
+                const r = view.getBoundingClientRect();
+                el.style.left = (e.clientX - r.left - 35) + 'px';
+                el.style.top = (e.clientY - r.top - 40) + 'px';
             };
 
             document.onmousedown = (e) => {
                 if (e.button === 0) {
-                    const rect = container.getBoundingClientRect();
-                    const gx = Math.floor((e.clientX - rect.left - GRID.sx) / GRID.cw);
-                    const gy = Math.floor((e.clientY - rect.top - GRID.sy) / GRID.ch);
+                    const r = view.getBoundingClientRect();
+                    const gx = Math.floor((e.clientX - r.left - CONFIG.grid.sx) / CONFIG.grid.cw);
+                    const gy = Math.floor((e.clientY - r.top - CONFIG.grid.sy) / CONFIG.grid.ch);
 
-                    if (gx >= 0 && gx < GRID.cols && gy >= 0 && gy < GRID.rows) {
-                        handleGridClick(gx, gy);
-                    }
+                    if (gx >= 0 && gx < 9 && gy >= 0 && gy < 5) placeOnGrid(gx, gy);
                     
-                    entitiesLayer.removeChild(visual);
-                    state.dragging = null;
+                    if (game.dragging) layer.removeChild(el);
+                    game.dragging = null;
                     document.onmousemove = null;
                     document.onmousedown = null;
                 }
             };
         }
 
-        function handleGridClick(gx, gy) {
-            const existingIdx = state.plants.findIndex(p => p.gx === gx && p.gy === gy);
-            const existing = state.plants[existingIdx];
+        function placeOnGrid(gx, gy) {
+            const type = game.dragging.type;
+            const idx = game.plants.findIndex(p => p.gx === gx && p.gy === gy);
+            const exist = game.plants[idx];
 
-            if (state.dragging.type === 'shovel') {
-                if (existing) {
-                    entitiesLayer.removeChild(existing.el);
-                    clearInterval(existing.timer);
-                    state.plants.splice(existingIdx, 1);
+            if (type === 'shovel') {
+                if (exist) {
+                    layer.removeChild(exist.el);
+                    clearInterval(exist.timer);
+                    game.plants.splice(idx, 1);
+                    play('plant');
                 }
                 return;
             }
 
-            const type = state.dragging.type;
-            const costs = { peashooter: 100, sunflower: 50, wallnut: 50 };
-            
-            if (existing) {
-                // FUSION
-                if ((existing.type === 'sunflower' && type === 'peashooter') || 
-                    (existing.type === 'peashooter' && type === 'sunflower')) {
-                    state.sun -= costs[type];
-                    entitiesLayer.removeChild(existing.el);
-                    clearInterval(existing.timer);
-                    state.plants.splice(existingIdx, 1);
-                    createPlant('sunpea', gx, gy);
-                    playSnd('snd-plant');
+            if (exist) {
+                // FUSION LOGIC
+                const recipes = { sunflower: { peashooter: 'sunpea' }, peashooter: { sunflower: 'sunpea' } };
+                const res = recipes[exist.type]?.[type];
+                if (res) {
+                    game.sun -= CONFIG.costs[type];
+                    layer.removeChild(exist.el);
+                    clearInterval(exist.timer);
+                    game.plants.splice(idx, 1);
+                    createPlant(res, gx, gy);
+                    play('plant');
                 }
             } else {
-                state.sun -= costs[type];
+                game.sun -= CONFIG.costs[type];
                 createPlant(type, gx, gy);
-                playSnd('snd-plant');
+                play('plant');
             }
         }
 
         function createPlant(type, gx, gy) {
             const el = document.createElement('img');
-            el.src = ASSETS[type];
-            el.style.position = 'absolute';
-            el.style.left = (GRID.sx + gx * GRID.cw) + 'px';
-            el.style.top = (GRID.sy + gy * GRID.ch) + 'px';
+            el.src = CONFIG.assets[type];
+            el.className = 'entity';
+            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw) + 'px';
+            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch) + 'px';
             el.style.zIndex = 100 + gy;
-            if (type === 'sunpea') el.style.width = '60px';
-            else el.style.width = '75px';
-            
-            entitiesLayer.appendChild(el);
+            el.style.width = type === 'sunpea' ? '60px' : '75px';
+            layer.appendChild(el);
 
-            const plant = {
+            gsap.from(el, { scale: 0, duration: 0.4, ease: "back.out(2)" });
+
+            const p = {
                 type, gx, gy, el, hp: type === 'wallnut' ? 400 : 100,
-                timer: setInterval(() => plantAction(plant), 3000)
+                timer: setInterval(() => {
+                    if (!game.running) return;
+                    if (type.includes('sun')) spawnSun(gx, gy);
+                    if (type.includes('pea')) {
+                        if (game.zombies.some(z => z.gy === gy && z.x > (CONFIG.grid.sx + gx * CONFIG.grid.cw))) {
+                            spawnBullet(gx, gy);
+                        }
+                    }
+                }, 3000)
             };
-            state.plants.push(plant);
-        }
-
-        function plantAction(p) {
-            if (!state.gameRunning) return;
-            if (p.type === 'sunflower' || p.type === 'sunpea') {
-                spawnSun(p.gx, p.gy);
-            }
-            if (p.type === 'peashooter' || p.type === 'sunpea') {
-                if (state.zombies.some(z => z.gy === p.gy && z.x > (GRID.sx + p.gx * GRID.cw))) {
-                    spawnBullet(p.gx, p.gy);
-                }
-            }
+            game.plants.push(p);
         }
 
         function spawnSun(gx, gy) {
             const el = document.createElement('img');
-            el.src = ASSETS.sun;
-            el.style.position = 'absolute';
-            el.style.left = (GRID.sx + gx * GRID.cw + 20) + 'px';
-            el.style.top = (GRID.sy + gy * GRID.ch) + 'px';
-            el.style.zIndex = 2000;
-            el.style.cursor = 'pointer';
+            el.src = CONFIG.assets.sun;
+            el.className = 'sun';
+            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw + 20) + 'px';
+            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch - 20) + 'px';
             el.onclick = () => {
-                playSnd('snd-points');
-                state.sun += 25;
-                entitiesLayer.removeChild(el);
-                state.suns = state.suns.filter(s => s.el !== el);
+                play('sun');
+                game.sun += 25;
+                gsap.to(el, { x: -el.offsetLeft + 40, y: -el.offsetTop + 40, opacity: 0, duration: 0.6, onComplete: () => {
+                    if (el.parentNode) layer.removeChild(el);
+                    game.suns = game.suns.filter(s => s.el !== el);
+                }});
             };
-            entitiesLayer.appendChild(el);
-            state.suns.push({ el, y: GRID.sy + gy * GRID.ch, targetY: GRID.sy + gy * GRID.ch + 40 });
+            layer.appendChild(el);
+            game.suns.push({ el });
+            gsap.to(el, { y: "+=50", duration: 1, ease: "bounce.out" });
         }
 
         function spawnBullet(gx, gy) {
-            playSnd('snd-shoot');
+            play('shoot');
             const el = document.createElement('img');
-            el.src = ASSETS.bullet;
-            el.style.position = 'absolute';
-            el.style.left = (GRID.sx + gx * GRID.cw + 40) + 'px';
-            el.style.top = (GRID.sy + gy * GRID.ch + 10) + 'px';
-            el.style.zIndex = 500;
-            entitiesLayer.appendChild(el);
-            state.bullets.push({ el, x: GRID.sx + gx * GRID.cw + 40, gy });
+            el.src = CONFIG.assets.bullet;
+            el.className = 'bullet';
+            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw + 50) + 'px';
+            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch + 15) + 'px';
+            layer.appendChild(el);
+            game.bullets.push({ el, x: CONFIG.grid.sx + gx * CONFIG.grid.cw + 50, gy });
         }
 
         function spawnZombie() {
             const gy = Math.floor(Math.random() * 5);
             const el = document.createElement('img');
-            el.src = ASSETS.zombie;
-            el.style.position = 'absolute';
+            el.src = CONFIG.assets.zombie;
+            el.className = 'zombie';
             el.style.left = '900px';
-            el.style.top = (GRID.sy + gy * GRID.ch - 20) + 'px';
+            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch - 30) + 'px';
             el.style.zIndex = 1000 + gy;
-            entitiesLayer.appendChild(el);
-            state.zombies.push({ el, x: 900, gy, hp: 10 });
+            layer.appendChild(el);
+            game.zombies.push({ el, x: 900, gy, hp: 10 });
         }
 
-        function startGameLoop() {
+        function runEngine() {
             setInterval(() => {
-                if (!state.gameRunning) return;
+                if (!game.running) return;
 
-                // Spawn
-                if (Math.random() < 0.003 + (state.level * 0.001)) spawnZombie();
+                if (Math.random() < 0.003 + (game.level * 0.001)) spawnZombie();
 
-                // Move Zombies
-                state.zombies.forEach(z => {
-                    let target = state.plants.find(p => p.gy === z.gy && Math.abs((GRID.sx + p.gx * GRID.cw) - z.x) < 40);
+                document.getElementById('sun-val').innerText = game.sun;
+
+                // Zombies logic
+                game.zombies.forEach(z => {
+                    const target = game.plants.find(p => p.gy === z.gy && Math.abs((CONFIG.grid.sx + p.gx * CONFIG.grid.cw) - z.x) < 40);
                     if (target) {
-                        target.hp -= 0.5;
-                        if (Math.random() < 0.1) playSnd('snd-chomp');
+                        if (z.el.src !== CONFIG.assets.z_eat) z.el.src = CONFIG.assets.z_eat;
+                        target.hp -= 0.4;
+                        if (Math.random() < 0.05) play('chomp');
                         if (target.hp <= 0) {
-                            entitiesLayer.removeChild(target.el);
+                            layer.removeChild(target.el);
                             clearInterval(target.timer);
-                            state.plants = state.plants.filter(p => p !== target);
+                            game.plants = game.plants.filter(p => p !== target);
+                            z.el.src = CONFIG.assets.zombie;
                         }
                     } else {
                         z.x -= 0.5;
                         z.el.style.left = z.x + 'px';
                     }
-                    if (z.x < 50) gameOver();
+                    if (z.x < 50) endGame();
                 });
 
-                // Move Bullets
-                state.bullets.forEach((b, bi) => {
-                    b.x += 6;
+                // Bullets logic
+                game.bullets.forEach((b, bi) => {
+                    b.x += 7;
                     b.el.style.left = b.x + 'px';
-                    
-                    let hit = state.zombies.find(z => z.gy === b.gy && Math.abs(z.x - b.x) < 30);
+                    const hit = game.zombies.find(z => z.gy === b.gy && Math.abs(z.x - b.x) < 30);
                     if (hit) {
                         hit.hp -= 2;
-                        entitiesLayer.removeChild(b.el);
-                        state.bullets.splice(bi, 1);
+                        layer.removeChild(b.el);
+                        game.bullets.splice(bi, 1);
                         if (hit.hp <= 0) {
-                            hit.el.src = ASSETS.zombie_die;
-                            state.zombiesKilled++;
+                            hit.el.src = CONFIG.assets.z_die;
+                            game.killed++;
                             setTimeout(() => {
-                                try { entitiesLayer.removeChild(hit.el); } catch(e){}
-                                state.zombies = state.zombies.filter(z => z !== hit);
-                            }, 2000);
+                                if (hit.el.parentNode) layer.removeChild(hit.el);
+                                game.zombies = game.zombies.filter(z => z !== hit);
+                            }, 1500);
                             checkWin();
                         }
                     }
-                    if (b.x > 900) {
-                        entitiesLayer.removeChild(b.el);
-                        state.bullets.splice(bi, 1);
-                    }
+                    if (b.x > 950) { if (b.el.parentNode) layer.removeChild(b.el); game.bullets.splice(bi, 1); }
                 });
-
-                // Sun
-                state.suns.forEach(s => {
-                    if (parseFloat(s.el.style.top) < s.targetY) {
-                        s.el.style.top = (parseFloat(s.el.style.top) + 1) + 'px';
-                    }
-                });
-
-                sunDisplay.innerText = state.sun;
             }, 20);
         }
 
         function checkWin() {
-            if (state.zombiesKilled >= 5 + state.level * 2) {
-                state.gameRunning = false;
-                state.level++;
-                localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: state.playerName, level: state.level }));
-                alert("Nível Completo! Avançando para o Nível " + state.level);
+            if (game.killed >= 5 + game.level * 2) {
+                game.running = false;
+                game.level++;
+                localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: game.name, level: game.level }));
+                alert("NÍVEL COMPLETO! PRÓXIMO: " + game.level);
                 location.reload();
             }
         }
 
-        function gameOver() {
-            state.gameRunning = false;
-            playSnd('snd-lose');
-            document.getElementById('game-over-overlay').style.display = 'flex';
+        function endGame() {
+            game.running = false;
+            play('lose');
+            document.getElementById('game-over').style.display = 'flex';
         }
     </script>
 </body>
