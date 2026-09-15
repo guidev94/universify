@@ -808,8 +808,72 @@ async function executeCleanup() {
 }
 
 
-// Novas funcionalidades de WhatsApp com Proposta Personalizada
-async function openWppMessageModal(id) {
+// Gerenciador de Envio em Lote (Bulk WhatsApp)
+let bulkQueue = [];
+let isProcessingBulk = false;
+
+async function bulkAIContact() {
+    if (selectedIds.size === 0) {
+        showToast('Selecione pelo menos um lead', 'warning');
+        return;
+    }
+
+    const confirm = await confirmModal(
+        `Deseja preparar o envio em lote para ${selectedIds.size} leads selecionados? 
+         As mensagens serão abertas uma por uma para seu controle.`,
+        'Iniciar Lote'
+    );
+    
+    if (!confirm) return;
+
+    bulkQueue = Array.from(selectedIds);
+    selectedIds.clear();
+    updateBulkBar();
+    processNextInBulk();
+}
+
+async function processNextInBulk() {
+    if (bulkQueue.length === 0) {
+        isProcessingBulk = false;
+        showToast('Lote finalizado!', 'success');
+        loadLeads(currentPage);
+        return;
+    }
+
+    isProcessingBulk = true;
+    const leadId = bulkQueue.shift();
+    
+    // Abre o modal de proposta personalizada para este lead do lote
+    await openWppMessageModal(leadId);
+    
+    // Adiciona um listener temporário no botão de envio para saber quando passar para o próximo
+    const originalSend = window.sendFinalWpp;
+    window.sendFinalWpp = async function(id, phone) {
+        const msg = encodeURIComponent(document.getElementById('wppMessageArea').value);
+        const cleanPhone = phone.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+        
+        await api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'contacted' }) });
+        document.getElementById('wppProposalModal').remove();
+        
+        showToast(`(${bulkQueue.length} restantes) Proposta enviada. Próximo...`, 'info');
+        
+        // Restaura e chama o próximo
+        window.sendFinalWpp = originalSend;
+        setTimeout(processNextInBulk, 500); 
+    };
+    
+    // Se o usuário cancelar no meio do lote
+    const modal = document.getElementById('wppProposalModal');
+    const cancelBtn = modal.querySelector('button[onclick*="remove"]');
+    cancelBtn.onclick = () => {
+        modal.remove();
+        bulkQueue = []; // Limpa fila
+        isProcessingBulk = false;
+        window.sendFinalWpp = originalSend;
+        showToast('Envio em lote cancelado', 'warning');
+    };
+}
     try {
         const lead = await api(`/api/leads/${id}`);
         const modal = document.createElement('div');
