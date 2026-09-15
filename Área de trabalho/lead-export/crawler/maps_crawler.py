@@ -31,10 +31,63 @@ class MapsCrawler:
                     logger.info(f"[maps:api] retornou {len(leads)} leads")
                     return leads
             except Exception as e:
-                logger.error(f"[maps:api] falha na API: {e}")
+                logger.error(f"[maps:api] falha na API Google: {e}")
         
-        # Fallback: Selenium Scraping
+        # Priority 2: SerpApi (Best Fallback - High Reliability)
+        if Config.SERPAPI_KEY:
+            try:
+                leads = self._crawl_serpapi(query, location, quantity, on_progress)
+                if leads:
+                    logger.info(f"[maps:serpapi] retornou {len(leads)} leads")
+                    return leads
+            except Exception as e:
+                logger.error(f"[maps:serpapi] falha na API SerpApi: {e}")
+        
+        # Fallback: Selenium Scraping (Free but brittle)
         return self._crawl_scrape(query, location, quantity, on_progress)
+
+    def _crawl_serpapi(self, query, location, quantity, on_progress):
+        from config import Config
+        api_key = Config.SERPAPI_KEY
+        url = "https://serpapi.com/search.json"
+        
+        params = {
+            "engine": "google_maps",
+            "q": f"{query} {location}",
+            "api_key": api_key,
+            "hl": "pt-br",
+            "gl": "br"
+        }
+        
+        leads = []
+        # SerpApi returns about 20 results per page
+        for page in range(3): 
+            if len(leads) >= quantity: break
+            
+            if page > 0:
+                params["start"] = page * 20
+                
+            response = requests.get(url, params=params, timeout=30)
+            data = response.json()
+            
+            results = data.get("local_results", [])
+            if not results: break
+            
+            for item in results:
+                if len(leads) >= quantity: break
+                
+                phone = item.get("phone", "")
+                leads.append({
+                    "name": item.get("title"),
+                    "phone": phone,
+                    "whatsapp": phone,
+                    "website": item.get("website", ""),
+                    "source": "google_maps_serp",
+                    "category": item.get("type", "business")
+                })
+                if on_progress: on_progress(len(leads))
+                
+        return leads
 
     def _crawl_api(self, query, location, quantity, on_progress):
         from config import Config

@@ -65,8 +65,8 @@ class ParallelScheduler:
     """
 
     def __init__(self):
-        # Reduzido de 30 para 15 para evitar sobrecarga de threads e locks no SQLite
-        self.executor = ThreadPoolExecutor(max_workers=15, thread_name_prefix="sched")
+        # Reduzido para 10 workers globais do agendador
+        self.executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="sched")
         self.timers = {}
         self.running = False
         self._lock = threading.Lock()
@@ -85,12 +85,11 @@ class ParallelScheduler:
         if self.running:
             return
         
-        # Reset de jobs "running" órfãos na inicialização
+        # Reset de jobs "running" órfãos na inicialização com transação
         try:
-            conn = get_connection()
-            conn.execute("UPDATE crawl_jobs SET status = 'error' WHERE status = 'running'")
-            conn.commit()
-            conn.close()
+            with get_connection() as conn:
+                conn.execute("UPDATE crawl_jobs SET status = 'error' WHERE status = 'running'")
+                conn.commit()
         except Exception: pass
 
         self.running = True
@@ -270,10 +269,10 @@ class ParallelScheduler:
 
         logger.info(f"[scheduler:crawl] auto-crawl — {len(expanded_pool)} variations from {len(keywords)} keywords")
 
-        # Processamento paralelo de variações para ganhar velocidade
-        with ThreadPoolExecutor(max_workers=5, thread_name_prefix="auto-crawl-batch") as auto_executor:
+        # Processamento paralelo moderado de variações
+        with ThreadPoolExecutor(max_workers=3, thread_name_prefix="auto-crawl-batch") as auto_executor:
             futures = []
-            for query_string in expanded_pool[:15]: # Aumentado para 15 variações
+            for query_string in expanded_pool[:8]: # Reduzido para 8 variações
                 if not self.running: break
                 
                 def _run_task(qs):

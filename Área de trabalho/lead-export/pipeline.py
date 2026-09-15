@@ -94,6 +94,8 @@ class LeadPipeline:
         self.deep_executor.shutdown(wait=False)
         self.enrich_executor.shutdown(wait=False)
         self.cnpj_executor.shutdown(wait=False)
+        from crawler.browser_pool import browser_pool
+        browser_pool.shutdown()
 
     def submit_for_verification(self, leads):
         """Submit leads for site verification. leads = list of {id, website}."""

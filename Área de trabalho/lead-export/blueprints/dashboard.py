@@ -18,28 +18,24 @@ def index():
 @bp.route("/api/dashboard/stats")
 def stats():
     try:
-        # Lead.get_stats() agora é uma query única otimizada com CASE WHEN
         data = Lead.get_stats()
         
-        # Otimização: Status do pipeline direto da memória (sem query)
         from scheduler import scheduler
         if scheduler.pipeline:
             data["pipeline"] = scheduler.pipeline.status
         
-        # Otimização: Busca success rate em query única e rápida
-        conn = get_connection()
-        row = conn.execute("""
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as success
-            FROM (SELECT status FROM crawl_jobs ORDER BY started_at DESC LIMIT 20)
-        """).fetchone()
-        conn.close()
-        
-        if row and row["total"] > 0:
-            data["job_success_rate"] = round((row["success"] / row["total"]) * 100, 1)
-        else:
-            data["job_success_rate"] = 0
+        with get_connection() as conn:
+            row = conn.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as success
+                FROM (SELECT status FROM crawl_jobs ORDER BY started_at DESC LIMIT 20)
+            """).fetchone()
+            
+            if row and row["total"] > 0:
+                data["job_success_rate"] = round((row["success"] / row["total"]) * 100, 1)
+            else:
+                data["job_success_rate"] = 0
             
         return jsonify(data)
     except Exception as e:
@@ -81,20 +77,20 @@ def api_logs():
     per_page = 20
     offset = (page - 1) * per_page
 
-    conn = get_connection()
-    total = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs").fetchone()["c"]
-    jobs = conn.execute(
-        "SELECT * FROM crawl_jobs ORDER BY started_at DESC LIMIT ? OFFSET ?",
-        (per_page, offset),
-    ).fetchall()
+    with get_connection() as conn:
+        total = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs").fetchone()["c"]
+        jobs = conn.execute(
+            "SELECT * FROM crawl_jobs ORDER BY started_at DESC LIMIT ? OFFSET ?",
+            (per_page, offset),
+        ).fetchall()
 
-    total_leads = conn.execute("SELECT COUNT(*) as c FROM leads").fetchone()["c"]
-    today = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
-    campaigns_count = conn.execute("SELECT COUNT(*) as c FROM campaigns WHERE status = 'active'").fetchone()["c"]
-    completed_jobs = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs WHERE status = 'completed'").fetchone()["c"]
-    conn.close()
+        total_leads = conn.execute("SELECT COUNT(*) as c FROM leads").fetchone()["c"]
+        today = conn.execute("SELECT COUNT(*) as c FROM leads WHERE date(created_at) = date('now', 'localtime')").fetchone()["c"]
+        campaigns_count = conn.execute("SELECT COUNT(*) as c FROM campaigns WHERE status = 'active'").fetchone()["c"]
+        completed_jobs = conn.execute("SELECT COUNT(*) as c FROM crawl_jobs WHERE status = 'completed'").fetchone()["c"]
 
     enriched_jobs = []
+    # ... resto do loop ...
     for job in jobs:
         j = dict(job)
         if j.get("job_state"):

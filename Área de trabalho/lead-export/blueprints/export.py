@@ -13,9 +13,14 @@ def page():
     return render_template("export.html")
 
 
-@bp.route("/api/export", methods=["POST"])
+@bp.route("/api/export", methods=["GET", "POST"])
 def export_leads():
-    data = request.get_json() or {}
+    if request.method == "POST":
+        data = request.get_json() or {}
+    else:
+        # Support GET for simple direct downloads
+        data = request.args.to_dict()
+        
     fmt = data.get("format", "csv")
     tier = data.get("tier", "").strip() or None
     status = data.get("status", "").strip() or None
@@ -36,6 +41,11 @@ def export_leads():
     score_min = data.get("score_min")
     sort = data.get("sort", "created_at")
     order = data.get("order", "desc")
+    
+    # Suporte para múltiplos status separados por vírgula (ex: Hot Leads page)
+    status_filter = status
+    if status and ',' in status:
+        status_filter = status # Passa direto, o model precisa lidar ou iteramos aqui
 
     if fmt not in ("csv", "xlsx"):
         return jsonify({"error": "Formato inválido"}), 400

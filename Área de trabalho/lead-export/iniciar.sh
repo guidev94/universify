@@ -26,22 +26,23 @@ fi
 echo -e "${BLUE}[2/3] Verificando dependências...${NC}"
 source venv/bin/activate
 pip install -r requirements.txt
-pip install gunicorn  # Garante que gunicorn está disponível para prod
+pip install gunicorn flask-compress
 
-# 3. Verificar porta 5000
-PORT_BUSY=$(lsof -i :5000)
+# 3. Limpar processos antigos e verificar porta 5000
+echo -e "${BLUE}[3/3] Limpando ambiente e verificando porta 5000...${NC}"
+pkill -f "python3 app.py" 2>/dev/null
+pkill -f "gunicorn" 2>/dev/null
+pkill -f "chrome" 2>/dev/null
+pkill -f "chromedriver" 2>/dev/null
+
+PORT_BUSY=$(lsof -t -i :5000)
 if [ ! -z "$PORT_BUSY" ]; then
-    echo -e "${RED}[AVISO] A porta 5000 já parece estar em uso.${NC}"
-    echo "$PORT_BUSY"
-    echo -e "${BLUE}Deseja tentar encerrar o processo na porta 5000? (s/n)${NC}"
-    read -r response
-    if [[ "$response" =~ ^([sS][iI]|[sS])$ ]]; then
-        fuser -k 5000/tcp
-    fi
+    echo -e "${RED}[AVISO] Encerrando processo na porta 5000 (PID: $PORT_BUSY)...${NC}"
+    kill -9 $PORT_BUSY 2>/dev/null
 fi
 
 # 4. Iniciar o projeto
-echo -e "${GREEN}[3/3] Iniciando servidor em http://localhost:5000...${NC}"
+echo -e "${GREEN}Iniciando servidor em http://localhost:5000...${NC}"
 echo -e "${BLUE}Logs serão exibidos abaixo. Pressione CTRL+C para parar.${NC}"
 echo ""
 

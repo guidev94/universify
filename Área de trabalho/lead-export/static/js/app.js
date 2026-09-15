@@ -26,15 +26,40 @@ async function api(url, options = {}) {
     if (!options.method || options.method === 'GET') {
         const cached = cache.get(url);
         if (cached) return cached;
+    } else if (url.includes('/api/leads/')) {
+        // Se for uma operação de escrita em lead específico, limpa cache de leads
+        Object.keys(localStorage).forEach(key => {
+            if (key.includes('/leads')) localStorage.removeItem(key);
+        });
     }
-// ...
+
+    const defaults = {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': getCSRFToken(),
+        },
+    };
+// ... resto igual ...
+
+    const config = { ...defaults, ...options };
+    if (options.headers) {
+        config.headers = { ...defaults.headers, ...options.headers };
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Erro ${response.status}`);
+    }
+
     const contentType = response.headers.get('Content-Type') || '';
     if (contentType.includes('application/json')) {
         const data = await response.json();
         // Save to cache if applicable
         if (!options.method || options.method === 'GET') {
-            if (url.includes('/stats') || url.includes('/categories')) {
-                cache.set(url, data, 60000); // 1 min cache
+            if (url.includes('/stats') || url.includes('/categories') || url.includes('/leads')) {
+                cache.set(url, data, 15000); // 15s cache para maior fluidez
             }
         }
         return data;

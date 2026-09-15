@@ -25,55 +25,48 @@ class ConnectionPool:
         self._initialized = False
 
     def _create_connection(self):
-        """Cria uma nova conexão com PRAGMAs otimizados para performance extrema."""
+        """Cria uma nova conexão com PRAGMAs otimizados para performance extrema e sem travas."""
         conn = sqlite3.connect(self._database_path, timeout=self._timeout)
         conn.row_factory = sqlite3.Row
         
-        # Otimizações críticas para SQLite em ambiente multi-thread
-        conn.execute("PRAGMA journal_mode=WAL")          # Permite leituras concorrentes com escrita
-        conn.execute("PRAGMA synchronous=NORMAL")      # Equilíbrio entre segurança e velocidade (NORMAL é seguro em WAL)
-        conn.execute("PRAGMA cache_size=-128000")       # 128MB cache (em KB, valor negativo)
-        conn.execute("PRAGMA temp_store=MEMORY")        # Tabelas temporárias na RAM
-        conn.execute("PRAGMA mmap_size=268435456")      # 256MB Memory Map para I/O ultra rápido
-        conn.execute("PRAGMA busy_timeout=60000")       # 60s timeout para evitar SQLITE_BUSY imediato
-        conn.execute("PRAGMA wal_autocheckpoint=1000")  # Checkpoint do log a cada 1000 páginas
-        conn.execute("PRAGMA foreign_keys=ON")          # Garante integridade referencial
+        # Otimizações críticas para nunca travar
+        conn.execute("PRAGMA journal_mode=WAL")          # Permite leitura e escrita simultânea sem lock
+        conn.execute("PRAGMA synchronous=NORMAL")       # Muito mais rápido, seguro para WAL
+        conn.execute("PRAGMA cache_size=-128000")       # 128MB cache
+        conn.execute("PRAGMA temp_store=MEMORY")        # Temporários em RAM
+        conn.execute("PRAGMA mmap_size=268435456")      # 256MB Memory Map
+        conn.execute("PRAGMA busy_timeout=60000")       # 60s timeout de espera de lock
+        conn.execute("PRAGMA threads=4")                # Multi-threading no motor SQLite
+        conn.execute("PRAGMA foreign_keys=ON")
         return conn
 
     def get(self):
-        """Obtém uma conexão do pool ou cria uma nova."""
+        """Obtém uma conexão do pool com tratamento robusto de erros."""
         try:
             conn = self._pool.get_nowait()
-            # Testa se a conexão ainda é válida
             try:
                 conn.execute("SELECT 1")
                 return conn
             except Exception:
-                # Conexão morta, cria nova
                 with self._lock:
                     self._created -= 1
+                try: conn.close()
+                except: pass
         except Empty:
             pass
 
-        # Criar nova conexão se dentro do limite
         with self._lock:
             if self._created < self._pool_size:
                 self._created += 1
                 return self._create_connection()
 
-        # Pool cheio — espera por uma conexão disponível
+        # Se o pool estiver exausto, tenta recuperar conexões zumbis
+        # ou aguarda com um timeout menor para não travar a thread por muito tempo
         try:
-            conn = self._pool.get(timeout=self._timeout)
-            try:
-                conn.execute("SELECT 1")
-                return conn
-            except Exception:
-                with self._lock:
-                    self._created -= 1
-                return self._create_connection()
+            return self._pool.get(timeout=10) # Reduzido de 60 para 10 para falhar rápido e não travar tudo
         except Empty:
-            # Fallback: cria mesmo assim para não travar o sistema
-            logger.warning("[db-pool] Pool exausto, criando conexão extra")
+            logger.error("[db-pool] Erro CRÍTICO: Pool de conexões esgotado!")
+            # Em último caso, cria uma conexão temporária fora do pool para não travar o processo
             return self._create_connection()
 
     def put(self, conn):

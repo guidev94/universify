@@ -209,8 +209,10 @@ class Lead:
             conditions.append("tier = ?")
             params.append(tier)
         if status:
-            conditions.append("status = ?")
-            params.append(status)
+            statuses = [s.strip() for s in status.split(",")]
+            placeholders = ",".join("?" * len(statuses))
+            conditions.append(f"status IN ({placeholders})")
+            params.extend(statuses)
         if source:
             conditions.append("source = ?")
             params.append(source)
@@ -469,8 +471,10 @@ class Lead:
             conditions.append(f"tier IN ({placeholders})")
             params.extend(tiers)
         if status:
-            conditions.append("status = ?")
-            params.append(status)
+            statuses = [s.strip() for s in status.split(",")]
+            placeholders = ",".join("?" * len(statuses))
+            conditions.append(f"status IN ({placeholders})")
+            params.extend(statuses)
         if is_qualified is not None:
             conditions.append("is_qualified = ?")
             params.append(1 if is_qualified else 0)

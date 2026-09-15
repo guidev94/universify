@@ -39,7 +39,7 @@ def list_leads():
     created_days = request.args.get("created_days", type=int)
     is_qualified = request.args.get("qualified", "").strip()
 
-    per_page = min(per_page, 100)
+    per_page = min(per_page, 2000) # Aumentado de 100 para 2000 para Hot Leads
 
     only_verified = request.args.get("verified", "").strip()
 
@@ -84,7 +84,51 @@ def get_categories():
         conn.close()
 
 
-@bp.route("/api/leads/<int:lead_id>")
+@bp.route("/api/leads/<int:lead_id>/audit")
+def get_lead_audit(lead_id):
+    lead = Lead.get_by_id(lead_id)
+    if not lead:
+        return jsonify({"error": "Lead não encontrado"}), 404
+        
+    # Gera um relatório de auditoria técnica para abordagem comercial
+    audit = {
+        "score": lead["score"],
+        "critical_issues": [],
+        "warnings": [],
+        "strengths": [],
+        "opportunity_msg": ""
+    }
+    
+    # 1. SSL
+    if not lead.get("ssl_valid") and lead.get("website"):
+        if lead.get("ssl_expired"):
+            audit["critical_issues"].append("Certificado SSL expirado (Site marcado como 'Não Seguro')")
+        else:
+            audit["critical_issues"].append("Site não possui conexão segura (HTTPS ausente)")
+            
+    # 2. Responsividade
+    if lead.get("is_responsive") == 0:
+        audit["critical_issues"].append("Site não é responsivo (perda de clientes no mobile)")
+        
+    # 3. Qualidade Visual/Técnica
+    if lead.get("site_quality") == "poor":
+        audit["warnings"].append("Tecnologia do site está obsoleta ou lenta")
+        
+    # 4. Anúncios vs Site
+    if lead.get("has_ads") and lead.get("site_quality") == "poor":
+        audit["critical_issues"].append("Desperdício de Verba: Investe em anúncios direcionando para um site ruim")
+        
+    # 5. CMS
+    if lead.get("cms") and lead.get("cms") != "Custom/Other":
+        audit["strengths"].append(f"Utiliza plataforma {lead['cms']}")
+        
+    # Gera mensagem de oportunidade baseada no gancho
+    audit["opportunity_msg"] = lead.get("pitch_hook", "Melhorar presença digital")
+    
+    return jsonify(audit)
+
+
+@bp.route("/api/leads/<int:lead_id>", methods=["GET"])
 def get_lead(lead_id):
     lead = Lead.get_by_id(lead_id)
     if not lead:
@@ -117,21 +161,26 @@ def qualify_lead(lead_id):
     return jsonify({"ok": True, "is_qualified": bool(new_val)})
 
 
-@bp.route("/api/leads/<int:lead_id>/close", methods=["PATCH"])
-def close_lead(lead_id):
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Dados obrigatórios"}), 400
+@bp.route("/api/leads/<int:lead_id>/favorite", methods=["PATCH"])
+def toggle_favorite(lead_id):
+    conn = get_connection()
+    row = conn.execute("SELECT is_favorite FROM leads WHERE id = ?", (lead_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Lead não encontrado"}), 404
+    
+    new_val = 0 if row["is_favorite"] else 1
+    conn.execute("UPDATE leads SET is_favorite = ? WHERE id = ?", (new_val, lead_id))
+    conn.commit()
+    conn.close()
+    
+    Activity.log(lead_id, "favorite_toggled", "Lead favoritado" if new_val else "Lead removido dos favoritos")
+    return jsonify({"ok": True, "is_favorite": bool(new_val)})
 
-    value = float(data.get("deal_value", 0))
-    notes = str(data.get("deal_notes", "")).strip()[:500]
 
-    success = Lead.close_deal(lead_id, value, notes)
-    if not success:
-        return jsonify({"error": "Erro ao salvar. Tente novamente."}), 500
-
-    Activity.log(lead_id, "deal_closed", f"R$ {value:.2f}")
-    return jsonify({"ok": True})
+@bp.route("/favorites")
+def favorites_page():
+    return render_template("favorites.html")
 
 
 @bp.route("/api/leads/<int:lead_id>", methods=["DELETE"])

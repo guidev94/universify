@@ -97,59 +97,59 @@ async function loadLeads(page = 1) {
 
 function renderTable(leads) {
     const tbody = document.getElementById('leadsTableBody');
+    if (!tbody) return;
 
     if (!leads || leads.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" class="text-center text-zinc-600 py-12">Nenhum lead encontrado</td></tr>';
         return;
     }
 
-    tbody.innerHTML = leads.map(lead => {
-        const checked = selectedIds.has(lead.id) ? 'checked' : '';
-        const whatsappLink = lead.whatsapp
-            ? `<a href="https://wa.me/${lead.whatsapp.replace(/\\D/g, '')}" target="_blank" rel="noopener" class="text-green-400 hover:text-green-300 text-xs">${escapeHtml(lead.whatsapp)}</a>`
-            : '<span class="text-zinc-600">—</span>';
+    // Renderização em pedaços para não travar a aba principal
+    tbody.innerHTML = '';
+    const CHUNK_SIZE = 25;
+    let index = 0;
 
-        const siteLink = lead.website
-            ? `<a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 text-[11px] truncate max-w-[120px] inline-block">${escapeHtml(lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0])}</a>`
-            : '<span class="text-zinc-700">—</span>';
+    function renderChunk() {
+        const chunk = leads.slice(index, index + CHUNK_SIZE);
+        const html = chunk.map(lead => {
+            const checked = selectedIds.has(lead.id) ? 'checked' : '';
+            const siteLink = lead.website
+                ? `<a href="${escapeHtml(lead.website)}" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 text-[11px] truncate max-w-[120px] inline-block">${escapeHtml(lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0])}</a>`
+                : '<span class="text-zinc-700">—</span>';
+            
+            const adsIcon = lead.has_ads ? `<span class="ml-1 text-amber-500" title="Investe em Anúncios">📢</span>` : '';
+            const rowClass = lead.tier === 'hot' ? 'border-l-2 border-l-amber-400/60 bg-amber-500/[0.02]' : lead.tier === 'warm' ? 'border-l-2 border-l-orange-400/40' : '';
+
+            return `
+                <tr class="${rowClass}">
+                    <td><input type="checkbox" class="lead-checkbox rounded-sm cursor-pointer" data-id="${lead.id}" ${checked} onchange="toggleSelect(${lead.id})"></td>
+                    <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}${adsIcon}</td>
+                    <td class="group">${lead.email ? `<span class="inline-flex items-center gap-1"><a href="mailto:${escapeHtml(lead.email.split(';')[0])}" class="text-zinc-300 hover:text-blue-400 truncate max-w-[140px] inline-block text-[12px]">${escapeHtml(lead.email.split(';')[0])}</a></span>` : '<span class="text-zinc-700">—</span>'}</td>
+                    <td class="group">${lead.phone ? `<span class="inline-flex items-center gap-1"><a href="tel:${lead.phone.split(';')[0]}" class="text-zinc-300 hover:text-emerald-400 text-[12px]">${escapeHtml(lead.phone.split(';')[0])}</a></span>` : '<span class="text-zinc-700">—</span>'}</td>
+                    <td>${siteLink}</td>
+                    <td>${scoreBadge(lead.score)}</td>
+                    <td>${statusBadge(lead.status)}</td>
+                    <td class="text-[11px] text-zinc-500 whitespace-nowrap">${formatDateTime(lead.created_at)}</td>
+                    <td>
+                        <div class="flex items-center gap-0.5">
+                            <button onclick="sendWhatsApp(${lead.id})" class="p-1.5 rounded-lg hover:bg-green-500/10 transition-colors"><i data-lucide="message-square" class="w-3.5 h-3.5 text-green-400"></i></button>
+                            <button onclick="deleteLead(${lead.id})" class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        tbody.insertAdjacentHTML('beforeend', html);
+        lucide.createIcons();
         
-        const adsIcon = lead.has_ads ? `<span class="ml-1 text-amber-500" title="Investe em Anúncios: ${escapeHtml(lead.ads_platforms)}">📢</span>` : '';
+        index += CHUNK_SIZE;
+        if (index < leads.length) {
+            requestAnimationFrame(renderChunk);
+        }
+    }
 
-        const rowClass = lead.tier === 'hot' ? 'border-l-2 border-l-amber-400/60 bg-amber-500/[0.02]' : lead.tier === 'warm' ? 'border-l-2 border-l-orange-400/40' : '';
-        const qualBadge = lead.score >= 80 ? '<span class="ml-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/15 text-amber-400">QUALIFICADO</span>' : '';
-
-        return `
-            <tr class="${rowClass}">
-                <td><input type="checkbox" class="lead-checkbox rounded-sm cursor-pointer" data-id="${lead.id}" ${checked} onchange="toggleSelect(${lead.id})"></td>
-                <td class="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors" onclick="openLeadDetail(${lead.id})">${escapeHtml(lead.name)}${qualBadge}${adsIcon}</td>
-                <td class="group">${lead.email ? `<span class="inline-flex items-center gap-1"><a href="mailto:${escapeHtml(lead.email.split(';')[0])}" class="text-zinc-300 hover:text-blue-400 truncate max-w-[140px] inline-block text-[12px]">${escapeHtml(lead.email.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.email.split(';')[0]}'); showToast('Email copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
-                <td class="group">${lead.phone ? `<span class="inline-flex items-center gap-1"><a href="tel:${lead.phone.split(';')[0]}" class="text-zinc-300 hover:text-emerald-400 text-[12px]">${escapeHtml(lead.phone.split(';')[0])}</a><button onclick="event.stopPropagation(); navigator.clipboard.writeText('${lead.phone.split(';')[0]}'); showToast('Telefone copiado!','success')" class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/5 transition-all" title="Copiar"><svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></span>` : '<span class="text-zinc-700">—</span>'}</td>
-                <td>${siteLink}</td>
-                <td>${scoreBadge(lead.score)}</td>
-                <td>${statusBadge(lead.status)}</td>
-                <td class="text-[11px] text-zinc-500 whitespace-nowrap">${formatDateTime(lead.created_at)}</td>
-                <td>
-                    <div class="flex items-center gap-0.5">
-                        <button onclick="sendWhatsApp(${lead.id})" title="WhatsApp" class="p-1.5 rounded-lg hover:bg-green-500/10 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.687-1.228A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.347 0-4.518-.803-6.237-2.15l-.364-.298-3.02.792.83-3.042-.327-.39A9.96 9.96 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
-                        </button>
-                        <button onclick="sendEmail(${lead.id})" title="Email" class="p-1.5 rounded-lg hover:bg-blue-500/10 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        </button>
-                        <button onclick="changeStatus(${lead.id}, 'negotiating')" title="Negociando" class="p-1.5 rounded-lg hover:bg-orange-500/10 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        </button>
-                        <button onclick="openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" title="Fechar Negócio" class="p-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </button>
-                        <button onclick="deleteLead(${lead.id})" title="Excluir" class="btn-delete p-1.5 rounded-lg hover:bg-red-500/10 transition-colors">
-                            <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join('');
+    renderChunk();
 }
 
 function renderPagination(current, total, totalItems) {
@@ -328,196 +328,137 @@ async function submitClose() {
 }
 
 async function openLeadDetail(id) {
+    // Busca dados imediatamente sem esperar animação de modal
+    const fetchLead = api(`/api/leads/${id}`);
     const modal = document.getElementById('leadDetailModal');
-    const title = document.getElementById('leadDetailName');
     const body = document.getElementById('leadDetailBody');
+    
+    if (!modal || !body) return;
 
+    // Mostra modal vazio com skeleton/spinner se demorar
     modal.classList.remove('hidden');
-    body.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>';
-    title.textContent = '';
+    body.innerHTML = `<div class="p-12 text-center flex flex-col items-center gap-4">
+        <div class="w-10 h-10 border-2 border-zinc-800 border-t-blue-500 rounded-full animate-spin"></div>
+        <p class="text-zinc-500 text-sm">Buscando inteligência do lead...</p>
+    </div>`;
 
     try {
-        const lead = await api(`/api/leads/${id}`);
-        title.textContent = lead.name;
-
-        const tierGradients = { hot: 'from-amber-500/20 to-orange-600/5', warm: 'from-orange-500/15 to-amber-500/5', cold: 'from-zinc-500/15 to-zinc-700/5' };
-        const tierLabels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };
-        const tierColors = { hot: 'text-amber-400', warm: 'text-orange-400', cold: 'text-zinc-400' };
-        const statusLabels = { new: 'Novo', contacted: 'Contatado', negotiating: 'Negociando', closed_won: 'Fechado', closed_lost: 'Perdido' };
-
-        const emails = (lead.email || '').split(';').filter(e => e.trim());
-        const phones = (lead.phone || '').split(';').filter(p => p.trim());
-        const mainPhone = lead.whatsapp || (phones[0] || '');
-        const whatsappUrl = mainPhone ? `https://wa.me/${mainPhone.replace(/\D/g, '')}` : '';
-        const domain = lead.website ? lead.website.replace(/https?:\/\/(www\.)?/, '').split('/')[0] : '';
-
-        const scorePercent = Math.min(lead.score, 100);
-        const scoreColor = lead.score >= 80 ? '#f59e0b' : lead.score >= 50 ? '#f97316' : '#64748b';
-
+        const lead = await fetchLead;
+        
         body.innerHTML = `
-            <div class="rounded-2xl bg-gradient-to-br ${tierGradients[lead.tier] || tierGradients.cold} p-5 mb-4 border border-white/5">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider ${tierColors[lead.tier] || tierColors.cold}">${tierLabels[lead.tier] || '—'}</span>
-                            ${lead.site_verified ? '<span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">&#10003; Verificado</span>' : ''}
-                            ${lead.has_ads ? `<span class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full" title="${escapeHtml(lead.ads_platforms)}">📢 Anuncia</span>` : ''}
-                        </div>
-                        <p class="text-[11px] text-zinc-500">${lead.source || 'Fonte desconhecida'} &middot; ${lead.category || 'Sem categoria'}</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="relative w-14 h-14">
-                            <svg class="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                                <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>
-                                <circle cx="28" cy="28" r="24" fill="none" stroke="${scoreColor}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${scorePercent * 1.508} 200"/>
-                            </svg>
-                            <span class="absolute inset-0 flex items-center justify-center text-[14px] font-bold text-zinc-100">${lead.score}</span>
-                        </div>
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-zinc-100">${escapeHtml(lead.name)}</h2>
+                    <div class="flex gap-2 items-center mt-1">
+                        <span class="text-xs text-zinc-500 font-medium">${escapeHtml(lead.category) || 'Lead Qualificado'}</span>
+                        <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                        <span class="text-[10px] text-zinc-500 uppercase tracking-tighter">${lead.source}</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Contatos</p>
-                <select onchange="changeLeadStatus(${lead.id}, this.value)" class="select-glass !py-1 !px-2 !text-[11px] !rounded-lg">
-                    ${['new','contacted','negotiating','closed_won','closed_lost'].map(s =>
-                        `<option value="${s}" ${lead.status === s ? 'selected' : ''}>${statusLabels[s]}</option>`
-                    ).join('')}
-                </select>
-            </div>
-
-            <div class="space-y-1.5">
-                ${emails.map(email => `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-blue-500/20 transition-colors">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                                <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <a href="mailto:${escapeHtml(email.trim())}" class="text-[12px] text-zinc-200 hover:text-blue-400 truncate transition-colors">${escapeHtml(email.trim())}</a>
-                        </div>
-                        <button onclick="navigator.clipboard.writeText('${email.trim()}'); showToast('Email copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/5 transition-all">
-                            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        </button>
-                    </div>
-                `).join('')}
-
-                ${phones.map(p => `
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-emerald-500/20 transition-colors">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                            </div>
-                            <span class="text-[12px] text-zinc-200">${escapeHtml(p.trim())}</span>
-                        </div>
-                        <button onclick="navigator.clipboard.writeText('${p.trim()}'); showToast('Telefone copiado!','success')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/5 transition-all">
-                            <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        </button>
-                    </div>
-                `).join('')}
-
-                ${lead.website ? `
-                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/20 transition-colors">
-                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                            <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=16" alt="" class="w-4 h-4 rounded-sm" onerror="this.style.display='none'">
-                        </div>
-                        <a href="${escapeHtml(lead.website)}" target="_blank" class="text-[12px] text-blue-400 hover:text-blue-300 truncate transition-colors">${escapeHtml(domain)}</a>
-                    </div>
-                ` : ''}
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 mt-4">
-                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Tecnologias</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-1">${lead.cms || 'Próprio'} &middot; ${lead.ads_platforms || 'Sem anúncios'}</p>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-xs font-bold border border-amber-500/20">Score ${lead.score}</span>
+                    <span class="text-[10px] text-zinc-600 font-mono">${formatDateTime(lead.created_at)}</span>
                 </div>
-                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">CNPJ / Sócios</p>
-                    <p class="text-[11px] text-zinc-300 font-medium mt-1 truncate" title="${escapeHtml(lead.partners || '')}">${lead.cnpj || 'Não encontrado'} ${lead.partners ? ' &middot; ' + lead.partners.split(';')[0] : ''}</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 mt-2">
-                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Criado em</p>
-                    <p class="text-[12px] text-zinc-300 font-medium mt-1">${formatDate(lead.created_at)}</p>
-                </div>
-                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <p class="text-[9px] text-zinc-600 uppercase tracking-wide">Contatado em</p>
-                    <p class="text-[12px] text-zinc-300 font-medium mt-1">${lead.contacted_at ? formatDate(lead.contacted_at) : 'Ainda não'}</p>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center justify-center gap-2 mt-4">
-                <button onclick="generateAICopy(${lead.id})" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-purple-500/[0.08] border border-purple-500/20 hover:bg-purple-500/15 transition-colors flex-1 group">
-                    <i data-lucide="sparkles" class="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[10px] font-bold text-purple-400">Gerar IA</span>
-                </button>
-                ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-500/[0.05] border border-green-500/15 hover:bg-green-500/10 transition-colors flex-1">
-                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.687-1.228A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.347 0-4.518-.803-6.237-2.15l-.364-.298-3.02.792.83-3.042-.327-.39A9.96 9.96 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
-                    <span class="text-[10px] font-semibold text-green-400">WhatsApp</span>
-                </a>` : ''}
-                <button onclick="closeLeadDetail(); openCloseModal(${lead.id}, this.dataset.name)" data-name="${escapeHtml(lead.name).replace(/'/g, '&#39;')}" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/15 hover:bg-emerald-500/10 transition-colors flex-1">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="text-[10px] font-semibold text-emerald-400">Fechar</span>
-                </button>
             </div>
             
-            <div id="aiCopyArea-${lead.id}" class="hidden mt-4 p-4 rounded-xl bg-purple-500/[0.03] border border-purple-500/10 fade-up">
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Sugestão de Abordagem</p>
-                    <button onclick="copyAICopy(${lead.id})" class="text-[10px] text-zinc-500 hover:text-zinc-300">Copiar</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1.5 tracking-widest">Canais de Contato</p>
+                    <div class="space-y-2">
+                        ${lead.whatsapp ? `<p class="text-[13px] text-emerald-400 font-bold flex items-center gap-2"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${formatPhone(lead.whatsapp)}</p>` : ''}
+                        ${lead.phone && lead.phone !== lead.whatsapp ? `<p class="text-[13px] text-zinc-300 flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5"></i> ${lead.phone}</p>` : ''}
+                        ${lead.email ? `<p class="text-[12px] text-blue-400 font-medium flex items-center gap-2 underline underline-offset-4 decoration-blue-500/30 truncate"><i data-lucide="mail" class="w-3.5 h-3.5"></i> ${lead.email.split(';')[0]}</p>` : ''}
+                        ${!lead.whatsapp && !lead.email && !lead.phone ? '<p class="text-xs text-zinc-600 italic">Nenhum contato direto encontrado</p>' : ''}
+                    </div>
                 </div>
-                <p id="aiCopyText-${lead.id}" class="text-[12px] text-zinc-300 leading-relaxed"></p>
-                <div class="flex gap-2 mt-3">
-                    <button onclick="sendAIWhatsApp(${lead.id})" class="btn-accent !bg-green-600 !border-green-500/30 !py-1.5 !px-3 text-[10px] flex-1">Enviar via WhatsApp</button>
-                </div>
-            </div>
-
-
-            <!-- Tags -->
-            <div class="mt-4">
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Tags</p>
-                    <button onclick="document.getElementById('tagInput-${lead.id}').classList.toggle('hidden')" class="text-[10px] text-blue-400 hover:text-blue-300">+ Adicionar</button>
-                </div>
-                <div class="flex flex-wrap gap-1.5" id="leadTags-${lead.id}">
-                    ${(lead.tags || '').split(',').filter(t => t.trim()).map(tag =>
-                        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/15">
-                            ${escapeHtml(tag.trim())}
-                            <button onclick="removeTag(${lead.id}, '${escapeHtml(tag.trim())}')" class="hover:text-red-400 transition-colors">&times;</button>
-                        </span>`
-                    ).join('') || '<span class="text-[10px] text-zinc-600">Sem tags</span>'}
-                </div>
-                <div id="tagInput-${lead.id}" class="hidden mt-2 flex gap-2">
-                    <input type="text" id="newTag-${lead.id}" placeholder="Nova tag..." class="input-glass !py-1.5 !text-[11px] flex-1" onkeydown="if(event.key==='Enter')addTag(${lead.id})">
-                    <button onclick="addTag(${lead.id})" class="btn-accent !py-1.5 !px-3 text-[10px]">Add</button>
+                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1.5 tracking-widest">Presença Digital</p>
+                    ${lead.website ? `
+                        <a href="${lead.website}" target="_blank" class="text-[13px] text-blue-400 font-bold hover:underline flex items-center gap-2 mb-2">
+                            <i data-lucide="globe" class="w-3.5 h-3.5"></i> ${lead.website.replace(/https?:\/\//, '')}
+                        </a>
+                        <div class="flex flex-wrap gap-1.5 mt-2">
+                            ${lead.site_quality === 'poor' ? '<span class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 text-[9px] font-black border border-red-500/10">SITE OBSOLETO</span>' : ''}
+                            ${lead.has_ads ? '<span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-black border border-purple-500/10">MARKETING ATIVO</span>' : ''}
+                            ${lead.cms && lead.cms !== 'Custom/Other' ? `<span class="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[9px] font-bold border border-white/5">${lead.cms}</span>` : ''}
+                        </div>
+                    ` : '<p class="text-xs text-zinc-600 italic">Não possui website oficial</p>'}
                 </div>
             </div>
 
-            <!-- Activity Feed -->
-            <div class="mt-4">
-                <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-2">Atividades</p>
-                <div id="leadActivities-${lead.id}" class="space-y-1.5 max-h-[120px] overflow-y-auto">
-                    <p class="text-[10px] text-zinc-600">Carregando...</p>
-                </div>
+            <div class="p-5 rounded-2xl bg-amber-500/[0.04] border border-amber-500/10 mb-6 relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all"></div>
+                <p class="text-[9px] text-amber-500 uppercase font-black mb-2 tracking-widest flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-3 h-3"></i> Gancho Comercial / Auditoria Técnica
+                </p>
+                <p class="text-[14px] text-zinc-100 font-medium leading-relaxed italic">"${lead.pitch_hook || 'Lead com alto potencial para novos serviços de desenvolvimento.'}"</p>
             </div>
 
-            <button onclick="deleteLeadFromModal(${lead.id})" class="w-full mt-4 p-2.5 rounded-xl text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 border border-red-500/10 hover:border-red-500/20 transition-all flex items-center justify-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                Excluir este lead
-            </button>
+            ${lead.notes ? `
+            <div class="mb-6">
+                <p class="text-[9px] text-zinc-500 uppercase font-black mb-2 tracking-widest">Notas de Observação</p>
+                <div class="p-4 rounded-xl bg-zinc-900/50 border border-white/5 text-[13px] text-zinc-400 whitespace-pre-wrap leading-relaxed">${escapeHtml(lead.notes)}</div>
+            </div>` : ''}
+
+            <div class="flex flex-wrap md:flex-nowrap gap-3 pt-6 border-t border-white/5">
+                <button onclick="closeLeadDetail()" class="h-12 flex-1 px-4 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs uppercase tracking-wider hover:bg-zinc-700 transition-all active:scale-95">Fechar</button>
+                
+                <button onclick="toggleFavoriteFromModal(${lead.id})" id="favBtnModal" class="h-12 w-12 rounded-xl border border-white/5 transition-all flex items-center justify-center active:scale-95 ${lead.is_favorite ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/30' : 'bg-white/[0.02] text-zinc-500'}" title="Favoritar">
+                    <i data-lucide="star" class="w-5 h-5 ${lead.is_favorite ? 'fill-yellow-400' : ''}"></i>
+                </button>
+
+                ${lead.whatsapp ? `
+                    <button onclick="openWppMessageModal(${lead.id})" class="h-12 flex-[2] px-6 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-900/40 transition-all flex items-center justify-center gap-2 active:scale-95">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar Proposta WhatsApp
+                    </button>
+                ` : ''}
+                
+                <button onclick="deleteLeadFromModal(${lead.id})" class="h-12 w-12 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all flex items-center justify-center active:scale-95" title="Excluir Lead">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+            </div>
         `;
-
-        loadLeadActivities(lead.id);
+        
+        lucide.createIcons();
     } catch (e) {
-        body.innerHTML = '<p class="text-center text-red-400 py-6">Erro ao carregar lead</p>';
+        body.innerHTML = `<div class="p-12 text-center">
+            <p class="text-red-400 text-sm">Erro ao carregar os dados deste lead. Tente novamente.</p>
+            <button onclick="closeLeadDetail()" class="mt-4 px-6 py-2 bg-zinc-800 rounded-lg text-xs font-bold uppercase tracking-wider">Voltar</button>
+        </div>`;
     }
 }
 
 function closeLeadDetail() {
-    document.getElementById('leadDetailModal').classList.add('hidden');
+    const modal = document.getElementById('leadDetailModal');
+    if (modal) modal.classList.add('hidden');
 }
+
+async function toggleFavoriteFromModal(id) {
+    try {
+        const res = await api(`/api/leads/${id}/favorite`, { method: 'PATCH' });
+        const btn = document.getElementById('favBtnModal');
+        if (res.is_favorite) {
+            btn.classList.add('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
+            btn.classList.remove('bg-white/[0.02]', 'text-zinc-500');
+            btn.querySelector('i').classList.add('fill-yellow-400');
+        } else {
+            btn.classList.remove('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
+            btn.classList.add('bg-white/[0.02]', 'text-zinc-500');
+            btn.querySelector('i').classList.remove('fill-yellow-400');
+        }
+        showToast(res.is_favorite ? 'Adicionado aos favoritos' : 'Removido dos favoritos', 'success');
+        
+        // Recarrega listagem de fundo se estiver na aba de favoritos ou leads
+        if (window.location.pathname === '/favorites' && typeof loadFavorites === 'function') loadFavorites();
+        else if (typeof loadLeads === 'function') loadLeads(currentPage);
+    } catch (e) {
+        showToast('Erro ao favoritar', 'error');
+    }
+}
+
+// Aliases para compatibilidade entre abas
+window.viewLead = openLeadDetail;
+window.showLeadDetail = openLeadDetail;
 
 async function changeLeadStatus(id, status) {
     try {
@@ -867,7 +808,76 @@ async function executeCleanup() {
 }
 
 
-// SSE real-time updates
+// Novas funcionalidades de WhatsApp com Proposta Personalizada
+async function openWppMessageModal(id) {
+    try {
+        const lead = await api(`/api/leads/${id}`);
+        const modal = document.createElement('div');
+        modal.id = 'wppProposalModal';
+        modal.className = 'fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm';
+        
+        // Gera propostas baseadas nos ganchos detectados
+        let defaultMsg = `Olá, tudo bem?\n\nVi o site da ${lead.name} e notei algumas oportunidades de melhoria técnica que podem aumentar suas vendas. Gostaria de apresentar uma proposta de atualização. Podemos conversar?`;
+        
+        if (lead.site_quality === 'poor' || lead.pitch_hook.includes('obsoleto')) {
+            defaultMsg = `Olá! Sou desenvolvedor especialista em modernização digital.\n\nAnalisei o site da ${lead.name} e notei que ele utiliza tecnologias antigas que estão prejudicando seu rankeamento e conversão. Criei um esboço de como ficaria uma versão moderna e 100% responsiva para vocês. \n\nPodemos agendar um café virtual de 5 minutos?`;
+        } else if (lead.has_ads) {
+            defaultMsg = `Olá! Notei que a ${lead.name} investe em tráfego pago, mas o destino final (o site) não está otimizado para converter esses cliques em vendas reais.\n\nTrabalho com LPs de alta conversão e gostaria de mostrar como podemos reduzir seu custo por lead apenas ajustando a interface. \n\nTem interesse em ver os números?`;
+        } else if (!lead.website) {
+             defaultMsg = `Olá! Vi o perfil da ${lead.name} e notei que vocês ainda não possuem um site oficial. No mercado atual, isso passa uma imagem amadora e faz vocês perderem clientes para a concorrência.\n\nDesenvolvo sites profissionais de alta performance. Gostaria de uma proposta sem compromisso?`;
+        }
+
+        modal.innerHTML = `
+            <div class="relative glass-card p-6 w-full max-w-lg border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                        <i data-lucide="message-square" class="text-emerald-500 w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-zinc-100">Proposta via WhatsApp</h3>
+                        <p class="text-xs text-zinc-500">Personalize sua abordagem para ${lead.name}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="p-3 rounded-xl bg-emerald-500/[0.03] border border-emerald-500/10 flex gap-3 items-start">
+                        <i data-lucide="info" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                        <p class="text-[11px] text-zinc-400 leading-tight">Dica: Cite os problemas técnicos detectados (${lead.site_quality === 'poor' ? 'Site Lento' : 'Sem SSL'}) para gerar mais autoridade.</p>
+                    </div>
+                    
+                    <textarea id="wppMessageArea" rows="8" class="w-full bg-zinc-900/50 border border-white/5 rounded-xl p-4 text-sm text-zinc-200 outline-none focus:border-emerald-500/30 transition-all leading-relaxed">${defaultMsg}</textarea>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button onclick="document.getElementById('wppProposalModal').remove()" class="flex-1 py-3 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs uppercase tracking-wider hover:bg-zinc-700 transition-all">Cancelar</button>
+                    <button onclick="sendFinalWpp(${lead.id}, '${lead.whatsapp}')" class="flex-2 py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                        Enviar Agora <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        lucide.createIcons();
+    } catch (e) {
+        showToast('Erro ao preparar proposta', 'error');
+    }
+}
+
+function sendFinalWpp(id, phone) {
+    const msg = encodeURIComponent(document.getElementById('wppMessageArea').value);
+    const cleanPhone = phone.replace(/\D/g, '');
+    window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+    
+    // Atualiza status e limpa modal
+    api(`/api/leads/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'contacted' }) });
+    document.getElementById('wppProposalModal').remove();
+    showToast('Proposta enviada! Status atualizado para Contatado.', 'success');
+    
+    // Recarrega listagem se necessário
+    if (typeof loadHotLeads === 'function') loadHotLeads();
+    else loadLeads(currentPage);
+}
 let lastLeadLoad = 0;
 if (typeof events !== 'undefined') {
     events.on('lead_new', (data) => {
