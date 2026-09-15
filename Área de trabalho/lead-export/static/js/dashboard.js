@@ -392,7 +392,10 @@ async function openDashLeadDetail(id) {
             ${lead.facebook ? `<div class="text-[12px] text-zinc-300">Facebook: <a href="${lead.facebook}" target="_blank" class="text-blue-400 hover:underline">${escapeHtml(lead.facebook)}</a></div>` : ''}
         </div>
         <div class="flex items-center justify-center gap-2 flex-wrap">
-            ${wa ? `<a href="https://wa.me/${wa.replace(/\\D/g, '')}" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10 flex-1"><span class="text-green-400">WhatsApp</span></a>` : ''}
+            <button onclick="toggleLeadFavorite(${lead.id}, 'dashFavBtn')" id="dashFavBtn" class="p-2.5 rounded-xl border border-white/5 transition-all flex items-center justify-center active:scale-95 ${lead.is_favorite ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/30' : 'bg-white/[0.02] text-zinc-500'}" title="Favoritar">
+                <svg class="w-4 h-4 ${lead.is_favorite ? 'fill-yellow-400' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            </button>
+            ${wa ? `<a href="https://wa.me/${wa.replace(/\D/g, '')}" target="_blank" class="btn-ghost !py-2.5 text-[11px] text-center !border-green-500/20 hover:!bg-green-500/10 flex-1"><span class="text-green-400">WhatsApp</span></a>` : ''}
             ${emails[0] ? `<a href="mailto:${emails[0]}" class="btn-ghost !py-2.5 text-[11px] text-center !border-blue-500/20 hover:!bg-blue-500/10 flex-1"><span class="text-blue-400">Email</span></a>` : ''}
             ${lead.website ? `<a href="${lead.website}" target="_blank" rel="noopener" class="btn-ghost !py-2.5 text-[11px] text-center flex-1"><span class="text-zinc-300">Website</span></a>` : ''}
             <a href="/leads" class="btn-ghost !py-2.5 text-[11px] text-center flex-1"><span class="text-zinc-300">Ver na lista</span></a>

@@ -109,6 +109,36 @@ function formatDateTime(dateStr) {
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+async function toggleLeadFavorite(id, btnId = 'favBtnModal') {
+    try {
+        const res = await api(`/api/leads/${id}/favorite`, { method: 'PATCH' });
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            if (res.is_favorite) {
+                btn.classList.add('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
+                btn.classList.remove('bg-white/[0.02]', 'text-zinc-500');
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.add('fill-yellow-400');
+            } else {
+                btn.classList.remove('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
+                btn.classList.add('bg-white/[0.02]', 'text-zinc-500');
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.remove('fill-yellow-400');
+            }
+        }
+        showToast(res.is_favorite ? 'Adicionado aos favoritos' : 'Removido dos favoritos', 'success');
+        
+        // Recarrega listagem se as funções existirem no contexto atual
+        if (window.location.pathname === '/favorites' && typeof loadFavorites === 'function') loadFavorites();
+        else if (typeof loadLeads === 'function') loadLeads(currentPage);
+        else if (typeof loadHotLeads === 'function') loadHotLeads();
+        
+        return res.is_favorite;
+    } catch (e) {
+        showToast('Erro ao favoritar', 'error');
+    }
+}
+
 function tierBadge(tier) {
     const map = { hot: 'badge-hot', warm: 'badge-warm', cold: 'badge-cold' };
     const labels = { hot: 'Quente', warm: 'Morno', cold: 'Frio' };

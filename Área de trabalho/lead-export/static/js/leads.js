@@ -434,26 +434,7 @@ function closeLeadDetail() {
 }
 
 async function toggleFavoriteFromModal(id) {
-    try {
-        const res = await api(`/api/leads/${id}/favorite`, { method: 'PATCH' });
-        const btn = document.getElementById('favBtnModal');
-        if (res.is_favorite) {
-            btn.classList.add('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
-            btn.classList.remove('bg-white/[0.02]', 'text-zinc-500');
-            btn.querySelector('i').classList.add('fill-yellow-400');
-        } else {
-            btn.classList.remove('bg-yellow-400/20', 'text-yellow-400', 'border-yellow-400/30');
-            btn.classList.add('bg-white/[0.02]', 'text-zinc-500');
-            btn.querySelector('i').classList.remove('fill-yellow-400');
-        }
-        showToast(res.is_favorite ? 'Adicionado aos favoritos' : 'Removido dos favoritos', 'success');
-        
-        // Recarrega listagem de fundo se estiver na aba de favoritos ou leads
-        if (window.location.pathname === '/favorites' && typeof loadFavorites === 'function') loadFavorites();
-        else if (typeof loadLeads === 'function') loadLeads(currentPage);
-    } catch (e) {
-        showToast('Erro ao favoritar', 'error');
-    }
+    await toggleLeadFavorite(id, 'favBtnModal');
 }
 
 // Aliases para compatibilidade entre abas
