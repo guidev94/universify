@@ -108,6 +108,11 @@ class OfflineConversionSettingsService
                 continue;
             }
 
+            if (!str_contains($value, '|')) {
+                $decrypted[$key] = $value;
+                continue;
+            }
+
             $decoded = $this->encryptionHelper->decrypt($value);
             $decrypted[$key] = false !== $decoded ? $decoded : $value;
         }

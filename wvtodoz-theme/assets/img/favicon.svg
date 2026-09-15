@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="WV">
-  <rect width="32" height="32" rx="7" ry="7" fill="#CFFF04"/>
-  <text x="16" y="16" text-anchor="middle" dominant-baseline="central"
-        font-family="DejaVu Sans, Liberation Sans, Arial Black, sans-serif"
-        font-weight="700" font-size="13.5" fill="#0A0A0A">WV</text>
-</svg>

@@ -22,6 +22,16 @@ class MicrosoftAdsProvider extends AbstractAdsProvider
     private const CUSTOMER_NS = 'https://bingads.microsoft.com/Customer/v13';
     private const CAMPAIGN_NS = 'https://bingads.microsoft.com/CampaignManagement/v13';
 
+    private const REPORTING_WSDL = 'https://reporting.api.bingads.microsoft.com/Api/Advertiser/Reporting/v13/ReportingService.svc?singleWsdl';
+    private const REPORTING_NS = 'https://bingads.microsoft.com/Reporting/v13';
+
+    /**
+     * Reporting is asynchronous: submit, then poll until the report is generated.
+     * Bounded so a sync run can never hang indefinitely.
+     */
+    private const REPORT_POLL_MAX_ATTEMPTS = 30;
+    private const REPORT_POLL_INTERVAL_SECONDS = 5;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly EncryptionHelper $encryptionHelper,
@@ -572,9 +582,385 @@ class MicrosoftAdsProvider extends AbstractAdsProvider
         $this->throwOnPartialErrors($response->PartialErrors ?? null, 'Microsoft keyword removal failed.');
     }
 
+    /**
+     * Pulls daily campaign performance from the Bing Ads Reporting API.
+     *
+     * Reporting is asynchronous: submit a CampaignPerformanceReportRequest, poll until
+     * it is generated, download the (zipped) CSV and parse it. Returns rows in the same
+     * normalized shape as the other providers so SyncMetricsCommand can upsert them.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function syncMetrics(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array
     {
-        return [];
+        if (!class_exists(\ZipArchive::class)) {
+            throw new \RuntimeException(
+                'The PHP zip extension is required to download Microsoft Advertising reports'
+                .' (they are delivered as ZIP archives) but is not enabled on this server.'
+                .' Install/enable it (e.g. "apt install php-zip" or "docker-php-ext-install zip")'
+                .' and restart PHP-FPM.'
+            );
+        }
+
+        $client = $this->createReportingClient($account);
+
+        $reportRequestId = $this->submitCampaignPerformanceReport($client, $account, $from, $to);
+        if ('' === $reportRequestId) {
+            $this->logger->warning(sprintf(
+                'AdsIntelligence: Microsoft report submission for account %s returned no ReportRequestId.',
+                $account->getExternalAccountId()
+            ));
+
+            return [];
+        }
+
+        $downloadUrl = $this->pollReportDownloadUrl($client, $reportRequestId, $account->getExternalAccountId());
+        if (null === $downloadUrl) {
+            // Success with no URL means there is simply no data for the requested window.
+            return [];
+        }
+
+        $csv = $this->downloadAndExtractReportCsv($downloadUrl);
+        if (null === $csv) {
+            return [];
+        }
+
+        return $this->parseCampaignPerformanceCsv($csv);
+    }
+
+    /**
+     * Submits the report request and returns the ReportRequestId.
+     */
+    private function submitCampaignPerformanceReport(
+        \SoapClient $client,
+        AdsAccount $account,
+        \DateTimeInterface $from,
+        \DateTimeInterface $to,
+    ): string {
+        $accountId = (int) preg_replace('/\D+/', '', $account->getExternalAccountId());
+        if (0 === $accountId) {
+            throw new \RuntimeException(sprintf('Invalid Microsoft account id "%s".', $account->getExternalAccountId()));
+        }
+
+        $reportRequest = new \stdClass();
+        $reportRequest->Format                 = 'Csv';
+        $reportRequest->FormatVersion          = '2.0';
+        $reportRequest->ReportName             = 'Mautic AdsIntelligence Campaign Performance';
+        $reportRequest->ReturnOnlyCompleteData  = false;
+        // Keep column headers so columns can be mapped by name instead of by position.
+        $reportRequest->ExcludeColumnHeaders   = false;
+        $reportRequest->ExcludeReportHeader    = true;
+        $reportRequest->ExcludeReportFooter    = true;
+        $reportRequest->Aggregation            = 'Daily';
+
+        // TimePeriod is required for every aggregation other than Summary.
+        $reportRequest->Columns = [
+            'CampaignPerformanceReportColumn' => [
+                'TimePeriod',
+                'CampaignId',
+                'CampaignName',
+                'Impressions',
+                'Clicks',
+                'Spend',
+                'Conversions',
+                'Revenue',
+            ],
+        ];
+
+        $reportRequest->Scope = [
+            'AccountIds' => ['long' => [$accountId]],
+        ];
+
+        $reportRequest->Time = [
+            'CustomDateRangeStart' => [
+                'Day'   => (int) $from->format('j'),
+                'Month' => (int) $from->format('n'),
+                'Year'  => (int) $from->format('Y'),
+            ],
+            'CustomDateRangeEnd' => [
+                'Day'   => (int) $to->format('j'),
+                'Month' => (int) $to->format('n'),
+                'Year'  => (int) $to->format('Y'),
+            ],
+        ];
+
+        // ReportRequest is polymorphic; the concrete type must be declared via xsi:type.
+        $typedRequest = new \SoapVar(
+            $reportRequest,
+            SOAP_ENC_OBJECT,
+            'CampaignPerformanceReportRequest',
+            self::REPORTING_NS
+        );
+
+        try {
+            $response = $client->__soapCall('SubmitGenerateReport', [[
+                'ReportRequest' => $typedRequest,
+            ]]);
+        } catch (\Throwable $e) {
+            $this->logger->error(sprintf(
+                'AdsIntelligence: Microsoft SubmitGenerateReport failed for account %s: %s',
+                $account->getExternalAccountId(),
+                $e->getMessage()
+            ));
+
+            throw new \RuntimeException('Microsoft SubmitGenerateReport failed: '.$e->getMessage(), 0, $e);
+        }
+
+        return (string) ($response->ReportRequestId ?? '');
+    }
+
+    /**
+     * Polls until the report is generated. Returns the download URL, or null when the
+     * report succeeded but holds no data.
+     */
+    private function pollReportDownloadUrl(\SoapClient $client, string $reportRequestId, string $accountId): ?string
+    {
+        for ($attempt = 1; $attempt <= self::REPORT_POLL_MAX_ATTEMPTS; ++$attempt) {
+            try {
+                $response = $client->__soapCall('PollGenerateReport', [[
+                    'ReportRequestId' => $reportRequestId,
+                ]]);
+            } catch (\Throwable $e) {
+                throw new \RuntimeException('Microsoft PollGenerateReport failed: '.$e->getMessage(), 0, $e);
+            }
+
+            $status = $response->ReportRequestStatus ?? null;
+            $state  = (string) ($status->Status ?? '');
+
+            if ('Error' === $state) {
+                throw new \RuntimeException(sprintf(
+                    'Microsoft report generation failed for account %s (request %s).',
+                    $accountId,
+                    $reportRequestId
+                ));
+            }
+
+            if ('Success' === $state) {
+                $url = (string) ($status->ReportDownloadUrl ?? '');
+
+                if ('' === $url) {
+                    $this->logger->info(sprintf(
+                        'AdsIntelligence: Microsoft report for account %s has no data in the requested period.',
+                        $accountId
+                    ));
+
+                    return null;
+                }
+
+                return $url;
+            }
+
+            // Still Pending — wait before polling again.
+            if ($attempt < self::REPORT_POLL_MAX_ATTEMPTS) {
+                sleep(self::REPORT_POLL_INTERVAL_SECONDS);
+            }
+        }
+
+        throw new \RuntimeException(sprintf(
+            'Microsoft report for account %s did not finish within %d seconds.',
+            $accountId,
+            self::REPORT_POLL_MAX_ATTEMPTS * self::REPORT_POLL_INTERVAL_SECONDS
+        ));
+    }
+
+    /**
+     * Downloads the zipped report and returns the contents of the CSV inside it.
+     */
+    private function downloadAndExtractReportCsv(string $downloadUrl): ?string
+    {
+        $zipPath = tempnam(sys_get_temp_dir(), 'ads_ms_report_');
+        if (false === $zipPath) {
+            throw new \RuntimeException('Unable to create a temporary file for the Microsoft report download.');
+        }
+
+        try {
+            $response = $this->httpClient->request('GET', $downloadUrl, ['timeout' => 120]);
+
+            if ($response->getStatusCode() >= 400) {
+                throw new \RuntimeException(sprintf(
+                    'Microsoft report download returned HTTP %d.',
+                    $response->getStatusCode()
+                ));
+            }
+
+            if (false === file_put_contents($zipPath, $response->getContent())) {
+                throw new \RuntimeException('Unable to write the Microsoft report download to disk.');
+            }
+
+            $zip = new \ZipArchive();
+            if (true !== $zip->open($zipPath)) {
+                throw new \RuntimeException('Unable to open the Microsoft report archive.');
+            }
+
+            $csv = null;
+            for ($i = 0; $i < $zip->numFiles; ++$i) {
+                $name = (string) $zip->getNameIndex($i);
+                if ('' === $name || str_ends_with($name, '/')) {
+                    continue;
+                }
+
+                $contents = $zip->getFromIndex($i);
+                if (false !== $contents) {
+                    $csv = $contents;
+                    break;
+                }
+            }
+
+            $zip->close();
+
+            if (null === $csv || '' === trim($csv)) {
+                return null;
+            }
+
+            return $csv;
+        } finally {
+            if (is_file($zipPath)) {
+                unlink($zipPath);
+            }
+        }
+    }
+
+    /**
+     * Parses the campaign performance CSV into normalized metric rows.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function parseCampaignPerformanceCsv(string $csv): array
+    {
+        // Microsoft prefixes the CSV with a UTF-8 BOM, which would otherwise become
+        // part of the first header cell and break column lookups.
+        $csv = preg_replace('/^\xEF\xBB\xBF/', '', $csv) ?? $csv;
+
+        $handle = fopen('php://temp', 'r+');
+        if (false === $handle) {
+            throw new \RuntimeException('Unable to open a stream to parse the Microsoft report.');
+        }
+
+        fwrite($handle, $csv);
+        rewind($handle);
+
+        $header = null;
+        $metrics = [];
+
+        while (false !== ($row = fgetcsv($handle))) {
+            if (null === $row || [null] === $row) {
+                continue;
+            }
+
+            // Skip blank lines the report may contain around the data block.
+            $nonEmpty = array_filter($row, static fn ($v): bool => null !== $v && '' !== trim((string) $v));
+            if ([] === $nonEmpty) {
+                continue;
+            }
+
+            if (null === $header) {
+                $header = array_map(
+                    static fn ($v): string => trim((string) $v, " \t\n\r\0\x0B\xEF\xBB\xBF\""),
+                    $row
+                );
+                continue;
+            }
+
+            $assoc = [];
+            foreach ($header as $index => $column) {
+                $assoc[$column] = $row[$index] ?? null;
+            }
+
+            $date = $this->normalizeReportDate((string) ($assoc['TimePeriod'] ?? ''));
+            if (null === $date) {
+                continue;
+            }
+
+            $metrics[] = [
+                'date'               => $date,
+                'externalCampaignId' => trim((string) ($assoc['CampaignId'] ?? '')),
+                'impressions'        => (int) $this->numericFromReport($assoc['Impressions'] ?? null),
+                'clicks'             => (int) $this->numericFromReport($assoc['Clicks'] ?? null),
+                'cost'               => $this->numericFromReport($assoc['Spend'] ?? null),
+                'conversions'        => $this->numericFromReport($assoc['Conversions'] ?? null),
+                'conversionValue'    => $this->numericFromReport($assoc['Revenue'] ?? null),
+            ];
+        }
+
+        fclose($handle);
+
+        return $metrics;
+    }
+
+    /**
+     * Report dates arrive in a few shapes depending on FormatVersion and locale.
+     * Returns Y-m-d, or null when the value is not a date (footer/summary rows).
+     */
+    private function normalizeReportDate(string $value): ?string
+    {
+        $value = trim($value);
+        if ('' === $value) {
+            return null;
+        }
+
+        if (1 === preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value)) {
+            return $value;
+        }
+
+        if (1 === preg_match('#^(\d{1,2})/(\d{1,2})/(\d{4})$#', $value, $m)) {
+            return sprintf('%04d-%02d-%02d', (int) $m[3], (int) $m[1], (int) $m[2]);
+        }
+
+        try {
+            return (new \DateTimeImmutable($value))->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Report cells can carry thousands separators, currency symbols, percentages or
+     * "--" when a value was not computed. Anything non-numeric becomes 0.0.
+     */
+    private function numericFromReport(mixed $value): float
+    {
+        if (null === $value) {
+            return 0.0;
+        }
+
+        $clean = preg_replace('/[^0-9.\-]/', '', (string) $value);
+
+        if (null === $clean || '' === $clean || '-' === $clean) {
+            return 0.0;
+        }
+
+        return (float) $clean;
+    }
+
+    private function createReportingClient(AdsAccount $account): \SoapClient
+    {
+        $credential = $this->entityManager->getRepository(AdsProviderCredential::class)->find((int) $account->getCredentialId());
+        if (!$credential instanceof AdsProviderCredential) {
+            throw new \RuntimeException(sprintf(
+                'Credential #%d not found for account %s.',
+                $account->getCredentialId(),
+                $account->getExternalAccountId()
+            ));
+        }
+
+        $accessToken = $this->getValidAccessToken($credential);
+        if (null === $accessToken) {
+            throw new \RuntimeException('Unable to obtain a valid Microsoft Advertising access token.');
+        }
+
+        $developerToken = $this->getDeveloperToken();
+        if ('' === $developerToken) {
+            throw new \RuntimeException('Microsoft Advertising developer token is not configured.');
+        }
+
+        return $this->createSoapClient(
+            self::REPORTING_WSDL,
+            self::REPORTING_NS,
+            $developerToken,
+            $accessToken,
+            (string) $account->getExternalManagerId(),
+            $account->getExternalAccountId(),
+        );
     }
 
     /**
@@ -854,6 +1240,11 @@ class MicrosoftAdsProvider extends AbstractAdsProvider
                 continue;
             }
 
+            if (!str_contains($value, '|')) {
+                $keys[$key] = $value;
+                continue;
+            }
+
             $decrypted = $this->encryptionHelper->decrypt($value);
             $keys[$key] = false !== $decrypted ? $decrypted : $value;
         }
@@ -864,6 +1255,11 @@ class MicrosoftAdsProvider extends AbstractAdsProvider
     private function decrypt(?string $encrypted): ?string
     {
         if (null === $encrypted || '' === $encrypted) {
+            return null;
+        }
+
+        // Values not produced by EncryptionHelper have no "<payload>|<iv>" shape.
+        if (!str_contains($encrypted, '|')) {
             return null;
         }
 
@@ -906,6 +1302,17 @@ class MicrosoftAdsProvider extends AbstractAdsProvider
         ?string $customerId = null,
         ?string $accountId = null,
     ): \SoapClient {
+        // Every Microsoft Advertising call goes through here, so this is the one place
+        // that needs to check the extension. Without it PHP raises a bare
+        // "Class SoapClient not found", which says nothing about how to fix it.
+        if (!class_exists(\SoapClient::class)) {
+            throw new \RuntimeException(
+                'The PHP soap extension is required by Microsoft Advertising (Bing Ads uses a SOAP API)'
+                .' but is not enabled on this server. Install/enable it (e.g. "apt install php-soap"'
+                .' or "docker-php-ext-install soap") and restart PHP-FPM.'
+            );
+        }
+
         $client = new \SoapClient($wsdl, [
             'trace'      => false,
             'exceptions' => true,

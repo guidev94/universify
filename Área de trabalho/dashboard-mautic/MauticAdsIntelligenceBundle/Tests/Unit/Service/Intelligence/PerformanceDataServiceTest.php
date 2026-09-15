@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MauticPlugin\MauticAdsIntelligenceBundle\Tests\Unit\Service\Intelligence;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsAccount;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\GoogleAdsProvider;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\LinkedInAdsProvider;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\MicrosoftAdsProvider;
@@ -19,6 +19,7 @@ class PerformanceDataServiceTest extends TestCase
     private MockObject|GoogleAdsProvider $googleAdsProvider;
     private MockObject|MicrosoftAdsProvider $microsoftAdsProvider;
     private MockObject|LinkedInAdsProvider $linkedInAdsProvider;
+    private MockObject|Connection $connection;
     private PerformanceDataService $service;
 
     protected function setUp(): void
@@ -27,6 +28,9 @@ class PerformanceDataServiceTest extends TestCase
         $this->googleAdsProvider = $this->createMock(GoogleAdsProvider::class);
         $this->microsoftAdsProvider = $this->createMock(MicrosoftAdsProvider::class);
         $this->linkedInAdsProvider = $this->createMock(LinkedInAdsProvider::class);
+        $this->connection = $this->createMock(Connection::class);
+
+        $this->entityManager->method('getConnection')->willReturn($this->connection);
 
         $this->service = new PerformanceDataService(
             $this->entityManager,
@@ -36,51 +40,36 @@ class PerformanceDataServiceTest extends TestCase
         );
     }
 
-    public function testGetClickPerformanceDataReturnsMockWhenNoAccounts(): void
+    public function testGetClickPerformanceDataQueriesDatabase(): void
     {
-        $repository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
-        $repository->method('findBy')->willReturn([]);
+        $filters = ['account_id' => 1];
+        
+        $this->connection->expects($this->once())
+            ->method('fetchAllAssociative')
+            ->willReturn([
+                ['date' => '2026-08-01', 'campaign' => 'C1', 'clicks' => 10, 'impressions' => 100, 'conversions' => 1, 'cost' => 50.0]
+            ]);
 
-        $this->entityManager->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($repository);
+        $data = $this->service->getClickPerformanceData($filters);
 
-        $data = $this->service->getClickPerformanceData([]);
-
-        $this->assertArrayHasKey('labels', $data);
-        $this->assertArrayHasKey('datasets', $data);
         $this->assertArrayHasKey('tableData', $data);
-        $this->assertGreaterThan(0, count($data['labels']));
+        $this->assertCount(1, $data['tableData']);
+        $this->assertEquals('C1', $data['tableData'][0]['campaign']);
     }
 
-    public function testGetClickPerformanceDataAggregatesMultipleProviders(): void
+    public function testGetKeywordPerformanceDataQueriesDatabase(): void
     {
-        $account1 = $this->createMock(AdsAccount::class);
-        $account1->method('getProvider')->willReturn('google');
-        $account2 = $this->createMock(AdsAccount::class);
-        $account2->method('getProvider')->willReturn('microsoft');
-
-        $repository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
-        $repository->method('findBy')->willReturn([$account1, $account2]);
-
-        $this->entityManager->method('getRepository')->willReturn($repository);
-
-        $this->googleAdsProvider->expects($this->once())
-            ->method('fetchClickPerformance')
+        $this->connection->expects($this->once())
+            ->method('fetchAllAssociative')
             ->willReturn([
-                ['segments' => ['date' => '2026-08-01'], 'campaign' => ['name' => 'G1'], 'metrics' => ['clicks' => 10, 'impressions' => 100, 'costMicros' => 1000000]]
+                ['keyword' => 'kw1', 'qs' => 8, 'match_type' => 'broad', 'status' => 'enabled', 'campaign' => 'C1', 'clicks' => 50, 'impressions' => 500, 'cost' => 200.0]
             ]);
 
-        $this->microsoftAdsProvider->expects($this->once())
-            ->method('syncMetrics')
-            ->willReturn([
-                ['segments' => ['date' => '2026-08-01'], 'campaign' => ['name' => 'M1'], 'metrics' => ['clicks' => 5, 'impressions' => 50, 'costMicros' => 500000]]
-            ]);
+        $data = $this->service->getKeywordPerformanceData([]);
 
-        $data = $this->service->getClickPerformanceData([]);
-
-        $this->assertCount(2, $data['tableData']);
-        $this->assertEquals('G1', $data['tableData'][0]['campaign']);
-        $this->assertEquals('M1', $data['tableData'][1]['campaign']);
+        $this->assertArrayHasKey('tableData', $data);
+        $this->assertCount(1, $data['tableData']);
+        $this->assertEquals('kw1', $data['tableData'][0]['keyword']);
+        $this->assertGreaterThan(0, $data['tableData'][0]['heatmap_intensity']);
     }
 }

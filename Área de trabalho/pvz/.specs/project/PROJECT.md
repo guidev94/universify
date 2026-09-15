@@ -1,14 +1,8 @@
-# PVZ Fusion Remake (HD Web)
+## Vision
+An expanded version of the browser-based Plants vs. Zombies remake, focusing on high-quality visuals, complex fusion mechanics, and a polished user interface.
 
-## Visão
-Recriar a experiência original de 2009 com as mecânicas do mod Fusion (RH), otimizada para navegadores modernos, 100% open-source e sem anúncios.
-
-## Metas de Design
-- **Fidelidade Cinética**: Animações de squash & stretch idênticas ao original.
-- **Interface Tátil**: Drag & Drop responsivo que detecta o centro de cada tile do gramado.
-- **Assets HD**: Uso de CDNs de alta disponibilidade para imagens originais.
-
-## Mecânicas Core
-1. **Economia de Sol**: Geração passiva (noite) e ativa (girassóis).
-2. **Sistema de Ondas**: Hordas calculadas por tempo e intensidade.
-3. **Mecânica Fusion**: Sobreposição de plantas gera híbridos (Ex: Girassol + Disparervilha).
+## Goals
+- **Content Expansion:** Increase the variety of plants, zombies, and unique fusion combinations.
+- **UI/UX Polishing:** High-end SaaS-style HUD, refined typography, and smooth micro-interactions.
+- **Asset Integrity:** Ensure all assets are locally hosted and correctly mapped to avoid broken images.
+- **Technical Excellence:** Clean, modularized logic and performance-optimized animations.

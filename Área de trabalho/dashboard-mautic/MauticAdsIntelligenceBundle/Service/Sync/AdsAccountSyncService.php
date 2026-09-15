@@ -8,7 +8,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsAccount;
 use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsProviderCredential;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\GoogleAdsProvider;
+use MauticPlugin\MauticAdsIntelligenceBundle\Provider\LinkedInAdsProvider;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\MicrosoftAdsProvider;
+use MauticPlugin\MauticAdsIntelligenceBundle\Provider\OpenAiAdsProvider;
 
 class AdsAccountSyncService
 {
@@ -16,6 +18,8 @@ class AdsAccountSyncService
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleAdsProvider $googleAdsProvider,
         private readonly MicrosoftAdsProvider $microsoftAdsProvider,
+        private readonly LinkedInAdsProvider $linkedInAdsProvider,
+        private readonly OpenAiAdsProvider $openAiAdsProvider,
         private readonly ProviderStatusService $providerStatusService,
     ) {
     }
@@ -33,21 +37,41 @@ class AdsAccountSyncService
      *
      * @return array{synced: int, accounts: array<int, array<string, mixed>>, errors: array<int, string>}
      */
-    public function syncAccounts(array $providers = ['google', 'microsoft']): array
+    public function syncAccounts(array $providers = ['google', 'microsoft', 'linkedin', 'openai']): array
     {
-        if (in_array('microsoft', $providers, true) && $this->providerStatusService->isProviderEnabled('microsoft')) {
-            $this->microsoftAdsProvider->syncCredentialFromIntegration();
-        }
-
-        $credentials = $this->entityManager->getRepository(AdsProviderCredential::class)->findBy([
-            'status'   => 'active',
-        ]);
-
         $result = [
             'synced'   => 0,
             'accounts' => [],
             'errors'   => [],
         ];
+
+        // Bootstrap credentials from the integration settings. These were previously
+        // unguarded, so a single provider failing here aborted the whole sync — every
+        // other provider (including OpenAI) never got a chance to run.
+        $bootstraps = [
+            'microsoft' => $this->microsoftAdsProvider,
+            'openai'    => $this->openAiAdsProvider,
+        ];
+
+        foreach ($bootstraps as $providerName => $providerService) {
+            if (!in_array($providerName, $providers, true)) {
+                continue;
+            }
+
+            if (!$this->providerStatusService->isProviderEnabled($providerName)) {
+                continue;
+            }
+
+            try {
+                $providerService->syncCredentialFromIntegration();
+            } catch (\Throwable $e) {
+                $result['errors'][] = sprintf('%s (credential): %s', $providerName, $e->getMessage());
+            }
+        }
+
+        $credentials = $this->entityManager->getRepository(AdsProviderCredential::class)->findBy([
+            'status'   => 'active',
+        ]);
 
         foreach ($credentials as $credential) {
             if (!$credential instanceof AdsProviderCredential) {
@@ -87,11 +111,13 @@ class AdsAccountSyncService
         return $result;
     }
 
-    private function getProvider(string $provider): GoogleAdsProvider|MicrosoftAdsProvider|null
+    private function getProvider(string $provider): GoogleAdsProvider|MicrosoftAdsProvider|LinkedInAdsProvider|OpenAiAdsProvider|null
     {
         return match ($provider) {
             'google'    => $this->googleAdsProvider,
             'microsoft' => $this->microsoftAdsProvider,
+            'linkedin'  => $this->linkedInAdsProvider,
+            'openai'    => $this->openAiAdsProvider,
             default     => null,
         };
     }

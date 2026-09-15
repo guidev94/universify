@@ -159,6 +159,11 @@ class GeminiSettingsService
                 continue;
             }
 
+            if (!str_contains($value, '|')) {
+                $decrypted[$key] = $value;
+                continue;
+            }
+
             try {
                 $decoded = $this->encryptionHelper->decrypt($value);
             } catch (\TypeError) {

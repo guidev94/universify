@@ -1,21 +1,18 @@
-# Project Roadmap
+## Phase 11-14: Customization & Unlimited Expansion (Completed)
+- [x] Fixed Zombie Selection UI and Alignment
+- [x] 50+ Hybrid Matrix and Optimized Zombie AI
+- [x] Vasebreaker Mode removed, replaced by Unlimited Mode
+- [x] Mod Styles Selection (Standard vs Japanese Fusion)
+- [x] UI Compaction to fit VH without scrollbars
 
-## Phase 1: Core Engine Refinement
-- [ ] Implement a proper State Machine (Menu, Loading, Playing, Paused).
-- [ ] Switch to a 100% Canvas rendering for UI components (Seed Tray, Sun Counter).
-- [ ] Implement precise grid-based coordinate system matching original 2009 dimensions.
+## Phase 15: Bosses & Roof World (Current)
+- [ ] **Zumboni King:** High-tier boss at Level 10.
+- [ ] **Roof World Mechanics:** Sloped grid and catapult plant logic.
+- [ ] **Premium Skins:** Use coins to unlock master sprites and gold variants.
 
-## Phase 2: High-Fidelity Assets & Animations
-- [ ] Integrate spritesheets for smoother animations (idle, walk, eat).
-- [ ] Add particle effects (pea impact, fusion glow, sun sparkle).
-- [ ] Implement proper Z-indexing (zombies walking behind/in-front of plants).
+## Phase 16: Meta-Game & Polish
+- [ ] Almanac detailed stats and genealogies.
+- [ ] Dynamic weather effects (Rain/Snow).
+- [ ] Daily challenges for coin rewards.
 
-## Phase 3: Gameplay Mechanics (Fusion 100%)
-- [ ] Implement full "Fusion Table" with at least 10 hybrid plants.
-- [ ] Add Zombie variations (Conehead, Buckethead) with correct HP/Armor.
-- [ ] Add Shovel mechanic.
 
-## Phase 4: Scoring & Progress
-- [ ] Level progression system.
-- [ ] Progress bar (Zombie waves).
-- [ ] Local storage for saving progress.

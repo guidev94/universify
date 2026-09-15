@@ -71,4 +71,14 @@ abstract class AbstractAdsProvider implements AdsProviderInterface
     {
         return $this->errorResult('Provider does not support mutations');
     }
+
+    /**
+     * Default: no auction-insights support. Google/Bing override this.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function syncAuctionInsights(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        return [];
+    }
 }

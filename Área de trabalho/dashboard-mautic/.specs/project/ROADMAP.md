@@ -1,21 +1,23 @@
-# Roadmap: Google Ads Dashboard Plugin
+# Roadmap: Mautic Ads Intelligence - Dashboards Premium
 
-## Milestone 1: Foundation
-- [ ] Initialize WordPress Plugin structure.
-- [ ] Set up Google Ads API authentication flow (OAuth2).
-- [ ] Create basic settings page for API Credentials.
+## Fase 1: Infraestrutura e Ingestão (Concluído)
+- [x] Mautic v7 + MySQL 8.4.
+- [x] Integração Google Ads via GAQL.
+- [x] Extensão SOAP para Bing Ads.
+- [x] Sincronização de métricas por Campanha e Keyword.
 
-## Milestone 2: Dashboard UI
-- [ ] Implement Dashboard Layout (Header, Filters).
-- [ ] Create KPI Cards (Impressions, Clicks, etc.).
-- [ ] Implement Performance Charts (Line & Bar charts).
+## Fase 2: UI/UX Pixel Perfect (Concluído)
+- [x] Estilo Google Ads/Looker Studio.
+- [x] Cabeçalhos profissionais e filtros brancos.
+- [x] Heatmaps dinâmicos nas tabelas.
 
-## Milestone 3: Data Integration
-- [ ] Fetch dynamic data for "Search Performance" (Image 1).
-- [ ] Fetch dynamic data for "Keyword Performance" (Image 2).
-- [ ] Map API responses to Dashboard components.
+## Fase 3: Paridade Total e Inteligência (Atual)
+- [ ] Alinhamento 100% dos campos e colunas com Looker Studio.
+- [ ] Lógica de agregação "All" robusta para grandes volumes.
+- [ ] Implementação de métricas calculadas ausentes (ex: Avg. CPC na tabela).
+- [ ] UX de filtros sem recarregamento desnecessário e preservação de estado.
 
-## Milestone 4: Refinement
-- [ ] Add loading states and error handling.
-- [ ] Polishing UI/UX (Awwwards-level transitions).
-- [ ] Final security audit.
+## Fase 4: Entrega e Documentação (Próximo)
+- [ ] Spec Driven finalizado.
+- [ ] Testes unitários e E2E Playwright.
+- [ ] Push final para repositório remoto.

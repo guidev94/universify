@@ -33,8 +33,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
         private readonly EncryptionHelper $encryptionHelper,
         private readonly HttpClientInterface $httpClient,
         private readonly LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -91,9 +90,9 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            $this->logger->error('AdsIntelligence: Google OAuth refresh failed: '.$e->getMessage());
+            $this->logger->error('AdsIntelligence: Google OAuth refresh failed: ' . $e->getMessage());
 
-            return $this->errorResult('Google OAuth refresh failed: '.$e->getMessage());
+            return $this->errorResult('Google OAuth refresh failed: ' . $e->getMessage());
         }
 
         if (!empty($payload['error'])) {
@@ -147,9 +146,9 @@ class GoogleAdsProvider extends AbstractAdsProvider
             ]);
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            $this->logger->error('AdsIntelligence: Google Ads listAccessibleCustomers failed: '.$e->getMessage());
+            $this->logger->error('AdsIntelligence: Google Ads listAccessibleCustomers failed: ' . $e->getMessage());
 
-            throw new \RuntimeException('Google Ads listAccessibleCustomers failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads listAccessibleCustomers failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -178,6 +177,16 @@ class GoogleAdsProvider extends AbstractAdsProvider
                 continue;
             }
 
+            // Skip manager/MCC accounts — they don't serve ads and can't return metrics.
+            if (!empty($account['manager'])) {
+                $this->logger->info(sprintf(
+                    'AdsIntelligence: skipping Google Ads manager account %s (%s).',
+                    $customerId,
+                    (string) ($account['name'] ?? '')
+                ));
+                continue;
+            }
+
             $accounts[] = $account;
         }
 
@@ -200,6 +209,16 @@ class GoogleAdsProvider extends AbstractAdsProvider
                 'timeout' => 30,
             ]);
             $payload = $response->toArray(false);
+
+            if ($response->getStatusCode() >= 400) {
+                $this->logger->info(sprintf(
+                    'AdsIntelligence: skipping Google Ads customer %s (HTTP %d — likely no access via the current MCC).',
+                    $customerId,
+                    $response->getStatusCode()
+                ));
+
+                return null;
+            }
         } catch (\Throwable $e) {
             $this->logger->warning(sprintf('AdsIntelligence: failed to fetch Google Ads customer %s details: %s', $customerId, $e->getMessage()));
 
@@ -222,7 +241,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
         return [
             'externalAccountId' => $this->normalizeCustomerId((string) ($customer['id'] ?? $customerId)),
             'externalManagerId' => '' !== $loginCustomerId ? $loginCustomerId : null,
-            'name'              => (string) ($customer['descriptiveName'] ?? 'Google Ads '.$customerId),
+            'name'              => (string) ($customer['descriptiveName'] ?? 'Google Ads ' . $customerId),
             'currency'          => $customer['currencyCode'] ?? null,
             'timezone'          => $customer['timeZone'] ?? null,
             'status'            => strtolower((string) ($customer['status'] ?? 'active')),
@@ -236,7 +255,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
     private function getGoogleAdsHeaders(string $accessToken, string $developerToken, string $loginCustomerId): array
     {
         $headers = [
-            'Authorization'   => 'Bearer '.$accessToken,
+            'Authorization'   => 'Bearer ' . $accessToken,
             'developer-token' => $developerToken,
             'Content-Type'    => 'application/json',
         ];
@@ -259,7 +278,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
         $refresh = $this->refreshToken($credential);
         if (!($refresh['success'] ?? false)) {
-            $this->logger->error('AdsIntelligence: unable to refresh Google Ads token: '.($refresh['message'] ?? 'unknown error'));
+            $this->logger->error('AdsIntelligence: unable to refresh Google Ads token: ' . ($refresh['message'] ?? 'unknown error'));
 
             return null;
         }
@@ -287,6 +306,11 @@ class GoogleAdsProvider extends AbstractAdsProvider
                 continue;
             }
 
+            if (!str_contains($value, '|')) {
+                $keys[$key] = $value;
+                continue;
+            }
+
             $decrypted = $this->encryptionHelper->decrypt($value);
             $keys[$key] = false !== $decrypted ? $decrypted : $value;
         }
@@ -297,6 +321,11 @@ class GoogleAdsProvider extends AbstractAdsProvider
     private function decrypt(?string $encrypted): ?string
     {
         if (null === $encrypted || '' === $encrypted) {
+            return null;
+        }
+
+        // Values not produced by EncryptionHelper have no "<payload>|<iv>" shape.
+        if (!str_contains($encrypted, '|')) {
             return null;
         }
 
@@ -458,12 +487,12 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads campaign budget creation failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads campaign budget creation failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
             $message = $this->formatGoogleAdsError($payload['error'], 'Google Ads campaign budget creation failed.');
-            $this->logger->error('AdsIntelligence: '.$message);
+            $this->logger->error('AdsIntelligence: ' . $message);
 
             throw new \RuntimeException($message);
         }
@@ -494,7 +523,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
                             'status'                       => 'PAUSED',
                             'manualCpc'                    => new \stdClass(),
                             'campaignBudget'               => $budgetResourceName,
-                            'containsEuPoliticalAdvertising'=> 'DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING',
+                            'containsEuPoliticalAdvertising' => 'DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING',
                             'networkSettings'              => [
                                 'targetGoogleSearch'         => true,
                                 'targetSearchNetwork'        => true,
@@ -509,12 +538,12 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads campaign creation failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads campaign creation failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
             $message = $this->formatGoogleAdsError($payload['error'], 'Google Ads campaign creation failed.');
-            $this->logger->error('AdsIntelligence: '.$message);
+            $this->logger->error('AdsIntelligence: ' . $message);
 
             throw new \RuntimeException($message);
         }
@@ -547,7 +576,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
         if (!empty($error['details'])) {
             $details = json_encode($error['details'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             if (is_string($details)) {
-                $message .= ' Details: '.$details;
+                $message .= ' Details: ' . $details;
             }
         }
 
@@ -576,7 +605,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
             $adGroups[] = [
                 'externalCampaignId' => (string) ($campaign['id'] ?? ''),
                 'externalAdgroupId'  => $externalAdGroupId,
-                'name'               => (string) ($adGroup['name'] ?? 'Google Ads Ad Group '.$externalAdGroupId),
+                'name'               => (string) ($adGroup['name'] ?? 'Google Ads Ad Group ' . $externalAdGroupId),
                 'status'             => isset($adGroup['status']) ? strtolower((string) $adGroup['status']) : null,
             ];
         }
@@ -590,6 +619,87 @@ class GoogleAdsProvider extends AbstractAdsProvider
         return [];
     }
 
+    /**
+     * Fetches daily search-term (search query) performance from the Google Ads
+     * search_term_view resource — the same source the reference Looker Studio
+     * report reads. One row per (search term, campaign, ad group, date).
+     *
+     * @return array<int, array{
+     *     searchTerm: string,
+     *     metricDate: string,
+     *     externalCampaignId: string,
+     *     externalAdgroupId: string,
+     *     status: ?string,
+     *     impressions: int,
+     *     clicks: int,
+     *     cost: float,
+     *     conversions: float,
+     *     conversionValue: float
+     * }>
+     */
+    public function syncSearchTerms(AdsAccount $account, string $from, string $to): array
+    {
+        $context = $this->getSearchContext($account);
+
+        $query = sprintf(
+            'SELECT search_term_view.search_term, search_term_view.status, segments.date, '
+            .'campaign.id, ad_group.id, '
+            .'metrics.clicks, metrics.impressions, metrics.cost_micros, '
+            .'metrics.conversions, metrics.conversions_value '
+            .'FROM search_term_view '
+            ."WHERE segments.date BETWEEN '%s' AND '%s' "
+            .'ORDER BY segments.date',
+            $this->normalizeGaqlDate($from),
+            $this->normalizeGaqlDate($to)
+        );
+
+        $rows    = $this->searchGoogleAds($context['endpoint'], $context['headers'], $query);
+        $metrics = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $searchTermView = is_array($row['searchTermView'] ?? null) ? $row['searchTermView'] : [];
+            $segments       = is_array($row['segments'] ?? null) ? $row['segments'] : [];
+            $campaign       = is_array($row['campaign'] ?? null) ? $row['campaign'] : [];
+            $adGroup        = is_array($row['adGroup'] ?? null) ? $row['adGroup'] : [];
+            $rowMetrics     = is_array($row['metrics'] ?? null) ? $row['metrics'] : [];
+
+            $searchTerm = trim((string) ($searchTermView['searchTerm'] ?? ''));
+            $date       = (string) ($segments['date'] ?? '');
+            if ('' === $searchTerm || '' === $date) {
+                continue;
+            }
+
+            $metrics[] = [
+                'searchTerm'         => $searchTerm,
+                'metricDate'         => $date,
+                'externalCampaignId' => (string) ($campaign['id'] ?? ''),
+                'externalAdgroupId'  => (string) ($adGroup['id'] ?? ''),
+                'status'             => isset($searchTermView['status']) ? strtolower((string) $searchTermView['status']) : null,
+                'impressions'        => (int) ($rowMetrics['impressions'] ?? 0),
+                'clicks'             => (int) ($rowMetrics['clicks'] ?? 0),
+                'cost'               => ((int) ($rowMetrics['costMicros'] ?? 0)) / 1_000_000,
+                'conversions'        => (float) ($rowMetrics['conversions'] ?? 0),
+                'conversionValue'    => (float) ($rowMetrics['conversionsValue'] ?? 0),
+            ];
+        }
+
+        return $metrics;
+    }
+
+    private function normalizeGaqlDate(string $date): string
+    {
+        $timestamp = strtotime($date);
+        if (false === $timestamp) {
+            throw new \InvalidArgumentException(sprintf('Invalid date expression for Google Ads query: "%s".', $date));
+        }
+
+        return date('Y-m-d', $timestamp);
+    }
+
     public function syncKeywords(AdsAccount $account): array
     {
         $context = $this->getSearchContext($account);
@@ -598,7 +708,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
         $adGroupRows = $this->searchGoogleAds(
             $context['endpoint'],
             $context['headers'],
-            'SELECT campaign.id, ad_group.id, ad_group_criterion.criterion_id, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.status, ad_group_criterion.negative FROM keyword_view WHERE ad_group_criterion.type = KEYWORD AND ad_group_criterion.status != REMOVED ORDER BY campaign.id, ad_group.id, ad_group_criterion.criterion_id'
+            'SELECT campaign.id, ad_group.id, ad_group_criterion.criterion_id, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.status, ad_group_criterion.negative, ad_group_criterion.quality_info.quality_score FROM keyword_view WHERE ad_group_criterion.type = KEYWORD AND ad_group_criterion.status != REMOVED ORDER BY campaign.id, ad_group.id, ad_group_criterion.criterion_id'
         );
 
         foreach ($adGroupRows as $row) {
@@ -654,7 +764,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads negative keyword creation failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads negative keyword creation failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -706,7 +816,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads keyword creation failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads keyword creation failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -782,7 +892,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads keyword removal failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads keyword removal failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -907,9 +1017,9 @@ class GoogleAdsProvider extends AbstractAdsProvider
 
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            $this->logger->error('AdsIntelligence: Google Ads search failed: '.$e->getMessage());
+            $this->logger->error('AdsIntelligence: Google Ads search failed: ' . $e->getMessage());
 
-            throw new \RuntimeException('Google Ads search failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads search failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -950,6 +1060,7 @@ class GoogleAdsProvider extends AbstractAdsProvider
             'matchType'          => isset($keyword['matchType']) ? strtolower((string) $keyword['matchType']) : null,
             'status'             => isset($criterion['status']) ? strtolower((string) $criterion['status']) : null,
             'negative'           => (bool) ($criterion['negative'] ?? false),
+            'qualityScore'       => isset($criterion['qualityInfo']['qualityScore']) ? (int) $criterion['qualityInfo']['qualityScore'] : null,
         ];
     }
 
@@ -987,13 +1098,169 @@ class GoogleAdsProvider extends AbstractAdsProvider
     public function syncMetrics(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array
     {
         $context = $this->getSearchContext($account);
-        $query = sprintf(
-            "SELECT segments.date, metrics.clicks, metrics.impressions, metrics.conversions, metrics.cost_micros FROM customer WHERE segments.date BETWEEN '%s' AND '%s'",
+
+        // Fetch Campaign Level Metrics
+        $campaignQuery = sprintf(
+            "SELECT segments.date, campaign.id, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value FROM campaign WHERE segments.date BETWEEN '%s' AND '%s'",
             $from->format('Y-m-d'),
             $to->format('Y-m-d')
         );
 
-        return $this->searchGoogleAds($context['endpoint'], $context['headers'], $query);
+        // Fetch Keyword Level Metrics
+        $keywordQuery = sprintf(
+            "SELECT segments.date, campaign.id, ad_group.id, ad_group_criterion.criterion_id, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value FROM keyword_view WHERE segments.date BETWEEN '%s' AND '%s'",
+            $from->format('Y-m-d'),
+            $to->format('Y-m-d')
+        );
+
+        $metrics = [];
+        try {
+            $campaignRows = $this->searchGoogleAds($context['endpoint'], $context['headers'], $campaignQuery);
+            foreach ($campaignRows as $row) {
+                $segments = $row['segments'] ?? [];
+                $campaign = $row['campaign'] ?? [];
+                $m = $row['metrics'] ?? [];
+                $metrics[] = [
+                    'date' => (string)($segments['date'] ?? ''),
+                    'externalCampaignId' => (string)($campaign['id'] ?? ''),
+                    'impressions' => (int)($m['impressions'] ?? 0),
+                    'clicks' => (int)($m['clicks'] ?? 0),
+                    'cost' => ((float)($m['costMicros'] ?? 0)) / 1000000,
+                    'conversions' => (float)($m['conversions'] ?? 0),
+                    'conversionValue' => (float)($m['conversionsValue'] ?? 0),
+                ];
+            }
+
+            $keywordRows = $this->searchGoogleAds($context['endpoint'], $context['headers'], $keywordQuery);
+            foreach ($keywordRows as $row) {
+                $segments = $row['segments'] ?? [];
+                $campaign = $row['campaign'] ?? [];
+                $adGroup = $row['adGroup'] ?? [];
+                $criterion = $row['adGroupCriterion'] ?? [];
+                $m = $row['metrics'] ?? [];
+                $metrics[] = [
+                    'date' => (string)($segments['date'] ?? ''),
+                    'externalCampaignId' => (string)($campaign['id'] ?? ''),
+                    'externalAdgroupId' => (string)($adGroup['id'] ?? ''),
+                    'externalKeywordId' => (string)($criterion['criterionId'] ?? ''),
+                    'impressions' => (int)($m['impressions'] ?? 0),
+                    'clicks' => (int)($m['clicks'] ?? 0),
+                    'cost' => ((float)($m['costMicros'] ?? 0)) / 1000000,
+                    'conversions' => (float)($m['conversions'] ?? 0),
+                    'conversionValue' => (float)($m['conversionsValue'] ?? 0),
+                ];
+            }
+        } catch (\Throwable $e) {
+            if (!$this->isSkippableAccountError($e->getMessage())) throw $e;
+        }
+
+        return $metrics;
+    }
+
+    /**
+     * Errors that mean "this account simply can't be queried" — a manager/MCC account,
+     * an account outside the configured MCC, or a deactivated one. These are skipped
+     * quietly instead of failing the whole sync run.
+     */
+    private function isSkippableAccountError(string $message): bool
+    {
+        foreach (
+            [
+                'REQUESTED_METRICS_FOR_MANAGER',
+                'USER_PERMISSION_DENIED',
+                'CUSTOMER_NOT_ENABLED',
+                'manager account',
+            ] as $needle
+        ) {
+            if (str_contains($message, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Fetches Auction Insights data from the Google Ads API, segmented by ad strength.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function syncAuctionInsights(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        $context = $this->getSearchContext($account);
+
+        $query = sprintf(
+            "SELECT ad_group_ad.ad_strength, segments.date, segments.device, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.average_cpm, campaign.id, ad_group.id FROM ad_group_ad WHERE segments.date BETWEEN '%s' AND '%s'",
+            $from->format('Y-m-d'),
+            $to->format('Y-m-d')
+        );
+
+        try {
+            $rows = $this->searchGoogleAds($context['endpoint'], $context['headers'], $query);
+        } catch (\Throwable $e) {
+            if ($this->isSkippableAccountError($e->getMessage())) {
+                $this->logger->info(sprintf(
+                    'AdsIntelligence: skipping auction insights for Google Ads account %s: %s',
+                    $account->getExternalAccountId(),
+                    $e->getMessage()
+                ));
+
+                return [];
+            }
+
+            throw $e;
+        }
+
+        $insights = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $adGroupAd = $row['adGroupAd'] ?? [];
+            $segments  = $row['segments'] ?? [];
+            $metrics   = $row['metrics'] ?? [];
+            $campaign  = $row['campaign'] ?? [];
+            $adGroup   = $row['adGroup'] ?? [];
+
+            if (!is_array($metrics)) {
+                continue;
+            }
+
+            $insights[] = [
+                'externalCampaignId' => (string) (is_array($campaign) ? ($campaign['id'] ?? '') : ''),
+                'externalAdgroupId'  => (string) (is_array($adGroup) ? ($adGroup['id'] ?? '') : ''),
+                'adStrength'         => $this->mapAdStrength(is_array($adGroupAd) ? ($adGroupAd['adStrength'] ?? null) : null),
+                'device'             => $this->mapDevice(is_array($segments) ? ($segments['device'] ?? null) : null),
+                'metricDate'         => (string) (is_array($segments) ? ($segments['date'] ?? $to->format('Y-m-d')) : $to->format('Y-m-d')),
+                'impressions'        => (int) ($metrics['impressions'] ?? 0),
+                'clicks'             => (int) ($metrics['clicks'] ?? 0),
+                'avgCpm'             => ((float) ($metrics['averageCpm'] ?? 0)) / 1000000.0,
+                'conversions'        => (float) ($metrics['conversions'] ?? 0),
+                'conversionValue'    => (float) ($metrics['conversionsValue'] ?? 0),
+            ];
+        }
+
+        return $insights;
+    }
+
+    private function mapAdStrength(?string $adStrength): ?string
+    {
+        return match (strtoupper((string) $adStrength)) {
+            'EXCELLENT' => 'Excellent',
+            'GOOD'      => 'Good',
+            'AVERAGE'   => 'Average',
+            'POOR'      => 'Poor',
+            'PENDING'   => 'Pending',
+            default     => null,
+        };
+    }
+
+    private function mapDevice(?string $device): ?string
+    {
+        $normalized = strtolower((string) $device);
+
+        return in_array($normalized, ['mobile', 'desktop', 'tablet'], true) ? $normalized : ($normalized ?: null);
     }
 
     public function fetchClickPerformance(AdsAccount $account, array $filters): array
@@ -1098,7 +1365,7 @@ GAQL);
             ]);
             $payload = $response->toArray(false);
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Google Ads conversion action creation failed: '.$e->getMessage(), 0, $e);
+            throw new \RuntimeException('Google Ads conversion action creation failed: ' . $e->getMessage(), 0, $e);
         }
 
         if (!empty($payload['error'])) {
@@ -1202,6 +1469,6 @@ GAQL);
     public function applyAction(AdsAction $action): array
     {
         // TODO: route to correct mutation service based on action type
-        return $this->errorResult('Not yet implemented: '.$action->getActionType());
+        return $this->errorResult('Not yet implemented: ' . $action->getActionType());
     }
 }

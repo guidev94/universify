@@ -30,6 +30,8 @@ class AdsKeyword
 
     private ?string $status = null;
 
+    private ?int $qualityScore = null;
+
     private \DateTimeInterface $createdAt;
 
     private ?\DateTimeInterface $updatedAt = null;
@@ -82,6 +84,11 @@ class AdsKeyword
 
         $builder->addNamedField('status', Types::STRING, 'status', true);
 
+        $builder->createField('qualityScore', Types::INTEGER)
+            ->columnName('quality_score')
+            ->nullable()
+            ->build();
+
         $builder->addNamedField('createdAt', Types::DATETIME_MUTABLE, 'created_at');
 
         $builder->createField('updatedAt', Types::DATETIME_MUTABLE)
@@ -109,6 +116,8 @@ class AdsKeyword
     public function setNegative(bool $negative): self { $this->negative = $negative; return $this; }
     public function getStatus(): ?string { return $this->status; }
     public function setStatus(?string $status): self { $this->status = $status; return $this; }
+    public function getQualityScore(): ?int { return $this->qualityScore; }
+    public function setQualityScore(?int $qualityScore): self { $this->qualityScore = $qualityScore; return $this; }
     public function getCreatedAt(): \DateTimeInterface { return $this->createdAt; }
     public function setCreatedAt(\DateTimeInterface $createdAt): self { $this->createdAt = $createdAt; return $this; }
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }

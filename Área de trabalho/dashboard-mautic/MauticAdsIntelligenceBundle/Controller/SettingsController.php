@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MauticPlugin\MauticAdsIntelligenceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
+use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsAccount;
+use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsProviderCredential;
 use MauticPlugin\MauticAdsIntelligenceBundle\Service\AI\CreativeModelCatalog;
 use MauticPlugin\MauticAdsIntelligenceBundle\Service\AI\CreativeSystemPromptCatalog;
 use MauticPlugin\MauticAdsIntelligenceBundle\Service\AI\GeminiSettingsService;
@@ -22,11 +24,41 @@ class SettingsController extends CommonController
 
     public function indexAction(Request $request): Response
     {
+        $em = $this->doctrine->getManager();
+
+        // LinkedIn supports several connected accounts — one credential per authorization.
+        $linkedinCredentials = $em->getRepository(AdsProviderCredential::class)->findBy(
+            ['provider' => 'linkedin'],
+            ['createdAt' => 'DESC']
+        );
+
+        $linkedinAccounts = [];
+        foreach ($linkedinCredentials as $credential) {
+            $linkedinAccounts[$credential->getId()] = $em->getRepository(AdsAccount::class)->findBy([
+                'provider'     => 'linkedin',
+                'credentialId' => $credential->getId(),
+            ]);
+        }
+
+        // OpenAI Ads uses one API key, and each key is scoped to a single ad account.
+        $openaiCredential = $em->getRepository(AdsProviderCredential::class)->findOneBy(['provider' => 'openai']);
+        $openaiAccounts   = [];
+        if ($openaiCredential instanceof AdsProviderCredential) {
+            $openaiAccounts = $em->getRepository(AdsAccount::class)->findBy([
+                'provider'     => 'openai',
+                'credentialId' => $openaiCredential->getId(),
+            ]);
+        }
+
         return $this->delegateView([
             'viewParameters'  => [
                 'currentRoute'          => 'mautic_ads_intelligence_settings',
                 'geminiSettings'        => $this->getGeminiSettingsService()->getSettings(),
                 'systemPromptMaxLength' => CreativeSystemPromptCatalog::MAX_LENGTH,
+                'linkedinCredentials'   => $linkedinCredentials,
+                'linkedinAccounts'      => $linkedinAccounts,
+                'openaiCredential'      => $openaiCredential,
+                'openaiAccounts'        => $openaiAccounts,
             ],
             'contentTemplate' => '@MauticAdsIntelligence/Settings/index.html.twig',
             'passthroughVars' => [

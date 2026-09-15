@@ -7,86 +7,179 @@
 {% block content %}
 <div class="ads-intelligence-overview">
 
-    {# KPIs Row #}
+    <p class="text-muted mb-md">Período: {{ dateFrom }} a {{ dateTo }} (30 dias)</p>
+
+    {# ===== KPIs Row 1: Ads Performance ===== #}
     <div class="row">
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.investment'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
+        {% set cards = [
+            {label: 'Investimento', value: kpi.investment, fmt: 'money', prev: prevKpi.cost, good: 'neutral'},
+            {label: 'Cliques', value: kpi.clicks, fmt: 'int', prev: prevKpi.clicks, good: 'up'},
+            {label: 'Impressões', value: kpi.impressions, fmt: 'int', prev: prevKpi.impressions, good: 'up'},
+            {label: 'CTR', value: kpi.ctr, fmt: 'pct', prev: null, good: 'up'},
+            {label: 'CPC Médio', value: kpi.cpc, fmt: 'money', prev: null, good: 'down'},
+            {label: 'Conversões', value: kpi.conversions, fmt: 'num', prev: prevKpi.conversions, good: 'up'}
+        ] %}
+        {% for c in cards %}
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-body text-center" style="padding:12px 8px">
+                        <small class="text-muted">{{ c.label }}</small>
+                        <p style="font-size:1.4em;font-weight:700;margin:4px 0">
+                            {%- if c.fmt == 'money' -%}R$ {{ c.value|number_format(2, ',', '.') }}
+                            {%- elseif c.fmt == 'pct' -%}{{ c.value|number_format(2, ',', '.') }}%
+                            {%- elseif c.fmt == 'int' -%}{{ c.value|number_format(0, ',', '.') }}
+                            {%- else -%}{{ c.value|number_format(1, ',', '.') }}{%- endif -%}
+                        </p>
+                        {% if c.prev is not null and c.prev > 0 %}
+                            {% set pct = ((c.value - c.prev) / c.prev * 100)|round(1) %}
+                            {% set isGood = (c.good == 'up' and pct >= 0) or (c.good == 'down' and pct <= 0) or c.good == 'neutral' %}
+                            <small class="{{ isGood ? 'text-success' : 'text-danger' }}">
+                                {{ pct >= 0 ? '↑' : '↓' }} {{ pct|abs }}% vs período anterior
+                            </small>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.revenue'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.roas'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.cac'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
+    {# ===== KPIs Row 2: Funnel ===== #}
     <div class="row">
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.leads'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
+        {% set funnelCards = [
+            {label: 'Leads', value: kpi.leads, fmt: 'int', prev: prevKpi.leads},
+            {label: 'Hot Leads', value: kpi.hot_leads, fmt: 'int', prev: null},
+            {label: 'Oportunidades', value: kpi.opportunities, fmt: 'int', prev: null},
+            {label: 'Clientes', value: kpi.customers, fmt: 'int', prev: null},
+            {label: 'ROAS', value: kpi.roas, fmt: 'num', prev: null},
+            {label: 'CAC', value: kpi.cac, fmt: 'money', prev: null}
+        ] %}
+        {% for c in funnelCards %}
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-body text-center" style="padding:12px 8px">
+                        <small class="text-muted">{{ c.label }}</small>
+                        <p style="font-size:1.4em;font-weight:700;margin:4px 0">
+                            {%- if c.fmt == 'money' -%}R$ {{ c.value|number_format(2, ',', '.') }}
+                            {%- elseif c.fmt == 'int' -%}{{ c.value|number_format(0, ',', '.') }}
+                            {%- else -%}{{ c.value|number_format(2, ',', '.') }}{%- endif -%}
+                        </p>
+                        {% if c.prev is defined and c.prev is not null and c.prev > 0 %}
+                            {% set pct = ((c.value - c.prev) / c.prev * 100)|round(1) %}
+                            <small class="{{ pct >= 0 ? 'text-success' : 'text-danger' }}">{{ pct >= 0 ? '↑' : '↓' }} {{ pct|abs }}%</small>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.hot_leads'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.opportunities'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-body text-center">
-                    <h4>{{ 'mautic.ads_intelligence.kpi.customers'|trans }}</h4>
-                    <p class="lead text-muted">—</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
-    {# Growth towards goal #}
+    {# ===== Daily Performance Chart ===== #}
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">{{ 'mautic.ads_intelligence.overview.goal_progress'|trans }}</h3>
-        </div>
+        <div class="panel-heading"><b>Performance Diária (últimos 30 dias)</b></div>
         <div class="panel-body">
-            <p class="text-muted">{{ 'mautic.ads_intelligence.overview.no_data'|trans }}</p>
+            {% if dailyData|length > 0 %}
+                <div class="row">
+                    <div class="col-md-6"><canvas id="chartClicksImpr" height="180"></canvas></div>
+                    <div class="col-md-6"><canvas id="chartCostConv" height="180"></canvas></div>
+                </div>
+            {% else %}
+                <p class="text-muted text-center">Nenhum dado de métricas diárias encontrado. Execute <code>mautic:ads-intelligence:sync-metrics</code> para popular os dados.</p>
+            {% endif %}
         </div>
     </div>
+
+    {# ===== Provider Breakdown ===== #}
+    {% if byProvider|length > 0 %}
+    <div class="panel panel-default">
+        <div class="panel-heading"><b>Por Provedor</b></div>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Provedor</th>
+                        <th class="text-right">Impressões</th>
+                        <th class="text-right">Cliques</th>
+                        <th class="text-right">CTR</th>
+                        <th class="text-right">Custo</th>
+                        <th class="text-right">Conversões</th>
+                        <th class="text-right">CPC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in byProvider %}
+                        {% set pImpr = p.impressions|default(0) %}
+                        {% set pClicks = p.clicks|default(0) %}
+                        {% set pCost = p.cost|default(0) %}
+                        {% set pConv = p.conversions|default(0) %}
+                        <tr>
+                            <td><strong>{{ p.provider|capitalize }}</strong></td>
+                            <td class="text-right">{{ pImpr|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">{{ pClicks|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">{{ (pImpr > 0 ? pClicks / pImpr * 100 : 0)|number_format(2, ',', '.') }}%</td>
+                            <td class="text-right">R$ {{ pCost|number_format(2, ',', '.') }}</td>
+                            <td class="text-right">{{ pConv|number_format(0, ',', '.') }}</td>
+                            <td class="text-right">R$ {{ (pClicks > 0 ? pCost / pClicks : 0)|number_format(2, ',', '.') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
+
+{% if dailyData|length > 0 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    var daily = {{ dailyData|json_encode|raw }};
+    var labels = daily.map(function(r){ return r.metric_date ? r.metric_date.substring(5) : ''; });
+
+    new Chart(document.getElementById('chartClicksImpr'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Cliques', data: daily.map(function(r){ return parseInt(r.clicks)||0; }),
+                  borderColor: '#1976d2', backgroundColor: 'rgba(25,118,210,0.08)', fill: true, tension: 0.3, yAxisID: 'y' },
+                { label: 'Impressões', data: daily.map(function(r){ return parseInt(r.impressions)||0; }),
+                  borderColor: '#90caf9', borderDash: [4,3], backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {mode:'index', intersect:false},
+            plugins: {legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},
+            scales: {
+                y: {type:'linear', position:'left', beginAtZero:true, title:{display:true, text:'Cliques'}},
+                y1: {type:'linear', position:'right', beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true, text:'Impressões'}}
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartCostConv'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Custo (R$)', data: daily.map(function(r){ return parseFloat(r.cost)||0; }),
+                  borderColor: '#f57c00', backgroundColor: 'rgba(245,124,0,0.08)', fill: true, tension: 0.3, yAxisID: 'y' },
+                { label: 'Conversões', data: daily.map(function(r){ return parseFloat(r.conversions)||0; }),
+                  borderColor: '#43a047', backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {mode:'index', intersect:false},
+            plugins: {legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},
+            scales: {
+                y: {type:'linear', position:'left', beginAtZero:true, title:{display:true, text:'Custo (R$)'}},
+                y1: {type:'linear', position:'right', beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true, text:'Conversões'}}
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

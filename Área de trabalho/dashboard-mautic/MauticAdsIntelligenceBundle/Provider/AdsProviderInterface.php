@@ -96,6 +96,13 @@ interface AdsProviderInterface
     public function syncMetrics(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array;
 
     /**
+     * Fetches Auction Insights (metrics segmented by ad strength) for the account/date range.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function syncAuctionInsights(AdsAccount $account, \DateTimeInterface $from, \DateTimeInterface $to): array;
+
+    /**
      * Uploads offline conversion data to the provider.
      *
      * @param array<int, array<string, mixed>> $conversions

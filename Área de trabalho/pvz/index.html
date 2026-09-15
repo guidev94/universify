@@ -2,409 +2,661 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PVZ: Fusion RH - Elite Web Version</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PVZ: FUSION UNLIMITED - 2026 | MOD GRÁTIS INSANO</title>
+    <meta name="description" content="Jogue o PVZ Fusion Unlimited 2026! O melhor MOD GRÁTIS com fusões insanas estilo japonês, 50+ plantas novas e hordas épicas. Sem download, jogue agora no navegador!">
+    <meta name="keywords" content="PVZ MOD, Plants vs Zombies Fusion, MOD GRÁTIS, Jogo de Criança, Fusões Insanas, PVZ Japonês, Melhores Jogos Web 2026">
+    <meta property="og:title" content="🔥 PVZ FUSION UNLIMITED - O MOD MAIS ÉPICO DE 2026">
+    <meta property="og:description" content="Crie fusões impossíveis e derrote hordas de zumbis gigantes. Grátis e direto no navegador!">
+    <meta property="og:image" content="images/Sun.gif">
+    <link rel="icon" href="images/Sun.gif" type="image/gif">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Bungee', cursive; }
-        #game-view { position: relative; width: 900px; height: 600px; border: 4px solid #3e2723; background: #1a1a1a; overflow: hidden; }
+        :root { --primary: #4caf50; --accent: #f4d03f; --danger: #f44336; --border: rgba(255, 255, 255, 0.15); }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-drag: none; }
+        body, html { width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; position: fixed; }
+        #viewport { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(circle, #2c3e50 0%, #000 100%); }
+        #game-view { position: absolute; width: 1400px; height: 750px; background: #111; transform-origin: 0 0; box-shadow: 0 0 100px rgba(0,0,0,1); overflow: hidden; }
+        #bg-layer { position: absolute; inset: 0; background: url('images/Background.jpg') no-repeat; background-size: 1400px 750px; z-index: 1; }
         
-        #bg { position: absolute; inset: 0; width: 1400px; height: 600px; z-index: 1; }
+        #hud { position: absolute; top: 10px; left: 10px; width: calc(100% - 20px); height: 120px; z-index: 8000; display: none; align-items: flex-start; justify-content: space-between; pointer-events: none; }
+        .hud-group { display: flex; align-items: center; pointer-events: auto; gap: 10px; }
+        #seed-bank { display: flex; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); border: 3px solid var(--accent); border-radius: 20px; padding: 10px 18px; height: 110px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        #sun-counter-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 5px 15px; min-width: 100px; height: 90px; margin-right: 15px; border: 2px solid var(--border); }
+        #sun-val { color: var(--accent); font-size: 42px; font-weight: 900; font-family: 'Inter', sans-serif; text-shadow: 0 2px 12px rgba(244, 208, 63, 0.5); line-height: 1; }
+        #sun-img { width: 35px; height: 35px; margin-top: 5px; filter: drop-shadow(0 0 10px gold); }
 
-        /* Full Screen Name UI */
-        #name-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 5000; transition: opacity 0.5s;
-        }
-        .wood-panel {
-            background: #5d4037 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
-            border: 10px solid #3e2723; border-radius: 30px; padding: 60px;
-            text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5);
-            transform: scale(0.9); opacity: 0;
-        }
-        .wood-panel h1 { color: #f4d03f; font-size: 42px; text-shadow: 4px 4px #000; margin-bottom: 40px; }
-        .wood-panel input {
-            background: #2b1b17; border: 5px solid #edc9af; border-radius: 15px;
-            padding: 20px; color: #fff; font-family: 'Bungee'; font-size: 24px;
-            text-align: center; width: 350px; outline: none; margin-bottom: 30px;
-            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .btn-green {
-            background: #4caf50; color: white; border: none; padding: 20px 60px;
-            font-family: 'Bungee'; font-size: 28px; border-radius: 15px;
-            cursor: pointer; border-bottom: 8px solid #2e7d32; transition: all 0.1s;
-            text-shadow: 2px 2px #000;
-        }
-        .btn-green:hover { background: #66bb6a; }
-        .btn-green:active { transform: translateY(6px); border-bottom-width: 0; }
+        #seed-tray { display: flex; gap: 8px; height: 90px; align-items: center; }
+        .seed-card { width: 44px; height: 66px; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border-radius: 6px; flex-shrink: 0; position: relative; border: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .seed-card:hover { transform: translateY(-3px) scale(1.05); background: rgba(255, 255, 255, 0.2); border-color: #fff; }
+        .seed-card.active { border: 2px solid #fff; box-shadow: 0 0 15px #fff; transform: translateY(-5px); }
+        .seed-card img { width: 80%; height: 65%; object-fit: contain; margin-top: -10px; }
+        .seed-card .cost { position: absolute; bottom: 1px; right: 2px; color: var(--accent); font-size: 9px; font-family: 'Inter'; font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
-        /* HUD & UI */
-        #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
-        #seed-bank {
-            position: absolute; top: 0; left: 10px; width: 450px; height: 90px;
-            background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Screen/SeedBank.png') no-repeat;
-            background-size: contain; pointer-events: auto;
-        }
-        #sun-val { position: absolute; top: 62px; left: 32px; width: 75px; text-align: center; font-size: 20px; color: #000; font-weight: 900; }
-        #seeds { margin-left: 110px; display: flex; gap: 4px; padding-top: 8px; }
-        .seed { width: 52px; height: 75px; cursor: pointer; position: relative; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.3); }
-        .seed img { width: 100%; height: 100%; object-fit: contain; }
-        .cd-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: rgba(0,0,0,0.7); z-index: 10; }
-        
-        #shovel-bank {
-            position: absolute; top: 0; left: 470px; width: 75px; height: 85px;
-            background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/ShovelBank.png') no-repeat;
-            background-size: contain; pointer-events: auto; display: flex; align-items: center; justify-content: center;
-        }
-        #shovel-icon { width: 55px; cursor: pointer; transition: transform 0.2s; }
-        #shovel-icon:hover { transform: rotate(-15deg); }
+        #shovel-btn { width: 75px; height: 75px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; border: 1px solid var(--border); border-radius: 18px; padding-bottom: 2px; pointer-events: auto; }
+        #shovel-btn.active { background: var(--danger); border-color: #fff; transform: scale(1.1); }
+        #shovel-btn span { font-size: 14px; font-family: 'Bungee'; color: #fff; margin-top: 0; line-height: 1; }
+        .speed-box { display: flex; gap: 4px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 6px; border-radius: 12px; border: 1px solid var(--border); pointer-events: auto; }
+        .speed-btn { background: transparent; color: rgba(255,255,255,0.6); border: none; padding: 6px 12px; cursor: pointer; border-radius: 8px; font-family: 'Bungee'; font-size: 14px; transition: all 0.2s; }
+        .speed-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .speed-btn.active { background: #4caf50; color: #fff; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4); }
 
-        #player-label {
-            position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.85); 
-            padding: 8px 25px; border-radius: 25px; color: #f4d03f; font-size: 14px;
-            border: 3px solid #edc9af; text-shadow: 2px 2px #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
+        .entity-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .entity { position: absolute; pointer-events: none; transform-origin: bottom center; }
+        .zombie { width: 166px; height: 144px; z-index: 500; }
+        .plant { width: 70px; height: 70px; z-index: 400; }
+        .hybrid { filter: drop-shadow(0 0 12px gold) !important; }
+        .sun-token { position: absolute; width: 60px; height: 60px; z-index: 2000; cursor: pointer; pointer-events: auto; filter: drop-shadow(0 0 15px gold); }
+        .coin-token { position: absolute; width: 50px; height: 50px; z-index: 2000; cursor: pointer; pointer-events: auto; border: 3px solid #d35400; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Bungee'; font-size: 20px; box-shadow: 0 0 15px rgba(241, 196, 15, 0.6); }
+        .gravestone { position: absolute; width: 70px; height: 80px; z-index: 350; background: url('https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Grave/Grave.png') no-repeat center; background-size: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .lawnmower { width: 100px; z-index: 600; }
+        .particle { position: absolute; pointer-events: none; border-radius: 50%; z-index: 1000; }
+        .spark { background: #fff; box-shadow: 0 0 10px #f4d03f; }
+        .fire-particle { background: #ff4400; box-shadow: 0 0 15px #ff4400; }
+        .ice-particle { background: #00bcd4; box-shadow: 0 0 15px #00bcd4; }
 
-        #game-over {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 10000; flex-direction: column; align-items: center; justify-content: center;
-            color: #f44336; text-shadow: 4px 4px #000;
-        }
+        .overlay { position: absolute; inset: 0; display: none; z-index: 10000; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); transition: all 0.5s ease; padding: 20px; }
+        .wood-box { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(25px); border: 4px solid var(--accent); border-radius: 40px; padding: 20px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); position: relative; max-height: 92vh; width: 600px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-game { background: linear-gradient(180deg, #64dd17 0%, #2e7d32 100%); color: #fff; border: 2px solid #fff; padding: 8px 25px; font-family: 'Bungee'; font-size: 16px; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 0 #1b5e20; transition: all 0.1s ease; width: 100%; margin-bottom: 8px; }
+        .btn-game:active { transform: translateY(4px); box-shadow: 0 2px 0 #1b5e20; }
+        .btn-orange { background: linear-gradient(180deg, #ffb300 0%, #e65100 100%); box-shadow: 0 6px 0 #bf360c; }
+        .btn-blue { background: linear-gradient(180deg, #039be5 0%, #01579b 100%); box-shadow: 0 6px 0 #0d47a1; }
+        .btn-red { background: linear-gradient(180deg, #ff5252 0%, #b71c1c 100%); box-shadow: 0 6px 0 #7f0000; }
+        .btn-purple { background: linear-gradient(180deg, #ba68c8 0%, #7b1fa2 100%); box-shadow: 0 6px 0 #4a148c; }
 
-        /* Entities */
-        .entity { position: absolute; transform-origin: bottom center; }
-        .bullet { position: absolute; width: 20px; height: 20px; z-index: 500; }
-        .sun { position: absolute; width: 70px; height: 70px; z-index: 2000; cursor: pointer; }
-        .zombie { position: absolute; width: 166px; height: 144px; transform: scale(0.8); }
+        #chooser-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; padding: 15px; width: 850px; max-height: 380px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid var(--border); margin: 10px 0; }
+        .chooser-seed { width: 100px; height: 140px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .chooser-seed:hover { transform: scale(1.05); border-color: var(--accent); }
+        .chooser-seed.chosen { filter: grayscale(1) opacity(0.3); }
+        .chooser-seed .cost-tag { position: absolute; bottom: 8px; right: 8px; background: var(--accent); color: #000; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 6px; font-family: 'Inter'; }
+        .chooser-seed img { width: 80%; height: 70%; object-fit: contain; }
+
+        #zombie-preview-container { width: 320px; background: rgba(0,0,0,0.7); padding: 25px; border-radius: 40px; border: 4px solid #222; text-align: center; height: 480px; overflow-y: auto; }
+        #zombie-preview { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+        .zombie-card { width: 125px; height: 160px; background: rgba(30, 5, 5, 1); border-radius: 20px; border: 2px solid #500; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; text-align: center; padding: 5px; }
+        .zombie-card.selected { border: 3px solid #ff4444; background: rgba(80, 20, 20, 1); box-shadow: 0 0 25px rgba(255,0,0,0.4); }
+        .zombie-card img { width: 85px; height: 100px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+        .zombie-card p { color: #fff; font-size: 12px; font-family: 'Bungee'; margin: 0; text-shadow: 0 2px 4px #000; }
+
+        #grid-highlight { position: absolute; pointer-events: none; z-index: 50; width: 82px; height: 110px; border: 4px solid #fff; border-radius: 12px; display: none; }
+        #mouse-ghost { position: absolute; pointer-events: none; z-index: 9999; width: 80px; opacity: 0.7; display: none; transform: translate(-50%, -50%); }
+        #wave-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #f44336; font-size: 60px; text-shadow: 4px 4px #000; z-index: 8500; pointer-events: none; display: none; font-family: 'Bungee'; }
+
+        .almanac-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 15px; }
+        .almanac-card { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 10px; cursor: pointer; transition: 0.3s; text-align: center; }
+        .almanac-card:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+
+        .shop-item { width: 170px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 20px; border: 2px solid var(--border); padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
+        .shop-item:hover { transform: scale(1.05); background: rgba(255,255,255,0.2); border-color: var(--accent); }
+        .shop-item p { color: #fff; font-family: 'Inter'; font-weight: 900; font-size: 13px; margin: 15px 0; text-align: center; }
+        .shop-item .cost-tag { background: var(--accent); color: #000; padding: 4px 12px; border-radius: 10px; font-family: 'Bungee'; font-size: 13px; }
+
+        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .pulse-title { animation: pulseText 2s ease-in-out infinite; }
+        @keyframes pulseText { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.3); } }
     </style>
 </head>
 <body>
-    <div id="game-view">
-        <!-- Full Screen Name UI -->
-        <div id="name-overlay">
-            <div class="wood-panel" id="ui-panel">
-                <h1>QUEM VAI DEFENDER O JARDIM?</h1>
-                <input type="text" id="name-input" placeholder="DIGITE SEU NOME" maxlength="12">
-                <br>
-                <button class="btn-green" onclick="startGame()">VAMOS NESSA!</button>
-            </div>
-        </div>
-
-        <img id="bg" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies@master/resources/graphics/Items/Background/Background_1.jpg">
-
-        <div id="hud">
-            <div id="seed-bank">
-                <div id="sun-val">100</div>
-                <div id="seeds">
-                    <div class="seed" onclick="selectPlant('sunflower')">
-                        <div id="cd-sunflower" class="cd-overlay"></div>
-                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/SunFlower.png">
-                    </div>
-                    <div class="seed" onclick="selectPlant('peashooter')">
-                        <div id="cd-peashooter" class="cd-overlay"></div>
-                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/Peashooter.png">
-                    </div>
-                    <div class="seed" onclick="selectPlant('wallnut')">
-                        <div id="cd-wallnut" class="cd-overlay"></div>
-                        <img src="https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Cards/Plants/WallNut.png">
+    <div id="viewport">
+        <div id="game-view">
+            <div id="bg-layer"></div>
+            <div id="game-layer" class="entity-layer"></div>
+            <div id="ui-layer" class="entity-layer"><div id="grid-highlight"></div></div>
+            <div id="hud">
+                <div class="hud-group">
+                    <div id="seed-bank">
+                        <div id="sun-counter-box"><div id="sun-val">200</div><img id="sun-img" src="images/Sun.gif"></div>
+                        <div id="seed-tray"></div>
                     </div>
                 </div>
+                <div class="hud-right">
+                    <div id="shovel-btn" onclick="toggleShovel()"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18.1,13.7L10.3,5.9c-0.4-0.4-1-0.4-1.4,0L7.5,7.3c-0.4,0.4-0.4,1,0,1.4l1.4,1.4L4,15v5h5l4.9-4.9l1.4,1.4c0.4,0.4,1,0.4,1.4,0l1.4-1.4C18.5,14.7,18.5,14.1,18.1,13.7z M8,18H6v-2l4.1-4.1l2,2L8,18z"/></svg><span>REMOVER</span></div>
+                    <div id="food-btn" onclick="togglePlantFood()" style="width: 75px; height: 75px; background: rgba(76, 175, 80, 0.3); backdrop-filter: blur(10px); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; border: 2px solid #4caf50; border-radius: 18px; pointer-events: auto;">
+                        <img src="images/Sun.gif" width="30" style="filter: hue-rotate(120deg);">
+                        <span style="font-size: 14px; font-family: 'Bungee'; color: #fff;" id="food-val">3</span>
+                    </div>
+                    <div class="speed-box"><button class="speed-btn active" onclick="setSpeed(1, this)">1x</button><button class="speed-btn" onclick="setSpeed(2, this)">2x</button></div>
+                    <div class="hud-group" style="background:rgba(0,0,0,0.4); border-radius:12px; padding:5px 15px; border:1px solid var(--border);"><span style="color:var(--accent); font-family:'Bungee'; font-size:18px;" id="coin-val">0</span><span style="color:#fff; font-family:'Bungee'; font-size:10px; margin-left:5px;">COINS</span></div>
+                    <div class="hud-group" style="background:rgba(0,0,0,0.4); border-radius:12px; padding:5px 15px; border:1px solid var(--border);"><span style="color:#fff; font-family:'Bungee'; font-size:12px;" id="level-display">NÍVEL: 1</span></div>
+                    <div class="hud-group" style="background:rgba(0,0,0,0.4); border-radius:12px; padding:5px 15px; border:1px solid var(--border); cursor:pointer;" onclick="state.sun += 1000; updateUI();"><img src="images/Sun.gif" width="35"><span style="color:#fff; font-family:'Bungee'; font-size:11px;">+1000</span></div>
+                </div>
             </div>
-            <div id="shovel-bank">
-                <img id="shovel-icon" src="https://raw.githubusercontent.com/marblexu/PythonPlantsVsZombies/master/resources/graphics/Items/Shovel/Shovel_0.png" onclick="selectPlant('shovel')">
+            <div id="loading-screen" class="overlay" style="display:flex;">
+                <img src="images/Sun.gif" width="100" style="filter:drop-shadow(0 0 20px gold); margin-bottom: 20px;">
+                <h1 style="font-family:'Bungee'; font-size:40px; color:var(--primary);">CARREGANDO...</h1>
+                <div class="loader-bar"><div id="load-fill" class="loader-fill"></div></div>
+                <p id="load-status" style="font-family:'Inter'; font-weight:900; color:var(--accent);">0% COMPLETADO</p>
             </div>
-            <div id="player-label">JOGADOR: <span id="p-name">...</span> | LVL: <span id="p-lvl">1</span></div>
-        </div>
-
-        <div id="game-layer" style="position: absolute; inset: 0; z-index: 10;"></div>
-
-        <div id="game-over">
-            <h1 style="font-size: 60px;">FIM DE JOGO</h1>
-            <p style="font-size: 24px; color: #fff;">OS ZUMBIS INVADIRAM SUA CASA!</p>
-            <button class="btn-green" style="margin-top: 40px;" onclick="location.reload()">TENTAR NOVAMENTE</button>
+            <div id="name-screen" class="overlay"><div class="wood-box"><h2 style="color:#fff; margin-bottom:20px; font-family:'Bungee';">QUAL SEU NOME?</h2><input type="text" id="name-input" placeholder="DIGITE AQUI" maxlength="12" style="background:rgba(0,0,0,0.3); border:2px solid var(--accent); color:#fff; padding:10px; font-family:'Bungee'; border-radius:10px; width:300px; margin-bottom:20px; text-align:center; outline:none;"><button class="btn-game" onclick="confirmName()">SALVAR E INICIAR</button></div></div>
+            <div id="menu-screen" class="overlay">
+                <img src="images/Zombie.gif" style="position:absolute; left:5%; bottom:20px; width:280px; transform:scaleX(-1); opacity:0.6;">
+                <img src="images/SunFlower.gif" style="position:absolute; right:10%; bottom:50px; width:150px; opacity:0.8;">
+                <div class="wood-box">
+                    <h1 class="pulse-title" style="color:var(--accent); font-size:60px; text-shadow:4px 4px 0 #000; margin-bottom:40px; font-family:'Bungee';">FUSION UNLIMITED</h1>
+                    <div style="background: rgba(0,0,0,0.4); padding: 8px 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 15px;">
+                        <p style="color:var(--accent); font-family:'Bungee'; font-size: 10px; margin:0;">DEFENSOR ATUAL:</p>
+                        <p id="user-display" style="color:#fff; font-family:'Inter'; font-weight:900; font-size: 18px; margin: 2px 0;"></p>
+                        <button class="btn-game" style="width:auto; padding:4px 15px; font-size:10px; margin:0;" onclick="showScreen('name-screen')">EDITAR NOME</button>
+                    </div>
+                    <div style="width:400px; margin:0 auto; display: grid; gap: 8px;">
+                        <button class="btn-game" onclick="openStageSelector()">MODO AVENTURA</button>
+                        <button class="btn-game btn-red" onclick="startUnlimited()">MODO ILIMITADO</button>
+                        <button class="btn-game btn-orange" onclick="openShop()">LOJA DO CRAZY DAVE</button>
+                        <button class="btn-game btn-blue" onclick="openAlmanac()">ALMANAQUE</button>
+                        <button id="world-btn" class="btn-game btn-blue" style="background:#444;" onclick="toggleWorld()">MUNDO: DIA</button>
+                    </div>
+                    <p style="position:absolute; top:20px; right:20px; z-index:100;"><button class="btn-game" style="width:auto; padding:10px 20px; font-size:14px; background:rgba(255,255,255,0.1); box-shadow:none; border:1px solid var(--border);" onclick="addBookmark()">⭐ FAVORITOS</button></p>
+                </div>
+            </div>
+            <div id="stage-screen" class="overlay">
+                <div class="wood-box">
+                    <h1 style="color:var(--accent); margin-bottom:20px; font-family:'Bungee';">NÍVEIS</h1>
+                    <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; margin-bottom:25px;" id="stage-grid"></div>
+                    <h3 style="color:#fff; margin-bottom:12px; font-family:'Bungee'; font-size:14px;">MODS CUSTOM</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                        <button class="btn-game btn-purple" style="font-size:12px;" onclick="selectStage('custom_chaos')">HORDA JAPONESA</button>
+                        <button class="btn-game btn-red" style="font-size:12px;" onclick="selectStage('custom_boss')">APOCALIPSE</button>
+                    </div>
+                    <button class="btn-game btn-orange" style="width:180px;" onclick="showMenu()">VOLTAR</button>
+                </div>
+            </div>
+            <div id="chooser-screen" class="overlay"><h1 style="color:#fff; margin-bottom:10px; font-family:'Bungee'; font-size: 32px;">PREPARE SUA DEFESA</h1><div style="display:flex; gap:40px; align-items: flex-start;"><div style="text-align: center;"><h2 id="chooser-count" style="color:var(--accent); margin-bottom:15px; font-family:'Bungee'; font-size: 20px;">PLANTAS (0/14)</h2><div id="chooser-grid"></div></div><div id="zombie-preview-container"><h2 style="color:var(--danger); font-family:'Bungee'; font-size: 20px;">ZUMBIS</h2><div id="zombie-preview"></div></div></div><div style="display:flex; gap:20px; margin-top:30px;"><button class="btn-game btn-orange" style="width:250px;" onclick="showMenu()">VOLTAR AO MENU</button><button id="btn-fight" class="btn-game" style="width:250px; display:none;" onclick="startCombat()">INICIAR COMBATE</button></div></div>
+            <div id="shop-screen" class="overlay"><div class="wood-box" style="width:800px;"><h1 style="color:var(--accent); margin-bottom:30px; font-family:'Bungee';">LOJA DO CRAZY DAVE</h1><div style="display:flex; gap:20px; justify-content:center; margin-bottom:30px;"><div class="shop-item" onclick="buyItem('extra_sun', 500)"><img src="images/Sun.gif" width="60"><p>Sol Inicial +100</p><span class="cost-tag">500 C</span></div><div class="shop-item" onclick="buyItem('fast_recharge', 1000)"><img src="images/Sun.gif" width="60" style="filter:hue-rotate(150deg);"><p>Recarga Rápida</p><span class="cost-tag">1000 C</span></div></div><button class="btn-game btn-orange" style="width:300px;" onclick="showMenu()">VOLTAR</button></div></div>
+            <div id="almanac-screen" class="overlay"><div class="wood-box" style="width:1000px;"><h1 style="color:var(--accent); margin-bottom:20px; font-family:'Bungee';">ALMANAQUE DE FUSÕES</h1><div class="almanac-grid" id="almanac-grid"></div><button class="btn-game btn-orange" style="width:300px; margin-top:20px;" onclick="showMenu()">VOLTAR</button></div></div>
+            <div id="game-over" class="overlay"><h1 style="font-size:80px; color:var(--danger); margin-bottom:30px; font-family:'Bungee';">GAME OVER</h1><button class="btn-game" style="width:300px;" onclick="location.reload()">RECOMECAR</button></div>
+            <div id="achievement-toast" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.9); border:2px solid gold; border-radius:15px; padding:15px; display:none; z-index:9000; align-items:center; gap:15px;"><div style="font-size:30px;">🏆</div><div><h4 style="color:gold; font-family:'Bungee'; font-size:12px;">NOVA FUSÃO!</h4><p id="achievement-name" style="color:#fff; font-family:'Inter'; font-weight:900;"></p></div></div>
+            <img id="mouse-ghost" src=""><div id="wave-msg"></div>
         </div>
     </div>
 
-    <!-- Sounds -->
-    <audio id="s-sun" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/points.mp3"></audio>
-    <audio id="s-plant" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/plant1.mp3"></audio>
-    <audio id="s-shoot" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/firepea.mp3"></audio>
-    <audio id="s-chomp" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/chomp.mp3"></audio>
-    <audio id="s-lose" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/losemusic.mp3"></audio>
-    <audio id="s-ready" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/readysetplant.mp3"></audio>
+    <!-- Audio -->
+    <audio id="snd-sun" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/points.mp3"></audio>
+    <audio id="snd-plant" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/plant1.mp3"></audio>
+    <audio id="snd-shoot" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/firepea.mp3"></audio>
+    <audio id="snd-chomp" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/chomp.mp3"></audio>
+    <audio id="snd-lose" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/losemusic.mp3"></audio>
+    <audio id="snd-ready" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/readysetplant.mp3"></audio>
+    <audio id="bgm-day" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/Uraniwani.mp3" loop></audio>
+    <audio id="bgm-night" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/Moongrains.mp3" loop></audio>
+    <audio id="snd-achievement" src="https://cdn.jsdelivr.net/gh/jiangnangame/New-Plants-vs-Zombies-JavaScript@master/audio/winmusic.mp3"></audio>
 
     <script>
-        const CONFIG = {
-            grid: { rows: 5, cols: 9, sx: 130, sy: 100, cw: 82, ch: 100 },
-            costs: { sunflower: 50, peashooter: 100, wallnut: 50, shovel: 0 },
-            assets: {
-                sunflower: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/SunFlower/SunFlower.gif',
-                peashooter: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/Peashooter/Peashooter.gif',
-                wallnut: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/WallNut/WallNut.gif',
-                sunpea: 'https://patchwiki.biligame.com/images/pvzrh/4/43/9xqxxo3tjlpym0nbsia1h7z8fx6orl9.png',
-                zombie: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/Zombie.gif',
-                z_eat: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieAttack.gif',
-                z_die: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Zombies/Zombie/ZombieDie.gif',
-                sun: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/interface/Sun.gif',
-                bullet: 'https://cdn.jsdelivr.net/gh/Jasmine709/Plants-VS-Zombies-Game@main/images/Plants/PB00.gif'
+        const MOD_CONFIG = {
+            plants: [
+                { id: 'peashooter', cost: 100, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif' },
+                { id: 'sunflower', cost: 50, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif' },
+                { id: 'wallnut', cost: 50, card: 'images/TallNut.png', gif: 'images/TallNut.gif', scale: 0.8, tint: 'hue-rotate(30deg)' },
+                { id: 'tallnut', cost: 125, card: 'images/TallNut.png', gif: 'images/TallNut.gif' },
+                { id: 'snowpea', cost: 175, card: 'images/SnowPea.png', gif: 'images/SnowPea.gif' },
+                { id: 'repeater', cost: 200, card: 'images/Repeater.png', gif: 'images/Repeater.gif' },
+                { id: 'gatlingpea', cost: 250, card: 'images/GatlingPea.png', gif: 'images/GatlingPea.gif' },
+                { id: 'twinsunflower', cost: 150, card: 'images/TwinSunflower.png', gif: 'images/TwinSunflower.gif' },
+                { id: 'cherrybomb', cost: 150, card: 'images/CherryBomb.png', gif: 'images/CherryBomb.gif' },
+                { id: 'jalapeno', cost: 125, card: 'images/Jalapeno.png', gif: 'images/Jalapeno.gif' },
+                { id: 'cactus', cost: 125, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif', tint: 'hue-rotate(120deg)', name: 'Cacto' },
+                { id: 'torchwood', cost: 175, card: 'images/TallNut.png', gif: 'images/TallNut.gif', tint: 'brightness(1.5) sepia(0.5)', name: 'Tronco' },
+                { id: 'puffshroom', cost: 0, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(280deg)', name: 'Puff', scale: 0.6 },
+                { id: 'fumeshroom', cost: 75, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif', tint: 'hue-rotate(280deg)', name: 'Fume' },
+                { id: 'squash', cost: 50, card: 'images/TallNut.png', gif: 'images/TallNut.gif', tint: 'hue-rotate(100deg)', name: 'Squash' },
+                { id: 'starfruit', cost: 125, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(60deg)', name: 'Estrela' },
+                { id: 'wintermelon', cost: 200, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif', tint: 'hue-rotate(200deg)', name: 'Winter' },
+                { id: 'hypnoshroom', cost: 75, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(300deg)', name: 'Hipno' },
+                { id: 'gravebuster', cost: 75, card: 'images/TallNut.png', gif: 'images/TallNut.gif', tint: 'brightness(0.3)', name: 'Comedor' },
+                { id: 'marigold', cost: 50, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(200deg)', name: 'Gold' },
+                { id: 'coffeebean', cost: 75, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'sepia(1)', name: 'Café' },
+                { id: 'pumpkin', cost: 125, card: 'images/TallNut.png', gif: 'images/TallNut.gif', tint: 'hue-rotate(40deg)', name: 'Pumpkin' },
+                { id: 'lilypad', cost: 25, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(120deg) brightness(0.5)', name: 'Vitória-Régia', isWater: true },
+                { id: 'tanglekelp', cost: 25, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(180deg) brightness(0.3)', name: 'Alga', isWater: true },
+                { id: 'flowerpot', cost: 25, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'sepia(0.8) brightness(0.8)', name: 'Vaso', isRoof: true },
+                { id: 'cabbagepult', cost: 100, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif', tint: 'hue-rotate(80deg)', name: 'Repolho', isPult: true },
+                { id: 'cornpult', cost: 100, card: 'images/SunFlower.png', gif: 'images/SunFlower.gif', tint: 'hue-rotate(40deg)', name: 'Milho', isPult: true },
+                { id: 'melonpult', cost: 300, card: 'images/Peashooter.png', gif: 'images/Peashooter.gif', tint: 'hue-rotate(150deg)', name: 'Melancia', isPult: true }
+            ],
+            zombies: [
+                { id: 'normal', hp: 80, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'COMUM', speed: 0.4 },
+                { id: 'cone', hp: 200, img: 'ConeheadZombie.gif', eat: 'ConeheadZombieAttack.gif', name: 'CONE', speed: 0.4 },
+                { id: 'bucket', hp: 500, img: 'BucketheadZombie.gif', eat: 'BucketheadZombieAttack.gif', name: 'BALDE', speed: 0.4 },
+                { id: 'football', hp: 800, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'ATLETA', speed: 1.0, tint: 'hue-rotate(-50deg)' },
+                { id: 'door', hp: 1000, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'PORTA', speed: 0.3, tint: 'contrast(0.5)' },
+                { id: 'balloon', hp: 150, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'BALÃO', speed: 0.8, tint: 'hue-rotate(90deg)', type: 'air' },
+                { id: 'gargantuar', hp: 3000, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'BOSS', speed: 0.2, scale: 1.4, tint: 'contrast(1.5)' },
+                { id: 'zomboni', hp: 1200, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'ZOMBONI', speed: 0.7, tint: 'hue-rotate(180deg)' },
+                { id: 'dolphin', hp: 300, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'GOLFINHO', speed: 1.1, isAir: true, tint: 'hue-rotate(200deg)' },
+                { id: 'pogo', hp: 300, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'POGO', speed: 0.6, canVault: true },
+                { id: 'newspaper', hp: 400, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'JORNAL', speed: 0.5, tint: 'grayscale(0.8)' },
+                { id: 'snorkel', hp: 250, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'SNORKEL', speed: 0.6, isWater: true, tint: 'hue-rotate(220deg)' },
+                { id: 'tankmaster', hp: 2000, img: 'Zombie.gif', eat: 'ZombieAttack.gif', name: 'TANK MASTER', speed: 0.2, tint: 'brightness(0.5) contrast(2)', isTank: true },
+                { id: 'zumboniking', hp: 5000, img: 'BucketheadZombie.gif', eat: 'BucketheadZombieAttack.gif', name: 'ZUMBONI KING', speed: 0.5, tint: 'hue-rotate(180deg) brightness(1.5)', scale: 1.8, isBoss: true }
+            ],
+            fusions: {
+                'sunflower+peashooter': 'sunpea', 'peashooter+sunflower': 'sunpea',
+                'wallnut+peashooter': 'nutpea', 'peashooter+wallnut': 'nutpea',
+                'snowpea+wallnut': 'icenut', 'wallnut+snowpea': 'icenut',
+                'repeater+sunflower': 'megasun', 'sunflower+repeater': 'megasun',
+                'gatlingpea+wallnut': 'gatlingnut', 'wallnut+gatlingpea': 'gatlingnut',
+                'twinsunflower+gatlingpea': 'sungatling', 'gatlingpea+twinsunflower': 'sungatling',
+                'cherrybomb+jalapeno': 'nuclearbomb', 'jalapeno+cherrybomb': 'nuclearbomb',
+                'tallnut+tallnut': 'titannut', 'gatlingpea+gatlingpea': 'hypergatling',
+                'cherrybomb+peashooter': 'explodopea', 'repeater+jalapeno': 'plasmagatling',
+                'snowpea+repeater': 'icerepeater', 'sunflower+torchwood': 'fireflower',
+                'lilypad+sunflower': 'sunpad', 'tanglekelp+peashooter': 'kelppea'
+            },
+            grid: { sx: 255, sy: 160, cw: 82, ch: 110 }
+        };
+
+        const FUSION_DATA = {
+            'sunpea': { gif: 'images/SunFlower.gif', hp: 600, projectile: 'pea', sunRate: 150, desc: 'Atira ervilhas e gera sol.' },
+            'nutpea': { gif: 'images/TallNut.gif', hp: 4000, projectile: 'pea', desc: 'Barreira pesada que atira.' },
+            'icenut': { gif: 'images/TallNut.gif', hp: 4000, projectile: 'snow', tint: 'hue-rotate(180deg)', desc: 'Barreira que congela inimigos.' },
+            'megasun': { gif: 'images/TwinSunflower.gif', hp: 800, projectile: 'pea', sunRate: 80, count: 2, desc: 'Dobro de sol e dobro de tiro.' },
+            'gatlingnut': { gif: 'images/TallNut.gif', hp: 6000, projectile: 'pea', count: 4, tint: 'sepia(0.3)', desc: 'Tanque com metralhadora.' },
+            'sungatling': { gif: 'images/TwinSunflower.gif', hp: 1000, projectile: 'pea', sunRate: 60, count: 4, tint: 'hue-rotate(60deg)', desc: 'Suprema geração de recursos.' },
+            'nuclearbomb': { gif: 'images/CherryBomb.gif', hp: 100, tint: 'hue-rotate(100deg)', onDeath: 'nuke', desc: 'Destruição total do mapa.' },
+            'titannut': { gif: 'images/TallNut.gif', hp: 10000, tint: 'contrast(1.5)', scale: 1.1, desc: 'A maior vida do jogo.' },
+            'hypergatling': { gif: 'images/GatlingPea.gif', hp: 2000, projectile: 'pea', count: 8, tint: 'hue-rotate(45deg)', desc: '8 disparos simultâneos.' },
+            'explodopea': { gif: 'images/Peashooter.gif', hp: 800, projectile: 'pea', onDeath: 'explode', tint: 'contrast(2)', desc: 'Ervilha explosiva.' },
+            'plasmagatling': { gif: 'images/GatlingPea.gif', hp: 2500, projectile: 'pea', count: 5, tint: 'hue-rotate(200deg) brightness(2)', desc: 'Dano de plasma azul.' },
+            'icerepeater': { gif: 'images/SnowPea.gif', hp: 800, projectile: 'snow', count: 2, tint: 'brightness(1.5)', desc: 'Repetidora de gelo.' },
+            'fireflower': { gif: 'images/SunFlower.gif', hp: 1000, sunRate: 40, tint: 'hue-rotate(-30deg) brightness(1.8)', desc: 'Sol de fogo ultra rápido.' },
+            'sunpad': { gif: 'images/SunFlower.gif', hp: 400, isWater: true, sunRate: 50, tint: 'hue-rotate(120deg)', desc: 'Gera sol sobre a água.' },
+            'kelppea': { gif: 'images/Peashooter.gif', hp: 500, isWater: true, projectile: 'pea', tint: 'hue-rotate(180deg)', desc: 'Ataque subaquático.' },
+            'tankmaster': { gif: 'images/Zombie.gif', hp: 3000, speed: 0.2, tint: 'brightness(0.5) contrast(2)', desc: 'Carrega zumbis nas costas.' }
+        };
+
+        function getCellPos(gx, gy) {
+            let x = MOD_CONFIG.grid.sx + gx * MOD_CONFIG.grid.cw;
+            let y = MOD_CONFIG.grid.sy + gy * MOD_CONFIG.grid.ch;
+            if (state.world === 'roof') {
+                if (gx < 5) y -= (5 - gx) * 20;
             }
-        };
-
-        let game = {
-            running: false,
-            sun: 100,
-            level: 1,
-            name: '',
-            plants: [],
-            zombies: [],
-            bullets: [],
-            suns: [],
-            dragging: null,
-            killed: 0
-        };
-
-        const view = document.getElementById('game-view');
-        const layer = document.getElementById('game-layer');
-
-        window.onload = () => {
-            gsap.to("#ui-panel", { scale: 1, opacity: 1, duration: 0.8, ease: "back.out" });
-            const saved = localStorage.getItem('pvz_fusion_save');
-            if (saved) {
-                const data = JSON.parse(saved);
-                document.getElementById('name-input').value = data.name;
-                game.level = data.level;
-            }
-        };
-
-        function play(id) {
-            const a = document.getElementById('s-' + id);
-            if (a) { a.currentTime = 0; a.play().catch(()=>{}); }
+            return { x, y };
         }
 
-        function startGame() {
-            game.name = document.getElementById('name-input').value || "GUERREIRO";
-            localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: game.name, level: game.level }));
-            
-            document.getElementById('p-name').innerText = game.name.toUpperCase();
-            document.getElementById('p-lvl').innerText = game.level;
+        let state = { sun: 200, level: 1, name: '', plants: [], zombies: [], bullets: [], lawnmowers: [], coins: 0, chosen: [], selectedZombies: [], selected: null, isShovel: false, isPlantFood: false, plantFood: 3, running: false, scale: 1, tick: 0, gameSpeed: 1, wave: 0, world: 'day', modStyle: 'standard', gravestones: [], bgBrightness: 1, loopStarted: false, discoveredFusions: [], mode: 'adventure', vases: [] };
+        const view = document.getElementById('game-view'), layer = document.getElementById('game-layer'), ghost = document.getElementById('mouse-ghost'), highlight = document.getElementById('grid-highlight');
 
-            gsap.to("#name-overlay", { opacity: 0, duration: 0.5, onComplete: () => {
-                document.getElementById('name-overlay').style.display = 'none';
-                play('ready');
-                game.running = true;
-                runEngine();
-            }});
+        function playSnd(id) { const el = document.getElementById(id); if (el) { el.currentTime = 0; el.play().catch(()=>{}); } }
+        function updateUI() { 
+            document.getElementById('sun-val').innerText = state.sun; 
+            document.getElementById('coin-val').innerText = state.coins; 
+            document.getElementById('level-display').innerText = `NÍVEL: ${state.level}`; 
+            document.getElementById('food-val').innerText = state.plantFood;
+            const wv = document.getElementById('wave-val'); if(wv) wv.innerText = state.wave; 
+        }
+        function showScreen(id) { document.querySelectorAll('.overlay').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
+        function confirmName() { state.name = document.getElementById('name-input').value || 'Guerreiro'; localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: state.name, level: state.level, coins: state.coins, discovered: state.discoveredFusions })); showMenu(); }
+        function showMenu() { showScreen('menu-screen'); document.getElementById('user-display').innerText = `DEFENSOR: ${state.name}`; }
+        function openStageSelector() {
+            showScreen('stage-screen');
+            const grid = document.getElementById('stage-grid'); grid.innerHTML = '';
+            for(let i=1; i<=10; i++) {
+                const btn = document.createElement('button'); btn.className = 'btn-game'; btn.innerText = i; btn.style.fontSize = '14px';
+                btn.onclick = () => selectStage(i);
+                grid.appendChild(btn);
+            }
+        }
+        function selectStage(lvl) {
+            if (lvl === 'custom_chaos') { state.level = 10; state.modStyle = 'japanese'; MOD_CONFIG.zombies.forEach(z => z.speed *= 1.5); }
+            else if (lvl === 'custom_boss') { state.level = 20; state.selectedZombies = ['gargantuar', 'tankmaster']; }
+            else { state.level = lvl; state.modStyle = 'standard'; }
+            openChooser();
+        }
+        function openShop() { showScreen('shop-screen'); }
+        function buyItem(id, cost) { if (state.coins >= cost) { state.coins -= cost; updateUI(); alert('Comprado!'); } else alert('Sem moedas!'); }
+        function toggleWorld() { 
+            const modes = ['day', 'night', 'pool', 'roof'];
+            let idx = modes.indexOf(state.world);
+            state.world = modes[(idx + 1) % modes.length];
+            const btn = document.getElementById('world-btn'), bg = document.getElementById('bg-layer');
+            btn.innerText = `MUNDO: ${state.world.toUpperCase()}`;
+            if(state.world === 'night') bg.style.filter = 'brightness(0.4) hue-rotate(240deg)';
+            else if(state.world === 'pool') bg.style.filter = 'hue-rotate(180deg) brightness(0.8) contrast(1.2)';
+            else if(state.world === 'roof') bg.style.filter = 'hue-rotate(30deg) brightness(0.7) contrast(1.5)';
+            else bg.style.filter = 'none';
+        }
+        function toggleModStyle() {
+            state.modStyle = (state.modStyle === 'standard' ? 'japanese' : 'standard');
+            const btn = document.getElementById('mod-btn');
+            btn.innerText = `MOD: ${state.modStyle.toUpperCase()}`;
+            if (state.modStyle === 'japanese') { MOD_CONFIG.zombies.forEach(z => z.speed *= 1.5); FUSION_DATA.hypergatling.count = 12; }
+            else { MOD_CONFIG.zombies.forEach(z => z.speed /= 1.5); FUSION_DATA.hypergatling.count = 8; }
+        }
+        function addBookmark() { alert("Pressione CTRL + D para adicionar aos seus favoritos!"); }
+
+        function openAlmanac() {
+            showScreen('almanac-screen');
+            const grid = document.getElementById('almanac-grid'); grid.innerHTML = '';
+            Object.keys(FUSION_DATA).forEach(key => {
+                const isDiscovered = state.discoveredFusions.includes(key);
+                const data = FUSION_DATA[key];
+                const div = document.createElement('div'); div.className = 'almanac-card';
+                div.style.width = '150px'; div.style.height = '180px';
+                div.innerHTML = `
+                    <div style="filter: ${isDiscovered ? 'none' : 'brightness(0) invert(1)'}">
+                        <img src="${data.gif}" style="width:60px; ${data.tint ? 'filter:'+data.tint : ''}">
+                    </div>
+                    <p style="color:${isDiscovered ? 'gold' : '#555'}; font-size:12px; font-family:'Bungee'; margin-top:10px;">${isDiscovered ? key.toUpperCase() : '???'}</p>
+                    ${isDiscovered ? `
+                        <p style="color:#fff; font-size:10px; margin-top:5px;">${data.desc}</p>
+                        <div style="display:flex; justify-content:space-around; margin-top:10px; font-size:9px; color:var(--accent);">
+                            <span>HP: ${data.hp}</span>
+                            <span>${data.sunRate ? 'SOL: '+data.sunRate : ''}</span>
+                        </div>
+                    ` : ''}
+                `;
+                grid.appendChild(div);
+            });
         }
 
-        function selectPlant(type) {
-            if (!game.running || (type !== 'shovel' && game.sun < CONFIG.costs[type])) return;
+        function resize() { const sw = window.innerWidth, sh = window.innerHeight, gw = 1400, gh = 750; state.scale = Math.min(sw/gw, sh/gh); view.style.transform = `scale(${state.scale})`; view.style.left = (sw - gw * state.scale) / 2 + 'px'; view.style.top = (sh - gh * state.scale) / 2 + 'px'; }
+        window.onload = () => { 
+            window.addEventListener('resize', resize); resize(); 
+            const fill = document.getElementById('load-fill');
+            gsap.to(fill, { width: '100%', duration: 1, onComplete: () => { 
+                const saved = localStorage.getItem('pvz_fusion_save'); 
+                if(saved) { const d = JSON.parse(saved); state.name = d.name; state.level = d.level; state.coins = d.coins || 0; state.discoveredFusions = d.discovered || []; showMenu(); } 
+                else showScreen('name-screen'); 
+                document.getElementById('loading-screen').style.display = 'none'; 
+            }}); 
+        };
 
-            if (game.dragging) layer.removeChild(game.dragging.el);
+        function openChooser() {
+            showScreen('chooser-screen'); state.chosen = []; state.selectedZombies = []; updateChooserUI();
+            const zp = document.getElementById('zombie-preview'); zp.innerHTML = '';
+            MOD_CONFIG.zombies.forEach(z => {
+                const div = document.createElement('div'); div.className = 'zombie-card';
+                div.innerHTML = `<img src="images/${z.img}" style="${z.tint?'filter:'+z.tint:''}"><p>${z.name}</p>`;
+                div.onclick = () => { if(state.selectedZombies.includes(z.id)) { state.selectedZombies = state.selectedZombies.filter(id=>id!==z.id); div.classList.remove('selected'); } else { state.selectedZombies.push(z.id); div.classList.add('selected'); }};
+                zp.appendChild(div);
+            });
+            const grid = document.getElementById('chooser-grid'); grid.innerHTML = '';
+            MOD_CONFIG.plants.forEach(p => {
+                const div = document.createElement('div'); div.className = 'chooser-seed';
+                div.innerHTML = `<img src="${p.card}" style="${p.tint?'filter:'+p.tint:''}"><div class="cost-tag">${p.cost}</div>`;
+                div.onclick = () => { if(state.chosen.length < 14 && !state.chosen.includes(p)) { state.chosen.push(p); div.classList.add('chosen'); updateChooserUI(); playSnd('snd-plant'); }};
+                grid.appendChild(div);
+            });
+        }
+        function updateChooserUI() { document.getElementById('chooser-count').innerText = `(${state.chosen.length}/14)`; document.getElementById('btn-fight').style.display = (state.chosen.length > 0 ? 'block' : 'none'); }
 
-            const el = document.createElement('img');
-            el.src = type === 'shovel' ? document.getElementById('shovel-icon').src : CONFIG.assets[type];
-            el.className = 'entity';
-            el.style.zIndex = 5000;
-            el.style.opacity = 0.7;
-            el.style.pointerEvents = 'none';
-            el.style.width = type === 'sunpea' ? '60px' : '75px';
+        function startCombat() {
+            showScreen('hud'); document.getElementById('hud').style.display = 'flex';
+            state.mode = (state.mode === 'unlimited' ? 'unlimited' : 'adventure');
+            initLevel(); state.running = true; playSnd('snd-ready'); const bgm = document.getElementById(state.world==='night'?'bgm-night':'bgm-day'); if(bgm) { bgm.volume = 0.3; bgm.play().catch(()=>{}); } if(!state.loopStarted) { state.loopStarted = true; setInterval(gameLoop, 20); }
+        }
 
-            layer.appendChild(el);
-            game.dragging = { type, el };
+        function startUnlimited() { state.mode = 'unlimited'; state.sun = 9999; startCombat(); }
 
+        function initLevel() {
+            layer.innerHTML = ''; state.plants = []; state.zombies = []; state.bullets = []; state.lawnmowers = []; state.gravestones = []; state.wave = 0; updateUI();
+            const tray = document.getElementById('seed-tray'); tray.innerHTML = '';
+            state.chosen.forEach(p => {
+                const div = document.createElement('div'); div.className = 'seed-card';
+                div.innerHTML = `<img src="${p.card}" style="${p.tint?'filter:'+p.tint:''}"><div class="cost">${p.cost}</div>`;
+                div.onclick = (e) => { e.stopPropagation(); pickSeed(p, div); };
+                tray.appendChild(div);
+            });
+            for(let i=0; i<5; i++) {
+                const el = document.createElement('img'); el.src = 'images/LawnMower.gif'; el.className = 'entity lawnmower'; el.style.left = '150px'; el.style.top = (MOD_CONFIG.grid.sy + i*MOD_CONFIG.grid.ch + 10) + 'px';
+                layer.appendChild(el); state.lawnmowers.push({ el, row: i, x: 150, active: false });
+            }
+            if(state.world === 'night') for(let i=0; i<6; i++) { const gx = 5+Math.floor(Math.random()*4), gy = Math.floor(Math.random()*5); const el = document.createElement('div'); el.className = 'gravestone'; el.style.left = (MOD_CONFIG.grid.sx+gx*MOD_CONFIG.grid.cw)+'px'; el.style.top = (MOD_CONFIG.grid.sy+gy*MOD_CONFIG.grid.ch)+'px'; layer.appendChild(el); state.gravestones.push({ el, gx, gy }); }
+        }
+
+        function toggleShovel() { if(state.isShovel) cancelPick(); else { cancelPick(); state.isShovel = true; document.getElementById('shovel-btn').classList.add('active'); setupInput(); } }
+        function togglePlantFood() { if(state.plantFood > 0) { if(state.isPlantFood) cancelPick(); else { cancelPick(); state.isPlantFood = true; document.getElementById('food-btn').style.background = 'rgba(76, 175, 80, 0.8)'; setupInput(); } } }
+        function pickSeed(p, el) { 
+            if (state.sun < p.cost && state.mode !== 'unlimited') { cancelPick(); return; }
+            cancelPick(); state.selected = p; el.classList.add('active'); ghost.src = p.gif; ghost.style.display = 'block'; if(p.tint) ghost.style.filter = p.tint; setupInput(); 
+        }
+        function cancelPick() { state.selected = null; state.isShovel = false; state.isPlantFood = false; ghost.style.display = 'none'; highlight.style.display = 'none'; document.querySelectorAll('.seed-card').forEach(s=>s.classList.remove('active')); document.getElementById('shovel-btn').classList.remove('active'); document.getElementById('food-btn').style.background = 'rgba(76, 175, 80, 0.3)'; document.onmousemove = null; view.onmousedown = null; }
+
+        function setupInput() {
             document.onmousemove = (e) => {
-                const r = view.getBoundingClientRect();
-                el.style.left = (e.clientX - r.left - 35) + 'px';
-                el.style.top = (e.clientY - r.top - 40) + 'px';
+                const r = view.getBoundingClientRect(), lx = (e.clientX - r.left)/state.scale, ly = (e.clientY - r.top)/state.scale;
+                ghost.style.left = lx+'px'; ghost.style.top = ly+'px';
+                const gx = Math.floor((lx-MOD_CONFIG.grid.sx)/MOD_CONFIG.grid.cw), gy = Math.floor((ly-MOD_CONFIG.grid.sy)/MOD_CONFIG.grid.ch);
+                if(gx>=0 && gx<9 && gy>=0 && gy<5) {
+                    const pos = getCellPos(gx, gy);
+                    highlight.style.display = 'block'; highlight.style.left = pos.x+'px'; highlight.style.top = pos.y+'px';
+                    const exist = state.plants.find(p=>p.gx===gx && p.gy===gy);
+                    if(state.isShovel) highlight.style.borderColor = exist?'#fff':'#f00';
+                    else if(state.selected) highlight.style.borderColor = exist?(MOD_CONFIG.fusions[`${exist.id}+${state.selected.id}`]?'gold':'#f00'):(state.sun >= state.selected.cost || state.mode === 'unlimited' ? '#0f0' : '#f00');
+                } else highlight.style.display = 'none';
             };
-
-            document.onmousedown = (e) => {
-                if (e.button === 0) {
-                    const r = view.getBoundingClientRect();
-                    const gx = Math.floor((e.clientX - r.left - CONFIG.grid.sx) / CONFIG.grid.cw);
-                    const gy = Math.floor((e.clientY - r.top - CONFIG.grid.sy) / CONFIG.grid.ch);
-
-                    if (gx >= 0 && gx < 9 && gy >= 0 && gy < 5) placeOnGrid(gx, gy);
-                    
-                    if (game.dragging) layer.removeChild(el);
-                    game.dragging = null;
-                    document.onmousemove = null;
-                    document.onmousedown = null;
-                }
-            };
+            view.onmousedown = (e) => { const r = view.getBoundingClientRect(), lx = (e.clientX - r.left)/state.scale, ly = (e.clientY - r.top)/state.scale, gx = Math.floor((lx-MOD_CONFIG.grid.sx)/MOD_CONFIG.grid.cw), gy = Math.floor((ly-MOD_CONFIG.grid.sy)/MOD_CONFIG.grid.ch); if(gx>=0 && gx<9 && gy>=0 && gy<5) { if(handleAction(gx, gy)) cancelPick(); } else cancelPick(); };
         }
 
-        function placeOnGrid(gx, gy) {
-            const type = game.dragging.type;
-            const idx = game.plants.findIndex(p => p.gx === gx && p.gy === gy);
-            const exist = game.plants[idx];
+        function handleAction(gx, gy) {
+            const plantsAtCell = state.plants.filter(p=>p.gx===gx && p.gy===gy);
+            const exist = plantsAtCell.find(p => p.id !== 'flowerpot') || plantsAtCell[0];
+            const pot = plantsAtCell.find(p => p.id === 'flowerpot');
 
-            if (type === 'shovel') {
-                if (exist) {
-                    layer.removeChild(exist.el);
-                    clearInterval(exist.timer);
-                    game.plants.splice(idx, 1);
-                    play('plant');
+            if(state.isShovel) { 
+                if(exist) { 
+                    exist.el.remove(); 
+                    state.plants = state.plants.filter(p => p !== exist);
+                    playSnd('snd-plant'); return true; 
+                } 
+                return false; 
+            }
+            if(state.isPlantFood) {
+                if(exist) {
+                    state.plantFood--; updateUI();
+                    triggerPlantFood(exist);
+                    return true;
                 }
-                return;
+                return false;
+            }
+            if(!state.selected) return false;
+            if(state.mode !== 'unlimited' && state.sun < state.selected.cost) { cancelPick(); return false; }
+            
+            if(state.world === 'roof') {
+                if(state.selected.id === 'flowerpot') {
+                    if(pot) return false;
+                    if (state.mode!=='unlimited') state.sun -= state.selected.cost;
+                    updateUI(); spawnPlant('flowerpot', gx, gy); return true;
+                }
+                if(!pot) {
+                    alert("Você precisa de um VASO!");
+                    cancelPick(); return false;
+                }
             }
 
-            if (exist) {
-                // FUSION LOGIC
-                const recipes = { sunflower: { peashooter: 'sunpea' }, peashooter: { sunflower: 'sunpea' } };
-                const res = recipes[exist.type]?.[type];
-                if (res) {
-                    game.sun -= CONFIG.costs[type];
-                    layer.removeChild(exist.el);
-                    clearInterval(exist.timer);
-                    game.plants.splice(idx, 1);
-                    createPlant(res, gx, gy);
-                    play('plant');
+            if(exist && exist.id !== 'flowerpot') {
+                const fId = MOD_CONFIG.fusions[`${exist.id}+${state.selected.id}`];
+                if(fId) { 
+                    if(state.mode!=='unlimited') state.sun -= state.selected.cost; 
+                    updateUI(); exist.el.remove(); 
+                    state.plants = state.plants.filter(p => p !== exist);
+                    spawnPlant(fId, gx, gy, true); 
+                    if(!state.discoveredFusions.includes(fId)) { 
+                        state.discoveredFusions.push(fId); showAchievement(fId); confirmName(); 
+                    } 
+                    return true; 
                 }
+                return false;
+            }
+            if (state.mode!=='unlimited') state.sun -= state.selected.cost; 
+            updateUI(); spawnPlant(state.selected.id, gx, gy); return true;
+        }
+
+        function triggerPlantFood(p) {
+            gsap.to(p.el, {filter:'brightness(3) contrast(1.5)', duration:0.2, repeat:5, yoyo:true, onComplete:()=>p.el.style.filter=(FUSION_DATA[p.id]?.tint || MOD_CONFIG.plants.find(i=>i.id===p.id)?.tint || '')});
+            if(p.id.includes('pea')) {
+                let count = 0;
+                const interval = setInterval(() => {
+                    shoot(p); count++;
+                    if(count > 60) clearInterval(interval);
+                }, 50);
+            } else if(p.id.includes('sun')) {
+                for(let i=0; i<15; i++) setTimeout(() => spawnSun(p), i*100);
+            } else if(p.id.includes('nut')) {
+                p.hp = 20000; p.el.style.filter = 'brightness(1.5) contrast(1.2)';
             } else {
-                game.sun -= CONFIG.costs[type];
-                createPlant(type, gx, gy);
-                play('plant');
+                // Default: just heal and some particles
+                p.hp += 2000; spawnParticle(getCellPos(p.gx, p.gy).x, getCellPos(p.gx, p.gy).y, 'spark');
             }
         }
 
-        function createPlant(type, gx, gy) {
-            const el = document.createElement('img');
-            el.src = CONFIG.assets[type];
-            el.className = 'entity';
-            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw) + 'px';
-            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch) + 'px';
-            el.style.zIndex = 100 + gy;
-            el.style.width = type === 'sunpea' ? '60px' : '75px';
-            layer.appendChild(el);
+        function showAchievement(id) { const t = document.getElementById('achievement-toast'), n = document.getElementById('achievement-name'); n.innerText = id.toUpperCase(); t.style.display = 'flex'; playSnd('snd-achievement'); gsap.fromTo(t, {x:400, opacity:0}, {x:0, opacity:1, duration:0.6}); setTimeout(()=>gsap.to(t, {x:400, opacity:0, onComplete:()=>t.style.display='none'}), 4000); }
 
-            gsap.from(el, { scale: 0, duration: 0.4, ease: "back.out(2)" });
-
-            const p = {
-                type, gx, gy, el, hp: type === 'wallnut' ? 400 : 100,
-                timer: setInterval(() => {
-                    if (!game.running) return;
-                    if (type.includes('sun')) spawnSun(gx, gy);
-                    if (type.includes('pea')) {
-                        if (game.zombies.some(z => z.gy === gy && z.x > (CONFIG.grid.sx + gx * CONFIG.grid.cw))) {
-                            spawnBullet(gx, gy);
-                        }
-                    }
-                }, 3000)
-            };
-            game.plants.push(p);
+        function spawnPlant(id, gx, gy, isHybrid=false) {
+            const d = FUSION_DATA[id] || MOD_CONFIG.plants.find(p=>p.id===id);
+            const pos = getCellPos(gx, gy);
+            const el = document.createElement('img'); el.src = d.gif; el.className = 'entity plant ' + (isHybrid?'hybrid':'');
+            el.style.left = pos.x+'px'; el.style.top = pos.y+'px'; el.style.zIndex = 400+gy;
+            if(d.tint) el.style.filter = d.tint; if(d.scale) el.style.transform = `scale(${d.scale})`;
+            layer.appendChild(el); playSnd('snd-plant');
+            if(id==='cherrybomb' || id==='nuclearbomb') gsap.to(el, {scale:1.2, duration:0.8, repeat:1, yoyo:true, onComplete:()=>explode(gx, gy, el, id==='nuclearbomb'?3:1)});
+            else if(id==='jalapeno') gsap.to(el, {scaleY:1.3, duration:0.8, onComplete:()=>burnRow(gy, el)});
+            else { gsap.from(el, {scale:0, duration:0.5}); gsap.to(el, {x:"+=3", duration:2+Math.random(), repeat:-1, yoyo:true, ease:"sine.inOut"}); }
+            state.plants.push({ id, gx, gy, el, hp: d.hp || (id.includes('nut')?4000:300), timer:0, projectile: d.projectile || (id.includes('pea')?(id.includes('snow')?'snow':'pea'):null), sunRate: d.sunRate || (id.includes('sun')?150:null), count: d.count || (id.includes('repeater')?2:1), onDeath: d.onDeath });
         }
 
-        function spawnSun(gx, gy) {
-            const el = document.createElement('img');
-            el.src = CONFIG.assets.sun;
-            el.className = 'sun';
-            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw + 20) + 'px';
-            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch - 20) + 'px';
-            el.onclick = () => {
-                play('sun');
-                game.sun += 25;
-                gsap.to(el, { x: -el.offsetLeft + 40, y: -el.offsetTop + 40, opacity: 0, duration: 0.6, onComplete: () => {
-                    if (el.parentNode) layer.removeChild(el);
-                    game.suns = game.suns.filter(s => s.el !== el);
-                }});
-            };
-            layer.appendChild(el);
-            game.suns.push({ el });
-            gsap.to(el, { y: "+=50", duration: 1, ease: "bounce.out" });
+        function explode(gx, gy, el, range=1) { el.src = 'images/Boom.gif'; el.style.width = (200*range)+'px'; el.style.height = (200*range)+'px'; el.style.transform = 'translate(-35%, -35%)'; state.zombies.forEach(z => { if(Math.abs(z.row-gy)<=range && Math.abs((MOD_CONFIG.grid.sx+gx*MOD_CONFIG.grid.cw)-z.x) < 150*range) z.hp = 0; }); setTimeout(()=>el.remove(), 1000); if(range>2) { gsap.to(view, {x:20, y:20, duration:0.1, repeat:10, yoyo:true}); showWaveMsg("APOCALYPSE!"); } }
+        function burnRow(row, el) { el.src = 'images/JalapenoAttack.gif'; el.style.width = '1200px'; el.style.left = '200px'; state.zombies.forEach(z => { if(z.row===row) z.hp = 0; }); setTimeout(()=>el.remove(), 1000); }
+
+        function spawnParticle(x, y, type) {
+            const count = 5;
+            for(let i=0; i<count; i++) {
+                const p = document.createElement('div'); p.className = `particle ${type}`;
+                const size = 5 + Math.random() * 10; p.style.width = size + 'px'; p.style.height = size + 'px'; p.style.left = x + 'px'; p.style.top = y + 'px';
+                layer.appendChild(p); gsap.to(p, { x: x + (Math.random()-0.5) * 100, y: y + (Math.random()-0.5) * 100, opacity: 0, scale: 0, duration: 0.5 + Math.random(), onComplete: () => p.remove() });
+            }
         }
 
-        function spawnBullet(gx, gy) {
-            play('shoot');
-            const el = document.createElement('img');
-            el.src = CONFIG.assets.bullet;
-            el.className = 'bullet';
-            el.style.left = (CONFIG.grid.sx + gx * CONFIG.grid.cw + 50) + 'px';
-            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch + 15) + 'px';
-            layer.appendChild(el);
-            game.bullets.push({ el, x: CONFIG.grid.sx + gx * CONFIG.grid.cw + 50, gy });
-        }
+        function gameLoop() {
+            if(!state.running) return;
+            const s = state.gameSpeed; state.tick += s; updateUI();
+            const bg = document.getElementById('bg-layer');
+            if(state.world==='day') { let br = Math.max(0.4, 1-state.wave*0.02); state.bgBrightness += (br-state.bgBrightness)*0.01; bg.style.filter = `brightness(${state.bgBrightness})`; }
+            if(state.tick % (state.world==='day'?400:800) < s && state.mode !== 'unlimited') spawnSun();
 
-        function spawnZombie() {
-            const gy = Math.floor(Math.random() * 5);
-            const el = document.createElement('img');
-            el.src = CONFIG.assets.zombie;
-            el.className = 'zombie';
-            el.style.left = '900px';
-            el.style.top = (CONFIG.grid.sy + gy * CONFIG.grid.ch - 30) + 'px';
-            el.style.zIndex = 1000 + gy;
-            layer.appendChild(el);
-            game.zombies.push({ el, x: 900, gy, hp: 10 });
-        }
+            let spawnRate = Math.max(40, 250 - state.wave*10 - state.level*20);
+            if(state.tick % spawnRate < s) {
+                let pool = MOD_CONFIG.zombies.filter(z => state.selectedZombies.includes(z.id));
+                if(pool.length === 0) pool = MOD_CONFIG.zombies.slice(0, Math.min(MOD_CONFIG.zombies.length, state.level + 2));
+                const zD = pool[Math.floor(Math.random()*pool.length)], row = Math.floor(Math.random()*5), el = document.createElement('img'); el.src = `images/${zD.img}`; el.className = 'entity zombie';
+                el.style.left = '1350px'; el.style.top = (MOD_CONFIG.grid.sy+row*MOD_CONFIG.grid.ch - 80)+'px'; if(zD.tint) el.style.filter = zD.tint; if(zD.scale) el.style.transform = `scale(${zD.scale})`;
+                layer.appendChild(el);
+                state.zombies.push({ el, x: 1350, row, hp: zD.hp, type: zD.id, state: 'walk', speed: zD.speed*s, isAir: zD.type==='air', canVault: zD.canVault, isTank: zD.isTank });
+                if(state.tick % 800 < s) { state.wave++; if(state.wave%10===0) { showWaveMsg("HORDA!"); if(state.world==='night') state.gravestones.forEach(g=>setTimeout(()=>spawnZombieAt(g.gx, g.gy), Math.random()*2000)); } }
+            }
 
-        function runEngine() {
-            setInterval(() => {
-                if (!game.running) return;
-
-                if (Math.random() < 0.003 + (game.level * 0.001)) spawnZombie();
-
-                document.getElementById('sun-val').innerText = game.sun;
-
-                // Zombies logic
-                game.zombies.forEach(z => {
-                    const target = game.plants.find(p => p.gy === z.gy && Math.abs((CONFIG.grid.sx + p.gx * CONFIG.grid.cw) - z.x) < 40);
-                    if (target) {
-                        if (z.el.src !== CONFIG.assets.z_eat) z.el.src = CONFIG.assets.z_eat;
-                        target.hp -= 0.4;
-                        if (Math.random() < 0.05) play('chomp');
-                        if (target.hp <= 0) {
-                            layer.removeChild(target.el);
-                            clearInterval(target.timer);
-                            game.plants = game.plants.filter(p => p !== target);
-                            z.el.src = CONFIG.assets.zombie;
-                        }
+            if(state.wave >= 20+state.level*10 && state.mode !== 'unlimited') winLevel();
+            state.lawnmowers.forEach(m => { if(m.active) { m.x += 12*s; m.el.style.left = m.x+'px'; state.zombies.forEach(z=>{ if(z.row===m.row && Math.abs(z.x-m.x)<60) z.hp=0; }); if(m.x > 1400) { m.el.remove(); state.lawnmowers = state.lawnmowers.filter(i=>i!==m); } } else if(state.zombies.some(z=>z.row===m.row && z.x < 330)) m.active = true; });
+            
+            state.zombies.forEach(z => {
+                const zD = MOD_CONFIG.zombies.find(i=>i.id===z.type);
+                const t = z.isAir ? null : state.plants.find(p=>p.gy===z.row && Math.abs((getCellPos(p.gx, p.gy).x)-z.x) < 45);
+                if(t) {
+                    if (zD && zD.isBoss) { // Zumboni King crushes plants
+                        t.hp -= 100*s; if(state.tick%30<s) playSnd('snd-chomp');
+                    } else if(z.canVault) { 
+                        z.canVault = false; playSnd('snd-plant'); gsap.to(z.el, {y:z.el.offsetTop-60, x:z.x-120, duration:0.6, onComplete:()=>z.x-=120}); 
                     } else {
-                        z.x -= 0.5;
-                        z.el.style.left = z.x + 'px';
+                        t.hp -= 0.5*s; if(state.tick%60<s) playSnd('snd-chomp');
                     }
-                    if (z.x < 50) endGame();
-                });
+                    if((t.id.includes('nut') || t.id.includes('wall')) && t.hp < 1300) t.el.src = t.hp < 650 ? 'images/TallnutCracked2.gif' : 'images/TallnutCracked1.gif';
+                    if(z.state!=='eat' && !zD.isBoss) { z.state='eat'; z.el.src=`images/${zD.eat}`; }
+                    if(t.hp<=0) { if(t.onDeath==='explode') explode(t.gx, t.gy, t.el); t.el.remove(); state.plants = state.plants.filter(p=>p!==t); z.state='walk'; z.el.src=`images/${zD.img}`; }
+                } else { 
+                    if(z.state==='eat') { z.state='walk'; z.el.src=`images/${zD.img}`; } 
+                    z.x -= z.speed; z.el.style.left = z.x+'px'; 
+                    if (state.world === 'roof') {
+                        let gx = (z.x - MOD_CONFIG.grid.sx) / MOD_CONFIG.grid.cw;
+                        let y = MOD_CONFIG.grid.sy + z.row * MOD_CONFIG.grid.ch - 80;
+                        if (gx < 5) y -= (5 - gx) * 20;
+                        z.el.style.top = y + 'px';
+                    }
+                }
+                if(z.type === 'zumboniking' && state.tick % 20 < s) {
+                    // Leave ice trail
+                    const ice = document.createElement('div');
+                    ice.style.position = 'absolute'; ice.style.width = '60px'; ice.style.height = '40px';
+                    ice.style.background = 'rgba(100, 200, 255, 0.4)'; ice.style.filter = 'blur(10px)';
+                    ice.style.left = (z.x + 80) + 'px'; ice.style.top = (z.el.offsetTop + 100) + 'px';
+                    ice.style.zIndex = 100; layer.appendChild(ice);
+                    setTimeout(() => ice.remove(), 5000);
+                }
+                if(z.x < 280) { state.running=false; playSnd('snd-lose'); document.getElementById('game-over').style.display='flex'; }
+                if(z.hp <= 0) { if(z.isTank) { z.isTank = false; spawnZombieAt(Math.floor((z.x-MOD_CONFIG.grid.sx)/MOD_CONFIG.grid.cw), z.row); } if(Math.random()>0.9) spawnCoin(z.x, MOD_CONFIG.grid.sy+z.row*MOD_CONFIG.grid.ch); z.el.src='images/ZombieDie.gif'; setTimeout(()=>{ try{z.el.remove();}catch(e){} state.zombies = state.zombies.filter(i=>i!==z); }, 1500/s); }
+            });
 
-                // Bullets logic
-                game.bullets.forEach((b, bi) => {
-                    b.x += 7;
+            state.plants.forEach(p => {
+                p.timer += s; if(p.sunRate && p.timer >= p.sunRate) { spawnSun(p); p.timer = 0; }
+                if(p.projectile && p.timer >= 120) { shoot(p); if(p.count>1) for(let i=1; i<p.count; i++) setTimeout(()=>shoot(p), i*150/s); p.timer=0; }
+            });
+
+            state.bullets.forEach((b, i) => {
+                if (b.isLobbed) {
+                    b.progress += 0.02 * s;
+                    b.x += 8 * s;
+                    // Parabolic arc
+                    let arc = Math.sin(b.progress * Math.PI) * 150;
+                    let targetY = MOD_CONFIG.grid.sy + b.row * MOD_CONFIG.grid.ch + 30;
+                    if (state.world === 'roof') {
+                        let currentGx = (b.x - MOD_CONFIG.grid.sx) / MOD_CONFIG.grid.cw;
+                        if (currentGx < 5) targetY -= (5 - currentGx) * 20;
+                    }
                     b.el.style.left = b.x + 'px';
-                    const hit = game.zombies.find(z => z.gy === b.gy && Math.abs(z.x - b.x) < 30);
-                    if (hit) {
-                        hit.hp -= 2;
-                        layer.removeChild(b.el);
-                        game.bullets.splice(bi, 1);
-                        if (hit.hp <= 0) {
-                            hit.el.src = CONFIG.assets.z_die;
-                            game.killed++;
-                            setTimeout(() => {
-                                if (hit.el.parentNode) layer.removeChild(hit.el);
-                                game.zombies = game.zombies.filter(z => z !== hit);
-                            }, 1500);
-                            checkWin();
+                    b.el.style.top = (targetY - arc) + 'px';
+                } else {
+                    b.x += 14*s; b.el.style.left = b.x+'px';
+                    if (state.world === 'roof') {
+                        let currentGx = (b.x - MOD_CONFIG.grid.sx) / MOD_CONFIG.grid.cw;
+                        let roofY = MOD_CONFIG.grid.sy + b.row * MOD_CONFIG.grid.ch + 30;
+                        if (currentGx < 5) roofY -= (5 - currentGx) * 20;
+                        // If bullet is lower than roof at this point, and it's coming from a higher slope or lower slope...
+                        // Simplify: if bullet gx is different from plant gx and they are on different slope levels
+                        if (currentGx < 5 && Math.abs(currentGx - b.gx) > 0.5) {
+                            let plantRoofY = MOD_CONFIG.grid.sy + b.row * MOD_CONFIG.grid.ch + 30;
+                            if (b.gx < 5) plantRoofY -= (5 - b.gx) * 20;
+                            if (roofY < plantRoofY - 10) { // Bullet hits the roof rising up
+                                b.el.remove(); state.bullets.splice(i,1); return;
+                            }
                         }
                     }
-                    if (b.x > 950) { if (b.el.parentNode) layer.removeChild(b.el); game.bullets.splice(bi, 1); }
-                });
-            }, 20);
+                }
+
+                const hit = state.zombies.find(z=>z.row===b.row && Math.abs(z.x-b.x)<40);
+                if (hit && (!b.isLobbed || b.progress > 0.5)) {
+                    hit.hp -= 20; b.el.remove(); state.bullets.splice(i,1);
+                    spawnParticle(b.x, b.el.offsetTop, b.type==='snow'?'ice-particle':'spark');
+                    if(b.type==='snow') { hit.speed *= 0.5; hit.el.style.filter = 'hue-rotate(180deg) brightness(1.5)'; setTimeout(()=>{hit.speed *= 2; hit.el.style.filter='';}, 3000); }
+                } else if(b.x > 1400 || (b.isLobbed && b.progress > 1.2)) { b.el.remove(); state.bullets.splice(i,1); }
+            });
         }
 
-        function checkWin() {
-            if (game.killed >= 5 + game.level * 2) {
-                game.running = false;
-                game.level++;
-                localStorage.setItem('pvz_fusion_save', JSON.stringify({ name: game.name, level: game.level }));
-                alert("NÍVEL COMPLETO! PRÓXIMO: " + game.level);
-                location.reload();
-            }
+        function spawnSun(p) { 
+            const el = document.createElement('img'); el.src = 'images/Sun.gif'; el.className = 'sun-token'; 
+            let x, y;
+            if(p) { const pos = getCellPos(p.gx, p.gy); x = pos.x+20; y = pos.y; }
+            else { x = 200+Math.random()*1000; y = -60; }
+            el.style.left = x+'px'; el.style.top = y+'px'; layer.appendChild(el); 
+            el.onclick = () => { state.sun += 50; updateUI(); playSnd('snd-sun'); gsap.to(el, {scale:0, duration:0.3, onComplete:()=>el.remove()}); }; 
+            if(p) gsap.to(el, {x:(Math.random()-0.5)*80, y:"+=50", duration:1.2, ease:"bounce.out"}); 
+            else gsap.to(el, {y:100+Math.random()*400, duration:4, ease:"none"}); 
+            setTimeout(()=>{ if(el.parentElement) gsap.to(el, {opacity:0, onComplete:()=>el.remove()}); }, 8000); 
         }
-
-        function endGame() {
-            game.running = false;
-            play('lose');
-            document.getElementById('game-over').style.display = 'flex';
+        function spawnCoin(x, y) { const g = Math.random()>0.8, el = document.createElement('div'); el.className = 'coin-token'; el.style.left = x+'px'; el.style.top = y+'px'; el.style.background = g?'radial-gradient(circle, #f1c40f 0%, #f39c12 100%)':'radial-gradient(circle, #bdc3c7 0%, #95a5a6 100%)'; el.innerText = g?'G':'S'; layer.appendChild(el); el.onclick = () => { state.coins += g?50:10; updateUI(); playSnd('snd-sun'); gsap.to(el, {scale:0, onComplete:()=>el.remove()}); }; gsap.from(el, {y:"-=30", duration:0.5, ease:"bounce.out"}); setTimeout(()=>{ if(el.parentElement) gsap.to(el, {opacity:0, onComplete:()=>el.remove()}); }, 8000); }
+        function shoot(p) { 
+            if(!state.zombies.some(z=>z.row===p.gy && z.x > (255+p.gx*82))) return; 
+            playSnd('snd-shoot'); 
+            const d = MOD_CONFIG.plants.find(i=>i.id===p.id) || FUSION_DATA[p.id];
+            const isLobbed = d && d.isPult;
+            const el = document.createElement('img'); el.className = 'entity'; 
+            el.src = isLobbed ? 'images/Sun.gif' : (p.projectile==='snow'?'images/SnowBullet.gif':'images/Bullet.gif'); // Placeholder for pult ammo
+            el.style.width = '35px';
+            const pos = getCellPos(p.gx, p.gy);
+            el.style.left = (pos.x+55)+'px'; el.style.top = (pos.y+10)+'px'; layer.appendChild(el); 
+            state.bullets.push({ el, x: (pos.x+55), y: (pos.y+10), startY: pos.y+10, row: p.gy, type: p.projectile, isLobbed, progress: 0, gx: p.gx }); 
         }
+        function spawnZombieAt(gx, gy) { const zD = MOD_CONFIG.zombies[0], el = document.createElement('img'); el.src = `images/${zD.img}`; el.className = 'entity zombie'; const x = MOD_CONFIG.grid.sx+gx*MOD_CONFIG.grid.cw; el.style.left = x+'px'; el.style.top = (MOD_CONFIG.grid.sy+gy*MOD_CONFIG.grid.ch-80)+'px'; layer.appendChild(el); state.zombies.push({ el, x, row: gy, hp: zD.hp, type: zD.id, state: 'walk', speed: zD.speed*state.gameSpeed, isAir: false, canVault: false }); }
+        function showWaveMsg(txt) { const el = document.getElementById('wave-msg'); el.innerText = txt; el.style.display = 'block'; gsap.fromTo(el, {scale:0}, {scale:1.2, duration:0.8, onComplete:()=>setTimeout(()=>gsap.to(el, {scale:2, opacity:0, onComplete:()=>el.style.display='none'}), 2000)}); }
     </script>
 </body>
 </html>

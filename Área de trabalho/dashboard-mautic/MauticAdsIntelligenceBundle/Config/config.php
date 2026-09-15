@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'name'        => 'Mautic Ads Intelligence',
     'description' => 'Integra dados de anúncios com CRM para otimização por IA',
-    'version'     => '0.1.14',
+    'version'     => '0.1.16',
     'author'      => 'LetsWork',
 
     'routes' => [
@@ -27,9 +27,29 @@ return [
                 'path'       => '/ads-intelligence/overview',
                 'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::overviewAction',
             ],
+            'mautic_ads_intelligence_performance_overview' => [
+                'path'       => '/ads-intelligence/performance-overview',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::performanceOverviewAction',
+            ],
+            'mautic_ads_intelligence_account_performance' => [
+                'path'       => '/ads-intelligence/account-performance',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::accountPerformanceAction',
+            ],
+            'mautic_ads_intelligence_search_query_performance' => [
+                'path'       => '/ads-intelligence/search-query-performance',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::searchQueryPerformanceAction',
+            ],
             'mautic_ads_intelligence_channels' => [
                 'path'       => '/ads-intelligence/channels',
                 'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::channelsAction',
+            ],
+            'mautic_ads_intelligence_auction_insights' => [
+                'path'       => '/ads-intelligence/auction-insights',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\AuctionInsightController::indexAction',
+            ],
+            'mautic_ads_intelligence_auction_insights_copy' => [
+                'path'       => '/ads-intelligence/auction-insights-copy',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\AuctionInsightController::copyAction',
             ],
             'mautic_ads_intelligence_click_performance' => [
                 'path'       => '/ads-intelligence/click-performance',
@@ -105,6 +125,23 @@ return [
             'mautic_ads_intelligence_logs' => [
                 'path'       => '/ads-intelligence/logs',
                 'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::logsAction',
+            ],
+
+            // AJAX Routes
+            'mautic_ads_intelligence_ajax_campaigns' => [
+                'path'       => '/ads-intelligence/ajax/campaigns',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::ajaxCampaignsAction',
+                'method'     => 'GET',
+            ],
+            'mautic_ads_intelligence_ajax_ad_groups' => [
+                'path'       => '/ads-intelligence/ajax/ad-groups',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::ajaxAdGroupsAction',
+                'method'     => 'GET',
+            ],
+            'mautic_ads_intelligence_ajax_performance' => [
+                'path'       => '/ads-intelligence/ajax/performance-data',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\DashboardController::ajaxPerformanceDataAction',
+                'method'     => 'GET',
             ],
 
             // Accounts
@@ -273,6 +310,30 @@ return [
                 'controller'   => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\ContactNoInterestController::modalAction',
                 'requirements' => ['contactId' => '\\d+'],
             ],
+
+            // LinkedIn multi-account management
+            'mautic_ads_intelligence_linkedin_accounts' => [
+                'path'       => '/ads-intelligence/linkedin/accounts',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\LinkedInAccountController::listAction',
+                'method'     => 'GET',
+            ],
+            'mautic_ads_intelligence_linkedin_disconnect' => [
+                'path'         => '/ads-intelligence/linkedin/{credentialId}/disconnect',
+                'controller'   => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\LinkedInAccountController::disconnectAction',
+                'method'       => 'POST',
+                'requirements' => ['credentialId' => '\\d+'],
+            ],
+            'mautic_ads_intelligence_linkedin_status' => [
+                'path'       => '/ads-intelligence/linkedin/status',
+                'controller' => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\LinkedInAccountController::statusAction',
+                'method'     => 'GET',
+            ],
+            'mautic_ads_intelligence_linkedin_rename' => [
+                'path'         => '/ads-intelligence/linkedin/{credentialId}/rename',
+                'controller'   => 'MauticPlugin\MauticAdsIntelligenceBundle\Controller\LinkedInAccountController::renameAction',
+                'method'       => 'POST',
+                'requirements' => ['credentialId' => '\\d+'],
+            ],
         ],
     ],
 
@@ -289,10 +350,35 @@ return [
                         'access'   => 'ads:intelligence:view',
                         'priority' => 100,
                     ],
+                    'mautic.ads_intelligence.menu.performance_overview' => [
+                        'route'    => 'mautic_ads_intelligence_performance_overview',
+                        'access'   => 'ads:intelligence:view',
+                        'priority' => 95,
+                    ],
+                    'mautic.ads_intelligence.menu.account_performance' => [
+                        'route'    => 'mautic_ads_intelligence_account_performance',
+                        'access'   => 'ads:intelligence:view',
+                        'priority' => 93,
+                    ],
+                    'mautic.ads_intelligence.menu.search_query_performance' => [
+                        'route'    => 'mautic_ads_intelligence_search_query_performance',
+                        'access'   => 'ads:intelligence:view',
+                        'priority' => 91,
+                    ],
                     'mautic.ads_intelligence.menu.channels' => [
                         'route'    => 'mautic_ads_intelligence_channels',
                         'access'   => 'ads:intelligence:view',
                         'priority' => 90,
+                    ],
+                    'mautic.ads_intelligence.menu.auction_insights' => [
+                        'route'    => 'mautic_ads_intelligence_auction_insights',
+                        'access'   => 'ads:intelligence:view',
+                        'priority' => 88,
+                    ],
+                    'mautic.ads_intelligence.menu.auction_insights_copy' => [
+                        'route'    => 'mautic_ads_intelligence_auction_insights_copy',
+                        'access'   => 'ads:intelligence:view',
+                        'priority' => 88,
                     ],
                     'mautic.ads_intelligence.menu.click_performance' => [
                         'route'    => 'mautic_ads_intelligence_click_performance',
@@ -382,6 +468,48 @@ return [
             ],
             'mautic.integration.adsintelligencemicrosoft' => [
                 'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Integration\AdsIntelligenceMicrosoftIntegration::class,
+                'arguments' => [
+                    'event_dispatcher',
+                    'mautic.helper.cache_storage',
+                    'doctrine.orm.entity_manager',
+                    'request_stack',
+                    'router',
+                    'translator',
+                    'monolog.logger.mautic',
+                    'mautic.helper.encryption',
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.company',
+                    'mautic.helper.paths',
+                    'mautic.core.model.notification',
+                    'mautic.lead.model.field',
+                    'mautic.plugin.model.integration_entity',
+                    'mautic.lead.model.dnc',
+                    'mautic.lead.field.fields_with_unique_identifier',
+                ],
+            ],
+            'mautic.integration.adsintelligencelinkedin' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Integration\AdsIntelligenceLinkedInIntegration::class,
+                'arguments' => [
+                    'event_dispatcher',
+                    'mautic.helper.cache_storage',
+                    'doctrine.orm.entity_manager',
+                    'request_stack',
+                    'router',
+                    'translator',
+                    'monolog.logger.mautic',
+                    'mautic.helper.encryption',
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.company',
+                    'mautic.helper.paths',
+                    'mautic.core.model.notification',
+                    'mautic.lead.model.field',
+                    'mautic.plugin.model.integration_entity',
+                    'mautic.lead.model.dnc',
+                    'mautic.lead.field.fields_with_unique_identifier',
+                ],
+            ],
+            'mautic.integration.adsintelligenceopenai' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Integration\AdsIntelligenceOpenAiIntegration::class,
                 'arguments' => [
                     'event_dispatcher',
                     'mautic.helper.cache_storage',
@@ -523,7 +651,21 @@ return [
             ],
             'mautic.ads_intelligence.provider.linkedin' => [
                 'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Provider\LinkedInAdsProvider::class,
-                'arguments' => [],
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                    'mautic.helper.encryption',
+                    'mautic.native.connector',
+                    'monolog.logger.mautic',
+                ],
+            ],
+            'mautic.ads_intelligence.provider.openai' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Provider\OpenAiAdsProvider::class,
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                    'mautic.helper.encryption',
+                    'mautic.native.connector',
+                    'monolog.logger.mautic',
+                ],
             ],
             'mautic.ads_intelligence.service.account_sync' => [
                 'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Service\Sync\AdsAccountSyncService::class,
@@ -531,6 +673,8 @@ return [
                     'doctrine.orm.entity_manager',
                     'mautic.ads_intelligence.provider.google',
                     'mautic.ads_intelligence.provider.microsoft',
+                    'mautic.ads_intelligence.provider.linkedin',
+                    'mautic.ads_intelligence.provider.openai',
                     'mautic.ads_intelligence.service.provider_status',
                 ],
             ],
@@ -540,7 +684,18 @@ return [
                     'doctrine.orm.entity_manager',
                     'mautic.ads_intelligence.provider.google',
                     'mautic.ads_intelligence.provider.microsoft',
+                    'mautic.ads_intelligence.provider.linkedin',
+                    'mautic.ads_intelligence.provider.openai',
                     'mautic.ads_intelligence.service.provider_status',
+                ],
+            ],
+            'mautic.ads_intelligence.service.metrics_sync' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Service\Sync\AdsMetricsSyncService::class,
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                    'mautic.ads_intelligence.provider.google',
+                    'mautic.ads_intelligence.service.provider_status',
+                    'monolog.logger.mautic',
                 ],
             ],
             'mautic.ads_intelligence.service.provider_status' => [
@@ -563,6 +718,22 @@ return [
                     'mautic.ads_intelligence.provider.google',
                     'mautic.ads_intelligence.provider.microsoft',
                 ],
+            ],
+            'mautic.ads_intelligence.service.auction_insight_sync' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Service\Sync\AdsAuctionInsightSyncService::class,
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                    'mautic.ads_intelligence.provider.google',
+                    'mautic.ads_intelligence.service.provider_status',
+                    'monolog.logger.mautic',
+                ],
+            ],
+            'mautic.ads_intelligence.command.sync_auction_insights' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Command\SyncAuctionInsightsCommand::class,
+                'arguments' => [
+                    'mautic.ads_intelligence.service.auction_insight_sync',
+                ],
+                'tag'       => 'console.command',
             ],
 
             // AI services
@@ -639,6 +810,18 @@ return [
                 'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Command\GenerateRecommendationsCommand::class,
                 'arguments' => [
                     'mautic.ads_intelligence.service.negative_keyword_recommendation',
+                ],
+                'tag'       => 'console.command',
+            ],
+            'mautic.ads_intelligence.command.sync_metrics' => [
+                'class'     => \MauticPlugin\MauticAdsIntelligenceBundle\Command\SyncMetricsCommand::class,
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                    'mautic.ads_intelligence.provider.google',
+                    'mautic.ads_intelligence.provider.microsoft',
+                    'mautic.ads_intelligence.provider.linkedin',
+                    'mautic.ads_intelligence.provider.openai',
+                    'mautic.ads_intelligence.service.provider_status',
                 ],
                 'tag'       => 'console.command',
             ],

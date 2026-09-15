@@ -12,6 +12,8 @@ class ProviderStatusService
     private const PROVIDER_INTEGRATIONS = [
         'google'    => 'AdsIntelligence',
         'microsoft' => 'AdsIntelligenceMicrosoft',
+        'linkedin'  => 'AdsIntelligenceLinkedIn',
+        'openai'    => 'AdsIntelligenceOpenAi',
     ];
 
     public function __construct(private readonly EntityManagerInterface $entityManager)

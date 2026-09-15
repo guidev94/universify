@@ -68,11 +68,19 @@ class AccountController extends CommonController
 
         $result = $this->container->get('mautic.ads_intelligence.service.account_sync')->syncAccounts();
 
-        if ([] !== $result['errors']) {
-            $this->addFlash('error', implode(' ', $result['errors']));
-        } else {
+        // Report the count even when some providers failed: a partial success used to be
+        // reported as a pure error, which made working providers look broken.
+        if (0 < $result['synced']) {
             $this->addFlash('notice', $this->translator->trans('mautic.ads_intelligence.accounts.sync_success', [
                 '%count%' => $result['synced'],
+            ]));
+        }
+
+        if ([] !== $result['errors']) {
+            $this->addFlash('error', implode(' ', $result['errors']));
+        } elseif (0 === $result['synced']) {
+            $this->addFlash('notice', $this->translator->trans('mautic.ads_intelligence.accounts.sync_success', [
+                '%count%' => 0,
             ]));
         }
 

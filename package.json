@@ -11,6 +11,7 @@
     "test:e2e:desktop": "playwright test --project=chromium"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0"
+    "@playwright/test": "^1.49.0",
+    "vercel": "^58.8.0"
   }
 }

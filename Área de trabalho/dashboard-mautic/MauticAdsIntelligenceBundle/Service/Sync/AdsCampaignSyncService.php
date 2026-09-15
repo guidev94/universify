@@ -10,7 +10,9 @@ use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsAdGroup;
 use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsCampaign;
 use MauticPlugin\MauticAdsIntelligenceBundle\Entity\AdsKeyword;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\GoogleAdsProvider;
+use MauticPlugin\MauticAdsIntelligenceBundle\Provider\LinkedInAdsProvider;
 use MauticPlugin\MauticAdsIntelligenceBundle\Provider\MicrosoftAdsProvider;
+use MauticPlugin\MauticAdsIntelligenceBundle\Provider\OpenAiAdsProvider;
 
 class AdsCampaignSyncService
 {
@@ -18,6 +20,8 @@ class AdsCampaignSyncService
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleAdsProvider $googleAdsProvider,
         private readonly MicrosoftAdsProvider $microsoftAdsProvider,
+        private readonly LinkedInAdsProvider $linkedInAdsProvider,
+        private readonly OpenAiAdsProvider $openAiAdsProvider,
         private readonly ProviderStatusService $providerStatusService,
     ) {
     }
@@ -35,7 +39,7 @@ class AdsCampaignSyncService
      *
      * @return array{synced: int, adGroups: int, keywords: int, campaigns: array<int, array<string, mixed>>, errors: array<int, string>}
      */
-    public function syncCampaigns(array $providers = ['google', 'microsoft'], ?int $accountId = null): array
+    public function syncCampaigns(array $providers = ['google', 'microsoft', 'linkedin', 'openai'], ?int $accountId = null): array
     {
         $criteria = [];
 
@@ -113,11 +117,13 @@ class AdsCampaignSyncService
         return $result;
     }
 
-    private function getProvider(string $provider): GoogleAdsProvider|MicrosoftAdsProvider|null
+    private function getProvider(string $provider): GoogleAdsProvider|MicrosoftAdsProvider|LinkedInAdsProvider|OpenAiAdsProvider|null
     {
         return match ($provider) {
             'google'    => $this->googleAdsProvider,
             'microsoft' => $this->microsoftAdsProvider,
+            'linkedin'  => $this->linkedInAdsProvider,
+            'openai'    => $this->openAiAdsProvider,
             default     => null,
         };
     }
@@ -246,6 +252,7 @@ class AdsCampaignSyncService
             ->setMatchType($matchType)
             ->setNegative($negative)
             ->setStatus($keywordData['status'] ?? null)
+            ->setQualityScore($keywordData['qualityScore'] ?? null)
             ->setUpdatedAt(new \DateTime());
 
         $this->entityManager->persist($keyword);

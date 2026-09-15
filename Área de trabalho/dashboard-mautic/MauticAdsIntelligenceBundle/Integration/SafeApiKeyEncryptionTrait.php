@@ -48,12 +48,25 @@ trait SafeApiKeyEncryptionTrait
         $decrypted = [];
 
         foreach ($keys as $name => $key) {
-            if (!is_string($key)) {
+            if (!is_string($key) || '' === $key) {
                 $decrypted[$name] = $key;
                 continue;
             }
 
-            $decoded = $this->encryptionHelper->decrypt($key, $mainDecryptOnly);
+            // Core EncryptionHelper::decrypt() explodes on "<payload>|<iv>"; anything
+            // without that separator was never encrypted by it, so pass it through.
+            if (!str_contains($key, '|')) {
+                $decrypted[$name] = $key;
+                continue;
+            }
+
+            try {
+                $decoded = $this->encryptionHelper->decrypt($key, $mainDecryptOnly);
+            } catch (\TypeError) {
+                $decrypted[$name] = $key;
+                continue;
+            }
+
             if (false === $decoded) {
                 continue;
             }

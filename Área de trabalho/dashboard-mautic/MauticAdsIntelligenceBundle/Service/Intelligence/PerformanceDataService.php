@@ -22,248 +22,187 @@ class PerformanceDataService
 
     public function getClickPerformanceData(array $filters): array
     {
-        $accounts = $this->getTargetAccounts($filters);
+        [$from, $to] = $this->resolveDateRange($filters);
+        $conn = $this->entityManager->getConnection();
+        [$where, $params] = $this->buildMetricsWhereSql($filters, $from, $to);
         
-        if (empty($accounts)) {
-            return $this->getStaticClickPerformanceData();
+        $sql = "SELECT 
+                    m.metric_date as raw_date,
+                    DATE_FORMAT(m.metric_date, '%d/%m/%Y') as date,
+                    COALESCE(c.name, CONCAT('Campaign #', m.campaign_id)) as campaign,
+                    SUM(m.clicks) as clicks,
+                    SUM(m.impressions) as impressions,
+                    SUM(m.conversions) as conversions,
+                    SUM(m.cost) as cost
+                FROM ads_metrics_daily m
+                LEFT JOIN ads_campaigns c ON c.id = m.campaign_id
+                WHERE " . implode(' AND ', $where) . "
+                GROUP BY m.metric_date, m.campaign_id, c.name
+                ORDER BY m.metric_date ASC, clicks DESC";
+
+        $results = $conn->fetchAllAssociative($sql, $params);
+
+        $labels = []; $impressionsDataset = []; $clicksDataset = []; $tableData = [];
+        
+        // Accurate Daily Aggregation for Charts
+        $dailyAgg = [];
+        foreach ($results as $row) {
+            $d = $row['date'];
+            if (!isset($dailyAgg[$d])) { $dailyAgg[$d] = ['clicks' => 0, 'impressions' => 0]; }
+            $dailyAgg[$d]['clicks'] += (int)$row['clicks'];
+            $dailyAgg[$d]['impressions'] += (int)$row['impressions'];
         }
 
-        $allResults = [];
-        foreach ($accounts as $account) {
-            try {
-                $results = [];
-                if ($account->getProvider() === 'google') {
-                    $results = $this->googleAdsProvider->fetchClickPerformance($account, $filters);
-                } elseif ($account->getProvider() === 'microsoft') {
-                    // Fallback to static or actual sync logic
-                    $results = [];
-                }
-                
-                if (!empty($results)) {
-                    $allResults = array_merge($allResults, $results);
-                }
-            } catch (\Throwable $e) {
-                // Silently continue
-            }
+        foreach ($dailyAgg as $date => $metrics) {
+            $labels[] = $date;
+            $impressionsDataset[] = $metrics['impressions'];
+            $clicksDataset[] = $metrics['clicks'];
         }
 
-        if (empty($allResults)) {
-            return $this->getStaticClickPerformanceData();
+        $maxClicks = 1;
+        foreach ($results as $row) { if ((int)$row['clicks'] > $maxClicks) $maxClicks = (int)$row['clicks']; }
+
+        foreach ($results as $row) {
+            $i = (int)$row['impressions'];
+            $c = (int)$row['clicks'];
+            $ctr = $i > 0 ? ($c / $i) * 100 : 0;
+
+            $tableData[] = [
+                'date' => $row['date'],
+                'campaign' => $row['campaign'],
+                'clicks' => $c,
+                'impressions' => $i,
+                'ctr' => number_format($ctr, 2) . '%',
+                'conversions' => number_format((float)$row['conversions'], 0),
+                'cost' => 'R$ ' . number_format((float)$row['cost'], 2, ',', '.'),
+                'heatmap_intensity' => ($c / $maxClicks) * 100
+            ];
         }
 
-        return $this->formatClickPerformanceData($allResults);
+        return [
+            'labels' => $labels, 
+            'datasets' => [['label' => 'Impressões', 'data' => $impressionsDataset], ['label' => 'Cliques', 'data' => $clicksDataset]], 
+            'tableData' => $tableData, 
+            'filters' => ['date_from' => $from->format('Y-m-d'), 'date_to' => $to->format('Y-m-d')]
+        ];
     }
 
     public function getKeywordPerformanceData(array $filters): array
     {
-        $accounts = $this->getTargetAccounts($filters);
-        
-        if (empty($accounts)) {
-            return $this->getStaticKeywordPerformanceData();
-        }
+        [$from, $to] = $this->resolveDateRange($filters);
+        $conn = $this->entityManager->getConnection();
+        [$where, $params] = $this->buildMetricsWhereSql($filters, $from, $to);
+        $where[] = "m.keyword_id IS NOT NULL";
 
-        $allResults = [];
-        foreach ($accounts as $account) {
-            try {
-                $results = [];
-                if ($account->getProvider() === 'google') {
-                    $results = $this->googleAdsProvider->fetchKeywordPerformance($account, $filters);
-                }
-                
-                if (!empty($results)) {
-                    $allResults = array_merge($allResults, $results);
-                }
-            } catch (\Throwable $e) {
-                // Silently continue
+        $sql = "SELECT 
+                    k.keyword_text as keyword,
+                    k.quality_score as qs,
+                    k.match_type as match_type,
+                    k.status as status,
+                    COALESCE(c.name, 'Unknown') as campaign,
+                    SUM(m.clicks) as clicks,
+                    SUM(m.impressions) as impressions,
+                    SUM(m.cost) as cost
+                FROM ads_metrics_daily m
+                INNER JOIN ads_keywords k ON k.id = m.keyword_id
+                LEFT JOIN ads_campaigns c ON c.id = m.campaign_id
+                WHERE " . implode(' AND ', $where) . "
+                GROUP BY k.id, m.campaign_id, c.name
+                ORDER BY clicks DESC";
+
+        $results = $conn->fetchAllAssociative($sql, $params);
+
+        $tableData = []; 
+        $qsData = array_fill(1, 11, 0); 
+        $qsCount = array_fill(1, 11, 0);
+        $matchTypeAgg = ['phrase' => ['clicks' => 0, 'cost' => 0], 'broad'  => ['clicks' => 0, 'cost' => 0], 'exact'  => ['clicks' => 0, 'cost' => 0]];
+
+        $maxClicks = 1;
+        foreach ($results as $row) { if ((int)$row['clicks'] > $maxClicks) $maxClicks = (int)$row['clicks']; }
+
+        foreach ($results as $row) {
+            $c = (int)$row['clicks'];
+            $i = (int)$row['impressions'];
+            $cost = (float)$row['cost'];
+            $qs = $row['qs'] !== null ? (int)$row['qs'] : null;
+            $match = strtolower((string)$row['match_type']);
+
+            if ($qs !== null && $qs >= 1 && $qs <= 10) {
+                $qsData[$qs] += $cost;
+                $qsCount[$qs] += $c;
             }
-        }
-
-        if (empty($allResults)) {
-            return $this->getStaticKeywordPerformanceData();
-        }
-
-        return $this->formatKeywordPerformanceData($allResults);
-    }
-
-    private function getTargetAccounts(array $filters): array
-    {
-        $criteria = [];
-        if (!empty($filters['account_id'])) {
-            $criteria['id'] = (int)$filters['account_id'];
-        }
-        if (!empty($filters['channel'])) {
-            $criteria['provider'] = (string)$filters['channel'];
-        }
-        
-        $results = $this->entityManager->getRepository(AdsAccount::class)->findBy($criteria);
-
-        return is_array($results) ? $results : [];
-    }
-
-    private function formatClickPerformanceData(array $results): array
-    {
-        $labels = [];
-        $impressions = [];
-        $clicks = [];
-        $tableData = [];
-
-        foreach ($results as $result) {
-            $dateStr = $result['segments']['date'] ?? 'Unknown';
-            try {
-                $dt = new \DateTime($dateStr);
-                $dateFormatted = $dt->format('d/m/Y');
-                $labelDate = $dt->format('d M');
-            } catch (\Throwable $e) {
-                $dateFormatted = (string)$dateStr;
-                $labelDate = (string)$dateStr;
+            if (isset($matchTypeAgg[$match])) {
+                $matchTypeAgg[$match]['clicks'] += $c;
+                $matchTypeAgg[$match]['cost'] += $cost;
             }
-
-            $campaign = $result['campaign']['name'] ?? 'Unknown';
-            $c = (int) ($result['metrics']['clicks'] ?? 0);
-            $i = (int) ($result['metrics']['impressions'] ?? 0);
-            $conv = (float) ($result['metrics']['conversions'] ?? 0);
-            $costMicros = (float) ($result['metrics']['costMicros'] ?? 0);
-            $cost = $costMicros / 1000000;
-            $ctr = $i > 0 ? ($c / $i) * 100 : 0;
-
-            $labels[] = $labelDate;
-            $impressions[] = $i;
-            $clicks[] = $c;
 
             $tableData[] = [
-                'date' => $dateFormatted,
-                'campaign' => $campaign,
+                'keyword' => $row['keyword'],
+                'qs' => $row['qs'] ?? 'null',
+                'match' => ucfirst($match),
+                'status' => strtolower((string)$row['status']),
+                'state' => 'Active',
+                'campaign' => $row['campaign'],
                 'clicks' => $c,
                 'impressions' => $i,
-                'ctr' => number_format($ctr, 2) . '%',
-                'conversions' => number_format($conv, 0),
-                'cost' => 'R$ ' . number_format($cost, 2, ',', '.')
+                'ctr' => ($i > 0 ? number_format(($c / $i) * 100, 2, ',', '.') : '0,00') . '%',
+                'avg_cpc' => ($c > 0 ? 'R$ ' . number_format($cost / $c, 2, ',', '.') : 'R$ 0,00'),
+                'cost' => 'R$ ' . number_format($cost, 2, ',', '.'),
+                'heatmap_intensity' => ($c / $maxClicks) * 100
             ];
         }
 
-        return [
-            'labels' => $labels,
-            'datasets' => [['label' => 'Impressões', 'data' => $impressions], ['label' => 'Cliques', 'data' => $clicks]],
-            'tableData' => $tableData
-        ];
-    }
-
-    private function formatKeywordPerformanceData(array $results): array
-    {
-        $tableData = [];
-        $qsData = array_fill(1, 11, 0);
-        $qsCount = array_fill(1, 11, 0);
-        $matchTypeData = ['phrase' => ['clicks' => 0, 'cost' => 0], 'broad' => ['clicks' => 0, 'cost' => 0], 'exact' => ['clicks' => 0, 'cost' => 0]];
-
-        foreach ($results as $result) {
-            $keyword = $result['adGroupCriterion']['keyword']['text'] ?? 'Unknown';
-            $qs = $result['adGroupCriterion']['qualityInfo']['qualityScore'] ?? null;
-            $match = strtolower($result['adGroupCriterion']['keyword']['matchType'] ?? 'Unknown');
-            $status = $result['adGroupCriterion']['status'] ?? 'Unknown';
-            $campaign = $result['campaign']['name'] ?? 'Unknown';
-            $clicks = (int) ($result['metrics']['clicks'] ?? 0);
-            $impressions = (int) ($result['metrics']['impressions'] ?? 0);
-            $ctr = ($result['metrics']['ctr'] ?? 0) * 100;
-            $costMicros = (float) ($result['metrics']['costMicros'] ?? 0);
-            $cost = $costMicros / 1000000;
-
-            if ($qs && $qs >= 1 && $qs <= 10) {
-                $qsData[(int)$qs] += $cost / ($clicks ?: 1);
-                $qsCount[(int)$qs]++;
-            }
-
-            if (isset($matchTypeData[$match])) {
-                $matchTypeData[$match]['clicks'] += $clicks;
-                $matchTypeData[$match]['cost'] += $cost;
-            }
-
-            $tableData[] = [
-                'keyword' => $keyword,
-                'qs' => $qs,
-                'match' => ucfirst($match),
-                'status' => strtolower($status),
-                'state' => 'Active',
-                'campaign' => $campaign,
-                'clicks' => $clicks,
-                'impressions' => $impressions,
-                'ctr' => number_format($ctr, 2) . '%',
-                'cost' => 'R$ ' . number_format($cost, 2, ',', '.')
-            ];
-        }
-
-        $cpcData = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $cpcData[] = $qsCount[$i] ? $qsData[$i] / $qsCount[$i] : 0;
+        $cpcByQs = [];
+        for ($q = 1; $q <= 10; $q++) {
+            $cpcByQs[] = $qsCount[$q] > 0 ? $qsData[$q] / $qsCount[$q] : 0;
         }
 
         return [
-            'cpcData' => ['labels' => ['1','2','3','4','5','6','7','8','9','10'], 'data' => $cpcData],
+            'cpcData' => ['labels' => ['1','2','3','4','5','6','7','8','9','10'], 'data' => $cpcByQs],
             'matchTypeData' => [
                 'labels' => ['Phrase', 'Broad', 'Exact'],
-                'clicks' => [$matchTypeData['phrase']['clicks'], $matchTypeData['broad']['clicks'], $matchTypeData['exact']['clicks']],
-                'cost' => [$matchTypeData['phrase']['cost'], $matchTypeData['broad']['cost'], $matchTypeData['exact']['cost']]
+                'clicks' => [$matchTypeAgg['phrase']['clicks'], $matchTypeAgg['broad']['clicks'], $matchTypeAgg['exact']['clicks']],
+                'cost' => [$matchTypeAgg['phrase']['cost'], $matchTypeAgg['broad']['cost'], $matchTypeAgg['exact']['cost']]
             ],
-            'tableData' => $tableData
+            'tableData' => $tableData,
+            'filters' => ['date_from' => $from->format('Y-m-d'), 'date_to' => $to->format('Y-m-d')]
         ];
     }
 
-    private function getStaticClickPerformanceData(): array
+    private function buildMetricsWhereSql(array $filters, \DateTimeInterface $from, \DateTimeInterface $to): array
     {
-        // NO RAND() - COMPLETELY STATIC FOR STABILITY
-        $dates = ['14/07/2026', '15/07/2026', '16/07/2026', '17/07/2026', '18/07/2026', '19/07/2026', '20/07/2026'];
-        $labels = ['14 Jul', '15 Jul', '16 Jul', '17 Jul', '18 Jul', '19 Jul', '20 Jul'];
-        $impressions = [1064, 1410, 3192, 4497, 4337, 3383, 3135];
-        $clicks = [331, 63, 251, 194, 174, 250, 221];
-        $conversions = [7, 3, 10, 9, 3, 10, 10];
-        $costs = [40.76, 21.09, 49.45, 20.98, 12.17, 22.60, 43.96];
-        
-        $tableData = [];
-        foreach ($dates as $idx => $date) {
-            $tableData[] = [
-                'date' => $date,
-                'campaign' => '[Pesquisa] Módulos - Leads',
-                'clicks' => $clicks[$idx],
-                'impressions' => $impressions[$idx],
-                'ctr' => number_format(($clicks[$idx]/$impressions[$idx])*100, 2) . '%',
-                'conversions' => $conversions[$idx],
-                'cost' => 'R$ ' . number_format($costs[$idx], 2, ',', '.')
-            ];
+        $where = ["m.metric_date BETWEEN :dateFrom AND :dateTo"];
+        $params = ['dateFrom' => $from->format('Y-m-d'), 'dateTo' => $to->format('Y-m-d')];
+
+        if (!empty($filters['channel']) && $filters['channel'] !== '') {
+            $where[] = "m.provider = :provider"; $params['provider'] = (string) $filters['channel'];
         }
-        return [
-            'labels' => $labels,
-            'datasets' => [['label' => 'Impressões', 'data' => $impressions], ['label' => 'Cliques', 'data' => $clicks]],
-            'tableData' => $tableData
-        ];
+        if (!empty($filters['account_id']) && (int)$filters['account_id'] > 0) {
+            $where[] = "m.account_id = :accountId"; $params['accountId'] = (int)$filters['account_id'];
+        }
+        if (!empty($filters['campaign_id']) && (int)$filters['campaign_id'] > 0) {
+            $where[] = "m.campaign_id = :campaignId"; $params['campaignId'] = (int)$filters['campaign_id'];
+        }
+        if (!empty($filters['ad_group_id']) && (int)$filters['ad_group_id'] > 0) {
+            $where[] = "m.adgroup_id = :adgroupId"; $params['adgroupId'] = (int)$filters['ad_group_id'];
+        }
+        if (!empty($filters['device']) && $filters['device'] !== '') {
+            $where[] = "m.device = :device"; $params['device'] = (string)$filters['device'];
+        }
+        return [$where, $params];
     }
 
-    private function getStaticKeywordPerformanceData(): array
+    private function resolveDateRange(array $filters): array
     {
-        $keywords = [
-            ['kw' => 'gestão de segurança do trabalho', 'qs' => 4, 'cl' => 260, 'im' => 1691, 'cost' => 51.77],
-            ['kw' => 'recursos humanos', 'qs' => 9, 'cl' => 297, 'im' => 4404, 'cost' => 54.34],
-            ['kw' => 'software sst', 'qs' => 2, 'cl' => 443, 'im' => 3152, 'cost' => 46.77],
-            ['kw' => 'treinamento de pessoal', 'qs' => 2, 'cl' => 360, 'im' => 4214, 'cost' => 97.99]
-        ];
-        
-        $tableData = [];
-        foreach ($keywords as $k) {
-            $tableData[] = [
-                'keyword' => $k['kw'],
-                'qs' => $k['qs'],
-                'match' => 'Phrase',
-                'status' => 'enabled',
-                'state' => 'Active',
-                'campaign' => '[Pesquisa] Geral',
-                'clicks' => $k['cl'],
-                'impressions' => $k['im'],
-                'ctr' => number_format(($k['cl']/$k['im'])*100, 2) . '%',
-                'cost' => 'R$ ' . number_format($k['cost'], 2, ',', '.')
-            ];
-        }
-        return [
-            'cpcData' => ['labels' => ['1','2','3','4','5','6','7','8','9','10'], 'data' => [9.2, 8.4, 5.0, 0.4, 0.8, 6.1, 4.5, 3.2, 2.1, 1.1]],
-            'matchTypeData' => ['labels' => ['Phrase', 'Broad', 'Exact'], 'clicks' => [120, 850, 420], 'cost' => [400, 2600, 940]],
-            'tableData' => $tableData
-        ];
+        $to = $this->parseDate($filters['date_to'] ?? null) ?? new \DateTimeImmutable('today');
+        $from = $this->parseDate($filters['date_from'] ?? null) ?? $to->modify('-29 days');
+        if ($from > $to) { [$from, $to] = [$to, $from]; }
+        return [$from, $to];
+    }
+
+    private function parseDate(mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || '' === trim($value)) return null;
+        try { return new \DateTimeImmutable($value); } catch (\Throwable) { return null; }
     }
 }
