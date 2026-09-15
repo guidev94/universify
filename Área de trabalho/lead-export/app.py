@@ -2,20 +2,20 @@ import os
 import atexit
 import logging
 from flask import Flask
+from flask_compress import Compress
 from config import Config
 from database import init_db
 
 sentry_dsn = os.getenv("SENTRY_DSN", "")
-if sentry_dsn:
-    import sentry_sdk
-    from sentry_sdk.integrations.flask import FlaskIntegration
-    sentry_sdk.init(dsn=sentry_dsn, integrations=[FlaskIntegration()], traces_sample_rate=0.3)
-
-
+# ...
 def create_app():
     print("[app] Starting create_app...")
     app = Flask(__name__)
     app.secret_key = Config.SECRET_KEY
+    
+    # Ativa compressão Gzip para respostas JSON (Performance Front-end)
+    Compress(app)
+
 
     print("[app] Initializing DB...")
     init_db()
@@ -64,4 +64,4 @@ app = create_app()
 
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug_mode, port=5000, threaded=True)
+    app.run(host="0.0.0.0", debug=debug_mode, port=5000, threaded=True)

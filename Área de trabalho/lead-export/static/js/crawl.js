@@ -14,6 +14,8 @@ quantitySlider.addEventListener('input', () => {
     quantityValue.textContent = quantitySlider.value;
 });
 
+let sessionJobs = [];
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -37,6 +39,18 @@ form.addEventListener('submit', async (e) => {
 
         currentJobId = data.job_id;
         progressSection.classList.remove('hidden');
+        
+        // Add to session history
+        sessionJobs.unshift({
+            uuid: data.job_id,
+            query: query,
+            location: location,
+            total: quantity,
+            progress: 0,
+            status: 'running'
+        });
+        renderSessionHistory();
+        
         startPolling(quantity);
     } catch (err) {
         showToast(err.message, 'error');
@@ -44,11 +58,57 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
+function renderSessionHistory() {
+    const container = document.getElementById('sessionHistory');
+    const countEl = document.getElementById('sessionJobCount');
+    if (!container) return;
+
+    countEl.textContent = sessionJobs.length;
+
+    if (sessionJobs.length === 0) {
+        container.innerHTML = '<p class="text-center text-[11px] text-zinc-700 py-4 italic">Nenhuma busca iniciada ainda.</p>';
+        return;
+    }
+
+    container.innerHTML = sessionJobs.map(job => {
+        const pct = Math.min(100, Math.round((job.progress / job.total) * 100));
+        const isDone = job.status === 'completed';
+        const isError = job.status === 'error';
+
+        return `
+            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="min-w-0">
+                        <p class="text-[12px] font-bold text-zinc-100 truncate">${escapeHtml(job.query)}</p>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-tighter">${escapeHtml(job.location || 'Brasil')}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <span class="text-[10px] font-black ${isDone ? 'text-emerald-400' : isError ? 'text-red-400' : 'text-blue-400'} uppercase tracking-widest">${job.status}</span>
+                        <span class="text-[9px] text-zinc-500 font-mono">${job.progress}/${job.total}</span>
+                    </div>
+                </div>
+                <div class="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    lucide.createIcons();
+}
+
 function startPolling(total) {
     pollInterval = setInterval(async () => {
         try {
             const data = await api(`/api/crawl/status/${currentJobId}`);
             const pct = Math.min((data.progress / total) * 100, 100);
+
+            // Update state
+            const job = sessionJobs.find(j => j.uuid === currentJobId);
+            if (job) {
+                job.progress = data.progress;
+                job.status = data.status;
+                renderSessionHistory();
+            }
 
             document.getElementById('progressBar').style.width = pct + '%';
             document.getElementById('progressText').textContent = `${data.progress} / ${total}`;

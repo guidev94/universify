@@ -30,7 +30,7 @@ def test_lead_scoring_logic():
         "whatsapp": "5511999998888",
         "website": "https://empresa.com.br"
     }
-    score, tier = calculate_score(lead_br)
+    score, tier, _ = calculate_score(lead_br)
     assert score >= 80
     assert tier == "hot"
 
@@ -40,7 +40,7 @@ def test_lead_scoring_logic():
         "email": "info@company.us",
         "website": "https://company.us"
     }
-    score_us, tier_us = calculate_score(lead_us)
+    score_us, tier_us, _ = calculate_score(lead_us)
     assert score_us < 50
     assert tier_us == "cold"
 

@@ -1,154 +1,120 @@
-import re
-import time
 import logging
 import requests
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
-from urllib.parse import urlparse, urlencode
-import os
+from urllib.parse import urlparse, unquote
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from config import Config
+from crawler.search_engine import SearchEngine
 from crawler.utils import (
     safe_request,
     extract_emails_from_text,
     extract_phones_from_text,
     extract_whatsapp_from_html,
     extract_business_name,
+    extract_social_from_html,
 )
 
 logger = logging.getLogger("leadhunter.duckduckgo")
 
 
 class DuckDuckGoCrawler:
+    """Crawler DuckDuckGo otimizado com paralelismo alto e timeouts curtos."""
+
     def __init__(self):
-        self.ua = UserAgent()
-        self.delay = int(os.getenv("REQUEST_DELAY_MS", "1500")) / 1000
         self.session = requests.Session()
         self.session.headers.update({
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "User-Agent": SearchEngine._UA_POOL[0],
         })
+        self.search_engine = SearchEngine()
 
     def crawl(self, query, quantity, on_progress=None):
         leads = []
-        urls = self._search(query, quantity * 3)
+        # Busca URLs via SearchEngine (já otimizado com paralelo)
+        urls = self.search_engine.search(query, quantity * 3)
 
-        logger.info(f"[duckduckgo] buscando '{query}' — {len(urls)} URLs encontradas")
+        if not urls:
+            urls = self._search_fallback(query, quantity * 2)
 
-        for url in urls:
-            if len(leads) >= quantity:
-                break
-            try:
-                page_leads = self._extract_from_url(url)
-                leads.extend(page_leads)
-                if on_progress:
-                    on_progress(len(leads))
-                time.sleep(self.delay)
-            except Exception as e:
-                logger.debug(f"[duckduckgo] erro extraindo {url[:60]}: {e}")
-                continue
+        logger.info(f"[duckduckgo] '{query}' — {len(urls)} URLs para processar")
+
+        # Processamento paralelo com workers da Config
+        with ThreadPoolExecutor(max_workers=Config.CRAWLER_WORKERS) as executor:
+            future_to_url = {executor.submit(self._extract_from_url, url): url for url in urls}
+
+            for future in as_completed(future_to_url, timeout=90):
+                if len(leads) >= quantity:
+                    break
+                try:
+                    page_leads = future.result(timeout=Config.CRAWLER_TIMEOUT + 2)
+                    if page_leads:
+                        leads.extend(page_leads)
+                        if on_progress:
+                            on_progress(len(leads))
+                except Exception:
+                    continue
 
         logger.info(f"[duckduckgo] '{query}' — {len(leads)} leads extraídos")
         return leads[:quantity]
 
-    def _search(self, query, num_results):
+    def _search_fallback(self, query, num_results):
+        """Fallback local se SearchEngine não retornar nada."""
         urls = []
-        queries = [
-            f"{query} contato telefone whatsapp",
-            f"{query} endereço telefone",
-            f"{query} instagram whatsapp",
-        ]
-        search_query = queries[hash(query) % len(queries)]
-
-        for page in range(min(5, (num_results // 10) + 1)):
-            self.session.headers["User-Agent"] = self.ua.random
-
-            data = {
-                "q": search_query,
-                "kl": "br-pt",
-                "df": "",
-            }
-
-            if page > 0 and hasattr(self, "_next_params"):
-                data.update(self._next_params)
-
-            try:
-                response = self.session.post(
-                    "https://html.duckduckgo.com/html/",
-                    data=data,
-                    timeout=15,
-                )
-
-                if response.status_code == 202:
-                    logger.warning(f"[duckduckgo] desafio detectado na busca — tentando rota alternativa")
-                    # Try GET instead of POST
-                    try:
-                        response = self.session.get(
-                            f"https://html.duckduckgo.com/html/?{urlencode(data)}",
-                            timeout=15,
-                        )
-                    except:
-                        break
-                    if response.status_code != 200:
-                        break
-                
-                if response.status_code != 200:
-                    logger.warning(f"[duckduckgo] status {response.status_code} na busca")
-                    break
-
+        try:
+            response = self.session.get(
+                "https://lite.duckduckgo.com/lite/",
+                params={"q": query},
+                timeout=Config.CRAWLER_TIMEOUT,
+            )
+            if response.status_code == 200:
                 soup = BeautifulSoup(response.text, "lxml")
-
-                for link in soup.select("a.result__a"):
+                for link in soup.select("a.result-link"):
                     href = link.get("href", "")
-                    if href.startswith("//duckduckgo.com/l/?uddg="):
-                        from urllib.parse import unquote
-                        real_url = unquote(href.split("uddg=")[1].split("&")[0])
-                        if self._is_valid_url(real_url):
-                            urls.append(real_url)
-                    elif href.startswith("http") and self._is_valid_url(href):
+                    if href.startswith("http") and self._is_valid_url(href):
                         urls.append(href)
 
-                next_form = soup.select_one("form.nav-link input[name='s']")
-                if next_form:
-                    self._next_params = {
-                        "s": next_form.get("value", ""),
-                        "nextParams": "",
-                        "v": "l",
-                        "o": "json",
-                        "dc": str((page + 1) * 30),
-                        "api": "d.js",
-                    }
-                else:
-                    break
-
-                if len(urls) >= num_results:
-                    break
-
-                time.sleep(self.delay * 1.5)
-
-            except Exception as e:
-                logger.warning(f"[duckduckgo] erro na busca página {page}: {e}")
-                break
+            if not urls:
+                response = self.session.post(
+                    "https://html.duckduckgo.com/html/",
+                    data={"q": query, "kl": "br-pt"},
+                    timeout=Config.CRAWLER_TIMEOUT,
+                )
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, "lxml")
+                    for link in soup.select("a.result__a"):
+                        href = link.get("href", "")
+                        if "uddg=" in href:
+                            try:
+                                real_url = unquote(href.split("uddg=")[1].split("&")[0])
+                                if self._is_valid_url(real_url):
+                                    urls.append(real_url)
+                            except Exception:
+                                continue
+                        elif href.startswith("http") and self._is_valid_url(href):
+                            urls.append(href)
+        except Exception as e:
+            logger.debug(f"[duckduckgo] search fallback error: {e}")
 
         return urls[:num_results]
 
     def _is_valid_url(self, url):
-        excluded = {
+        excluded = frozenset({
             "duckduckgo.com", "google.com", "youtube.com", "facebook.com",
             "instagram.com", "twitter.com", "linkedin.com", "wikipedia.org",
             "bing.com", "microsoft.com",
-        }
+        })
         try:
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-            return parsed.scheme in ("http", "https") and not any(ex in domain for ex in excluded)
+            domain = urlparse(url).netloc.lower()
+            return not any(ex in domain for ex in excluded)
         except Exception:
             return False
 
     def _extract_from_url(self, url):
+        """Extrai leads de uma URL com timeout curto."""
         leads = []
-        self.session.headers["User-Agent"] = self.ua.random
 
-        # Reduced timeout from 12 to 8
-        response = safe_request(self.session, url, timeout=8)
+        response = safe_request(self.session, url, timeout=Config.CRAWLER_TIMEOUT)
         if not response or response.status_code != 200:
             return leads
 
@@ -156,22 +122,26 @@ class DuckDuckGoCrawler:
         if "text/html" not in content_type:
             return leads
 
-        soup = BeautifulSoup(response.text, "lxml")
+        html = response.text
+        soup = BeautifulSoup(html, "lxml")
         text = soup.get_text(separator=" ")
         domain = urlparse(url).netloc
 
-        emails = extract_emails_from_text(text, response.text)
+        emails = extract_emails_from_text(text, html)
         phones = extract_phones_from_text(text)
-        whatsapp = extract_whatsapp_from_html(response.text)
+        whatsapp = extract_whatsapp_from_html(html)
         name = extract_business_name(soup, domain)
+        social = extract_social_from_html(html)
 
-        if emails or phones:
+        if emails or phones or whatsapp:
             leads.append({
                 "name": name,
-                "email": emails[0] if emails else "",
-                "phone": phones[0] if phones else "",
+                "email": ";".join(emails) if emails else "",
+                "phone": ";".join(phones) if phones else "",
                 "whatsapp": whatsapp or (phones[0] if phones else ""),
                 "website": url,
+                "instagram": social.get("instagram", ""),
+                "facebook": social.get("facebook", ""),
                 "source": "duckduckgo",
                 "category": "",
             })

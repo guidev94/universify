@@ -58,6 +58,20 @@ class CNPJEnricher:
             if response.status_code == 200:
                 data = response.json()
                 
+                # Verify if company is ACTIVE (Situacao Cadastral 2 = Ativa)
+                status = data.get("situacao_cadastral")
+                status_label = data.get("descricao_situacao_cadastral", "DESCONHECIDO")
+                
+                if status and status != 2:
+                    logger.warning(f"[cnpj] Lead {lead_id} ({cnpj_clean}) possui status {status_label}. Pulando.")
+                    # Optional: mark lead as unqualified in DB
+                    conn = get_connection()
+                    conn.execute("UPDATE leads SET notes = ?, is_qualified = 0 WHERE id = ?", 
+                                 (f"CNPJ Inativo: {status_label}", lead_id))
+                    conn.commit()
+                    conn.close()
+                    return False
+
                 partners = []
                 for qsa in data.get("qsa", []):
                     partners.append(f"{qsa.get('nome_socio')} ({qsa.get('qualificacao_socio')})")
@@ -79,7 +93,7 @@ class CNPJEnricher:
                 )
                 conn.commit()
                 conn.close()
-                logger.info(f"[cnpj] Lead {lead_id} enriquecido com CNPJ {cnpj_clean}")
+                logger.info(f"[cnpj] Lead {lead_id} enriquecido com CNPJ {cnpj_clean} (Status: {status_label})")
                 return True
         except Exception as e:
             logger.error(f"[cnpj] Erro ao enriquecer lead {lead_id}: {e}")

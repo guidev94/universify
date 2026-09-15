@@ -41,14 +41,17 @@ def retry(max_attempts=3, backoff_factor=2, initial_delay=1):
     return decorator
 
 
-def safe_request(session, url, method="get", timeout=15, delay=0, **kwargs):
+def safe_request(session, url, method="get", timeout=None, delay=0, **kwargs):
+    if timeout is None:
+        from config import Config
+        timeout = Config.CRAWLER_TIMEOUT
     try:
         response = getattr(session, method)(url, timeout=timeout, **kwargs)
 
         if response.status_code == 429:
-            retry_after = int(response.headers.get("Retry-After", "30"))
+            retry_after = int(response.headers.get("Retry-After", "10"))
             logger.warning(f"[rate-limit] 429 em {url[:80]} — espera {retry_after}s")
-            time.sleep(retry_after)
+            time.sleep(min(retry_after, 30))  # Cap em 30s
             response = getattr(session, method)(url, timeout=timeout, **kwargs)
 
         if delay > 0:
@@ -154,12 +157,18 @@ def expand_local_keywords(keyword, location):
 
 def extract_emails_from_text(text, html=""):
     import re
+    # Standard email regex
     pattern = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
     found = set(re.findall(pattern, text))
+    
     if html:
+        # Try to find mailto: links which are more reliable
+        mailto_pattern = r'href=["\']mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})'
+        found.update(re.findall(mailto_pattern, html, re.IGNORECASE))
+        # Also check normal regex in html
         found.update(re.findall(pattern, html))
 
-    excluded_extensions = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".css", ".js"}
+    excluded_extensions = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".css", ".js", ".pdf", ".zip"}
     excluded_domains = {"example.com", "email.com", "sentry.io", "wixpress.com", "w3.org", "sentry-next.wixpress.com"}
     excluded_domain_parts = ("sentry", "wixpress", "example.com", "noreply", "mailchimp", "sendgrid")
     excluded_prefixes = ("noreply", "no-reply", "mailer", "admin@", "info@example", "webmaster")
@@ -186,21 +195,24 @@ def extract_emails_from_text(text, html=""):
 
 def extract_phones_from_text(text):
     import re
+    # Expanded Brazilian phone patterns
     patterns = [
-        r"\+55\s*\(?\d{2}\)?\s*9\d{4}[\-\s]?\d{4}", # Celular com 9
-        r"\+55\s*\(?\d{2}\)?\s*\d{4}[\-\s]?\d{4}",   # Fixo
-        r"\(?\d{2}\)?\s*9\d{4}[\-\s]?\d{4}",         # Celular local
-        r"\(?\d{2}\)?\s*\d{4}[\-\s]?\d{4}",           # Fixo local
-        r"\d{2}\s9\d{4}\s\d{4}",
-        r"\d{2}\s\d{4}\s\d{4}",
-        r"0800\s\d{3}\s\d{4}",                        # 0800
+        r"\+55\s?\(?\d{2}\)?\s?9\d{4}[-\s]?\d{4}", # +55 (11) 91234-5678
+        r"\+55\s?\d{2}\s?9\d{4}[-\s]?\d{4}",       # +55 11 91234-5678
+        r"\(?\d{2}\)?\s?9\d{4}[-\s]?\d{4}",         # (11) 91234-5678
+        r"\d{2}\s?9\d{4}[-\s]?\d{4}",               # 11 91234-5678
+        r"\+55\s?\(?\d{2}\)?\s?\d{4}[-\s]?\d{4}",  # Fixo com +55
+        r"\(?\d{2}\)?\s?\d{4}[-\s]?\d{4}",          # Fixo local
+        r"0800\s?\d{3}\s?\d{4}",                     # 0800
+        r"4004\s?\d{4}",                             # 4004
     ]
 
     phones = set()
     for pattern in patterns:
         for match in re.findall(pattern, text):
+            # Clean and validate
             digits = re.sub(r"\D", "", match)
-            if 10 <= len(digits) <= 13 or digits.startswith("0800"):
+            if 10 <= len(digits) <= 13 or digits.startswith("0800") or digits.startswith("4004"):
                 phones.add(match.strip())
 
     return list(phones)[:5]
@@ -208,21 +220,40 @@ def extract_phones_from_text(text):
 
 def extract_whatsapp_from_html(html):
     import re
+    # Brazilian WhatsApp patterns
     patterns = [
-        r"wa\.me/(\d+)",
-        r"api\.whatsapp\.com/send\?phone=(\d+)",
-        r"web\.whatsapp\.com/send\?phone=(\d+)",
-        r"whatsapp.*?phone=(\d+)",
-        r"whatsapp.*?(\d{12,13})",
-        r"https?://vcard\.link/card/(\w+)", # VCard links sometimes used
+        r"wa\.me/(55\d{10,11})",
+        r"api\.whatsapp\.com/send\?phone=(55\d{10,11})",
+        r"web\.whatsapp\.com/send\?phone=(55\d{10,11})",
+        r"whatsapp.*?phone=(55\d{10,11})",
+        # Generic patterns but checking for 55 prefix or Brazilian DDD (11-99)
+        r"wa\.me/(\d{10,11})",
+        r"api\.whatsapp\.com/send\?phone=(\d{10,11})",
     ]
 
     for pattern in patterns:
         match = re.search(pattern, html, re.IGNORECASE)
         if match:
             number = match.group(1)
-            if len(number) >= 12:
-                return number
+            # Basic validation
+            if len(number) == 12 or len(number) == 13:
+                 # Check if it starts with 55 (Brazil)
+                 if number.startswith("55"):
+                     return number
+            if len(number) == 10 or len(number) == 11:
+                 # DDDs in Brazil are 11-99
+                 if 11 <= int(number[:2]) <= 99:
+                     return "55" + number
+
+    # Try to find a phone number near a "whatsapp" text
+    whatsapp_near = re.findall(r"whatsapp.*?\+?(\d[\d\s\-\(\)]{8,15}\d)", html, re.IGNORECASE)
+    for potential in whatsapp_near:
+        digits = re.sub(r"\D", "", potential)
+        if 10 <= len(digits) <= 13:
+            if len(digits) <= 11 and 11 <= int(digits[:2]) <= 99:
+                return "55" + digits
+            if digits.startswith("55") and (len(digits) == 12 or len(digits) == 13):
+                return digits
 
     return ""
 
@@ -290,6 +321,29 @@ def extract_business_name(soup, domain):
         return domain_name.title()
     
     return "Empresa sem Nome"
+
+
+def verify_email_mx(email):
+    """Checks if the email domain has valid MX records."""
+    if not email or "@" not in email:
+        return False
+    
+    try:
+        import dns.resolver
+        domain = email.split("@")[1]
+        answers = dns.resolver.resolve(domain, 'MX')
+        return len(answers) > 0
+    except Exception:
+        # Fallback to simple regex if dns-python is not installed or fails
+        return True
+
+def verify_company_active(cnpj):
+    """
+    Checks if a company is active via BrasilAPI or similar.
+    In a real scenario, this would call the API.
+    We'll integrate this into CNPJEnricher.
+    """
+    pass
 
 
 def extract_social_from_html(html):

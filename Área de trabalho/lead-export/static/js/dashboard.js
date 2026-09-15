@@ -56,6 +56,29 @@ async function loadStats() {
         document.getElementById('statConversion').textContent = `${data.conversion_rate}%`;
         document.getElementById('statContacted').textContent = (data.contacted || 0).toLocaleString('pt-BR');
         document.getElementById('statNegotiating').textContent = data.negotiating.toLocaleString('pt-BR');
+        
+        if (data.job_success_rate !== undefined) {
+            document.getElementById('statJobSuccessRate').textContent = `${data.job_success_rate}%`;
+        }
+
+        if (data.pipeline) {
+            const vPending = data.pipeline.verify_pending || 0;
+            const ePending = data.pipeline.enrich_pending || 0;
+            const totalPending = vPending + ePending;
+            const loadPct = Math.min(100, Math.round((totalPending / 500) * 100)); // Cap load at 500 for visualization
+            
+            const loadBar = document.getElementById('pipelineLoadBar');
+            const loadText = document.getElementById('pipelineLoadText');
+            if (loadBar) loadBar.style.width = `${loadPct}%`;
+            if (loadText) loadText.textContent = `${totalPending} itens`;
+            
+            // Color bar based on load
+            if (loadBar) {
+                if (loadPct > 80) loadBar.className = 'h-full bg-red-500 transition-all duration-1000';
+                else if (loadPct > 40) loadBar.className = 'h-full bg-amber-500 transition-all duration-1000';
+                else loadBar.className = 'h-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-1000';
+            }
+        }
 
         isFirstLoad = false;
     } catch (e) {
@@ -171,25 +194,20 @@ async function loadSchedulerStatus() {
         const data = await api('/api/system/health');
         const dot = document.getElementById('schedulerDot');
         const label = document.getElementById('schedulerLabel');
-        const next = document.getElementById('schedulerNext');
-        const rate = document.getElementById('schedulerRate');
 
         if (data.running) {
             dot.className = 'w-2 h-2 rounded-full bg-emerald-400 glow-dot';
-            label.textContent = 'Auto-Crawl Ativo';
+            label.textContent = 'Parallel Ativo';
         } else {
             dot.className = 'w-2 h-2 rounded-full bg-red-400';
-            label.textContent = 'Auto-Crawl Parado';
+            label.textContent = 'Parallel Parado';
         }
 
-        const mins = Math.floor(data.next_crawl_in / 60);
-        const hours = Math.floor(mins / 60);
-        const remainMins = mins % 60;
-        next.textContent = hours > 0
-            ? `Próximo em ${hours}h ${remainMins}min`
-            : `Próximo em ${mins}min`;
+        if (data.active_workers) {
+            document.getElementById('workerVerifyCount').textContent = data.active_workers.verify || 0;
+            document.getElementById('workerEnrichCount').textContent = data.active_workers.enrich || 0;
+        }
 
-        rate.textContent = `Sucesso: ${data.success_rate}%`;
     } catch (e) {
         const label = document.getElementById('schedulerLabel');
         if (label) label.textContent = 'Status indisponível';
@@ -400,12 +418,41 @@ async function deleteDashLead(id) {
     }
 }
 
+async function loadTopQualified() {
+    try {
+        const data = await api('/api/dashboard/top-qualified');
+        const container = document.getElementById('topQualifiedList');
+        if (!data.leads || data.leads.length === 0) {
+            container.innerHTML = '<p class="text-[11px] text-zinc-600 text-center py-6">Nenhum lead qualificado ainda</p>';
+            return;
+        }
+
+        container.innerHTML = data.leads.map(l => `
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-blue-500/20 transition-all cursor-pointer group" onclick="openDashLeadDetail(${l.id})">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <span class="text-[12px] font-black text-blue-400">${l.score}</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-bold text-zinc-100 truncate">${escapeHtml(l.name)}</p>
+                    <p class="text-[10px] text-zinc-500 truncate">${escapeHtml(l.category || 'Empresa')}</p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    ${l.has_ads ? '<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[8px] font-black tracking-widest">ADS</span>' : ''}
+                    ${l.site_quality === 'poor' ? '<span class="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 text-[8px] font-black tracking-widest uppercase">Redesign</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Failed to load top qualified', e);
+    }
+}
+
 async function loadActivityFeed() {
     try {
         const data = await api('/api/dashboard/activity');
         const container = document.getElementById('activityFeed');
         if (!data.feed || data.feed.length === 0) {
-            container.innerHTML = '<p class="text-[11px] text-zinc-600 text-center py-6">Nenhuma atividade ainda</p>';
+            container.innerHTML = '<p class="text-[11px] text-zinc-600 text-center py-6 col-span-full">Nenhuma atividade ainda</p>';
             return;
         }
 
@@ -414,56 +461,51 @@ async function loadActivityFeed() {
 
             if (item.type === 'job') {
                 const pct = item.total > 0 ? Math.round((item.found / item.total) * 100) : 0;
-                return `<div class="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/[0.03] border border-amber-500/10" data-job-uuid="${item.uuid || ''}">
+                return `<div class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/[0.03] border border-amber-500/10" data-job-uuid="${item.uuid || ''}">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
                     <div class="flex-1 min-w-0">
-                        <p class="text-[11px] text-zinc-200 truncate">Extraindo: <span class="text-amber-400 font-medium">${escapeHtml(item.keyword)}</span></p>
-                        <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-[11px] text-zinc-200 truncate">Busca: <span class="text-amber-400 font-medium">${escapeHtml(item.keyword)}</span></p>
+                        <div class="flex items-center gap-2 mt-1">
                             <div class="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden">
                                 <div class="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-700" style="width: ${pct}%"></div>
                             </div>
                             <span class="text-[9px] text-zinc-400 font-mono job-progress-text">${item.found}/${item.total}</span>
                         </div>
                     </div>
-                    <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
                 </div>`;
             }
 
             if (item.type === 'activity') {
-                const actionLabel = (item.action || '').replace(/_/g, ' ');
-                return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span>
+                const actionLabels = {
+                    'lead_qualified': '💎 Qualificado',
+                    'lead_unqualified': '⚪ Desqualificado',
+                    'deal_closed': '💰 Fechado',
+                    'note_added': '📝 Nota adicionada',
+                    'contact_whatsapp': '💬 WhatsApp',
+                    'bulk_contact': '⚡ Contato em massa'
+                };
+                const actionLabel = actionLabels[item.action] || (item.action || '').replace(/_/g, ' ');
+                return `<div class="flex items-center gap-2.5 p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5">
+                    <div class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-[11px] text-zinc-300 truncate">${escapeHtml(actionLabel)}: <span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
+                        <p class="text-[11px] text-zinc-300 truncate"><span class="text-zinc-500">${actionLabel}:</span> <span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
                         ${item.details ? `<p class="text-[9px] text-zinc-500 truncate">${escapeHtml(item.details)}</p>` : ''}
                     </div>
-                    <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
+                    <span class="text-[9px] text-zinc-700 shrink-0">${timeAgo}</span>
                 </div>`;
             }
 
             const tierDot = { hot: 'bg-amber-400', warm: 'bg-orange-400', cold: 'bg-zinc-500' };
-            return `<div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.02] transition-colors cursor-pointer" onclick="openDashLeadDetail(${item.id})">
+            return `<div class="flex items-center gap-2.5 p-3 rounded-xl hover:bg-white/[0.02] transition-colors border border-transparent hover:border-white/5 cursor-pointer group" onclick="openDashLeadDetail(${item.id})">
                 <span class="w-2 h-2 rounded-full ${tierDot[item.tier] || 'bg-emerald-400'} shrink-0"></span>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[11px] text-zinc-300 truncate"><span class="text-zinc-100 font-medium">${escapeHtml(item.name)}</span></p>
-                    <p class="text-[9px] text-zinc-500">${item.source || '—'}</p>
+                    <p class="text-[11px] text-zinc-300 truncate group-hover:text-blue-400 transition-colors font-medium">${escapeHtml(item.name)}</p>
+                    <p class="text-[9px] text-zinc-500 truncate">${item.source || '—'}</p>
                 </div>
-                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${item.tier === 'hot' ? 'text-amber-400 bg-amber-500/10' : item.tier === 'warm' ? 'text-orange-400 bg-orange-500/10' : 'text-zinc-400 bg-zinc-500/10'}">${{hot:'QUENTE',warm:'MORNO',cold:'FRIO'}[item.tier] || ''}</span>
-                <span class="text-[9px] text-zinc-600 shrink-0">${timeAgo}</span>
+                <span class="text-[9px] text-zinc-700 shrink-0">${timeAgo}</span>
             </div>`;
         }).join('');
     } catch (e) {}
-}
-
-function getTimeAgo(dateStr) {
-    if (!dateStr) return '';
-    const now = new Date();
-    const date = new Date(dateStr.replace(' ', 'T'));
-    const diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return 'agora';
-    if (diff < 3600) return Math.floor(diff / 60) + 'min';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h';
-    return Math.floor(diff / 86400) + 'd';
 }
 
 loadStats();
@@ -471,6 +513,11 @@ loadCharts();
 loadRecentJobs();
 loadSchedulerStatus();
 loadActivityFeed();
+loadTopQualified();
+
+// ... existing intervals
+setInterval(loadTopQualified, 45000);
+
 
 // Debounced reloads to avoid redundant calls from multiple SSE events
 let loadStatsTimeout;

@@ -107,7 +107,7 @@ class MapsCrawler:
         leads = []
         search_term = f"{query} {location}".strip()
         crawl_start = time.time()
-        MAPS_TIMEOUT = 90
+        MAPS_TIMEOUT = 180 # Aumentado de 90 para 180
 
         try:
             from selenium.webdriver.common.by import By
@@ -138,25 +138,31 @@ class MapsCrawler:
                         logger.warning(f"[maps] timeout global de {MAPS_TIMEOUT}s atingido")
                         break
 
-                    results = driver.find_elements(By.CSS_SELECTOR, "a[href*='/maps/place/'], [role='article'] a[href*='/maps/place/']")
+                    # Multiple selectors for robustness
+                    results = driver.find_elements(By.CSS_SELECTOR, "a.hfpxzc, a[href*='/maps/place/'], [role='article'] a[href*='/maps/place/']")
 
                     if len(results) == last_count:
                         scroll_attempts += 1
-                        if scroll_attempts > 4: # Aumentado de 3 para 4
+                        if scroll_attempts > 5:
                             break
                     else:
                         scroll_attempts = 0
 
                     last_count = len(results)
 
-                    feed = driver.find_elements(By.CSS_SELECTOR, "div[role='feed'], div.m679ee-PK9Sce")
+                    # Try to find the scrollable container
+                    feed = driver.find_elements(By.CSS_SELECTOR, "div[role='feed'], div.m679ee-PK9Sce, div.m679ee-PK9Sce-L9619c")
                     if feed:
                         driver.execute_script(
                             "arguments[0].scrollTop = arguments[0].scrollHeight", feed[0]
                         )
-                    time.sleep(2.5) # Aumentado de 2 para 2.5
+                    else:
+                        # Fallback scroll
+                        driver.execute_script("window.scrollBy(0, 1000);")
+                    
+                    time.sleep(2.0)
 
-                results = driver.find_elements(By.CSS_SELECTOR, "a[href*='/maps/place/'], [role='article'] a[href*='/maps/place/']")
+                results = driver.find_elements(By.CSS_SELECTOR, "a.hfpxzc, a[href*='/maps/place/'], [role='article'] a[href*='/maps/place/']")
                 logger.info(f"[maps] encontrou {len(results)} resultados no Maps")
 
                 for result in results:
@@ -221,38 +227,38 @@ class MapsCrawler:
             category = ""
 
             # Tenta múltiplos seletores para o nome
-            for selector in ["h1.DUwDvf", "h1.fontHeadlineLarge", "h1"]:
+            for selector in ["h1.DUwDvf", "h1.fontHeadlineLarge", "h1", "h1 span"]:
                 els = driver.find_elements(By.CSS_SELECTOR, selector)
                 if els:
                     for el in els:
                         text = el.text.strip()
-                        if text and text != "Resultados" and text != "Filtros":
+                        if text and text not in ["Resultados", "Filtros", "Google Maps", "Busca"]:
                             name = text
                             break
                 if name: break
 
             # Tenta múltiplos seletores para o telefone
             info_buttons = driver.find_elements(
-                By.CSS_SELECTOR, "button[data-item-id*='phone'], a[data-item-id*='phone'], [aria-label*='Telefone'], [aria-label*='Phone']"
+                By.CSS_SELECTOR, "button[data-item-id*='phone'], a[data-item-id*='phone'], [aria-label*='Telefone'], [aria-label*='Phone'], [data-tooltip*='Telefone']"
             )
             for btn in info_buttons:
                 aria = btn.get_attribute("aria-label") or ""
+                tooltip = btn.get_attribute("data-tooltip") or ""
                 text = btn.text or ""
-                combined = f"{aria} {text}"
+                combined = f"{aria} {tooltip} {text}"
                 phone_match = re.search(r"(\(?\d{2}\)?\s?\d{4,5}[-\s]?\d{4})", combined)
                 if phone_match:
                     phone = phone_match.group(1).strip()
                     break
-                # Fallback se não bater regex mas tiver aria-label com Telefone
-                if "Telefone" in aria or "Phone" in aria:
-                    # Limpa o texto para pegar só números e símbolos comuns
-                    clean_phone = re.sub(r"[^\d\s\(\)\-\+]", "", aria.replace("Telefone:", "").replace("Phone:", ""))
-                    if len(clean_phone.strip()) > 8:
-                        phone = clean_phone.strip()
-                        break
+                
+                # Check for international format too
+                phone_match_intl = re.search(r"(\+55\s?\(?\d{2}\)?\s?\d{4,5}[-\s]?\d{4})", combined)
+                if phone_match_intl:
+                    phone = phone_match_intl.group(1).strip()
+                    break
 
             website_els = driver.find_elements(
-                By.CSS_SELECTOR, "a[data-item-id='authority'], a[aria-label*='website'], a[aria-label*='Site']"
+                By.CSS_SELECTOR, "a[data-item-id='authority'], a[aria-label*='website'], a[aria-label*='Site'], a[data-value='Website']"
             )
             if website_els:
                 website = website_els[0].get_attribute("href") or ""
@@ -265,29 +271,23 @@ class MapsCrawler:
                 return None
 
             # Se não tiver telefone, tenta pegar do site se existir
-            if not website:
-                # Fallback: tenta buscar o site pelo nome no motor de busca
-                try:
-                    from crawler.search_engine import SearchEngine
-                    se = SearchEngine()
-                    website = se.find_business_website(name, category)
-                    if website:
-                        logger.debug(f"[maps] site encontrado via busca para {name}: {website}")
-                except Exception as e:
-                    logger.debug(f"[maps] erro na busca de fallback por site: {e}")
-
+            # (Removido busca de site aqui para não travar o loop, o pipeline cuida disso)
+            
             email = ""
             whatsapp = ""
-            if website:
-                try:
-                    email, whatsapp = self._extract_contact_from_website(website)
-                except Exception as e:
-                    logger.debug(f"[maps] erro ao extrair do site {website}: {e}")
+            # Removido: Deixamos o enriquecimento para o Pipeline assíncrono
+            # if website:
+            #     try:
+            #         email, whatsapp = self._extract_contact_from_website(website)
+            #     except Exception as e:
+            #         logger.debug(f"[maps] erro ao extrair do site {website}: {e}")
 
-            if not phone and not whatsapp and not email:
-                # Se não tem nenhum contato, o lead é de baixa qualidade
+            if not phone and not whatsapp and not email and not website:
+                # Se não tem ABSOLUTAMENTE nada, o lead é inútil
                 return None
 
+            # Otimização: Não visitamos o site agora para não travar o loop do Maps
+            # O LeadPipeline (SiteVerifier/Enricher) fará isso em segundo plano de forma muito mais rápida e paralela
             return {
                 "name": name,
                 "email": email,

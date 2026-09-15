@@ -171,14 +171,18 @@
         </a>
     </div>
 
-    <!-- Keyword Suggestions -->
-    <div class="glass-card-static p-5 mt-6 fade-up fade-up-delay-2">
-        <div class="flex items-center gap-2 mb-3">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-600 stroke-[1.5]"></i>
-            <h3 class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide">Buscas Recentes</h3>
+    <!-- Session History -->
+    <div class="glass-card-static p-6 mt-6 fade-up">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-zinc-500"></i>
+                <h3 class="text-[12px] font-bold text-zinc-100 uppercase tracking-widest">Extrações desta Sessão</h3>
+            </div>
+            <span id="sessionJobCount" class="text-[10px] font-black text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-tighter">0</span>
         </div>
-        <div id="keywordSuggestions" class="flex flex-wrap gap-2">
-            <span class="text-[11px] text-zinc-700">Nenhuma busca anterior</span>
+        <div id="sessionHistory" class="space-y-2">
+            <!-- Dynamic items -->
+            <p class="text-center text-[11px] text-zinc-700 py-4 italic">Nenhuma busca iniciada ainda.</p>
         </div>
     </div>
 </div>

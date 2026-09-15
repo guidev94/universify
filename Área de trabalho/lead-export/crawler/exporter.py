@@ -18,6 +18,10 @@ ALL_COLUMNS = {
     "source": "Origem",
     "category": "Categoria",
     "site_verified": "Site Verificado",
+    "site_status": "Status do Site",
+    "ssl_expired": "SSL Expirado",
+    "copyright_year": "Ano Copyright",
+    "is_responsive": "Responsivo",
     "cms": "CMS",
     "cnpj": "CNPJ",
     "partners": "Sócios",
@@ -57,7 +61,7 @@ def export_csv(leads, filepath, selected_columns=None):
                         val = f"https://wa.me/{digits}"
                     else:
                         val = ""
-                elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics"):
+                elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics", "ssl_expired", "is_responsive"):
                     val = "Sim" if lead.get(key) else "Não"
                 else:
                     val = lead.get(key, "")
@@ -110,7 +114,7 @@ def export_xlsx(leads, filepath, selected_columns=None):
                     val = f"https://wa.me/{digits}"
                 else:
                     val = ""
-            elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics"):
+            elif key in ("site_verified", "has_ads", "has_pixel", "has_analytics", "ssl_expired", "is_responsive"):
                 val = "Sim" if lead.get(key) else "Não"
             else:
                 val = lead.get(key, "")

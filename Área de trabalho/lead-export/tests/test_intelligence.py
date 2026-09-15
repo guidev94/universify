@@ -39,7 +39,7 @@ def test_tech_opportunity_detection():
         "whatsapp": "5511999999999",
         "site_verified": 0
     }
-    score, tier = calculate_score(lead_no_site)
+    score, tier, _ = calculate_score(lead_no_site)
     # Base: 0 + 25 (phone) + 25 (wa) + 25 (no site bonus) + 5 (name) = 80
     assert score >= 80 
     assert tier == "hot"
@@ -51,6 +51,6 @@ def test_tech_opportunity_detection():
         "site_verified": 1,
         "phone": "11999999999"
     }
-    score_poor, tier_poor = calculate_score(lead_poor_site)
+    score_poor, tier_poor, _ = calculate_score(lead_poor_site)
     # Should be higher than a normal site with same info
     assert score_poor > 40

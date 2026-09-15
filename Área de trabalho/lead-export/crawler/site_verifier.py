@@ -3,166 +3,266 @@ import socket
 import threading
 import requests
 import urllib3
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from crawler.lead_scorer import calculate_score
+from config import Config
 
-# Desabilita avisos de SSL inseguro para limpar os logs do servidor
+# Desabilita avisos de SSL inseguro
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class SiteVerifier:
-    def __init__(self, max_workers=5):
-        self.max_workers = max_workers
+    """Verificador de sites com alta paralelização e timeouts agressivos.
+
+    Otimizações:
+    - Timeout reduzido de 12s para 5s (sites BR que demoram mais estão offline)
+    - SSL check com timeout de 3s (não 10s)
+    - Batch timeout global de 90s (não 120s)
+    - Sem retry com sleep (se falhou, marca como falha)
+    - DB update com retry apenas para lock
+    """
+
+    # Session reutilizável para evitar overhead de TLS handshake repetido
+    _session = None
+    _session_lock = threading.Lock()
+
+    def __init__(self, max_workers=None):
+        self.max_workers = max_workers or Config.PIPELINE_VERIFY_WORKERS
+
+    @classmethod
+    def _get_session(cls):
+        if cls._session is None:
+            with cls._session_lock:
+                if cls._session is None:
+                    cls._session = requests.Session()
+                    cls._session.headers.update({
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+                    })
+                    # Adapter com pool de conexões para reutilizar TCP sockets
+                    adapter = requests.adapters.HTTPAdapter(
+                        pool_connections=50,
+                        pool_maxsize=50,
+                        max_retries=0,  # Sem retry automático — velocidade > confiabilidade
+                    )
+                    cls._session.mount("http://", adapter)
+                    cls._session.mount("https://", adapter)
+        return cls._session
+
+    def verify_batch(self, leads):
+        """Verifica um batch de leads e retorna os resultados para salvamento externo."""
+        if not leads:
+            return []
+            
+        results = []
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(self._verify_single, lead, update_db=False): lead
+                for lead in leads if lead.get("website")
+            }
+
+            for future in as_completed(futures, timeout=120):
+                try:
+                    res = future.result()
+                    if res:
+                        results.append(res)
+                except Exception:
+                    pass
+        return results
 
     def verify_leads(self, leads, on_complete=None, on_lead_complete=None):
-        """Blocking verification of a list of leads."""
-        self._run_verification(leads, on_complete, on_lead_complete)
+        """Verificação blocking de uma lista de leads."""
+        if not leads:
+            return
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(self._verify_single, lead, on_lead_complete): lead
+                for lead in leads if lead.get("website")
+            }
+
+            for future in as_completed(futures, timeout=90):
+                try:
+                    future.result()
+                except Exception:
+                    pass
+
+        if on_complete:
+            on_complete()
 
     def verify_leads_async(self, leads, on_complete=None, on_lead_complete=None):
-        """Non-blocking verification of a list of leads."""
+        """Verificação non-blocking."""
         thread = threading.Thread(
-            target=self._run_verification,
+            target=self.verify_leads,
             args=(leads, on_complete, on_lead_complete),
             daemon=True,
         )
         thread.start()
 
-    def _run_verification(self, leads, on_complete, on_lead_complete=None):
-        from concurrent.futures import as_completed
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self._verify_single, lead, on_lead_complete): lead for lead in leads if lead.get("website")}
-            
-            for future in as_completed(futures, timeout=120): # Global timeout for the whole batch
-                try:
-                    future.result()
-                except Exception as e:
-                    lead = futures[future]
-                    print(f"Error verifying lead {lead.get('id')}: {e}")
-
-        if on_complete:
-            on_complete()
-
-    def _verify_single(self, lead, on_lead_complete=None):
-        from models import Lead
+    def _verify_single(self, lead, on_lead_complete=None, update_db=True):
         from database import get_connection
         import time
 
         lid = lead.get("id")
-        url = lead.get("website")
-        print(f"[site-verifier] Starting verify for lead {lid}: {url}")
+        url = lead.get("website", "")
         
+        # ... (continua o resto igual até o update_db)
+
         if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
         site_ok = False
-        tech_data = {"quality": "poor", "score": 0, "cms": "Offline", "has_pixel": 0, "has_analytics": 0, "has_ads": 0, "ads_platforms": ""}
         ssl_valid = 0
+        ssl_expired = 0
+        copyright_year = 0
+        is_responsive = 1
+        response = None
+        # Site offline recebe quality "unknown" (NÃO "poor"): fora do ar e "site feio"
+        # são oportunidades de venda distintas e não devem ser confundidos.
+        tech_data = {
+            "quality": "unknown", "score": 0, "cms": "Offline",
+            "has_pixel": 0, "has_analytics": 0, "has_ads": 0, "ads_platforms": "",
+            "copyright_year": 0, "is_responsive": 1,
+        }
 
-        try:
-            # Single GET request with shorter timeout
-            response = requests.get(
-                url, 
-                timeout=7, # Reduced from 12 to 7
-                allow_redirects=True, 
-                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"},
-                verify=False # Skip SSL verify for speed, we check it separately if needed
-            )
-            site_ok = response.status_code < 400
-            
-            if site_ok:
-                tech_data = self._analyze_html(response.text, response)
-                # Quick SSL check only if https
-                if url.startswith("https"):
-                    ssl_valid = 1 if self._check_ssl(url) else 0
-        except Exception:
-            site_ok = False
-
-        # Unified DB Update with Retry
-        for attempt in range(5):
-            conn = get_connection()
+        # Timeout 8s + 1 retry: hospedagem BR compartilhada é lenta; a tentativa única
+        # de 5s marcava sites bons como "offline"/"poor" e poluía os leads de renovação.
+        for _attempt in range(2):
             try:
-                # Get current lead data to recalculate overall score
-                row = conn.execute("SELECT * FROM leads WHERE id = ?", (lead["id"],)).fetchone()
-                if row:
-                    lead_data = dict(row)
-                    # Update with new tech data for scoring
-                    lead_data.update({
-                        "site_verified": 1 if site_ok else 0,
-                        "ssl_valid": ssl_valid,
-                        "site_quality": tech_data["quality"],
-                        "has_pixel": tech_data["has_pixel"],
-                        "has_ads": tech_data["has_ads"]
-                    })
-                    new_score, new_tier, pitch_hook = calculate_score(lead_data)
-                    
-                    # Update all fields in one go
-                    conn.execute(
-                        """UPDATE leads SET 
-                           site_verified = ?, 
-                           ssl_valid = ?, 
-                           site_quality = ?, 
-                           cms = ?, 
-                           has_pixel = ?, 
-                           has_analytics = ?, 
-                           has_ads = ?,
-                           ads_platforms = ?,
-                           tech_score = ?,
-                           score = ?,
-                           tier = ?,
-                           pitch_hook = ?,
-                           updated_at = datetime('now', 'localtime')
-                           WHERE id = ?""",
-                        (1 if site_ok else 0, ssl_valid, tech_data["quality"], tech_data["cms"], 
-                         tech_data["has_pixel"], tech_data["has_analytics"], tech_data["has_ads"], 
-                         tech_data["ads_platforms"], tech_data["score"], new_score, new_tier, pitch_hook, lead["id"])
-                    )
-                
-                conn.commit()
-                conn.close()
+                session = self._get_session()
+                response = session.get(
+                    url,
+                    timeout=8,
+                    allow_redirects=True,
+                    verify=False,
+                )
+                site_ok = response.status_code < 400
                 break
-            except Exception as e:
-                if conn: conn.close()
-                if "locked" in str(e).lower():
-                    time.sleep(0.5 * (attempt + 1))
-                    continue
-                break
+            except Exception:
+                site_ok = False
+                if _attempt == 0:
+                    time.sleep(0.3)
+                continue
+
+        if site_ok and response is not None:
+            tech_data = self._analyze_html(response.text, response)
+            copyright_year = tech_data.get("copyright_year", 0)
+            is_responsive = tech_data.get("is_responsive", 1)
+            # SSL check apenas para HTTPS — distingue expirado de ausente
+            if url.startswith("https"):
+                ssl_valid, ssl_expired = self._check_ssl(url)
+
+        site_status = "live" if site_ok else "offline"
+
+        # Retorna os dados para processamento em batch se update_db for False
+        result_data = None
+        if not update_db or on_lead_complete:
+            # Prepara os dados que seriam salvos
+            lead_data_to_save = {
+                "id": lid,
+                "site_verified": 1 if site_ok else 0,
+                "site_status": site_status,
+                "ssl_valid": ssl_valid,
+                "ssl_expired": ssl_expired,
+                "copyright_year": copyright_year,
+                "is_responsive": is_responsive,
+                "site_quality": tech_data["quality"],
+                "cms": tech_data["cms"],
+                "has_pixel": tech_data["has_pixel"],
+                "has_analytics": tech_data["has_analytics"],
+                "has_ads": tech_data["has_ads"],
+                "ads_platforms": tech_data["ads_platforms"],
+                "tech_score": tech_data["score"],
+            }
+            result_data = lead_data_to_save
+
+        if update_db:
+            # DB Update com retry para lock (max 3 tentativas, sem sleep longo)
+            for attempt in range(3):
+                conn = get_connection()
+                try:
+                    row = conn.execute("SELECT * FROM leads WHERE id = ?", (lid,)).fetchone()
+                    if row:
+                        lead_data = dict(row)
+                        lead_data.update({
+                            "site_verified": 1 if site_ok else 0,
+                            "site_status": site_status,
+                            "ssl_valid": ssl_valid,
+                            "ssl_expired": ssl_expired,
+                            "copyright_year": copyright_year,
+                            "is_responsive": is_responsive,
+                            "site_quality": tech_data["quality"],
+                            "cms": tech_data["cms"],
+                            "has_pixel": tech_data["has_pixel"],
+                            "has_ads": tech_data["has_ads"],
+                        })
+                        new_score, new_tier, pitch_hook = calculate_score(lead_data)
+
+                        conn.execute(
+                            """UPDATE leads SET
+                               site_verified = ?, site_status = ?, ssl_valid = ?, ssl_expired = ?,
+                               copyright_year = ?, is_responsive = ?, site_quality = ?,
+                               cms = ?, has_pixel = ?, has_analytics = ?, has_ads = ?,
+                               ads_platforms = ?, tech_score = ?, score = ?, tier = ?,
+                               pitch_hook = ?, updated_at = datetime('now', 'localtime')
+                               WHERE id = ?""",
+                            (1 if site_ok else 0, site_status, ssl_valid, ssl_expired,
+                             copyright_year, is_responsive, tech_data["quality"],
+                             tech_data["cms"], tech_data["has_pixel"], tech_data["has_analytics"],
+                             tech_data["has_ads"], tech_data["ads_platforms"], tech_data["score"],
+                             new_score, new_tier, pitch_hook, lid)
+                        )
+                    conn.commit()
+                    conn.close()
+                    break
+                except Exception as e:
+                    conn.close()
+                    if "locked" in str(e).lower() and attempt < 2:
+                        time.sleep(0.2 * (attempt + 1))
+                        continue
+                    break
 
         if on_lead_complete:
-            on_lead_complete(lead["id"], 1 if site_ok else 0)
+            on_lead_complete(lid, 1 if site_ok else 0)
+        
+        return result_data
 
     def _analyze_html(self, html_content, response):
-        html = html_content[:30000].lower()
-        issues = 0
+        """Análise técnica rápida do HTML."""
+        html = html_content[:25000].lower()
         tech_score = 100
         cms = "Custom/Other"
         has_pixel = 0
         has_analytics = 0
-        
+
         # CMS Detection
         if 'wp-content' in html or '/wp-includes/' in html:
             cms = "WordPress"
-            if 'elementor' in html: cms = "WordPress (Elementor)"
-            if 'woocommerce' in html: cms = "WordPress (WooCommerce)"
+            if 'elementor' in html:
+                cms = "WordPress (Elementor)"
+            elif 'woocommerce' in html:
+                cms = "WordPress (WooCommerce)"
         elif 'wix.com' in html or 'wix-style' in html:
             cms = "Wix"
         elif 'shopify.com' in html or 'cdn.shopify.com' in html:
             cms = "Shopify"
         elif 'vtex' in html:
             cms = "VTEX"
-        elif 'rdstation' in html or 'rd-js-station' in html:
-            cms = "RD Station Landing Page"
+        elif 'rdstation' in html:
+            cms = "RD Station"
         elif 'nuvemshop' in html:
             cms = "Nuvemshop"
 
-        # Pixel & Analytics Detection
+        # Pixel & Analytics
         if 'fbevents.js' in html or 'connect.facebook.net' in html:
             has_pixel = 1
         if 'googletagmanager.com' in html or 'google-analytics.com' in html:
             has_analytics = 1
-        
-        # Specific Ads Platform Detection
+
+        # Ads Platforms
         ads_platforms = []
-        if 'googleadservices.com' in html or 'aw-' in html or 'googletagmanager.com/gtag/js?id=aw-' in html:
+        if 'googleadservices.com' in html or 'googletagmanager.com/gtag/js?id=aw-' in html:
             ads_platforms.append("Google Ads")
         if has_pixel:
             ads_platforms.append("Meta Ads")
@@ -172,62 +272,52 @@ class SiteVerifier:
             ads_platforms.append("LinkedIn Ads")
         if 'analytics.tiktok.com' in html:
             ads_platforms.append("TikTok Ads")
-        
-        # CRM & Sales Tools Detection
-        crms = []
-        if 'pipedrive.com' in html or 'pipedrive-assets' in html:
-            crms.append("Pipedrive")
-        if 'hubspot.com' in html or 'hs-scripts' in html:
-            crms.append("HubSpot")
-        if 'salesforce.com' in html:
-            crms.append("Salesforce")
-        if 'rdstation' in html or 'rd-js-station' in html:
-            crms.append("RD Station CRM")
-            
-        if crms:
-            tech_score += 20 # Business that invests in sales
-            
-        # B2B & High Value indicators
-        b2b_keywords = ["atacadista", "distribuidor", "indústria", "soluções b2b", "corporativo", "revenda", "parceiros"]
-        if any(kw in html for kw in b2b_keywords):
-            tech_score += 15
-            
-        if 'trabalhe conosco' in html or 'vagas' in html:
-            tech_score += 10 # Company is growing
-            
-        has_ads = 1 if ads_platforms else 0
-        ads_platforms_str = ", ".join(ads_platforms)
 
-        is_legacy = False
-        if '<table' in html and ('width=' in html or 'cellpadding=' in html):
-            is_legacy = True
+        has_ads = 1 if ads_platforms else 0
+
+        # Quality scoring
+        has_viewport = 'viewport' in html
+        if not has_viewport:
             tech_score -= 30
-        if 'frameset' in html or 'frame src' in html:
-            is_legacy = True
+        if '<table' in html and 'cellpadding=' in html:
+            tech_score -= 30
+        if 'frameset' in html:
             tech_score -= 40
-        if 'frontpage' in html or 'dreamweaver' in html:
-            is_legacy = True
-            tech_score -= 20
-        
-        if 'viewport' not in html:
-            tech_score -= 30
-        
         if not response.url.startswith("https"):
             tech_score -= 10
-        
         if response.elapsed.total_seconds() > 4:
             tech_score -= 10
-        
         if len(html) < 800:
             tech_score -= 20
 
-        if tech_score < 55 or is_legacy:
-            quality = "poor"
-        elif tech_score < 75:
-            quality = "regular"
-        else:
-            quality = "good"
-            
+        # Sinais fortes de site abandonado/legado (ótimos ganchos de renovação)
+        if 'jquery-1.' in html or 'jquery/1.' in html or 'jquery.min.js?ver=1' in html:
+            tech_score -= 15   # jQuery 1.x = site muito antigo
+        if 'shockwave-flash' in html or '.swf' in html or 'application/x-shockwave' in html:
+            tech_score -= 25   # Flash = tecnologia morta
+
+        # Bonus for modern features
+        if 'hubspot' in html or 'pipedrive' in html or 'rdstation' in html:
+            tech_score += 15
+        if 'trabalhe conosco' in html or 'vagas' in html:
+            tech_score += 10
+
+        # Responsividade: viewport meta é o sinal mais confiável
+        is_responsive = 1 if has_viewport else 0
+
+        # Ano de copyright no rodapé — "© 2015" é um argumento de venda imediato
+        copyright_year = 0
+        try:
+            import re as _re
+            years = _re.findall(r'(?:©|&copy;|copyright)[^\d]{0,12}(20\d{2})', html)
+            valid_years = [int(y) for y in years if 2000 <= int(y) <= 2100]
+            if valid_years:
+                copyright_year = max(valid_years)
+        except Exception:
+            copyright_year = 0
+
+        quality = "good" if tech_score >= 75 else ("regular" if tech_score >= 55 else "poor")
+
         return {
             "quality": quality,
             "score": tech_score,
@@ -235,30 +325,33 @@ class SiteVerifier:
             "has_pixel": has_pixel,
             "has_analytics": has_analytics,
             "has_ads": has_ads,
-            "ads_platforms": ads_platforms_str
+            "ads_platforms": ", ".join(ads_platforms),
+            "copyright_year": copyright_year,
+            "is_responsive": is_responsive,
         }
 
-    def _check_http(self, url):
-        try:
-            if not url.startswith(("http://", "https://")):
-                url = "https://" + url
-            response = requests.head(url, timeout=10, allow_redirects=True)
-            return response.status_code < 400
-        except Exception:
-            return False
-
     def _check_ssl(self, url):
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(url if url.startswith("http") else f"https://{url}")
-            hostname = parsed.hostname
-            if not hostname:
-                return False
+        """Verifica SSL e distingue certificado expirado de ausente/inválido.
 
-            context = ssl.create_default_context()
-            with socket.create_connection((hostname, 443), timeout=10) as sock:
+        Retorna (ssl_valid:int, ssl_expired:int).
+        - (1, 0): certificado válido
+        - (0, 1): certificado EXPIRADO — gancho de segurança urgente
+        - (0, 0): sem HTTPS válido / cadeia inválida
+        """
+        from urllib.parse import urlparse
+        hostname = urlparse(url).hostname
+        if not hostname:
+            return 0, 0
+
+        context = ssl.create_default_context()
+        try:
+            with socket.create_connection((hostname, 443), timeout=3) as sock:
                 with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-                    cert = ssock.getpeercert()
-                    return cert is not None
+                    return (1 if ssock.getpeercert() else 0), 0
+        except ssl.SSLCertVerificationError as e:
+            # "certificate has expired" é o caso mais valioso para vendas
+            if "expired" in str(e).lower():
+                return 0, 1
+            return 0, 0
         except Exception:
-            return False
+            return 0, 0

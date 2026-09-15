@@ -63,6 +63,10 @@
                     <i data-lucide="users" class="w-[18px] h-[18px] stroke-[1.5]"></i>
                     <span>Leads</span>
                 </a>
+                <a href="/hot-leads" class="sidebar-link {% if active_page == 'hot_leads' %}active{% endif %}">
+                    <i data-lucide="flame" class="w-[18px] h-[18px] stroke-[1.5] text-amber-500"></i>
+                    <span class="flex items-center gap-2">Hot Leads <span class="bg-amber-500/20 text-amber-500 text-[8px] px-1 rounded-full font-bold border border-amber-500/20">HOT</span></span>
+                </a>
                 <a href="/crawl" class="sidebar-link {% if active_page == 'crawl' %}active{% endif %}">
                     <i data-lucide="radar" class="w-[18px] h-[18px] stroke-[1.5]"></i>
                     <span>Nova Extração</span>

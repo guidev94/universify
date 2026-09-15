@@ -49,7 +49,7 @@ def test_lead_dedup_same_domain():
 
 
 def test_lead_dedup_merges_emails():
-    Lead.create({
+    lead_id = Lead.create({
         "name": "Empresa X",
         "email": "contato@empresa.com",
         "phone": "+5511111111111",
@@ -63,7 +63,7 @@ def test_lead_dedup_merges_emails():
         "website": "https://empresa.com.br/contato",
         "source": "test",
     })
-    lead = Lead.get_by_id(1)
+    lead = Lead.get_by_id(lead_id)
     assert "contato@empresa.com" in lead["email"]
     assert "vendas@empresa.com" in lead["email"]
 
@@ -85,14 +85,14 @@ def test_chart_data_has_7_days():
 
 def test_lead_scoring_hot():
     data = {"name": "Full Name Here", "email": "test@test.com", "phone": "+5511999999999", "whatsapp": "+5511999999999", "website": "", "category": "dentista"}
-    score, tier = calculate_score(data)
+    score, tier, pitch_hook = calculate_score(data)
     assert score >= 75
     assert tier == "hot"
 
 
 def test_lead_scoring_cold():
     data = {"name": "X", "email": "", "phone": "", "whatsapp": "", "website": "", "category": ""}
-    score, tier = calculate_score(data)
+    score, tier, pitch_hook = calculate_score(data)
     assert score < 50
     assert tier == "cold"
 
@@ -209,12 +209,12 @@ def test_extraction_quantity_uses_remaining():
 
 
 def test_pipeline_stats_all_stages():
-    Lead.create({"name": "New Lead", "email": "new@t.com", "phone": "", "website": "https://newl.com", "source": "t"})
+    lead_id = Lead.create({"name": "New Lead", "email": "new@t.com", "phone": "", "website": "https://newl.com", "source": "t"})
     conn = get_connection()
-    conn.execute("UPDATE leads SET status = 'contacted' WHERE email = 'new@t.com'")
+    conn.execute("UPDATE leads SET status = 'contacted' WHERE id = ?", (lead_id,))
     conn.commit()
     conn.close()
-    lead = Lead.get_by_id(1)
+    lead = Lead.get_by_id(lead_id)
     assert lead["status"] == "contacted"
 
 
@@ -229,7 +229,8 @@ def test_lead_status_transitions():
 
 
 def test_crawl_job_create_and_fail():
-    job_uuid = "test-uuid-001"
+    import uuid
+    job_uuid = f"test-{uuid.uuid4().hex[:8]}"
     job_id = CrawlJob.create(job_uuid, "test_keyword", "SP", "both", 30)
     assert job_id is not None
     CrawlJob.fail(job_uuid, "Timeout error")
@@ -239,7 +240,8 @@ def test_crawl_job_create_and_fail():
 
 
 def test_crawl_job_complete():
-    job_uuid = "test-uuid-002"
+    import uuid
+    job_uuid = f"test-{uuid.uuid4().hex[:8]}"
     CrawlJob.create(job_uuid, "dentista", "RJ", "website", 25)
     CrawlJob.set_running(job_uuid)
     job = CrawlJob.get_by_uuid(job_uuid)
@@ -251,8 +253,8 @@ def test_crawl_job_complete():
 
 
 def test_crawl_job_cleanup_stuck():
-    import time
-    job_uuid = "test-uuid-stuck"
+    import uuid
+    job_uuid = f"test-stuck-{uuid.uuid4().hex[:8]}"
     CrawlJob.create(job_uuid, "stuck_test", "", "both", 10)
     CrawlJob.set_running(job_uuid)
     conn = get_connection()

@@ -29,30 +29,46 @@ class BingCrawler:
 
         logger.info(f"[bing] buscando '{query}' — {len(urls)} URLs encontradas")
 
-        for url in urls:
-            if len(leads) >= quantity:
-                break
-            try:
-                page_leads = self._extract_from_url(url)
-                leads.extend(page_leads)
-                if on_progress:
-                    on_progress(len(leads))
-                time.sleep(self.delay)
-            except Exception as e:
-                logger.debug(f"[bing] erro extraindo {url[:60]}: {e}")
-                continue
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        from config import Config
+
+        with ThreadPoolExecutor(max_workers=Config.CRAWLER_WORKERS) as executor:
+            future_to_url = {executor.submit(self._extract_from_url, url): url for url in urls}
+
+            for future in as_completed(future_to_url, timeout=90):
+                if len(leads) >= quantity:
+                    break
+                try:
+                    page_leads = future.result(timeout=Config.CRAWLER_TIMEOUT + 2)
+                    if page_leads:
+                        leads.extend(page_leads)
+                        if on_progress:
+                            on_progress(len(leads))
+                except Exception:
+                    continue
 
         logger.info(f"[bing] '{query}' — {len(leads)} leads extraídos")
         return leads[:quantity]
 
     def _search_bing(self, query, num_results):
         urls = []
-        queries = [
-            f"{query} contato telefone whatsapp",
-            f"{query} endereço telefone comercial",
-            f"{query} instagram telefone",
+        
+        # Enhanced Dorks for technical obsolescence and high-ticket niches
+        dorks = [
+            f'"{query}" site:.com.br "© 2017..2022"',
+            f'"{query}" site:.com.br "melhor visualizado"',
+            f'"{query}" "contato" "11"',
+            f'"{query}" site:.com.br "desenvolvido por"',
+            f'"{query}" "anuncie aqui"',
+            f'"{query}" "whatsapp" "com.br"',
+            f'"{query}" "atendimento"',
         ]
-        search_query = queries[hash(query) % len(queries)]
+        
+        # Select 2 random dorks and combine them or rotate faster
+        import random
+        search_query = random.choice(dorks)
+        logger.info(f"[bing] Using dork: {search_query}")
+        
         page = 0
 
         while len(urls) < num_results and page < 5:

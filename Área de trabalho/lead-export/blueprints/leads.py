@@ -11,6 +11,11 @@ def page():
     return render_template("leads.html")
 
 
+@bp.route("/hot-leads")
+def hot_leads_page():
+    return render_template("hot_leads.html")
+
+
 @bp.route("/api/leads")
 def list_leads():
     page = request.args.get("page", 1, type=int)
@@ -58,6 +63,25 @@ def list_leads():
         "per_page": per_page,
         "pages": (total + per_page - 1) // per_page,
     })
+
+
+@bp.route("/api/leads/categories")
+def get_categories():
+    conn = get_connection()
+    try:
+        # OTIMIZAÇÃO: DISTINCT pode ser lento em tabelas grandes. 
+        # Usamos GROUP BY que aproveita melhor o índice e limitamos as Top 100.
+        rows = conn.execute("""
+            SELECT category, COUNT(*) as cnt 
+            FROM leads 
+            WHERE category != '' 
+            GROUP BY category 
+            ORDER BY cnt DESC 
+            LIMIT 100
+        """).fetchall()
+        return jsonify([row["category"] for row in rows])
+    finally:
+        conn.close()
 
 
 @bp.route("/api/leads/<int:lead_id>")
@@ -145,32 +169,48 @@ def leads_stats_by_score():
 
 @bp.route("/api/leads/bulk-delete-by-score", methods=["POST"])
 def bulk_delete_by_score():
-    data = request.get_json()
-    if not data or "max_score" not in data:
-        return jsonify({"error": "max_score obrigatório"}), 400
+    try:
+        data = request.get_json()
+        if not data or "max_score" not in data:
+            return jsonify({"error": "max_score obrigatório"}), 400
 
-    max_score = int(data["max_score"])
-    if max_score < 0 or max_score > 100:
-        return jsonify({"error": "max_score deve ser entre 0 e 100"}), 400
+        max_score = int(data["max_score"])
+        if max_score < 0 or max_score > 100:
+            return jsonify({"error": "max_score deve ser entre 0 e 100"}), 400
 
-    conn = get_connection()
-    # Also fetch tiers for the preview
-    rows = conn.execute("SELECT count(*) as count, tier FROM leads WHERE score <= ? GROUP BY tier", (max_score,)).fetchall()
-    counts_by_tier = {row["tier"]: row["count"] for row in rows}
-    total_count = sum(counts_by_tier.values())
+        conn = get_connection()
+        # Query simplified and robust
+        tier_rows = conn.execute("""
+            SELECT COALESCE(tier, 'cold') as tier_name, count(*) as count 
+            FROM leads 
+            WHERE score <= ? 
+            GROUP BY tier_name
+        """, (max_score,)).fetchall()
+        
+        counts_by_tier = {row["tier_name"]: row["count"] for row in tier_rows}
+        total_count = sum(counts_by_tier.values())
 
-    if data.get("dry_run"):
+        if data.get("dry_run"):
+            conn.close()
+            return jsonify({
+                "count": total_count, 
+                "details": counts_by_tier,
+                "dry_run": True
+            })
+
+        conn.execute("DELETE FROM leads WHERE score <= ?", (max_score,))
+        conn.commit()
         conn.close()
-        return jsonify({
-            "count": total_count, 
-            "details": counts_by_tier,
-            "dry_run": True
-        })
-
-    conn.execute("DELETE FROM leads WHERE score <= ?", (max_score,))
-    conn.commit()
-    conn.close()
-    return jsonify({"deleted": total_count})
+        
+        # Log activity for history
+        Activity.log(0, "bulk_delete", f"Removidos {total_count} leads com pontuação <= {max_score}")
+        
+        return jsonify({"deleted": total_count, "count": total_count})
+    except Exception as e:
+        import traceback
+        print(f"Error in bulk_delete_by_score: {e}")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/api/leads/<int:lead_id>/action/whatsapp")
@@ -320,10 +360,11 @@ def bulk_status_update():
     conn = get_connection()
     # If from_status is 'opportunities', we handle it specially based on the technical logic
     if from_status == 'opportunities':
-        # This matches the frontend filter logic
+        # This matches the frontend filter logic — foco em negócios com site vivo
+        # (redesign) e negócios sem site; offline é ruído e fica de fora.
         conn.execute("""
             UPDATE leads SET status = ?, updated_at = datetime('now', 'localtime')
-            WHERE (site_quality = 'poor' AND site_verified = 1) 
+            WHERE (site_quality = 'poor' AND site_verified = 1)
             OR (website = '' AND site_verified = 0)
         """, (to_status,))
     else:
@@ -403,7 +444,7 @@ def bulk_delete_column():
     if status == 'opportunities':
         conn.execute("""
             DELETE FROM leads 
-            WHERE (site_quality = 'poor' AND site_verified = 1) 
+            WHERE (site_quality = 'poor' AND site_verified = 1)
             OR (website = '' AND site_verified = 0)
         """)
     else:

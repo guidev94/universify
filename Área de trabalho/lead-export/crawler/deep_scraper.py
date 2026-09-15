@@ -52,14 +52,21 @@ class DeepContactScraper:
                 "possible_owners": []
             }
             
-            # Scrape up to 2 candidate pages
-            for link in internal_links[:2]:
-                try:
-                    res = self.session.get(link, timeout=10)
-                    if res.status_code == 200:
-                        self._extract_info(res.text, found_data)
-                except:
-                    continue
+            # Scrape up to 3 candidate pages in parallel (Performance)
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                futures = []
+                for link in internal_links[:3]:
+                    def _fetch(l):
+                        try:
+                            return self.session.get(l, timeout=8).text
+                        except: return None
+                    futures.append(executor.submit(_fetch, link))
+                
+                for f in futures:
+                    html_page = f.result()
+                    if html_page:
+                        self._extract_info(html_page, found_data)
             
             if found_data["emails"] or found_data["phones"] or found_data["possible_owners"]:
                 self._update_db(lead_id, found_data)
@@ -86,19 +93,31 @@ class DeepContactScraper:
         if cnpj_match:
             store["cnpj"] = cnpj_match.group()
         
-        # Try to find names after keywords like "Sócio", "Fundador", "CEO"
+        # Advanced Decision Maker Detection
         soup = BeautifulSoup(html, "lxml")
-        text = soup.get_text()
         
+        # 1. Check for Social Links (LinkedIn/Instagram) that might point to personal profiles
+        for a in soup.find_all("a", href=True):
+            href = a["href"].lower()
+            if "linkedin.com/in/" in href:
+                name = href.split("/in/")[1].split("/")[0].replace("-", " ").title()
+                if len(name) > 3: store["possible_owners"].append(f"{name} (via LinkedIn)")
+
+        # 2. Extract names after titles (including plural/variations)
+        text = soup.get_text(separator=" ")
         patterns = [
-            r"(?:sócio|fundador|diretor|ceo|proprietário|gerente)[:\-\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})",
+            r"(?:sócio|fundador|diretor|ceo|proprietário|gerente|responsável|quem somos|equipe|nossa história)[:\-\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})",
+            r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})[\-\s]+(?:sócio|fundador|diretor|ceo|proprietário)",
         ]
         
         for pattern in patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE)
+            matches = re.findall(pattern, text)
             for m in matches:
-                if len(m) > 5 and m.lower() not in ["contato", "empresa", "telefone"]:
+                if len(m) > 5 and m.lower() not in ["contato", "empresa", "telefone", "todos os direitos", "copyright"]:
                     store["possible_owners"].append(m.strip())
+        
+        # Clean duplicates
+        store["possible_owners"] = list(dict.fromkeys(store["possible_owners"]))[:5]
 
     def _update_db(self, lead_id, data):
         conn = get_connection()

@@ -2,9 +2,32 @@ import hashlib
 import json
 from datetime import datetime
 from database import get_connection
+from crawler.lead_scorer import calculate_score
 
 
 class Lead:
+    @staticmethod
+    def bulk_create(leads_data, crawl_job_id=None):
+        """Cria múltiplos leads em uma única transação ultra-rápida."""
+        if not leads_data:
+            return 0
+            
+        conn = get_connection()
+        created_count = 0
+        try:
+            with conn: # Transação única
+                for data in leads_data:
+                    # Aproveitamos a lógica de deduplicação mas dentro da mesma conexão
+                    Lead.create(data, crawl_job_id=crawl_job_id, conn=conn)
+                    created_count += 1
+            return created_count
+        except Exception as e:
+            import logging
+            logging.getLogger("leadhunter.models").error(f"[bulk_create] error: {e}")
+            return created_count
+        finally:
+            conn.close()
+
     @staticmethod
     def create(data, crawl_job_id=None, conn=None):
         should_close = False
@@ -15,7 +38,8 @@ class Lead:
         dedup_hash = Lead._generate_hash(data)
 
         try:
-            existing = conn.execute("SELECT id, email, phone, whatsapp, score FROM leads WHERE dedup_hash = ?", (dedup_hash,)).fetchone()
+            # Query otimizada: busca apenas o necessário para o merge
+            existing = conn.execute("SELECT id, email, phone, whatsapp, score, campaign FROM leads WHERE dedup_hash = ?", (dedup_hash,)).fetchone()
 
             if existing:
                 existing = dict(existing)
@@ -24,40 +48,43 @@ class Lead:
                 new_whatsapp = data.get("whatsapp", "")
                 new_score = data.get("score", 0)
 
+                # Merge de emails
                 merged_email = existing["email"]
                 if new_email and new_email not in (merged_email or ""):
-                    merged_email = f"{merged_email};{new_email}" if merged_email else new_email
+                    emails = set((merged_email or "").split(";")) | set(new_email.split(";"))
+                    emails.discard("")
+                    merged_email = ";".join(sorted(list(emails))[:5])
 
+                # Merge de telefones
                 merged_phone = existing["phone"]
                 if new_phone and new_phone not in (merged_phone or ""):
-                    merged_phone = f"{merged_phone};{new_phone}" if merged_phone else new_phone
+                    phones = set((merged_phone or "").split(";")) | set(new_phone.split(";"))
+                    phones.discard("")
+                    merged_phone = ";".join(sorted(list(phones))[:3])
 
-                merged_whatsapp = existing["whatsapp"]
-                if new_whatsapp and new_whatsapp not in (merged_whatsapp or ""):
-                    merged_whatsapp = new_whatsapp if not merged_whatsapp else merged_whatsapp
-
+                merged_whatsapp = existing["whatsapp"] or new_whatsapp
                 best_score = max(new_score, existing["score"] or 0)
-                score, tier, pitch_hook = calculate_score(data)
-
-                # Campaign logic: if existing lead is unassigned, assign it to the new campaign
-                new_campaign = data.get("campaign", "")
-                existing_campaign = conn.execute("SELECT campaign FROM leads WHERE id = ?", (existing["id"],)).fetchone()["campaign"]
                 
-                campaign_sql = ""
-                campaign_params = []
-                if new_campaign and not existing_campaign:
-                    campaign_sql = ", campaign = ?"
-                    campaign_params = [new_campaign]
+                # Só recalcula se o score novo for maior ou dados mudaram significativamente
+                score, tier, pitch_hook = calculate_score(data)
+                if score < best_score:
+                    score = best_score
+                
+                # Atribuição de campanha se estiver vazio
+                new_campaign = data.get("campaign", "")
+                target_campaign = existing["campaign"] or new_campaign
 
                 conn.execute(
-                    f"""UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?, pitch_hook = ?,
-                       updated_at = datetime('now', 'localtime'){campaign_sql} WHERE id = ?""",
-                    [merged_email, merged_phone, merged_whatsapp, best_score, pitch_hook] + campaign_params + [existing["id"]],
+                    """UPDATE leads SET email = ?, phone = ?, whatsapp = ?, score = ?, tier = ?, 
+                       pitch_hook = ?, campaign = ?, updated_at = datetime('now', 'localtime') 
+                       WHERE id = ?""",
+                    (merged_email, merged_phone, merged_whatsapp, score, tier, pitch_hook, target_campaign, existing["id"]),
                 )
                 if should_close:
                     conn.commit()
                 return existing["id"]
 
+            # Novo Lead
             score, tier, pitch_hook = calculate_score(data)
             conn.execute(
                 """INSERT INTO leads (name, email, phone, whatsapp, website, category, source,
@@ -75,8 +102,17 @@ class Lead:
             )
             if should_close:
                 conn.commit()
-            lead_id = conn.execute("SELECT id FROM leads WHERE dedup_hash = ?", (dedup_hash,)).fetchone()
-            return lead_id["id"] if lead_id else None
+            
+            # Nota: evitamos o SELECT secundário se possível, mas o ID é necessário às vezes
+            if should_close:
+                row = conn.execute("SELECT last_insert_rowid() as id").fetchone()
+                return row["id"] if row else None
+            return True # No bulk mode, retornar True basta
+        except Exception as e:
+            if "UNIQUE" in str(e):
+                if should_close: conn.rollback()
+                return None
+            raise e
         finally:
             if should_close:
                 conn.close()
@@ -218,15 +254,18 @@ class Lead:
 
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-        allowed_sorts = {"score", "created_at", "name", "tier"}
+        allowed_sorts = {"score", "created_at", "name", "tier", "deal_value"}
         sort_col = sort if sort in allowed_sorts else "score"
         sort_order = "ASC" if order == "asc" else "DESC"
 
         total = conn.execute(f"SELECT COUNT(*) as cnt FROM leads {where}", params).fetchone()["cnt"]
 
         offset = (page - 1) * per_page
+        
+        # OTIMIZAÇÃO: Seleciona apenas colunas essenciais para a lista (reduz tráfego de dados)
+        cols = "id, name, email, phone, whatsapp, website, category, source, score, tier, status, created_at, site_quality, has_ads, is_qualified"
         rows = conn.execute(
-            f"SELECT * FROM leads {where} ORDER BY {sort_col} {sort_order} LIMIT ? OFFSET ?",
+            f"SELECT {cols} FROM leads {where} ORDER BY {sort_col} {sort_order} LIMIT ? OFFSET ?",
             params + [per_page, offset],
         ).fetchall()
 
@@ -339,34 +378,48 @@ class Lead:
     @staticmethod
     def get_stats():
         conn = get_connection()
-        stats = {}
-        stats["hot"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'hot'").fetchone()["cnt"]
-        stats["warm"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'warm'").fetchone()["cnt"]
-        stats["cold"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE tier = 'cold'").fetchone()["cnt"]
-        stats["total"] = stats["hot"] + stats["warm"] + stats["cold"]
-        stats["with_email"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE email != ''").fetchone()["cnt"]
-        stats["with_phone"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE phone != ''").fetchone()["cnt"]
-        stats["with_whatsapp"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE whatsapp != ''").fetchone()["cnt"]
-        stats["with_ads"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE has_ads = 1").fetchone()["cnt"]
-        stats["with_pixel"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE has_pixel = 1").fetchone()["cnt"]
-        stats["verified"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE site_verified = 1").fetchone()["cnt"]
+        try:
+            # Query consolidada para evitar múltiplos SELECTs e overhead de locks
+            stats_row = conn.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN tier = 'hot' THEN 1 ELSE 0 END) as hot,
+                    SUM(CASE WHEN tier = 'warm' THEN 1 ELSE 0 END) as warm,
+                    SUM(CASE WHEN tier = 'cold' THEN 1 ELSE 0 END) as cold,
+                    SUM(CASE WHEN email != '' THEN 1 ELSE 0 END) as with_email,
+                    SUM(CASE WHEN phone != '' THEN 1 ELSE 0 END) as with_phone,
+                    SUM(CASE WHEN whatsapp != '' THEN 1 ELSE 0 END) as with_whatsapp,
+                    SUM(CASE WHEN has_ads = 1 THEN 1 ELSE 0 END) as with_ads,
+                    SUM(CASE WHEN site_verified = 1 THEN 1 ELSE 0 END) as verified,
+                    AVG(score) as avg_score
+                FROM leads
+            """).fetchone()
+            
+            stats = dict(stats_row)
+            stats["avg_score"] = round(stats["avg_score"] or 0, 1)
 
-        avg_row = conn.execute("SELECT AVG(score) as avg_score FROM leads").fetchone()
-        stats["avg_score"] = round(avg_row["avg_score"] or 0, 1)
+            # Stats de vendas
+            sales_row = conn.execute("""
+                SELECT 
+                    COALESCE(SUM(deal_value), 0) as revenue,
+                    SUM(CASE WHEN status = 'closed_won' THEN 1 ELSE 0 END) as deals_closed,
+                    SUM(CASE WHEN status = 'negotiating' THEN 1 ELSE 0 END) as negotiating,
+                    SUM(CASE WHEN status = 'contacted' THEN 1 ELSE 0 END) as contacted
+                FROM leads
+                WHERE status IN ('closed_won', 'negotiating', 'contacted')
+            """).fetchone()
+            
+            stats.update(dict(sales_row))
+            stats["revenue"] = round(stats["revenue"], 2)
 
-        revenue_row = conn.execute("SELECT COALESCE(SUM(deal_value), 0) as total FROM leads WHERE status = 'closed_won'").fetchone()
-        stats["revenue"] = round(revenue_row["total"], 2)
-        stats["deals_closed"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE status = 'closed_won'").fetchone()["cnt"]
-        stats["negotiating"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE status = 'negotiating'").fetchone()["cnt"]
-        stats["contacted"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE status = 'contacted'").fetchone()["cnt"]
+            if stats["total"] > 0:
+                stats["conversion_rate"] = round((stats["deals_closed"] / stats["total"]) * 100, 1)
+            else:
+                stats["conversion_rate"] = 0
 
-        if stats["total"] > 0:
-            stats["conversion_rate"] = round((stats["deals_closed"] / stats["total"]) * 100, 1)
-        else:
-            stats["conversion_rate"] = 0
-
-        conn.close()
-        return stats
+            return stats
+        finally:
+            conn.close()
 
     @staticmethod
     def get_chart_data():
@@ -592,12 +645,29 @@ class Keyword:
     @staticmethod
     def get_suggestions(limit=10):
         conn = get_connection()
+        # Otimização: Cache de sugestões via query simples
         rows = conn.execute(
             "SELECT keyword, location, times_used, total_leads_found FROM keywords ORDER BY times_used DESC LIMIT ?",
             (limit,),
         ).fetchall()
         conn.close()
         return [dict(r) for r in rows]
+
+    @staticmethod
+    def cleanup_old_data(days=60):
+        """Limpa logs e dados temporários antigos para manter o banco leve."""
+        conn = get_connection()
+        try:
+            # Limpa atividades muito antigas
+            conn.execute("DELETE FROM lead_activities WHERE created_at < datetime('now', ? || ' days')", (f"-{days}",))
+            # Limpa histórico de jobs antigos (mantém os últimos 500)
+            conn.execute("""
+                DELETE FROM crawl_jobs 
+                WHERE id NOT IN (SELECT id FROM crawl_jobs ORDER BY started_at DESC LIMIT 500)
+            """)
+            conn.commit()
+        finally:
+            conn.close()
 
     @staticmethod
     def get_for_autocrawl(limit=3):

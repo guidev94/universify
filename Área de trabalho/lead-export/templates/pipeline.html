@@ -24,264 +24,209 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-6 pb-20">
-    <!-- Sticky Stats & Summary -->
-    <div class="sticky top-0 z-30 -mx-4 px-4 py-3 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 flex flex-wrap items-center justify-between gap-4 fade-up">
-        <div class="flex items-center gap-6">
-            <div class="flex flex-col">
-                <span id="statPriorityCount" class="text-[14px] font-black text-amber-500 line-height-1">0</span>
-                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Alta Prioridade</span>
-            </div>
-            <div class="w-px h-6 bg-white/5"></div>
-            <div class="flex flex-col">
-                <span id="statRecentCount" class="text-[14px] font-black text-blue-400 line-height-1">0</span>
-                <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Novos Hoje</span>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <!-- Search -->
-            <div class="relative group">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 group-focus-within:text-blue-400 transition-colors"></i>
-                <input type="text" id="pipelineSearch" oninput="filterPipeline()" placeholder="Buscar oportunidades..." class="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-[12px] focus:outline-none focus:border-blue-500/50 w-48 lg:w-64 transition-all">
-            </div>
-
-            <div id="selectionActions" class="hidden items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-xl">
-                <span id="selectedCount" class="text-[10px] font-black text-blue-400 uppercase mr-1">0 Sel.</span>
-                <button onclick="batchAction('qualify')" class="p-1.5 hover:bg-emerald-500/20 rounded-lg text-emerald-400" title="Qualificar Selecionados"><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i></button>
-                <button onclick="batchAction('contacted')" class="p-1.5 hover:bg-blue-500/20 rounded-lg text-blue-400" title="Marcar como Contatados"><i data-lucide="check-check" class="w-3.5 h-3.5"></i></button>
-                <button onclick="batchAction('archive')" class="p-1.5 hover:bg-red-500/20 rounded-lg text-red-400" title="Arquivar Selecionados"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                <button onclick="exportSelected()" class="p-1.5 hover:bg-zinc-500/20 rounded-lg text-zinc-300" title="Exportar Selecionados"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-                <div class="w-px h-4 bg-blue-500/20 mx-1"></div>
-                <button onclick="clearSelection()" class="text-[9px] font-bold text-zinc-500 hover:text-zinc-300 uppercase">Limpar</button>
-            </div>
-
-            <button onclick="openExportModal()" class="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10 transition-all" title="Exportar em massa">
-                <i data-lucide="download" class="w-4 h-4"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Header & Filter Row -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+<div class="space-y-6 pb-20">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-2 fade-up">
         <div>
-            <h2 class="text-[28px] font-black text-zinc-100 tracking-tight flex items-center gap-3">
-                Pipeline <span class="text-blue-500">Hunter</span>
+            <h2 class="text-2xl font-bold text-zinc-100 tracking-tight flex items-center gap-3">
+                Pipeline <span class="text-accent">Hunter</span>
             </h2>
             <p class="text-[13px] text-zinc-500 font-medium">Algoritmo identificando <span class="text-zinc-300 font-bold">oportunidades de redesign</span> e leads sem presença digital.</p>
         </div>
         
         <div class="flex items-center gap-2">
-            <select id="filterQualified" onchange="resetAndLoad()" class="select-glass !text-[11px] font-bold uppercase tracking-widest !bg-zinc-900/50">
-                <option value="">Qualificação: Todas</option>
-                <option value="1">Apenas Qualificados</option>
-                <option value="0">Não Qualificados</option>
-            </select>
-            <select id="filterQuality" onchange="resetAndLoad()" class="select-glass !text-[11px] font-bold uppercase tracking-widest !bg-zinc-900/50">
-                <option value="">Qualidade: Todas</option>
-                <option value="poor">Design Obsoleto</option>
-                <option value="none">Sem Website</option>
-            </select>
-            <select id="filterSource" onchange="loadPipeline()" class="select-glass !text-[11px] font-bold uppercase tracking-widest !bg-zinc-900/50">
-                <option value="">Todas as Fontes</option>
-                <option value="google_maps">Maps</option>
-                <option value="website_crawler">Web</option>
-            </select>
-            <button onclick="selectAllLeads()" class="btn-ghost !py-2.5 !px-4 flex items-center gap-2">
-                <i data-lucide="check-square" class="w-4 h-4 text-blue-400"></i>
-                <span class="text-[11px] font-bold uppercase tracking-wider">Sel. Todos</span>
-            </button>
-            <button onclick="loadPipeline()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-blue-400 hover:bg-blue-400/10 hover:border-blue-400/20 transition-all">
+            <button onclick="loadPipeline()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all" title="Atualizar">
                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+            <button onclick="openExportModal()" class="btn-ghost flex items-center gap-2" title="Exportar">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Exportar</span>
             </button>
         </div>
     </div>
 
-    <!-- Feed Container -->
-    <div id="pipelineFeed" class="space-y-4 pt-4">
-        <!-- Loading State -->
-        <div class="flex flex-col items-center justify-center py-20 opacity-20">
-            <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-[12px] font-bold uppercase tracking-widest">Analisando Oportunidades...</p>
+    <!-- Stats & Filter Bar -->
+    <div class="glass-card-static p-5 mb-6 fade-up">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+            <!-- Mini Stats -->
+            <div class="flex items-center gap-8">
+                <div class="flex flex-col">
+                    <span id="statPriorityCount" class="text-xl font-bold text-amber-500 leading-none">0</span>
+                    <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-wider mt-1.5">Prioridade</span>
+                </div>
+                <div class="w-px h-8 bg-zinc-800"></div>
+                <div class="flex flex-col">
+                    <span id="statRecentCount" class="text-xl font-bold text-blue-400 leading-none">0</span>
+                    <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-wider mt-1.5">Oportunidades</span>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="relative group">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600"></i>
+                    <input type="text" id="pipelineSearch" oninput="filterPipeline()" placeholder="Buscar leads..." class="input-glass !pl-10 !py-2 !text-[12px] w-48 lg:w-64">
+                </div>
+
+                <select id="filterQualified" onchange="resetAndLoad()" class="select-glass !text-[11px] font-bold uppercase tracking-widest !py-2">
+                    <option value="">Qualificação</option>
+                    <option value="1">Qualificados</option>
+                    <option value="0">Pendentes</option>
+                </select>
+
+                <select id="filterQuality" onchange="resetAndLoad()" class="select-glass !text-[11px] font-bold uppercase tracking-widest !py-2">
+                    <option value="">Qualidade Site</option>
+                    <option value="poor">Redesign</option>
+                    <option value="none">Sem Site</option>
+                </select>
+
+                <div id="selectionActions" class="hidden items-center gap-1.5 bg-accent-subtle border border-accent/20 px-2 py-1 rounded-xl">
+                    <span id="selectedCount" class="text-[10px] font-bold text-accent uppercase mx-2">0 Sel.</span>
+                    <button onclick="batchAction('qualify')" class="p-1.5 hover:bg-emerald-500/10 rounded-lg text-emerald-400" title="Qualificar"><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i></button>
+                    <button onclick="batchAction('contacted')" class="p-1.5 hover:bg-blue-500/10 rounded-lg text-blue-400" title="Contatados"><i data-lucide="check-check" class="w-3.5 h-3.5"></i></button>
+                    <button onclick="batchAction('archive')" class="p-1.5 hover:bg-red-500/10 rounded-lg text-red-400" title="Arquivar"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <button onclick="clearSelection()" class="text-[9px] font-bold text-zinc-500 hover:text-zinc-300 uppercase px-2">Limpar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Container -->
+    <div class="flex gap-4 overflow-x-auto pb-10 min-h-[600px] -mx-4 px-4 scrollbar-hide" id="kanbanBoard">
+        <!-- Novo -->
+        <div class="kanban-column flex-shrink-0 w-[320px] group">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                    <h3 class="text-[11px] font-bold text-zinc-100 uppercase tracking-[0.2em]">Novos Leads</h3>
+                    <span id="count-new" class="text-[10px] font-bold text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <button onclick="clearColumn('new')" class="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all" title="Limpar Coluna">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+            <div id="col-new" class="space-y-3 min-h-[500px] rounded-2xl bg-white/[0.01] border border-dashed border-white/5 p-2 transition-colors hover:bg-white/[0.02]" ondrop="drop(event, 'new')" ondragover="allowDrop(event)">
+                <!-- Cards go here -->
+            </div>
+        </div>
+
+        <!-- Contatado -->
+        <div class="kanban-column flex-shrink-0 w-[320px] group">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                    <h3 class="text-[11px] font-bold text-zinc-100 uppercase tracking-[0.2em]">Contatados</h3>
+                    <span id="count-contacted" class="text-[10px] font-bold text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <div id="col-contacted" class="space-y-3 min-h-[500px] rounded-2xl bg-white/[0.01] border border-dashed border-white/5 p-2 transition-colors hover:bg-white/[0.02]" ondrop="drop(event, 'contacted')" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <!-- Negociando -->
+        <div class="kanban-column flex-shrink-0 w-[320px] group">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
+                    <h3 class="text-[11px] font-bold text-zinc-100 uppercase tracking-[0.2em]">Em Negociação</h3>
+                    <span id="count-negotiating" class="text-[10px] font-bold text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <div id="col-negotiating" class="space-y-3 min-h-[500px] rounded-2xl bg-white/[0.01] border border-dashed border-white/5 p-2 transition-colors hover:bg-white/[0.02]" ondrop="drop(event, 'negotiating')" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <!-- Fechado -->
+        <div class="kanban-column flex-shrink-0 w-[320px] group">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                    <h3 class="text-[11px] font-bold text-zinc-100 uppercase tracking-[0.2em]">Vendas Fechadas</h3>
+                    <span id="count-closed_won" class="text-[10px] font-bold text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <div id="col-closed_won" class="space-y-3 min-h-[500px] rounded-2xl bg-emerald-500/[0.02] border border-dashed border-emerald-500/10 p-2 transition-colors hover:bg-emerald-500/[0.04]" ondrop="drop(event, 'closed_won')" ondragover="allowDrop(event)"></div>
         </div>
     </div>
 
     <!-- Pagination -->
-    <div id="paginationContainer" class="hidden flex items-center justify-center gap-4 py-10 border-t border-white/5">
-        <button onclick="prevPage()" id="prevBtn" class="btn-ghost !py-2 !px-4 disabled:opacity-30">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+    <div id="paginationContainer" class="hidden flex items-center justify-center gap-6 py-12">
+        <button onclick="prevPage()" id="prevBtn" class="w-10 h-10 rounded-full border border-white/5 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10 transition-all disabled:opacity-20">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
-        <div class="flex items-center gap-2 text-[12px] font-bold text-zinc-500">
-            Página <span id="currentPage" class="text-zinc-100">1</span> de <span id="totalPages">1</span>
+        <div class="flex items-center gap-2 text-[13px] font-semibold text-zinc-500">
+            <span id="currentPage" class="text-zinc-100">1</span>
+            <span class="opacity-30">/</span>
+            <span id="totalPages">1</span>
         </div>
-        <button onclick="nextPage()" id="nextBtn" class="btn-ghost !py-2 !px-4 disabled:opacity-30">
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        <button onclick="nextPage()" id="nextBtn" class="w-10 h-10 rounded-full border border-white/5 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:bg-white/10 transition-all disabled:opacity-20">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
     </div>
 </div>
 
 <!-- Export Selection Modal -->
 <div id="exportModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeExportModal()"></div>
-    <div class="relative glass-card p-8 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-                <i data-lucide="download" class="w-5 h-5"></i>
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="closeExportModal()"></div>
+    <div class="relative glass-card p-8 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto !border-white/10 shadow-2xl">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-accent">
+                <i data-lucide="download" class="w-6 h-6"></i>
             </div>
             <div>
-                <h3 class="text-[18px] font-bold text-zinc-100">Exportar Estratégico</h3>
-                <p class="text-[12px] text-zinc-500 font-medium">Filtros avançados para sua prospecção</p>
+                <h3 class="text-xl font-bold text-zinc-100">Exportar Estratégico</h3>
+                <p class="text-sm text-zinc-500">Selecione o grupo para download</p>
             </div>
         </div>
         
-        <div class="space-y-4 mb-8">
+        <div class="space-y-4 mb-10">
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="exportPipeline('hot')" class="flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/30 transition-all text-left group">
-                    <i data-lucide="zap" class="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform"></i>
+                <button onclick="exportPipeline('hot')" class="flex flex-col gap-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/30 transition-all text-left group">
+                    <i data-lucide="zap" class="w-6 h-6 text-amber-500 group-hover:scale-110 transition-transform"></i>
                     <div>
-                        <p class="text-[13px] font-bold text-zinc-200 leading-tight">Score 80+</p>
-                        <p class="text-[10px] text-zinc-500 mt-0.5">Leads quentes</p>
+                        <p class="text-sm font-bold text-zinc-200">Score 80+</p>
+                        <p class="text-[11px] text-zinc-500 mt-1">Leads prontos</p>
                     </div>
                 </button>
 
-                <button onclick="exportPipeline('qualified')" class="flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all text-left group">
-                    <i data-lucide="star" class="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                <button onclick="exportPipeline('qualified')" class="flex flex-col gap-3 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all text-left group">
+                    <i data-lucide="star" class="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform"></i>
                     <div>
-                        <p class="text-[13px] font-bold text-zinc-200 leading-tight">Qualificados</p>
-                        <p class="text-[10px] text-zinc-500 mt-0.5">Seu Shortlist</p>
+                        <p class="text-sm font-bold text-zinc-200">Qualificados</p>
+                        <p class="text-[11px] text-zinc-500 mt-1">Sua shortlist</p>
                     </div>
                 </button>
             </div>
-
-            <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5">
-                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Exportação por Pontuação</p>
-                <div class="flex items-center gap-3">
-                    <div class="flex-1">
-                        <label class="text-[9px] text-zinc-600 font-bold uppercase mb-1 block">Score Mínimo</label>
-                        <input type="number" id="exportMinScore" value="50" min="0" max="100" class="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-[13px] focus:border-blue-500/50 outline-none">
-                    </div>
-                    <button onclick="exportByScore()" class="mt-4 btn-accent !py-2.5 !px-6">Baixar</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3">
-                <button onclick="exportPipeline('poor')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-orange-500/30 transition-all text-left group">
-                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
-                        <i data-lucide="monitor-x" class="w-5 h-5"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-[13px] font-bold text-zinc-200 leading-tight">Design Obsoleto</p>
-                        <p class="text-[10px] text-zinc-500 mt-0.5">Leads que precisam de um novo site técnico</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-700 group-hover:text-zinc-400"></i>
-                </button>
-
-                <button onclick="exportPipeline('none')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-red-500/30 transition-all text-left group">
-                    <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                        <i data-lucide="globe" class="w-5 h-5"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-[13px] font-bold text-zinc-200 leading-tight">Empresas Sem Site</p>
-                        <p class="text-[10px] text-zinc-500 mt-0.5">Prospecção de entrada (Criação de Site)</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-700 group-hover:text-zinc-400"></i>
-                </button>
-            </div>
-        </div>
-
-        <button onclick="closeExportModal()" class="w-full btn-ghost !py-3">Cancelar</button>
-    </div>
-</div>
-
-    </div>
-</div>
-
-<!-- Export Selection Modal -->
-<div id="exportModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeExportModal()"></div>
-    <div class="relative glass-card p-8 w-full max-w-sm mx-auto">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-                <i data-lucide="download" class="w-5 h-5"></i>
-            </div>
-            <div>
-                <h3 class="text-[16px] font-bold text-zinc-100">Exportar Leads</h3>
-                <p class="text-[11px] text-zinc-500 font-medium">Selecione o filtro de exportação</p>
-            </div>
-        </div>
-        
-        <div class="space-y-3 mb-8">
-            <button onclick="exportPipeline('hot')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                    <i data-lucide="zap" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Alta Prioridade (Score 80+)</p>
-                    <p class="text-[10px] text-zinc-500">Leads quentes e prontos para venda</p>
-                </div>
-            </button>
-
-            <button onclick="exportPipeline('warm')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-orange-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
-                    <i data-lucide="flame" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Interessantes (Score 50+)</p>
-                    <p class="text-[10px] text-zinc-500">Leads com bom potencial de conversão</p>
-                </div>
-            </button>
-
-            <button onclick="exportPipeline('recent')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-blue-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                    <i data-lucide="clock" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Recém Capturados</p>
-                    <p class="text-[10px] text-zinc-500">Últimos 100 leads salvos</p>
-                </div>
-            </button>
 
             <button onclick="exportPipeline('poor')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-orange-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
                     <i data-lucide="monitor-x" class="w-5 h-5"></i>
                 </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Melhorar Website</p>
-                    <p class="text-[10px] text-zinc-500">Leads com site antigo/ruim</p>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-zinc-200">Design Obsoleto</p>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">Oportunidades de Redesign</p>
                 </div>
             </button>
 
             <button onclick="exportPipeline('none')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-red-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
                     <i data-lucide="globe" class="w-5 h-5"></i>
                 </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Sem Website</p>
-                    <p class="text-[10px] text-zinc-500">Empresas sem site oficial</p>
-                </div>
-            </button>
-
-            <button onclick="exportPipeline('ads')" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all text-left group">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
-                    <i data-lucide="trending-up" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <p class="text-[13px] font-bold text-zinc-200">Gasta com Ads</p>
-                    <p class="text-[10px] text-zinc-500">Empresas que investem em tráfego</p>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-zinc-200">Sem Website</p>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">Prospecção de Entrada</p>
                 </div>
             </button>
         </div>
 
-        <button onclick="closeExportModal()" class="w-full btn-ghost !py-3">Cancelar</button>
+        <button onclick="closeExportModal()" class="w-full btn-ghost !py-3.5">Cancelar</button>
     </div>
 </div>
 
 <!-- Lead Detail Modal -->
 <div id="leadDetailModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeLeadDetail()"></div>
-    <div class="relative glass-card w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="closeLeadDetail()"></div>
+    <div class="relative glass-card w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto !border-white/10 shadow-2xl">
         <button onclick="closeLeadDetail()" class="absolute top-6 right-6 p-2 rounded-xl hover:bg-white/5 transition-colors z-10">
-            <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
+            <i data-lucide="x" class="w-5 h-5 text-zinc-500"></i>
         </button>
         <div id="leadDetailContent">
             <!-- Dynamic content -->
@@ -291,23 +236,23 @@
 
 <!-- Sales Script Modal -->
 <div id="salesScriptModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeSalesScript()"></div>
-    <div class="relative glass-card p-8 w-full max-w-lg mx-auto">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-                <i data-lucide="message-square" class="w-5 h-5"></i>
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="closeSalesScript()"></div>
+    <div class="relative glass-card p-8 w-full max-w-lg mx-auto !border-white/10 shadow-2xl">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <i data-lucide="message-square" class="w-6 h-6"></i>
             </div>
             <div>
-                <h3 class="text-[16px] font-bold text-zinc-100">Script de Abordagem</h3>
-                <p class="text-[11px] text-zinc-500 font-medium">Baseado na falha técnica detectada</p>
+                <h3 class="text-xl font-bold text-zinc-100">Script de Abordagem</h3>
+                <p class="text-sm text-zinc-500">Personalizado para a dor do lead</p>
             </div>
         </div>
-        <div class="bg-zinc-950/50 border border-white/5 rounded-xl p-5 mb-6">
-            <p id="scriptText" class="text-[14px] text-zinc-300 leading-relaxed italic"></p>
+        <div class="bg-zinc-950/50 border border-white/5 rounded-2xl p-6 mb-8">
+            <p id="scriptText" class="text-base text-zinc-300 leading-relaxed italic"></p>
         </div>
-        <div class="flex gap-3">
-            <button onclick="copyScript()" class="btn-accent flex-1 !py-3">Copiar Script</button>
-            <button onclick="closeSalesScript()" class="btn-ghost flex-1 !py-3">Fechar</button>
+        <div class="flex gap-4">
+            <button onclick="copyScript()" class="btn-accent flex-1 !py-3.5 uppercase tracking-widest text-[11px]">Copiar Script</button>
+            <button onclick="closeSalesScript()" class="btn-ghost flex-1 !py-3.5 uppercase tracking-widest text-[11px]">Fechar</button>
         </div>
     </div>
 </div>

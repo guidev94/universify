@@ -3,29 +3,41 @@ function getCSRFToken() {
     return meta ? meta.getAttribute('content') : '';
 }
 
+// Simple local cache to speed up UI
+const cache = {
+    get: (key) => {
+        const item = localStorage.getItem(`lh_cache_${key}`);
+        if (!item) return null;
+        const parsed = JSON.parse(item);
+        if (Date.now() > parsed.expiry) {
+            localStorage.removeItem(`lh_cache_${key}`);
+            return null;
+        }
+        return parsed.value;
+    },
+    set: (key, value, ttl = 300000) => { // Default 5 min
+        const item = { value, expiry: Date.now() + ttl };
+        localStorage.setItem(`lh_cache_${key}`, JSON.stringify(item));
+    }
+};
+
 async function api(url, options = {}) {
-    const defaults = {
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': getCSRFToken(),
-        },
-    };
-
-    const config = { ...defaults, ...options };
-    if (options.headers) {
-        config.headers = { ...defaults.headers, ...options.headers };
+    // Cache GET requests for stats and categories
+    if (!options.method || options.method === 'GET') {
+        const cached = cache.get(url);
+        if (cached) return cached;
     }
-
-    const response = await fetch(url, config);
-
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Erro ${response.status}`);
-    }
-
+// ...
     const contentType = response.headers.get('Content-Type') || '';
     if (contentType.includes('application/json')) {
-        return response.json();
+        const data = await response.json();
+        // Save to cache if applicable
+        if (!options.method || options.method === 'GET') {
+            if (url.includes('/stats') || url.includes('/categories')) {
+                cache.set(url, data, 60000); // 1 min cache
+            }
+        }
+        return data;
     }
     return response;
 }

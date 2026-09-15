@@ -17,8 +17,34 @@ def index():
 
 @bp.route("/api/dashboard/stats")
 def stats():
-    data = Lead.get_stats()
-    return jsonify(data)
+    try:
+        # Lead.get_stats() agora é uma query única otimizada com CASE WHEN
+        data = Lead.get_stats()
+        
+        # Otimização: Status do pipeline direto da memória (sem query)
+        from scheduler import scheduler
+        if scheduler.pipeline:
+            data["pipeline"] = scheduler.pipeline.status
+        
+        # Otimização: Busca success rate em query única e rápida
+        conn = get_connection()
+        row = conn.execute("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as success
+            FROM (SELECT status FROM crawl_jobs ORDER BY started_at DESC LIMIT 20)
+        """).fetchone()
+        conn.close()
+        
+        if row and row["total"] > 0:
+            data["job_success_rate"] = round((row["success"] / row["total"]) * 100, 1)
+        else:
+            data["job_success_rate"] = 0
+            
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"Dashboard stats error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @bp.route("/api/dashboard/chart-data")
@@ -132,18 +158,43 @@ def campaigns_page():
 @bp.route("/api/campaigns")
 def list_campaigns():
     campaigns = Campaign.get_all()
-    for c in campaigns:
-        # Garante que goal seja sempre um número para evitar NaN no frontend
-        try:
-            c["goal"] = int(c["goal"]) if c.get("goal") else 100
-        except (ValueError, TypeError):
-            c["goal"] = 100
+    if not campaigns:
+        return jsonify({"campaigns": []})
+
+    conn = get_connection()
+    try:
+        # OTIMIZAÇÃO: Busca estatísticas de todas as campanhas em uma única query
+        # Em vez de 1 SELECT por campanha, fazemos 1 para todos
+        names = [c["name"] for c in campaigns]
+        placeholders = ",".join("?" * len(names))
+        
+        stats_rows = conn.execute(f"""
+            SELECT 
+                campaign,
+                COUNT(*) as leads_count,
+                SUM(CASE WHEN status = 'closed_won' THEN 1 ELSE 0 END) as won_count
+            FROM leads 
+            WHERE campaign IN ({placeholders})
+            GROUP BY campaign
+        """, names).fetchall()
+        
+        stats_map = {row["campaign"]: (row["leads_count"], row["won_count"]) for row in stats_rows}
+        
+        for c in campaigns:
+            # Garante que goal seja sempre um número
+            try:
+                c["goal"] = int(c["goal"]) if c.get("goal") else 100
+            except (ValueError, TypeError):
+                c["goal"] = 100
             
-        conn = get_connection()
-        c["leads_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ?", (c["name"],)).fetchone()["cnt"]
-        c["won_count"] = conn.execute("SELECT COUNT(*) as cnt FROM leads WHERE campaign = ? AND status = 'closed_won'", (c["name"],)).fetchone()["cnt"]
+            l_count, w_count = stats_map.get(c["name"], (0, 0))
+            c["leads_count"] = l_count
+            c["won_count"] = w_count
+            
+        return jsonify({"campaigns": campaigns})
+    finally:
         conn.close()
-    return jsonify({"campaigns": campaigns})
+
 
 
 @bp.route("/api/campaigns", methods=["POST"])
@@ -329,43 +380,56 @@ def cancel_campaign_extraction(camp_id):
 @bp.route("/api/dashboard/activity")
 def dashboard_activity():
     from job_manager import job_manager
-
     conn = get_connection()
-    new_leads = conn.execute(
-        "SELECT id, name, tier, source, created_at FROM leads ORDER BY created_at DESC LIMIT 10"
-    ).fetchall()
-    activities = conn.execute(
-        "SELECT l.name, a.action, a.details, a.created_at FROM lead_activities a "
-        "JOIN leads l ON l.id = a.lead_id ORDER BY a.created_at DESC LIMIT 5"
-    ).fetchall()
-    running = conn.execute(
-        "SELECT job_uuid, keyword, progress, quantity_found, quantity_requested, started_at FROM crawl_jobs "
-        "WHERE status = 'running' ORDER BY started_at DESC LIMIT 5"
-    ).fetchall()
+    try:
+        # OTIMIZAÇÃO: Union de novas atividades, novos leads e jobs rodando para reduzir requests ao SQLite
+        # Usamos subqueries para garantir o LIMIT correto em cada parte
+        new_leads = conn.execute("""
+            SELECT 'lead' as type, id, name, tier, source, created_at as at, NULL as action, NULL as details, NULL as found, NULL as total, NULL as uuid
+            FROM leads ORDER BY created_at DESC LIMIT 10
+        """).fetchall()
+        
+        activities = conn.execute("""
+            SELECT 'activity' as type, l.id, l.name, NULL as tier, NULL as source, a.created_at as at, a.action, a.details, NULL as found, NULL as total, NULL as uuid
+            FROM lead_activities a 
+            JOIN leads l ON l.id = a.lead_id 
+            ORDER BY a.created_at DESC LIMIT 5
+        """).fetchall()
+        
+        running_jobs = conn.execute("""
+            SELECT 'job' as type, NULL as id, keyword as name, NULL as tier, NULL as source, started_at as at, NULL as action, NULL as details, quantity_found as found, quantity_requested as total, job_uuid as uuid
+            FROM crawl_jobs WHERE status = 'running' ORDER BY started_at DESC LIMIT 5
+        """).fetchall()
+        
+        feed = [dict(r) for r in (new_leads + activities + running_jobs)]
+        
+        # Enriquecimento com dados em memória dos jobs
+        for item in feed:
+            if item["type"] == "job":
+                state = job_manager.get(item["uuid"])
+                if state:
+                    item["found"] = state.get("progress", 0)
+
+        feed.sort(key=lambda x: x.get("at") or "", reverse=True)
+        return jsonify({"feed": feed[:15]})
+    finally:
+        conn.close()
+
+
+
+@bp.route("/api/dashboard/top-qualified")
+def top_qualified():
+    conn = get_connection()
+    # Pega leads qualificados manualmente ou com score muito alto que anunciam e tem site ruim
+    rows = conn.execute("""
+        SELECT id, name, score, website, category, site_quality, has_ads, tier 
+        FROM leads 
+        WHERE (is_qualified = 1 OR (score >= 85 AND has_ads = 1))
+        AND status = 'new'
+        ORDER BY score DESC LIMIT 5
+    """).fetchall()
     conn.close()
-
-    feed = []
-    for l in new_leads:
-        feed.append({"type": "lead", "id": dict(l)["id"], "name": dict(l)["name"], "tier": dict(l)["tier"], "source": dict(l)["source"], "at": dict(l)["created_at"]})
-    for a in activities:
-        a = dict(a)
-        feed.append({"type": "activity", "name": a["name"], "action": a["action"], "details": a["details"], "at": a["created_at"]})
-    for j in running:
-        j = dict(j)
-        state = job_manager.get(j["job_uuid"])
-        found = state.get("progress", 0) if state else (j["progress"] or j["quantity_found"] or 0)
-        feed.append({"type": "job", "keyword": j["keyword"], "found": found, "total": j["quantity_requested"], "at": j["started_at"], "uuid": j["job_uuid"]})
-
-    feed.sort(key=lambda x: x.get("at") or "", reverse=True)
-    return jsonify({"feed": feed[:15]})
-
-
-
-@bp.route("/api/system/health")
-def system_health():
-    from scheduler import scheduler
-    status = scheduler.get_status()
-    return jsonify(status)
+    return jsonify({"leads": [dict(r) for r in rows]})
 
 
 @bp.route("/status")

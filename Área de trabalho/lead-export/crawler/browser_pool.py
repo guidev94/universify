@@ -42,8 +42,15 @@ class BrowserPool:
                 # Try to get an existing driver
                 driver = self.pool.get(block=False)
                 if self._is_alive(driver):
-                    logger.debug("Reusing existing driver from pool")
-                    return driver
+                    # Check usage count to prevent memory leaks
+                    usage = getattr(driver, "_usage_count", 0)
+                    if usage < 50:
+                        driver._usage_count = usage + 1
+                        logger.debug(f"Reusing existing driver from pool (usage: {driver._usage_count})")
+                        return driver
+                    else:
+                        logger.info("Driver reached max usage, retiring")
+                        self._close_driver(driver)
                 else:
                     logger.debug("Driver in pool was dead, removing")
                     self._decrement_active()
@@ -88,29 +95,43 @@ class BrowserPool:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-notifications")
         options.add_argument("--disable-popup-blocking")
-        options.add_argument("--blink-settings=imagesEnabled=false") # Desabilita imagens para velocidade
-        options.add_argument(f"--user-agent={self.ua.random}")
+        options.add_argument("--blink-settings=imagesEnabled=false")
+        
+        # New Stealth & Performance Arguments
         options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--disable-infobars")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument(f"--user-agent={self.ua.random}")
         options.add_argument("--lang=pt-BR")
         
-        # Otimização de memória e CPU
-        options.add_argument("--proxy-server='direct://'")
-        options.add_argument("--proxy-bypass-list=*")
-        options.add_argument("--start-maximized")
-        
+        # Hide Selenium Presence
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
         
+        # Add more realistic headers/prefs
         prefs = {
             "profile.managed_default_content_settings.images": 2,
             "profile.default_content_settings.popups": 0,
-            "profile.default_content_setting_values.notifications": 2
+            "profile.default_content_setting_values.notifications": 2,
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False
         }
         options.add_experimental_option("prefs", prefs)
         
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
+        
+        # Execute CDP commands for stealth
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+            "source": """
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """
+        })
+        
         driver.set_page_load_timeout(25)
+        driver._usage_count = 1
         return driver
 
     def _is_alive(self, driver):
@@ -141,4 +162,4 @@ class BrowserPool:
             except Empty:
                 break
 
-browser_pool = BrowserPool(max_drivers=12)
+browser_pool = BrowserPool(max_drivers=4)

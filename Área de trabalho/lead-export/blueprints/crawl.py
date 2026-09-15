@@ -22,7 +22,7 @@ logger = logging.getLogger("leadhunter.crawl")
 
 bp = Blueprint("crawl", __name__)
 
-MAX_JOB_DURATION = 600
+MAX_JOB_DURATION = Config.JOB_MAX_DURATION
 
 
 def _get_event_bus():
@@ -151,10 +151,18 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
         crawl_sources["niche"] = lambda: NicheCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
         crawl_sources["yellowpages"] = lambda: YellowPagesCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
 
+        # Novas fontes para maior volume
+        from crawler.guias_br_crawler import GuiasBRCrawler
+        from crawler.social_media_crawler import SocialMediaCrawler
+        from crawler.classificados_crawler import ClassificadosCrawler
+        crawl_sources["guias_br"] = lambda: GuiasBRCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
+        crawl_sources["social_media"] = lambda: SocialMediaCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
+        crawl_sources["classificados"] = lambda: ClassificadosCrawler().crawl(query, location, fetch_qty, on_progress=on_progress)
+
         job_start = time.time()
 
-        # Aumentado para 8 para permitir que todas as fontes rodem em paralelo real
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        # Aumentado para 12 para permitir que todas as fontes rodem em paralelo real
+        with ThreadPoolExecutor(max_workers=12) as executor:
             futures = {executor.submit(fn): name for name, fn in crawl_sources.items()}
 
             try:
@@ -218,9 +226,10 @@ def run_crawl(job_uuid, job_id, source, query, quantity, location, campaign_name
                     continue
                 seen_validated.add(v_key)
 
-                score, tier = calculate_score(validated)
+                score, tier, pitch_hook = calculate_score(validated)
                 validated["score"] = score
                 validated["tier"] = tier
+                validated["pitch_hook"] = pitch_hook
                 if campaign_name:
                     validated["campaign"] = campaign_name
                 if location:

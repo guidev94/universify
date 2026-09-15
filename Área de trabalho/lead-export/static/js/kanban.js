@@ -68,7 +68,10 @@ function createKanbanCard(lead) {
     // Tech insights logic
     let techBadge = '';
     let techReason = '';
-    if (lead.site_quality === 'poor' && lead.site_verified) {
+    if (lead.site_status === 'offline') {
+        techBadge = '<span class="px-1.5 py-0.5 rounded-md text-[8px] font-black bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/10">FORA DO AR</span>';
+        techReason = 'Site fora do ar / domínio pode ter expirado';
+    } else if (lead.site_quality === 'poor' && lead.site_verified) {
         techBadge = '<span class="px-1.5 py-0.5 rounded-md text-[8px] font-black bg-amber-500/20 text-amber-500 border border-amber-500/10">SITE ANTIGO</span>';
         techReason = 'Design obsoleto ou não responsivo';
     } else if (!lead.website && lead.site_verified === 0) {

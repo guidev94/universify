@@ -1,8 +1,20 @@
+# ─── Python ───────────────────────────────────────────────
 venv/
 __pycache__/
 *.pyc
-data/leads.db
-exports/
-.env
+*.pyo
 .pytest_cache/
+
+# ─── Segredos / ambiente ─────────────────────────────────
+.env
+.env.local
+
+# ─── Banco de dados (SQLite + WAL) ───────────────────────
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# ─── Artefatos gerados ────────────────────────────────────
+exports/
 *.log
+server_*.log
