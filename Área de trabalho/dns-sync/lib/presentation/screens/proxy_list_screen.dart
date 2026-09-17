@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:ui';
 import '../../core/theme/app_theme.dart';
 import '../providers/proxy_provider.dart';
 
@@ -14,34 +16,124 @@ class ProxyListScreen extends ConsumerWidget {
     final proxiesAsync = ref.watch(listaProxyProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Lista de Proxies"),
-        actions: [
-          IconButton(
-            onPressed: () => ref.refresh(listaProxyProvider),
-            icon: const Icon(Icons.refresh),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildHeader(context),
+              
+              SliverPadding(
+                padding: const EdgeInsets.all(AppEspacamento.lg),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildSecurityAlert(context),
+                    const SizedBox(height: AppEspacamento.lg),
+                  ]),
+                ),
+              ),
+
+              proxiesAsync.when(
+                data: (proxies) => SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildModernProxyCard(context, proxies[index], index),
+                      childCount: proxies.length,
+                    ),
+                  ),
+                ),
+                loading: () => SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildSkeletonCard(context),
+                      childCount: 6,
+                    ),
+                  ),
+                ),
+                error: (err, stack) => SliverFillRemaining(
+                  child: _buildErrorState(context, ref),
+                ),
+              ),
+              const SizedBox(height: 100),
+            ],
+          ),
+
+          // Custom Floating Back Button
+          Positioned(
+            top: 50,
+            left: 20,
+            child: _buildBackButton(context),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Aviso de Segurança
-          _buildSecurityWarning(context),
-          
-          Expanded(
-            child: proxiesAsync.when(
-              data: (proxies) => ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(AppEspacamento.md),
-                itemCount: proxies.length,
-                separatorBuilder: (context, index) => const SizedBox(height: AppEspacamento.md),
-                itemBuilder: (context, index) {
-                  final proxy = proxies[index];
-                  return _buildProxyCard(context, proxy, index);
-                },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 120, AppEspacamento.lg, AppEspacamento.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Servidores",
+              style: TextStyle(
+                fontSize: 14, 
+                fontWeight: FontWeight.w800, 
+                letterSpacing: 2, 
+                color: AppCores.primario
               ),
-              loading: () => _buildSkeletonLoading(context),
-              error: (err, stack) => _buildErrorState(context, ref),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Lista de Proxies",
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context).withOpacity(0.8),
+            borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            border: Border.all(color: AppCores.borda(context)),
+          ),
+          child: IconButton(
+            icon: const Icon(LucideIcons.chevron_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+      ),
+    ).animate().fadeIn().slideX(begin: -0.2);
+  }
+
+  Widget _buildSecurityAlert(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppEspacamento.md),
+      decoration: BoxDecoration(
+        color: AppCores.alerta.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+        border: Border.all(color: AppCores.alerta.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(LucideIcons.shield_alert, color: AppCores.alerta, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "Use proxies apenas para navegação anônima básica. Evite dados sensíveis.",
+              style: TextStyle(fontSize: 12, color: AppCores.alerta, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -49,49 +141,89 @@ class ProxyListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSecurityWarning(BuildContext context) {
+  Widget _buildModernProxyCard(BuildContext context, dynamic proxy, int index) {
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.all(AppEspacamento.md),
-      padding: const EdgeInsets.all(AppEspacamento.md),
+      margin: const EdgeInsets.only(bottom: AppEspacamento.md),
       decoration: BoxDecoration(
-        color: AppCores.alerta.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-        border: Border.all(color: AppCores.alerta.withOpacity(0.3)),
+        color: AppCores.superficie(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+        border: Border.all(color: AppCores.borda(context)),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: AppCores.alerta, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              "Atenção: Proxies gratuitos podem ser instáveis e comprometer sua privacidade. Use com cautela.",
-              style: TextStyle(
-                fontSize: 12, 
-                color: AppCores.alerta.withOpacity(0.9),
-                fontWeight: FontWeight.w500
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+             ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Conectando ao proxy ${proxy['ip']}..."),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: AppCores.primario,
               ),
+            );
+          },
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+          child: Padding(
+            padding: const EdgeInsets.all(AppEspacamento.lg),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppCores.primario.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(LucideIcons.server, color: AppCores.primario, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${proxy['ip']}:${proxy['porta']}",
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(LucideIcons.globe, size: 12, color: AppCores.textoSuave(context)),
+                          const SizedBox(width: 4),
+                          Text(
+                            proxy['pais'],
+                            style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(LucideIcons.check_circle_2, size: 12, color: AppCores.sucesso),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Online",
+                            style: TextStyle(fontSize: 12, color: AppCores.sucesso, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(LucideIcons.chevron_right, size: 18, color: AppCores.bordaClaro),
+              ],
             ),
           ),
-        ],
+        ),
       ),
-    ).animate().fadeIn().slideY(begin: -0.2);
+    ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1);
   }
 
-  Widget _buildSkeletonLoading(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppEspacamento.md),
-      itemCount: 6,
-      separatorBuilder: (context, index) => const SizedBox(height: AppEspacamento.md),
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: AppCores.borda(context),
-        highlightColor: AppCores.fundo(context),
-        child: Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-          ),
+  Widget _buildSkeletonCard(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppCores.borda(context),
+      highlightColor: AppCores.fundo(context),
+      child: Container(
+        height: 90,
+        margin: const EdgeInsets.only(bottom: AppEspacamento.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
         ),
       ),
     );
@@ -104,15 +236,15 @@ class ProxyListScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppCores.primario),
+            const Icon(LucideIcons.cloud_off, size: 64, color: AppCores.textoSuaveClaro),
             const SizedBox(height: 20),
             const Text(
-              "Não foi possível carregar a lista",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              "Indisponível",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
             const Text(
-              "Verifique sua conexão e tente novamente.",
+              "Não conseguimos carregar os servidores agora.",
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
@@ -124,76 +256,5 @@ class ProxyListScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildProxyCard(BuildContext context, dynamic proxy, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppCores.fundo(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-        border: Border.all(color: AppCores.borda(context)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Conectando ao proxy ${proxy['ip']}..."),
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: AppCores.primario,
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-          child: Padding(
-            padding: const EdgeInsets.all(AppEspacamento.md),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppCores.secundario.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(LucideIcons.server, color: AppCores.secundario, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${proxy['ip']}:${proxy['porta']}",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(LucideIcons.map_pin, size: 12, color: AppCores.sucesso),
-                          const SizedBox(width: 4),
-                          Text(
-                            proxy['pais'],
-                            style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(LucideIcons.activity, size: 12, color: AppCores.alerta),
-                          const SizedBox(width: 4),
-                          Text(
-                            "Estável",
-                            style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(LucideIcons.signal_high, color: AppCores.sucesso, size: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1);
   }
 }

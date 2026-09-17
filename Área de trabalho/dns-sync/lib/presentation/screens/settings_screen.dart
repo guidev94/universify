@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/proxy_provider.dart';
 
@@ -12,104 +13,140 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final modoTema = ref.watch(temaProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Configurações"),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppEspacamento.md),
-        children: [
-          _buildSectionTitle("Aparência"),
-          _buildSettingTile(
-            context,
-            "Modo Escuro",
-            modoTema == ThemeMode.dark ? "Ativado" : "Desativado",
-            LucideIcons.moon,
-            trailing: Switch.adaptive(
-              value: modoTema == ThemeMode.dark,
-              activeColor: AppCores.primario,
-              onChanged: (val) {
-                HapticFeedback.mediumImpact();
-                ref.read(temaProvider.notifier).state = 
-                    val ? ThemeMode.dark : ThemeMode.light;
-              },
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 40, AppEspacamento.lg, AppEspacamento.xl),
+            child: Text(
+              "Ajustes",
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
             ),
           ),
-          const SizedBox(height: AppEspacamento.lg),
-          _buildSectionTitle("Conexão"),
-          _buildSettingTile(
-            context,
-            "Teste de Velocidade",
-            "Verificar latência e download",
-            LucideIcons.gauge,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Funcionalidade de Speed Test em breve!")),
-              );
-            },
-          ),
-          _buildSettingTile(
-            context,
-            "Notificações de Status",
-            "Mostrar ícone quando ativo",
-            LucideIcons.bell,
-            trailing: Switch.adaptive(
-              value: true,
-              activeColor: AppCores.primario,
-              onChanged: (val) {},
-            ),
-          ),
-          const SizedBox(height: AppEspacamento.lg),
-          _buildSectionTitle("Sobre"),
-          _buildSettingTile(
-            context,
-            "Versão do App",
-            "1.0.0+1",
-            LucideIcons.info,
-          ),
-          _buildSettingTile(
-            context,
-            "Desenvolvedor",
-            "Aquinodev",
-            LucideIcons.code,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-          color: AppCores.primario,
         ),
-      ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _buildModernSection(context, "Aparência", [
+                _buildModernTile(
+                  context,
+                  "Modo Escuro",
+                  modoTema == ThemeMode.dark ? "Visual noturno ativado" : "Visual claro ativado",
+                  modoTema == ThemeMode.dark ? LucideIcons.moon : LucideIcons.sun,
+                  trailing: Switch.adaptive(
+                    value: modoTema == ThemeMode.dark,
+                    activeColor: AppCores.primario,
+                    onChanged: (val) {
+                      HapticFeedback.mediumImpact();
+                      ref.read(temaProvider.notifier).state = 
+                          val ? ThemeMode.dark : ThemeMode.light;
+                    },
+                  ),
+                ),
+              ]),
+              const SizedBox(height: AppEspacamento.lg),
+              _buildModernSection(context, "Performance", [
+                _buildModernTile(
+                  context,
+                  "Teste de Velocidade",
+                  "Mede latência e download",
+                  LucideIcons.gauge,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Módulo de Speed Test em desenvolvimento")),
+                    );
+                  },
+                ),
+                _buildModernTile(
+                  context,
+                  "Conexão Inteligente",
+                  "Escolha automática do servidor",
+                  LucideIcons.zap,
+                  trailing: Switch.adaptive(
+                    value: false,
+                    activeColor: AppCores.primario,
+                    onChanged: (val) {},
+                  ),
+                ),
+              ]),
+              const SizedBox(height: AppEspacamento.lg),
+              _buildModernSection(context, "Sobre", [
+                _buildModernTile(
+                  context,
+                  "Versão",
+                  "1.0.0 Premium",
+                  LucideIcons.info,
+                ),
+                _buildModernTile(
+                  context,
+                  "Desenvolvedor",
+                  "Aquinodev",
+                  LucideIcons.terminal,
+                ),
+              ]),
+              const SizedBox(height: 120),
+            ]),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildSettingTile(
+  Widget _buildModernSection(BuildContext context, String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            title.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+              color: AppCores.primario,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+            border: Border.all(color: AppCores.borda(context)),
+          ),
+          child: Column(
+            children: children,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernTile(
     BuildContext context, 
     String title, 
     String subtitle, 
     IconData icon, 
     {Widget? trailing, VoidCallback? onTap}
   ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppEspacamento.sm),
-      child: ListTile(
-        onTap: onTap,
-        leading: Icon(icon, color: AppCores.primario, size: 22),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle, style: TextStyle(color: AppCores.textoSuave(context), fontSize: 13)),
-        trailing: trailing ?? (onTap != null ? const Icon(LucideIcons.chevron_right, size: 18) : null),
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppCores.fundo(context),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppCores.borda(context)),
+        ),
+        child: Icon(icon, color: AppCores.texto(context), size: 18),
       ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+      subtitle: Text(subtitle, style: TextStyle(color: AppCores.textoSuave(context), fontSize: 12)),
+      trailing: trailing ?? (onTap != null ? const Icon(LucideIcons.chevron_right, size: 16) : null),
     );
   }
 }
