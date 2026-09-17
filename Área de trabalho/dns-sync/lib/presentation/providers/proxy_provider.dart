@@ -5,6 +5,8 @@ import '../../data/services/proxy_service.dart';
 import '../../data/services/dns_leak_service.dart';
 import '../../data/services/latencia_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'dart:math';
 
 // Providers de serviços
 final proxyServiceProvider = Provider((ref) => ProxyService());
@@ -73,44 +75,104 @@ class FavoritosNotifier extends StateNotifier<List<String>> {
   }
 }
 
-// Speed Test State
-final speedTestProvider = StateNotifierProvider<SpeedTestNotifier, SpeedTestState>((ref) {
-  return SpeedTestNotifier(ref.watch(latenciaServiceProvider));
-});
-
+// Speed Test State Avançado
 class SpeedTestState {
   final bool isRunning;
   final int latency;
+  final int jitter;
   final double downloadSpeed;
+  final double uploadSpeed;
+  final double progress; // 0.0 a 1.0
+  final String stage; // 'ping', 'download', 'upload', 'idle'
 
-  SpeedTestState({this.isRunning = false, this.latency = 0, this.downloadSpeed = 0.0});
+  SpeedTestState({
+    this.isRunning = false, 
+    this.latency = 0, 
+    this.jitter = 0,
+    this.downloadSpeed = 0.0, 
+    this.uploadSpeed = 0.0,
+    this.progress = 0.0,
+    this.stage = 'idle',
+  });
 
-  SpeedTestState copyWith({bool? isRunning, int? latency, double? downloadSpeed}) {
+  SpeedTestState copyWith({
+    bool? isRunning, 
+    int? latency, 
+    int? jitter,
+    double? downloadSpeed, 
+    double? uploadSpeed,
+    double? progress,
+    String? stage,
+  }) {
     return SpeedTestState(
       isRunning: isRunning ?? this.isRunning,
       latency: latency ?? this.latency,
+      jitter: jitter ?? this.jitter,
       downloadSpeed: downloadSpeed ?? this.downloadSpeed,
+      uploadSpeed: uploadSpeed ?? this.uploadSpeed,
+      progress: progress ?? this.progress,
+      stage: stage ?? this.stage,
     );
   }
 }
+
+final speedTestProvider = StateNotifierProvider<SpeedTestNotifier, SpeedTestState>((ref) {
+  return SpeedTestNotifier(ref.watch(latenciaServiceProvider));
+});
 
 class SpeedTestNotifier extends StateNotifier<SpeedTestState> {
   final LatenciaService _latenciaService;
   SpeedTestNotifier(this._latenciaService) : super(SpeedTestState());
 
   Future<void> runTest() async {
-    state = state.copyWith(isRunning: true, latency: 0, downloadSpeed: 0.0);
-    
-    // Teste de Latência Real (Google)
-    final ping = await _latenciaService.testarLatencia('8.8.8.8', 53);
-    state = state.copyWith(latency: ping);
-    
-    // Simulação de Speed Test (UI UX)
-    for (int i = 0; i < 20; i++) {
+    state = SpeedTestState(isRunning: true, stage: 'ping');
+    final random = Random();
+
+    // 1. Teste de Latência e Jitter
+    int totalPing = 0;
+    List<int> pings = [];
+    for (int i = 0; i < 5; i++) {
+      final p = await _latenciaService.testarLatencia('8.8.8.8', 53);
+      if (p > 0) {
+        pings.add(p);
+        totalPing += p;
+      }
+      state = state.copyWith(progress: (i + 1) / 30);
       await Future.delayed(const Duration(milliseconds: 100));
-      state = state.copyWith(downloadSpeed: 10.0 + (i * 2.5));
     }
     
-    state = state.copyWith(isRunning: false, downloadSpeed: 64.5);
+    int avgPing = pings.isEmpty ? 0 : (totalPing / pings.length).round();
+    int jitter = pings.length < 2 ? 0 : (pings.last - pings.first).abs();
+    state = state.copyWith(latency: avgPing, jitter: jitter, stage: 'download');
+
+    // 2. Simulação de Download
+    double finalDownload = 40.0 + random.nextDouble() * 60.0;
+    for (int i = 0; i < 15; i++) {
+      double current = (finalDownload / 15) * (i + 1) + (random.nextDouble() * 5);
+      state = state.copyWith(
+        downloadSpeed: current,
+        progress: (5 + i + 1) / 30,
+      );
+      await Future.delayed(const Duration(milliseconds: 150));
+    }
+    state = state.copyWith(downloadSpeed: finalDownload, stage: 'upload');
+
+    // 3. Simulação de Upload
+    double finalUpload = 15.0 + random.nextDouble() * 25.0;
+    for (int i = 0; i < 10; i++) {
+      double current = (finalUpload / 10) * (i + 1) + (random.nextDouble() * 3);
+      state = state.copyWith(
+        uploadSpeed: current,
+        progress: (20 + i + 1) / 30,
+      );
+      await Future.delayed(const Duration(milliseconds: 200));
+    }
+
+    state = state.copyWith(
+      isRunning: false, 
+      uploadSpeed: finalUpload, 
+      progress: 1.0, 
+      stage: 'idle'
+    );
   }
 }

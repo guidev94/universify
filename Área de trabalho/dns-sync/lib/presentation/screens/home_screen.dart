@@ -10,6 +10,7 @@ import '../../core/constants/canal_nativo.dart';
 import '../providers/proxy_provider.dart';
 import 'proxy_list_screen.dart';
 import 'settings_screen.dart';
+import 'speed_test_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -37,9 +38,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           
           SafeArea(
             bottom: false,
-            child: _currentIndex == 0 
-                ? _buildHomeBody(context, estaConectado, provedorAtual, modoTema, conexaoInfo)
-                : const SettingsScreen(),
+            child: AnimatedSwitcher(
+              duration: 400.ms,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.05, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: IndexedStack(
+                key: ValueKey<int>(_currentIndex),
+                index: _currentIndex,
+                children: [
+                  _buildHomeBody(context, estaConectado, provedorAtual, modoTema, conexaoInfo),
+                  const ProxyListScreen(),
+                  const SpeedTestScreen(),
+                  const SettingsScreen(),
+                ],
+              ),
+            ),
           ),
           
           // Navegação Flutuante
@@ -87,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        // Custom Header (Non-generic)
+        // Custom Header (Minimalist)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(AppEspacamento.lg),
@@ -104,21 +127,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Image.asset('assets/images/icone.png', height: 28),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Sync DNS",
-                          style: GoogleFonts.inter(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
-                            color: AppCores.texto(context),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 8),
+                    Text(
+                      "Sync DNS",
+                      style: GoogleFonts.inter(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                        color: AppCores.texto(context),
+                      ),
                     ),
                   ],
                 ),
@@ -134,12 +151,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppEspacamento.md),
               
-              // Status Card com Efeito de Glow
+              // Status Card
               _buildModernStatusCard(estaConectado, provedorAtual),
               
               const SizedBox(height: AppEspacamento.xl),
               
-              // Conexão Info (Leak Test)
+              // Conexão Info
               _buildLeakTestCard(conexaoInfo),
               
               const SizedBox(height: AppEspacamento.xl),
@@ -152,7 +169,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: AppEspacamento.md),
               
-              // Grid Estilo Bento
               Row(
                 children: [
                   Expanded(
@@ -179,10 +195,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               const SizedBox(height: AppEspacamento.xl),
               
-              // Proxy Section Refatorada
               _buildPremiumProxySection(),
               
-              const SizedBox(height: 120), // Espaço para a nav bar
+              const SizedBox(height: 120),
             ]),
           ),
         ),
@@ -384,15 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: InkWell(
           onTap: () {
             HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => const ProxyListScreen(),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-              ),
-            );
+            setState(() => _currentIndex = 1); // Muda para aba de Proxies
           },
           borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
           child: Padding(
@@ -493,8 +500,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavIcon(0, Icons.home_rounded, "Início"),
-                _buildNavIcon(1, Icons.settings_rounded, "Ajustes"),
+                _buildNavIcon(0, LucideIcons.shield, "Início"),
+                _buildNavIcon(1, LucideIcons.globe, "Proxies"),
+                _buildNavIcon(2, LucideIcons.gauge, "Speed"),
+                _buildNavIcon(3, LucideIcons.settings, "Ajustes"),
               ],
             ),
           ),
@@ -532,26 +541,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _selecionarProvedor(String nome) async {
     final ips = nome == "Google" ? ["8.8.8.8", "8.8.4.4"] : ["1.1.1.1", "1.0.0.1"];
-    
     ref.read(provedorSelecionadoProvider.notifier).state = nome;
     
     final sucesso = await CanalNativo.aplicarDns(ips[0], ips[1]);
     
     if (sucesso) {
       ref.read(dnsStatusProvider.notifier).state = true;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("DNS alterado para $nome"),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppCores.primario,
-          margin: const EdgeInsets.only(bottom: 110, left: 20, right: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Aceite a permissão de VPN para ativar o DNS")),
-      );
     }
   }
 }

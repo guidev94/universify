@@ -79,8 +79,17 @@ class SettingsScreen extends ConsumerWidget {
                 _buildModernTile(
                   context,
                   "Versão",
-                  "1.0.0 Premium",
+                  "1.1.0 Premium",
                   LucideIcons.info,
+                ),
+                _buildModernTile(
+                  context,
+                  "GitHub",
+                  "github.com/guidev94",
+                  Icons.code_rounded,
+                  onTap: () {
+                    // Lógica para abrir link
+                  },
                 ),
                 _buildModernTile(
                   context,
