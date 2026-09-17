@@ -1,30 +1,19 @@
-# Análise de Segurança: DNS Sync
+# Auditoria de Segurança: Sync DNS (Play Store Ready)
 
-## 1. Escopo de Segurança
-O DNS Sync manipula configurações críticas de rede no nível do sistema operacional (Android/iOS).
+## 1. Ofuscação de Código (Obfuscation)
+Para subir na Play Store, o app será compilado com `--obfuscate`.
+- **Risco:** Engenharia reversa para descobrir lógica de proxy.
+- **Mitigação:** Dart code obfuscation e ProGuard no Android.
 
-## 2. Riscos Identificados e Mitigações
+## 2. Permissões Críticas
+O app solicita `BIND_VPN_SERVICE`.
+- **Regra Google Play:** Apps que usam VpnService devem ser explícitos.
+- **Ação:** Criar uma "Página de Consentimento" obrigatória no primeiro uso explicando que o app cria um túnel local para proteção DNS.
 
-### R-1: Manipulação de Tráfego via DNS/Proxy
-- **Risco:** Servidores DNS ou Proxies maliciosos podem interceptar tráfego, realizar ataques de Man-in-the-Middle (MitM) ou redirecionar o usuário para sites de phishing.
-- **Mitigação:** 
-    - O app fornece provedores DNS confiáveis (Google, Cloudflare) por padrão.
-    - **Aviso Obrigatório:** Implementar um aviso de isenção de responsabilidade (disclaimer) ao ativar proxies gratuitos.
-    - **Validação:** Verificar a integridade dos IPs de proxy antes da conexão.
+## 3. Integridade de Dados
+- **SSL Pinning:** Sugerido para chamadas à API de Proxies em versões futuras.
+- **Certificados:** O app deve usar apenas conexões HTTPS (já implementado).
 
-### R-2: Permissões de VPN (VpnService)
-- **Risco:** O uso de `VpnService` para alterar o DNS dá ao app visibilidade sobre todo o tráfego do dispositivo.
-- **Mitigação:** 
-    - Política de Privacidade clara declarando "Zero Logs".
-    - O túnel VPN deve ser configurado para interceptar apenas consultas DNS (Porta 53), não o tráfego de dados completo, sempre que possível.
-
-### R-3: Armazenamento de Dados Sensíveis
-- **Risco:** Logs de conexão ou IPs de proxy podem ser vazados.
-- **Mitigação:** 
-    - Não armazenar logs persistentes no dispositivo.
-    - Usar `flutter_secure_storage` para quaisquer chaves ou configurações sensíveis.
-
-## 3. Próximos Passos de Segurança
-- [ ] Implementar tela de consentimento e aviso sobre proxies.
-- [ ] Integrar checagem de "DNS Leak" dentro do app.
-- [ ] Realizar auditoria de pacotes externos.
+## 4. Segurança de Terceiros (Proxies)
+- **Risco:** O usuário pode se conectar a um proxy malicioso.
+- **Ação:** Adicionar o campo "Rating" de confiabilidade e avisos de "Sandbox" para proxies não verificados.

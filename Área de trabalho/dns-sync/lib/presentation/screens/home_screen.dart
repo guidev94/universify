@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/canal_nativo.dart';
+import '../../data/services/widget_service.dart';
 import '../providers/proxy_provider.dart';
 import 'proxy_list_screen.dart';
 import 'settings_screen.dart';
@@ -22,6 +23,18 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
+  void _atualizarWidget() {
+    final ativo = ref.read(dnsStatusProvider);
+    final provedor = ref.read(provedorSelecionadoProvider);
+    final velocidade = ref.read(speedTestProvider).downloadSpeed;
+    
+    WidgetService.atualizarWidget(
+      ativo: ativo,
+      provedor: provedor,
+      velocidade: velocidade,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final estaConectado = ref.watch(dnsStatusProvider);
@@ -33,7 +46,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       extendBody: true,
       body: Stack(
         children: [
-          // Background dinâmico
           _buildAnimatedBackground(estaConectado),
           
           SafeArea(
@@ -65,7 +77,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           
-          // Navegação Flutuante
           _buildFloatingNavBar(),
         ],
       ),
@@ -110,7 +121,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        // Custom Header (Minimalist)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(AppEspacamento.lg),
@@ -150,17 +160,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: AppEspacamento.md),
-              
-              // Status Card
               _buildModernStatusCard(estaConectado, provedorAtual),
-              
               const SizedBox(height: AppEspacamento.xl),
-              
-              // Conexão Info
               _buildLeakTestCard(conexaoInfo),
-              
               const SizedBox(height: AppEspacamento.xl),
-              
               Text(
                 "Provedores",
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -168,7 +171,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: AppEspacamento.md),
-              
               Row(
                 children: [
                   Expanded(
@@ -192,11 +194,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              
               const SizedBox(height: AppEspacamento.xl),
-              
               _buildPremiumProxySection(),
-              
               const SizedBox(height: 120),
             ]),
           ),
@@ -325,6 +324,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onTap: () {
         HapticFeedback.heavyImpact();
         ref.read(dnsStatusProvider.notifier).state = !ativo;
+        _atualizarWidget();
       },
       child: Container(
         width: 70,
@@ -399,7 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: InkWell(
           onTap: () {
             HapticFeedback.lightImpact();
-            setState(() => _currentIndex = 1); // Muda para aba de Proxies
+            setState(() => _currentIndex = 1);
           },
           borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
           child: Padding(
@@ -547,6 +547,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     
     if (sucesso) {
       ref.read(dnsStatusProvider.notifier).state = true;
+      _atualizarWidget();
     }
   }
 }
