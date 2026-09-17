@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/proxy_provider.dart';
 import 'proxy_list_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,190 @@ class HomeScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final estaConectado = ref.watch(dnsStatusProvider);
+    final provedorAtual = ref.watch(provedorSelecionadoProvider);
+    final modoTema = ref.watch(temaProvider);
+    final conexaoInfo = ref.watch(conexaoInfoProvider);
+
+    return Scaffold(
+      body: _currentIndex == 0 
+        ? _buildHomeBody(context, estaConectado, provedorAtual, modoTema, conexaoInfo)
+        : const SettingsScreen(),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildHomeBody(BuildContext context, bool estaConectado, String provedorAtual, ThemeMode modoTema, AsyncValue<Map<String, dynamic>> conexaoInfo) {
+    return SafeArea(
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            expandedHeight: 140,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    Hero(
+                      tag: 'logo',
+                      child: Image.asset(
+                        'assets/images/icone.png',
+                        height: 70,
+                        errorBuilder: (context, error, stackTrace) => 
+                            Icon(LucideIcons.shield, size: 50, color: AppCores.primario),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "SYNC DNS",
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        color: AppCores.primario,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  modoTema == ThemeMode.light ? LucideIcons.moon : LucideIcons.sun,
+                  color: AppCores.texto(context),
+                ),
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  ref.read(temaProvider.notifier).state = 
+                      modoTema == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+                },
+              ).animate().rotate(duration: 400.ms),
+              const SizedBox(width: AppEspacamento.md),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Text(
+                  "Sincronização DNS",
+                  style: Theme.of(context).textTheme.displayLarge,
+                ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.2),
+                
+                const SizedBox(height: AppEspacamento.sm),
+                
+                Text(
+                  "Mantenha sua conexão rápida e segura.",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideX(begin: -0.1),
+                
+                const SizedBox(height: AppEspacamento.xl),
+                
+                // Card de Status
+                _buildStatusCard(estaConectado, provedorAtual),
+                
+                const SizedBox(height: AppEspacamento.lg),
+                
+                // Leak Test / Info de Conexão
+                _buildLeakTestCard(conexaoInfo),
+                
+                const SizedBox(height: AppEspacamento.xl),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Provedores",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    TextButton(
+                      onPressed: () {}, 
+                      child: const Text("Ver todos"),
+                    ),
+                  ],
+                ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                
+                const SizedBox(height: AppEspacamento.md),
+                
+                _buildProviderCard(
+                  "Google DNS", 
+                  "8.8.8.8, 8.8.4.4", 
+                  LucideIcons.search,
+                  () => _selecionarProvedor("Google"),
+                ).animate().fadeIn(duration: 500.ms, delay: 300.ms).slideY(begin: 0.1),
+                
+                const SizedBox(height: AppEspacamento.md),
+                
+                _buildProviderCard(
+                  "Cloudflare", 
+                  "1.1.1.1, 1.0.0.1", 
+                  LucideIcons.zap,
+                  () => _selecionarProvedor("Cloudflare"),
+                ).animate().fadeIn(duration: 500.ms, delay: 400.ms).slideY(begin: 0.1),
+                
+                const SizedBox(height: AppEspacamento.xl),
+                
+                // Botão de Proxies
+                _buildProxySection(),
+                
+                const SizedBox(height: AppEspacamento.xl),
+                
+                const Center(
+                  child: Text(
+                    "Desenvolvido por Aquinodev",
+                    style: TextStyle(color: AppCores.textoSuaveClaro, fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                ).animate().fadeIn(delay: 800.ms),
+                
+                const SizedBox(height: AppEspacamento.xl),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppCores.borda(context))),
+      ),
+      child: BottomNavigationBar(
+        elevation: 0,
+        backgroundColor: AppCores.fundo(context),
+        selectedItemColor: AppCores.primario,
+        unselectedItemColor: AppCores.textoSuave(context),
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          HapticFeedback.selectionClick();
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: "Início"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), activeIcon: Icon(Icons.settings), label: "Ajustes"),
+        ],
+      ),
+    );
+  }
+
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
@@ -49,7 +235,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "DNS SYNC",
+                        "SYNC DNS",
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
@@ -360,68 +546,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildProxySection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppEspacamento.lg),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppCores.primario, Color(0xFFE31C5F)],
-        ),
+        color: AppCores.superficie(context),
         borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-        boxShadow: [
-          BoxShadow(
-            color: AppCores.primario.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(color: AppCores.borda(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(LucideIcons.unplug, color: Colors.white, size: 36),
-          const SizedBox(height: AppEspacamento.md),
-          const Text(
-            "Proxies Gratuitos",
-            style: TextStyle(
-              color: Colors.white, 
-              fontSize: 24, 
-              fontWeight: FontWeight.bold
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            "Navegue com total privacidade usando servidores globais.",
-            style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 15),
-          ),
-          const SizedBox(height: AppEspacamento.lg),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const ProxyListScreen(),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppBordas.raioGrande)),
+            child: Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppCores.primario, AppCores.primario.withOpacity(0.7)],
                 ),
-              );
-            }, 
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppCores.primario,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -20,
+                    top: -20,
+                    child: Icon(LucideIcons.unplug, size: 140, color: Colors.white.withOpacity(0.1)),
+                  ),
+                  const Center(
+                    child: Icon(LucideIcons.globe_2, color: Colors.white, size: 48),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppEspacamento.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Explorar Proxies"),
-                const SizedBox(width: 8),
-                Icon(LucideIcons.arrow_right, size: 18),
+                const Text(
+                  "Proxies Gratuitos",
+                  style: TextStyle(
+                    fontSize: 22, 
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Acesse servidores em todo o mundo para navegar com mais privacidade.",
+                  style: TextStyle(color: AppCores.textoSuave(context), fontSize: 14),
+                ),
+                const SizedBox(height: AppEspacamento.lg),
+                ElevatedButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => const ProxyListScreen(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(opacity: animation, child: child);
+                        },
+                      ),
+                    );
+                  }, 
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppCores.primario,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Explorar Servidores"),
+                      SizedBox(width: 8),
+                      Icon(LucideIcons.arrow_right, size: 18),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -429,6 +636,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     ).animate().slideY(begin: 0.2, duration: 600.ms, delay: 500.ms).fadeIn();
   }
+
 
   Widget _buildBottomNav() {
     return Container(
