@@ -48,6 +48,8 @@ dependencies:
   shimmer: ^4.0.0
   connectivity_plus: ^7.3.1
   dart_ping: ^9.0.1
+  flutter_foreground_task: ^11.0.3
+  shared_preferences: ^2.5.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

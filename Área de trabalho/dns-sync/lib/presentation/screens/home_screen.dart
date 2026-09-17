@@ -6,6 +6,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import '../../core/theme/app_theme.dart';
+import '../../core/constants/canal_nativo.dart';
 import '../providers/proxy_provider.dart';
 import 'proxy_list_screen.dart';
 import 'settings_screen.dart';
@@ -529,18 +530,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _selecionarProvedor(String nome) {
-    ref.read(provedorSelecionadoProvider.notifier).state = nome;
-    ref.read(dnsStatusProvider.notifier).state = true;
+  void _selecionarProvedor(String nome) async {
+    final ips = nome == "Google" ? ["8.8.8.8", "8.8.4.4"] : ["1.1.1.1", "1.0.0.1"];
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("DNS alterado para $nome"),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppCores.primario,
-        margin: const EdgeInsets.only(bottom: 110, left: 20, right: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    ref.read(provedorSelecionadoProvider.notifier).state = nome;
+    
+    final sucesso = await CanalNativo.aplicarDns(ips[0], ips[1]);
+    
+    if (sucesso) {
+      ref.read(dnsStatusProvider.notifier).state = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("DNS alterado para $nome"),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppCores.primario,
+          margin: const EdgeInsets.only(bottom: 110, left: 20, right: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Aceite a permissão de VPN para ativar o DNS")),
+      );
+    }
   }
 }

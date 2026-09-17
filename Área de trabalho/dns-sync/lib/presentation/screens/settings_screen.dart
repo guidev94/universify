@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/proxy_provider.dart';
+import 'speed_test_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -55,8 +56,9 @@ class SettingsScreen extends ConsumerWidget {
                   LucideIcons.gauge,
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Módulo de Speed Test em desenvolvimento")),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SpeedTestScreen()),
                     );
                   },
                 ),
