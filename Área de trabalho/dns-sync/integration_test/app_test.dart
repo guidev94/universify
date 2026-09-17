@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:dns_sync/main.dart' as app;
@@ -5,40 +6,51 @@ import 'package:dns_sync/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Teste de Fluxo Principal', () {
-    testWidgets('Verifica se o app inicia e permite alternar DNS', (tester) async {
+  group('E2E - Fluxos de Funcionalidade', () {
+    testWidgets('Ativar DNS e verificar mudança de UI', (tester) async {
       app.main();
       await tester.pumpAndSettle();
 
-      // Verifica título
-      expect(find.text('Sincronização DNS'), findsOneWidget);
+      // Verifica se o texto inicial de status está correto (Desativada)
+      expect(find.text('Desativada'), findsOneWidget);
 
-      // Tenta clicar no card do Google DNS
-      final googleCard = find.text('Google DNS');
-      expect(googleCard, findsOneWidget);
-      await tester.tap(googleCard);
+      // Clica no botão de ligar/desligar (Power Button)
+      // Procuramos pelo ícone de power dentro do GestureDetector
+      final powerButton = find.byType(GestureDetector).first;
+      await tester.tap(powerButton);
       await tester.pumpAndSettle();
 
-      // Verifica se o status mudou para Protegido
-      expect(find.text('Protegido'), findsOneWidget);
+      // Verifica se o texto mudou para Ativada
+      expect(find.text('Ativada'), findsOneWidget);
     });
 
-    testWidgets('Navegação para tela de Proxies', (tester) async {
+    testWidgets('Navegação via Floating NavBar para Ajustes', (tester) async {
       app.main();
       await tester.pumpAndSettle();
 
-      final botaoProxies = find.text('Explorar Proxies');
-      await tester.tap(botaoProxies);
+      // Tenta encontrar o ícone de configurações na NavBar flutuante
+      final settingsNav = find.byIcon(Icons.settings_rounded);
+      await tester.tap(settingsNav);
       await tester.pumpAndSettle();
 
-      // Verifica se entrou na tela de lista
+      // Verifica se o título da tela de Ajustes está visível
+      expect(find.text('Ajustes'), findsOneWidget);
+    });
+
+    testWidgets('Explorar Proxies e ver lista', (tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Rola até o botão de explorar servidores se necessário
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      final exploreButton = find.text('Explorar Servidores');
+      await tester.tap(exploreButton);
+      await tester.pumpAndSettle();
+
+      // Verifica se a tela de lista de proxies abriu
       expect(find.text('Lista de Proxies'), findsOneWidget);
-    });
-    group('Performance', () {
-      testWidgets('Tempo de resposta da UI ao alternar tema', (tester) async {
-        app.main();
-        await tester.pumpAndSettle();
-      });
     });
   });
 }

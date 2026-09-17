@@ -44,6 +44,10 @@ class AppCores {
       Theme.of(context).brightness == Brightness.light ? superficieClaro : superficieEscuro;
   static Color texto(BuildContext context) => 
       Theme.of(context).brightness == Brightness.light ? textoClaro : textoEscuro;
+  static Color textoSuave(BuildContext context) => 
+      Theme.of(context).brightness == Brightness.light ? textoSuaveClaro : textoSuaveEscuro;
+  static Color borda(BuildContext context) => 
+      Theme.of(context).brightness == Brightness.light ? bordaClaro : bordaEscuro;
 }
 
 class AppEspacamento {

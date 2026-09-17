@@ -492,8 +492,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavIcon(0, LucideIcons.home, "Início"),
-                _buildNavIcon(1, LucideIcons.settings, "Ajustes"),
+                _buildNavIcon(0, Icons.home_rounded, "Início"),
+                _buildNavIcon(1, Icons.settings_rounded, "Ajustes"),
               ],
             ),
           ),

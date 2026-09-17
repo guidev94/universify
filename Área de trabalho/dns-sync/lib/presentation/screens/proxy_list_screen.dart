@@ -194,7 +194,7 @@ class ProxyListScreen extends ConsumerWidget {
                             style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
                           ),
                           const SizedBox(width: 12),
-                          const Icon(LucideIcons.check_circle_2, size: 12, color: AppCores.sucesso),
+                          const Icon(Icons.check_circle_outline_rounded, size: 12, color: AppCores.sucesso),
                           const SizedBox(width: 4),
                           Text(
                             "Online",
