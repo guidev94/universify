@@ -3508,6 +3508,48 @@ div.leia-mais {
 }
 
 @media (max-width: 767px) {
+    .quick-links-section.home-destaques-menu,
+    .home-destaques-menu .container,
+    .home-destaques-menu .links-container-light,
+    .home-destaques-menu .links-container-light > ul {
+        overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        max-height: none !important;
+        height: auto !important;
+    }
+
+    .quick-links-section.home-destaques-menu {
+        padding: 28px 0 24px !important;
+    }
+
+    .home-destaques-menu .links-container-light > ul {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px 8px !important;
+        width: 100% !important;
+    }
+
+    .home-destaques-menu .links-container-light li {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .home-destaques-menu .links-container-light > ul > li > a {
+        min-height: 86px !important;
+        padding: 10px 6px !important;
+    }
+
+    .home-destaques-menu .links-container-light i {
+        font-size: 1.7em !important;
+        margin-bottom: 8px !important;
+    }
+
+    .home-destaques-menu .links-container-light span {
+        font-size: .78rem !important;
+        line-height: 1.25 !important;
+    }
+
     .home-destaques-menu .links-container-light .submenu-links {
         position: static !important;
         transform: none !important;
@@ -6707,16 +6749,19 @@ main {
     body.menu-aberto .mobile-menu-drawer-head {
         display: flex !important;
         align-items: center !important;
+        justify-content: flex-start !important;
         position: fixed !important;
         top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: min(520px, calc(100% - 32px)) !important;
         height: 68px !important;
-        padding: 0 72px 0 18px !important;
+        padding: 0 !important;
         box-sizing: border-box !important;
-        background: #fff !important;
-        border-bottom: 1px solid #eef2f7 !important;
+        background: transparent !important;
+        border-bottom: 0 !important;
         z-index: 11012 !important;
+        pointer-events: none !important;
     }
 
     body.menu-aberto .mobile-menu-logo {
@@ -6724,6 +6769,7 @@ main {
         align-items: center !important;
         line-height: 0 !important;
         text-decoration: none !important;
+        pointer-events: auto !important;
     }
 
     body.menu-aberto .mobile-menu-logo img {
@@ -6733,12 +6779,26 @@ main {
         object-fit: contain !important;
     }
 
+    body.menu-aberto .nav-bar-wrapper::before {
+        content: '' !important;
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 68px !important;
+        background: #fff !important;
+        border-bottom: 1px solid #eef2f7 !important;
+        z-index: 11011 !important;
+        pointer-events: none !important;
+    }
+
     body.menu-aberto .mobile-menu-close {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         position: fixed !important;
-        top: 20px !important;
+        top: 12px !important;
         right: 18px !important;
         width: 44px !important;
         height: 44px !important;
@@ -7567,16 +7627,22 @@ button {
     }
 
     main,
-    section,
+    section:not(.home-destaques-menu),
     .container,
     .container-noticias,
     .content-page-section,
     .internal-page-section,
-    .quick-links-section,
+    .quick-links-section:not(.home-destaques-menu),
     .secao-mista-agenda-parceiro,
     .home-videos-section {
         max-width: 100vw !important;
         overflow-x: hidden !important;
+    }
+
+    .quick-links-section.home-destaques-menu,
+    section.home-destaques-menu {
+        max-width: 100vw !important;
+        overflow: visible !important;
     }
 
     .container,
