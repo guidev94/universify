@@ -1,0 +1,24 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+  type:
+    label: Tipo
+    type: partial
+    path: $/siamfesp/parcerias/models/partner/_column_type.htm
+    searchable: true
+  title:
+    label: Nome
+    searchable: true
+  slug:
+    label: Slug
+    searchable: true
+  is_featured:
+    label: Destaque
+    type: switch
+  is_published:
+    label: Publicado
+    type: switch
+  sort_order:
+    label: Ordem
+    width: 90px

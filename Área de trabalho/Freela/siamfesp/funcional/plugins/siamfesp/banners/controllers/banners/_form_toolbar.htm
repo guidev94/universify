@@ -1,0 +1,37 @@
+<div data-control="toolbar" style="margin-bottom: 20px;">
+    <button
+        type="submit"
+        data-request="onSave"
+        data-request-data="close:0"
+        data-hotkey="ctrl+s, cmd+s"
+        data-load-indicator="Salvando Banner..."
+        class="btn btn-primary oc-icon-check">
+        Salvar
+    </button>
+
+    <button
+        type="submit"
+        data-request="onSave"
+        data-request-data="close:1"
+        data-hotkey="ctrl+enter, cmd+enter"
+        data-load-indicator="Salvando Banner..."
+        class="btn btn-default oc-icon-save">
+        Salvar e fechar
+    </button>
+
+    <?php if (isset($this->vars['formModel']) && $this->vars['formModel'] && $this->vars['formModel']->exists): ?>
+        <button
+            type="button"
+            class="btn btn-danger oc-icon-trash-o"
+            data-request="onDelete"
+            data-request-data="checked[]: '<?= $this->vars['formModel']->id ?>', redirect: 1"
+            data-request-confirm="Tem certeza que deseja excluir este banner?"
+            data-load-indicator="Excluindo Banner...">
+            Excluir
+        </button>
+    <?php endif; ?>
+
+    <a href="<?= Backend::url('siamfesp/banners/banners') ?>" class="btn btn-default oc-icon-times">
+        Cancelar
+    </a>
+</div>

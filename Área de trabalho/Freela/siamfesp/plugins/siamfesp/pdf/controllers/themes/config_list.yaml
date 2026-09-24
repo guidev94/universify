@@ -1,0 +1,12 @@
+list: $/siamfesp/pdf/models/theme/columns.yaml
+modelClass: Siamfesp\Pdf\Models\Theme
+title: Temas
+recordUrl: 'siamfesp/pdf/themes/update/:id'
+noRecordsMessage: Nenhum tema encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar tema...

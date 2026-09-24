@@ -1,0 +1,484 @@
+url = "/:cat/:slug"
+layout = "default"
+title = "Artigo"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Artigos\Models\Article;
+use Siamfesp\Artigos\Models\ArticleCategory;
+use Siamfesp\Menu\Models\Menu;
+use Siamfesp\Menu\Models\MenuItem;
+
+function onStart()
+{
+    if (MenuItem::isBackendRequestPath(\Request::getRequestUri())) {
+        return null;
+    }
+
+    if (!MenuItem::isFrontendUserLoggedIn()
+        && (MenuItem::pathRequiresLogin(\Request::getRequestUri())
+            || MenuItem::isRestrictedServicesFallbackPath(\Request::getRequestUri()))) {
+        return \Redirect::to(MenuItem::makeLoginRedirectUrl(\Request::getRequestUri()));
+    }
+
+    $catSlug = trim((string) $this->param('cat'), '/');
+    $slug = trim((string) $this->param('slug'), '/');
+
+    /*
+     * O projeto pode ter vindo do Joomla com a coluna state, e algumas versões
+     * também criaram is_published. Quando as duas existem, aceitar qualquer uma
+     * marcada como publicada evita o erro "Artigo ou categoria não encontrado"
+     * para artigos antigos/migrados que têm state=1 e is_published vazio/0.
+     */
+    $publishedScope = function($q) {
+        $hasIsPublished = \Schema::hasColumn('siamfesp_articles', 'is_published');
+        $hasState = \Schema::hasColumn('siamfesp_articles', 'state');
+
+        if ($hasIsPublished && $hasState) {
+            $q->where(function($published) {
+                $published->where('is_published', 1)
+                    ->orWhere('state', 1);
+            });
+        } elseif ($hasIsPublished) {
+            $q->where('is_published', 1);
+        } elseif ($hasState) {
+            $q->where('state', 1);
+        }
+    };
+
+    $menuPrincipal = Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1);
+            MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')
+              ->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1);
+            MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')
+              ->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $currentMenuItem = null;
+    $secondMenuItems = collect();
+    $menuContainerTitle = null;
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) use ($catSlug) {
+            return $item->slug === $catSlug;
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+            $currentMenuItem = $secondMenuItems->first(function($item) use ($slug) {
+                return $item->slug === $slug;
+            });
+        }
+    }
+
+    /*
+     * Nem todo menu do admin é filho do menu "principal".
+     * Exemplo da tela enviada: Menu = Destaque, Item pai = Sem pai.
+     * A URL fica /destaque/acordos-coletivos, onde "destaque" é o slug do
+     * container do menu, não um item pai. Por isso também procuramos o item
+     * pelo menu ao qual ele pertence.
+     */
+    if (!$currentMenuItem && $slug !== '') {
+        $candidates = MenuItem::query()
+            ->where('slug', $slug)
+            ->where('is_published', 1)
+            ->with(['menu', 'parent.children', 'parent.parent', 'article.category', 'category'])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $currentMenuItem = $candidates->first(function($item) use ($catSlug) {
+            $parentSlug = $item->parent ? trim((string) ($item->parent->slug ?: \Str::slug($item->parent->title)), '/') : '';
+            $menuSlug = $item->menu ? trim((string) ($item->menu->slug ?? ''), '/') : '';
+
+            return $parentSlug === $catSlug || $menuSlug === $catSlug;
+        }) ?: $candidates->first();
+
+        if ($currentMenuItem) {
+            if ($currentMenuItem->parent) {
+                $currentMenuParent = $currentMenuItem->parent;
+                $secondMenuItems = $currentMenuParent->children ?: collect();
+            } elseif ($currentMenuItem->menu) {
+                $menuContainerTitle = $currentMenuItem->menu->title ?? null;
+            }
+        }
+    }
+
+    if (!MenuItem::isFrontendUserLoggedIn()) {
+        $mustLogin = false;
+
+        if ($currentMenuItem && $currentMenuItem->requiresLoginIncludingParents()) {
+            $mustLogin = true;
+        } elseif ($currentMenuParent && (bool) $currentMenuParent->requires_login) {
+            $mustLogin = true;
+        }
+
+        if ($mustLogin) {
+            return \Redirect::to(MenuItem::makeLoginRedirectUrl(\Request::getRequestUri()));
+        }
+    }
+
+    $article = null;
+
+    // Prioridade: se a URL veio de um item de menu do tipo Artigo, abre o artigo vinculado no admin.
+    if ($currentMenuItem && $currentMenuItem->type === 'article' && $currentMenuItem->article_id) {
+        $linkedId = (int) $currentMenuItem->article_id;
+
+        /*
+         * Não use id OU joomla_id na mesma consulta sem prioridade.
+         * No banco enviado existe, por exemplo, artigo id=1903 (Trabalhista)
+         * e outro artigo com joomla_id=1903 (FIESP disponibiliza Informe Ambiental).
+         * A consulta antiga pegava o joomla_id primeiro e mostrava conteúdo errado.
+         */
+        $article = Article::query()
+            ->where('id', $linkedId)
+            ->where($publishedScope)
+            ->with('category')
+            ->first();
+
+        // Compatibilidade: só tenta Joomla ID quando não existir artigo com esse ID local.
+        if (!$article && \Schema::hasColumn('siamfesp_articles', 'joomla_id')) {
+            $article = Article::query()
+                ->where('joomla_id', $linkedId)
+                ->where($publishedScope)
+                ->with('category')
+                ->first();
+        }
+    }
+
+    // Fallback: abre pelo slug/alias da URL, mantendo compatibilidade com links antigos.
+    if (!$article && $slug !== '') {
+        $article = Article::query()
+            ->where(function($q) use ($slug) {
+                $hasCondition = false;
+
+                if (\Schema::hasColumn('siamfesp_articles', 'slug')) {
+                    $q->where('slug', $slug);
+                    $hasCondition = true;
+                }
+
+                if (\Schema::hasColumn('siamfesp_articles', 'alias')) {
+                    if ($hasCondition) {
+                        $q->orWhere('alias', $slug);
+                    } else {
+                        $q->where('alias', $slug);
+                        $hasCondition = true;
+                    }
+                }
+
+                if (!$hasCondition) {
+                    $q->where('id', 0);
+                }
+            })
+            ->where($publishedScope)
+            ->with('category')
+            ->first();
+    }
+
+    // Compatibilidade: se algum link antigo da Home ainda estiver como /imprensa/ID,
+    // abre pelo ID local primeiro e, se não encontrar, pelo joomla_id.
+    if (!$article && $slug !== '' && ctype_digit($slug)) {
+        $numericId = (int) $slug;
+
+        $article = Article::query()
+            ->where('id', $numericId)
+            ->where($publishedScope)
+            ->with(['category', 'category.parent'])
+            ->first();
+
+        if (!$article && \Schema::hasColumn('siamfesp_articles', 'joomla_id')) {
+            $article = Article::query()
+                ->where('joomla_id', $numericId)
+                ->where($publishedScope)
+                ->with(['category', 'category.parent'])
+                ->first();
+        }
+    }
+
+    // Fallback adicional: artigos novos podem estar sem slug/alias no CMS.
+    // Nesses casos o link público é gerado pelo título, então precisamos resolver
+    // /imprensa/titulo-da-materia procurando o slug calculado do título.
+    if (!$article && $slug !== '') {
+        $categoryIdsForUrl = [];
+
+        if ($catSlug !== '') {
+            $categoryIdsForUrl = ArticleCategory::query()
+                ->where(function($q) use ($catSlug) {
+                    $q->where('slug', $catSlug);
+
+                    if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_path')) {
+                        $q->orWhere('legacy_path', $catSlug);
+                    }
+
+                    if (\Schema::hasColumn('siamfesp_articles_categories', 'alias')) {
+                        $q->orWhere('alias', $catSlug);
+                    }
+                })
+                ->pluck('id')
+                ->all();
+
+            if ($categoryIdsForUrl) {
+                $childrenIds = ArticleCategory::query()
+                    ->whereIn('parent_id', $categoryIdsForUrl)
+                    ->pluck('id')
+                    ->all();
+
+                $categoryIdsForUrl = array_values(array_unique(array_merge(
+                    array_map('intval', $categoryIdsForUrl),
+                    array_map('intval', $childrenIds)
+                )));
+            }
+        }
+
+        $candidateQuery = Article::query()
+            ->where($publishedScope)
+            ->with(['category', 'category.parent']);
+
+        if ($categoryIdsForUrl) {
+            $candidateQuery->whereIn('category_id', $categoryIdsForUrl);
+        }
+
+        $candidates = $candidateQuery
+            ->orderByRaw('COALESCE(publish_up, updated_at, created_at) desc')
+            ->orderByDesc('id')
+            ->take(500)
+            ->get();
+
+        $article = $candidates->first(function($candidate) use ($slug) {
+            return \Illuminate\Support\Str::slug((string) $candidate->title) === $slug;
+        });
+    }
+
+    if ($article) {
+        $bannerBaseTitle = $currentMenuParent->title
+            ?? $menuContainerTitle
+            ?? $article->category->title
+            ?? 'Conteúdo';
+
+        /*
+         * Quando o artigo é aberto por um item do menu, o título exibido no banner
+         * deve ser o título cadastrado no menu, e não obrigatoriamente o título do
+         * artigo vinculado. Exemplo: menu "Acordos Coletivos" apontando para o
+         * artigo/base "Trabalhista" deve abrir /destaque/acordos-coletivos e mostrar
+         * "Acordos Coletivos" no topo.
+         */
+        $articleDisplayTitle = $article->title;
+        if ($currentMenuItem && trim((string) $currentMenuItem->title) !== '') {
+            $articleDisplayTitle = trim((string) $currentMenuItem->title);
+        }
+
+        $this['pageMode'] = 'article';
+        $this['article'] = $article;
+        $this['articleDisplayTitle'] = $articleDisplayTitle;
+        $this['currentMenuParent'] = $currentMenuParent;
+        $this['currentMenuItem'] = $currentMenuItem;
+        $this['secondMenuItems'] = $secondMenuItems;
+        $this['bannerTitle'] = $bannerBaseTitle;
+        $this['bannerDescription'] = $article->category->description ?? '';
+        $this['internalBannerFallbackEyebrow'] = $bannerBaseTitle;
+        $this['internalBannerFallbackTitle'] = $articleDisplayTitle;
+        $this['internalBannerFallbackDescription'] = $article->category->description ?? '';
+
+        $this->page->title = $articleDisplayTitle;
+        $this->page->meta_title = $articleDisplayTitle;
+        $this->page->meta_description = strip_tags((string) ($article->metadesc ?? $article->meta_description ?? ''));
+        return;
+    }
+
+    $categoryQuery = ArticleCategory::query()
+        ->where(function($q) use ($slug) {
+            $q->where('slug', $slug);
+
+            if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_path')) {
+                $q->orWhere('legacy_path', $slug);
+            }
+
+            if (\Schema::hasColumn('siamfesp_articles_categories', 'alias')) {
+                $q->orWhere('alias', $slug);
+            }
+        });
+
+    if (\Schema::hasColumn('siamfesp_articles_categories', 'is_published')) {
+        $categoryQuery->where('is_published', 1);
+    }
+
+    $category = $categoryQuery->first();
+
+    if ($category) {
+        $articles = Article::query()
+            ->where('category_id', $category->id)
+            ->where($publishedScope)
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderBy('publish_up', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(12);
+
+        $bannerBaseTitle = $currentMenuParent->title
+            ?? $menuContainerTitle
+            ?? $category->title
+            ?? 'Conteúdo';
+
+        $this['pageMode'] = 'category';
+        $this['category'] = $category;
+        $this['articles'] = $articles;
+        $this['currentMenuParent'] = $currentMenuParent;
+        $this['currentMenuItem'] = $currentMenuItem;
+        $this['secondMenuItems'] = $secondMenuItems;
+        $this['bannerTitle'] = $bannerBaseTitle;
+        $this['bannerDescription'] = $category->description ?? '';
+        $this['internalBannerFallbackEyebrow'] = $bannerBaseTitle;
+        $this['internalBannerFallbackTitle'] = $category->title;
+        $this['internalBannerFallbackDescription'] = $category->description ?? '';
+
+        $this->page->title = $category->title;
+        $this->page->meta_title = $category->title;
+        $this->page->meta_description = $category->meta_description ?? ($category->description ?? '');
+        return;
+    }
+
+    return \Response::make('Artigo ou categoria não encontrado', 404);
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ pageMode == 'article' ? (articleDisplayTitle ?: article.title) : bannerTitle }}</strong></h1>
+            <div class="divider"></div>
+            {% if bannerDescription %}
+                <p>{{ bannerDescription|striptags }}</p>
+            {% else %}
+                <p>{{ bannerTitle|upper }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if secondMenuItems|length %}
+<section class="internal-shortcuts">
+    <div class="container internal-shortcuts-container">
+        <div class="internal-shortcuts-grid">
+            {% for item in secondMenuItems %}
+                <a class="internal-shortcut-card{% if currentMenuItem and item.id == currentMenuItem.id %} is-active{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank or item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="internal-shortcut-icon"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-newspaper{% elseif loop.index == 4 %}bi-journals{% elseif loop.index == 5 %}bi-cloud-download{% elseif loop.index == 6 %}bi-envelope-paper{% elseif loop.index == 7 %}bi-journal-richtext{% elseif loop.index == 8 %}bi-file-earmark-text{% elseif loop.index == 9 %}bi-calendar-event{% else %}bi-link-45deg{% endif %}"></i></span>
+                    <span class="internal-shortcut-label">{{ item.title }}</span>
+                    <span class="internal-shortcut-arrow"><i class="bi bi-chevron-right"></i></span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if pageMode == 'category' %}
+<section class="internal-page-section">
+    <div class="container-noticias internal-page-container">
+        <div class="events-section-header">
+            <h2 class="section-title">{{ category.title }}</h2>
+            {% if category.description %}
+                <p class="section-subtitle">{{ category.description|striptags }}</p>
+            {% endif %}
+        </div>
+
+        {% if articles|length %}
+            {% set isDownloadList = category.slug == 'download-gratuito' %}
+
+            {% if isDownloadList %}
+                <div class="download-list-page">
+                    {% for item in articles %}
+                        {% set articleUrl = item.frontend_url %}
+                        {% set summary = item.metadesc ?: item.introtext %}
+                        <article class="download-list-card">
+                            <a class="download-list-card__thumb" href="{{ articleUrl }}">
+                                {% if item.intro_image_url %}
+                                    <img src="{{ item.intro_image_url }}" alt="{{ item.image_intro_alt ?: item.title }}">
+                                {% else %}
+                                    <div class="download-list-card__placeholder">
+                                        <i class="bi bi-file-earmark-arrow-down"></i>
+                                    </div>
+                                {% endif %}
+
+                                {% if item.publish_up %}
+                                    <div class="download-list-card__date">
+                                        <span>{{ item.publish_up|date('d') }}</span>
+                                        <small>{{ item.publish_up|date('M') }}</small>
+                                        <strong>{{ item.publish_up|date('Y') }}</strong>
+                                    </div>
+                                {% endif %}
+                            </a>
+
+                            <div class="download-list-card__content">
+                                <h3><a href="{{ articleUrl }}">{{ item.title }}</a></h3>
+                                {% if summary %}
+                                    <p>{{ summary|striptags|slice(0, 190) }}{% if summary|striptags|length > 190 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+
+                            <a class="download-list-card__action" href="{{ articleUrl }}" aria-label="Abrir {{ item.title }}">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="grid-eventos-home">
+                    {% for item in articles %}
+                        <a class="card-evento-vertical" href="{{ item.frontend_url }}">
+                            <div class="card-evento-body">
+                                <h3 class="card-evento-title">{{ item.title }}</h3>
+                                {% if item.metadesc %}
+                                    <p style="font-size: 0.95rem; color: #666; margin: 10px 0 0;">{{ item.metadesc|striptags|slice(0, 160) }}</p>
+                                {% elseif item.introtext %}
+                                    <p style="font-size: 0.95rem; color: #666; margin: 10px 0 0;">{{ item.introtext|striptags|slice(0, 160) }}</p>
+                                {% endif %}
+                                <span class="card-evento-link-text">Leia mais <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if articles.lastPage and articles.lastPage > 1 %}
+                <div class="pagination-wrap">{{ articles.render|raw }}</div>
+            {% endif %}
+        {% else %}
+            <div class="article-page-card" style="max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 30px;">
+                Nenhum artigo publicado foi encontrado nesta categoria.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<section class="internal-page-section">
+    <div class="container-noticias internal-page-container">
+        <article class="article-page-card article-page-card--detail internal-modern-card">
+            {% if article.intro_image_url %}
+                <!--<figure class="article-main-figure">
+                    <img src="{{ article.intro_image_url }}" alt="{{ article.image_intro_alt ?: article.title }}">
+                    {% if article.image_intro_caption %}
+                        <figcaption>{{ article.image_intro_caption }}</figcaption>
+                    {% endif %}
+                </figure>-->
+            {% endif %}
+
+            <div class="article-content">
+                {{ article.introtext_frontend|raw }}
+                {{ article.fulltext_frontend|raw }}
+            </div>
+        </article>
+    </div>
+</section>
+{% endif %}

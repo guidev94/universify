@@ -1,0 +1,205 @@
+url = "/servicos1/pdf1/:categoria?"
+layout = "default"
+title = "PDF"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Pdf\Models\Theme;
+use Siamfesp\Menu\Models\MenuItem;
+
+function onStart()
+{
+    $categoria = $this->param('categoria'); // Exemplo: teste
+    $themeId = null;
+
+    /*
+     * Quando acessa /servicos/teste:
+     * "teste" é o slug do item do menu.
+     * Buscamos esse item no menu e pegamos o Registro do plugin selecionado.
+     */
+    if ($categoria) {
+        $menuItem = MenuItem::query()
+            ->where('slug', $categoria)
+            ->whereNotNull('dynamic_record_id')
+            ->first();
+
+        if ($menuItem) {
+            $themeId = (int) $menuItem->dynamic_record_id;
+        }
+    }
+
+    $documentOrder = function ($q) {
+        $q->where(function ($query) {
+                $query->whereNotNull('pdf')
+                    ->where('pdf', '<>', '')
+                    ->orWhere(function ($urlQuery) {
+                        $urlQuery->whereNotNull('url')
+                            ->where('url', '<>', '');
+                    });
+            })
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderBy('id', 'desc');
+    };
+
+    $themesQuery = Theme::query()
+        ->whereHas('documents', $documentOrder)
+        ->with(['documents' => $documentOrder]);
+
+    /*
+     * Se veio pelo menu /servicos/teste e achou categoria,
+     * mostra somente a categoria vinculada ao item do menu.
+     */
+    if ($themeId) {
+        $themesQuery->where('id', $themeId);
+    } elseif ($categoria) {
+        // Se veio uma categoria na URL mas não achou vínculo no menu, não mostra tudo.
+        $themesQuery->whereRaw('1 = 0');
+    }
+
+    $themes = $themesQuery
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderBy('title', 'asc')
+        ->get();
+
+    $this['pdfThemes'] = $themes;
+    $this['pdfDocumentsTotal'] = $themes->sum(function ($theme) {
+        return $theme->documents ? $theme->documents->count() : 0;
+    });
+
+    if ($themes->count()) {
+        $this->page->title = $themes->first()->title;
+        $this->page->meta_title = $themes->first()->title;
+    } else {
+        $this->page->title = 'Revista';
+        $this->page->meta_title = 'Revista';
+    }
+
+    $bannerTitle = $themes->count() ? $themes->first()->title : 'Revista';
+    $bannerDescription = 'Publicações, relatórios, estudos e materiais em PDF do SIAMFESP.';
+
+    $this->page->meta_description = $bannerDescription;
+    $this['internalBannerFallbackEyebrow'] = 'Serviços';
+    $this['internalBannerFallbackTitle'] = $bannerTitle;
+    $this['internalBannerFallbackDescription'] = $bannerDescription;
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ pageMode == 'article' ? article.title : bannerTitle }}</strong></h1>
+            <div class="divider"></div>
+            {% if bannerDescription %}
+                <p>{{ bannerDescription|striptags }}</p>
+            {% else %}
+                <p>{{ bannerTitle|upper }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="download">
+    <div class="downloads-strip-wrap">
+        <div class="downloads-strip">
+            <a class="dl-item" href="#lista-pdfs">
+                <span class="dl-ic"><i class="bi bi-bar-chart-line"></i></span>
+                <span class="dl-txt">
+                    <span class="dl-title">Dados Estatísticos</span>
+                    <span class="dl-sub">Estudos e relatórios</span>
+                </span>
+                <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+            </a>
+
+            <a class="dl-item" href="#lista-pdfs">
+                <span class="dl-ic"><i class="bi bi-people"></i></span>
+                <span class="dl-txt">
+                    <span class="dl-title">Trabalhista</span>
+                    <span class="dl-sub">Legislação e guias</span>
+                </span>
+                <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+            </a>
+
+            <a class="dl-item" href="#lista-pdfs">
+                <span class="dl-ic"><i class="bi bi-receipt"></i></span>
+                <span class="dl-txt">
+                    <span class="dl-title">Tributário</span>
+                    <span class="dl-sub">Tributos e obrigações fiscais</span>
+                </span>
+                <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+            </a>
+
+            <a class="dl-item" href="#lista-pdfs">
+                <span class="dl-ic"><i class="bi bi-journals"></i></span>
+                <span class="dl-txt">
+                    <span class="dl-title">Acervo Digital</span>
+                    <span class="dl-sub">Publicações e manuais</span>
+                </span>
+                <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<br><br><br>
+
+<section id="lista-pdfs">
+    <div class="container-noticias">
+        <section class="publicacoes-section">
+            <div class="container-noticias">
+                
+
+                {% if pdfThemes|length %}
+                    {% for theme in pdfThemes %}
+                        <div id="categoria-pdf-{{ theme.id }}" class="events-section-header" style="background-color: transparent; padding-top: 0; margin-top: 35px;">
+                            <h2 class="section-title">{{ theme.title }}</h2>
+                            <p class="section-subtitle">
+                                {{ theme.documents|length }}
+                                publicaç{{ theme.documents|length == 1 ? 'ão' : 'ões' }}
+                                disponível{{ theme.documents|length == 1 ? '' : 'eis' }} para download.
+                            </p>
+                        </div>
+
+                        <div class="publicacoes-grid">
+                            {% for document in theme.documents %}
+                                {% set pdfUrl = document.pdf ? (document.pdf|media) : document.url %}
+                                {% set coverUrl = document.cover ? (document.cover|media) : 'https://www.siamfesp.org.br/images/Capa.png' %}
+
+                                <article class="pub-card">
+                                    <div class="pub-cover">
+                                        <img alt="{{ document.title }}" src="{{ coverUrl }}">
+                                        <div class="pub-title-box">
+                                            <h3>{{ document.title }}</h3>
+                                            {% if document.year_month %}
+                                                <small>{{ document.year_month }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="pub-actions">
+                                        <a class="pub-btn" download href="{{ pdfUrl }}">
+                                            <span>Download</span>
+                                            <i class="bi bi-download"></i>
+                                        </a>
+
+                                        <a class="pub-btn" href="{{ pdfUrl }}" target="_blank" rel="noopener noreferrer">
+                                            <span>Ver</span>
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="article-page-card" style="max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 30px;">
+                        Nenhum PDF cadastrado foi encontrado para este menu.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</section>

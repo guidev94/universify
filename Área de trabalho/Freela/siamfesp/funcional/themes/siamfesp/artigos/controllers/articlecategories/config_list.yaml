@@ -1,0 +1,15 @@
+list: $/siamfesp/artigos/models/articlecategory/columns.yaml
+modelClass: Siamfesp\Artigos\Models\ArticleCategory
+title: Categorias de Artigos
+recordUrl: 'siamfesp/artigos/articlecategories/update/:id'
+noRecordsMessage: Nenhuma categoria encontrada
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+defaultSort:
+  column: legacy_lft
+  direction: asc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar categoria...

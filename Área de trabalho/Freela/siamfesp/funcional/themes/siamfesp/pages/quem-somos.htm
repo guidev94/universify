@@ -1,0 +1,93 @@
+url = "/sobre-o-siamfesp/quem-somos"
+layout = "default"
+title = "Quem Somos"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $menuPrincipal = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1)
+              ->orderBy('sort_order')
+              ->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1)
+              ->orderBy('sort_order')
+              ->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return $item->slug === 'sobre-o-siamfesp';
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $bannerTitle = $currentMenuParent->title ?? 'Sobre o SIAMFESP';
+    $bannerDescription = 'Conheça a atuação institucional do sindicato e o suporte oferecido ao setor de metais e artefatos.';
+
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['bannerTitle'] = $bannerTitle;
+    $this['bannerDescription'] = $bannerDescription;
+    $this['internalBannerFallbackEyebrow'] = 'Sobre o SIAMFESP';
+    $this['internalBannerFallbackTitle'] = $bannerTitle;
+    $this['internalBannerFallbackDescription'] = $bannerDescription;
+}
+?>
+==
+{% component 'internalBanner' %}
+
+{% if secondMenuItems|length %}
+<div class="download">
+    <div class="downloads-strip-wrap">
+        <div class="downloads-strip">
+            {% for item in secondMenuItems|slice(0,5) %}
+                <a class="dl-item{% if loop.last %} is-cta{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="dl-ic"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-receipt{% elseif loop.index == 4 %}bi-journals{% else %}bi-cloud-download{% endif %}"></i></span>
+                    <span class="dl-txt">
+                        <span class="dl-title">{{ item.title }}</span>
+                        <span class="dl-sub">&nbsp;</span>
+                    </span>
+                    {% if loop.last %}
+                        <span class="dl-cta"><i class="bi bi-arrow-right"></i> Acessar</span>
+                    {% else %}
+                        <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<section>
+    <div class="container-noticias" style="padding-top: 40px;">
+        <div class="events-section-header">
+            <h2 class="section-title">Quem Somos</h2>
+        </div>
+
+        <article class="article-page-card" style="max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 30px;">
+            <div class="article-content" style="font-size:1rem; line-height:1.8; color:#444;">
+                <p>O SIAMFESP é uma entidade representativa voltada ao fortalecimento institucional e ao desenvolvimento das empresas do setor. Sua atuação reúne apoio técnico, articulação setorial, divulgação de informações estratégicas e defesa dos interesses das empresas associadas.</p>
+                <p>Além da representação institucional, o sindicato mantém iniciativas de apoio em áreas como relações trabalhistas, temas tributários, normalização técnica, indicadores setoriais, ações de comunicação e serviços de relacionamento com associados.</p>
+                <p>Esta página foi adicionada para corrigir a navegação do item <strong>Quem somos</strong>, que estava apontando para um conteúdo inexistente no banco importado. Caso você tenha o texto institucional definitivo do site antigo, basta substituir este conteúdo diretamente por ele.</p>
+                <p><strong>Contato:</strong> (11) 2291-5455 &nbsp;|&nbsp; WhatsApp: (11) 98577-0180 &nbsp;|&nbsp; <a href="mailto:siamfesp@siamfesp.org.br">siamfesp@siamfesp.org.br</a></p>
+            </div>
+        </article>
+    </div>
+</section>

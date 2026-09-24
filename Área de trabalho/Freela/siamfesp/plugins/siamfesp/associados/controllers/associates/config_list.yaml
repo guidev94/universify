@@ -1,0 +1,14 @@
+list: $/siamfesp/associados/models/associate/columns.yaml
+modelClass: Siamfesp\Associados\Models\Associate
+title: Associados
+recordUrl: 'siamfesp/associados/associates/update/:id'
+noRecordsMessage: Nenhum associado encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar associado...
+
+filter: config_filter.yaml

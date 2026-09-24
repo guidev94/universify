@@ -1,0 +1,203 @@
+[newsletterForm]
+
+[lgpdCookie]
+==
+<?php
+function onStart()
+{
+    if ($response = $this->redirectRestrictedMenuPageIfNeeded()) {
+        return $response;
+    }
+
+    $this['siteUserLoggedIn'] = \Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn();
+    $this['siteLoggedUser'] = '';
+
+    try {
+        $this['siteLoggedUser'] = (string) (
+        session()->get('siamfesp_site_user_name')
+        ?: session()->get('siamfesp_site_user')
+        ?: session()->get('siamfesp_frontend_user')
+        ?: session()->get('siamfesp_user')
+        ?: 'Associado'
+        );
+    } catch (\Throwable $e) {
+        $this['siteLoggedUser'] = 'Associado';
+    }
+
+    $this['menuPrincipal'] = \Siamfesp\Menu\Models\Menu::query()
+    ->where('slug', 'principal')
+    ->where('is_published', 1)
+    ->with([
+    'items' => function ($q) {
+        $q->whereNull('parent_id')
+        ->where('is_published', 1)
+        ->orderBy('sort_order')
+        ->orderBy('id');
+    },
+    'items.children' => function ($q) {
+        $q->where('is_published', 1)
+        ->orderBy('sort_order')
+        ->orderBy('id');
+    }
+    ])
+    ->first();
+}
+
+function redirectRestrictedMenuPageIfNeeded()
+{
+    $requestUri = \Request::getRequestUri();
+    $currentPath = parse_url($requestUri, PHP_URL_PATH) ?: '/';
+    $currentPath = '/' . trim($currentPath, '/');
+    if ($currentPath === '/') {
+        $currentPath = '/';
+    }
+
+    // O painel administrativo do OctoberCMS é independente do login do site.
+    // Não consulta sessão/auth frontend em /admin para não interferir no backend.
+    if (in_array($currentPath, ['/login', '/logout', '/minha-conta'], true) || \Siamfesp\Menu\Models\MenuItem::isBackendRequestPath($currentPath)) {
+        return null;
+    }
+
+    if (\Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn()) {
+        return null;
+    }
+
+    // Bloqueio principal controlado pelo menu no CMS.
+    if (\Siamfesp\Menu\Models\MenuItem::pathRequiresLogin($currentPath)
+    || \Siamfesp\Menu\Models\MenuItem::isRestrictedServicesFallbackPath($currentPath)) {
+        return \Redirect::to(\Siamfesp\Menu\Models\MenuItem::makeLoginRedirectUrl($requestUri));
+    }
+
+    return null;
+}
+
+function onGlobalDelete()
+{
+    $id = input('id');
+    $modelClass = input('model'); // Recebe a classe do Model dinamicamente
+
+    // Validação básica de segurança para garantir que enviaram os dados
+    if (!$id || !$modelClass) {
+        Flash::error('Dados inválidos para exclusão.');
+        return;
+    }
+
+    try {
+        // Encontra o Model dinamicamente (Ex: \Autor\Plugin\Models\Produto)
+        $item = $modelClass::find($id);
+
+        if ($item) {
+            $item->delete();
+            Flash::success('Registro excluído com sucesso!');
+        } else {
+            Flash::error('O registro já foi excluído ou não existe.');
+        }
+    } catch (\Exception $e) {
+        Flash::error('Erro ao excluir: ' . $e->getMessage());
+    }
+}
+?>
+==
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-140095390-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-140095390-1');
+    </script>
+    <link rel="icon" type="image/png" href="/storage/app/uploads/public/6a1/e13/b11/6a1e13b11dfa1369887840.ico">
+    <link rel="shortcut icon" href="/storage/app/uploads/public/6a1/e13/b11/6a1e13b11dfa1369887840.ico">
+    <link rel="apple-touch-icon" href="/storage/app/uploads/public/6a1/e13/b11/6a1e13b11dfa1369887840.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ this.page.meta_title ?: this.page.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="{{ 'assets/css/site.css'|theme }}" rel="stylesheet">
+    {% styles %}
+</head>
+<body>
+    {% partial 'site/header' %}
+    <main>
+        {% page %}
+    </main>
+    {% partial 'site/footer' %}
+    {% component 'lgpdCookie' %}
+    <a class="whatsapp-float" href="https://wa.me/5511985770180" target="_blank" rel="noopener noreferrer" aria-label="Fale com o SIAMFESP pelo WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <script src="{{ 'assets/js/site.js'|theme }}"></script>
+    {% framework extras %}
+    {% scripts %}
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="globalToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="globalToastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    {% framework extras %}
+
+    <script>
+        // 1. Escuta o clique em QUALQUER botão com a classe .btn-excluir-global no site inteiro
+        $(document).on('click', '.btn-excluir-global', function(e) {
+            e.preventDefault();
+            
+            var $botao = $(this);
+            var id = $botao.data('id');
+            var model = $botao.data('model'); // Guarda qual model deve ser excluído
+            
+            // Substitui o alert por um confirm nativo do navegador (se o usuário cancelar, para aqui)
+            if (!confirm("Tem certeza que deseja excluir este registro?")) {
+                return;
+            }
+
+            // Dispara o AJAX para a função global no PHP
+            $.request('onGlobalDelete', {
+                data: { id: id, model: model },
+                flash: 1,
+                success: function(data) {
+                    // Remove o elemento visual da tela (funciona com <tr>, <li> ou <div> que englobe o botão)
+                    $botao.closest('.item-linha').fadeOut(400, function() { 
+                        $(this).remove(); 
+                    });
+                    
+                    // Dispara os flashes/toasts
+                    this.success(data);
+                }
+            });
+        });
+
+        // 2. Intercepta as mensagens Flash do October e joga no Toast do Bootstrap
+        $(window).on('ajaxFlashMessages', function(event, messages) {
+            event.preventDefault(); 
+            $.each(messages, function(type, message) {
+                var toastEl = document.getElementById('globalToast');
+                var toastMessageEl = document.getElementById('globalToastMessage');
+                
+                toastMessageEl.textContent = message;
+                toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+                
+                if (type === 'error') toastEl.classList.add('bg-danger');
+                else if (type === 'warning') toastEl.classList.add('bg-warning');
+                else toastEl.classList.add('bg-success');
+
+                var bsToast = new bootstrap.Toast(toastEl);
+                bsToast.show();
+            });
+        });
+    </script>
+</body>
+
+
+</body>
+</html>

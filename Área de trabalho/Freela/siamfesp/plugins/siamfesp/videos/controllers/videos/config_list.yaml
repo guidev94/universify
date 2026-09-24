@@ -1,0 +1,16 @@
+list: $/siamfesp/videos/models/video/columns.yaml
+modelClass: Siamfesp\Videos\Models\Video
+title: Vídeos
+recordUrl: 'siamfesp/videos/videos/update/:id'
+noRecordsMessage: Nenhum vídeo encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 25
+defaultSort:
+  column: sort_order
+  direction: asc
+filter: config_filter.yaml
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar vídeo...

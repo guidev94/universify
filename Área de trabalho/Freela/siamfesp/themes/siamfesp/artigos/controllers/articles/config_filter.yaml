@@ -1,0 +1,6 @@
+scopes:
+  category:
+    label: Categoria
+    modelClass: Siamfesp\Artigos\Models\ArticleCategory
+    nameFrom: title
+    conditions: category_id in (:filtered)

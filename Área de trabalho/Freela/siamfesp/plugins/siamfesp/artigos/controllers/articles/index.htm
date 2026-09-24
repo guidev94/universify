@@ -1,0 +1,573 @@
+<?= $this->listRender() ?>
+
+<script>
+(function () {
+    var lastSortedTerm = '';
+    var lastSignature = '';
+
+    function normalizeText(value) {
+        return (value || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function escapeRegExp(value) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function getSearchInput() {
+        var selectors = [
+            '.list-search input',
+            '.search-input',
+            'input[name="search"]',
+            'input[type="search"]',
+            '[data-control="search"] input',
+            '.toolbar input',
+            '.list-toolbar input',
+            'input.form-control'
+        ];
+
+        for (var s = 0; s < selectors.length; s++) {
+            var inputs = document.querySelectorAll(selectors[s]);
+
+            for (var i = 0; i < inputs.length; i++) {
+                var input = inputs[i];
+                var placeholder = normalizeText(input.getAttribute('placeholder') || '');
+                var value = normalizeText(input.value || '');
+
+                if (value || placeholder.indexOf('buscar') !== -1 || placeholder.indexOf('pesquisar') !== -1) {
+                    return input;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    function getSearchTerm() {
+        var input = getSearchInput();
+
+        if (!input) {
+            return '';
+        }
+
+        return normalizeText(input.value);
+    }
+
+    function removePageParameter() {
+        try {
+            var url = new URL(window.location.href);
+
+            if (url.searchParams.has('page')) {
+                url.searchParams.delete('page');
+                window.history.replaceState({}, document.title, url.toString());
+            }
+        } catch (e) {}
+    }
+
+    function cellText(row, index) {
+        if (index < 0 || !row.children[index]) {
+            return '';
+        }
+
+        return row.children[index].innerText || row.children[index].textContent || '';
+    }
+
+    function findColumnIndex(table, candidates, fallbackIndex) {
+        var headers = table.querySelectorAll('thead th');
+
+        for (var i = 0; i < headers.length; i++) {
+            var text = normalizeText(headers[i].innerText || headers[i].textContent);
+
+            for (var j = 0; j < candidates.length; j++) {
+                if (text.indexOf(candidates[j]) !== -1) {
+                    return i;
+                }
+            }
+        }
+
+        return fallbackIndex;
+    }
+
+    function hasExactWord(text, term) {
+        if (!text || !term) {
+            return false;
+        }
+
+        var pattern = new RegExp('(^|\\s|[-–—:/.,;()])' + escapeRegExp(term) + '(\\s|$|[-–—:/.,;()])', 'i');
+
+        return pattern.test(text);
+    }
+
+    function relevanceRank(title, category, term) {
+        title = normalizeText(title);
+        category = normalizeText(category);
+
+        if (!term) return 99;
+
+        if (title === term) return 0;
+        if (category === term) return 1;
+
+        if (title.indexOf(term + ' ') === 0) return 2;
+        if (title.indexOf(term + ' -') === 0) return 3;
+        if (title.indexOf(term + '–') === 0) return 3;
+        if (title.indexOf(term + '—') === 0) return 3;
+        if (title.indexOf(term) === 0) return 4;
+
+        if (category.indexOf(term + ' ') === 0) return 5;
+        if (category.indexOf(term + ' -') === 0) return 6;
+        if (category.indexOf(term) === 0) return 7;
+
+        if (hasExactWord(title, term)) return 8;
+        if (hasExactWord(category, term)) return 9;
+
+        if (title.indexOf(term) !== -1) return 10;
+        if (category.indexOf(term) !== -1) return 11;
+
+        return 99;
+    }
+
+    function getTableSignature(rows) {
+        return rows.map(function (row) {
+            return row.innerText;
+        }).join('|').slice(0, 2000);
+    }
+
+    function sortRows() {
+        var term = getSearchTerm();
+
+        if (!term) {
+            return;
+        }
+
+        var tables = Array.prototype.slice.call(document.querySelectorAll('table'));
+
+        tables.forEach(function (table) {
+            var tbody = table.querySelector('tbody');
+            var rows = tbody ? Array.prototype.slice.call(tbody.querySelectorAll('tr')) : [];
+
+            if (!tbody || rows.length < 2) {
+                return;
+            }
+
+            var tableText = normalizeText(table.innerText || '');
+
+            if (tableText.indexOf('titulo') === -1 && tableText.indexOf('categoria') === -1) {
+                return;
+            }
+
+            var titleIndex = findColumnIndex(table, ['titulo', 'title'], 2);
+            var categoryIndex = findColumnIndex(table, ['categoria', 'category'], 3);
+
+            var ranked = rows.map(function (row, originalIndex) {
+                var title = cellText(row, titleIndex);
+                var category = cellText(row, categoryIndex);
+
+                return {
+                    row: row,
+                    originalIndex: originalIndex,
+                    titleText: normalizeText(title),
+                    rank: relevanceRank(title, category, term)
+                };
+            });
+
+            ranked.sort(function (a, b) {
+                if (a.rank !== b.rank) return a.rank - b.rank;
+
+                if (a.titleText < b.titleText) return -1;
+                if (a.titleText > b.titleText) return 1;
+
+                return a.originalIndex - b.originalIndex;
+            });
+
+            ranked.forEach(function (item) {
+                tbody.appendChild(item.row);
+            });
+
+            lastSortedTerm = term;
+            lastSignature = getTableSignature(rows);
+        });
+    }
+
+    function bindSearchInputs() {
+        var inputs = document.querySelectorAll('input');
+
+        inputs.forEach(function (input) {
+            var placeholder = normalizeText(input.getAttribute('placeholder') || '');
+            var value = normalizeText(input.value || '');
+
+            if (!value && placeholder.indexOf('buscar') === -1 && placeholder.indexOf('pesquisar') === -1) {
+                return;
+            }
+
+            if (input.getAttribute('data-siamfesp-busca-exata') === '1') {
+                return;
+            }
+
+            input.setAttribute('data-siamfesp-busca-exata', '1');
+
+            input.addEventListener('input', function () {
+                removePageParameter();
+                window.setTimeout(sortRows, 100);
+                window.setTimeout(sortRows, 400);
+                window.setTimeout(sortRows, 900);
+            });
+
+            input.addEventListener('keyup', function () {
+                window.setTimeout(sortRows, 100);
+                window.setTimeout(sortRows, 400);
+            });
+
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    removePageParameter();
+                    window.setTimeout(sortRows, 100);
+                    window.setTimeout(sortRows, 500);
+                    window.setTimeout(sortRows, 1000);
+                }
+            });
+        });
+    }
+
+    function refresh() {
+        bindSearchInputs();
+        sortRows();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        refresh();
+        window.setTimeout(refresh, 300);
+        window.setTimeout(refresh, 900);
+        window.setTimeout(refresh, 1600);
+    });
+
+    document.addEventListener('ajaxComplete', function () {
+        window.setTimeout(refresh, 100);
+        window.setTimeout(refresh, 500);
+    });
+
+    if (window.jQuery) {
+        jQuery(document).ajaxComplete(function () {
+            window.setTimeout(refresh, 100);
+            window.setTimeout(refresh, 500);
+        });
+
+        jQuery(document).on('render ajaxUpdateComplete', function () {
+            window.setTimeout(refresh, 100);
+            window.setTimeout(refresh, 500);
+        });
+    }
+
+    if (window.MutationObserver) {
+        var observer = new MutationObserver(function () {
+            window.clearTimeout(window.__siamfespBuscaTimer);
+            window.__siamfespBuscaTimer = window.setTimeout(refresh, 120);
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    window.setInterval(function () {
+        var term = getSearchTerm();
+
+        if (!term) {
+            return;
+        }
+
+        var firstTable = document.querySelector('table tbody');
+        var rows = firstTable ? Array.prototype.slice.call(firstTable.querySelectorAll('tr')) : [];
+        var signature = getTableSignature(rows);
+
+        if (term !== lastSortedTerm || signature !== lastSignature) {
+            sortRows();
+        }
+    }, 700);
+})();
+</script>
+
+<script>
+/* SIAMFESP_LIST_ROW_EDIT_FIX_V4
+ * Abre a edição com apenas 1 clique, inclusive depois de buscar/filtrar via AJAX.
+ * Usa pointerdown/mousedown em captura para navegar antes do blur do campo de busca disparar outra atualização.
+ * Não bloqueia checkbox, botões, links, switches ou controles da lista.
+ */
+(function () {
+    var updateBaseUrl = '<?= Backend::url("siamfesp/artigos/articles/update") ?>';
+    var isNavigating = false;
+
+    function closestElement(target, selector) {
+        if (!target) {
+            return null;
+        }
+
+        if (target.nodeType !== 1) {
+            target = target.parentElement;
+        }
+
+        return target && target.closest ? target.closest(selector) : null;
+    }
+
+    function isInsideIgnoredControl(target) {
+        return !!closestElement(target, [
+            'a[href]',
+            'button',
+            'input',
+            'select',
+            'textarea',
+            'label',
+            '.control-checkbox',
+            '.custom-checkbox',
+            '.list-checkbox',
+            '.checkbox',
+            '.switch',
+            '.list-cell-type-switch',
+            '.list-cell-type-button',
+            '.dropdown-menu',
+            '.dropdown-toggle',
+            '.list-setup',
+            '.nolink',
+            '[role="button"]'
+        ].join(','));
+    }
+
+    function normalizeUrl(url) {
+        if (!url) {
+            return '';
+        }
+
+        url = String(url).trim();
+
+        if (!url || url === '#' || url.indexOf('javascript:') === 0) {
+            return '';
+        }
+
+        return url;
+    }
+
+    function extractIdFromText(text) {
+        text = String(text || '').replace(/\s+/g, ' ').trim();
+        return /^\d+$/.test(text) ? text : '';
+    }
+
+    function extractUpdateUrlFromText(text) {
+        text = String(text || '');
+        var match = text.match(/(?:https?:\/\/[^\s'"]+)?\/admin\/[^'"\s;]+\/update\/([^'"\s;]+)/i) ||
+            text.match(/\/update\/([^'"\s;]+)/i);
+
+        return match ? match[0] : '';
+    }
+
+    function extractIdFromDataText(text) {
+        text = String(text || '');
+
+        var patterns = [
+            /(?:^|[,{;\s])id\s*[:=]\s*["']?(\d+)["']?/i,
+            /(?:^|[,{;\s])record_id\s*[:=]\s*["']?(\d+)["']?/i,
+            /(?:^|[,{;\s])recordId\s*[:=]\s*["']?(\d+)["']?/i,
+            /(?:^|[,{;\s])checked\s*[:=]\s*["']?(\d+)["']?/i
+        ];
+
+        for (var i = 0; i < patterns.length; i++) {
+            var match = text.match(patterns[i]);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+
+        return '';
+    }
+
+    function getRowId(row) {
+        var attrs = [
+            'data-record-id',
+            'data-id',
+            'data-list-record-id',
+            'data-request-data',
+            'data-record-data'
+        ];
+
+        for (var a = 0; a < attrs.length; a++) {
+            var value = row.getAttribute(attrs[a]) || '';
+
+            if (value && value !== 'on') {
+                var plainId = extractIdFromText(value);
+                if (plainId) {
+                    return plainId;
+                }
+
+                var dataId = extractIdFromDataText(value);
+                if (dataId) {
+                    return dataId;
+                }
+            }
+        }
+
+        var checkbox = row.querySelector('input[name="checked[]"][value], input[type="checkbox"][value]');
+
+        if (checkbox && checkbox.value && checkbox.value !== 'on') {
+            return checkbox.value;
+        }
+
+        var idCell = row.querySelector('[data-list-cell-name="id"], td[data-column="id"], td[data-name="id"]');
+
+        if (idCell) {
+            var recordId = extractIdFromText(idCell.innerText || idCell.textContent);
+            if (recordId) {
+                return recordId;
+            }
+        }
+
+        var cells = row.querySelectorAll('td');
+
+        for (var i = 0; i < cells.length; i++) {
+            var cellText = cells[i].innerText || cells[i].textContent;
+            var idFromCell = extractIdFromText(cellText);
+            if (idFromCell) {
+                return idFromCell;
+            }
+        }
+
+        return '';
+    }
+
+    function getRowEditUrl(row) {
+        var directUrl = normalizeUrl(
+            row.getAttribute('data-href') ||
+            row.getAttribute('data-link') ||
+            row.getAttribute('data-url') ||
+            row.getAttribute('data-record-url')
+        );
+
+        if (directUrl) {
+            return directUrl;
+        }
+
+        var onclickUrl = normalizeUrl(extractUpdateUrlFromText(row.getAttribute('onclick') || ''));
+
+        if (onclickUrl) {
+            return onclickUrl;
+        }
+
+        var link = row.querySelector('a[href*="/update/"]');
+
+        if (link) {
+            directUrl = normalizeUrl(link.getAttribute('href'));
+            if (directUrl) {
+                return directUrl;
+            }
+        }
+
+        var recordId = getRowId(row);
+
+        if (!recordId) {
+            return '';
+        }
+
+        return updateBaseUrl.replace(/\/+$/, '') + '/' + encodeURIComponent(recordId);
+    }
+
+    function markRows() {
+        var rows = document.querySelectorAll('.control-list tbody tr, .list-widget tbody tr, table.table tbody tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            if (getRowEditUrl(rows[i])) {
+                rows[i].classList.add('siamfesp-row-opens-edit');
+                rows[i].style.cursor = 'pointer';
+            }
+        }
+    }
+
+    function navigate(url, event) {
+        if (!url || isNavigating) {
+            return;
+        }
+
+        isNavigating = true;
+
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (event.stopImmediatePropagation) {
+                event.stopImmediatePropagation();
+            }
+        }
+
+        if (event && (event.ctrlKey || event.metaKey || event.button === 1)) {
+            window.open(url, '_blank');
+            isNavigating = false;
+            return;
+        }
+
+        window.location.assign(url);
+    }
+
+    function handleRowOpen(event) {
+        if (event.button && event.button !== 0 && event.button !== 1) {
+            return;
+        }
+
+        if (isInsideIgnoredControl(event.target)) {
+            return;
+        }
+
+        var row = closestElement(event.target, '.control-list tbody tr, .list-widget tbody tr, table.table tbody tr');
+
+        if (!row) {
+            return;
+        }
+
+        var url = getRowEditUrl(row);
+
+        if (!url) {
+            return;
+        }
+
+        navigate(url, event);
+    }
+
+    document.addEventListener('pointerdown', handleRowOpen, true);
+
+    if (!window.PointerEvent) {
+        document.addEventListener('mousedown', handleRowOpen, true);
+    }
+
+    document.addEventListener('click', handleRowOpen, true);
+    document.addEventListener('DOMContentLoaded', markRows);
+
+    if (window.jQuery) {
+        jQuery(document).ajaxComplete(function () {
+            window.setTimeout(markRows, 50);
+            window.setTimeout(markRows, 180);
+            window.setTimeout(markRows, 500);
+        });
+
+        jQuery(document).on('render ajaxUpdateComplete', function () {
+            window.setTimeout(markRows, 50);
+            window.setTimeout(markRows, 180);
+        });
+    }
+
+    if (window.MutationObserver) {
+        var observer = new MutationObserver(function () {
+            window.clearTimeout(window.__siamfespRowEditMarkTimer);
+            window.__siamfespRowEditMarkTimer = window.setTimeout(markRows, 80);
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    window.setTimeout(markRows, 200);
+    window.setTimeout(markRows, 700);
+})();
+</script>

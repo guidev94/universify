@@ -1,0 +1,16 @@
+name: Banner
+modelClass: Siamfesp\Banners\Models\Banner
+form: $/siamfesp/banners/models/banner/fields.yaml
+create:
+  title: Novo Banner
+  redirect: siamfesp/banners/banners/update/:id
+  redirectClose: siamfesp/banners/banners
+update:
+  title: Editar Banner
+  redirect: siamfesp/banners/banners
+  redirectClose: siamfesp/banners/banners
+preview:
+  title: Visualizar Banner
+defaultRedirect: siamfesp/banners/banners
+toolbar:
+  buttons: form_toolbar

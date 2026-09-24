@@ -1,0 +1,12 @@
+name: Parceiro
+modelClass: Siamfesp\Parcerias\Models\Partner
+form: $/siamfesp/parcerias/models/partner/fields.yaml
+toolbar:
+  buttons: form_toolbar
+defaultRedirect: siamfesp/parcerias/partners
+create:
+  redirect: 'siamfesp/parcerias/partners/update/:id'
+  redirectClose: siamfesp/parcerias/partners
+update:
+  redirect: siamfesp/parcerias/partners
+  redirectClose: siamfesp/parcerias/partners

@@ -1,0 +1,27 @@
+fields:
+    title:
+        label: Título
+        span: left
+        required: true
+        type: text
+
+    slug:
+        label: Slug
+        span: right
+        required: true
+        type: text
+        preset:
+            field: title
+            type: slug
+
+    is_published:
+        label: Publicado
+        span: left
+        type: switch
+        default: true
+
+    description:
+        label: Descrição
+        span: full
+        type: textarea
+        size: small

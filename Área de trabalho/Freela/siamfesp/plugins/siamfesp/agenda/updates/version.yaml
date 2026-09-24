@@ -1,0 +1,3 @@
+1.0.0:
+    - Cria cadastro de eventos da agenda
+    - create_events_table.php

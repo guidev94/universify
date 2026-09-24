@@ -1,0 +1,18 @@
+1.0.0:
+    - Cadastro de banners
+    - create_banners_table.php
+1.0.1:
+    - Adiciona seleção de target para os links dos banners
+    - add_button_target_to_banners_table.php
+1.0.2:
+    - Adiciona opção de banner somente com imagem
+    - add_image_only_to_banners_table.php
+1.0.3:
+    - Mantem Titulo 1 obrigatorio para identificar banners no admin e na ordenacao
+    - require_title_1_for_banners_table.php
+1.0.4:
+    - Cria cadastro separado de banners internos vinculados aos itens do menu
+    - create_internal_banners_table.php
+1.0.5:
+    - Corrige link do banner Associe-se da Home
+    - fix_associe_se_banner_link.php

@@ -1,0 +1,33 @@
+fields:
+  name:
+    label: Nome
+    type: text
+    span: auto
+  email:
+    label: E-mail
+    type: text
+    span: auto
+    required: true
+  is_active:
+    label: Ativo
+    type: switch
+    span: auto
+    default: true
+  last_subscribed_at:
+    label: Última inscrição
+    type: datepicker
+    mode: datetime
+    span: auto
+  source_page:
+    label: Página de origem
+    type: text
+    span: auto
+  ip_address:
+    label: IP
+    type: text
+    span: auto
+  user_agent:
+    label: Navegador / User Agent
+    type: textarea
+    size: tiny
+    span: full

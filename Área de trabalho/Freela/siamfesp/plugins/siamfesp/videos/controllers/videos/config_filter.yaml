@@ -1,0 +1,20 @@
+scopes:
+  source_type:
+    label: Origem do vídeo
+    type: group
+    conditions: source_type in (:filtered)
+    options:
+      youtube: YouTube
+      upload: Vídeo enviado
+  is_featured:
+    label: Destaque na home
+    type: switch
+    conditions:
+      - is_featured = 0
+      - is_featured = 1
+  is_published:
+    label: Publicado
+    type: switch
+    conditions:
+      - is_published = 0
+      - is_published = 1

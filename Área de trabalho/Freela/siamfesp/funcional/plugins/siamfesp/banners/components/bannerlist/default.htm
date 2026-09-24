@@ -1,0 +1,99 @@
+{% if banners and banners.count %}
+<div class="banner-container {{ allBannersImageOnly ? 'banner-container-image-only' : '' }}">
+    {% for banner in banners %}
+
+        {# Define o target seguro do link. Se não estiver preenchido, abre na mesma aba. #}
+        {% set link_target = banner.safe_button_target %}
+        {% set link_rel = banner.safe_button_rel %}
+        {% set is_image_only = banner.is_image_only %}
+
+        {% if is_image_only %}
+            {# Banner somente imagem: não usa background cover para não cortar/diminuir a leitura da arte. #}
+            <div class="hero-slide {{ loop.first ? 'active' }} image-only">
+                {% if banner.button_link %}
+                    <a
+                        class="banner-image-link"
+                        href="{{ banner.button_link }}"
+                        target="{{ link_target }}"
+                        {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                        aria-label="{{ banner.title_1 ?: 'Abrir banner' }}"
+                    >
+                {% endif %}
+
+                <img
+                    class="banner-image-only-img"
+                    src="{{ banner.image_url | media }}"
+                    alt="{{ banner.title_1 ?: 'Banner' }}"
+                    loading="{{ loop.first ? 'eager' : 'lazy' }}"
+                >
+
+                {% if banner.button_link %}
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            {# Banner com texto: mantém o layout antigo com overlay, títulos, descrição e botão. #}
+            {% set full_link = banner.button_link and not banner.button_text %}
+
+            <div class="hero-slide {{ loop.first ? 'active' }}" style="background-image: url('{{ banner.image_url | media }}');">
+                {% if full_link %}
+                    <a
+                        class="banner-image-link"
+                        href="{{ banner.button_link }}"
+                        target="{{ link_target }}"
+                        {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                        aria-label="{{ banner.title_1 ?: 'Abrir banner' }}"
+                        style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;"
+                    >
+                {% endif %}
+
+                <div class="hero-overlay"></div>
+
+                {# Só renderiza a caixa de conteúdo se houver algum texto preenchido #}
+                {% if banner.title_1 or banner.description or banner.button_text %}
+                    <div class="banner-content">
+
+                        {# Título e o Traço Amarelo (divider) só aparecem se houver título #}
+                        {% if banner.title_1 %}
+                            <h1>
+                                {{ banner.title_1 }}
+                                {% if banner.title_2 %}<strong>{{ banner.title_2 }}</strong>{% endif %}
+                            </h1>
+                            <div class="divider"></div>
+                        {% endif %}
+
+                        {% if banner.description %}
+                            <p>{{ banner.description }}</p>
+                        {% endif %}
+
+                        {# Botão físico só aparece se tiver link E texto #}
+                        {% if banner.button_link and banner.button_text %}
+                            <a
+                                class="btn-saiba-mais"
+                                href="{{ banner.button_link }}"
+                                target="{{ link_target }}"
+                                {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                            >
+                                {{ banner.button_text }}
+                            </a>
+                        {% endif %}
+
+                    </div>
+                {% endif %}
+
+                {% if full_link %}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {# Controles de navegação #}
+    {% if banners.count > 1 %}
+    <div class="hero-nav">
+        <button class="hero-btn" id="prevSlide" type="button"><i class="fas fa-chevron-left"></i></button>
+        <button class="hero-btn" id="nextSlide" type="button"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

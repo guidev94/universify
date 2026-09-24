@@ -1,0 +1,21 @@
+{% import _self as menus %}
+
+{% macro render_items(items, activeId, level, maxDepth) %}
+    {% import _self as menus %}
+    {% if items and level <= maxDepth %}
+        <ul class="siamfesp-menu level-{{ level }}">
+            {% for item in items if item.is_published %}
+                {% set hasChildren = item.children|length > 0 %}
+                {% set isActive = activeId == item.id %}
+                <li class="menu-item type-{{ item.type }}{{ hasChildren ? ' has-children' : '' }}{{ isActive ? ' is-active' : '' }}{{ item.css_class ? ' ' ~ item.css_class : '' }}">
+                    <a href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank or item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.title }}</a>
+                    {% if hasChildren %}
+                        {{ menus.render_items(item.children|sort((a, b) => a.sort_order <=> b.sort_order), activeId, level + 1, maxDepth) }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{{ menus.render_items(menuItems, menuActiveItemId, 1, menuMaxDepth) }}

@@ -1,0 +1,5 @@
+title: Reordenar Documentos
+modelClass: Siamfesp\Pdf\Models\Document
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

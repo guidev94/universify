@@ -1,0 +1,12 @@
+name: Evento da Agenda
+modelClass: Siamfesp\Agenda\Models\Event
+form: $/siamfesp/agenda/models/event/fields.yaml
+toolbar:
+  buttons: form_toolbar
+defaultRedirect: siamfesp/agenda/events
+create:
+  redirect: 'siamfesp/agenda/events/update/:id'
+  redirectClose: siamfesp/agenda/events
+update:
+  redirect: siamfesp/agenda/events
+  redirectClose: siamfesp/agenda/events

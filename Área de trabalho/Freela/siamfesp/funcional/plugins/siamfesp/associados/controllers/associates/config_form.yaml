@@ -1,0 +1,15 @@
+name: Associado
+modelClass: Siamfesp\Associados\Models\Associate
+form: $/siamfesp/associados/models/associate/fields.yaml
+toolbar:
+  buttons: form_toolbar
+
+defaultRedirect: siamfesp/associados/associates
+
+create:
+  redirect: 'siamfesp/associados/associates/update/:id'
+  redirectClose: siamfesp/associados/associates
+
+update:
+  redirect: siamfesp/associados/associates
+  redirectClose: siamfesp/associados/associates

@@ -1,0 +1,320 @@
+url = "/novas-parceirias/:slug?"
+layout = "default"
+title = "Novas Parcerias"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Artigos\Models\Article;
+use Siamfesp\Artigos\Models\ArticleCategory;
+use Siamfesp\Menu\Models\Menu;
+use Siamfesp\Menu\Models\MenuItem;
+
+function onStart()
+{
+    /*
+     * Esta página atende a URL antiga/pública:
+     * /novas-parceirias/:slug
+     *
+     * Exemplo solicitado:
+     * /novas-parceirias/parceiros
+     *
+     * O slug da URL pode ser "parceiros", mas o conteúdo que deve aparecer é a
+     * categoria de artigos "Novas Parcerias". Por isso, primeiro tentamos achar
+     * o item no menu "Novas Parcerias" e usamos a categoria vinculada no admin.
+     */
+    $routeSlug = trim((string) ($this->param('slug') ?: $this->param('categoria')));
+    $routeSlug = $routeSlug !== '' ? $routeSlug : 'novas-parcerias';
+
+    $novasParceriasSlugs = ['novas-parcerias', 'novas-parceirias', 'nossas-parcerias'];
+
+    $menuNovasParcerias = Menu::query()
+        ->whereIn('slug', $novasParceriasSlugs)
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1);
+            MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')
+              ->orderBy('id');
+        }, 'items.category'])
+        ->first();
+
+    $secondMenuItems = $menuNovasParcerias && $menuNovasParcerias->items
+        ? $menuNovasParcerias->items
+        : collect();
+
+    $currentMenuItem = $secondMenuItems->first(function ($item) use ($routeSlug) {
+        $itemSlug = trim((string) ($item->slug ?? ''));
+        $url = trim((string) ($item->frontend_url ?? ''));
+
+        return $itemSlug === $routeSlug
+            || preg_match('#/novas-parceirias/' . preg_quote($routeSlug, '#') . '/?$#', $url)
+            || preg_match('#/novas-parcerias/' . preg_quote($routeSlug, '#') . '/?$#', $url);
+    });
+
+    $publishedScope = function ($q) {
+        if (\Schema::hasColumn('siamfesp_articles', 'is_published') && \Schema::hasColumn('siamfesp_articles', 'state')) {
+            $q->where(function ($status) {
+                $status->where('is_published', 1)
+                       ->orWhere('state', 1);
+            });
+        } elseif (\Schema::hasColumn('siamfesp_articles', 'is_published')) {
+            $q->where('is_published', 1);
+        } elseif (\Schema::hasColumn('siamfesp_articles', 'state')) {
+            $q->where('state', 1);
+        }
+    };
+
+    $categoryPublishedScope = function ($q) {
+        if (\Schema::hasColumn('siamfesp_articles_categories', 'is_published')) {
+            $q->where('is_published', 1);
+        }
+    };
+
+    $category = null;
+
+    /*
+     * Se o item "Parceiros" do menu estiver vinculado à categoria "Novas Parcerias",
+     * ele manda na resolução. Isso permite a URL /novas-parceirias/parceiros
+     * listar a categoria correta, mesmo o slug da categoria sendo novas-parcerias.
+     */
+    if ($currentMenuItem && $currentMenuItem->category_id) {
+        $category = ArticleCategory::query()
+            ->where(function ($q) use ($currentMenuItem) {
+                $q->where('id', (int) $currentMenuItem->category_id);
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_id')) {
+                    $q->orWhere('legacy_id', (int) $currentMenuItem->category_id);
+                }
+            })
+            ->where($categoryPublishedScope)
+            ->first();
+    }
+
+    /*
+     * Fallback específico: no site antigo a URL usa /novas-parceirias/parceiros,
+     * mas a categoria de artigos que alimenta a lista é "Novas Parcerias".
+     */
+    if (!$category && in_array($routeSlug, ['parceiros', 'novas-parcerias', 'novas-parceirias', 'nossas-parcerias'], true)) {
+        $category = ArticleCategory::query()
+            ->where(function ($q) use ($novasParceriasSlugs) {
+                $q->whereIn('slug', $novasParceriasSlugs);
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_path')) {
+                    $q->orWhereIn('legacy_path', $novasParceriasSlugs);
+                }
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'alias')) {
+                    $q->orWhereIn('alias', $novasParceriasSlugs);
+                }
+            })
+            ->where($categoryPublishedScope)
+            ->first();
+    }
+
+    if (!$category) {
+        $categoryQuery = ArticleCategory::query()
+            ->where(function ($q) use ($routeSlug) {
+                $q->where('slug', $routeSlug);
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_path')) {
+                    $q->orWhere('legacy_path', $routeSlug);
+                }
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'alias')) {
+                    $q->orWhere('alias', $routeSlug);
+                }
+            })
+            ->where($categoryPublishedScope);
+
+        $category = $categoryQuery->first();
+    }
+
+    if (!$category) {
+        $novasCategoryIds = ArticleCategory::query()
+            ->where(function ($q) use ($novasParceriasSlugs) {
+                $q->whereIn('slug', $novasParceriasSlugs);
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'legacy_path')) {
+                    $q->orWhereIn('legacy_path', $novasParceriasSlugs);
+                }
+
+                if (\Schema::hasColumn('siamfesp_articles_categories', 'alias')) {
+                    $q->orWhereIn('alias', $novasParceriasSlugs);
+                }
+            })
+            ->pluck('id')
+            ->all();
+
+        $articleQuery = Article::query()
+            ->where(function ($q) use ($routeSlug) {
+                $q->where('slug', $routeSlug);
+
+                if (\Schema::hasColumn('siamfesp_articles', 'alias')) {
+                    $q->orWhere('alias', $routeSlug);
+                }
+            })
+            ->where($publishedScope)
+            ->with('category');
+
+        if ($novasCategoryIds) {
+            $articleQuery->whereIn('category_id', $novasCategoryIds);
+        }
+
+        $article = $articleQuery->first();
+
+        if ($article) {
+            $bannerTitle = $article->title ?: 'Novas Parcerias';
+            $bannerDescription = $article->category->description ?? 'Conteúdos de parcerias do SIAMFESP.';
+
+            $this['pageMode'] = 'article';
+            $this['article'] = $article;
+            $this['currentMenuParent'] = $menuNovasParcerias;
+            $this['currentMenuItem'] = $currentMenuItem;
+            $this['secondMenuItems'] = $secondMenuItems;
+            $this['bannerTitle'] = $bannerTitle;
+            $this['bannerDescription'] = $bannerDescription;
+            $this['internalBannerFallbackEyebrow'] = 'Novas Parcerias';
+            $this['internalBannerFallbackTitle'] = $bannerTitle;
+            $this['internalBannerFallbackDescription'] = $bannerDescription;
+
+            $this->page->title = $bannerTitle;
+            $this->page->meta_title = $bannerTitle;
+            $this->page->meta_description = strip_tags((string) ($article->metadesc ?? $article->meta_description ?? $bannerDescription));
+            return;
+        }
+
+        return \Response::make('Categoria ou artigo de Novas Parcerias não encontrado', 404);
+    }
+
+    $articles = Article::query()
+        ->where('category_id', $category->id)
+        ->where($publishedScope)
+        ->with(['category', 'category.parent'])
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderBy('publish_up', 'desc')
+        ->orderBy('id', 'desc')
+        ->paginate(12);
+
+    $months = [
+        '01' => 'janeiro', '02' => 'fevereiro', '03' => 'março', '04' => 'abril',
+        '05' => 'maio', '06' => 'junho', '07' => 'julho', '08' => 'agosto',
+        '09' => 'setembro', '10' => 'outubro', '11' => 'novembro', '12' => 'dezembro',
+    ];
+
+    $articles->getCollection()->each(function ($item) use ($months) {
+        $date = $item->publish_up ?: $item->created_at;
+        if ($date) {
+            $time = strtotime((string) $date);
+            $item->month_year_pt = ($months[date('m', $time)] ?? date('m', $time)) . ' de ' . date('Y', $time);
+            $item->date_pt = date('d', $time) . ' de ' . ($months[date('m', $time)] ?? date('m', $time)) . ' de ' . date('Y', $time);
+        } else {
+            $item->month_year_pt = '';
+            $item->date_pt = '';
+        }
+    });
+
+    $bannerTitle = $category->title ?: 'Novas Parcerias';
+    $bannerDescription = $category->description ?: 'Conteúdos de parcerias do SIAMFESP.';
+
+    $this['pageMode'] = 'category';
+    $this['category'] = $category;
+    $this['articles'] = $articles;
+    $this['currentMenuParent'] = $menuNovasParcerias;
+    $this['currentMenuItem'] = $currentMenuItem;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['bannerTitle'] = $bannerTitle;
+    $this['bannerDescription'] = $bannerDescription;
+    $this['internalBannerFallbackEyebrow'] = 'Novas Parcerias';
+    $this['internalBannerFallbackTitle'] = $bannerTitle;
+    $this['internalBannerFallbackDescription'] = $bannerDescription;
+
+    $this->page->title = $bannerTitle;
+    $this->page->meta_title = $bannerTitle;
+    $this->page->meta_description = strip_tags((string) $bannerDescription);
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ pageMode == 'article' ? article.title : bannerTitle }}</strong></h1>
+            <div class="divider"></div>
+            {% if bannerDescription %}
+                <p>{{ bannerDescription|striptags }}</p>
+            {% else %}
+                <p>NOVAS PARCERIAS</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if pageMode == 'article' %}
+<section class="internal-page-section">
+    <div class="container-noticias internal-page-container">
+        <article class="article-page-card article-page-card--detail internal-modern-card">
+            {% if article.intro_image_url %}
+                <figure class="article-main-figure">
+                    <img src="{{ article.intro_image_url }}" alt="{{ article.image_intro_alt ?: article.title }}">
+                    {% if article.image_intro_caption %}
+                        <figcaption>{{ article.image_intro_caption }}</figcaption>
+                    {% endif %}
+                </figure>
+            {% endif %}
+
+            <div class="article-content">
+                {{ article.introtext_frontend|raw }}
+                {{ article.fulltext_frontend|raw }}
+            </div>
+        </article>
+    </div>
+</section>
+{% else %}
+<section class="internal-page-section">
+    <div class="container-noticias internal-page-container">
+        <div class="events-section-header">
+            <h2 class="section-title">{{ category.title }}</h2>
+            {% if category.description %}
+                <p class="section-subtitle">{{ category.description|striptags }}</p>
+            {% endif %}
+        </div>
+
+        {% if articles|length %}
+            <div class="grid-eventos-home">
+                {% for item in articles %}
+                    <a class="card-evento-vertical" href="{{ item.frontend_url }}">
+                        {% if item.intro_image_url %}
+                            <div class="card-evento-img-wrapper">
+                                <img src="{{ item.intro_image_url }}" alt="{{ item.image_intro_alt ?: item.title }}">
+                            </div>
+                        {% endif %}
+                        <div class="card-evento-body">
+                            <h3 class="card-evento-title">{{ item.title }}</h3>
+                            {% if item.month_year_pt %}
+                                <p style="font-size: 0.9rem; color: #d6453d; margin: 8px 0 0; font-weight: 700; text-transform: uppercase;">{{ item.month_year_pt }}</p>
+                            {% endif %}
+                            {% set summary = item.metadesc ?: item.introtext %}
+                            {% if summary %}
+                                <p style="font-size: 0.95rem; color: #666; margin: 10px 0 0;">{{ summary|striptags|slice(0, 160) }}{% if summary|striptags|length > 160 %}...{% endif %}</p>
+                            {% endif %}
+                            <span class="card-evento-link-text">Leia mais <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            {% if articles.lastPage and articles.lastPage > 1 %}
+                <div class="pagination-wrap">{{ articles.render|raw }}</div>
+            {% endif %}
+        {% else %}
+            <div class="article-page-card" style="max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 30px;">
+                Nenhum artigo publicado foi encontrado nesta categoria.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

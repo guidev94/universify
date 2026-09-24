@@ -1,0 +1,12 @@
+scopes:
+  menu_item:
+    label: Item do menu
+    modelClass: Siamfesp\Menu\Models\MenuItem
+    nameFrom: title
+    conditions: menu_item_id in (:filtered)
+  is_published:
+    label: Publicado
+    type: switch
+    conditions:
+      - is_published = 0
+      - is_published = 1

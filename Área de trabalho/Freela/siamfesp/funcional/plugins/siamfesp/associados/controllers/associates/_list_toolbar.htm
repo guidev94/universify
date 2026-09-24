@@ -1,0 +1,14 @@
+<div data-control="toolbar">
+    <a href="<?= Backend::url('siamfesp/associados/associates/create') ?>" class="btn btn-primary oc-icon-plus">Novo Associado</a>
+    <a href="<?= Backend::url('siamfesp/associados/associates/reorder') ?>" class="btn btn-default oc-icon-sort">Reordenar</a>
+    <button
+        class="btn btn-danger oc-icon-trash-o"
+        disabled="disabled"
+        onclick="if (!confirm('Tem certeza que deseja excluir os itens selecionados?')) return false; $(this).request('onDelete', { data: { checked: $('.control-list').listWidget('getChecked') }, success: function(){ $('.control-list').listWidget('uncheckAll'); } }); return false;"
+        data-trigger-action="enable"
+        data-trigger=".control-list input[type=checkbox]"
+        data-trigger-condition="checked"
+        data-stripe-load-indicator>
+        Excluir selecionados
+    </button>
+</div>

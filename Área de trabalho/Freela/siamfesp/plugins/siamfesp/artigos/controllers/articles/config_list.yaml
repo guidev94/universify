@@ -1,0 +1,17 @@
+list: $/siamfesp/artigos/models/article/columns.yaml
+modelClass: Siamfesp\Artigos\Models\Article
+title: Artigos
+recordUrl: 'siamfesp/artigos/articles/update/:id'
+noRecordsMessage: Nenhum artigo encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+defaultSort:
+  column: publish_up
+  direction: desc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar artigo...
+
+filter: config_filter.yaml

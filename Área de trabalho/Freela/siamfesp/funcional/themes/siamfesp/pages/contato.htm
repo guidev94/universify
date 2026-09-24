@@ -1,0 +1,50 @@
+title = "Contato"
+url = "/contato"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Contato';
+    $this['internalBannerFallbackTitle'] = 'Fale com o SIAMFESP';
+    $this['internalBannerFallbackDescription'] = 'Entre em contato ou solicite informações para se associar.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+<section class="content-page-section">
+    <div class="container contact-page-grid">
+        <div class="contact-card">
+            <h2>Formulário de contato</h2>
+            <form class="contact-form" action="mailto:siamfesp@siamfesp.org.br" method="post" enctype="text/plain">
+                <label>Nome *<input type="text" name="nome" required></label>
+                <label>E-mail *<input type="email" name="email" required></label>
+                <label>Telefone<input type="tel" name="telefone"></label>
+                <label>Assunto *<input type="text" name="assunto" required></label>
+                <label>Mensagem *<textarea name="mensagem" rows="6" required></textarea></label>
+                <button type="submit">Enviar mensagem</button>
+            </form>
+        </div>
+        <div class="contact-card contact-info-card">
+            <h2>SIAMFESP - São Paulo</h2>
+            <p><strong>Endereço:</strong> Rua Padre Raposo, 39 - Alto da Mooca, São Paulo - SP, CEP 03118-000</p>
+            <p><strong>Telefone:</strong> <a href="tel:+551122915455">(11) 2291-5455</a></p>
+            <p><strong>WhatsApp:</strong> <a href="https://wa.me/5511985770180" target="_blank" rel="noopener noreferrer">(11) 98577-0180</a></p>
+            <p><strong>E-mail:</strong> <a href="mailto:siamfesp@siamfesp.org.br">siamfesp@siamfesp.org.br</a></p>
+            <a class="associate-cta-btn" href="https://wa.me/5511985770180" target="_blank" rel="noopener noreferrer">Quero me associar</a>
+        </div>
+    </div>
+</section>

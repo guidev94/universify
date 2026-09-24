@@ -1,0 +1,14 @@
+fields:
+  title:
+    label: Título
+    span: full
+    required: true
+
+  image:
+    label: Imagem
+    type: fileupload
+    mode: image
+    imageHeight: 260
+    thumbOptions:
+      mode: crop
+      extension: auto

@@ -1,0 +1,12 @@
+list: $/siamfesp/associados/models/associatecategory/columns.yaml
+modelClass: Siamfesp\Associados\Models\AssociateCategory
+title: Categorias de Associados
+recordUrl: 'siamfesp/associados/associatecategories/update/:id'
+noRecordsMessage: Nenhuma categoria encontrada
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar categoria...

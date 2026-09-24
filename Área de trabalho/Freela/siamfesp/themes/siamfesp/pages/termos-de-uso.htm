@@ -1,0 +1,64 @@
+title = "Termos de Uso"
+url = "/termos-de-uso"
+layout = "default"
+is_hidden = 0
+meta_title = "Termos de Uso - SIAMFESP"
+meta_description = "Termos de uso do site SIAMFESP."
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Institucional';
+    $this['internalBannerFallbackTitle'] = 'Termos de Uso';
+    $this['internalBannerFallbackDescription'] = 'Condições gerais de navegação e uso do site SIAMFESP.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            <p>{{ internalBannerData.description ?: internalBannerFallbackDescription }}</p>
+        </div>
+    </div>
+</div>
+
+<section class="lgpd-page">
+    <div class="lgpd-page-shell">
+        <aside class="lgpd-summary-card">
+            <span class="lgpd-kicker">Uso do site</span>
+            <h2>Termos e condições</h2>
+            <p>Ao acessar o site do SIAMFESP, o visitante concorda com as condições de uso abaixo.</p>
+        </aside>
+
+        <article class="lgpd-content-card">
+            <p class="lgpd-updated">Última atualização: junho de 2026</p>
+
+            <h2>1. Objetivo</h2>
+            <p>O site do SIAMFESP tem caráter institucional e informativo, disponibilizando notícias, eventos, serviços, publicações, materiais e canais de contato relacionados à entidade e aos setores representados.</p>
+
+            <h2>2. Uso adequado</h2>
+            <p>O visitante compromete-se a utilizar o site de forma lícita, sem praticar atos que prejudiquem sua segurança, funcionamento, conteúdo, disponibilidade ou demais usuários.</p>
+
+            <h2>3. Conteúdo</h2>
+            <p>As informações publicadas podem ser atualizadas, alteradas ou removidas a qualquer momento. O SIAMFESP busca manter os conteúdos corretos e atualizados, mas recomenda a confirmação de dados relevantes diretamente com a entidade.</p>
+
+            <h2>4. Links externos</h2>
+            <p>O site pode conter links para páginas de terceiros. O SIAMFESP não se responsabiliza por conteúdo, políticas ou práticas de privacidade de sites externos.</p>
+
+            <h2>5. Propriedade intelectual</h2>
+            <p>Textos, marcas, imagens, layouts e demais elementos do site são protegidos por direitos autorais e normas aplicáveis, salvo indicação em contrário. A reprodução deve respeitar a legislação vigente e a autorização dos respectivos titulares.</p>
+
+            <h2>6. Privacidade e cookies</h2>
+            <p>O tratamento de dados pessoais e o uso de cookies estão descritos na <a href="/politica-de-privacidade">Política de Privacidade</a>.</p>
+
+            <h2>7. Contato</h2>
+            <p>Dúvidas sobre estes Termos de Uso podem ser encaminhadas para siamfesp@siamfesp.org.br ou pelo telefone (11) 2291-5455.</p>
+        </article>
+    </div>
+</section>

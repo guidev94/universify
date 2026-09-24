@@ -1,0 +1,5 @@
+title: Reordenar Eventos
+modelClass: Siamfesp\Agenda\Models\Event
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

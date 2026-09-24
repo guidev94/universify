@@ -1,0 +1,44 @@
+fields:
+  consent_token:
+    label: Token do consentimento
+    type: text
+    span: full
+    readOnly: true
+  consent_type:
+    label: Tipo de aceite
+    type: text
+    span: auto
+    readOnly: true
+  categories:
+    label: Categorias aceitas
+    type: text
+    span: auto
+    readOnly: true
+  accepted_at:
+    label: Data do aceite
+    type: datepicker
+    mode: datetime
+    span: auto
+    readOnly: true
+  source_page:
+    label: Página de origem
+    type: text
+    span: auto
+    readOnly: true
+  ip_address:
+    label: IP
+    type: text
+    span: auto
+    readOnly: true
+  user_agent:
+    label: Navegador / User Agent
+    type: textarea
+    size: tiny
+    span: full
+    readOnly: true
+  preferences_json:
+    label: Preferências gravadas
+    type: textarea
+    size: small
+    span: full
+    readOnly: true

@@ -1,0 +1,5 @@
+title: Reordenar Parceiros
+modelClass: Siamfesp\Parcerias\Models\Partner
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

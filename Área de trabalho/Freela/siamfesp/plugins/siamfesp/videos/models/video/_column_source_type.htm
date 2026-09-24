@@ -1,0 +1,7 @@
+<?php
+    $types = [
+        'youtube' => 'YouTube',
+        'upload' => 'Upload',
+    ];
+    echo $types[$record->source_type] ?? e($record->source_type);
+?>

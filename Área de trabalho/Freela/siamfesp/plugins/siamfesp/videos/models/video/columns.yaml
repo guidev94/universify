@@ -1,0 +1,24 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+  title:
+    label: Título
+    searchable: true
+  source_type:
+    label: Origem
+    type: partial
+    path: $/siamfesp/videos/models/video/_column_source_type.htm
+    searchable: true
+  slug:
+    label: Slug
+    searchable: true
+  is_featured:
+    label: Destaque
+    type: switch
+  is_published:
+    label: Publicado
+    type: switch
+  sort_order:
+    label: Ordem
+    width: 90px

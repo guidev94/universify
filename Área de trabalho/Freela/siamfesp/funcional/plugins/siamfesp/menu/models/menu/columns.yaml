@@ -1,0 +1,31 @@
+columns:
+    id:
+        label: ID
+        type: number
+        sortable: true
+        invisible: true
+
+    title:
+        label: Título
+        searchable: true
+        sortable: true
+
+    slug:
+        label: Slug
+        searchable: true
+        sortable: true
+
+    is_published:
+        label: Publicado
+        type: switch
+        sortable: true
+
+    sort_order:
+        label: Ordem
+        type: number
+        sortable: true
+
+    updated_at:
+        label: Atualizado em
+        type: datetime
+        sortable: true

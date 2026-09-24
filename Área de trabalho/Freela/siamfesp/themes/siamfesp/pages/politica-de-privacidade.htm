@@ -1,0 +1,87 @@
+title = "Política de Privacidade"
+url = "/politica-de-privacidade"
+layout = "default"
+is_hidden = 0
+meta_title = "Política de Privacidade - SIAMFESP"
+meta_description = "Política de Privacidade e uso de cookies do site SIAMFESP."
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'LGPD';
+    $this['internalBannerFallbackTitle'] = 'Política de Privacidade';
+    $this['internalBannerFallbackDescription'] = 'Transparência no tratamento de dados pessoais e uso de cookies.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            <p>{{ internalBannerData.description ?: internalBannerFallbackDescription }}</p>
+        </div>
+    </div>
+</div>
+
+<section class="lgpd-page">
+    <div class="lgpd-page-shell">
+        <aside class="lgpd-summary-card">
+            <span class="lgpd-kicker">LGPD</span>
+            <h2>Privacidade e proteção de dados</h2>
+            <p>Esta página explica como o SIAMFESP pode coletar, utilizar e proteger dados pessoais enviados por visitantes, associados e interessados por meio do site.</p>
+            <button type="button" class="lgpd-summary-btn" onclick="window.SiamfespLgpdCookie && window.SiamfespLgpdCookie.openPreferences();">
+                Gerenciar cookies
+            </button>
+        </aside>
+
+        <article class="lgpd-content-card">
+            <p class="lgpd-updated">Última atualização: junho de 2026</p>
+
+            <h2>1. Quem somos</h2>
+            <p>O SIAMFESP – Sindicato da Indústria de Artefatos de Metais Não Ferrosos no Estado de São Paulo mantém este site para divulgar informações institucionais, serviços, notícias, eventos, materiais e canais de contato.</p>
+
+            <h2>2. Dados que podem ser coletados</h2>
+            <p>Podemos coletar dados informados voluntariamente em formulários do site, como nome, empresa, e-mail, telefone, cidade, mensagem, interesse em associação, inscrição em newsletter e demais informações necessárias para atendimento da solicitação.</p>
+            <p>Também podem ser coletados dados técnicos de navegação, como endereço IP, navegador, dispositivo, páginas acessadas, data e hora de acesso e preferências de cookies.</p>
+
+            <h2>3. Finalidades do tratamento</h2>
+            <ul>
+                <li>Responder contatos, solicitações e pedidos de associação;</li>
+                <li>Enviar notícias, comunicados, convites e materiais institucionais quando houver inscrição ou autorização;</li>
+                <li>Gerenciar acesso a áreas restritas e serviços destinados aos associados;</li>
+                <li>Melhorar a navegação, segurança e desempenho do site;</li>
+                <li>Cumprir obrigações legais, regulatórias ou solicitações de autoridades competentes.</li>
+            </ul>
+
+            <h2>4. Compartilhamento de dados</h2>
+            <p>Os dados pessoais podem ser compartilhados somente quando necessário para atendimento da solicitação, operação do site, envio de e-mails, cumprimento de obrigações legais ou proteção de direitos do SIAMFESP. Não comercializamos dados pessoais.</p>
+
+            <h2>5. Segurança e retenção</h2>
+            <p>Adotamos medidas técnicas e administrativas razoáveis para proteger os dados pessoais contra acessos não autorizados, perda, alteração, divulgação ou uso indevido. Os dados são mantidos pelo tempo necessário para cumprir as finalidades informadas, obrigações legais ou defesa de direitos.</p>
+
+            <h2 id="cookies">6. Uso de cookies</h2>
+            <p>Cookies são pequenos arquivos armazenados no navegador para permitir o funcionamento do site, lembrar preferências e melhorar a experiência de navegação.</p>
+            <div class="lgpd-cookie-types">
+                <div><strong>Necessários</strong><span>Essenciais para segurança, sessão, navegação e funcionamento básico do site.</span></div>
+                <div><strong>Medição e estatísticas</strong><span>Ajudam a entender o uso do site e melhorar conteúdos e páginas.</span></div>
+                <div><strong>Marketing e conteúdo externo</strong><span>Podem ser usados por vídeos, mapas, redes sociais ou conteúdos incorporados.</span></div>
+            </div>
+            <p>Você pode alterar suas preferências a qualquer momento pelo link “Preferências de cookies” no rodapé do site.</p>
+
+            <h2>7. Direitos do titular</h2>
+            <p>Nos termos da LGPD, o titular pode solicitar confirmação de tratamento, acesso, correção, atualização, portabilidade, anonimização, bloqueio, eliminação ou informações sobre compartilhamento de seus dados, conforme aplicável.</p>
+
+            <h2>8. Como entrar em contato</h2>
+            <p>Para dúvidas sobre privacidade, tratamento de dados pessoais ou exercício de direitos, entre em contato com o SIAMFESP:</p>
+            <p><strong>E-mail:</strong> siamfesp@siamfesp.org.br<br><strong>Telefone:</strong> (11) 2291-5455<br><strong>Endereço:</strong> Rua Padre Raposo, 39 - Alto da Mooca, São Paulo – SP, CEP 03118-000.</p>
+
+            <h2>9. Alterações desta política</h2>
+            <p>Esta Política de Privacidade poderá ser atualizada periodicamente para refletir mudanças legais, técnicas ou operacionais. A versão vigente estará sempre disponível nesta página.</p>
+        </article>
+    </div>
+</section>

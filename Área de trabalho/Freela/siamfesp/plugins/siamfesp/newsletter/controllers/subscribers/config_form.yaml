@@ -1,0 +1,12 @@
+name: Inscrito da Newsletter
+modelClass: Siamfesp\Newsletter\Models\Subscriber
+form: $/siamfesp/newsletter/models/subscriber/fields.yaml
+toolbar:
+  buttons: form_toolbar
+defaultRedirect: siamfesp/newsletter/subscribers
+create:
+  redirect: 'siamfesp/newsletter/subscribers/update/:id'
+  redirectClose: siamfesp/newsletter/subscribers
+update:
+  redirect: siamfesp/newsletter/subscribers
+  redirectClose: siamfesp/newsletter/subscribers

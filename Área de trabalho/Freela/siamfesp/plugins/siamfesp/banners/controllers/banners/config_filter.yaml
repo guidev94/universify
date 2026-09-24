@@ -1,0 +1,13 @@
+scopes:
+  is_image_only:
+    label: Somente imagem
+    type: switch
+    conditions:
+      - is_image_only = 0
+      - is_image_only = 1
+  is_published:
+    label: Publicado
+    type: switch
+    conditions:
+      - is_published = 0
+      - is_published = 1

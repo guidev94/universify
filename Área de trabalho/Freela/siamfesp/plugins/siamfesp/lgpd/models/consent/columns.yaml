@@ -1,0 +1,34 @@
+columns:
+  id:
+    label: ID
+    searchable: true
+    sortable: true
+    width: 70px
+  consent_type:
+    label: Tipo
+    searchable: true
+    sortable: true
+    width: 140px
+  categories:
+    label: Categorias aceitas
+    searchable: true
+    sortable: true
+  source_page:
+    label: Origem
+    searchable: true
+    sortable: true
+  ip_address:
+    label: IP
+    searchable: true
+    sortable: true
+    width: 130px
+  accepted_at:
+    label: Aceito em
+    type: datetime
+    sortable: true
+    width: 160px
+  created_at:
+    label: Criado em
+    type: datetime
+    sortable: true
+    width: 160px

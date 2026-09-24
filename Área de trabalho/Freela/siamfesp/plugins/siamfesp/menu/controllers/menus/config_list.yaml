@@ -1,0 +1,14 @@
+modelClass: Siamfesp\Menu\Models\Menu
+title: Menus
+list: $/siamfesp/menu/models/menu/columns.yaml
+recordUrl: siamfesp/menu/menus/update/:id
+noRecordsMessage: Nenhum menu encontrado
+showSetup: true
+showCheckboxes: true
+defaultSort:
+    column: sort_order
+    direction: asc
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: Buscar menu

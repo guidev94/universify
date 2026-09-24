@@ -1,0 +1,18 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+  title:
+    label: Título
+    searchable: true
+  event_date:
+    label: Data
+    type: datetime
+  location:
+    label: Local
+    searchable: true
+  is_published:
+    label: Publicado
+    type: switch
+  sort_order:
+    label: Ordem

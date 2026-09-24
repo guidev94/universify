@@ -1,0 +1,44 @@
+fields:
+  title:
+    label: Título *
+    required: true
+    span: full
+
+  theme:
+    label: Categoria / Tema *
+    type: relation
+    nameFrom: title
+    emptyOption: Selecione uma categoria
+    required: true
+    span: left
+
+  year_month:
+    label: Mês/Ano
+    comment: 'Aceita formatos como 01/2018, Jan/2019, Janeiro/2019 ou 2019.'
+    span: right
+
+  cover:
+    label: Capa (Media Library)
+    type: mediafinder
+    mode: image
+    comment: 'Selecione uma imagem no Media Library. Ex.: /Estudo Economico/Capa.webp'
+    span: left
+
+  pdf:
+    label: PDF (Media Library)
+    type: mediafinder
+    mode: file
+    comment: 'Selecione um PDF no Media Library. O link público será gerado automaticamente.'
+    span: right
+
+  url:
+    label: Link externo opcional
+    comment: 'Use apenas se o PDF estiver fora do Media Library. Se vazio, o sistema usa o PDF selecionado acima.'
+    span: full
+
+  public_link_preview:
+    label: Link público gerado
+    type: partial
+    path: $/siamfesp/pdf/models/document/_public_link.htm
+    context: update
+    span: full

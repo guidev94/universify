@@ -1,0 +1,10 @@
+1.0.0:
+    - Cria cadastro de parceiros no admin
+    - create_partners_table.php
+1.0.1:
+    - Insere conteúdo inicial das Parcerias FIESP e SIAMFESP
+    - seed_initial_partners.php
+
+1.0.2:
+    - Migra imagens locais de parceiros para o campo de upload
+    - migrate_local_partner_images_to_upload.php

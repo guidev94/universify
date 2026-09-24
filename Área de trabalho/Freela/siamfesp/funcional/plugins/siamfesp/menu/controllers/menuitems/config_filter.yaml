@@ -1,0 +1,21 @@
+scopes:
+  menu:
+    label: Menu
+    modelClass: Siamfesp\Menu\Models\Menu
+    nameFrom: title
+    conditions: menu_id in (:filtered)
+  type:
+    label: Tipo
+    type: group
+    conditions: type in (:filtered)
+    options:
+      page: Página CMS
+      article: Artigo
+      category: Categoria
+      plugin: Registro de plugin
+      url: URL externa
+  parent:
+    label: Item pai
+    modelClass: Siamfesp\Menu\Models\MenuItem
+    nameFrom: title
+    conditions: parent_id in (:filtered)

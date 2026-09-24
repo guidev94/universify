@@ -1,0 +1,6 @@
+scopes:
+  theme:
+    label: Tema
+    modelClass: Siamfesp\Pdf\Models\Theme
+    nameFrom: title
+    conditions: theme_id in (:filtered)

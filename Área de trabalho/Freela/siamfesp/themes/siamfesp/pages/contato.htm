@@ -1,0 +1,271 @@
+title = "Contato"
+url = "/contato"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Contato';
+    $this['internalBannerFallbackTitle'] = 'Fale com o SIAMFESP';
+    $this['internalBannerFallbackDescription'] = 'Entre em contato ou solicite informações para se associar.';
+
+    $this['contactSuccess'] = null;
+    $this['contactError'] = null;
+    $this['contactOld'] = [
+        'nome' => '',
+        'email' => '',
+        'telefone' => '',
+        'assunto' => '',
+        'mensagem' => '',
+    ];
+
+    if (\Request::isMethod('post')) {
+        $this->handleContactSubmit();
+    }
+}
+
+function handleContactSubmit()
+{
+    $nome = trim((string) \Request::input('nome'));
+    $email = trim((string) \Request::input('email'));
+    $telefone = trim((string) \Request::input('telefone'));
+    $assunto = trim((string) \Request::input('assunto'));
+    $mensagem = trim((string) \Request::input('mensagem'));
+    $honeypot = trim((string) \Request::input('site_url'));
+
+    $this['contactOld'] = [
+        'nome' => $nome,
+        'email' => $email,
+        'telefone' => $telefone,
+        'assunto' => $assunto,
+        'mensagem' => $mensagem,
+    ];
+
+    // Campo invisível contra spam. Se preenchido, não envia e mostra sucesso ao visitante.
+    if ($honeypot !== '') {
+        $this['contactSuccess'] = 'Mensagem enviada com sucesso. Em breve retornaremos o contato.';
+        $this['contactOld'] = [
+            'nome' => '', 'email' => '', 'telefone' => '', 'assunto' => '', 'mensagem' => ''
+        ];
+        return null;
+    }
+
+    $errors = [];
+
+    if ($nome === '') {
+        $errors[] = 'Informe o nome.';
+    }
+
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Informe um e-mail válido.';
+    }
+
+    if ($assunto === '') {
+        $errors[] = 'Informe o assunto.';
+    }
+
+    if ($mensagem === '') {
+        $errors[] = 'Informe a mensagem.';
+    }
+
+    if ($errors) {
+        $this['contactError'] = implode(' ', $errors);
+        return null;
+    }
+
+    $body = implode("\n", [
+        'Nova mensagem recebida pelo formulário de contato do site SIAMFESP',
+        '',
+        'Nome: ' . $nome,
+        'E-mail: ' . $email,
+        'Telefone: ' . ($telefone !== '' ? $telefone : 'Não informado'),
+        'Assunto: ' . $assunto,
+        '',
+        'Mensagem:',
+        $mensagem,
+        '',
+        'Origem: /contato',
+        'IP: ' . (\Request::ip() ?: 'Não informado'),
+        'Data: ' . date('d/m/Y H:i:s'),
+        'Destinatário: comunicacao@siamfesp.org.br',
+        '',
+        'Mensagem enviada automaticamente pelo formulário da página Contato.'
+    ]);
+
+    try {
+        \Mail::raw($body, function ($message) use ($nome, $email, $assunto) {
+            $message->to('comunicacao@siamfesp.org.br', 'Comunicação SIAMFESP');
+            $message->subject('Contato pelo site SIAMFESP - ' . $assunto);
+            $message->replyTo($email, $nome ?: null);
+        });
+
+        $this['contactSuccess'] = 'Mensagem enviada com sucesso. Em breve retornaremos o contato.';
+        $this['contactOld'] = [
+            'nome' => '', 'email' => '', 'telefone' => '', 'assunto' => '', 'mensagem' => ''
+        ];
+    } catch (\Throwable $e) {
+        $this['contactError'] = 'Não foi possível enviar sua mensagem no momento. Tente novamente ou entre em contato pelo telefone (11) 2291-5455.';
+    } catch (\Exception $e) {
+        $this['contactError'] = 'Não foi possível enviar sua mensagem no momento. Tente novamente ou entre em contato pelo telefone (11) 2291-5455.';
+    }
+
+    return null;
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+<section class="content-page-section">
+    <div class="container contact-page-grid">
+        <div class="contact-card">
+            <h2>Formulário de contato</h2>
+
+            {% if contactSuccess %}
+                <div class="contact-alert contact-alert-success">{{ contactSuccess }}</div>
+            {% endif %}
+
+            {% if contactError %}
+                <div class="contact-alert contact-alert-error">{{ contactError }}</div>
+            {% endif %}
+
+            <form class="contact-form" id="form-contato" action="/contato#form-contato" method="post" novalidate>
+                <div class="contact-hp" aria-hidden="true">
+                    <label>Não preencher<input type="text" name="site_url" tabindex="-1" autocomplete="off"></label>
+                </div>
+                <label>Nome *<input type="text" name="nome" value="{{ contactOld.nome|default('') }}" required></label>
+                <label>E-mail *<input type="email" name="email" value="{{ contactOld.email|default('') }}" required></label>
+                <label>Telefone<input type="tel" name="telefone" value="{{ contactOld.telefone|default('') }}"></label>
+                <label>Assunto *<input type="text" name="assunto" value="{{ contactOld.assunto|default('') }}" required></label>
+                <label>Mensagem *<textarea name="mensagem" rows="6" required>{{ contactOld.mensagem|default('') }}</textarea></label>
+                <button type="submit">Enviar mensagem</button>
+            </form>
+        </div>
+        <div class="contact-card contact-info-card">
+            <h2>SIAMFESP - São Paulo</h2>
+            <p><strong>Endereço:</strong> Rua Padre Raposo, 39 - Alto da Mooca, São Paulo - SP, CEP 03118-000</p>
+            <p><strong>Telefone:</strong> <a href="tel:+551122915455">(11) 2291-5455</a></p>
+            <p><strong>WhatsApp:</strong> <a href="https://wa.me/5511985770180" target="_blank" rel="noopener noreferrer">(11) 98577-0180</a></p>
+            <p><strong>E-mail:</strong> <a href="mailto:comunicacao@siamfesp.org.br">comunicacao@siamfesp.org.br</a></p>
+            <a class="associate-cta-btn" href="/associe-se">Quero me associar</a>
+        </div>
+    </div>
+</section>
+
+{% if contactSuccess %}
+<div class="contact-modal is-open" id="contactSuccessModal" role="dialog" aria-modal="true" aria-labelledby="contactSuccessTitle">
+    <div class="contact-modal-overlay" data-close-contact-modal></div>
+    <div class="contact-modal-card">
+        <button class="contact-modal-close" type="button" data-close-contact-modal aria-label="Fechar">×</button>
+        <div class="contact-modal-icon"><i class="fas fa-check"></i></div>
+        <h3 id="contactSuccessTitle">Mensagem enviada com sucesso!</h3>
+        <p>Obrigado pelo contato. Em breve retornaremos sua mensagem.</p>
+        <strong>Diretoria e Equipe SIAMFESP</strong>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('contactSuccessModal');
+    if (!modal) return;
+    modal.querySelectorAll('[data-close-contact-modal]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            modal.classList.remove('is-open');
+            modal.parentNode && modal.parentNode.removeChild(modal);
+        });
+    });
+});
+</script>
+{% endif %}
+
+<style>
+.contact-hp {
+    position: absolute !important;
+    left: -99999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+}
+.contact-alert {
+    border-radius: 10px;
+    margin: 0 0 18px;
+    padding: 13px 15px;
+    font-weight: 700;
+}
+.contact-alert-success {
+    background: #e8f7ed;
+    border: 1px solid #b9e6c6;
+    color: #20743a;
+}
+.contact-alert-error {
+    background: #fdeaea;
+    border: 1px solid #f3b8b8;
+    color: #a32929;
+}
+.contact-modal {
+    align-items: center;
+    display: none;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    z-index: 9999;
+}
+.contact-modal.is-open {
+    display: flex;
+}
+.contact-modal-overlay {
+    background: rgba(0, 0, 0, .55);
+    inset: 0;
+    position: absolute;
+}
+.contact-modal-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.25);
+    max-width: 440px;
+    padding: 32px 28px;
+    position: relative;
+    text-align: center;
+    width: calc(100% - 32px);
+}
+.contact-modal-close {
+    align-items: center;
+    background: #d9534f;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    font-size: 24px;
+    height: 36px;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 36px;
+}
+.contact-modal-icon {
+    align-items: center;
+    background: #e8f7ed;
+    border-radius: 50%;
+    color: #20743a;
+    display: inline-flex;
+    font-size: 26px;
+    height: 58px;
+    justify-content: center;
+    margin-bottom: 14px;
+    width: 58px;
+}
+</style>

@@ -1,0 +1,42 @@
+title = "Imprensa"
+url = "/imprensa"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Imprensa';
+    $this['internalBannerFallbackTitle'] = 'Imprensa';
+    $this['internalBannerFallbackDescription'] = 'Notícias, informativos, legislação, revista e jornal do SIAMFESP.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+<section class="content-page-section">
+    <div class="container">
+        <div class="events-section-header"><h2 class="section-title">Imprensa</h2><p class="section-subtitle">Acesse os conteúdos de comunicação do sindicato.</p></div>
+        <div class="content-card-grid">
+            {% for item in ['SIAMFESP em Ação','Legislação','Notícias','Avisos','Normalização','Informativo','Revista','Jornal','Eventos','Agenda'] %}
+                <article class="content-link-card" id="{{ item|lower|replace({' ':'-','ç':'c','ã':'a','é':'e'}) }}">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>{{ item }}</h3>
+                    <p>Conteúdo disponível para cadastro pelo CMS ou vinculação aos artigos importados.</p>
+                    <a href="/busca?q={{ item|url_encode }}">Pesquisar {{ item }}</a>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>

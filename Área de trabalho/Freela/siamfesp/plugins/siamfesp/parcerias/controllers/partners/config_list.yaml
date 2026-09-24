@@ -1,0 +1,16 @@
+list: $/siamfesp/parcerias/models/partner/columns.yaml
+modelClass: Siamfesp\Parcerias\Models\Partner
+title: Parcerias
+recordUrl: 'siamfesp/parcerias/partners/update/:id'
+noRecordsMessage: Nenhum parceiro encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 25
+defaultSort:
+  column: sort_order
+  direction: asc
+filter: config_filter.yaml
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar parceiro...

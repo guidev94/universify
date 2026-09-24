@@ -1,0 +1,94 @@
+title = "Imprensa"
+url = "/imprensa"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Menu\Models\Menu;
+
+function onStart()
+{
+    $menuPrincipal = Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')
+              ->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')
+              ->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return $item->slug === 'imprensa';
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['internalBannerFallbackEyebrow'] = 'Imprensa';
+    $this['internalBannerFallbackTitle'] = 'Imprensa';
+    $this['internalBannerFallbackDescription'] = 'Notícias, informativos, legislação, revista e jornal do SIAMFESP.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% if secondMenuItems|length %}
+<section class="imprensa-shortcuts imprensa-full-menu">
+    <div class="container imprensa-shortcuts-container">
+        <div class="imprensa-shortcuts-grid">
+            {% for item in secondMenuItems %}
+                <a class="imprensa-shortcut-card" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank or item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="imprensa-shortcut-icon"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-briefcase{% elseif loop.index == 3 %}bi-newspaper{% elseif loop.index == 4 %}bi-megaphone{% elseif loop.index == 5 %}bi-award{% elseif loop.index == 6 %}bi-envelope-paper{% elseif loop.index == 7 %}bi-journal-richtext{% elseif loop.index == 8 %}bi-file-earmark-text{% elseif loop.index == 9 %}bi-calendar-event{% else %}bi-calendar-check{% endif %}"></i></span>
+                    <span class="imprensa-shortcut-label">{{ item.title }}</span>
+                    <span class="imprensa-shortcut-arrow"><i class="bi bi-chevron-right"></i></span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="content-page-section">
+    <div class="container">
+        <div class="events-section-header"><h2 class="section-title">Imprensa</h2><p class="section-subtitle">Acesse os conteúdos de comunicação do sindicato.</p></div>
+        <div class="content-card-grid">
+            {% for item in ['SIAMFESP em Ação','Legislação','Notícias','Avisos','Normalização','Informativo','Revista','Jornal','Eventos','Agenda'] %}
+                <article class="content-link-card" id="{{ item|lower|replace({' ':'-','ç':'c','ã':'a','é':'e'}) }}">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>{{ item }}</h3>
+                    <p>Conteúdo disponível para cadastro pelo CMS ou vinculação aos artigos importados.</p>
+                    <a href="/busca?q={{ item|url_encode }}">Pesquisar {{ item }}</a>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>

@@ -1,0 +1,15 @@
+<a class="video-card-modern" href="{{ video.frontend_url }}">
+    <div class="video-card-thumb">
+        {% if video.thumbnail_url %}
+            <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+        {% else %}
+            <div class="video-no-thumb"><i class="bi bi-camera-video"></i></div>
+        {% endif %}
+        <span class="video-card-play"><i class="bi bi-play-fill"></i></span>
+    </div>
+    <div class="video-card-body">
+        <span class="video-badge">{{ video.source_type == 'youtube' ? 'YouTube' : 'Vídeo' }}</span>
+        <h3>{{ video.title }}</h3>
+        {% if video.short_description %}<p>{{ video.short_description }}</p>{% endif %}
+    </div>
+</a>

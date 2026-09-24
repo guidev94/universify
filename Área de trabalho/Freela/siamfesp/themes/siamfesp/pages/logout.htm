@@ -1,0 +1,39 @@
+title = "Logout"
+url = "/logout"
+layout = "default"
+is_hidden = 1
+==
+function onStart()
+{
+    try {
+        foreach ([
+            'siamfesp_site_auth',
+            'siamfesp_site_logged_in',
+            'siamfesp_site_user',
+            'siamfesp_site_user_id',
+            'siamfesp_site_user_name',
+            'siamfesp_site_user_email',
+            'siamfesp_site_source',
+            'siamfesp_frontend_auth',
+            'siamfesp_frontend_user',
+            'siamfesp_frontend_user_id',
+            'siamfesp_user',
+            'siamfesp_user_id',
+            'siamfesp_associado',
+            'siamfesp_associado_id',
+            'cliente_frontend_id',
+        ] as $key) {
+            session()->forget($key);
+        }
+    } catch (\Throwable $e) {
+    }
+
+    return \Redirect::to('/login?loggedout=1');
+}
+==
+<section class="login-section">
+    <div class="login-card">
+        <h2>Saindo...</h2>
+        <p class="login-intro">Você está sendo redirecionado para a tela de login.</p>
+    </div>
+</section>

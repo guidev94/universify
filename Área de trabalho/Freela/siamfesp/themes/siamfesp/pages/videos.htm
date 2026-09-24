@@ -1,0 +1,167 @@
+url = "/videos/:slug?"
+layout = "default"
+title = "Vídeos"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $slug = trim((string) $this->param('slug'), '/');
+    $this['videoPageMode'] = $slug ? 'detail' : 'list';
+    $this['video'] = null;
+    $this['videos'] = collect();
+    $this['featuredVideo'] = null;
+    $this['internalBannerFallbackEyebrow'] = 'Vídeos';
+    $this['internalBannerFallbackTitle'] = 'Vídeos SIAMFESP';
+    $this['internalBannerFallbackDescription'] = 'Assista aos vídeos, eventos e conteúdos institucionais do SIAMFESP.';
+
+    if (!class_exists('Siamfesp\\Videos\\Models\\Video') || !\Schema::hasTable('siamfesp_videos_videos')) {
+        return;
+    }
+
+    $queryBase = \Siamfesp\Videos\Models\Video::published()
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderByRaw('COALESCE(published_at, updated_at, created_at) desc')
+        ->orderByDesc('id');
+
+    if ($slug) {
+        $video = \Siamfesp\Videos\Models\Video::published()
+            ->where('slug', $slug)
+            ->first();
+
+        if (!$video) {
+            return \Response::make('Vídeo não encontrado', 404);
+        }
+
+        $this['video'] = $video;
+        $this['videoPageMode'] = 'detail';
+        $this['videos'] = \Siamfesp\Videos\Models\Video::published()
+            ->where('id', '<>', $video->id)
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderByRaw('COALESCE(published_at, updated_at, created_at) desc')
+            ->orderByDesc('id')
+            ->take(6)
+            ->get();
+
+        $this['internalBannerFallbackTitle'] = $video->title;
+        $this->page->title = $video->title;
+        $this->page->meta_title = $video->title;
+        $this->page->meta_description = strip_tags((string) ($video->short_description ?: 'Vídeo SIAMFESP'));
+        return;
+    }
+
+    $videos = $queryBase->paginate(12);
+    $this['videos'] = $videos;
+    $this['featuredVideo'] = \Siamfesp\Videos\Models\Video::published()
+        ->where('is_featured', 1)
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderByRaw('COALESCE(published_at, updated_at, created_at) desc')
+        ->orderByDesc('id')
+        ->first();
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ videoPageMode == 'detail' and video ? video.title : 'Vídeos SIAMFESP' }}</strong></h1>
+            <div class="divider"></div>
+            <p>Assista aos vídeos, eventos e conteúdos institucionais do SIAMFESP.</p>
+        </div>
+    </div>
+</div>
+
+<section class="videos-page-section">
+    <div class="container-noticias">
+        {% if videoPageMode == 'detail' and video %}
+            <article class="video-detail-card">
+                <div class="video-player-box">
+                    {% if video.player_html %}
+                        {{ video.player_html|raw }}
+                    {% else %}
+                        <div class="video-empty-player">Vídeo indisponível.</div>
+                    {% endif %}
+                </div>
+                <div class="video-detail-content">
+                    <span class="video-badge">{{ video.source_type == 'youtube' ? 'YouTube' : 'Vídeo enviado' }}</span>
+                    <h2>{{ video.title }}</h2>
+
+                    {% if video.description %}
+                        <div class="video-description">{{ video.description|raw }}</div>
+                    {% endif %}
+                    <a class="video-back-link" href="/videos"><i class="bi bi-arrow-left"></i> Voltar para vídeos</a>
+                </div>
+            </article>
+
+            {% if videos|length %}
+                <div class="events-section-header video-related-title">
+                    <h2 class="section-title">Outros vídeos</h2>
+                </div>
+                <div class="videos-grid-modern">
+                    {% for item in videos %}
+                        {% partial 'site/video-card' video=item %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="events-section-header">
+                <h2 class="section-title">Vídeos</h2>
+            </div>
+
+            <div class="videos-intro-content">
+                <p>Acompanhe os principais acontecimentos, eventos, palestras, entrevistas e iniciativas promovidas pelo SIAMFESP. Em nosso canal oficial no YouTube, você encontrará conteúdos exclusivos sobre o setor de metais não ferrosos, atualizações técnicas, debates sobre temas estratégicos, ações institucionais e informações relevantes para empresários e profissionais da indústria. O SIAMFESP promove regularmente eventos, palestras e ações voltadas ao desenvolvimento e fortalecimento das empresas representadas.</p>
+
+                <p>Assista aos vídeos, inscreva-se Canal Oficial do SIAMFESP no YouTube, e mantenha-se atualizado sobre tudo o que acontece no setor.</p>
+
+                <p>Acesse, acompanhe as novidades e compartilhe o conteúdo com sua equipe e parceiros.</p>
+
+                <a class="videos-youtube-button" href="https://www.youtube.com/@Siamfespoficial" target="_blank" rel="noopener">
+                    Veja Mais <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+            </div>
+
+            {% if featuredVideo %}
+                <a class="video-feature-card" href="{{ featuredVideo.frontend_url }}">
+                    <div class="video-feature-media">
+                        {% if featuredVideo.thumbnail_url %}
+                            <img src="{{ featuredVideo.thumbnail_url }}" alt="{{ featuredVideo.title }}">
+                        {% else %}
+                            <div class="video-no-thumb"><i class="bi bi-play-circle-fill"></i></div>
+                        {% endif %}
+                        <span class="video-play-float"><i class="bi bi-play-fill"></i></span>
+                    </div>
+                    <div class="video-feature-content">
+                        <span class="video-badge">Destaque</span>
+                        <h2>{{ featuredVideo.title }}</h2>
+                        <p>{{ featuredVideo.short_description ?: 'Clique para assistir ao vídeo.' }}</p>
+                        <span class="video-watch-link">Assistir vídeo <i class="bi bi-arrow-right"></i></span>
+                    </div>
+                </a>
+            {% endif %}
+
+            {% if videos|length %}
+                <div class="videos-grid-modern">
+                    {% for item in videos %}
+                        {% partial 'site/video-card' video=item %}
+                    {% endfor %}
+                </div>
+
+                {% if videos.lastPage and videos.lastPage > 1 %}
+                    <div class="pagination-wrapper">
+                        {{ videos.render|raw }}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="video-empty-state">
+                    <i class="bi bi-camera-video"></i>
+                    <h3>Nenhum vídeo cadastrado</h3>
+                    <p>Cadastre vídeos no admin em <strong>Vídeos</strong>.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>

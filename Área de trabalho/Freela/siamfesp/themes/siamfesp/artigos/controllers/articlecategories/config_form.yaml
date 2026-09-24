@@ -1,0 +1,15 @@
+name: Categoria de Artigo
+modelClass: Siamfesp\Artigos\Models\ArticleCategory
+form: $/siamfesp/artigos/models/articlecategory/fields.yaml
+toolbar:
+  buttons: form_toolbar
+
+defaultRedirect: siamfesp/artigos/articlecategories
+
+create:
+  redirect: 'siamfesp/artigos/articlecategories/update/:id'
+  redirectClose: siamfesp/artigos/articlecategories
+
+update:
+  redirect: siamfesp/artigos/articlecategories
+  redirectClose: siamfesp/artigos/articlecategories

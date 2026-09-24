@@ -1,0 +1,43 @@
+title = "Qualidade e Normalização"
+url = "/qualidade-e-normalizacao"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Qualidade';
+    $this['internalBannerFallbackTitle'] = 'Qualidade e Normalização';
+    $this['internalBannerFallbackDescription'] = 'Informações técnicas, normas setoriais, ABNT, Inmetro e programas de qualidade.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+<section class="content-page-section">
+    <div class="container">
+        <div class="events-section-header"><h2 class="section-title">Qualidade e Normalização</h2><p class="section-subtitle">Submenus e conteúdos técnicos organizados para consulta.</p></div>
+        <div class="content-card-grid">
+            {% set itens = ['ABNT/Comissões de Estudo','Inmetro','Desconto ABNT','Normas Técnicas Setoriais','PBQP-H/Qualihab'] %}
+            {% for item in itens %}
+                <article class="content-link-card" id="{{ item|lower|replace({'/':'-',' ':'-','ç':'c','ã':'a','é':'e'}) }}">
+                    <i class="fas fa-search-plus"></i>
+                    <h3>{{ item }}</h3>
+                    <p>Área criada para receber conteúdos de qualidade e normalização pelo CMS.</p>
+                    <a href="/busca?q={{ item|url_encode }}">Pesquisar {{ item }}</a>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>

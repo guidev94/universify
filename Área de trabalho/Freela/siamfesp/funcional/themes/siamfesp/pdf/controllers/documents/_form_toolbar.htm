@@ -1,0 +1,24 @@
+<div data-control="toolbar" style="margin-bottom: 20px;">
+    <button
+        type="submit"
+        data-request="onSave"
+        data-request-data="close:0"
+        data-hotkey="ctrl+s, cmd+s"
+        data-load-indicator="Salvando..."
+        class="btn btn-primary oc-icon-check">
+        Salvar
+    </button>
+
+    <button
+        type="submit"
+        data-request="onSave"
+        data-request-data="close:1"
+        data-load-indicator="Salvando..."
+        class="btn btn-default oc-icon-save">
+        Salvar &amp; Fechar
+    </button>
+
+    <a href="<?= Backend::url('siamfesp/pdf/documents') ?>" class="btn btn-default oc-icon-times">
+        Cancelar
+    </a>
+</div>

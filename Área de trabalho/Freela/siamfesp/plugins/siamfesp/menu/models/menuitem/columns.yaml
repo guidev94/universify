@@ -1,0 +1,42 @@
+columns:
+    id:
+        label: ID
+        type: number
+        sortable: true
+        invisible: true
+
+    title:
+        label: Título
+        searchable: true
+        sortable: true
+
+    menu:
+        label: Menu
+        relation: menu
+        select: title
+        sortable: false
+
+    parent:
+        label: Pai
+        relation: parent
+        select: title
+        sortable: false
+
+    type:
+        label: Tipo
+        sortable: true
+
+    is_published:
+        label: Publicado
+        type: switch
+        sortable: true
+
+    requires_login:
+        label: Restrito
+        type: switch
+        sortable: true
+
+    sort_order:
+        label: Ordem
+        type: number
+        sortable: true

@@ -1,0 +1,7 @@
+<?php
+    $types = [
+        'siamfesp' => 'SIAMFESP',
+        'fiesp' => 'FIESP',
+    ];
+    echo $types[$record->type] ?? e($record->type);
+?>

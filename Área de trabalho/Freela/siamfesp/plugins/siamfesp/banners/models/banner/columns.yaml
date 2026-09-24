@@ -1,0 +1,34 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+
+  title_1:
+    label: Título 1
+    searchable: true
+
+  title_2:
+    label: Título 2
+    searchable: true
+
+  is_image_only:
+    label: Somente imagem
+    type: switch
+
+  button_link:
+    label: Link do botão
+
+  button_target:
+    label: Abrir em
+
+  is_published:
+    label: Status
+    type: switch
+
+  sort_order:
+    label: Ordem
+    width: 90px
+
+  updated_at:
+    label: Atualizado em
+    type: datetime

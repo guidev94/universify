@@ -1,0 +1,99 @@
+title = "Busca"
+url = "/busca"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $term = trim((string) input('q'));
+    $this['termoBusca'] = $term;
+    $this['resultadosArtigos'] = collect();
+    $this['resultadosDocumentos'] = collect();
+
+    if ($term !== '') {
+        $like = '%' . $term . '%';
+
+        $this['resultadosArtigos'] = \Siamfesp\Artigos\Models\Article::query()
+            ->where(function($q) use ($like) {
+                $q->where('title', 'like', $like)
+                  ->orWhere('introtext', 'like', $like)
+                  ->orWhere('fulltext', 'like', $like)
+                  ->orWhere('metadesc', 'like', $like);
+            })
+            ->where(function($q) {
+                if (\Schema::hasColumn('siamfesp_articles', 'state')) {
+                    $q->where('state', 1);
+                }
+            })
+            ->orderByDesc('publish_up')
+            ->orderByDesc('id')
+            ->take(20)
+            ->get();
+
+        $this['resultadosDocumentos'] = \Siamfesp\Pdf\Models\Document::query()
+            ->where('title', 'like', $like)
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderByDesc('id')
+            ->take(20)
+            ->get();
+    }
+
+    $this['internalBannerFallbackEyebrow'] = 'Busca';
+    $this['internalBannerFallbackTitle'] = 'Busca no site';
+    $this['internalBannerFallbackDescription'] = 'Pesquise notícias, serviços e documentos do SIAMFESP.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+<section class="content-page-section">
+    <div class="container">
+        <div class="events-section-header">
+            <h2 class="section-title">Resultado da busca</h2>
+            <p class="section-subtitle">{% if termoBusca %}Você pesquisou por: <strong>{{ termoBusca }}</strong>{% else %}Digite um termo para pesquisar.{% endif %}</p>
+        </div>
+
+        <form class="site-search-page-form" action="/busca" method="get">
+            <input type="text" name="q" value="{{ termoBusca }}" placeholder="Pesquisar..." required>
+            <button type="submit"><i class="fas fa-search"></i> Pesquisar</button>
+        </form>
+
+        {% if termoBusca %}
+            {% set total = resultadosArtigos|length + resultadosDocumentos|length %}
+            {% if total %}
+                <div class="search-results-list">
+                    {% for artigo in resultadosArtigos %}
+                        {% set articleSlug = artigo.slug ?: artigo.alias %}
+                        {% set catSlug = artigo.category and artigo.category.slug ? artigo.category.slug : 'noticias' %}
+                        <a class="search-result-item" href="/{{ catSlug }}/{{ articleSlug }}">
+                            <span class="search-result-type">Conteúdo</span>
+                            <strong>{{ artigo.title }}</strong>
+                            {% if artigo.metadesc or artigo.introtext %}<p>{{ (artigo.metadesc ?: artigo.introtext)|striptags|slice(0, 180) }}...</p>{% endif %}
+                        </a>
+                    {% endfor %}
+                    {% for doc in resultadosDocumentos %}
+                        <a class="search-result-item" href="{{ doc.public_link }}" target="_blank" rel="noopener noreferrer">
+                            <span class="search-result-type">Documento</span>
+                            <strong>{{ doc.title }}</strong>
+                            {% if doc.year_month %}<p>{{ doc.year_month }}</p>{% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="associate-empty-state"><h3>Nenhum resultado encontrado</h3><p>Tente pesquisar por outro termo.</p></div>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>

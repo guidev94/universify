@@ -1,0 +1,54 @@
+fields:
+  title:
+    label: Título do evento *
+    type: text
+    span: left
+    required: true
+  slug:
+    label: Slug *
+    type: text
+    span: right
+    required: true
+    preset:
+      field: title
+      type: slug
+  event_date:
+    label: Data e hora do evento *
+    type: datepicker
+    mode: datetime
+    span: left
+    required: true
+  end_date:
+    label: Data final
+    type: datepicker
+    mode: datetime
+    span: right
+  location:
+    label: Local
+    type: text
+    span: left
+  link:
+    label: Link de inscrição / Saiba mais
+    type: text
+    span: right
+    placeholder: https://...
+  image:
+    label: Imagem
+    type: mediafinder
+    mode: image
+    span: full
+  description:
+    label: Descrição
+    type: richeditor
+    size: large
+    span: full
+  is_published:
+    label: Publicado
+    type: switch
+    default: true
+    span: left
+  sort_order:
+    label: Ordem
+    type: number
+    default: 0
+    span: right

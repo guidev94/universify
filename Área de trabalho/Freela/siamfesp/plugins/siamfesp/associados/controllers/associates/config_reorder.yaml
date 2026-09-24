@@ -1,0 +1,5 @@
+title: Reordenar Associados
+modelClass: Siamfesp\Associados\Models\Associate
+nameFrom: name
+toolbar:
+    buttons: reorder_toolbar

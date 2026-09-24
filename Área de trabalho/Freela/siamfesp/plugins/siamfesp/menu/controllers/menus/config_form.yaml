@@ -1,0 +1,10 @@
+name: Menu
+modelClass: Siamfesp\Menu\Models\Menu
+form: $/siamfesp/menu/models/menu/fields.yaml
+defaultRedirect: siamfesp/menu/menus
+create:
+    redirect: siamfesp/menu/menus/update/:id
+    redirectClose: siamfesp/menu/menus
+update:
+    redirect: siamfesp/menu/menus
+    redirectClose: siamfesp/menu/menus

@@ -1,0 +1,6 @@
+scopes:
+  parent:
+    label: Categoria pai
+    modelClass: Siamfesp\Artigos\Models\ArticleCategory
+    nameFrom: title
+    conditions: parent_id in (:filtered)

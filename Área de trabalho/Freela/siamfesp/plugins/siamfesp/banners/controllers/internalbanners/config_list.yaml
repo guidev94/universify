@@ -1,0 +1,14 @@
+list: $/siamfesp/banners/models/internalbanner/columns.yaml
+modelClass: Siamfesp\Banners\Models\InternalBanner
+title: Banners Internos
+recordUrl: siamfesp/banners/internalbanners/update/:id
+noRecordsMessage: Nenhum banner interno cadastrado.
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar banners internos...
+
+filter: config_filter.yaml

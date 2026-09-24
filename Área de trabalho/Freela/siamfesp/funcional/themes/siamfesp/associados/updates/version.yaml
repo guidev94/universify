@@ -1,0 +1,4 @@
+1.0.0:
+    - Cadastro de categorias e associados
+    - create_associate_categories_table.php
+    - create_associates_table.php

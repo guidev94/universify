@@ -1,0 +1,15 @@
+name: Tema
+modelClass: Siamfesp\Pdf\Models\Theme
+form: $/siamfesp/pdf/models/theme/fields.yaml
+toolbar:
+  buttons: form_toolbar
+  
+defaultRedirect: siamfesp/pdf/themes
+
+create:
+  redirect: 'siamfesp/pdf/themes/update/:id'
+  redirectClose: siamfesp/pdf/themes
+
+update:
+  redirect: siamfesp/pdf/themes
+  redirectClose: siamfesp/pdf/themes

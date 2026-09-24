@@ -1,0 +1,92 @@
+title = "Qualidade e Normalização"
+url = "/qualidade-e-normalizacao"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $menuPrincipal = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $currentMenuItem = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return in_array($item->slug, ['qualidade-e-normalizacao', 'qualidade-e-normalização', 'qualidade']);
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['currentMenuItem'] = $currentMenuItem;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['internalBannerFallbackEyebrow'] = 'Qualidade';
+    $this['internalBannerFallbackTitle'] = 'Qualidade e Normalização';
+    $this['internalBannerFallbackDescription'] = 'Informações técnicas, normas setoriais, ABNT, Inmetro e programas de qualidade.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}<p>{{ internalBannerData.description|striptags }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+
+{% if secondMenuItems|length %}
+<section class="internal-shortcuts">
+    <div class="container internal-shortcuts-container">
+        <div class="internal-shortcuts-grid">
+            {% for item in secondMenuItems %}
+                <a class="internal-shortcut-card{% if currentMenuItem and item.id == currentMenuItem.id %} is-active{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank or item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="internal-shortcut-icon"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-newspaper{% elseif loop.index == 4 %}bi-journals{% elseif loop.index == 5 %}bi-cloud-download{% elseif loop.index == 6 %}bi-envelope-paper{% elseif loop.index == 7 %}bi-journal-richtext{% elseif loop.index == 8 %}bi-file-earmark-text{% elseif loop.index == 9 %}bi-calendar-event{% else %}bi-link-45deg{% endif %}"></i></span>
+                    <span class="internal-shortcut-label">{{ item.title }}</span>
+                    <span class="internal-shortcut-arrow"><i class="bi bi-chevron-right"></i></span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="content-page-section">
+    <div class="container">
+        <div class="events-section-header"><h2 class="section-title">Qualidade e Normalização</h2><p class="section-subtitle">Submenus e conteúdos técnicos organizados para consulta.</p></div>
+        <div class="content-card-grid">
+            {% set itens = ['ABNT/Comissões de Estudo','Inmetro','Desconto ABNT','Normas Técnicas Setoriais','PBQP-H/Qualihab'] %}
+            {% for item in itens %}
+                <article class="content-link-card" id="{{ item|lower|replace({'/':'-',' ':'-','ç':'c','ã':'a','é':'e'}) }}">
+                    <i class="fas fa-search-plus"></i>
+                    <h3>{{ item }}</h3>
+                    <p>Área criada para receber conteúdos de qualidade e normalização pelo CMS.</p>
+                    <a href="/busca?q={{ item|url_encode }}">Pesquisar {{ item }}</a>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>

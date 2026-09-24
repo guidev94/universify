@@ -1,0 +1,16 @@
+modelClass: Siamfesp\Menu\Models\MenuItem
+title: Itens do Menu
+list: $/siamfesp/menu/models/menuitem/columns.yaml
+recordUrl: siamfesp/menu/menuitems/update/:id
+noRecordsMessage: Nenhum item encontrado
+showSetup: true
+showCheckboxes: true
+defaultSort:
+    column: sort_order
+    direction: asc
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: Buscar item de menu
+
+filter: config_filter.yaml

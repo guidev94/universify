@@ -1,0 +1,20 @@
+scopes:
+  type:
+    label: Tipo / categoria
+    type: group
+    conditions: type in (:filtered)
+    options:
+      siamfesp: Parcerias SIAMFESP
+      fiesp: Parcerias FIESP
+  is_featured:
+    label: Destaque na home
+    type: switch
+    conditions:
+      - is_featured = 0
+      - is_featured = 1
+  is_published:
+    label: Publicado
+    type: switch
+    conditions:
+      - is_published = 0
+      - is_published = 1

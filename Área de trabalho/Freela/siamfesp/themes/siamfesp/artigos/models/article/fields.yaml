@@ -1,0 +1,114 @@
+fields:
+  title:
+    label: Título
+    type: text
+    span: full
+    required: true
+
+  category:
+    label: Categoria
+    type: relation
+    nameFrom: title
+    emptyOption: Sem categoria
+    span: left
+
+  alias:
+    label: Alias Joomla
+    type: text
+    span: right
+    comment: Mesmo papel do slug no Joomla.
+
+  state:
+    label: Publicado
+    type: switch
+    default: true
+    span: left
+
+  featured:
+    label: Destaque
+    type: switch
+    default: false
+    span: right
+
+  publish_up:
+    label: Publicar em
+    type: datepicker
+    mode: datetime
+    span: left
+
+  publish_down:
+    label: Expirar em
+    type: datepicker
+    mode: datetime
+    span: right
+
+  image_intro_path:
+    label: Imagem de introdução
+    type: mediafinder
+    mode: image
+    span: left
+    comment: Campo novo do CMS. Quando preenchido, tem prioridade no site.
+
+  image_fulltext_path:
+    label: Imagem do conteúdo
+    type: mediafinder
+    mode: image
+    span: right
+    comment: Campo novo do CMS. Usado como imagem interna/conteúdo.
+
+  image_intro_alt:
+    label: ALT da imagem de introdução
+    type: text
+    span: left
+
+  image_intro_caption:
+    label: Legenda da imagem de introdução
+    type: text
+    span: right
+
+  image_fulltext_alt:
+    label: ALT da imagem do conteúdo
+    type: text
+    span: left
+
+  image_fulltext_caption:
+    label: Legenda da imagem do conteúdo
+    type: text
+    span: right
+
+  images_json:
+    label: JSON de imagens legado (Joomla)
+    type: textarea
+    size: small
+    span: full
+    comment: Campo legado migrado do Joomla. Quando usado, a imagem é buscada na pasta /images da raiz do FTP.
+
+  urls_json:
+    label: JSON de URLs legado (Joomla)
+    type: textarea
+    size: small
+    span: full
+
+  introtext:
+    label: Conteúdo principal
+    type: richeditor
+    size: huge
+    span: full
+
+  fulltext:
+    label: Conteúdo complementar
+    type: richeditor
+    size: huge
+    span: full
+
+  metadesc:
+    label: Meta description
+    type: textarea
+    size: small
+    span: left
+
+  metakey:
+    label: Meta keywords
+    type: textarea
+    size: small
+    span: right

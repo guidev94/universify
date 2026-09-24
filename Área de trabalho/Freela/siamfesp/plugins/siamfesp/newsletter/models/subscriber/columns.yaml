@@ -1,0 +1,33 @@
+columns:
+  id:
+    label: ID
+    searchable: true
+    sortable: true
+    width: 70px
+  name:
+    label: Nome
+    searchable: true
+    sortable: true
+  email:
+    label: E-mail
+    searchable: true
+    sortable: true
+  source_page:
+    label: Origem
+    searchable: true
+    sortable: true
+  is_active:
+    label: Ativo
+    type: switch
+    sortable: true
+    width: 100px
+  last_subscribed_at:
+    label: Última inscrição
+    type: datetime
+    sortable: true
+    width: 160px
+  created_at:
+    label: Criado em
+    type: datetime
+    sortable: true
+    width: 160px

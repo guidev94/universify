@@ -1,0 +1,237 @@
+title = "Minha Conta"
+url = "/minha-conta"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Área Restrita';
+    $this['internalBannerFallbackTitle'] = 'Minha Conta';
+    $this['internalBannerFallbackDescription'] = 'Atualize seus dados de acesso à área restrita do SIAMFESP.';
+
+    if (!\Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn()) {
+        return \Redirect::to(\Siamfesp\Menu\Models\MenuItem::makeLoginRedirectUrl('/minha-conta'));
+    }
+
+    $user = $this->getLoggedSiteUser();
+
+    if (!$user) {
+        $this['profileError'] = 'Não foi possível localizar seu cadastro. Faça login novamente.';
+        $this['profileSuccess'] = null;
+        $this['profileName'] = '';
+        $this['profileEmail'] = '';
+        $this['profileUsuario'] = '';
+        return null;
+    }
+
+    $this['profileError'] = null;
+    $this['profileSuccess'] = null;
+
+    if (\Request::isMethod('post')) {
+        $this->handleProfileUpdate($user);
+        $user = $this->getLoggedSiteUser() ?: $user;
+    }
+
+    $this['profileName'] = $user->name;
+    $this['profileEmail'] = $user->email;
+    $this['profileUsuario'] = $user->usuario;
+}
+
+function getLoggedSiteUser()
+{
+    try {
+        if (!\Schema::hasTable('siamfesp_site_users')) {
+            return null;
+        }
+
+        $id = session()->get('siamfesp_site_user_id');
+        if (!$id) {
+            return null;
+        }
+
+        $user = \Siamfesp\Menu\Models\SiteUser::query()
+            ->where('id', $id)
+            ->where('is_active', 1)
+            ->first();
+
+        return $user ?: null;
+    } catch (\Throwable $e) {
+        return null;
+    }
+}
+
+function handleProfileUpdate($user)
+{
+    $name = trim((string) \Request::input('name'));
+    $email = trim((string) \Request::input('email'));
+    $senhaAtual = (string) \Request::input('senha_atual');
+    $novaSenha = (string) \Request::input('nova_senha');
+    $confirmaSenha = (string) \Request::input('confirma_senha');
+
+    $errors = [];
+
+    if ($name === '') {
+        $errors[] = 'Informe o nome.';
+    }
+
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Informe um e-mail válido.';
+    }
+
+    $querAlterarSenha = ($senhaAtual !== '' || $novaSenha !== '' || $confirmaSenha !== '');
+
+    if ($querAlterarSenha) {
+        if ($senhaAtual === '') {
+            $errors[] = 'Informe a senha atual para alterar a senha.';
+        } elseif (!\Siamfesp\Menu\Models\SiteUser::checkPassword($senhaAtual, $user->senha)) {
+            $errors[] = 'Senha atual incorreta.';
+        }
+
+        if (strlen($novaSenha) < 4) {
+            $errors[] = 'A nova senha precisa ter pelo menos 4 caracteres.';
+        }
+
+        if ($novaSenha !== $confirmaSenha) {
+            $errors[] = 'A confirmação da nova senha não confere.';
+        }
+    }
+
+    if ($errors) {
+        $this['profileError'] = implode(' ', $errors);
+        $this['profileSuccess'] = null;
+        $this['profileName'] = $name;
+        $this['profileEmail'] = $email;
+        $this['profileUsuario'] = $user->usuario;
+        return null;
+    }
+
+    try {
+        $user->name = $name;
+        $user->email = $email !== '' ? $email : null;
+
+        if ($querAlterarSenha) {
+            $user->senha = $novaSenha;
+        }
+
+        $user->save();
+
+        session()->put('siamfesp_site_user_name', $user->name);
+        session()->put('siamfesp_site_user_email', $user->email ?: '');
+        session()->put('siamfesp_site_user', $user->usuario);
+        session()->put('siamfesp_site_user_id', $user->id);
+        session()->put('siamfesp_site_source', 'siamfesp_site_users');
+
+        $this['profileSuccess'] = $querAlterarSenha
+            ? 'Dados e senha atualizados com sucesso.'
+            : 'Dados atualizados com sucesso.';
+        $this['profileError'] = null;
+    } catch (\October\Rain\Exception\ValidationException $e) {
+        $this['profileError'] = $e->getMessage();
+        $this['profileSuccess'] = null;
+    } catch (\Throwable $e) {
+        $this['profileError'] = 'Não foi possível salvar seus dados. Verifique se o e-mail já não está cadastrado em outro usuário.';
+        $this['profileSuccess'] = null;
+    }
+
+    return null;
+}
+==
+
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}
+                <p>{{ internalBannerData.description|striptags }}</p>
+            {% elseif internalBannerFallbackDescription %}
+                <p>{{ internalBannerFallbackDescription|striptags }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="login-section account-section">
+    <div class="login-card account-card">
+        <h2>Minha Conta</h2>
+        <p class="login-intro">
+            Atualize seu nome, e-mail e senha de acesso à área restrita do SIAMFESP.
+        </p>
+
+        {% if profileSuccess %}
+            <div class="login-notice login-success">{{ profileSuccess }}</div>
+        {% endif %}
+
+        {% if profileError %}
+            <div class="login-notice login-error">{{ profileError }}</div>
+        {% endif %}
+
+        {% if profileUsuario %}
+        <form action="/minha-conta" method="POST" class="account-form">
+            <div class="form-group">
+                <label for="usuario">Usuário</label>
+                <div class="input-wrapper input-wrapper-disabled">
+                    <i class="fas fa-user"></i>
+                    <input class="form-control" id="usuario" value="{{ profileUsuario }}" type="text" readonly>
+                </div>
+                <small class="field-help">O usuário não é alterado para evitar conflito no login.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Nome *</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-id-card"></i>
+                    <input class="form-control" id="name" name="name" value="{{ profileName }}" placeholder="Nome completo ou empresa" required type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input class="form-control" id="email" name="email" value="{{ profileEmail }}" placeholder="email@empresa.com.br" type="email">
+                </div>
+            </div>
+
+            <hr class="account-divider">
+
+            <h3>Alterar senha</h3>
+            <p class="account-help">Preencha os campos abaixo somente se quiser trocar a senha.</p>
+
+            <div class="form-group">
+                <label for="senha_atual">Senha atual</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input class="form-control" id="senha_atual" name="senha_atual" placeholder="Senha atual" type="password" autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="form-group account-two-cols">
+                <div>
+                    <label for="nova_senha">Nova senha</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input class="form-control" id="nova_senha" name="nova_senha" placeholder="Nova senha" type="password" autocomplete="new-password">
+                    </div>
+                </div>
+                <div>
+                    <label for="confirma_senha">Confirmar nova senha</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input class="form-control" id="confirma_senha" name="confirma_senha" placeholder="Repita a nova senha" type="password" autocomplete="new-password">
+                    </div>
+                </div>
+            </div>
+
+            <div class="account-actions-row">
+                <button class="btn-acessar" type="submit">Salvar alterações</button>
+                <a class="btn-account-logout" href="/login?logout=1">Sair da conta</a>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</section>

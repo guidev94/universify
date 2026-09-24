@@ -1,0 +1,78 @@
+fields:
+  is_image_only:
+    label: Banner somente com imagem
+    type: switch
+    default: false
+    span: left
+    comment: Ative para esconder os textos e o botão no site. O Título 1 continua no cadastro/listagem para identificação e ordenação.
+
+  image:
+    label: Imagem
+    type: mediafinder
+    required: true
+    mode: image
+    span: right
+    comment: Use uma imagem grande, de preferência em formato horizontal.
+
+  title_1:
+    label: Título 1
+    type: text
+    span: left
+    required: true
+    comment: Usado para identificar o banner no admin e na ordenação. No modo somente imagem, não aparece no site.
+
+  title_2:
+    label: Título 2
+    type: text
+    span: right
+    trigger:
+      action: hide
+      field: is_image_only
+      condition: checked
+
+  description:
+    label: Descrição
+    type: textarea
+    size: small
+    span: full
+    trigger:
+      action: hide
+      field: is_image_only
+      condition: checked
+
+  is_published:
+    label: Status / Publicado
+    type: switch
+    default: true
+    span: right
+
+  button_text:
+    label: Texto do botão
+    type: text
+    default: Saiba Mais
+    span: left
+    trigger:
+      action: hide
+      field: is_image_only
+      condition: checked
+
+  button_link:
+    label: Link do banner / botão
+    type: text
+    span: right
+    placeholder: https://... ou /pagina
+    comment: No modo somente imagem, este link será aplicado na imagem inteira.
+
+  button_target:
+    label: Abrir link em
+    type: dropdown
+    span: left
+    default: _self
+    comment: Escolha como o link do banner/botão será aberto.
+
+  sort_order:
+    label: Ordem
+    type: number
+    default: 0
+    span: right
+    comment: Também pode ser alterado pela tela Reordenar.

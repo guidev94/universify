@@ -1,0 +1,15 @@
+list: $/siamfesp/newsletter/models/subscriber/columns.yaml
+modelClass: Siamfesp\Newsletter\Models\Subscriber
+title: Newsletter
+recordUrl: 'siamfesp/newsletter/subscribers/update/:id'
+noRecordsMessage: Nenhum inscrito encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 25
+defaultSort:
+  column: created_at
+  direction: desc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar inscrito...

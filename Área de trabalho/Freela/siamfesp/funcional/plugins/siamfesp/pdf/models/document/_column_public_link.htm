@@ -1,0 +1,5 @@
+<?php if ($record->public_link): ?>
+    <a href="<?= e($record->public_link) ?>" target="_blank" rel="noopener">Abrir PDF</a>
+<?php else: ?>
+    <span class="text-muted">Sem link</span>
+<?php endif ?>

@@ -1,0 +1,4 @@
+title: Reordenar Banners
+modelClass: Siamfesp\Banners\Models\Banner
+nameFrom: title_1
+recordUrl: siamfesp/banners/banners/update/:id

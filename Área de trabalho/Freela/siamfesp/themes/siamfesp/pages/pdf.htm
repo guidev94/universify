@@ -1,0 +1,894 @@
+url = "/servicos/pdf/:categoria?"
+layout = "default"
+title = "PDF"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Pdf\Models\Theme;
+use Siamfesp\Menu\Models\MenuItem;
+
+function onStart()
+{
+    if (\Siamfesp\Menu\Models\MenuItem::isBackendRequestPath(\Request::getRequestUri())) {
+        return null;
+    }
+
+    if (!\Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn()
+        && (\Siamfesp\Menu\Models\MenuItem::pathRequiresLogin(\Request::getRequestUri())
+            || \Siamfesp\Menu\Models\MenuItem::isRestrictedServicesFallbackPath(\Request::getRequestUri()))) {
+        return \Redirect::to(\Siamfesp\Menu\Models\MenuItem::makeLoginRedirectUrl(\Request::getRequestUri()));
+    }
+
+    $categoria = $this->param('categoria'); 
+    $themeId = null;
+    $menuItem = null;
+
+    if ($categoria) {
+        $menuItem = MenuItem::query()
+            ->with('parent.parent')
+            ->where('slug', $categoria)
+            ->whereNotNull('dynamic_record_id')
+            ->first();
+
+        if ($menuItem) {
+            $themeId = (int) $menuItem->dynamic_record_id;
+        }
+    }
+
+    if ($menuItem && $menuItem->requiresLoginIncludingParents() && !\Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn()) {
+        return \Redirect::to(\Siamfesp\Menu\Models\MenuItem::makeLoginRedirectUrl(\Request::getRequestUri()));
+    }
+
+    $documentOrder = function ($q) {
+        $q->where(function ($query) {
+                $query->whereNotNull('pdf')
+                    ->where('pdf', '<>', '')
+                    ->orWhere(function ($urlQuery) {
+                        $urlQuery->whereNotNull('url')
+                            ->where('url', '<>', '');
+                    });
+            })
+            ->orderBy('id', 'desc');
+    };
+
+    $themesQuery = Theme::query()
+        ->whereHas('documents', $documentOrder)
+        ->with(['documents' => $documentOrder]);
+
+    if ($themeId) {
+        $themesQuery->where('id', $themeId);
+    } elseif ($categoria) {
+        $themesQuery->whereRaw('1 = 0');
+    }
+
+    $themes = $themesQuery
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderBy('title', 'asc')
+        ->get();
+
+    $perPageDocuments = 12;
+    $allAvailableYears = []; // Guardará todos os anos de todos os registros
+
+    foreach ($themes as $theme) {
+        $documents = $theme->documents ?: collect();
+
+        // Ordenação Cronológica Completa
+        $documents = $documents->sortByDesc(function ($document) {
+            $yearMonth = trim((string) $document->year_month);
+            if (preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $yearMonth, $matches)) {
+                return $matches[2] . $matches[1];
+            }
+            if (preg_match('/(\d{4})/', $yearMonth, $matches)) {
+                return $matches[1] . '00';
+            }
+            return '000000';
+        });
+
+        // --- SOLUÇÃO: Mapeia todos os anos reais do banco ANTES de paginar ---
+        foreach ($documents as $doc) {
+            $yearMonth = trim((string) $doc->year_month);
+            if (preg_match('/(\d{4})/', $yearMonth, $matches)) {
+                $allAvailableYears[] = (int) $matches[1];
+            }
+        }
+
+        $documentsTotal = $documents->count();
+        $pageName = 'pagina_' . $theme->id;
+        $currentPage = max(1, (int) \Request::query($pageName, 1));
+        
+        $pageItems = $documents->forPage($currentPage, $perPageDocuments)->values();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $pageItems,
+            $documentsTotal,
+            $perPageDocuments,
+            $currentPage,
+            [
+                'path' => \Request::url(),
+                'pageName' => $pageName,
+            ]
+        );
+
+        $queryString = \Request::query();
+        unset($queryString[$pageName]);
+        $paginator->appends($queryString);
+
+        $theme->documentsTotal = $documentsTotal;
+        $theme->documentsPaginator = $paginator;
+        $theme->setRelation('documents', $pageItems);
+        
+        $theme->documentsByYear = $pageItems->groupBy(function ($document) {
+            $yearMonth = trim((string) $document->year_month);
+            if (preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $yearMonth, $matches)) {
+                return $matches[2];
+            }
+            if (preg_match('/(\d{4})/', $yearMonth, $matches)) {
+                return $matches[1];
+            }
+            return 'Outros';
+        })->sortKeysDesc();
+    }
+
+    // Filtra duplicados e ordena os anos decrescente
+    $allAvailableYears = array_unique($allAvailableYears);
+    rsort($allAvailableYears);
+
+    // Envia a lista global de anos corretos para a View do Twig
+    $this['disponiveisAnos'] = $allAvailableYears;
+
+    $menuPrincipal = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1);
+            \Siamfesp\Menu\Models\MenuItem::applyVisibilityToQuery($q);
+            $q->orderBy('sort_order')->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return $item->slug === 'servicos';
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $activeSecondMenuSlug = $categoria;
+    if ($menuItem && $currentMenuParent) {
+        $current = $menuItem;
+        while ($current) {
+            if ((int) $current->parent_id === (int) $currentMenuParent->id) {
+                $activeSecondMenuSlug = $current->slug;
+                break;
+            }
+            $current = $current->parent ?: null;
+        }
+    }
+
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['categoriaAtual'] = $activeSecondMenuSlug;
+    $this['currentPdfMenuItem'] = $menuItem;
+    $this['pageMode'] = 'category';
+    $this['pdfThemes'] = $themes;
+    $this['pdfDocumentsTotal'] = $themes->sum(function ($theme) {
+        return isset($theme->documentsTotal) ? (int) $theme->documentsTotal : ($theme->documents ? $theme->documents->count() : 0);
+    });
+
+    if ($themes->count()) {
+        $this->page->title = $themes->first()->title;
+        $this->page->meta_title = $themes->first()->title;
+    } else {
+        $this->page->title = 'Revista';
+        $this->page->meta_title = 'Revista';
+    }
+
+    $bannerTitle = $themes->count() ? $themes->first()->title : ($menuItem->title ?? 'PDF');
+    $bannerSubtitle = $currentMenuParent ? $currentMenuParent->title : 'Serviços';
+    $metaDescription = 'Publicações, relatórios, estudos e materiais em formato digital do SIAMFESP.';
+
+    $this->page->meta_description = $metaDescription;
+    $this['bannerTitle'] = $bannerTitle;
+    $this['bannerDescription'] = $bannerSubtitle;
+    $this['internalBannerFallbackEyebrow'] = $bannerSubtitle;
+    $this['internalBannerFallbackTitle'] = $bannerTitle;
+    $this['internalBannerFallbackDescription'] = $bannerSubtitle;
+}
+?>
+==
+<style>
+
+.pdf-list-wrapper{
+    background:#fafbfd;
+    padding:20px 0 60px;
+}
+
+.pdf-list-wrapper .container{
+    max-width:1280px;
+}
+
+/* CABEÇALHO DA CATEGORIA */
+
+.events-section-header{
+    text-align:center;
+    margin-bottom:50px !important;
+}
+
+.events-section-header .section-title{
+    font-size:2.4rem;
+    font-weight:800;
+    color:#1e293b;
+    margin-bottom:10px;
+}
+
+.events-section-header .section-subtitle{
+    color:#64748b;
+    font-size:1rem;
+}
+
+/* ANO */
+
+.pdf-year-group{
+    margin-bottom:70px;
+}
+
+.pdf-year-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    margin:0 0 30px;
+    padding:0;
+
+    border:none;
+
+    color:#0f172a;
+    font-size:2rem;
+    font-weight:800;
+}
+
+.pdf-year-title:before{
+    content:'';
+    width:8px;
+    height:34px;
+    border-radius:20px;
+    background:linear-gradient(
+        180deg,
+        #d90429,
+        #ff6b6b
+    );
+}
+
+/* GRID */
+
+#lista-pdfs .pdf-doc-row{
+    display:flex;
+    flex-wrap:wrap;
+    margin-left:-12px;
+    margin-right:-12px;
+}
+
+#lista-pdfs .pdf-doc-col{
+    display:flex;
+    padding-left:12px;
+    padding-right:12px;
+    margin-bottom:24px;
+}
+
+#lista-pdfs .pdf-doc-col .doc-list-card{
+    width:100%;
+}
+
+#lista-pdfs .col-xl-4,
+#lista-pdfs .col-lg-4,
+#lista-pdfs .col-md-6{
+    display:flex;
+}
+
+#lista-pdfs .col-lg-4{
+    width:33.333333%;
+}
+
+/* CARD */
+
+.doc-list-card{
+    position:relative;
+
+    background:#fff;
+
+    border:1px solid #e7ecf2;
+    border-radius:22px;
+
+    padding:24px;
+
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    overflow:hidden;
+
+    transition:all .35s ease;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.03);
+}
+
+.doc-list-card:before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+
+    background:linear-gradient(
+        90deg,
+        #d90429,
+        #ff5f6d
+    );
+}
+
+.doc-list-card:hover{
+    transform:translateY(-6px);
+
+    border-color:#d90429;
+
+    box-shadow:
+        0 20px 40px rgba(0,0,0,.08),
+        0 8px 20px rgba(217,4,41,.08);
+}
+
+/* CONTEÚDO */
+
+.doc-info-side{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    margin-bottom:24px;
+}
+
+.doc-icon-box{
+    width:72px;
+    min-width:72px;
+    height:72px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:linear-gradient(
+        135deg,
+        #fff0f2,
+        #ffe2e6
+    );
+
+    color:#d90429;
+
+    font-size:2rem;
+}
+
+.doc-details{
+    flex:1;
+}
+
+.doc-details h4{
+    margin:0;
+
+    color:#0f172a;
+
+    font-size:1.05rem;
+    font-weight:700;
+    line-height:1.6;
+
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+
+.doc-details span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    margin-top:12px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+
+    color:#64748b;
+
+    font-size:.82rem;
+    font-weight:500;
+}
+
+/* BOTÕES */
+
+.doc-actions-side{
+    display:flex;
+    gap:12px;
+    margin-top:auto;
+}
+
+.btn-pdf{
+    flex:1;
+
+    height:48px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    border-radius:12px;
+
+    text-decoration:none;
+
+    font-size:.92rem;
+    font-weight:600;
+
+    transition:.25s ease;
+}
+
+.btn-view{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    color:#334155;
+}
+
+.btn-view:hover{
+    background:#eef2f7;
+    color:#111827;
+}
+
+.btn-dl{
+    background:linear-gradient(
+        135deg,
+        #d90429,
+        #ef233c
+    );
+
+    color:#fff;
+}
+
+.btn-dl:hover{
+    color:#fff;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 20px rgba(217,4,41,.25);
+}
+
+/* PAGINAÇÃO */
+
+.pagination-wrap{
+    margin-top:50px;
+    display:flex;
+    justify-content:center;
+}
+
+/* SEM RESULTADO */
+
+.alert-light{
+    border:none;
+    border-radius:24px;
+    background:#fff;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.05);
+}
+
+/* TABLET */
+
+@media(max-width:991px){
+
+    #lista-pdfs .col-md-6{
+        width:50%;
+    }
+
+}
+
+/* MOBILE */
+
+@media(max-width:767px){
+
+    #lista-pdfs .col-12,
+    #lista-pdfs .col-md-6,
+    #lista-pdfs .col-lg-4{
+        width:100%;
+    }
+
+    .doc-actions-side{
+        flex-direction:column;
+    }
+
+    .doc-icon-box{
+        width:60px;
+        min-width:60px;
+        height:60px;
+        font-size:1.7rem;
+    }
+
+    .pdf-year-title{
+        font-size:1.5rem;
+    }
+
+    .events-section-header .section-title{
+        font-size:1.8rem;
+    }
+
+}
+
+/* TOOLBAR FILTROS */
+
+.pdf-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:40px;
+}
+
+.pdf-toolbar-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.pdf-toolbar-count{
+    padding:10px 16px;
+    border-radius:12px;
+    background:#fff;
+    border:1px solid #e7ecf2;
+    color:#475569;
+    font-size:.9rem;
+    font-weight:600;
+}
+
+.pdf-toolbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.pdf-search{
+    width:280px;
+    height:48px;
+    padding:0 16px;
+    border:1px solid #dbe2ea;
+    border-radius:12px;
+    background:#fff;
+    outline:none;
+    transition:.25s;
+}
+
+.pdf-search:focus{
+    border-color:#d90429;
+    box-shadow:0 0 0 4px rgba(217,4,41,.08);
+}
+
+.pdf-year-select{
+    min-width:180px;
+    height:48px;
+    padding:0 16px;
+    border:1px solid #dbe2ea;
+    border-radius:12px;
+    background:#fff;
+    outline:none;
+    cursor:pointer;
+}
+
+.pdf-year-select:focus{
+    border-color:#d90429;
+    box-shadow:0 0 0 4px rgba(217,4,41,.08);
+}
+
+@media(max-width:767px){
+
+    .pdf-toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .pdf-toolbar-right{
+        flex-direction:column;
+    }
+
+    .pdf-search,
+    .pdf-year-select{
+        width:100%;
+    }
+
+}
+
+</style>
+
+<div class="banner-container">
+
+{% component 'internalBanner' %}
+
+<div class="hero-overlay"></div>
+
+<div class="banner-content">
+
+<h1><strong>{{ pageMode == 'article' and article ? article.title : (bannerTitle ?: this.page.title) }}</strong></h1>
+
+<div class="divider"></div>
+
+{% if bannerDescription %}
+
+<p>{{ bannerDescription|striptags|upper }}</p>
+
+{% elseif internalBannerData.eyebrow %}
+
+<p>{{ internalBannerData.eyebrow|striptags|upper }}</p>
+
+{% else %}
+
+<p>{{ (currentMenuParent.title ?: 'Serviços')|upper }}</p>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+{% if secondMenuItems|length %}
+
+<section class="internal-shortcuts">
+
+<div class="container internal-shortcuts-container">
+
+<div class="internal-shortcuts-grid">
+
+{% for item in secondMenuItems %}
+
+<a class="internal-shortcut-card{% if item.slug == categoriaAtual %} is-active{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank or item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+
+<span class="internal-shortcut-icon"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-newspaper{% elseif loop.index == 4 %}bi-journals{% elseif loop.index == 5 %}bi-cloud-download{% elseif loop.index == 6 %}bi-envelope-paper{% elseif loop.index == 7 %}bi-journal-richtext{% elseif loop.index == 8 %}bi-file-earmark-text{% elseif loop.index == 9 %}bi-calendar-event{% else %}bi-link-45deg{% endif %}"></i></span>
+
+<span class="internal-shortcut-label">{{ item.title }}</span>
+
+<span class="internal-shortcut-arrow"><i class="bi bi-chevron-right"></i></span>
+
+</a>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</section>
+
+{% endif %}
+
+  
+
+<br><br><br>
+
+  
+
+<section class="pdf-list-wrapper" id="lista-pdfs">
+    <div class="container">
+        
+        {% if pdfThemes|length %}
+
+            {# Coleta e centraliza dinamicamente todos os anos existentes (evita duplicar no select) #}
+            {% set todosAnos = [] %}
+            {% for theme in pdfThemes %}
+                {% for year, docs in theme.documentsByYear %}
+                    {% if year not in todosAnos %}
+                        {% set todosAnos = todosAnos|merge([year]) %}
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+            {% for theme in pdfThemes %}
+                
+                {# 1. TÍTULO E SUBTÍTULO DO TEMA #}
+                <div id="categoria-pdf-{{ theme.id }}" class="events-section-header theme-block" style="background-color: transparent; padding-top: 0; margin-bottom: 30px;">
+                    <h2 class="section-title">{{ theme.title }}</h2>
+                    <p class="section-subtitle">
+                        <span class="theme-count">{{ theme.documentsTotal }}</span> publicaç{{ theme.documentsTotal == 1 ? 'ão' : 'ões' }} disponível{{ theme.documentsTotal == 1 ? '' : 'is' }} para download.
+                    </p>
+                </div>
+
+                {# 2. BARRA DE FERRAMENTAS #}
+                <div class="pdf-toolbar">
+                    <div class="pdf-toolbar-left">
+                        <div class="pdf-toolbar-count">
+                            Total do Tema: <span class="theme-docs-count-live" data-original="{{ theme.documentsTotal }}">{{ theme.documentsTotal }}</span> {{ theme.documentsTotal == 1 ? 'documento' : 'documentos' }}
+                        </div>
+                    </div>
+                    
+                    <div class="pdf-toolbar-right">
+                        <input type="text" id="pdf-search-input-{{ theme.id }}" class="pdf-search pdf-search-trigger" data-theme="{{ theme.id }}" placeholder="Pesquisar por título..." value="{{ input('search') }}">
+                        
+                        <select id="pdf-year-select-{{ theme.id }}" class="pdf-year-select pdf-year-trigger" data-theme="{{ theme.id }}">
+                            <option value="">Todos os anos</option>
+                            {% for ano in disponiveisAnos %}
+                                <option value="{{ ano }}" {{ input('ano') == ano ? 'selected' : '' }}>{{ ano }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {# 3. LISTAGEM DOS DOCUMENTOS #}
+                <div class="theme-content-wrapper" id="theme-content-{{ theme.id }}">
+                    {% for year, documentsByYear in theme.documentsByYear %}
+                        <div class="pdf-year-group" data-year="{{ year }}" style="display: {{ input('ano') and input('ano') != year ? 'none' : 'block' }};">
+                            <h3 class="pdf-year-title">{{ year }}</h3>
+                            
+                            <div class="row pdf-doc-row">
+                                {% for document in documentsByYear %}
+                                    {% set pdfUrl = document.public_link ?: (document.pdf ? (document.pdf|media) : document.url) %}
+                                    {% set isExternalUrl = not document.pdf and document.url %}
+                                    
+                                    <div class="col-12 col-md-6 col-lg-4 pdf-doc-col doc-item" data-title="{{ document.title|lower }}">
+                                        <div class="doc-list-card">
+                                            <div class="doc-info-side">
+                                                <div class="doc-icon-box">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="doc-details">
+                                                    <h4 class="doc-title-text">{{ document.title }}</h4>
+                                                    {% if document.year_month %}
+                                                        <span>
+                                                            <i class="bi bi-calendar3 me-1"></i>
+                                                            {{ document.year_month }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="doc-actions-side">
+                                                <a href="{{ pdfUrl }}" target="_blank" rel="noopener noreferrer" class="btn-pdf btn-view">
+                                                    <i class="bi bi-eye"></i> Ver
+                                                </a>
+                                                {% if not isExternalUrl %}
+                                                    <a href="{{ pdfUrl }}" download class="btn-pdf btn-dl">
+                                                        <i class="bi bi-download"></i> Baixar
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# 4. PAGINAÇÃO #}
+                {% if theme.documentsPaginator.lastPage and theme.documentsPaginator.lastPage > 1 %}
+                    <div class="pagination-wrap theme-pagination" style="display: {{ input('search') ? 'none' : 'flex' }};">
+                        {{ theme.documentsPaginator.render|raw }}
+                    </div>
+                {% endif %}
+                
+                {# 5. MENSAGEM DE ERRO (Corrigido com display none inline para não herdar regras do Bootstrap) #}
+                <div id="no-results-{{ theme.id }}" class="alert alert-light text-center shadow-sm p-5 row-no-results" style="display: none;">
+                    <p class="mb-0">Nenhum PDF corresponde aos filtros selecionados nesta página.</p>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+            <div class="alert alert-light text-center shadow-sm p-5">
+                <p class="mb-0">Nenhum PDF cadastrado foi encontrado para este menu.</p>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInputs = document.querySelectorAll('.pdf-search-trigger');
+    const yearSelects = document.querySelectorAll('.pdf-year-trigger');
+
+    // Inicializa o filtro caso já venham dados preenchidos
+    searchInputs.forEach(input => filterPdfsByTheme(input.dataset.theme, false));
+
+    function filterPdfsByTheme(themeId, isOnChangeEvent = true) {
+        const searchInput = document.getElementById(`pdf-search-input-${themeId}`);
+        const yearSelect = document.getElementById(`pdf-year-select-${themeId}`);
+        const themeWrapper = document.getElementById(`theme-content-${themeId}`);
+        const pagination = themeWrapper.nextElementSibling?.classList.contains('theme-pagination') ? themeWrapper.nextElementSibling : null;
+        const noResultsMessage = document.getElementById(`no-results-${themeId}`);
+        const counterLabel = searchInput.closest('.pdf-toolbar').querySelector('.theme-docs-count-live');
+
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedYear = yearSelect.value;
+
+        // Se o evento disparador foi uma troca no select de anos, recarrega via URL para buscar no banco globalmente
+        if (isOnChangeEvent && event && event.type === 'change') {
+            const url = new URL(window.location.href);
+            if(selectedYear) {
+                url.searchParams.set('ano', selectedYear);
+            } else {
+                url.searchParams.delete('ano');
+            }
+            url.searchParams.delete(`pagina_${themeId}`); // Limpa a página atual para não quebrar a busca
+            window.location.href = url.toString();
+            return;
+        }
+
+        let totalVisible = 0;
+        const isFiltering = searchTerm !== '' || selectedYear !== '';
+        
+        if (pagination && searchTerm !== '') {
+            pagination.style.display = 'none';
+        }
+
+        const yearGroups = themeWrapper.querySelectorAll('.pdf-year-group');
+        
+        yearGroups.forEach(group => {
+            const groupYear = group.getAttribute('data-year');
+            const docItems = group.querySelectorAll('.doc-item');
+            let visibleInGroup = 0;
+
+            const yearMatch = !selectedYear || groupYear === selectedYear;
+
+            docItems.forEach(item => {
+                const title = item.getAttribute('data-title');
+                const titleMatch = title.includes(searchTerm);
+
+                if (yearMatch && titleMatch) {
+                    item.style.setProperty('display', 'flex', 'important');
+                    visibleInGroup++;
+                    totalVisible++;
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                }
+            });
+
+            group.style.display = visibleInGroup > 0 ? 'block' : 'none';
+        });
+
+        if (searchTerm !== '') {
+            counterLabel.textContent = totalVisible;
+        } else {
+            counterLabel.textContent = counterLabel.getAttribute('data-original');
+        }
+
+        // Aplica e força visibilidade correta usando display CSS puro
+        if (totalVisible === 0 && isFiltering) {
+            noResultsMessage.style.setProperty('display', 'block', 'important');
+        } else {
+            noResultsMessage.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    searchInputs.forEach(input => {
+        input.addEventListener('input', () => filterPdfsByTheme(input.dataset.theme, false));
+    });
+    
+    yearSelects.forEach(select => {
+        select.addEventListener('change', () => filterPdfsByTheme(select.dataset.theme, true));
+    });
+});
+</script>

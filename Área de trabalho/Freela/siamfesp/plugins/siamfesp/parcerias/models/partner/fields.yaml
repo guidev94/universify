@@ -1,0 +1,87 @@
+tabs:
+  fields:
+    type:
+      label: Tipo da parceria *
+      type: dropdown
+      options: getTypeOptions
+      span: left
+      tab: Dados
+      required: true
+    title:
+      label: Nome do parceiro / categoria *
+      type: text
+      span: right
+      tab: Dados
+      required: true
+    slug:
+      label: Slug *
+      type: text
+      span: left
+      tab: Dados
+      required: true
+      preset:
+        field: title
+        type: slug
+      comment: Se apagar este campo, ele será recriado automaticamente sem conflito.
+    badge:
+      label: Selo do card
+      type: text
+      span: right
+      tab: Dados
+      placeholder: Parceiro SIAMFESP
+    image_file:
+      label: Imagem
+      type: fileupload
+      mode: image
+      span: full
+      tab: Dados
+      imageWidth: 160
+      imageHeight: 110
+      useCaption: false
+      fileTypes: jpg,jpeg,png,gif,webp
+      comment: Use este campo para enviar/substituir a imagem pelo CMS. Caminhos internos antigos, como /images/parceiros/logo.png, serão movidos para este campo quando encontrados no servidor.
+    image:
+      label: Imagem por URL externa
+      type: text
+      span: full
+      tab: Dados
+      placeholder: https://site.com.br/imagem.jpg
+      comment: Use somente para URL externa. Imagens do próprio site (/images, /images/parceiros ou Media Library) devem ficar no campo Imagem acima.
+    description:
+      label: Descrição
+      type: richeditor
+      size: large
+      span: full
+      tab: Conteúdo
+    link_url:
+      label: Link do parceiro / serviço
+      type: text
+      span: left
+      tab: Link
+      placeholder: https://...
+    link_target:
+      label: Abertura do link
+      type: dropdown
+      options: getLinkTargetOptions
+      default: _self
+      span: right
+      tab: Link
+    is_featured:
+      label: Destaque na home
+      type: switch
+      default: false
+      span: left
+      tab: Publicação
+      comment: Marque um parceiro para aparecer no bloco Parceiro em Destaque da Home.
+    is_published:
+      label: Publicado
+      type: switch
+      default: true
+      span: left
+      tab: Publicação
+    sort_order:
+      label: Ordem
+      type: number
+      default: 0
+      span: right
+      tab: Publicação

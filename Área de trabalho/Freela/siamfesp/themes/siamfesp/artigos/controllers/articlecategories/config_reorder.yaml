@@ -1,0 +1,3 @@
+title: Reordenar Categorias
+modelClass: Siamfesp\Artigos\Models\ArticleCategory
+nameFrom: title

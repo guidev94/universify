@@ -1,0 +1,14 @@
+name: Banner Interno
+modelClass: Siamfesp\Banners\Models\InternalBanner
+form: $/siamfesp/banners/models/internalbanner/fields.yaml
+create:
+  title: Novo Banner Interno
+  redirect: siamfesp/banners/internalbanners/update/:id
+  redirectClose: siamfesp/banners/internalbanners
+update:
+  title: Editar Banner Interno
+  redirect: siamfesp/banners/internalbanners
+  redirectClose: siamfesp/banners/internalbanners
+preview:
+  title: Visualizar Banner Interno
+defaultRedirect: siamfesp/banners/internalbanners

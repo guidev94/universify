@@ -1,0 +1,31 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+
+  name:
+    label: Nome administrativo
+    searchable: true
+
+  menu_item_label:
+    label: Item do menu
+    searchable: false
+
+  title:
+    label: Título
+    searchable: true
+
+  image:
+    label: Imagem
+
+  is_published:
+    label: Status
+    type: switch
+
+  sort_order:
+    label: Ordem
+    width: 90px
+
+  updated_at:
+    label: Atualizado em
+    type: datetime

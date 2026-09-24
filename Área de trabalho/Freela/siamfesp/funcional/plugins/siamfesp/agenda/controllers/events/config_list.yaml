@@ -1,0 +1,15 @@
+list: $/siamfesp/agenda/models/event/columns.yaml
+modelClass: Siamfesp\Agenda\Models\Event
+title: Agenda
+recordUrl: 'siamfesp/agenda/events/update/:id'
+noRecordsMessage: Nenhum evento encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+defaultSort:
+  column: event_date
+  direction: asc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar evento...

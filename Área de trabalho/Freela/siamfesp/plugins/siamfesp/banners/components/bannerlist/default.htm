@@ -1,0 +1,83 @@
+{% if banners and banners.count %}
+<div class="banner-container {{ allBannersImageOnly ? 'banner-container-image-only' : '' }}">
+    {% for banner in banners %}
+        {% set link_target = banner.safe_button_target %}
+        {% set link_rel = banner.safe_button_rel %}
+        {% set banner_url = banner.button_url %}
+        {% set is_image_only = banner.is_image_only %}
+
+        {% if is_image_only %}
+            <div class="hero-slide {{ loop.first ? 'active' }} image-only">
+                {% if banner_url %}
+                    <a
+                        class="banner-image-link"
+                        href="{{ banner_url }}"
+                        target="{{ link_target }}"
+                        {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                        aria-label="{{ banner.title_1 ?: 'Abrir banner' }}"
+                    >
+                {% endif %}
+
+                <img
+                    class="banner-image-only-img"
+                    src="{{ banner.image_url | media }}"
+                    alt="{{ banner.title_1 ?: 'Banner' }}"
+                    loading="{{ loop.first ? 'eager' : 'lazy' }}"
+                >
+
+                {% if banner_url %}
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="hero-slide {{ loop.first ? 'active' }}" style="background-image: url('{{ banner.image_url | media }}');">
+                {% if banner_url %}
+                    <a
+                        class="banner-full-link"
+                        href="{{ banner_url }}"
+                        target="{{ link_target }}"
+                        {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                        aria-label="{{ banner.title_1 ?: 'Abrir banner' }}"
+                    ></a>
+                {% endif %}
+
+                <div class="hero-overlay"></div>
+
+                {% if banner.title_1 or banner.description or banner.button_text %}
+                    <div class="banner-content">
+                        {% if banner.title_1 %}
+                            <h1>
+                                {{ banner.title_1 }}
+                                {% if banner.title_2 %}<strong>{{ banner.title_2 }}</strong>{% endif %}
+                            </h1>
+                            <div class="divider"></div>
+                        {% endif %}
+
+                        {% if banner.description %}
+                            <p>{{ banner.description }}</p>
+                        {% endif %}
+
+                        {% if banner_url and banner.button_text %}
+                            <a
+                                class="btn-saiba-mais"
+                                href="{{ banner_url }}"
+                                target="{{ link_target }}"
+                                {% if link_rel %}rel="{{ link_rel }}"{% endif %}
+                            >
+                                {{ banner.button_text }}
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if banners.count > 1 %}
+    <div class="hero-nav">
+        <button class="hero-btn" id="prevSlide" type="button"><i class="fas fa-chevron-left"></i></button>
+        <button class="hero-btn" id="nextSlide" type="button"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

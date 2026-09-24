@@ -1,0 +1,78 @@
+tabs:
+  fields:
+    title:
+      label: Título do vídeo *
+      type: text
+      span: left
+      tab: Dados
+      required: true
+    slug:
+      label: Slug *
+      type: text
+      span: right
+      tab: Dados
+      required: true
+      preset:
+        field: title
+        type: slug
+      comment: "Se apagar este campo, ele será recriado automaticamente sem conflito."
+    source_type:
+      label: Origem do vídeo *
+      type: dropdown
+      options: getSourceTypeOptions
+      default: youtube
+      span: left
+      tab: Vídeo
+      required: true
+      comment: "Escolha YouTube ou um arquivo enviado pela Media Library."
+    youtube_url:
+      label: Link do YouTube
+      type: text
+      span: right
+      tab: Vídeo
+      placeholder: https://www.youtube.com/watch?v=...
+      comment: "Pode colar link do YouTube, youtu.be, Shorts ou apenas o ID do vídeo."
+    video_file:
+      label: Arquivo de vídeo enviado
+      type: mediafinder
+      mode: file
+      span: left
+      tab: Vídeo
+      comment: "Use este campo quando a origem for Vídeo enviado. Ex.: MP4 na Media Library."
+    thumbnail:
+      label: Imagem de capa / thumb
+      type: mediafinder
+      mode: image
+      span: right
+      tab: Vídeo
+      comment: "Opcional. Para YouTube, se ficar vazio, usa a miniatura do próprio YouTube."
+    description:
+      label: Descrição
+      type: richeditor
+      size: large
+      span: full
+      tab: Conteúdo
+    is_featured:
+      label: Destaque na home
+      type: switch
+      default: false
+      span: left
+      tab: Publicação
+    is_published:
+      label: Publicado
+      type: switch
+      default: true
+      span: left
+      tab: Publicação
+    published_at:
+      label: Data de publicação
+      type: datepicker
+      mode: datetime
+      span: right
+      tab: Publicação
+    sort_order:
+      label: Ordem
+      type: number
+      default: 0
+      span: right
+      tab: Publicação

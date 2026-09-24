@@ -1,0 +1,28 @@
+[25-Mar-2026 19:07:49 UTC] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 7.4.33. in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/autoload_real.php(25): require()
+#1 /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/autoload.php(22): ComposerAutoloaderInitc64d05e6cf13367c12f2a45294a3ddc3::getLoader()
+#2 /home/dmsnetcom/siamfesp.dmsnet.com.br/bootstrap/autoload.php(22): require('/home/dmsnetcom...')
+#3 /home/dmsnetcom/siamfesp.dmsnet.com.br/index.php(18): require('/home/dmsnetcom...')
+#4 {main}
+  thrown in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/platform_check.php on line 22
+[25-Mar-2026 16:10:17 America/Sao_Paulo] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 2621440 bytes) in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/composer/src/Composer/DependencyResolver/DefaultPolicy.php on line 106
+[25-Mar-2026 16:10:27 America/Sao_Paulo] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 81920 bytes) in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/composer/src/Composer/DependencyResolver/DefaultPolicy.php on line 99
+[25-Mar-2026 16:25:48 America/Sao_Paulo] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 32768 bytes) in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/semver/src/CompilingMatcher.php(87) : eval()'d code on line 1
+[25-Mar-2026 16:28:45 America/Sao_Paulo] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 81920 bytes) in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/composer/src/Composer/DependencyResolver/DefaultPolicy.php on line 88
+[25-Mar-2026 16:30:52 America/Sao_Paulo] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 1310720 bytes) in /home/dmsnetcom/siamfesp.dmsnet.com.br/vendor/composer/composer/src/Composer/DependencyResolver/DefaultPolicy.php on line 106
+[31-Mar-2026 15:21:43 America/Sao_Paulo] PHP Fatal error:  Cannot declare class Siamfesp\Pdf\Plugin, because the name is already in use in /home/dmsnetcom/siamfesp.dmsnet.com.br/plugins/siamfesp1/pdf/Plugin.php on line 6
+[31-Mar-2026 15:21:52 America/Sao_Paulo] PHP Fatal error:  Cannot declare class Siamfesp\Pdf\Plugin, because the name is already in use in /home/dmsnetcom/siamfesp.dmsnet.com.br/plugins/siamfesp1/pdf/Plugin.php on line 6
+[09-Jun-2026 17:08:24 UTC] [BOOT] vendor/autoload.php missing. Run "composer install".
+[09-Jun-2026 17:18:12 UTC] [BOOT] vendor/autoload.php missing. Run "composer install".
+[09-Jun-2026 17:19:50 UTC] [BOOT] vendor/autoload.php missing. Run "composer install".
+[09-Jun-2026 17:20:46 UTC] [BOOT] vendor/autoload.php missing. Run "composer install".
+[09-Jun-2026 17:21:03 UTC] PHP Warning:  require(/home/siamfesporgbr/public_html/vendor/composer/platform_check.php): Failed to open stream: No such file or directory in /home/siamfesporgbr/public_html/vendor/composer/autoload_real.php on line 25
+[09-Jun-2026 17:21:03 UTC] PHP Warning:  require(/home/siamfesporgbr/public_html/vendor/composer/platform_check.php): Failed to open stream: No such file or directory in /home/siamfesporgbr/public_html/vendor/composer/autoload_real.php on line 25
+[09-Jun-2026 17:21:03 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/siamfesporgbr/public_html/vendor/composer/platform_check.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/siamfesporgbr/public_html/vendor/composer/autoload_real.php:25
+Stack trace:
+#0 /home/siamfesporgbr/public_html/vendor/autoload.php(22): ComposerAutoloaderInitc64d05e6cf13367c12f2a45294a3ddc3::getLoader()
+#1 /home/siamfesporgbr/public_html/bootstrap/autoload.php(22): require('/home/siamfespo...')
+#2 /home/siamfesporgbr/public_html/index.php(18): require('/home/siamfespo...')
+#3 {main}
+  thrown in /home/siamfesporgbr/public_html/vendor/composer/autoload_real.php on line 25

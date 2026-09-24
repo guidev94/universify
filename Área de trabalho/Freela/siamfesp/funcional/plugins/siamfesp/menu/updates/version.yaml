@@ -1,0 +1,14 @@
+1.0.1:
+    - 'Create menus table'
+    - create_menus_table.php
+1.0.2:
+    - 'Create menu items table'
+    - create_menu_items_table.php
+
+1.0.3:
+    - 'Add dynamic link support for plugin records'
+    - add_dynamic_link_columns_to_menu_items.php
+
+1.0.4:
+    - 'Convert Download Gratuito menu item to CMS page'
+    - convert_download_menu_item_to_page.php

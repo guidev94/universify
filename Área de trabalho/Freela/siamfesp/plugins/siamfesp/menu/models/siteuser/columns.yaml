@@ -1,0 +1,27 @@
+columns:
+    id:
+        label: ID
+        searchable: true
+        width: 70px
+
+    name:
+        label: Nome
+        searchable: true
+
+    usuario:
+        label: Usuário
+        searchable: true
+
+    email:
+        label: E-mail
+        searchable: true
+
+    is_active:
+        label: Ativo
+        type: switch
+        width: 90px
+
+    updated_at:
+        label: Atualizado em
+        type: datetime
+        width: 160px

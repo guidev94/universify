@@ -1,0 +1,38 @@
+fields:
+  title:
+    label: Título *
+    required: true
+    span: full
+
+  theme:
+    label: Tema *
+    type: relation
+    nameFrom: title
+    emptyOption: Selecione um tema
+    required: true
+    span: left
+
+  year_month:
+    label: Ano *
+    comment: 'Formato: MM/YYYY (ex: 01/2018)'
+    span: right
+
+  cover:
+    label: Capa (Media Library)
+    type: mediafinder
+    mode: image
+    comment: 'Selecione uma imagem no Media Library (ex.: capas/capa-outubro.jpg)'
+    span: left
+
+  pdf:
+    label: PDF (Media Library) *
+    type: mediafinder
+    mode: file
+    comment: 'Selecione um PDF no Media Library (ex.: pdfs/2024/meu-arquivo.pdf)'
+    span: right
+
+  url:
+    label: URL externa / Link
+    type: text
+    comment: 'Cole aqui o link completo quando o documento estiver em outro site (ex.: https://...). Se este campo for usado, o PDF não é obrigatório.'
+    span: full

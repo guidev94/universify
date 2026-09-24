@@ -1,0 +1,6 @@
+title: Reordenar Banners Internos
+modelClass: Siamfesp\Banners\Models\InternalBanner
+nameFrom: name
+recordUrl: siamfesp/banners/internalbanners/update/:id
+toolbar:
+    buttons: reorder_toolbar

@@ -1,0 +1,21 @@
+fields:
+  name:
+    label: Nome da categoria
+    type: text
+    span: full
+    required: true
+
+  slug:
+    label: Slug
+    type: text
+    span: full
+    preset:
+      field: name
+      type: slug
+    comment: Gerado automaticamente a partir do nome, seguindo o padrão de URL.
+
+  is_published:
+    label: Publicado
+    type: switch
+    default: true
+    span: left

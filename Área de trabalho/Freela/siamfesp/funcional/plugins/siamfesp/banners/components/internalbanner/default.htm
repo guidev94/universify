@@ -1,0 +1,3 @@
+{% if internalBannerData and internalBannerData.image_url %}
+    <div class="hero-slide active" style="background-image: url('{{ internalBannerData.image_url|e('html_attr') }}');">
+{% endif %}

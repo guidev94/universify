@@ -1,0 +1,174 @@
+<div id="lgpdCookieBanner" class="lgpd-cookie-banner" hidden aria-live="polite">
+    <div class="lgpd-cookie-card">
+        <div class="lgpd-cookie-main">
+            <span class="lgpd-cookie-icon"><i class="fas fa-shield-alt"></i></span>
+            <div>
+                <strong>Privacidade e cookies</strong>
+                <p>
+                    Utilizamos cookies necessários para o funcionamento do site e, com sua autorização, cookies de medição e marketing para melhorar sua experiência. Você pode aceitar todos ou personalizar suas preferências.
+                </p>
+                <a href="/politica-de-privacidade#cookies">Ver Política de Privacidade</a>
+            </div>
+        </div>
+
+        <div class="lgpd-cookie-actions">
+            <button type="button" class="lgpd-btn lgpd-btn-light" id="lgpdCustomizeBtn">Configurar</button>
+
+            <form class="lgpd-cookie-inline-form" data-request="lgpdCookie::onAccept" data-request-success="window.SiamfespLgpdCookie && window.SiamfespLgpdCookie.accepted(data);">
+                <input type="hidden" name="consent_type" value="necessary_only">
+                <input type="hidden" name="categories[]" value="necessary">
+                <button type="submit" class="lgpd-btn lgpd-btn-outline" data-attach-loading>Somente necessários</button>
+            </form>
+
+            <form class="lgpd-cookie-inline-form" data-request="lgpdCookie::onAccept" data-request-success="window.SiamfespLgpdCookie && window.SiamfespLgpdCookie.accepted(data);">
+                <input type="hidden" name="consent_type" value="accept_all">
+                <input type="hidden" name="categories[]" value="necessary">
+                <input type="hidden" name="categories[]" value="analytics">
+                <input type="hidden" name="categories[]" value="marketing">
+                <button type="submit" class="lgpd-btn lgpd-btn-primary" data-attach-loading>Aceitar todos</button>
+            </form>
+        </div>
+
+        <div id="lgpdCookiePanel" class="lgpd-cookie-panel" hidden>
+            <form data-request="lgpdCookie::onAccept" data-request-success="window.SiamfespLgpdCookie && window.SiamfespLgpdCookie.accepted(data);">
+                <input type="hidden" name="consent_type" value="custom">
+                <div class="lgpd-cookie-options">
+                    <label class="lgpd-cookie-option is-required">
+                        <span>
+                            <strong>Cookies necessários</strong>
+                            <small>Essenciais para segurança, navegação, sessão e funcionamento do site.</small>
+                        </span>
+                        <input type="hidden" name="categories[]" value="necessary">
+                        <input type="checkbox" checked disabled>
+                    </label>
+
+                    <label class="lgpd-cookie-option">
+                        <span>
+                            <strong>Medição e estatísticas</strong>
+                            <small>Ajudam a entender o uso do site e melhorar páginas e conteúdos.</small>
+                        </span>
+                        <input type="checkbox" name="categories[]" value="analytics">
+                    </label>
+
+                    <label class="lgpd-cookie-option">
+                        <span>
+                            <strong>Marketing e conteúdo externo</strong>
+                            <small>Permitem recursos de vídeos, redes sociais e conteúdos incorporados.</small>
+                        </span>
+                        <input type="checkbox" name="categories[]" value="marketing">
+                    </label>
+                </div>
+
+                <div class="lgpd-cookie-panel-actions">
+                    <button type="button" class="lgpd-btn lgpd-btn-light" id="lgpdClosePreferencesBtn">Voltar</button>
+                    <button type="submit" class="lgpd-btn lgpd-btn-primary" data-attach-loading>Salvar preferências</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var storageKey = 'siamfesp_lgpd_cookie_consent_v1';
+    var tokenKey = 'siamfesp_lgpd_cookie_token';
+
+    function getCookie(name) {
+        var matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+        return matches ? decodeURIComponent(matches[1]) : '';
+    }
+
+    function setCookie(name, value, days) {
+        var maxAge = days * 24 * 60 * 60;
+        document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+    }
+
+    function hideBanner() {
+        var banner = document.getElementById('lgpdCookieBanner');
+        if (banner) {
+            banner.setAttribute('hidden', 'hidden');
+            banner.classList.remove('is-visible');
+        }
+    }
+
+    function showBanner(openPreferences) {
+        var banner = document.getElementById('lgpdCookieBanner');
+        var panel = document.getElementById('lgpdCookiePanel');
+        if (!banner) return;
+
+        banner.removeAttribute('hidden');
+        window.setTimeout(function () {
+            banner.classList.add('is-visible');
+        }, 80);
+
+        if (panel) {
+            if (openPreferences) {
+                panel.removeAttribute('hidden');
+                panel.classList.add('is-open');
+            } else {
+                panel.setAttribute('hidden', 'hidden');
+                panel.classList.remove('is-open');
+            }
+        }
+    }
+
+    window.SiamfespLgpdCookie = {
+        accepted: function (data) {
+            data = data || {};
+            var token = data.token || getCookie(tokenKey) || String(Date.now());
+            var categories = data.categories || [];
+            try {
+                localStorage.setItem(storageKey, JSON.stringify({
+                    accepted: true,
+                    token: token,
+                    categories: categories,
+                    date: new Date().toISOString()
+                }));
+            } catch (e) {}
+
+            setCookie('siamfesp_lgpd_cookie_accepted', '1', 365);
+            setCookie(tokenKey, token, 365);
+            hideBanner();
+        },
+        openPreferences: function () {
+            showBanner(true);
+        },
+        reset: function () {
+            try { localStorage.removeItem(storageKey); } catch (e) {}
+            showBanner(true);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var banner = document.getElementById('lgpdCookieBanner');
+        var panel = document.getElementById('lgpdCookiePanel');
+        var customizeBtn = document.getElementById('lgpdCustomizeBtn');
+        var closePreferencesBtn = document.getElementById('lgpdClosePreferencesBtn');
+
+        if (!banner) return;
+
+        var hasAccepted = false;
+        try {
+            hasAccepted = !!localStorage.getItem(storageKey);
+        } catch (e) {}
+
+        if (!hasAccepted && getCookie('siamfesp_lgpd_cookie_accepted') !== '1') {
+            window.setTimeout(function () { showBanner(false); }, 700);
+        }
+
+        if (customizeBtn && panel) {
+            customizeBtn.addEventListener('click', function () {
+                panel.removeAttribute('hidden');
+                panel.classList.add('is-open');
+            });
+        }
+
+        if (closePreferencesBtn && panel) {
+            closePreferencesBtn.addEventListener('click', function () {
+                panel.setAttribute('hidden', 'hidden');
+                panel.classList.remove('is-open');
+            });
+        }
+    });
+})();
+</script>

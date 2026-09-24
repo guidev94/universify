@@ -1,0 +1,5 @@
+title: Reordenar Vídeos
+modelClass: Siamfesp\Videos\Models\Video
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

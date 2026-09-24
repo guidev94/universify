@@ -1,0 +1,30 @@
+columns:
+  id:
+    label: ID
+    width: 80px
+
+  title:
+    label: Título
+    searchable: true
+
+  theme[title]:
+    label: Tema
+
+  year_month:
+    label: Ano
+
+  pdf:
+    label: PDF
+
+  cover:
+    label: Capa
+
+  url:
+    label: URL
+
+  created_at:
+    label: Criado em
+    type: datetime
+
+  sort_order:
+    label: Ordem

@@ -1,0 +1,11 @@
+<?= Form::open(['class' => 'layout']) ?>
+
+    <div class="layout-row">
+        <?= $this->makePartial('form_toolbar') ?>
+    </div>
+
+    <div class="layout-row">
+        <?= $this->formRender() ?>
+    </div>
+
+<?= Form::close() ?>

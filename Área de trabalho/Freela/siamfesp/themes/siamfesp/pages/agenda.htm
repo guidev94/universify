@@ -1,0 +1,361 @@
+title = "Agenda"
+url = "/agenda/:slug?"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Agenda\Models\Event;
+
+function onStart()
+{
+    if (class_exists('Siamfesp\\Menu\\Models\\MenuItem') && \Siamfesp\Menu\Models\MenuItem::isBackendRequestPath(\Request::getRequestUri())) {
+        return null;
+    }
+
+    $this['agendaAvailable'] = class_exists(Event::class) && \Schema::hasTable('siamfesp_agenda_events');
+    $this['pageMode'] = 'list';
+    $this['agendaEvent'] = null;
+    $this['agendaEventos'] = collect();
+    $this['relatedAgendaEventos'] = collect();
+    $this['termoAgenda'] = trim((string) input('q'));
+
+    $formatDatePt = function ($date, $withYear = true) {
+        if (!$date) {
+            return '';
+        }
+
+        $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+        if (!$ts) {
+            return '';
+        }
+
+        $meses = [
+            1 => 'janeiro', 2 => 'fevereiro', 3 => 'março', 4 => 'abril',
+            5 => 'maio', 6 => 'junho', 7 => 'julho', 8 => 'agosto',
+            9 => 'setembro', 10 => 'outubro', 11 => 'novembro', 12 => 'dezembro'
+        ];
+
+        $texto = date('d', $ts) . ' de ' . $meses[(int) date('n', $ts)];
+        return $withYear ? ($texto . ' de ' . date('Y', $ts)) : $texto;
+    };
+
+    $formatMonthPt = function ($date) {
+        if (!$date) {
+            return '';
+        }
+
+        $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+        if (!$ts) {
+            return '';
+        }
+
+        $meses = [1=>'JAN',2=>'FEV',3=>'MAR',4=>'ABR',5=>'MAI',6=>'JUN',7=>'JUL',8=>'AGO',9=>'SET',10=>'OUT',11=>'NOV',12=>'DEZ'];
+        return $meses[(int) date('n', $ts)] ?? strtoupper(date('M', $ts));
+    };
+
+    $formatTimePt = function ($date) {
+        if (!$date) {
+            return '';
+        }
+
+        $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+        if (!$ts) {
+            return '';
+        }
+
+        return date('H\hi', $ts);
+    };
+
+    $formatDateTimePt = function ($start, $end = null) use ($formatDatePt, $formatTimePt) {
+        if (!$start) {
+            return '';
+        }
+
+        $startTs = is_numeric($start) ? (int) $start : strtotime((string) $start);
+        $endTs = $end ? (is_numeric($end) ? (int) $end : strtotime((string) $end)) : null;
+
+        if (!$startTs) {
+            return '';
+        }
+
+        $startDate = $formatDatePt($startTs);
+        $startTime = $formatTimePt($startTs);
+
+        if (!$endTs) {
+            return $startTime ? ($startDate . ' às ' . $startTime) : $startDate;
+        }
+
+        if (date('Y-m-d', $startTs) === date('Y-m-d', $endTs)) {
+            $endTime = $formatTimePt($endTs);
+            return $endTime ? ($startDate . ', das ' . $startTime . ' às ' . $endTime) : $startDate;
+        }
+
+        return $startDate . ' às ' . $startTime . ' até ' . $formatDatePt($endTs) . ' às ' . $formatTimePt($endTs);
+    };
+
+    $prepareEvent = function ($event) use ($formatDatePt, $formatMonthPt, $formatTimePt, $formatDateTimePt) {
+        if (!$event) {
+            return $event;
+        }
+
+        $event->day_pt = $event->event_date ? date('d', strtotime((string) $event->event_date)) : '--';
+        $event->month_pt = $formatMonthPt($event->event_date);
+        $event->date_pt = $formatDatePt($event->event_date);
+        $event->time_pt = $formatTimePt($event->event_date);
+        $event->datetime_pt = $formatDateTimePt($event->event_date, $event->end_date);
+
+        return $event;
+    };
+
+    if (!$this['agendaAvailable']) {
+        $this['internalBannerFallbackEyebrow'] = 'Agenda';
+        $this['internalBannerFallbackTitle'] = 'Agenda do Setor';
+        $this['internalBannerFallbackDescription'] = 'Cadastre eventos no módulo Agenda do painel.';
+        $this->page->title = 'Agenda';
+        $this->page->meta_title = 'Agenda do Setor';
+        return null;
+    }
+
+    $slug = trim((string) $this->param('slug'));
+
+    if ($slug !== '') {
+        $event = Event::query()
+            ->where('is_published', 1)
+            ->where('slug', $slug)
+            ->first();
+
+        if (!$event) {
+            return \Response::make('Evento da agenda não encontrado', 404);
+        }
+
+        $event = $prepareEvent($event);
+
+        $related = Event::query()
+            ->where('is_published', 1)
+            ->where('id', '<>', $event->id)
+            ->where(function ($q) {
+                $q->whereNull('event_date')->orWhere('event_date', '>=', date('Y-m-d 00:00:00'));
+            })
+            ->orderBy('event_date', 'asc')
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->take(4)
+            ->get();
+
+        $related->each(function ($item) use ($prepareEvent) {
+            $prepareEvent($item);
+        });
+
+        $this['pageMode'] = 'detail';
+        $this['agendaEvent'] = $event;
+        $this['relatedAgendaEventos'] = $related;
+        $this['internalBannerFallbackEyebrow'] = 'Agenda';
+        $this['internalBannerFallbackTitle'] = $event->title;
+        $this['internalBannerFallbackDescription'] = $event->datetime_pt ?: ($event->location ?: 'Agenda do Setor');
+
+        $this->page->title = $event->title;
+        $this->page->meta_title = $event->title;
+        $this->page->meta_description = trim((string) strip_tags((string) $event->description));
+        return null;
+    }
+
+    $query = Event::query()
+        ->where('is_published', 1);
+
+    if ($this['termoAgenda'] !== '') {
+        $like = '%' . $this['termoAgenda'] . '%';
+        $query->where(function ($q) use ($like) {
+            $q->where('title', 'like', $like)
+              ->orWhere('location', 'like', $like)
+              ->orWhere('description', 'like', $like);
+        });
+    }
+
+    $agendaEventos = $query
+        ->orderByRaw("CASE WHEN event_date IS NULL THEN 2 WHEN event_date >= ? THEN 0 ELSE 1 END asc", [date('Y-m-d 00:00:00')])
+        ->orderBy('event_date', 'asc')
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->paginate(9);
+
+    try {
+        $agendaEventos->appends(\Request::query());
+    } catch (\Throwable $e) {
+    }
+
+    $agendaEventos->each(function ($item) use ($prepareEvent) {
+        $prepareEvent($item);
+    });
+
+    $this['agendaEventos'] = $agendaEventos;
+    $this['internalBannerFallbackEyebrow'] = 'Agenda';
+    $this['internalBannerFallbackTitle'] = 'Agenda do Setor';
+    $this['internalBannerFallbackDescription'] = 'Eventos, reuniões, encontros e atividades do SIAMFESP.';
+
+    $this->page->title = 'Agenda';
+    $this->page->meta_title = 'Agenda do Setor';
+    $this->page->meta_description = 'Confira a agenda de eventos e atividades do SIAMFESP.';
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ pageMode == 'detail' and agendaEvent ? agendaEvent.title : 'Agenda do Setor' }}</strong></h1>
+            <div class="divider"></div>
+            {% if pageMode == 'detail' and agendaEvent %}
+                <p>{{ agendaEvent.datetime_pt ?: 'AGENDA' }}</p>
+            {% else %}
+                <p>Eventos, reuniões, encontros e atividades do SIAMFESP.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if pageMode == 'detail' and agendaEvent %}
+<section class="agenda-detail-section">
+    <div class="container">
+        <div class="agenda-detail-layout">
+            <article class="agenda-detail-card">
+                {% if agendaEvent.image_url %}
+                    <div class="agenda-detail-image">
+                        <img src="{{ agendaEvent.image_url }}" alt="{{ agendaEvent.title }}">
+                    </div>
+                {% endif %}
+
+                <div class="agenda-detail-content">
+                    <div class="agenda-detail-topline">
+                        <a href="/agenda" class="agenda-back-link"><i class="fas fa-arrow-left"></i> Voltar para agenda</a>
+                    </div>
+
+                    <h2>{{ agendaEvent.title }}</h2>
+
+                    <div class="agenda-detail-meta-grid">
+                        <div class="agenda-detail-meta-item">
+                            <span class="agenda-detail-meta-icon"><i class="far fa-calendar-alt"></i></span>
+                            <div>
+                                <strong>Data e horário</strong>
+                                <p>{{ agendaEvent.datetime_pt ?: 'Data a confirmar' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="agenda-detail-meta-item">
+                            <span class="agenda-detail-meta-icon"><i class="fas fa-map-marker-alt"></i></span>
+                            <div>
+                                <strong>Local</strong>
+                                <p>{{ agendaEvent.location ?: 'SIAMFESP' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if agendaEvent.description %}
+                        <div class="agenda-detail-text">
+                            {{ agendaEvent.description|raw }}
+                        </div>
+                    {% else %}
+                        <div class="agenda-detail-text">
+                            <p>Mais informações sobre este evento serão publicadas em breve.</p>
+                        </div>
+                    {% endif %}
+
+                    {% if agendaEvent.link %}
+                        <a class="agenda-primary-btn" href="{{ agendaEvent.link }}" target="_blank" rel="noopener noreferrer">
+                            Acessar inscrição / saiba mais <i class="fas fa-arrow-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </article>
+
+            <aside class="agenda-sidebar-card">
+                <h3>Próximos eventos</h3>
+                {% if relatedAgendaEventos|length %}
+                    <div class="agenda-sidebar-list">
+                        {% for item in relatedAgendaEventos %}
+                            <a href="{{ item.frontend_url }}" class="agenda-sidebar-item">
+                                <span class="mini-date"><span class="d">{{ item.day_pt }}</span><span class="m">{{ item.month_pt }}</span></span>
+                                <span class="agenda-sidebar-info">
+                                    <strong>{{ item.title }}</strong>
+                                    <small>{{ item.location ?: 'SIAMFESP' }}</small>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="agenda-sidebar-empty">Nenhum outro evento publicado no momento.</p>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</section>
+{% else %}
+<section class="agenda-page-section">
+    <div class="container">
+        <div class="events-section-header agenda-page-header">
+            <h2 class="section-title">Agenda do Setor</h2>
+            <p class="section-subtitle">Acompanhe eventos, encontros e atividades cadastradas no painel.</p>
+        </div>
+
+        <form class="agenda-search-form" method="get" action="/agenda">
+            <input type="text" name="q" value="{{ termoAgenda }}" placeholder="Buscar evento por título, local ou descrição">
+            <button type="submit"><i class="fas fa-search"></i> Buscar</button>
+            {% if termoAgenda %}
+                <a href="/agenda" class="agenda-clear-search">Limpar</a>
+            {% endif %}
+        </form>
+
+        {% if agendaAvailable %}
+            {% if agendaEventos|length %}
+                <div class="agenda-page-grid">
+                    {% for item in agendaEventos %}
+                        <a class="agenda-page-card" href="{{ item.frontend_url }}">
+                            <div class="agenda-page-card-media{% if not item.image_url %} is-placeholder{% endif %}">
+                                {% if item.image_url %}
+                                    <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="agenda-page-date-big">
+                                        <span>{{ item.day_pt }}</span>
+                                        <small>{{ item.month_pt }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="agenda-page-card-body">
+                                <div class="agenda-page-meta">
+                                    <span><i class="far fa-calendar-alt"></i> {{ item.datetime_pt ?: 'Data a confirmar' }}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ item.location ?: 'SIAMFESP' }}</span>
+                                </div>
+                                <h3>{{ item.title }}</h3>
+                                {% if item.description %}
+                                    <p>{{ item.description|striptags|slice(0, 150) }}{% if item.description|striptags|length > 150 %}...{% endif %}</p>
+                                {% endif %}
+                                <span class="agenda-card-link">Ver detalhes <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                {% if agendaEventos.lastPage and agendaEventos.lastPage > 1 %}
+                    <div class="pagination-wrap">{{ agendaEventos.render|raw }}</div>
+                {% endif %}
+            {% else %}
+                <div class="agenda-empty-state">
+                    <h3>Nenhum evento encontrado</h3>
+                    {% if termoAgenda %}
+                        <p>Não encontramos eventos para a busca informada.</p>
+                        <a href="/agenda" class="agenda-primary-btn">Ver todos os eventos</a>
+                    {% else %}
+                        <p>Cadastre eventos no módulo Agenda do painel para exibir nesta página.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="agenda-empty-state">
+                <h3>Módulo Agenda indisponível</h3>
+                <p>A tabela <strong>siamfesp_agenda_events</strong> ainda não está disponível neste ambiente.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

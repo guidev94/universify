@@ -1,0 +1,12 @@
+name: Consentimento LGPD
+modelClass: Siamfesp\Lgpd\Models\Consent
+form: $/siamfesp/lgpd/models/consent/fields.yaml
+toolbar:
+  buttons: form_toolbar
+defaultRedirect: siamfesp/lgpd/consents
+create:
+  redirect: 'siamfesp/lgpd/consents/update/:id'
+  redirectClose: siamfesp/lgpd/consents
+update:
+  redirect: siamfesp/lgpd/consents
+  redirectClose: siamfesp/lgpd/consents

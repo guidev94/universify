@@ -1,0 +1,84 @@
+fields:
+  _section_identification:
+    label: Identificação do banner
+    type: section
+    comment: Defina o nome administrativo e selecione em qual item do menu este banner será usado.
+
+  name:
+    label: Nome administrativo
+    type: text
+    span: left
+    required: true
+    placeholder: 'Exemplo: Banner interno Associados'
+    comment: Usado somente no painel para identificar o cadastro.
+
+  menu_item_id:
+    label: Categoria / item do menu
+    type: dropdown
+    span: right
+    emptyOption: Banner interno padrão
+    comment: Selecione o item PAI, por exemplo Associados, para que os submenus usem a mesma imagem.
+
+  _section_image:
+    label: Imagem do banner
+    type: section
+    comment: Escolha uma imagem horizontal para o topo das páginas internas.
+
+  image:
+    label: Imagem do banner interno
+    type: mediafinder
+    required: true
+    mode: image
+    span: full
+    comment: Recomendado usar imagem horizontal grande, por exemplo 1920x420px ou maior.
+
+  show_overlay:
+    label: Aplicar escurecimento na imagem
+    type: switch
+    default: true
+    span: left
+    comment: Mantém a leitura do texto sobre a imagem.
+
+  _section_content:
+    label: Textos do banner
+    type: section
+    comment: Campos opcionais. Se ficarem em branco, a página usa o título e a descrição padrão.
+
+  eyebrow:
+    label: Texto pequeno acima do título
+    type: text
+    span: left
+    placeholder: 'Exemplo: Associados'
+    comment: Opcional.
+
+  title:
+    label: Título do banner
+    type: text
+    span: right
+    placeholder: 'Exemplo: Artefatos Metálicos'
+    comment: Opcional. Em branco usa o título da página/categoria atual.
+
+  description:
+    label: Descrição
+    type: textarea
+    size: tiny
+    span: full
+    comment: Opcional. Em branco usa a descrição configurada na página.
+
+  _section_publish:
+    label: Publicação e ordenação
+    type: section
+    comment: Controle se o banner está ativo e a prioridade quando houver mais de um para o mesmo item.
+
+  is_published:
+    label: Status / Publicado
+    type: switch
+    default: true
+    span: left
+
+  sort_order:
+    label: Ordem
+    type: number
+    default: 0
+    span: right
+    comment: O menor número aparece primeiro.

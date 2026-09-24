@@ -1,0 +1,3 @@
+title: Reordenar Artigos
+modelClass: Siamfesp\Artigos\Models\Article
+nameFrom: title

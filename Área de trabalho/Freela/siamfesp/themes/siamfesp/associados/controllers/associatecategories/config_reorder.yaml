@@ -1,0 +1,3 @@
+title: Reordenar Categorias
+modelClass: Siamfesp\Associados\Models\AssociateCategory
+nameFrom: name

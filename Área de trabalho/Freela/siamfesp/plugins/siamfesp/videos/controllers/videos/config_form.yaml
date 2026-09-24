@@ -1,0 +1,12 @@
+name: Vídeo
+modelClass: Siamfesp\Videos\Models\Video
+form: $/siamfesp/videos/models/video/fields.yaml
+toolbar:
+  buttons: form_toolbar
+defaultRedirect: siamfesp/videos/videos
+create:
+  redirect: 'siamfesp/videos/videos/update/:id'
+  redirectClose: siamfesp/videos/videos
+update:
+  redirect: siamfesp/videos/videos
+  redirectClose: siamfesp/videos/videos

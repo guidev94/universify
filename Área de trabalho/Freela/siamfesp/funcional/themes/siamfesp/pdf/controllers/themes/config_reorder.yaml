@@ -1,0 +1,3 @@
+title: Reordenar Temas
+modelClass: Siamfesp\Pdf\Models\Theme
+nameFrom: title

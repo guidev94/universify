@@ -1,0 +1,24 @@
+<div class="form-buttons">
+    <button type="submit" data-request="onSave" data-hotkey="ctrl+s, cmd+s" class="btn btn-primary">
+        <i class="icon-check"></i> Salvar
+    </button>
+
+    <?php if (!$this->action == 'create'): ?>
+    <?php endif ?>
+
+    <?php if (isset($this->vars['formModel']) && $this->vars['formModel'] && $this->vars['formModel']->exists): ?>
+        <button
+            type="button"
+            class="btn btn-danger oc-icon-trash-o"
+            data-request="onDelete"
+            data-request-data="checked[]: '<?= $this->vars['formModel']->id ?>'"
+            data-request-confirm="Tem certeza que deseja excluir este item de menu?"
+            data-hotkey="cmd+backspace, ctrl+backspace">
+            Excluir
+        </button>
+    <?php endif; ?>
+
+    <button type="button" class="btn btn-default" onclick="window.location='<?= Backend::url('siamfesp/menu/menuitems') ?>'">
+        Voltar
+    </button>
+</div>

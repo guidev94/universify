@@ -1,0 +1,15 @@
+name: Documento
+modelClass: Siamfesp\Pdf\Models\Document
+form: $/siamfesp/pdf/models/document/fields.yaml
+toolbar:
+  buttons: form_toolbar
+  
+defaultRedirect: siamfesp/pdf/documents
+
+create:
+  redirect: 'siamfesp/pdf/documents/update/:id'
+  redirectClose: siamfesp/pdf/documents
+
+update:
+  redirect: siamfesp/pdf/documents
+  redirectClose: siamfesp/pdf/documents

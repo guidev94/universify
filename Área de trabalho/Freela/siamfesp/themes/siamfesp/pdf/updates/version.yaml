@@ -1,0 +1,12 @@
+1.0.0:
+    - Primeira versão do plugin (Temas + Documentos)
+    - create_themes_table.php
+    - create_documents_table.php
+
+1.0.1:
+    - Adicionar colunas pdf e cover (string / Media Library)
+    - add_pdf_cover_columns.php
+
+1.0.2:
+    - Adiciona ordenação manual para temas e documentos
+    - add_sort_order_columns.php

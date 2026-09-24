@@ -1,0 +1,15 @@
+list: $/siamfesp/banners/models/banner/columns.yaml
+modelClass: Siamfesp\Banners\Models\Banner
+title: Banners
+recordUrl: siamfesp/banners/banners/update/:id
+noRecordsMessage: Nenhum banner encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+defaultSort:
+  column: sort_order
+  direction: asc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar banner...

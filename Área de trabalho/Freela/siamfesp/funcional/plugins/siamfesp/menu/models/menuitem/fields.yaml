@@ -1,0 +1,123 @@
+fields:
+    menu:
+        label: Menu
+        type: relation
+        nameFrom: title
+        span: left
+        required: true
+
+    parent:
+        label: Item pai
+        type: relation
+        nameFrom: title
+        emptyOption: Sem pai
+        span: right
+
+    title:
+        label: Título
+        type: text
+        span: left
+        required: true
+
+    slug:
+        label: Slug
+        type: text
+        span: right
+        preset:
+            field: title
+            type: slug
+
+    type:
+        label: Tipo
+        type: dropdown
+        span: left
+        required: true
+
+    is_published:
+        label: Publicado
+        type: switch
+        span: right
+        default: true
+
+    page_name:
+        label: Página CMS
+        type: dropdown
+        span: left
+        comment: "Usado para tipo Página e também como rota de apoio para links de plugins."
+
+    page_param:
+        label: Parâmetro da página
+        type: text
+        span: right
+        default: slug
+
+    article:
+        label: Artigo
+        type: relation
+        nameFrom: title
+        span: left
+        emptyOption: Selecione um artigo
+        comment: "Usado quando o tipo for Artigo."
+        trigger:
+            action: show
+            field: type
+            condition: value[article]
+
+    category:
+        label: Categoria
+        type: relation
+        nameFrom: title
+        span: right
+        emptyOption: Selecione uma categoria
+        comment: "Usado quando o tipo for Categoria."
+        trigger:
+            action: show
+            field: type
+            condition: value[category]
+
+    dynamic_source:
+        label: Origem do plugin
+        type: dropdown
+        span: left
+        placeholder: Selecione uma origem
+        comment: "Use no tipo Associados / Outros plugins. Para novas integrações, basta cadastrar em plugins/siamfesp/menu/config/linkables.php"
+        dependsOn:
+            - type
+        trigger:
+            action: show
+            field: type
+            condition: value[plugin]
+
+    dynamic_record_id:
+        label: Registro do plugin
+        type: dropdown
+        span: right
+        placeholder: Selecione um registro
+        comment: "Lista os registros publicados da origem escolhida."
+        dependsOn:
+            - type
+            - dynamic_source
+        trigger:
+            action: show
+            field: type
+            condition: value[plugin]
+
+    url:
+        label: URL externa
+        type: text
+        span: left
+        comment: "Usado quando o tipo for URL externa."
+        trigger:
+            action: show
+            field: type
+            condition: value[url]
+
+    css_class:
+        label: Classe CSS
+        type: text
+        span: right
+
+    target_blank:
+        label: Abrir em nova aba
+        type: switch
+        span: left

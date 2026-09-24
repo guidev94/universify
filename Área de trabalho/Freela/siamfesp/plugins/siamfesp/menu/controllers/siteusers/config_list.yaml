@@ -1,0 +1,11 @@
+title: Logins do Site
+modelClass: Siamfesp\Menu\Models\SiteUser
+list: $/siamfesp/menu/models/siteuser/columns.yaml
+recordUrl: siamfesp/menu/siteusers/update/:id
+noRecordsMessage: Nenhum login cadastrado ainda
+showSetup: false
+showCheckboxes: true
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: Buscar usuário

@@ -1,0 +1,8 @@
+<div data-control="toolbar" style="margin-bottom: 20px;">
+    <button type="submit" data-request="onSave" data-request-data="close:0" data-hotkey="ctrl+s, cmd+s" data-load-indicator="Salvando evento..." class="btn btn-primary oc-icon-check">Salvar</button>
+    <button type="submit" data-request="onSave" data-request-data="close:1" data-hotkey="ctrl+enter, cmd+enter" data-load-indicator="Salvando evento..." class="btn btn-default oc-icon-save">Salvar &amp; Fechar</button>
+    <a href="<?= Backend::url('siamfesp/agenda/events') ?>" class="btn btn-default oc-icon-times">Cancelar</a>
+    <?php if ($this->action == 'update'): ?>
+        <button type="button" data-request="onDelete" data-request-confirm="Tem certeza que deseja excluir este evento?" data-load-indicator="Excluindo evento..." class="btn btn-danger oc-icon-trash-o">Excluir</button>
+    <?php endif ?>
+</div>

@@ -1,0 +1,14 @@
+list: $/siamfesp/pdf/models/document/columns.yaml
+modelClass: Siamfesp\Pdf\Models\Document
+title: Documentos
+recordUrl: 'siamfesp/pdf/documents/update/:id'
+noRecordsMessage: Nenhum documento encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar documento...
+
+filter: config_filter.yaml

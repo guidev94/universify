@@ -1,0 +1,8 @@
+1.0.0:
+    - Cadastro de categorias e artigos
+    - create_article_categories_table.php
+    - create_articles_table.php
+
+1.0.1:
+    - Adiciona ordenação manual para categorias e artigos
+    - add_sort_order_columns.php

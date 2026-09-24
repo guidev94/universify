@@ -1,0 +1,5 @@
+title: Reordenar Menus
+modelClass: Siamfesp\Menu\Models\Menu
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

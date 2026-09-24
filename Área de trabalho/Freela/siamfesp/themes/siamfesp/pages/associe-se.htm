@@ -1,0 +1,677 @@
+title = "Associe-se"
+url = "/associe-se"
+layout = "default"
+is_hidden = 0
+meta_title = "Associe-se ao SIAMFESP"
+meta_description = "Faça parte do SIAMFESP e tenha acesso a representatividade, assessoria, benefícios e informações qualificadas para sua indústria."
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Associe-se';
+    $this['internalBannerFallbackTitle'] = 'Associe-se ao SIAMFESP';
+    $this['internalBannerFallbackDescription'] = 'Fortaleça sua empresa com representatividade, benefícios e informações estratégicas para o setor.';
+
+    $this['associeSeSuccess'] = null;
+    $this['associeSeError'] = null;
+    $this['associeSeOld'] = [
+        'nome' => '',
+        'empresa' => '',
+        'email' => '',
+        'telefone' => '',
+        'cidade' => '',
+        'website' => '',
+    ];
+
+    if (\Request::isMethod('post')) {
+        $this->handleAssocieSeSubmit();
+    }
+}
+
+function handleAssocieSeSubmit()
+{
+    $nome = trim((string) \Request::input('nome'));
+    $empresa = trim((string) \Request::input('empresa'));
+    $email = trim((string) \Request::input('email'));
+    $telefone = trim((string) \Request::input('telefone'));
+    $cidade = trim((string) \Request::input('cidade'));
+    $website = trim((string) \Request::input('website'));
+    $honeypot = trim((string) \Request::input('site_url'));
+
+    $this['associeSeOld'] = [
+        'nome' => $nome,
+        'empresa' => $empresa,
+        'email' => $email,
+        'telefone' => $telefone,
+        'cidade' => $cidade,
+        'website' => $website,
+    ];
+
+    // Campo invisível para reduzir spam. Se preenchido, não envia e não mostra erro ao visitante.
+    if ($honeypot !== '') {
+        $this['associeSeSuccess'] = 'Mensagem enviada com sucesso. Em breve retornaremos o contato.';
+        $this['associeSeOld'] = [
+            'nome' => '', 'empresa' => '', 'email' => '', 'telefone' => '', 'cidade' => '', 'website' => ''
+        ];
+        return null;
+    }
+
+    $errors = [];
+
+    if ($nome === '') {
+        $errors[] = 'Informe o nome completo.';
+    }
+
+    if ($empresa === '') {
+        $errors[] = 'Informe o nome da empresa.';
+    }
+
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Informe um e-mail válido.';
+    }
+
+    if ($telefone === '') {
+        $errors[] = 'Informe o telefone.';
+    }
+
+    if ($cidade === '') {
+        $errors[] = 'Informe a cidade.';
+    }
+
+    if ($errors) {
+        $this['associeSeError'] = implode(' ', $errors);
+        return null;
+    }
+
+    $body = implode("\n", [
+        'Nova solicitação de associação pelo site SIAMFESP',
+        '',
+        'Nome: ' . $nome,
+        'Empresa: ' . $empresa,
+        'E-mail: ' . $email,
+        'Telefone: ' . $telefone,
+        'Cidade: ' . $cidade,
+        'Website: ' . ($website !== '' ? $website : 'Não informado'),
+        'Tipo: associar-se',
+        'Destinatário: comunicacao@siamfesp.org.br',
+        '',
+        'Mensagem enviada automaticamente pelo formulário da página Associe-se.'
+    ]);
+
+    try {
+        \Mail::raw($body, function ($message) use ($nome, $email) {
+            $message->to('comunicacao@siamfesp.org.br', 'Comunicação SIAMFESP');
+            $message->subject('Nova solicitação de associação pelo site');
+
+            if ($email !== '') {
+                $message->replyTo($email, $nome ?: null);
+            }
+        });
+
+        $this['associeSeSuccess'] = 'Mensagem enviada com sucesso. Em breve retornaremos o contato.';
+        $this['associeSeOld'] = [
+            'nome' => '', 'empresa' => '', 'email' => '', 'telefone' => '', 'cidade' => '', 'website' => ''
+        ];
+    } catch (\Throwable $e) {
+        $this['associeSeError'] = 'Não foi possível enviar sua solicitação no momento. Tente novamente ou entre em contato pelo telefone (11) 2291-5455.';
+    }
+
+    return null;
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}
+                <p>{{ internalBannerData.description|striptags }}</p>
+            {% elseif internalBannerFallbackDescription %}
+                <p>{{ internalBannerFallbackDescription|striptags }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="join-page">
+    <div class="join-shell">
+        <div class="join-intro-grid">
+            <article class="join-intro-card">
+                <span class="join-kicker">Faça parte</span>
+                <h2>Associe sua empresa ao SIAMFESP</h2>
+                <p>
+                    Associando-se ao SIAMFESP, você fortalece a entidade que representa e atua na defesa dos interesses das indústrias de artefatos de metais não ferrosos.
+                </p>
+                <p>
+                    Somos interlocutores junto às entidades, Governo do Estado de São Paulo, imprensa, pesquisadores e formadores de opinião, divulgando informações exclusivas e qualificadas para o setor.
+                </p>
+                <div class="join-contact-strip">
+                    <span><i class="fas fa-phone"></i> (11) 2291-5455</span>
+                    <span><i class="fab fa-whatsapp"></i> (11) 98577-0180</span>
+                </div>
+            </article>
+
+            <aside class="join-highlight-card">
+                <div class="join-highlight-icon"><i class="fas fa-handshake"></i></div>
+                <h3>Juntos somos mais fortes!</h3>
+                <p>Empresas associadas têm acesso a benefícios exclusivos, representatividade institucional e apoio técnico para crescer com segurança.</p>
+                <a href="#form-associe-se">Preencher formulário <i class="fas fa-arrow-down"></i></a>
+            </aside>
+        </div>
+
+        <div class="join-benefits-head">
+            <span class="join-kicker">Benefícios</span>
+            <h2>O que sua empresa ganha ao se associar</h2>
+            <p>Conheça alguns dos serviços e diferenciais disponíveis para empresas associadas ao SIAMFESP.</p>
+        </div>
+
+        <div class="join-benefits-grid">
+            <div class="join-benefit"><i class="fas fa-scale-balanced"></i><span>Assessoria jurídica nas áreas sindical, trabalhista e tributária</span></div>
+            <div class="join-benefit"><i class="fas fa-lock"></i><span>Acesso à área restrita do site do SIAMFESP</span></div>
+            <div class="join-benefit"><i class="fas fa-calendar-check"></i><span>Condições especiais para feiras, eventos, cursos, seminários e palestras</span></div>
+            <div class="join-benefit"><i class="fas fa-file-signature"></i><span>Convenções Coletivas de Trabalho e informações setoriais</span></div>
+            <div class="join-benefit"><i class="fas fa-hand-holding-dollar"></i><span>Convênios Serasa, ABNT e outros benefícios exclusivos</span></div>
+            <div class="join-benefit"><i class="fas fa-bullhorn"></i><span>Divulgação da empresa no site do SIAMFESP</span></div>
+            <div class="join-benefit"><i class="fas fa-users-gear"></i><span>Grupos de Trabalho de RH, Tributário e Comissões de Estudo</span></div>
+            <div class="join-benefit"><i class="fas fa-chart-line"></i><span>Informações, pesquisas, estatísticas e orientação técnica</span></div>
+            <div class="join-benefit"><i class="fas fa-industry"></i><span>Programas da qualidade, melhoria tecnológica e participação em reuniões setoriais</span></div>
+        </div>
+
+        <div class="join-sectors-card">
+            <div>
+                <span class="join-kicker">Quem pode participar</span>
+                <h2>Indústrias fabricantes de artefatos de metais não ferrosos</h2>
+                <p>Representamos os setores de Artefatos Metálicos, Esquadrias, Fechaduras, Metais Sanitários e Utilidades Domésticas.</p>
+            </div>
+            <div class="join-sectors-tags">
+                <span>Artefatos Metálicos</span>
+                <span>Esquadrias</span>
+                <span>Fechaduras</span>
+                <span>Metais Sanitários</span>
+                <span>Utilidades Domésticas</span>
+            </div>
+        </div>
+
+        <div class="join-form-grid" id="form-associe-se">
+            <div class="join-form-copy">
+                <span class="join-kicker">Solicite contato</span>
+                <h2>Preencha o formulário</h2>
+                <p>Após o envio, a equipe do SIAMFESP retornará o contato para orientar sua empresa sobre o processo de associação.</p>
+                <p>Caso tenha dúvidas sobre o preenchimento ou deseje mais informações, entre em contato pelo telefone <strong>(11) 2291-5455</strong>.</p>
+            </div>
+
+            <form class="join-form" action="/associe-se#form-associe-se" method="post" novalidate>
+                <input type="hidden" name="tipo" value="associar-se">
+                <div class="join-hp" aria-hidden="true">
+                    <label>Não preencher<input type="text" name="site_url" tabindex="-1" autocomplete="off"></label>
+                </div>
+
+                <h3>Associar-se</h3>
+
+                {% if associeSeSuccess %}
+                    <div class="join-alert join-alert-success">{{ associeSeSuccess }}</div>
+                {% endif %}
+
+                {% if associeSeError %}
+                    <div class="join-alert join-alert-error">{{ associeSeError }}</div>
+                {% endif %}
+
+                <label for="associeNome">Nome completo *</label>
+                <input id="associeNome" name="nome" type="text" value="{{ associeSeOld.nome|default('') }}" placeholder="Nome completo" required>
+
+                <label for="associeEmpresa">Empresa *</label>
+                <input id="associeEmpresa" name="empresa" type="text" value="{{ associeSeOld.empresa|default('') }}" placeholder="Empresa" required>
+
+                <div class="join-form-two-cols">
+                    <div>
+                        <label for="associeEmail">E-mail *</label>
+                        <input id="associeEmail" name="email" type="email" value="{{ associeSeOld.email|default('') }}" placeholder="email@empresa.com.br" required>
+                    </div>
+                    <div>
+                        <label for="associeTelefone">Telefone *</label>
+                        <input id="associeTelefone" name="telefone" type="tel" value="{{ associeSeOld.telefone|default('') }}" placeholder="(11) 0000-0000" required>
+                    </div>
+                </div>
+
+                <div class="join-form-two-cols">
+                    <div>
+                        <label for="associeCidade">Cidade *</label>
+                        <input id="associeCidade" name="cidade" type="text" value="{{ associeSeOld.cidade|default('') }}" placeholder="Cidade" required>
+                    </div>
+                    <div>
+                        <label for="associeWebsite">Website</label>
+                        <input id="associeWebsite" name="website" type="text" value="{{ associeSeOld.website|default('') }}" placeholder="www.empresa.com.br">
+                    </div>
+                </div>
+
+                <button class="join-submit" type="submit">Enviar solicitação <i class="fas fa-arrow-right"></i></button>
+                <p class="join-form-note">Os campos marcados com * são obrigatórios.</p>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% if associeSeSuccess %}
+<div class="join-modal is-open" id="joinSuccessModal" role="dialog" aria-modal="true" aria-labelledby="joinSuccessTitle">
+    <div class="join-modal-overlay" data-close-join-modal></div>
+    <div class="join-modal-card">
+        <button class="join-modal-close" type="button" data-close-join-modal aria-label="Fechar">×</button>
+        <div class="join-modal-icon"><i class="fas fa-check"></i></div>
+        <h3 id="joinSuccessTitle">Mensagem enviada com sucesso!</h3>
+        <p>Olá, agradecemos seu interesse em associar-se ao SIAMFESP.</p>
+        <p>Em breve retornaremos o contato.</p>
+        <strong>Diretoria e Equipe SIAMFESP</strong>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.join-page {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(215, 25, 32, .10), transparent 34rem),
+        linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+    padding: 64px 16px 86px;
+}
+.join-shell {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+.join-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #d71920;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .78rem;
+}
+.join-kicker::before {
+    content: "";
+    width: 38px;
+    height: 3px;
+    border-radius: 999px;
+    background: #d71920;
+}
+.join-intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+    gap: 26px;
+    align-items: stretch;
+}
+.join-intro-card,
+.join-highlight-card,
+.join-sectors-card,
+.join-form,
+.join-form-copy {
+    background: #fff;
+    border: 1px solid rgba(36, 48, 67, .10);
+    border-radius: 26px;
+    box-shadow: 0 20px 55px rgba(23, 35, 56, .08);
+}
+.join-intro-card {
+    padding: 34px;
+}
+.join-intro-card h2,
+.join-benefits-head h2,
+.join-sectors-card h2,
+.join-form-copy h2 {
+    margin: 10px 0 14px;
+    color: #243043;
+    font-family: Inter, Roboto, Arial, sans-serif;
+    font-weight: 900;
+    letter-spacing: -.045em;
+    line-height: 1.04;
+}
+.join-intro-card h2 {
+    font-size: clamp(2rem, 4vw, 3.35rem);
+}
+.join-intro-card p,
+.join-benefits-head p,
+.join-sectors-card p,
+.join-form-copy p {
+    color: #607086;
+    line-height: 1.72;
+    font-size: 1.03rem;
+}
+.join-contact-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+.join-contact-strip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 15px;
+    border-radius: 999px;
+    background: #f6f8fb;
+    color: #243043;
+    font-weight: 800;
+}
+.join-contact-strip i { color: #d71920; }
+.join-highlight-card {
+    position: relative;
+    overflow: hidden;
+    padding: 34px;
+    color: #fff;
+    background:
+        linear-gradient(145deg, rgba(13, 27, 48, .94), rgba(215, 25, 32, .88)),
+        url('https://www.siamfesp.org.br/assets/images/dt-associe02.jpg') center/cover no-repeat;
+    isolation: isolate;
+}
+.join-highlight-card::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 5px;
+    background: linear-gradient(90deg, #d71920, #ffb000);
+}
+.join-highlight-icon {
+    width: 74px;
+    height: 74px;
+    display: grid;
+    place-items: center;
+    border-radius: 24px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(7px);
+    font-size: 2rem;
+    margin-bottom: 22px;
+}
+.join-highlight-card h3 {
+    margin: 0 0 14px;
+    font-size: 2rem;
+    line-height: 1.05;
+    color: #fff;
+}
+.join-highlight-card p {
+    color: rgba(255,255,255,.86);
+    line-height: 1.65;
+}
+.join-highlight-card a {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 16px;
+    color: #fff;
+    font-weight: 900;
+    text-decoration: none;
+}
+.join-benefits-head {
+    margin: 54px 0 26px;
+    max-width: 850px;
+}
+.join-benefits-head h2,
+.join-sectors-card h2,
+.join-form-copy h2 {
+    font-size: clamp(1.85rem, 3.2vw, 2.75rem);
+}
+.join-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+.join-benefit {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid rgba(36, 48, 67, .10);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 14px 38px rgba(23, 35, 56, .07);
+    min-height: 118px;
+}
+.join-benefit i {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: rgba(215, 25, 32, .10);
+    color: #d71920;
+    font-size: 1.15rem;
+}
+.join-benefit span {
+    color: #243043;
+    font-weight: 800;
+    line-height: 1.45;
+}
+.join-sectors-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+    align-items: center;
+    padding: 30px;
+    margin: 34px 0;
+}
+.join-sectors-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+}
+.join-sectors-tags span {
+    padding: 12px 16px;
+    border-radius: 999px;
+    color: #243043;
+    background: #f6f8fb;
+    border: 1px solid rgba(36, 48, 67, .10);
+    font-weight: 900;
+}
+.join-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .78fr) minmax(420px, 1fr);
+    gap: 26px;
+    align-items: start;
+    scroll-margin-top: 120px;
+}
+.join-form-copy,
+.join-form {
+    padding: 30px;
+}
+.join-form h3 {
+    margin: 0 0 22px;
+    color: #243043;
+    font-size: 1.75rem;
+    font-weight: 900;
+}
+.join-form label {
+    display: block;
+    color: #243043;
+    font-weight: 900;
+    font-size: .92rem;
+    margin: 0 0 8px;
+}
+.join-form input {
+    width: 100%;
+    height: 52px;
+    border: 1px solid rgba(36, 48, 67, .14);
+    border-radius: 15px;
+    padding: 0 16px;
+    outline: none;
+    color: #243043;
+    background: #fff;
+    font-size: 1rem;
+    transition: border-color .2s ease, box-shadow .2s ease;
+    margin-bottom: 17px;
+}
+.join-form input:focus {
+    border-color: rgba(215, 25, 32, .55);
+    box-shadow: 0 0 0 4px rgba(215, 25, 32, .10);
+}
+.join-form-two-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.join-submit {
+    width: 100%;
+    min-height: 54px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #d71920, #f04a50);
+    color: #fff;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 18px 38px rgba(215, 25, 32, .22);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.join-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 46px rgba(215, 25, 32, .30);
+}
+.join-form-note {
+    margin: 14px 0 0;
+    color: #607086;
+    font-size: .9rem;
+}
+.join-alert {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+.join-alert-success {
+    background: rgba(23, 155, 87, .10);
+    color: #167247;
+    border: 1px solid rgba(23, 155, 87, .18);
+}
+.join-alert-error {
+    background: rgba(215, 25, 32, .10);
+    color: #b70f16;
+    border: 1px solid rgba(215, 25, 32, .18);
+}
+.join-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+.join-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+.join-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 16, 30, .62);
+    backdrop-filter: blur(4px);
+}
+.join-modal-card {
+    position: relative;
+    width: min(440px, 100%);
+    background: #fff;
+    border-radius: 26px;
+    padding: 34px;
+    box-shadow: 0 30px 90px rgba(0,0,0,.28);
+    text-align: center;
+}
+.join-modal-close {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    border: 0;
+    background: transparent;
+    font-size: 2rem;
+    line-height: 1;
+    color: #607086;
+    cursor: pointer;
+}
+.join-modal-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(23, 155, 87, .12);
+    color: #179b57;
+    font-size: 1.9rem;
+}
+.join-modal-card h3 {
+    margin: 0 0 12px;
+    color: #243043;
+    font-weight: 900;
+    font-size: 1.55rem;
+}
+.join-modal-card p {
+    margin: 0 0 8px;
+    color: #607086;
+    line-height: 1.55;
+}
+.join-modal-card strong { color: #243043; }
+body.join-modal-open { overflow: hidden; }
+@media (max-width: 980px) {
+    .join-intro-grid,
+    .join-sectors-card,
+    .join-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .join-benefits-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .join-sectors-tags { justify-content: flex-start; }
+}
+@media (max-width: 680px) {
+    .join-page { padding: 42px 14px 62px; }
+    .join-intro-card,
+    .join-highlight-card,
+    .join-sectors-card,
+    .join-form-copy,
+    .join-form { padding: 24px; border-radius: 22px; }
+    .join-benefits-grid,
+    .join-form-two-cols {
+        grid-template-columns: 1fr;
+    }
+    .join-benefit { min-height: 0; }
+    .join-form-grid { gap: 18px; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('joinSuccessModal');
+
+    if (!modal) {
+        return;
+    }
+
+    document.body.classList.add('join-modal-open');
+
+    function closeModal() {
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+        document.body.classList.remove('join-modal-open');
+    }
+
+    modal.querySelectorAll('[data-close-join-modal]').forEach(function (button) {
+        button.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+});
+</script>

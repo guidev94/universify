@@ -1,0 +1,15 @@
+list: $/siamfesp/lgpd/models/consent/columns.yaml
+modelClass: Siamfesp\Lgpd\Models\Consent
+title: Consentimentos LGPD
+recordUrl: 'siamfesp/lgpd/consents/update/:id'
+noRecordsMessage: Nenhum consentimento encontrado
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 25
+defaultSort:
+  column: accepted_at
+  direction: desc
+toolbar:
+  buttons: list_toolbar
+  search:
+    prompt: Buscar consentimento...

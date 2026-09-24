@@ -1,0 +1,18 @@
+scopes:
+  category:
+    label: Categoria
+    modelClass: Siamfesp\Artigos\Models\ArticleCategory
+    nameFrom: title
+    conditions: category_id in (:filtered)
+  state:
+    label: Publicado
+    type: switch
+    conditions:
+      - state = 0
+      - state = 1
+  featured:
+    label: Destaque
+    type: switch
+    conditions:
+      - featured = 0
+      - featured = 1

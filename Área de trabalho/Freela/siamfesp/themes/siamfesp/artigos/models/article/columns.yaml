@@ -1,0 +1,23 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+  title:
+    label: Título
+    searchable: true
+  category[title]:
+    label: Categoria
+  state:
+    label: Publicado
+    type: switch
+  featured:
+    label: Destaque
+    type: switch
+  publish_up:
+    label: Publicar em
+    type: datetime
+  updated_at:
+    label: Atualizado em
+    type: datetime
+  sort_order:
+    label: Ordem

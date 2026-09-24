@@ -1,0 +1,15 @@
+name: Artigo
+modelClass: Siamfesp\Artigos\Models\Article
+form: $/siamfesp/artigos/models/article/fields.yaml
+toolbar:
+  buttons: form_toolbar
+
+defaultRedirect: siamfesp/artigos/articles
+
+create:
+  redirect: 'siamfesp/artigos/articles/update/:id'
+  redirectClose: siamfesp/artigos/articles
+
+update:
+  redirect: siamfesp/artigos/articles
+  redirectClose: siamfesp/artigos/articles

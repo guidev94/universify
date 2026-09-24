@@ -1,0 +1,333 @@
+url = "/parcerias-fiesp"
+layout = "default"
+title = "Parcerias FIESP"
+is_hidden = 0
+meta_title = "Parcerias FIESP"
+meta_description = "Categorias de serviços e benefícios oferecidos por parceiros FIESP."
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Parcerias';
+    $this['internalBannerFallbackTitle'] = 'Parcerias FIESP';
+    $this['internalBannerFallbackDescription'] = 'Acesse as categorias de serviços e benefícios disponibilizadas pela FIESP.';
+
+    $this['fiespPartnerLinks'] = [];
+
+    if (class_exists('Siamfesp\Parcerias\Models\Partner') && \Schema::hasTable('siamfesp_parcerias_partners')) {
+        $this['fiespPartnerLinks'] = \Siamfesp\Parcerias\Models\Partner::published()
+            ->ofType('fiesp')
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderBy('title', 'asc')
+            ->get()
+            ->map(function ($partner) {
+                return [
+                    'title' => $partner->title,
+                    'href' => $partner->link_url ?: '#',
+                    'target' => $partner->link_target ?: '_self',
+                    'image' => $partner->image_url,
+                    'alt' => $partner->title,
+                    'badge' => $partner->badge ?: 'Parceiro FIESP',
+                    'description' => $partner->description,
+                ];
+            })
+            ->all();
+    }
+}
+?>
+==
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}
+                <p>{{ internalBannerData.description|striptags }}</p>
+            {% elseif internalBannerFallbackDescription %}
+                <p>{{ internalBannerFallbackDescription|striptags }}</p>
+            {% else %}
+                <p>PARCERIAS</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="fiesp-partners-page">
+    <div class="fiesp-partners-shell">
+        <div class="fiesp-partners-head">
+            <span class="fiesp-partners-kicker">Serviços e benefícios</span>
+            <h2>Parcerias FIESP</h2>
+            <p>Consulte as opções de parceiros por categoria.</p>
+        </div>
+
+        <div class="fiesp-partners-toolbar">
+            <div class="fiesp-partners-search">
+                <i class="fas fa-search"></i>
+                <input id="fiespPartnersSearch" type="search" placeholder="Buscar parceria..." aria-label="Buscar parceria FIESP">
+            </div>
+            <span class="fiesp-partners-count"><strong>{{ fiespPartnerLinks|length }}</strong> categorias</span>
+        </div>
+
+        <div class="fiesp-partners-grid" id="fiespPartnersGrid">
+            {% for item in fiespPartnerLinks %}
+                <a class="fiesp-partner-card" href="{{ item.href }}" target="{{ item.target }}" data-search="{{ item.title|lower }}">
+                    <span class="fiesp-partner-card__image">
+                        <img src="{{ item.image }}" alt="{{ item.alt }}" loading="lazy">
+                    </span>
+                    <span class="fiesp-partner-card__body">
+                        <span class="fiesp-partner-card__tag">{{ item.badge ?: 'Parceiro FIESP' }}</span>
+                        <strong>{{ item.title }}</strong>
+                        <span class="fiesp-partner-card__action">Acessar serviço <i class="fas fa-arrow-right"></i></span>
+                    </span>
+                </a>
+            {% endfor %}
+        </div>
+
+        <div class="fiesp-partners-empty" id="fiespPartnersEmpty" style="display:none;">
+            Nenhuma categoria encontrada para a busca informada.
+        </div>
+    </div>
+</section>
+
+<style>
+.fiesp-partners-page {
+    background:
+        radial-gradient(circle at top left, rgba(226, 38, 43, .10), transparent 34rem),
+        linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+    padding: 64px 16px 84px;
+}
+.fiesp-partners-shell {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+.fiesp-partners-head {
+    max-width: 790px;
+    margin-bottom: 28px;
+}
+.fiesp-partners-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #d71920;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .78rem;
+}
+.fiesp-partners-kicker::before {
+    content: "";
+    width: 38px;
+    height: 3px;
+    border-radius: 999px;
+    background: #d71920;
+}
+.fiesp-partners-head h2 {
+    margin: 10px 0 12px;
+    color: #243043;
+    font-family: Inter, Roboto, Arial, sans-serif;
+    font-size: clamp(2rem, 4vw, 3.45rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.045em;
+}
+.fiesp-partners-head p {
+    color: #607086;
+    font-size: 1.06rem;
+    line-height: 1.7;
+    margin: 0;
+}
+.fiesp-partners-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 26px 0 28px;
+}
+.fiesp-partners-search {
+    flex: 1 1 520px;
+    max-width: 560px;
+    height: 54px;
+    border: 1px solid rgba(36, 48, 67, .12);
+    background: rgba(255,255,255,.9);
+    border-radius: 999px;
+    box-shadow: 0 16px 40px rgba(23, 35, 56, .08);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+}
+.fiesp-partners-search i {
+    color: #d71920;
+    margin-right: 10px;
+}
+.fiesp-partners-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #243043;
+    font-size: 1rem;
+}
+.fiesp-partners-count {
+    color: #607086;
+    background: #fff;
+    border: 1px solid rgba(36, 48, 67, .10);
+    border-radius: 999px;
+    padding: 12px 18px;
+    box-shadow: 0 10px 28px rgba(23, 35, 56, .06);
+    white-space: nowrap;
+}
+.fiesp-partners-count strong { color: #d71920; }
+.fiesp-partners-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+.fiesp-partner-card {
+    position: relative;
+    min-height: 315px;
+    overflow: hidden;
+    border-radius: 24px;
+    background: #182235;
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 20px 50px rgba(23, 35, 56, .16);
+    isolation: isolate;
+    transform: translateY(0);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.fiesp-partner-card:hover,
+.fiesp-partner-card:focus-visible {
+    transform: translateY(-7px);
+    box-shadow: 0 30px 70px rgba(23, 35, 56, .24);
+    color: #fff;
+    text-decoration: none;
+}
+.fiesp-partner-card__image {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+}
+.fiesp-partner-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.02);
+    transition: transform .45s ease;
+}
+.fiesp-partner-card:hover .fiesp-partner-card__image img {
+    transform: scale(1.09);
+}
+.fiesp-partner-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(8, 16, 30, .10) 0%, rgba(8, 16, 30, .52) 45%, rgba(8, 16, 30, .92) 100%);
+}
+.fiesp-partner-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #d71920, #ffb000);
+}
+.fiesp-partner-card__body {
+    min-height: 315px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 26px;
+}
+.fiesp-partner-card__tag {
+    align-self: flex-start;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.20);
+    backdrop-filter: blur(6px);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: .74rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+.fiesp-partner-card strong {
+    display: block;
+    font-family: Inter, Roboto, Arial, sans-serif;
+    font-size: 1.38rem;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    text-shadow: 0 2px 14px rgba(0,0,0,.32);
+}
+.fiesp-partner-card__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 18px;
+    color: #fff;
+    font-weight: 800;
+    font-size: .93rem;
+}
+.fiesp-partner-card__action i {
+    transition: transform .2s ease;
+}
+.fiesp-partner-card:hover .fiesp-partner-card__action i {
+    transform: translateX(5px);
+}
+.fiesp-partners-empty {
+    margin-top: 22px;
+    background: #fff;
+    border: 1px solid rgba(36, 48, 67, .10);
+    color: #607086;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 14px 38px rgba(23, 35, 56, .07);
+}
+@media (max-width: 980px) {
+    .fiesp-partners-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+    .fiesp-partners-page { padding: 42px 14px 60px; }
+    .fiesp-partners-toolbar { flex-direction: column; align-items: stretch; }
+    .fiesp-partners-search { flex-basis: auto; max-width: none; }
+    .fiesp-partners-count { text-align: center; }
+    .fiesp-partners-grid { grid-template-columns: 1fr; gap: 18px; }
+    .fiesp-partner-card, .fiesp-partner-card__body { min-height: 255px; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('fiespPartnersSearch');
+    var grid = document.getElementById('fiespPartnersGrid');
+    var empty = document.getElementById('fiespPartnersEmpty');
+
+    if (!input || !grid) {
+        return;
+    }
+
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.fiesp-partner-card'));
+
+    input.addEventListener('input', function () {
+        var term = (input.value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+        var visible = 0;
+
+        cards.forEach(function (card) {
+            var text = (card.getAttribute('data-search') || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+            var show = !term || text.indexOf(term) !== -1;
+            card.style.display = show ? '' : 'none';
+            if (show) { visible++; }
+        });
+
+        if (empty) {
+            empty.style.display = visible ? 'none' : 'block';
+        }
+    });
+});
+</script>

@@ -1,0 +1,29 @@
+columns:
+  id:
+    label: ID
+    width: 80px
+
+  title:
+    label: Título
+    searchable: true
+
+  theme[title]:
+    label: Categoria / Tema
+
+  year_month:
+    label: Mês/Ano
+
+  pdf:
+    label: PDF Media
+
+  public_link:
+    label: Link público
+    type: partial
+    path: $/siamfesp/pdf/models/document/_column_public_link.htm
+
+  created_at:
+    label: Criado em
+    type: datetime
+
+  sort_order:
+    label: Ordem

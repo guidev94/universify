@@ -1,0 +1,491 @@
+url = "/servicos/pdf/:categoria?"
+layout = "default"
+title = "PDF"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Pdf\Models\Theme;
+use Siamfesp\Menu\Models\MenuItem;
+
+function onStart()
+{
+    $categoria = $this->param('categoria'); // Exemplo: teste
+    $themeId = null;
+    $menuItem = null;
+
+    /*
+     * Quando acessa /servicos/teste:
+     * "teste" é o slug do item do menu.
+     * Buscamos esse item no menu e pegamos o Registro do plugin selecionado.
+     */
+    if ($categoria) {
+        $menuItem = MenuItem::query()
+            ->with('parent.parent')
+            ->where('slug', $categoria)
+            ->whereNotNull('dynamic_record_id')
+            ->first();
+
+        if ($menuItem) {
+            $themeId = (int) $menuItem->dynamic_record_id;
+        }
+    }
+
+    $documentOrder = function ($q) {
+        $q->where(function ($query) {
+                $query->whereNotNull('pdf')
+                    ->where('pdf', '<>', '')
+                    ->orWhere(function ($urlQuery) {
+                        $urlQuery->whereNotNull('url')
+                            ->where('url', '<>', '');
+                    });
+            })
+            ->orderByRaw('COALESCE(sort_order, 999999) asc')
+            ->orderBy('id', 'desc');
+    };
+
+    $themesQuery = Theme::query()
+        ->whereHas('documents', $documentOrder)
+        ->with(['documents' => $documentOrder]);
+
+    /*
+     * Se veio pelo menu /servicos/teste e achou categoria,
+     * mostra somente a categoria vinculada ao item do menu.
+     */
+    if ($themeId) {
+        $themesQuery->where('id', $themeId);
+    } elseif ($categoria) {
+        // Se veio uma categoria na URL mas não achou vínculo no menu, não mostra tudo.
+        $themesQuery->whereRaw('1 = 0');
+    }
+
+    $themes = $themesQuery
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderBy('title', 'asc')
+        ->get();
+
+    foreach ($themes as $theme) {
+        $documents = $theme->documents ?: collect();
+        $theme->documentsByYear = $documents->groupBy(function ($document) {
+            $yearMonth = trim((string) $document->year_month);
+
+            if (preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $yearMonth, $matches)) {
+                return $matches[2];
+            }
+
+            if (preg_match('/(\d{4})/', $yearMonth, $matches)) {
+                return $matches[1];
+            }
+
+            return 'Sem ano';
+        })->sortKeysDesc();
+    }
+
+    $menuPrincipal = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')->where('is_published', 1)->orderBy('sort_order')->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1)->orderBy('sort_order')->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return $item->slug === 'servicos';
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $activeSecondMenuSlug = $categoria;
+    if ($menuItem && $currentMenuParent) {
+        $current = $menuItem;
+        while ($current) {
+            if ((int) $current->parent_id === (int) $currentMenuParent->id) {
+                $activeSecondMenuSlug = $current->slug;
+                break;
+            }
+
+            $current = $current->parent ?: null;
+        }
+    }
+
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['categoriaAtual'] = $activeSecondMenuSlug;
+    $this['currentPdfMenuItem'] = $menuItem;
+    $this['pageMode'] = 'category';
+    $this['pdfThemes'] = $themes;
+    $this['pdfDocumentsTotal'] = $themes->sum(function ($theme) {
+        return $theme->documents ? $theme->documents->count() : 0;
+    });
+
+    if ($themes->count()) {
+        $this->page->title = $themes->first()->title;
+        $this->page->meta_title = $themes->first()->title;
+    } else {
+        $this->page->title = 'Revista';
+        $this->page->meta_title = 'Revista';
+    }
+
+    $bannerTitle = $themes->count() ? $themes->first()->title : ($menuItem->title ?? 'PDF');
+    $bannerSubtitle = $currentMenuParent ? $currentMenuParent->title : 'Serviços';
+    $metaDescription = 'Publicações, relatórios, estudos e materiais em PDF do SIAMFESP.';
+
+    $this->page->meta_description = $metaDescription;
+    $this['bannerTitle'] = $bannerTitle;
+    $this['bannerDescription'] = $bannerSubtitle;
+    $this['internalBannerFallbackEyebrow'] = $bannerSubtitle;
+    $this['internalBannerFallbackTitle'] = $bannerTitle;
+    $this['internalBannerFallbackDescription'] = $bannerSubtitle;
+}
+?>
+==
+<style>
+    .doc-list-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+
+    padding: 22px;
+
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    transition: all .3s ease;
+}
+
+.doc-list-card:hover {
+    border-color: #0056b3;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    transform: translateY(-3px);
+}
+
+.doc-info-side {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.doc-icon-box {
+    width: 58px;
+    min-width: 58px;
+    height: 58px;
+
+    background: #fff3f3;
+    color: #d90429;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.5rem;
+}
+
+.doc-details h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.doc-details span {
+    display: block;
+    margin-top: 8px;
+    color: #888;
+    font-size: .9rem;
+}
+
+.doc-actions-side {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.btn-pdf {
+    flex: 1;
+
+    padding: 11px 15px;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    text-decoration: none;
+    font-weight: 600;
+
+    transition: .2s ease;
+}
+
+.btn-view {
+    background: #f3f4f6;
+    color: #333;
+}
+
+.btn-view:hover {
+    background: #e5e7eb;
+    color: #111;
+}
+
+.btn-dl {
+    background: #0056b3;
+    color: #fff;
+}
+
+.btn-dl:hover {
+    background: #004494;
+    color: #fff;
+}
+#lista-pdfs .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#lista-pdfs .col-xl-4,
+#lista-pdfs .col-lg-4,
+#lista-pdfs .col-md-6 {
+    display: flex;
+    margin-bottom: 25px;
+}
+
+/* 3 POR LINHA */
+#lista-pdfs .col-lg-4 {
+    width: 33.333333%;
+}
+
+/* 2 POR LINHA TABLET */
+@media (max-width: 991px) {
+
+    #lista-pdfs .col-md-6 {
+        width: 50%;
+    }
+}
+
+/* 1 POR LINHA MOBILE */
+@media (max-width: 767px) {
+
+    #lista-pdfs .col-12,
+    #lista-pdfs .col-md-6,
+    #lista-pdfs .col-lg-4 {
+        width: 100%;
+    }
+
+    .doc-actions-side {
+        flex-direction: column;
+    }
+}
+
+.pdf-list-wrapper .container {
+    max-width: 1180px;
+}
+
+.pdf-year-group {
+    margin-bottom: 34px;
+}
+
+.pdf-year-title {
+    margin: 0 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #d9534f;
+    color: #d9534f;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+#lista-pdfs .pdf-doc-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-left: -12px;
+    margin-right: -12px;
+}
+
+#lista-pdfs .pdf-doc-col {
+    display: flex;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-bottom: 24px;
+}
+
+#lista-pdfs .pdf-doc-col .doc-list-card {
+    width: 100%;
+}
+
+</style>
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ pageMode == 'article' and article ? article.title : (bannerTitle ?: this.page.title) }}</strong></h1>
+            <div class="divider"></div>
+            {% if bannerDescription %}
+                <p>{{ bannerDescription|striptags|upper }}</p>
+            {% elseif internalBannerData.eyebrow %}
+                <p>{{ internalBannerData.eyebrow|striptags|upper }}</p>
+            {% else %}
+                <p>{{ (currentMenuParent.title ?: 'Serviços')|upper }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% if secondMenuItems|length %}
+<div class="download">
+    <div class="downloads-strip-wrap">
+        <div class="downloads-strip">
+            {% for item in secondMenuItems|slice(0,5) %}
+                <a class="dl-item{% if item.slug == categoriaAtual %} is-active{% endif %}{% if loop.last %} is-cta{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.should_open_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="dl-ic"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-receipt{% elseif loop.index == 4 %}bi-journals{% else %}bi-cloud-download{% endif %}"></i></span>
+                    <span class="dl-txt">
+                        <span class="dl-title">{{ item.title }}</span>
+                        <span class="dl-sub">&nbsp;</span>
+                    </span>
+                    {% if loop.last %}
+                        <span class="dl-cta"><i class="bi bi-arrow-right"></i> Acessar</span>
+                    {% else %}
+                        <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<br><br><br>
+
+<section class="pdf-list-wrapper" id="lista-pdfs">
+
+    <div class="container">
+
+        {% if pdfThemes|length %}
+
+            {% for theme in pdfThemes %}
+
+                <div
+                    id="categoria-pdf-{{ theme.id }}"
+                    class="events-section-header"
+                    style="background-color: transparent; padding-top: 0; margin-bottom: 30px;"
+                >
+
+                    <h2 class="section-title">
+                        {{ theme.title }}
+                    </h2>
+
+                    <p class="section-subtitle">
+                        {{ theme.documents|length }}
+                        publicaç{{ theme.documents|length == 1 ? 'ão' : 'ões' }}
+                        disponív{{ theme.documents|length == 1 ? '' : 'eis' }}
+                        para download.
+                    </p>
+
+                </div>
+
+                {% for year, documentsByYear in theme.documentsByYear %}
+
+                    <div class="pdf-year-group">
+                        <h3 class="pdf-year-title">{{ year }}</h3>
+
+                        <div class="row pdf-doc-row">
+
+                            {% for document in documentsByYear %}
+
+                                {% set pdfUrl = document.public_link ?: (document.pdf ? (document.pdf|media) : document.url) %}
+                                {% set isExternalUrl = not document.pdf and document.url %}
+
+                                <div class="col-12 col-md-6 col-lg-4 pdf-doc-col">
+
+                                    <div class="doc-list-card">
+
+                                        <div class="doc-info-side">
+
+                                            <div class="doc-icon-box">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </div>
+
+                                            <div class="doc-details">
+
+                                                <h4>{{ document.title }}</h4>
+
+                                                {% if document.year_month %}
+                                                    <span>
+                                                        <i class="bi bi-calendar3 me-1"></i>
+                                                        {{ document.year_month }}
+                                                    </span>
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="doc-actions-side">
+
+                                            <a
+                                                href="{{ pdfUrl }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn-pdf btn-view"
+                                            >
+                                                <i class="bi bi-eye"></i>
+                                                Ver
+                                            </a>
+
+                                            {% if not isExternalUrl %}
+                                                <a
+                                                    href="{{ pdfUrl }}"
+                                                    download
+                                                    class="btn-pdf btn-dl"
+                                                >
+                                                    <i class="bi bi-download"></i>
+                                                    Baixar
+                                                </a>
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-light text-center shadow-sm p-5">
+
+                <p class="mb-0">
+                    Nenhum PDF cadastrado foi encontrado para este menu.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>

@@ -1,0 +1,16 @@
+columns:
+  id:
+    label: ID
+    searchable: true
+    width: 80px
+
+  title:
+    label: Título
+    searchable: true
+
+  created_at:
+    label: Criado em
+    type: datetime
+
+  sort_order:
+    label: Ordem

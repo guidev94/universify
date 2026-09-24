@@ -1,0 +1,12 @@
+name: Login do Site
+modelClass: Siamfesp\Menu\Models\SiteUser
+form: $/siamfesp/menu/models/siteuser/fields.yaml
+defaultRedirect: siamfesp/menu/siteusers
+create:
+    title: Novo login do site
+    redirect: siamfesp/menu/siteusers/update/:id
+    redirectClose: siamfesp/menu/siteusers
+update:
+    title: Editar login do site
+    redirect: siamfesp/menu/siteusers
+    redirectClose: siamfesp/menu/siteusers

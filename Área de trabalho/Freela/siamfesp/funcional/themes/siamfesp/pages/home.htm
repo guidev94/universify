@@ -1,0 +1,318 @@
+title = "Home"
+url = "/"
+layout = "default"
+is_hidden = 0
+
+[viewBag]
+
+[bannerList]
+limit = 0
+==
+<?php
+    use Siamfesp\Associados\Models\Associate;
+    use Siamfesp\Menu\Models\MenuItem;
+
+    function onStart()
+    {
+        $formatDatePt = function ($date, $withYear = true) {
+            if (!$date) {
+                return '';
+            }
+
+            $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+            if (!$ts) {
+                return '';
+            }
+
+            $meses = [1=>'janeiro',2=>'fevereiro',3=>'março',4=>'abril',5=>'maio',6=>'junho',7=>'julho',8=>'agosto',9=>'setembro',10=>'outubro',11=>'novembro',12=>'dezembro'];
+            $texto = date('d', $ts) . ' de ' . $meses[(int) date('n', $ts)];
+
+            return $withYear ? ($texto . ' de ' . date('Y', $ts)) : $texto;
+        };
+
+        $menuUrl = function ($slug, $fallback = '#') {
+            $item = MenuItem::query()
+                ->where('is_published', 1)
+                ->where('slug', $slug)
+                ->with('parent')
+                ->orderBy('parent_id', 'desc')
+                ->orderBy('sort_order')
+                ->first();
+
+            return $item && $item->frontend_url ? $item->frontend_url : $fallback;
+        };
+
+        $formatMonthPt = function ($date) {
+            if (!$date) return '';
+            $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+            if (!$ts) return '';
+            $meses = [1=>'JAN',2=>'FEV',3=>'MAR',4=>'ABR',5=>'MAI',6=>'JUN',7=>'JUL',8=>'AGO',9=>'SET',10=>'OUT',11=>'NOV',12=>'DEZ'];
+            return $meses[(int) date('n', $ts)] ?? strtoupper(date('M', $ts));
+        };
+
+        $this['formatDatePt'] = $formatDatePt;
+        $this['formatMonthPt'] = $formatMonthPt;
+        $this['destaqueLinks'] = [
+            ['title' => 'Acordos Coletivos', 'icon' => 'fa-solid fa-file-signature', 'url' => $menuUrl('acordos-coletivos', '/servicos/pdf/acordos-coletivos')],
+            ['title' => 'Contrib. Sindicais', 'icon' => 'fa-solid fa-users', 'url' => $menuUrl('contribuicoes-sindicais', '/servicos/pdf/contribuicoes-sindicais')],
+            ['title' => 'Contrib. Assistenciais', 'icon' => 'fa-solid fa-hand-holding-dollar', 'url' => $menuUrl('contribuicoes-assistenciais', '/servicos/pdf/contribuicoes-assistenciais')],
+            ['title' => 'Enquadramento', 'icon' => 'fa-solid fa-briefcase', 'url' => $menuUrl('enquadramento', '/servicos/pdf/enquadramento')],
+            ['title' => 'Emissão de Boletos', 'icon' => 'fa-solid fa-barcode', 'url' => '/login'],
+            ['title' => 'Eventos', 'icon' => 'fa-solid fa-calendar-day', 'url' => '#eventos'],
+            ['title' => 'Agenda', 'icon' => 'fa-solid fa-clipboard-list', 'url' => '/agenda'],
+            [
+                'title' => 'Parcerias',
+                'icon' => 'fa-solid fa-handshake',
+                'url' => '/sobre-o-siamfesp/quem-somos',
+                'children' => [
+                    ['title' => 'Parcerias Siamfesp', 'url' => '/sobre-o-siamfesp/quem-somos'],
+                    ['title' => 'Parcerias Fiesp', 'url' => 'https://www.fiesp.com.br/', 'target' => '_blank'],
+                ],
+            ],
+            ['title' => 'Vídeos', 'icon' => 'fa-solid fa-video', 'url' => '#videos'],
+        ];
+
+        $this['associatedCompanies'] = Associate::query()
+            ->where('is_published', 1)
+            ->whereNotNull('image')
+            ->where('image', '<>', '')
+            ->inRandomOrder()
+            ->limit(48)
+            ->get();
+
+        $ultimosArtigos = \Siamfesp\Artigos\Models\Article::query()
+            ->with(['category', 'category.parent'])
+            ->where('state', 1)
+            ->where('category_id', '!=', 26)
+            ->orderByDesc('publish_up')
+            ->orderByDesc('id')
+            ->take(6)
+            ->get();
+
+        $ultimosArtigos->each(function ($item) use ($formatDatePt) {
+            $item->date_pt = $formatDatePt($item->publish_up ?: $item->created_at);
+        });
+
+        $this['ultimosArtigos'] = $ultimosArtigos;
+
+        $ultimosEventos = \Siamfesp\Artigos\Models\Article::query()
+            ->with(['category', 'category.parent'])
+            ->where('state', 1)
+            ->where('category_id', 26)
+            ->orderByDesc('publish_up')
+            ->orderByDesc('id')
+            ->take(3)
+            ->get();
+
+        $ultimosEventos->each(function ($item) use ($formatDatePt) {
+            $item->date_pt = $formatDatePt($item->publish_up ?: $item->created_at);
+        });
+
+        $this['ultimosEventos'] = $ultimosEventos;
+
+        $agendaEventos = collect();
+        if (class_exists('Siamfesp\\Agenda\\Models\\Event') && \Schema::hasTable('siamfesp_agenda_events')) {
+            $agendaEventos = \Siamfesp\Agenda\Models\Event::published()
+                ->upcoming()
+                ->orderBy('event_date', 'asc')
+                ->orderByRaw('COALESCE(sort_order, 999999) asc')
+                ->take(4)
+                ->get();
+
+            $agendaEventos->each(function ($item) use ($formatMonthPt) {
+                $item->day_pt = $item->event_date ? date('d', strtotime((string) $item->event_date)) : '--';
+                $item->month_pt = $formatMonthPt($item->event_date);
+            });
+        }
+        $this['agendaEventos'] = $agendaEventos;
+    }
+?>
+==
+
+{% component 'bannerList' %}
+<section class="quick-links-section home-destaques-menu">
+    <div class="container">
+        <div class="events-section-header" style="background-color: transparent; padding-top: 0;">
+            <h2 class="section-title">Destaques</h2>
+        </div>
+        <nav class="links-container-light">
+            <ul>
+                {% for link in destaqueLinks %}
+                    {% set hasChildren = link.children is defined and link.children|length %}
+                    <li class="{{ hasChildren ? 'has-submenu' : '' }}">
+                        <a href="{{ link.url }}" {% if link.target is defined %}target="{{ link.target }}" rel="noopener noreferrer"{% endif %}>
+                            <i class="{{ link.icon }}"></i>
+                            <span>{{ link.title }}{% if hasChildren %} <i class="fas fa-caret-down submenu-caret"></i>{% endif %}</span>
+                        </a>
+                        {% if hasChildren %}
+                            <ul class="submenu-links">
+                                {% for child in link.children %}
+                                    <li><a href="{{ child.url }}" {% if child.target is defined %}target="{{ child.target }}" rel="noopener noreferrer"{% endif %}>{{ child.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</section>
+<br/><br/><br/>
+
+<div class="container-noticias">
+    <div class="grid-noticias-iba">
+    {% for artigo in ultimosArtigos %}
+        <a href="{{ artigo.frontend_url }}" class="card-news-horizontal">
+            <div class="card-news-img">
+                {% set imagem = artigo.intro_image_url ?: artigo.fulltext_image_url %}
+                {% if imagem %}
+                    <img src="{{ imagem }}" alt="{{ artigo.image_intro_alt ?: artigo.title }}">
+                {% else %}
+                    <img src="{{ 'assets/images/foto.jpg'|theme }}" alt="{{ artigo.title }}">
+                {% endif %}
+            </div>
+
+            <div class="card-news-body">
+                <div class="card-news-date">
+                    <i class="fa-regular fa-calendar"></i>
+                    {{ artigo.date_pt }}
+                </div>
+
+                {% if artigo.category %}
+                    <span class="card-news-tag">
+                        {{ artigo.category.title ?: artigo.category.name }}
+                    </span>
+                {% endif %}
+
+                <h3 class="card-news-titulo">
+                    {{ artigo.title }}
+                </h3>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+</div>
+<section class="secao-detalhe-blob" id="eventos" style="margin-top: 40px; padding-bottom: 60px;">
+    <div class="container-noticias" style="margin-top: 0;">
+        <div class="events-section-header">
+            <h2 class="section-title">Eventos</h2>
+            <p class="section-subtitle">Conectando conhecimento e oportunidades</p>
+        </div>
+        <div class="grid-eventos-home">
+                {% for evento in ultimosEventos %}
+
+            <a class="card-evento-vertical" href="{{ evento.frontend_url }}">
+                <div class="card-evento-img-wrapper">
+                    {% set imagem1 = evento.intro_image_url ?: evento.fulltext_image_url %}
+                    {% if imagem1 %}
+                    <img src="{{ imagem1 }}" alt="{{ evento.image_intro_alt ?: evento.title }}">
+                {% else %}
+                    <img src="{{ 'assets/images/foto.jpg'|theme }}" alt="{{ evento.title }}">
+                {% endif %}
+
+                    <div class="card-icon-overlay"><i class="fas fa-microphone-alt"></i></div>
+                </div>
+                <div class="card-evento-body">
+                    <div class="card-evento-info">
+                        <div class="card-evento-date"><i class="far fa-calendar-alt"></i>{{ evento.date_pt }}</div>
+                        <h3 class="card-evento-title">{{ evento.title }}</h3>
+                    </div>
+                    <span class="card-evento-link-text">Inscreva-se <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<section class="secao-mista-agenda-parceiro" style="margin-top: 50px; margin-bottom: 50px;">
+    <div class="container-noticias">
+        <div class="grid-mista-agenda-parceiro">
+            <div class="col-parceiro">
+                <h2 class="section-title-left">Parceiro em Destaque</h2>
+                <a class="card-parceiro-vertical" href="/sobre-o-siamfesp/quem-somos">
+                    <div class="parceiro-img-wrapper">
+                        <img alt="Parceiro" src="https://blog.cresol.com.br/wp-content/uploads/2022/02/reuniao-de-assembleia-cooperativa.jpg"/>
+                    </div>
+                    <div class="parceiro-content">
+                        <span class="parceiro-tag">Parceria Estratégica</span>
+                        <h3 class="parceiro-title">Parceria SSA Brasil/Serasa e SIAMFESP</h3>
+                        <p class="parceiro-desc">Confira os benefícios exclusivos para associados e impulsione a gestão financeira da sua empresa.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-agenda" id="agenda">
+                <h2 class="section-title-left">Agenda do Setor</h2>
+                <div class="agenda-list-compact">
+                    {% if agendaEventos|length %}
+                        {% for agenda in agendaEventos %}
+                            <a class="agenda-item" href="{{ agenda.frontend_url }}">
+                                <div class="mini-date"><span class="d">{{ agenda.day_pt }}</span><span class="m">{{ agenda.month_pt }}</span></div>
+                                <div class="agenda-info">
+                                    <h4>{{ agenda.title }}</h4>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ agenda.location ?: 'SIAMFESP' }}</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <a class="agenda-item" href="/agenda">
+                            <div class="mini-date"><span class="d">--</span><span class="m">CMS</span></div>
+                            <div class="agenda-info">
+                                <h4>Agenda disponível para cadastro no CMS</h4>
+                                <span><i class="fas fa-calendar-alt"></i> Cadastre eventos no módulo Agenda</span>
+                            </div>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="secao-detalhe-linhas" id="videos" style="padding-top: 20px;">
+    <div class="container-videos-cta">
+        <div class="container-videos-cta-inner">
+            <div class="events-section-header" style="padding-top: 0; padding-bottom: 30px !important;">
+                <h2 class="section-title">Associe-se e fortaleça sua indústria</h2>
+                <p class="section-subtitle">Junte-se a nós e impulsione o crescimento do seu negócio.</p>
+            </div>
+            <div class="banners-grid">
+                <a class="banner-large-card" href="/contato">
+                    <div class="banner-overlay-gradient"></div>
+                    <img alt="Associe-se" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&amp;w=1740&amp;auto-format&amp;fit=crop"/>
+                    <div class="banner-text-content">
+                        <h3>ASSOCIE-SE</h3>
+                    </div>
+                </a>
+                <a class="banner-large-card" href="/associados">
+                    <div class="banner-overlay-gradient"></div>
+                    <img alt="Conheça empresas" src="https://images.unsplash.com/photo-1531498860502-7c67cf02f657?q=80&amp;w=1740&amp;auto-format&amp;fit=crop"/>
+                    <div class="banner-text-content">
+                        <h3>CONHEÇA AS EMPRESAS ASSOCIADAS AO SIAMFESP.</h3>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="associadas-section">
+    <div class="events-section-header">
+        <h2 class="section-title">EMPRESAS ASSOCIADAS</h2>
+        <p class="section-subtitle">Empresas que fortalecem o setor.</p>
+    </div>
+    <div id="banco-de-logos" style="display: none;">
+        {% for company in associatedCompanies %}
+        {% if company.associate_link %}
+        <a href="{{ company.associate_link }}" target="_blank" rel="noopener noreferrer">
+            <img alt="{{ company.image_alt ?: company.name }}" src="{{ company.image|media }}"/>
+        </a>
+        {% else %}
+        <img alt="{{ company.image_alt ?: company.name }}" src="{{ company.image|media }}"/>
+        {% endif %}
+        {% else %}
+        <img alt="Nenhuma empresa associada cadastrada" src="{{ 'assets/images/s.png'|theme }}"/>
+        {% endfor %}
+    </div>
+    <div class="rows-container">
+        <div class="associadas-track scroll-left" id="track-linha-1"></div>
+        <div class="associadas-track scroll-right" id="track-linha-2"></div>
+    </div>
+</section>

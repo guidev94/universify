@@ -1,0 +1,5 @@
+title: Reordenar Categorias
+modelClass: Siamfesp\Associados\Models\AssociateCategory
+nameFrom: name
+toolbar:
+    buttons: reorder_toolbar

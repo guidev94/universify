@@ -1,0 +1,14 @@
+columns:
+  id:
+    label: ID
+    width: 70px
+  title:
+    label: Título
+    searchable: true
+  parent[title]:
+    label: Categoria pai
+  updated_at:
+    label: Atualizado em
+    type: datetime
+  sort_order:
+    label: Ordem

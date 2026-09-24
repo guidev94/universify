@@ -1,0 +1,356 @@
+title = "Login"
+url = "/login"
+layout = "default"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+function onStart()
+{
+    $this['internalBannerFallbackEyebrow'] = 'Área Restrita';
+    $this['internalBannerFallbackTitle'] = 'Área Restrita Associados';
+    $this['internalBannerFallbackDescription'] = 'Acesse conteúdos exclusivos para empresas associadas ao SIAMFESP.';
+
+    $redirect = trim((string) (\Request::input('redirect') ?: '/'));
+    $redirect = $this->normalizeLoginRedirect($redirect);
+
+    try {
+        session()->put('url.intended', $redirect);
+        session()->put('redirect_after_login', $redirect);
+    } catch (\Throwable $e) {
+    }
+
+    if (\Request::input('logout')) {
+        $this->clearSiteLoginSession();
+        return \Redirect::to('/login?loggedout=1');
+    }
+
+    if (\Request::isMethod('post')) {
+        return $this->handleSiteLogin($redirect);
+    }
+
+    if (\Siamfesp\Menu\Models\MenuItem::isFrontendUserLoggedIn() && $redirect !== '/login') {
+        return \Redirect::to($redirect);
+    }
+
+    $this['redirectTo'] = $redirect;
+    $this['loginError'] = null;
+    $this['logoutSuccess'] = \Request::input('loggedout') ? 'Você saiu da área restrita com segurança.' : null;
+}
+
+function handleSiteLogin($redirect)
+{
+    $usuario = trim((string) \Request::input('usuario'));
+    $senha = (string) \Request::input('senha');
+
+    if ($usuario === '' || $senha === '') {
+        $this['redirectTo'] = $redirect;
+        $this['loginError'] = 'Informe usuário e senha.';
+        $this['logoutSuccess'] = null;
+        return null;
+    }
+
+    $loggedUser = $this->validateSiteLogin($usuario, $senha);
+
+    if (!$loggedUser) {
+        $this['redirectTo'] = $redirect;
+        $this['loginError'] = 'Usuário ou senha inválidos.';
+        $this['logoutSuccess'] = null;
+        return null;
+    }
+
+    try {
+        if (method_exists(session(), 'regenerate')) {
+            session()->regenerate();
+        }
+
+        session()->put('siamfesp_site_auth', true);
+        session()->put('siamfesp_site_logged_in', true);
+        session()->put('siamfesp_site_user', $loggedUser['login'] ?? $usuario);
+        session()->put('siamfesp_site_user_id', $loggedUser['id'] ?? 1);
+        session()->put('siamfesp_site_user_name', $loggedUser['name'] ?? ($loggedUser['login'] ?? $usuario));
+        session()->put('siamfesp_site_user_email', $loggedUser['email'] ?? '');
+        session()->put('siamfesp_site_source', $loggedUser['source'] ?? '');
+    } catch (\Throwable $e) {
+    }
+
+    return \Redirect::to($redirect ?: '/');
+}
+
+function validateSiteLogin($usuario, $senha)
+{
+    // 1) Login separado configurado no .env. Não usa o usuário do /admin.
+    $envUser = trim((string) env('SIAMFESP_SITE_LOGIN_USER', ''));
+    $envPass = (string) env('SIAMFESP_SITE_LOGIN_PASSWORD', '');
+
+    if ($envUser !== '' && $envPass !== '') {
+        if (hash_equals($envUser, $usuario) && hash_equals($envPass, $senha)) {
+            return ['id' => 1, 'login' => $usuario, 'name' => $usuario, 'email' => '', 'source' => 'env'];
+        }
+
+        // Se o .env tiver um login antigo configurado, ele continua funcionando,
+        // mas não bloqueia os usuários cadastrados no painel administrativo.
+    }
+
+    // 2) RainLab.User, caso exista, é frontend e separado do Backend do OctoberCMS.
+    try {
+        if (class_exists('RainLab\\User\\Facades\\Auth')) {
+            $user = \RainLab\User\Facades\Auth::authenticate([
+                'login' => $usuario,
+                'password' => $senha,
+            ], (bool) \Request::input('remember'));
+
+            if ($user && !is_a($user, 'Backend\\Models\\User')) {
+                return [
+                    'id' => $user->id ?? 1,
+                    'login' => $usuario,
+                    'name' => $user->name ?? $usuario,
+                    'email' => $user->email ?? '',
+                    'source' => 'rainlab',
+                ];
+            }
+        }
+    } catch (\Throwable $e) {
+    }
+
+    // 3) Tabelas frontend/legadas, se existirem. Nunca consulta backend_users.
+    return $this->validateSiteLoginFromDatabase($usuario, $senha);
+}
+
+function validateSiteLoginFromDatabase($usuario, $senha)
+{
+    $tables = [
+        'siamfesp_site_users',
+        'siamfesp_frontend_users',
+        'siamfesp_users',
+        'frontend_users',
+        'users',
+    ];
+
+    foreach ($tables as $table) {
+        try {
+            if (!\Schema::hasTable($table)) {
+                continue;
+            }
+
+            $loginColumns = array_values(array_filter(['usuario', 'username', 'login', 'email'], function ($column) use ($table) {
+                return \Schema::hasColumn($table, $column);
+            }));
+
+            $passwordColumn = null;
+            foreach (['senha', 'password', 'passwd'] as $column) {
+                if (\Schema::hasColumn($table, $column)) {
+                    $passwordColumn = $column;
+                    break;
+                }
+            }
+
+            if (!$loginColumns || !$passwordColumn) {
+                continue;
+            }
+
+            $query = \Db::table($table)->where(function ($q) use ($loginColumns, $usuario) {
+                foreach ($loginColumns as $index => $column) {
+                    if ($index === 0) {
+                        $q->where($column, $usuario);
+                    } else {
+                        $q->orWhere($column, $usuario);
+                    }
+                }
+            });
+
+            foreach (['is_active', 'active', 'activated', 'enabled'] as $activeColumn) {
+                if (\Schema::hasColumn($table, $activeColumn)) {
+                    $query->where($activeColumn, 1);
+                    break;
+                }
+            }
+
+            if (\Schema::hasColumn($table, 'deleted_at')) {
+                $query->whereNull('deleted_at');
+            }
+
+            $user = $query->first();
+
+            if (!$user) {
+                continue;
+            }
+
+            $storedPassword = (string) ($user->{$passwordColumn} ?? '');
+
+            if ($this->checkSitePassword($senha, $storedPassword)) {
+                return [
+                    'id' => $user->id ?? 1,
+                    'login' => $user->usuario ?? $user->username ?? $user->login ?? $usuario,
+                    'name' => $user->name ?? $user->nome ?? $user->usuario ?? $usuario,
+                    'email' => $user->email ?? '',
+                    'source' => $table,
+                ];
+            }
+        } catch (\Throwable $e) {
+            continue;
+        }
+    }
+
+    return false;
+}
+
+function checkSitePassword($plainPassword, $storedPassword)
+{
+    $storedPassword = (string) $storedPassword;
+
+    if ($storedPassword === '') {
+        return false;
+    }
+
+    try {
+        if (function_exists('password_verify') && password_verify($plainPassword, $storedPassword)) {
+            return true;
+        }
+    } catch (\Throwable $e) {
+    }
+
+    try {
+        if (class_exists('Hash') && \Hash::check($plainPassword, $storedPassword)) {
+            return true;
+        }
+    } catch (\Throwable $e) {
+    }
+
+    if (preg_match('/^[a-f0-9]{32}$/i', $storedPassword) && hash_equals(strtolower($storedPassword), md5($plainPassword))) {
+        return true;
+    }
+
+    // Formato legado Joomla antigo: hash:salt
+    if (strpos($storedPassword, ':') !== false) {
+        [$hash, $salt] = explode(':', $storedPassword, 2);
+        if ($hash !== '' && $salt !== '' && hash_equals($hash, md5($plainPassword . $salt))) {
+            return true;
+        }
+    }
+
+    // Aceita senha em texto apenas para base legada/importada.
+    return hash_equals($storedPassword, $plainPassword);
+}
+
+function clearSiteLoginSession()
+{
+    try {
+        foreach ([
+            'siamfesp_site_auth',
+            'siamfesp_site_logged_in',
+            'siamfesp_site_user',
+            'siamfesp_site_user_id',
+            'siamfesp_site_user_name',
+            'siamfesp_site_user_email',
+            'siamfesp_site_source',
+            'siamfesp_frontend_auth',
+            'siamfesp_frontend_user',
+            'siamfesp_frontend_user_id',
+            'siamfesp_user',
+            'siamfesp_user_id',
+            'siamfesp_associado',
+            'siamfesp_associado_id',
+            'cliente_frontend_id',
+        ] as $key) {
+            session()->forget($key);
+        }
+    } catch (\Throwable $e) {
+    }
+}
+
+function normalizeLoginRedirect($redirect)
+{
+    $redirect = trim((string) $redirect);
+
+    if ($redirect === '' || $redirect === '#') {
+        return '/';
+    }
+
+    if (preg_match('#^https?://#i', $redirect)) {
+        $host = parse_url($redirect, PHP_URL_HOST);
+        $currentHost = \Request::getHost();
+
+        if (!$host || strtolower((string) $host) !== strtolower((string) $currentHost)) {
+            return '/';
+        }
+
+        $path = parse_url($redirect, PHP_URL_PATH) ?: '/';
+        $query = parse_url($redirect, PHP_URL_QUERY);
+        $redirect = $path . ($query ? '?' . $query : '');
+    }
+
+    if (strpos($redirect, '/') !== 0) {
+        $redirect = '/' . $redirect;
+    }
+
+    if (strpos($redirect, '/login') === 0 || \Siamfesp\Menu\Models\MenuItem::isBackendRequestPath($redirect)) {
+        return '/';
+    }
+
+    return $redirect;
+}
+==
+
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ internalBannerData.title ?: internalBannerFallbackTitle ?: this.page.title }}</strong></h1>
+            <div class="divider"></div>
+            {% if internalBannerData.description %}
+                <p>{{ internalBannerData.description|striptags }}</p>
+            {% elseif internalBannerFallbackDescription %}
+                <p>{{ internalBannerFallbackDescription|striptags }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="login-section">
+<div class="login-card">
+<h2>Efetue o login</h2>
+<p class="login-intro">
+                O SIAMFESP agradece sua visita. Este conteúdo é restrito às empresas associadas. 
+                Caso ainda não seja associado <strong><a href="/associe-se">CLIQUE AQUI!</a></strong> Juntos somos mais fortes.
+            </p>
+{% if logoutSuccess %}
+    <div class="login-notice login-success">{{ logoutSuccess }}</div>
+{% endif %}
+{% if loginError %}
+    <div class="login-notice login-error">{{ loginError }}</div>
+{% endif %}
+{% if redirectTo and redirectTo != '/' %}
+    <div class="login-notice">Faça login para continuar para a página solicitada.</div>
+{% endif %}
+<form action="/login?redirect={{ redirectTo|url_encode }}" method="POST">
+<input type="hidden" name="redirect" value="{{ redirectTo }}">
+<div class="form-group">
+<label for="usuario">Nome para usuário *</label>
+<div class="input-wrapper">
+<i class="fas fa-user"></i>
+<input class="form-control" id="usuario" name="usuario" placeholder="Seu usuário" required="" type="text"/>
+</div>
+</div>
+<div class="form-group">
+<label for="senha">Senha *</label>
+<div class="input-wrapper">
+<i class="fas fa-lock"></i>
+<input class="form-control" id="senha" name="senha" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn-show-password" id="togglePassword" type="button">Mostrar senha</button>
+</div>
+<div class="options-row">
+<label class="checkbox-label">
+<input name="remember" type="checkbox"/> Lembrar-me
+                    </label>
+</div>
+<button class="btn-acessar" type="submit">Acessar</button>
+</form>
+<div class="login-footer">
+                Para acessar as áreas restritas, utilize login e senha.<br/>
+                Caso tenha dúvidas: <a href="mailto:comunicacao@siamfesp.org.br">comunicacao@siamfesp.org.br</a>
+</div>
+</div>
+</section>

@@ -1,0 +1,46 @@
+fields:
+  category:
+    label: Categoria
+    type: relation
+    nameFrom: name
+    emptyOption: Selecione uma categoria
+    required: true
+    span: left
+
+  is_published:
+    label: Publicado
+    type: switch
+    default: true
+    span: right
+
+  name:
+    label: Nome do associado
+    type: text
+    span: full
+    required: true
+
+  slug:
+    label: Slug
+    type: text
+    span: full
+    preset:
+      field: name
+      type: slug
+    comment: Gerado automaticamente a partir do nome, seguindo o padrão de URL.
+
+  image:
+    label: Imagem
+    type: mediafinder
+    mode: image
+    span: full
+
+  image_alt:
+    label: ALT da imagem
+    type: text
+    span: full
+
+  associate_link:
+    label: Link do associado
+    type: text
+    span: full
+    comment: "Informe a URL completa, por exemplo: https://site.com.br"

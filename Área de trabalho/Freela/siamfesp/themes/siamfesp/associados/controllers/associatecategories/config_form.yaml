@@ -1,0 +1,15 @@
+name: Categoria de Associado
+modelClass: Siamfesp\Associados\Models\AssociateCategory
+form: $/siamfesp/associados/models/associatecategory/fields.yaml
+toolbar:
+  buttons: form_toolbar
+
+defaultRedirect: siamfesp/associados/associatecategories
+
+create:
+  redirect: 'siamfesp/associados/associatecategories/update/:id'
+  redirectClose: siamfesp/associados/associatecategories
+
+update:
+  redirect: siamfesp/associados/associatecategories
+  redirectClose: siamfesp/associados/associatecategories

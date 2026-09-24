@@ -1,0 +1,640 @@
+url = "/"
+layout = "default"
+title = "Home"
+is_hidden = 0
+
+[bannerList]
+limit = 0
+==
+<?php
+use Siamfesp\Associados\Models\Associate;
+    use Siamfesp\Menu\Models\MenuItem;
+
+    function onStart()
+    {
+        $formatDatePt = function ($date, $withYear = true) {
+            if (!$date) {
+                return '';
+            }
+
+            $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+            if (!$ts) {
+                return '';
+            }
+
+            $meses = [1=>'janeiro',2=>'fevereiro',3=>'março',4=>'abril',5=>'maio',6=>'junho',7=>'julho',8=>'agosto',9=>'setembro',10=>'outubro',11=>'novembro',12=>'dezembro'];
+            $texto = date('d', $ts) . ' de ' . $meses[(int) date('n', $ts)];
+
+            return $withYear ? ($texto . ' de ' . date('Y', $ts)) : $texto;
+        };
+
+        $menuUrl = function ($slugs, $fallback = '#') {
+            $slugs = is_array($slugs) ? $slugs : [$slugs];
+            $slugs = array_values(array_filter(array_map(function ($value) {
+                $value = trim((string) $value);
+                $value = trim($value, '/');
+                return $value;
+            }, $slugs)));
+
+            if (!$slugs) {
+                return $fallback;
+            }
+
+            $item = MenuItem::query()
+                ->where('is_published', 1)
+                ->whereIn('slug', $slugs)
+                ->with(['parent', 'menu'])
+                ->orderBy('parent_id', 'desc')
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->first();
+
+            return $item && $item->frontend_url ? $item->frontend_url : $fallback;
+        };
+
+        $articleHomeUrl = function ($article, $fallbackCategory = 'imprensa') {
+            if (!$article) {
+                return '#';
+            }
+
+            $slug = trim((string) ($article->slug ?: $article->alias), '/');
+            if ($slug === '') {
+                $slug = \Illuminate\Support\Str::slug((string) $article->title);
+            }
+            if ($slug === '') {
+                $slug = (string) $article->id;
+            }
+
+            $categorySlug = $fallbackCategory ?: 'imprensa';
+            try {
+                if ($article->category) {
+                    $parent = $article->category->parent ?: null;
+                    if ($parent && trim((string) $parent->slug) !== '') {
+                        $categorySlug = trim((string) $parent->slug, '/');
+                    } elseif (trim((string) $article->category->slug) !== '') {
+                        $categorySlug = trim((string) $article->category->slug, '/');
+                    }
+                }
+            } catch (\Throwable $e) {
+            }
+
+            return '/' . trim($categorySlug, '/') . '/' . trim($slug, '/');
+        };
+
+        $formatMonthPt = function ($date) {
+            if (!$date) return '';
+            $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+            if (!$ts) return '';
+            $meses = [1=>'JAN',2=>'FEV',3=>'MAR',4=>'ABR',5=>'MAI',6=>'JUN',7=>'JUL',8=>'AGO',9=>'SET',10=>'OUT',11=>'NOV',12=>'DEZ'];
+            return $meses[(int) date('n', $ts)] ?? strtoupper(date('M', $ts));
+        };
+
+        $this['formatDatePt'] = $formatDatePt;
+        $this['formatMonthPt'] = $formatMonthPt;
+        $this['destaqueLinks'] = [
+            ['title' => 'Acordos Coletivos', 'icon' => 'fa-solid fa-file-signature', 'url' => $menuUrl(['acordos-coletivos'], '/destaque/acordos-coletivos')],
+            ['title' => 'Enquadramento', 'icon' => 'fa-solid fa-briefcase', 'url' => $menuUrl(['enquadramento', 'enquadramento-sindical'], '/destaque/enquadramento-sindical')],
+            ['title' => 'Eventos', 'icon' => 'fa-solid fa-calendar-day', 'url' => $menuUrl(['eventos'], '/imprensa/eventos')],
+            ['title' => 'Agenda', 'icon' => 'fa-solid fa-clipboard-list', 'url' => '/agenda'],
+            [
+                'title' => 'Parcerias',
+                'icon' => 'fa-solid fa-handshake',
+                'url' => '/parcerias-siamfesp',
+                'children' => [
+                    ['title' => 'Parcerias Siamfesp', 'url' => '/parcerias-siamfesp'],
+                    ['title' => 'Parcerias Fiesp', 'url' => '/parcerias-fiesp'],
+                ],
+            ],
+            ['title' => 'Vídeos', 'icon' => 'fa-solid fa-video', 'url' => '/videos'],
+        ];
+
+        $this['associatedCompanies'] = Associate::query()
+            ->where('is_published', 1)
+            ->whereNotNull('image')
+            ->where('image', '<>', '')
+            ->inRandomOrder()
+            ->limit(48)
+            ->get();
+
+        /*
+         * Destaques da Home
+         *
+         * Corrigido para:
+         * 1) buscar a última matéria de cada grupo/categoria;
+         * 2) ordenar os cards finais pela data da matéria, do mais recente para o mais antigo;
+         * 3) deixar a categoria "Imprensa - Programa de Qualidade" mais fácil de localizar,
+         *    mesmo que o ID/slug no banco esteja diferente.
+         */
+        $categoriasDestaqueHome = [
+            [
+                'label' => 'SIAMFESP EM AÇÃO',
+                'ids' => [25],
+                'slugs' => ['acontece', 'siamfesp-em-acao'],
+                'titles' => ['Siamfesp em Ação', 'SIAMFESP EM AÇÃO'],
+            ],
+            [
+                'label' => 'LEGISLAÇÃO',
+                'ids' => [29],
+                'slugs' => ['impresa-legislacao', 'imprensa-legislacao', 'legislacao'],
+                'titles' => ['Imprensa - Legislação', 'Legislação', 'LEGISLAÇÃO'],
+            ],
+            [
+                'label' => 'NOTÍCIAS',
+                'ids' => [36, 24],
+                'slugs' => ['destaque-de-noticias', 'noticias'],
+                'titles' => ['Notícias', 'NOTÍCIAS'],
+            ],
+            [
+                'label' => 'AVISOS',
+                'ids' => [38],
+                'slugs' => ['revistas-eletronicas-siamfesp-new', 'avisos', 'avisos-siamfesp'],
+                'titles' => ['Avisos  SIAMFESP', 'Avisos SIAMFESP', 'Avisos', 'AVISOS'],
+            ],
+            [
+                'label' => 'NORMALIZAÇÃO',
+                'ids' => [30, 31],
+                'slugs' => [
+                    'imprensa-programa-de-qualidade',
+                    'programa-de-qualidade',
+                    'programas-de-qualidade',
+                    'normalizacao',
+                    'normalização',
+                ],
+                'titles' => [
+                    'Imprensa - Programa de Qualidade',
+                    'Programa de Qualidade',
+                    'Programas de Qualidade',
+                    'Normalização',
+                    'NORMALIZAÇÃO',
+                ],
+            ],
+            [
+                'label' => 'INFORMATIVOS',
+                'ids' => [37],
+                'slugs' => ['informativo', 'informativos'],
+                'titles' => ['Informativo', 'Informativos', 'INFORMATIVOS'],
+            ],
+        ];
+
+        $categoryModel = new \Siamfesp\Artigos\Models\ArticleCategory;
+        $categoryTable = $categoryModel->getTable();
+
+        $resolverCategoriaIds = function (array $config) use ($categoryTable) {
+            $ids = array_filter(array_map('intval', $config['ids'] ?? []));
+            $slugs = array_values(array_filter(array_map(function ($value) {
+                return trim((string) $value);
+            }, $config['slugs'] ?? [])));
+
+            $titles = array_values(array_filter(array_map(function ($value) {
+                return trim((string) $value);
+            }, $config['titles'] ?? [])));
+
+            $query = \Siamfesp\Artigos\Models\ArticleCategory::query()
+                ->where(function ($q) use ($slugs, $titles, $categoryTable) {
+                    if ($slugs) {
+                        $q->orWhereIn('slug', $slugs);
+                    }
+
+                    if ($titles && \Schema::hasColumn($categoryTable, 'title')) {
+                        $q->orWhereIn('title', $titles);
+                    }
+
+                    if ($titles && \Schema::hasColumn($categoryTable, 'name')) {
+                        $q->orWhereIn('name', $titles);
+                    }
+                });
+
+            $categorias = $query->get();
+
+            foreach ($categorias as $categoria) {
+                $ids[] = (int) $categoria->id;
+            }
+
+            $ids = array_values(array_unique(array_filter($ids)));
+
+            if ($ids) {
+                $filhas = \Siamfesp\Artigos\Models\ArticleCategory::query()
+                    ->whereIn('parent_id', $ids)
+                    ->pluck('id')
+                    ->all();
+
+                foreach ($filhas as $idFilha) {
+                    $ids[] = (int) $idFilha;
+                }
+            }
+
+            return array_values(array_unique(array_filter($ids)));
+        };
+
+        $ultimosArtigos = collect();
+        $agora = date('Y-m-d H:i:s');
+
+        $articleModel = new \Siamfesp\Artigos\Models\Article;
+        $articleTable = $articleModel->getTable();
+
+        /*
+         * Data usada para ordenar:
+         * - publish_up quando existe;
+         * - updated_at como fallback;
+         * - created_at como último fallback.
+         */
+        $articleDateOrderSql = "COALESCE(NULLIF(NULLIF({$articleTable}.publish_up, ''), '0000-00-00 00:00:00'), {$articleTable}.updated_at, {$articleTable}.created_at)";
+
+        foreach ($categoriasDestaqueHome as $categoriaHome) {
+            $categoriaIds = $resolverCategoriaIds($categoriaHome);
+
+            if (!$categoriaIds) {
+                continue;
+            }
+
+            $artigo = \Siamfesp\Artigos\Models\Article::query()
+                ->with(['category', 'category.parent'])
+                ->whereIn('category_id', $categoriaIds)
+                ->where(function ($q) {
+                    $q->where('state', 1)
+                        ->orWhere('is_published', 1);
+                })
+                ->where(function ($q) use ($agora) {
+                    $q->whereNull('publish_up')
+                        ->orWhere('publish_up', '')
+                        ->orWhere('publish_up', '<=', $agora);
+                })
+                ->where(function ($q) use ($agora) {
+                    $q->whereNull('publish_down')
+                        ->orWhere('publish_down', '')
+                        ->orWhere('publish_down', '>=', $agora);
+                })
+                ->orderByRaw($articleDateOrderSql . ' desc')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($artigo) {
+                $dataArtigo = $artigo->publish_up ?: $artigo->updated_at ?: $artigo->created_at;
+
+                $artigo->date_pt = $formatDatePt($dataArtigo);
+                $artigo->home_date_sort = $dataArtigo ? strtotime((string) $dataArtigo) : 0;
+                $artigo->home_category_title = $categoriaHome['label'];
+                $artigo->home_frontend_url = $articleHomeUrl($artigo, 'imprensa');
+
+                $ultimosArtigos->push($artigo);
+            }
+        }
+
+        /*
+         * Esta linha é a principal correção visual:
+         * depois de pegar a última matéria de cada grupo, ordena os 6 cards pela data real.
+         */
+        $ultimosArtigos = $ultimosArtigos
+            ->sortByDesc(function ($item) {
+                return (int) ($item->home_date_sort ?: 0);
+            })
+            ->values();
+
+        $this['ultimosArtigos'] = $ultimosArtigos;
+
+        $ultimosEventos = \Siamfesp\Artigos\Models\Article::query()
+            ->with(['category', 'category.parent'])
+            ->where('state', 1)
+            ->where('category_id', 26)
+            ->orderByDesc('publish_up')
+            ->orderByDesc('id')
+            ->take(3)
+            ->get();
+
+        $ultimosEventos->each(function ($item) use ($formatDatePt, $articleHomeUrl) {
+            $item->date_pt = $formatDatePt($item->publish_up ?: $item->created_at);
+            $item->home_frontend_url = $articleHomeUrl($item, 'imprensa');
+        });
+
+        $this['ultimosEventos'] = $ultimosEventos;
+
+        $agendaEventos = collect();
+        if (class_exists('Siamfesp\\Agenda\\Models\\Event') && \Schema::hasTable('siamfesp_agenda_events')) {
+            $today = date('Y-m-d 00:00:00');
+
+            /*
+             * Na home não podemos buscar somente eventos futuros.
+             * Se o evento cadastrado já passou, a área ficava vazia e mostrava
+             * a mensagem "Agenda disponível para cadastro no CMS" mesmo existindo
+             * agenda cadastrada. Agora mostra os próximos eventos primeiro e,
+             * se não houver próximos, mostra os últimos eventos cadastrados.
+             */
+            $agendaEventos = \Siamfesp\Agenda\Models\Event::published()
+                ->orderByRaw("CASE WHEN event_date IS NULL THEN 2 WHEN event_date >= ? THEN 0 ELSE 1 END asc", [$today])
+                ->orderByRaw("CASE WHEN event_date >= ? THEN event_date END asc", [$today])
+                ->orderByRaw("CASE WHEN event_date < ? THEN event_date END desc", [$today])
+                ->orderByRaw('COALESCE(sort_order, 999999) asc')
+                ->orderByDesc('id')
+                ->take(12)
+                ->get();
+
+            $agendaEventos->each(function ($item) use ($formatMonthPt) {
+                $item->day_pt = $item->event_date ? date('d', strtotime((string) $item->event_date)) : '--';
+                $item->month_pt = $formatMonthPt($item->event_date);
+            });
+        }
+        $this['agendaEventos'] = $agendaEventos;
+
+        $featuredPartner = null;
+        if (class_exists('Siamfesp\Parcerias\Models\Partner') && \Schema::hasTable('siamfesp_parcerias_partners')) {
+            $featuredPartner = \Siamfesp\Parcerias\Models\Partner::published()
+                ->where('is_featured', 1)
+                ->orderByRaw('COALESCE(sort_order, 999999) asc')
+                ->orderBy('title', 'asc')
+                ->first();
+
+            if (!$featuredPartner) {
+                $featuredPartner = \Siamfesp\Parcerias\Models\Partner::published()
+                    ->ofType('siamfesp')
+                    ->orderByRaw('COALESCE(sort_order, 999999) asc')
+                    ->orderBy('title', 'asc')
+                    ->first();
+            }
+        }
+        $this['featuredPartner'] = $featuredPartner;
+
+        $homeVideos = collect();
+        $homeFeaturedVideo = null;
+        if (class_exists('Siamfesp\Videos\Models\Video') && \Schema::hasTable('siamfesp_videos_videos')) {
+            $homeVideos = \Siamfesp\Videos\Models\Video::published()
+                ->orderByDesc('is_featured')
+                ->orderByRaw('COALESCE(sort_order, 999999) asc')
+                ->orderByRaw('COALESCE(published_at, updated_at, created_at) desc')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get();
+
+            $homeFeaturedVideo = $homeVideos->first(function ($item) {
+                return (bool) $item->is_featured;
+            }) ?: $homeVideos->first();
+        }
+        $this['homeVideos'] = $homeVideos;
+        $this['homeFeaturedVideo'] = $homeFeaturedVideo;
+    }
+?>
+==
+{% component 'bannerList' %}
+<section class="quick-links-section home-destaques-menu">
+    <div class="container">
+        <div class="events-section-header" style="background-color: transparent; padding-top: 0;">
+            <h2 class="section-title">Destaques</h2>
+        </div>
+        <nav class="links-container-light">
+            <ul>
+                {% for link in destaqueLinks %}
+                    {% set hasChildren = link.children is defined and link.children|length %}
+                    <li class="{{ hasChildren ? 'has-submenu' : '' }}">
+                        <a href="{{ link.url }}" {% if link.target is defined %}target="{{ link.target }}" rel="noopener noreferrer"{% endif %}>
+                            <i class="{{ link.icon }}"></i>
+                            <span>{{ link.title }}{% if hasChildren %} <i class="fas fa-caret-down submenu-caret"></i>{% endif %}</span>
+                        </a>
+                        {% if hasChildren %}
+                            <ul class="submenu-links">
+                                {% for child in link.children %}
+                                    <li><a href="{{ child.url }}" {% if child.target is defined %}target="{{ child.target }}" rel="noopener noreferrer"{% endif %}>{{ child.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</section>
+<br/><br/><br/>
+
+<div class="container-noticias">
+    <div class="grid-noticias-iba">
+    {% for artigo in ultimosArtigos %}
+        <a href="{{ artigo.home_frontend_url ?: artigo.frontend_url }}" class="card-news-horizontal">
+            <div class="card-news-img">
+                {% set imagem = artigo.intro_image_url ?: artigo.fulltext_image_url %}
+                {% if imagem %}
+                    <img src="{{ imagem }}" alt="{{ artigo.image_intro_alt ?: artigo.title }}">
+                {% else %}
+                    <img src="{{ 'assets/images/foto.jpg'|theme }}" alt="{{ artigo.title }}">
+                {% endif %}
+            </div>
+
+            <div class="card-news-body">
+                <div class="card-news-date">
+                    <i class="fa-regular fa-calendar"></i>
+                    {{ artigo.date_pt }}
+                </div>
+
+                {% if artigo.category %}
+                    <span class="card-news-tag home-category-title">
+                        {{ artigo.home_category_title ?: (artigo.category.title ?: artigo.category.name) }}
+                    </span>
+                {% endif %}
+
+                <h3 class="card-news-titulo">
+                    {{ artigo.title }}
+                </h3>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+</div>
+<section class="secao-detalhe-blob" id="eventos" style="margin-top: 40px; padding-bottom: 60px;">
+    <div class="container-noticias" style="margin-top: 0;">
+        <div class="events-section-header">
+            <h2 class="section-title">Eventos</h2>
+            <p class="section-subtitle">Conectando conhecimento e oportunidades</p>
+        </div>
+        <div class="grid-eventos-home">
+                {% for evento in ultimosEventos %}
+
+            <a class="card-evento-vertical" href="{{ evento.home_frontend_url ?: evento.frontend_url }}">
+                <div class="card-evento-img-wrapper">
+                    {% set imagem1 = evento.intro_image_url ?: evento.fulltext_image_url %}
+                    {% if imagem1 %}
+                    <img src="{{ imagem1 }}" alt="{{ evento.image_intro_alt ?: evento.title }}">
+                {% else %}
+                    <img src="{{ 'assets/images/foto.jpg'|theme }}" alt="{{ evento.title }}">
+                {% endif %}
+
+                    <div class="card-icon-overlay"><i class="fas fa-microphone-alt"></i></div>
+                </div>
+                <div class="card-evento-body">
+                    <div class="card-evento-info">
+                        <div class="card-evento-date"><i class="far fa-calendar-alt"></i>{{ evento.date_pt }}</div>
+                        <h3 class="card-evento-title">{{ evento.title }}</h3>
+                    </div>
+                    <span class="card-evento-link-text">Inscreva-se <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<section class="secao-mista-agenda-parceiro" style="margin-top: 50px; margin-bottom: 50px;">
+    <div class="container-noticias">
+        <div class="grid-mista-agenda-parceiro">
+            <div class="col-parceiro">
+                    <h2 class="section-title-left">Parceiro em Destaque</h2>
+                    
+                    <a href="/novas-parceirias/parceiros" class="card-parceiro-vertical">
+                        <div class="parceiro-img-wrapper">
+                            <img src="/images/dst-1.png" alt="Parceiro">
+                        </div>
+                        <div class="parceiro-content">
+                            <span class="parceiro-tag">Parceria Estratégica</span>
+                            <h3 class="parceiro-title">Parceria SSA Brasil/Serasa e SIAMFESP</h3>
+                            <p class="parceiro-desc">Confira os benefícios exclusivos para associados e impulsione a gestão financeira da sua empresa.</p>
+                        </div>
+                    </a>
+                </div>
+            <div class="col-agenda" id="agenda">
+                <h2 class="section-title-left">Agenda do Setor</h2>
+                <div class="agenda-list-compact">
+                    {% if agendaEventos|length %}
+                        {% for agenda in agendaEventos %}
+                            <a class="agenda-item home-agenda-page-item" href="{{ agenda.frontend_url }}" data-agenda-index="{{ loop.index0 }}">
+                                <div class="mini-date"><span class="d">{{ agenda.day_pt }}</span><span class="m">{{ agenda.month_pt }}</span></div>
+                                <div class="agenda-info">
+                                    <h4>{{ agenda.title }}</h4>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ agenda.location ?: 'SIAMFESP' }}</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+
+                        {% if agendaEventos|length > 3 %}
+                            <div class="home-agenda-pagination" data-agenda-per-page="3">
+                                <button type="button" class="home-agenda-page-btn home-agenda-prev" aria-label="Eventos anteriores">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="home-agenda-page-status">1</span>
+                                <button type="button" class="home-agenda-page-btn home-agenda-next" aria-label="Próximos eventos">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <a class="home-agenda-all-link" href="/agenda">Ver agenda completa</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <a class="agenda-item" href="/agenda">
+                            <div class="mini-date"><span class="d">--</span><span class="m">CMS</span></div>
+                            <div class="agenda-info">
+                                <h4>Agenda disponível para cadastro no CMS</h4>
+                                <span><i class="fas fa-calendar-alt"></i> Cadastre eventos no módulo Agenda</span>
+                            </div>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="secao-detalhe-linhas" id="associe-se-home" style="padding-top: 20px;">
+    <div class="container-videos-cta">
+        <div class="container-videos-cta-inner">
+            <div class="events-section-header" style="padding-top: 0; padding-bottom: 30px !important;">
+                <h2 class="section-title">Associe-se e fortaleça sua indústria</h2>
+                <p class="section-subtitle">Junte-se a nós e impulsione o crescimento do seu negócio.</p>
+            </div>
+            <div class="banners-grid">
+                <a class="banner-large-card" href="/associe-se">
+                    <div class="banner-overlay-gradient"></div>
+                    <img alt="Associe-se" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&amp;w=1740&amp;auto-format&amp;fit=crop"/>
+                    <div class="banner-text-content">
+                        <h3>ASSOCIE-SE</h3>
+                    </div>
+                </a>
+                <a class="banner-large-card" href="/associados">
+                    <div class="banner-overlay-gradient"></div>
+                    <img alt="Conheça empresas" src="https://images.unsplash.com/photo-1531498860502-7c67cf02f657?q=80&amp;w=1740&amp;auto-format&amp;fit=crop"/>
+                    <div class="banner-text-content">
+                        <h3>CONHEÇA AS EMPRESAS ASSOCIADAS AO SIAMFESP.</h3>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="associadas-section">
+    <div class="events-section-header">
+        <h2 class="section-title">EMPRESAS ASSOCIADAS</h2>
+        <p class="section-subtitle">Empresas que fortalecem o setor.</p>
+    </div>
+    <div id="banco-de-logos" style="display: none;">
+        {% for company in associatedCompanies %}
+        {% if company.associate_link %}
+        <a href="{{ company.associate_link }}" target="_blank" rel="noopener noreferrer">
+            <img alt="{{ company.image_alt ?: company.name }}" src="{{ company.image|media }}"/>
+        </a>
+        {% else %}
+        <img alt="{{ company.image_alt ?: company.name }}" src="{{ company.image|media }}"/>
+        {% endif %}
+        {% else %}
+        <img alt="Nenhuma empresa associada cadastrada" src="{{ 'assets/images/s.png'|theme }}"/>
+        {% endfor %}
+    </div>
+    <div class="rows-container">
+        <div class="associadas-track scroll-left" id="track-linha-1"></div>
+        <div class="associadas-track scroll-right" id="track-linha-2"></div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var list = document.querySelector('.agenda-list-compact');
+    if (!list) {
+        return;
+    }
+
+    var items = Array.prototype.slice.call(list.querySelectorAll('.home-agenda-page-item'));
+    var pagination = list.querySelector('.home-agenda-pagination');
+    if (!items.length || !pagination) {
+        return;
+    }
+
+    var perPage = parseInt(pagination.getAttribute('data-agenda-per-page'), 10) || 3;
+    var totalPages = Math.ceil(items.length / perPage);
+    var currentPage = 1;
+    var prev = pagination.querySelector('.home-agenda-prev');
+    var next = pagination.querySelector('.home-agenda-next');
+    var status = pagination.querySelector('.home-agenda-page-status');
+
+    function renderAgendaPage() {
+        var start = (currentPage - 1) * perPage;
+        var end = start + perPage;
+
+        items.forEach(function (item, index) {
+            item.style.display = index >= start && index < end ? 'flex' : 'none';
+        });
+
+        if (status) {
+            status.textContent = currentPage + ' / ' + totalPages;
+        }
+
+        if (prev) {
+            prev.disabled = currentPage === 1;
+        }
+
+        if (next) {
+            next.disabled = currentPage === totalPages;
+        }
+    }
+
+    if (prev) {
+        prev.addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderAgendaPage();
+            }
+        });
+    }
+
+    if (next) {
+        next.addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderAgendaPage();
+            }
+        });
+    }
+
+    renderAgendaPage();
+});
+</script>

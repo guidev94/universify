@@ -1,0 +1,10 @@
+fields:
+    site_name:
+        label: Nome do site
+        type: text
+        default: Siamfesp
+        span: auto
+    contact_email:
+        label: E-mail de contato
+        type: text
+        span: auto

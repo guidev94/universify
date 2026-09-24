@@ -1,0 +1,6 @@
+name: Siamfesp
+code: siamfesp
+author: OpenAI
+homepage: ""
+description: "Tema Siamfesp convertido do projeto HTML para OctoberCMS"
+form: config/fields.yaml

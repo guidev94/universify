@@ -1,0 +1,10 @@
+<?php if ($model && $model->public_link): ?>
+    <div class="form-control" style="height:auto; min-height:38px; word-break:break-all;">
+        <a href="<?= e($model->public_link) ?>" target="_blank" rel="noopener">
+            <?= e($model->public_link) ?>
+        </a>
+    </div>
+    <p class="help-block">Esse é o link que a página Revista usa para abrir e baixar o PDF.</p>
+<?php else: ?>
+    <p class="help-block">Salve o documento com um PDF ou link externo para gerar o link público.</p>
+<?php endif ?>

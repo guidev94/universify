@@ -1,0 +1,110 @@
+<?= Form::open(['class' => 'layout siamfesp-internal-banner-form']) ?>
+
+    <div class="siamfesp-admin-form-wrap">
+        <div class="siamfesp-action-bar">
+            <?= $this->makePartial('form_toolbar') ?>
+        </div>
+
+        <div class="siamfesp-form-panel">
+            <?= $this->formRender() ?>
+        </div>
+    </div>
+
+<?= Form::close() ?>
+
+<style>
+    .siamfesp-internal-banner-form .siamfesp-admin-form-wrap {
+        max-width: 1120px;
+        margin: 22px auto 48px auto;
+        padding: 0 24px;
+    }
+
+    .siamfesp-internal-banner-form .siamfesp-action-bar {
+        background: #fff;
+        border: 1px solid #d8e0ea;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
+        margin: 0 0 18px 0;
+        padding: 12px 14px;
+        position: sticky;
+        top: 58px;
+        z-index: 50;
+    }
+
+    .siamfesp-internal-banner-form .siamfesp-action-bar [data-control="toolbar"] {
+        margin: 0 !important;
+    }
+
+    .siamfesp-internal-banner-form .siamfesp-action-bar .btn {
+        margin-right: 8px;
+        min-width: 92px;
+    }
+
+    .siamfesp-internal-banner-form .siamfesp-form-panel {
+        background: #fff;
+        border: 1px solid #d8e0ea;
+        border-radius: 10px;
+        box-shadow: 0 6px 22px rgba(15, 23, 42, .05);
+        overflow: hidden;
+        padding: 22px 24px 6px 24px;
+    }
+
+    .siamfesp-internal-banner-form .form-group {
+        margin-bottom: 18px;
+    }
+
+    .siamfesp-internal-banner-form .form-group.section-field {
+        background: #f7f9fc;
+        border-bottom: 1px solid #e5ebf2;
+        border-top: 1px solid #e5ebf2;
+        margin: 24px -24px 20px -24px;
+        padding: 16px 24px 14px 24px;
+    }
+
+    .siamfesp-internal-banner-form .form-group.section-field:first-child {
+        border-top: 0;
+        margin-top: -22px;
+    }
+
+    .siamfesp-internal-banner-form .field-section h4 {
+        color: #1f2937;
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+    }
+
+    .siamfesp-internal-banner-form .field-section p {
+        color: #6b7280;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .siamfesp-internal-banner-form label {
+        color: #243041;
+        font-weight: 600;
+    }
+
+    .siamfesp-internal-banner-form .form-control,
+    .siamfesp-internal-banner-form select.form-control,
+    .siamfesp-internal-banner-form textarea.form-control {
+        border-color: #cfd8e3;
+        border-radius: 6px;
+    }
+
+    .siamfesp-internal-banner-form .help-block,
+    .siamfesp-internal-banner-form .comment {
+        color: #68758a;
+        font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+        .siamfesp-internal-banner-form .siamfesp-admin-form-wrap {
+            margin-top: 14px;
+            padding: 0 12px;
+        }
+
+        .siamfesp-internal-banner-form .siamfesp-action-bar {
+            top: 0;
+        }
+    }
+</style>

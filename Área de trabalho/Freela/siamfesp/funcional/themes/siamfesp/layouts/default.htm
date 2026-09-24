@@ -1,0 +1,49 @@
+==
+function onStart()
+{
+    $this['menuPrincipal'] = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with([
+            'items' => function ($q) {
+                $q->whereNull('parent_id')
+                  ->where('is_published', 1)
+                  ->orderBy('sort_order')
+                  ->orderBy('id');
+            },
+            'items.children' => function ($q) {
+                $q->where('is_published', 1)
+                  ->orderBy('sort_order')
+                  ->orderBy('id');
+            }
+        ])
+        ->first();
+}
+==
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ this.page.meta_title ?: this.page.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="{{ 'assets/css/site.css'|theme }}" rel="stylesheet">
+    {% styles %}
+</head>
+<body>
+    {% partial 'site/header' %}
+    <main>
+        {% page %}
+    </main>
+    {% partial 'site/footer' %}
+    <a class="whatsapp-float" href="https://wa.me/5511985770180" target="_blank" rel="noopener noreferrer" aria-label="Fale com o SIAMFESP pelo WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <script src="{{ 'assets/js/site.js'|theme }}"></script>
+    {% framework extras %}
+    {% scripts %}
+</body>
+</html>

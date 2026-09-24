@@ -1,0 +1,12 @@
+scopes:
+  category:
+    label: Categoria
+    modelClass: Siamfesp\Associados\Models\AssociateCategory
+    nameFrom: name
+    conditions: category_id in (:filtered)
+  is_published:
+    label: Publicado
+    type: switch
+    conditions:
+      - is_published = 0
+      - is_published = 1

@@ -1,0 +1,17 @@
+<div data-control="toolbar" style="margin-bottom: 20px;">
+    <?php if (isset($this->vars['formModel']) && $this->vars['formModel'] && $this->vars['formModel']->exists): ?>
+        <button
+            type="button"
+            data-request="onDelete"
+            data-request-data="checked[]: '<?= $this->vars['formModel']->id ?>', redirect: 1"
+            data-request-confirm="Tem certeza que deseja excluir este consentimento?"
+            data-load-indicator="Excluindo..."
+            class="btn btn-danger oc-icon-trash-o">
+            Excluir
+        </button>
+    <?php endif ?>
+
+    <a href="<?= Backend::url('siamfesp/lgpd/consents') ?>" class="btn btn-default oc-icon-times">
+        Voltar
+    </a>
+</div>

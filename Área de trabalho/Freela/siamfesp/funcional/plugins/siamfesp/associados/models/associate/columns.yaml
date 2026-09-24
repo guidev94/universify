@@ -1,0 +1,30 @@
+columns:
+  id:
+    label: ID
+    searchable: true
+    width: 80px
+
+  name:
+    label: Nome do associado
+    searchable: true
+
+  category[name]:
+    label: Categoria
+
+  slug:
+    label: Slug
+    searchable: true
+
+  associate_link:
+    label: Link
+
+  is_published:
+    label: Publicado
+    type: switch
+
+  created_at:
+    label: Criado em
+    type: datetime
+
+  sort_order:
+    label: Ordem

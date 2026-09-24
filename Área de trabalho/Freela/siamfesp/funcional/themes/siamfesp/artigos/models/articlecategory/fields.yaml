@@ -1,0 +1,19 @@
+fields:
+  title:
+    label: Título
+    type: text
+    span: left
+    required: true
+
+  parent:
+    label: Categoria pai
+    type: relation
+    nameFrom: title
+    emptyOption: Sem categoria pai
+    span: right
+
+  description:
+    label: Descrição
+    type: textarea
+    size: large
+    span: full

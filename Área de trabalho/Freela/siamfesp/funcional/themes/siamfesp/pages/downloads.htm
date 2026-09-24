@@ -1,0 +1,174 @@
+url = "/servicos/download-gratuito"
+layout = "default"
+title = "Download Gratuito"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+function onStart()
+{
+    $category = \Siamfesp\Artigos\Models\ArticleCategory::query()
+        ->where('slug', 'download-gratuito')
+        ->when(\Schema::hasColumn('siamfesp_articles_categories', 'is_published'), function ($q) {
+            $q->where('is_published', 1);
+        })
+        ->first();
+
+    if (!$category) {
+        return \Response::make('Categoria de downloads não encontrada', 404);
+    }
+
+    $publishedScope = function($q) {
+        if (\Schema::hasColumn('siamfesp_articles', 'is_published')) {
+            $q->where('is_published', 1);
+        } else {
+            $q->where('state', 1);
+        }
+    };
+
+    $menuPrincipal = \Siamfesp\Menu\Models\Menu::query()
+        ->where('slug', 'principal')
+        ->where('is_published', 1)
+        ->with(['items' => function ($q) {
+            $q->whereNull('parent_id')
+              ->where('is_published', 1)
+              ->orderBy('sort_order')
+              ->orderBy('id');
+        }, 'items.children' => function ($q) {
+            $q->where('is_published', 1)
+              ->orderBy('sort_order')
+              ->orderBy('id');
+        }])
+        ->first();
+
+    $currentMenuParent = null;
+    $secondMenuItems = collect();
+
+    if ($menuPrincipal && $menuPrincipal->items) {
+        $currentMenuParent = $menuPrincipal->items->first(function($item) {
+            return $item->slug === 'servicos';
+        });
+
+        if ($currentMenuParent) {
+            $secondMenuItems = $currentMenuParent->children;
+        }
+    }
+
+    $articles = \Siamfesp\Artigos\Models\Article::query()
+        ->where('category_id', $category->id)
+        ->where($publishedScope)
+        ->orderByRaw('COALESCE(sort_order, 999999) asc')
+        ->orderBy('publish_up', 'desc')
+        ->orderBy('id', 'desc')
+        ->paginate(12);
+
+    $this['category'] = $category;
+    $this['articles'] = $articles;
+    $this['currentMenuParent'] = $currentMenuParent;
+    $this['secondMenuItems'] = $secondMenuItems;
+    $this['bannerTitle'] = $category->title ?? 'Download Gratuito';
+    $this['bannerDescription'] = $category->description ?? '';
+
+    $this->page->title = $category->title ?: 'Download Gratuito';
+    $this->page->meta_title = $category->title ?: 'Download Gratuito';
+    $this->page->meta_description = $category->description ?? 'Downloads';
+}
+?>
+==
+<div class="banner-container">
+{% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ bannerTitle }}</strong></h1>
+            <div class="divider"></div>
+            {% if bannerDescription %}
+                <p>{{ bannerDescription|striptags }}</p>
+            {% else %}
+                <p>{{ bannerTitle|upper }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if secondMenuItems|length %}
+<div class="download">
+    <div class="downloads-strip-wrap">
+        <div class="downloads-strip">
+            {% for item in secondMenuItems|slice(0,5) %}
+                <a class="dl-item{% if loop.last %} is-cta{% endif %}" href="{{ item.frontend_url ?: '#' }}" {% if item.target_blank %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="dl-ic"><i class="bi {% if loop.index == 1 %}bi-bar-chart-line{% elseif loop.index == 2 %}bi-people{% elseif loop.index == 3 %}bi-receipt{% elseif loop.index == 4 %}bi-journals{% else %}bi-cloud-download{% endif %}"></i></span>
+                    <span class="dl-txt">
+                        <span class="dl-title">{{ item.title }}</span>
+                        <span class="dl-sub">&nbsp;</span>
+                    </span>
+                    {% if loop.last %}
+                        <span class="dl-cta"><i class="bi bi-arrow-right"></i> Acessar</span>
+                    {% else %}
+                        <span class="dl-arrow"><i class="bi bi-chevron-right"></i></span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<section>
+    <div class="container-noticias" style="padding-top: 40px;">
+        <div class="events-section-header">
+            <h2 class="section-title">{{ category.title }}</h2>
+            {% if category.description %}
+                <p class="section-subtitle">{{ category.description|striptags }}</p>
+            {% endif %}
+        </div>
+
+        {% if articles|length %}
+            <div class="download-list-page">
+                {% for item in articles %}
+                    {% set articleSlug = item.slug ?: item.alias %}
+                    {% set articleUrl = '/servicos/' ~ articleSlug %}
+                    {% set summary = item.metadesc ?: item.introtext %}
+                    <article class="download-list-card">
+                        <a class="download-list-card__thumb" href="{{ articleUrl }}">
+                            {% if item.intro_image_url %}
+                                <img src="{{ item.intro_image_url | media }}" alt="{{ item.image_intro_alt ?: item.title }}">
+                            {% else %}
+                                <div class="download-list-card__placeholder">
+                                    <i class="bi bi-file-earmark-arrow-down"></i>
+                                </div>
+                            {% endif %}
+
+                            {% if item.publish_up %}
+                                <div class="download-list-card__date">
+                                    <span>{{ item.publish_up|date('d') }}</span>
+                                    <small>{{ item.publish_up|date('M') }}</small>
+                                    <strong>{{ item.publish_up|date('Y') }}</strong>
+                                </div>
+                            {% endif %}
+                        </a>
+
+                        <div class="download-list-card__content">
+                            <h3><a href="{{ articleUrl }}">{{ item.title }}</a></h3>
+                            {% if summary %}
+                                <p>{{ summary|striptags|slice(0, 190) }}{% if summary|striptags|length > 190 %}...{% endif %}</p>
+                            {% endif %}
+                        </div>
+
+                        <a class="download-list-card__action" href="{{ articleUrl }}" aria-label="Abrir {{ item.title }}">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+            {% if articles.lastPage and articles.lastPage > 1 %}
+                <div class="pagination-wrap">{{ articles.render|raw }}</div>
+            {% endif %}
+        {% else %}
+            <div class="article-page-card" style="max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 30px;">
+                Nenhum download publicado foi encontrado nesta categoria.
+            </div>
+        {% endif %}
+    </div>
+</section>

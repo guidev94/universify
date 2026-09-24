@@ -1,0 +1,5 @@
+title: Reordenar Temas
+modelClass: Siamfesp\Pdf\Models\Theme
+nameFrom: title
+toolbar:
+    buttons: reorder_toolbar

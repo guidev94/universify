@@ -1,0 +1,32 @@
+fields:
+    name:
+        label: Nome
+        type: text
+        span: left
+        required: true
+
+    usuario:
+        label: Usuário do site
+        type: text
+        span: right
+        required: true
+        comment: 'Este usuário é somente para o login do site. Não é o mesmo usuário do /admin.'
+
+    email:
+        label: E-mail
+        type: text
+        span: left
+        comment: 'Opcional. Também pode ser usado para entrar no login do site.'
+
+    senha:
+        label: Senha
+        type: password
+        span: right
+        comment: 'Ao editar, deixe em branco para manter a senha atual.'
+
+    is_active:
+        label: Ativo
+        type: switch
+        span: left
+        default: true
+        comment: 'Desative para bloquear o acesso sem excluir o cadastro.'

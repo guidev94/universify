@@ -1,0 +1,122 @@
+url = "/associados/:categoria?"
+layout = "default"
+title = "Associados"
+is_hidden = 0
+
+[internalBanner]
+defaultImage = "https://www.siamfesp.org.br/images/banners/banner-servicos2.jpg"
+==
+<?php
+use Siamfesp\Associados\Models\Associate;
+use Siamfesp\Associados\Models\AssociateCategory;
+
+function onStart()
+{
+    $categoriaSlug = trim((string) $this->param('categoria'));
+
+    $categorias = AssociateCategory::query()
+        ->where('is_published', 1)
+        ->orderBy('sort_order')
+        ->orderBy('name')
+        ->get();
+
+    $categoriaAtual = null;
+
+    if ($categoriaSlug !== '') {
+        $categoriaAtual = AssociateCategory::query()
+            ->where('is_published', 1)
+            ->where('slug', $categoriaSlug)
+            ->first();
+
+        if (!$categoriaAtual) {
+            return \Response::make('Categoria de associado não encontrada', 404);
+        }
+    }
+
+    $associadosQuery = Associate::query()
+        ->where('is_published', 1)
+        ->whereNotNull('image')
+        ->where('image', '<>', '')
+        ->with('category')
+        ->orderBy('name');
+
+    if ($categoriaAtual) {
+        $associadosQuery->where('category_id', $categoriaAtual->id);
+        $this->page->meta_title = $categoriaAtual->name . ' - Associados';
+    } else {
+        $this->page->meta_title = 'Associados';
+    }
+
+    $tituloPagina = $categoriaAtual ? $categoriaAtual->name : 'Empresas Associadas';
+    $subtituloPagina = $categoriaAtual ? 'Empresas associadas da categoria selecionada.' : 'Conheça as empresas associadas ao SIAMFESP.';
+
+    $this['categoriasAssociados'] = $categorias;
+    $this['categoriaAtual'] = $categoriaAtual;
+    $this['associados'] = $associadosQuery->paginate(24);
+    $this['internalBannerFallbackEyebrow'] = 'Associados';
+    $this['internalBannerFallbackTitle'] = $tituloPagina;
+    $this['internalBannerFallbackDescription'] = $subtituloPagina;
+}
+?>
+==
+{% set tituloPagina = categoriaAtual ? categoriaAtual.name : 'Empresas Associadas' %}
+{% set subtituloPagina = categoriaAtual ? 'Empresas associadas da categoria selecionada.' : 'Conheça as empresas associadas ao SIAMFESP.' %}
+
+<div class="banner-container">
+    {% component 'internalBanner' %}
+        <div class="hero-overlay"></div>
+        <div class="banner-content">
+            <h1><strong>{{ tituloPagina }}</strong></h1>
+            <div class="divider"></div>
+                <p>{{ subtituloPagina }}</p>
+        </div>
+    </div>
+</div>
+
+<section class="associate-page-section">
+    <div class="container">
+        <div class="events-section-header associate-page-header">
+            <h2 class="section-title">Junte-se ao SIAMFESP e tenha acesso a informações, benefícios e representatividade para o seu segmento.</h2>
+            <a href="/associe-se" class="associate-cta-btn">Quero me associar</a>
+        </div>
+
+        {% if categoriasAssociados.count %}
+        <section class="internal-shortcuts internal-shortcuts--inline associate-shortcuts">
+            <div class="internal-shortcuts-grid">
+                {% for categoria in categoriasAssociados %}
+                    <a href="{{ 'associados'|page({ categoria: categoria.slug }) }}" class="internal-shortcut-card {{ categoriaAtual and categoriaAtual.id == categoria.id ? 'is-active' : '' }}">
+                        <span class="internal-shortcut-icon"><i class="bi {% if loop.index == 1 %}bi-building{% elseif loop.index == 2 %}bi-grid{% elseif loop.index == 3 %}bi-shield-check{% elseif loop.index == 4 %}bi-droplet{% else %}bi-boxes{% endif %}"></i></span>
+                        <span class="internal-shortcut-label">{{ categoria.name }}</span>
+                        <span class="internal-shortcut-arrow"><i class="bi bi-chevron-right"></i></span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if associados.count %}
+        <div class="associate-grid">
+            {% for associado in associados %}
+                {% set cardTag = associado.associate_link ? 'a' : 'div' %}
+                <{{ cardTag }}
+                    class="associate-card"
+                    {% if associado.associate_link %}href="{{ associado.associate_link }}" target="_blank" rel="noopener noreferrer"{% endif %}
+                >
+                    <div class="associate-card-logo-wrap">
+                        <img src="{{ associado.image|media }}" alt="{{ associado.image_alt ?: associado.name }}" loading="lazy">
+                    </div>
+                    <div class="associate-card-name">{{ associado.name }}</div>
+                </{{ cardTag }}>
+            {% endfor %}
+        </div>
+        {% if associados.lastPage and associados.lastPage > 1 %}
+            <div class="pagination-wrap">{{ associados.render|raw }}</div>
+        {% endif %}
+        {% else %}
+        <div class="associate-empty-state">
+            <h3>Nenhum associado encontrado</h3>
+            <p>Publique associados com imagem no painel para exibir nesta página.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
