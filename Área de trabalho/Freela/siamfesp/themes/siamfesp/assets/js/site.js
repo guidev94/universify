@@ -329,6 +329,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    document.querySelectorAll('.mobile-menu-logo').forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 1024) {
+                closeMobileMenu();
+            }
+        });
+    });
+
     document.addEventListener('keyup', function (event) {
         if (event.key === 'Escape') {
             closeMobileMenu();

@@ -6449,6 +6449,22 @@ main {
     display: none;
 }
 
+.mobile-menu-close,
+.mobile-menu-social,
+.mobile-menu-drawer-head {
+    display: none !important;
+}
+
+@media (min-width: 1025px) {
+    .mobile-menu-close,
+    .mobile-menu-social,
+    .mobile-menu-drawer-head {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
 @media (max-width: 1024px) {
     header {
         position: relative !important;
@@ -6462,19 +6478,31 @@ main {
 
     .header-top {
         height: auto !important;
-        min-height: 78px !important;
-        padding: 10px 70px 10px 18px !important;
+        min-height: 92px !important;
+        padding: 16px 72px 16px 18px !important;
+        align-items: center !important;
         background: #fff !important;
         border-bottom: 3px solid #d71920 !important;
     }
 
     .brand-area {
         min-width: 0 !important;
-        gap: 10px !important;
+        gap: 8px !important;
+        align-items: center !important;
+        padding: 2px 0 !important;
+    }
+
+    .brand-area .logo {
+        display: flex !important;
+        align-items: center !important;
+        line-height: 0 !important;
     }
 
     .brand-area .logo img {
-        max-height: 54px !important;
+        max-height: 52px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
     }
 
     .brand-area .slogan {
@@ -6671,8 +6699,38 @@ main {
         border-top: 1px solid #eef2f7 !important;
     }
 
-    .mobile-menu-close {
+    .mobile-menu-close,
+    .mobile-menu-drawer-head {
         display: none !important;
+    }
+
+    body.menu-aberto .mobile-menu-drawer-head {
+        display: flex !important;
+        align-items: center !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 68px !important;
+        padding: 0 72px 0 18px !important;
+        box-sizing: border-box !important;
+        background: #fff !important;
+        border-bottom: 1px solid #eef2f7 !important;
+        z-index: 11012 !important;
+    }
+
+    body.menu-aberto .mobile-menu-logo {
+        display: inline-flex !important;
+        align-items: center !important;
+        line-height: 0 !important;
+        text-decoration: none !important;
+    }
+
+    body.menu-aberto .mobile-menu-logo img {
+        max-height: 46px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
     }
 
     body.menu-aberto .mobile-menu-close {
@@ -6752,8 +6810,8 @@ main {
 
 @media (max-width: 575px) {
     .header-top {
-        padding-left: 14px !important;
-        padding-right: 64px !important;
+        min-height: 88px !important;
+        padding: 14px 64px 14px 14px !important;
     }
 
     .brand-area .logo img {
@@ -6784,82 +6842,129 @@ main {
 }
 
 @media (max-width: 1024px) {
-    .banner-container {
-        min-height: 420px !important;
+    .banner-container:not(.banner-container-image-only) {
+        display: block !important;
+        min-height: clamp(280px, 50svh, 360px) !important;
+        height: clamp(280px, 50svh, 360px) !important;
+        max-height: 68svh !important;
+        touch-action: pan-y !important;
     }
 
-    .hero-slide {
-        min-height: 420px !important;
-        background-position: center center !important;
+    .banner-container:not(.banner-container-image-only) .hero-slide {
+        min-height: 100% !important;
+        height: 100% !important;
+        background-position: center 35% !important;
+        background-size: cover !important;
+        align-items: flex-end !important;
+        touch-action: pan-y !important;
+    }
+
+    .banner-container:not(.banner-container-image-only) .hero-slide .hero-overlay {
+        background: linear-gradient(
+            to top,
+            rgba(12, 12, 14, .88) 0%,
+            rgba(12, 12, 14, .52) 42%,
+            rgba(12, 12, 14, .08) 100%
+        ) !important;
+    }
+
+    .banner-container:not(.banner-container-image-only) .hero-slide .banner-full-link {
+        touch-action: pan-y !important;
     }
 
     .banner-content {
         width: min(100% - 32px, 860px) !important;
-        margin: 0 auto !important;
-        padding-top: 74px !important;
+        margin: 0 auto 0 0 !important;
+        margin-top: 0 !important;
+        padding: 0 16px 78px !important;
         text-align: left !important;
+        box-sizing: border-box !important;
     }
 
-    .banner-content h1,
+    .banner-content h1 {
+        font-size: clamp(1.05rem, 3.6vw, 1.35rem) !important;
+        line-height: 1.15 !important;
+    }
+
     .banner-content h1 strong {
-        font-size: clamp(2.2rem, 6vw, 4rem) !important;
+        font-size: clamp(1.85rem, 7.2vw, 2.45rem) !important;
         line-height: .98 !important;
+        margin-top: 2px !important;
     }
 
     .banner-content p {
-        max-width: 640px !important;
+        max-width: 100% !important;
         padding: 0 !important;
-        font-size: 1rem !important;
-    }
-
-    .hero-nav {
-        right: 24px !important;
-        bottom: 26px !important;
-        transform: none !important;
-    }
-
-    .hero-btn {
-        width: 46px !important;
-        height: 46px !important;
-    }
-}
-
-@media (max-width: 767px) {
-    .banner-container {
-        min-height: 360px !important;
-    }
-
-    .hero-slide {
-        min-height: 360px !important;
-    }
-
-    .banner-content {
-        padding-top: 56px !important;
-        text-align: left !important;
-    }
-
-    .banner-content h1,
-    .banner-content h1 strong {
-        font-size: clamp(2rem, 10vw, 3rem) !important;
+        margin-top: 8px !important;
+        font-size: .88rem !important;
+        line-height: 1.45 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
     }
 
     .banner-content .divider,
-    .divider {
-        width: 72px !important;
-        height: 4px !important;
-        margin-left: 0 !important;
+    .banner-container:not(.banner-container-image-only) .divider {
+        width: 56px !important;
+        height: 3px !important;
+        margin: 10px 0 8px !important;
+    }
+
+    .banner-content .btn-saiba-mais {
+        margin-top: 10px !important;
+        padding: 10px 20px !important;
+        font-size: .88rem !important;
     }
 
     .hero-nav {
         left: 16px !important;
         right: auto !important;
-        bottom: 20px !important;
+        bottom: 18px !important;
+        transform: none !important;
         gap: 10px !important;
     }
 
     .hero-btn {
-        width: 42px !important;
-        height: 42px !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: .95rem !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .banner-container:not(.banner-container-image-only) {
+        min-height: clamp(250px, 46svh, 320px) !important;
+        height: clamp(250px, 46svh, 320px) !important;
+        max-height: 62svh !important;
+    }
+
+    .banner-content {
+        padding-bottom: 72px !important;
+    }
+
+    .banner-content h1 strong {
+        font-size: clamp(1.65rem, 9vw, 2.15rem) !important;
+    }
+
+    .hero-nav {
+        left: 14px !important;
+        bottom: 14px !important;
+    }
+
+    .hero-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    .banner-container.banner-container-image-only {
+        aspect-ratio: 4 / 3 !important;
+        max-height: 50svh !important;
+        margin-bottom: 20px !important;
+    }
+
+    .banner-container.banner-container-image-only .banner-image-only-img {
+        object-fit: cover !important;
     }
 }
 
@@ -8086,4 +8191,17 @@ span.internal-shortcut-label {
 
 figure.article-main-figure {
     display: none;
+}
+
+/* Mobile: neutraliza regras legadas do banner (600px / margin-top 100px) */
+@media (max-width: 1024px) {
+    .banner-container:not(.banner-container-image-only) {
+        min-height: clamp(280px, 50svh, 360px) !important;
+        height: clamp(280px, 50svh, 360px) !important;
+    }
+
+    .banner-container:not(.banner-container-image-only) .banner-content {
+        margin-top: 0 !important;
+        text-align: left !important;
+    }
 }
