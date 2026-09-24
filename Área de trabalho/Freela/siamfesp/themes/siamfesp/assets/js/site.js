@@ -259,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /* SIAMFESP - ajustes responsivos finais do frontend */
 document.addEventListener('DOMContentLoaded', function () {
     var menuToggle = document.getElementById('mobile-menu-toggle');
+    var menuClose = document.getElementById('mobile-menu-close');
     var menuLinks = document.querySelectorAll('.main-menu a');
 
     function closeMobileMenu() {
@@ -266,9 +267,21 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.overflow = '';
     }
 
+    if (menuClose) {
+        menuClose.addEventListener('click', closeMobileMenu);
+    }
+
     menuLinks.forEach(function (link) {
         link.addEventListener('click', function () {
             if (window.innerWidth <= 1024 && !link.parentElement.querySelector('ul')) {
+                closeMobileMenu();
+            }
+        });
+    });
+
+    document.querySelectorAll('.mobile-menu-social a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 1024) {
                 closeMobileMenu();
             }
         });

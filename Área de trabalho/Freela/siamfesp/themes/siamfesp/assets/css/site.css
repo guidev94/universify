@@ -6580,6 +6580,82 @@ main {
         font-size: .92rem !important;
         font-weight: 700 !important;
     }
+
+    .mobile-menu-close {
+        display: none !important;
+    }
+
+    body.menu-aberto .mobile-menu-close {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: fixed !important;
+        top: 20px !important;
+        right: 18px !important;
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        border: 1px solid #e4e8f0 !important;
+        border-radius: 12px !important;
+        background: #f5f7fb !important;
+        color: #263247 !important;
+        font-size: 1.25rem !important;
+        cursor: pointer !important;
+        z-index: 11015 !important;
+        box-shadow: 0 4px 12px rgba(16, 24, 40, .08) !important;
+        transition: background-color .2s ease, color .2s ease, transform .2s ease !important;
+    }
+
+    body.menu-aberto .mobile-menu-close:hover,
+    body.menu-aberto .mobile-menu-close:focus-visible {
+        background: #fff4f3 !important;
+        color: #d71920 !important;
+        outline: none !important;
+    }
+
+    body.menu-aberto .mobile-menu-close:active {
+        transform: scale(.96) !important;
+    }
+
+    body.menu-aberto .mobile-menu-toggle {
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    .mobile-menu-social {
+        display: none !important;
+    }
+
+    body.menu-aberto .mobile-menu-social {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 14px !important;
+        margin-top: 28px !important;
+        padding-top: 22px !important;
+        border-top: 1px solid #e4e8f0 !important;
+    }
+
+    body.menu-aberto .mobile-menu-social__label {
+        font-size: .78rem !important;
+        font-weight: 800 !important;
+        letter-spacing: .08em !important;
+        text-transform: uppercase !important;
+        color: #6b7280 !important;
+    }
+
+    body.menu-aberto .mobile-menu-social .social-icons-header {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+
+    body.menu-aberto .mobile-menu-social .social-icons-header a {
+        width: 46px !important;
+        height: 46px !important;
+        font-size: 1.12rem !important;
+        box-shadow: 0 4px 12px rgba(16, 24, 40, .08) !important;
+    }
 }
 
 @media (max-width: 575px) {

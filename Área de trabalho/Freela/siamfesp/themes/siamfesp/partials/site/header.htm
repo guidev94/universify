@@ -9,13 +9,7 @@
 <div class="slogan">Trabalhando para o futuro de nossas empresas</div>
 </div>
 <div class="actions-area">
-<div class="social-icons-header">
-<a aria-label="Facebook" href="https://www.facebook.com/siamfesp.org.br/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-<a aria-label="Twitter" href="https://x.com/siamfesp" target="_blank"><i class="fab fa-x-twitter"></i></a>
-<a aria-label="YouTube" href="https://www.youtube.com/channel/UCS1fhaYqZO1ijIOJwVq806A/featured" target="_blank"><i class="fab fa-youtube"></i></a>
-<a aria-label="LinkedIn" href="https://www.linkedin.com/company/sindicato-siamfesp/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-<a aria-label="Instagram" href="https://www.instagram.com/siamfesp/" target="_blank"><i class="fab fa-instagram"></i></a>
-</div>
+{% partial 'site/social-icons-header' %}
 <form class="search-bar-header" action="/busca" method="get">
 <input name="q" placeholder="Pesquisar..." type="text" aria-label="Pesquisar no site"/>
 <button type="submit" aria-label="Pesquisar"><i class="fas fa-search"></i></button>
@@ -51,6 +45,9 @@
 </div>
 </div>
 <div class="nav-bar-wrapper">
+<button type="button" class="mobile-menu-close" id="mobile-menu-close" aria-label="Fechar menu">
+<i class="fas fa-times" aria-hidden="true"></i>
+</button>
 <div class="container">
 <nav class="main-menu">
 <ul>
@@ -92,6 +89,10 @@
     {% endif %}
 </ul>
 </nav>
+<div class="mobile-menu-social" aria-label="Redes sociais">
+<span class="mobile-menu-social__label">Siga-nos</span>
+{% partial 'site/social-icons-header' %}
+</div>
 </div>
 </div>
 </header>
