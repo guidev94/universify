@@ -67,13 +67,24 @@
             {% set iconClass = 'fas fa-bullhorn' %}
         {% endif %}
 
-        <li>
+        <li{% if item.children.count %} class="menu-item-has-children"{% endif %}>
+            {% if item.children.count %}
+            <div class="mobile-menu-item-head">
+                <a href="{{ item.frontend_url ?: '#' }}"{% if item.target_blank %} target="_blank" rel="noopener noreferrer"{% endif %}{% if item.css_class %} class="{{ item.css_class }}"{% endif %}>
+                    <i class="{{ iconClass }}"></i> {{ item.title }}
+                </a>
+                <button type="button" class="mobile-submenu-toggle" aria-expanded="false" aria-label="Expandir {{ item.title }}">
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            </div>
+            {% else %}
             <a href="{{ item.frontend_url ?: '#' }}"{% if item.target_blank %} target="_blank" rel="noopener noreferrer"{% endif %}{% if item.css_class %} class="{{ item.css_class }}"{% endif %}>
                 <i class="{{ iconClass }}"></i> {{ item.title }}
             </a>
+            {% endif %}
 
             {% if item.children.count %}
-                <ul>
+                <ul class="mobile-submenu">
                     {% for child in item.children %}
                             {% if child.is_visible %}
                         <li>
