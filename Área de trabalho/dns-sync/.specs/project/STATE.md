@@ -1,21 +1,18 @@
 # State: DNS Sync
 
 ## Decisions
-- **UI Inspiration:** Airbnb (minimalist, clean, rounded corners, soft shadows, focus on typography).
-- **Core DNS Providers:** Google (8.8.8.8) and Cloudflare (1.1.1.1).
-- **Project Methodology:** TLC Spec-Driven.
-- **State Management:** Riverpod.
-- **Proxy APIs:** Using ProxyScrape V2 API.
-- **DNS/Proxy Implementation:** Will use a local VPN-based approach for maximum compatibility on Android/iOS.
+- **UI Aesthetic:** Airbnb-inspired minimal glassmorphism, responsive light/dark themes, tactile microinteractions.
+- **Architecture:** Clean Layered Architecture with Riverpod 2.0 State Management.
+- **Native Android Forwarder:** Kotlin-based high-performance user-space DNS packet forwarder using protected `DatagramSocket` over `VpnService` TUN interface without breaking standard IPv4/IPv6 web traffic.
+- **Proxy Handling:** Android `VpnService.setHttpProxy` + Dart `HttpOverrides` global client proxying.
+- **Notifications:** Android Foreground Service persistent notification with quick "Desconectar" action + Flutter Local Notifications.
+- **Testing:** 100% automated unit and widget test coverage with mocked HTTP responses.
+- **Deployment:** Direct ADB deploy and verification.
 
-## Blockers
-- **Mobile OS Permissions:** Changing DNS/Proxy system-wide is restricted. Verified that a VPN-based approach is necessary.
-
-## Todos
-- [x] Research free proxy APIs.
-- [ ] Determine best Flutter package for DNS/VPN management.
-- [ ] Implement Airbnb UI components.
-
-## Deferred Ideas
-- Custom DNS entry.
-- Proxy speed testing.
+## Current Milestone
+- [x] Spec-Driven Feature Architecture & Design
+- [ ] Native Kotlin DNS Forwarder + Proxy Implementation
+- [ ] Notification System & Real Visual Feedback
+- [ ] Beautiful Home Widgets
+- [ ] Automated Unit Tests
+- [ ] ADB Rebuild & Device Verification

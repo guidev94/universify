@@ -1,44 +1,23 @@
-# Design: Core DNS & Proxy Management
+# Architecture & Design: DNS & Proxy with Native Android Forwarder
 
-## Architecture
-The app will follow a Clean Architecture / Layered approach:
-- **Presentation:** Flutter Widgets, Riverpod Providers for UI state.
-- **Domain:** Models for DNS Provider, Proxy, and use cases (ToggleDNS, FetchProxies).
-- **Data:** Repository implementations fetching from Proxy APIs and interacting with native platform channels for DNS/VPN.
+## Native Architecture (Android Kotlin)
+1. **`MyVpnService`**:
+   - Manages TUN virtual interface via `VpnService.Builder`.
+   - Adds route for DNS server IPs (`/32`) or sets HTTP proxy via `setHttpProxy` (API 29+).
+   - Runs a lightweight background thread (`DnsPacketForwarder`) reading UDP port 53 packets from TUN `FileDescriptor`.
+   - Protects `DatagramSocket` via `protect(socket)` to bypass the VPN tunnel and communicate directly with upstream DNS (Google, Cloudflare, etc.).
+   - Reconstructs IPv4 UDP response packets with valid checksums and writes back to TUN `FileOutputStream`.
+   - Manages Android Foreground Service Notification with Action Button ("Desconectar") and PendingIntents.
+2. **`MainActivity` & MethodChannel (`com.dnssync.app/dns`)**:
+   - `aplicarDns(principal, secundario, nome)`: Starts VPN in DNS mode with selected DNS.
+   - `aplicarProxy(ip, porta)`: Configures HTTP proxy in VPN and Dart `HttpOverrides`.
+   - `desconectar()`: Gracefully closes TUN, stops foreground service, notifies Flutter.
+   - `obterStatus()`: Returns current connection state, active provider/proxy, and uptime.
+   - Event channel or state broadcast back to Flutter.
 
-## UI Components (Airbnb Style)
-- **Top Bar:** Large title, minimalist icons.
-- **DNS Card:** Large card with current status, toggle switch, and provider selection.
-- **Proxy Card:** List of available proxies in a clean card format with speed/latency indicator.
-- **Navigation:** Bottom navigation bar (Home, Proxies, Settings).
-
-## Color Palette
-- **Primary:** `#FF385C` (Airbnb Red)
-- **Secondary:** `#008489` (Airbnb Teal)
-- **Background:** `#FFFFFF`
-- **Surface:** `#F7F7F7`
-- **Text:** `#222222`
-- **Success:** `#4CAF50`
-- **Warning:** `#FFB400`
-
-## Native Integration
-- **Android:** `MethodChannel` to start/stop a `VpnService` that sets the desired DNS.
-- **iOS:** `MethodChannel` to use `NEVPNManager` or `NEDNSSettingsManager`.
-
-## Data Models
-```dart
-class DnsProvider {
-  final String name;
-  final String primary;
-  final String secondary;
-  final String icon;
-}
-
-class Proxy {
-  final String ip;
-  final String port;
-  final String country;
-  final String protocol;
-  final int latency;
-}
-```
+## Presentation & UI Design (Airbnb Modern / SaaS Dark & Light)
+- **Status Hub**: Elevated glassmorphic card with dynamic glow, status badge, pulsing connect button, connection timer, and live ping meter.
+- **Provider Bento Grid**: Cloudflare, Google, AdGuard, OpenDNS, and Custom DNS cards with micro-interactions.
+- **Proxy Management**: Searchable list with live ping probe, country badges, favorites, and 1-tap connection with active state feedback.
+- **Notification Manager**: Foreground service notification with action controls + `flutter_local_notifications` system.
+- **Home Screen Widgets**: Polished 2x2 and 2x1 XML layouts with active status and interactive toggle action.

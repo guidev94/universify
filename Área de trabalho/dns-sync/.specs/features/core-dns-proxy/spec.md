@@ -1,26 +1,23 @@
-# Feature Spec: Core DNS & Proxy Management
+# Feature Spec: Core DNS & Proxy Management (Full Fix & Polish)
 
 ## Overview
-This feature handles the core logic of switching DNS settings and managing free proxies.
+Comprehensive fix and enhancement of the DNS & Proxy subsystem in Sync DNS, ensuring real network forwarding without blackholing internet connectivity, foreground notification controls, rich visual feedback, beautiful home widgets, automated unit & widget tests, and ADB deployment.
 
 ## Requirements
-- **REQ-1 (DNS-GOOG):** The app must allow switching device DNS to Google (8.8.8.8, 8.8.4.4).
-- **REQ-2 (DNS-CF):** The app must allow switching device DNS to Cloudflare (1.1.1.1, 1.0.0.1).
-- **REQ-3 (PROXY-LIST):** The app must fetch a list of free proxies from at least one public API.
-- **REQ-4 (PROXY-APPLY):** The app must allow applying a selected proxy to the device network settings.
-- **REQ-5 (UI-AIRBNB):** The interface must follow Airbnb's design language:
-    - High-quality typography (Inter-like).
-    - Large rounded corners (16px+).
-    - Subtle shadows.
-    - Clean whitespace.
-    - Bottom sheet for proxy selection.
-- **REQ-6 (CROSS-PLATFORM):** Must work on both Android and iOS.
-
-## Gray Areas (Need Discussion/Research)
-- **Permissions:** How to programmatically set DNS/Proxy without user manual intervention? (VPN Service might be needed).
-- **Proxy APIs:** Which free APIs are stable? (ProxyScrape, PubProxy, etc.)
-
-## Success Criteria
-- DNS change is verified (e.g., via a DNS leak test or internal ping).
-- Proxy list is populated and searchable.
-- UI matches the Airbnb aesthetic.
+- **REQ-1 (DNS-FORWARDING):** Native Android `VpnService` must correctly intercept DNS queries (UDP port 53) and forward them to selected DNS servers (Google `8.8.8.8`/`8.8.4.4`, Cloudflare `1.1.1.1`/`1.0.0.1`, AdGuard `94.140.14.14`/`94.140.15.15`, OpenDNS `208.67.222.222`/`208.67.220.220`) using protected sockets without dropping standard IPv4/IPv6 web traffic.
+- **REQ-2 (PROXY-ROUTING):** Native VPN service & Flutter network layers must support HTTP/SOCKS proxying with latency verification, live status, and disconnect management.
+- **REQ-3 (VISUAL-FEEDBACK):** The app must provide rich, real-time visual feedback:
+  - Connection state transitions (Disconnected -> Connecting -> Connected / Error)
+  - Animated pulsing glow, live connection duration timer, real ping meter
+  - Real-time DNS Leak test & public IP indicator
+  - Interactive proxy selection with health indicator and active connection card.
+- **REQ-4 (NOTIFICATIONS-STATUS):** Persistent Foreground Service notification with:
+  - Active provider & IP status
+  - Quick action button: "Desconectar"
+  - In-app notification triggers for status changes via `flutter_local_notifications`.
+- **REQ-5 (HOME-WIDGETS):** High-end Android home screen widgets (Standard and Compact) with:
+  - Modern glassmorphism UI
+  - Real-time status, active provider, latency
+  - One-tap interactive quick toggle action.
+- **REQ-6 (AUTOMATED-TESTS):** Complete test suite covering services, providers, models, channels, and widget UI components with 100% pass rate in `flutter test`.
+- **REQ-7 (ADB-REBUILD):** Full build and deployment to connected Android device via ADB with logcat verification.
