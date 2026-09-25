@@ -17,6 +17,8 @@ class AppEstilos {
     Color corTexto = isClaro ? AppCores.textoClaro : AppCores.textoEscuro;
     Color corBorda = isClaro ? AppCores.bordaClaro : AppCores.bordaEscuro;
 
+    final baseTextTheme = GoogleFonts.interTextTheme();
+
     return ThemeData(
       useMaterial3: true,
       brightness: brilho,
@@ -24,32 +26,40 @@ class AppEstilos {
         seedColor: AppCores.primario,
         brightness: brilho,
         primary: AppCores.primario,
-        secondary: AppCores.secundario,
+        secondary: AppCores.cianoNeon,
         surface: isClaro ? AppCores.superficieClaro : AppCores.superficieEscuro,
       ),
       scaffoldBackgroundColor: corFundo,
-      textTheme: GoogleFonts.interTextTheme().copyWith(
+      textTheme: baseTextTheme.copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.2,
           color: corTexto,
         ),
         titleLarge: GoogleFonts.inter(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
+          color: corTexto,
+        ),
+        titleMedium: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
           color: corTexto,
         ),
         bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
           color: corTexto,
         ),
         bodyMedium: GoogleFonts.inter(
-          fontSize: 14,
+          fontSize: 13,
           color: isClaro ? AppCores.textoSuaveClaro : AppCores.textoSuaveEscuro,
         ),
       ),
       cardTheme: CardThemeData(
-        color: isClaro ? AppCores.fundoClaro : AppCores.superficieEscuro,
+        color: isClaro ? AppCores.superficieClaro : AppCores.superficieEscuro,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
@@ -60,13 +70,14 @@ class AppEstilos {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppCores.primario,
           foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
           ),
           textStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
           ),
           elevation: 0,
         ),
@@ -78,7 +89,8 @@ class AppEstilos {
         titleTextStyle: GoogleFonts.inter(
           color: corTexto,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
         ),
         iconTheme: IconThemeData(color: corTexto),
       ),

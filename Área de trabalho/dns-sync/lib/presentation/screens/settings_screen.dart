@@ -200,25 +200,32 @@ class SettingsScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
             title.toUpperCase(),
             style: GoogleFonts.inter(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
+              letterSpacing: 1.6,
               color: AppCores.primario,
             ),
           ),
         ),
         Container(
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: AppCores.superficie(context),
-            borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+            color: AppCores.moldura(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
             border: Border.all(color: AppCores.borda(context)),
           ),
-          child: Column(
-            children: children,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Column(
+              children: children,
+            ),
           ),
         ),
       ],

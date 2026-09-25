@@ -100,10 +100,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final totalBloqueados = ref.watch(anunciosBloqueadosProvider);
 
     return Scaffold(
+      backgroundColor: AppCores.fundo(context),
       extendBody: true,
       body: Stack(
         children: [
-          _buildAnimatedBackground(estaConectado),
+          _buildAmbientBackground(estaConectado),
           
           SafeArea(
             bottom: false,
@@ -136,15 +137,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildAnimatedBackground(bool ativo) {
+  Widget _buildAmbientBackground(bool ativo) {
     return Positioned.fill(
       child: RepaintBoundary(
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 350),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
             color: ativo 
-                ? AppCores.primario.withValues(alpha: 0.03) 
+                ? AppCores.primario.withValues(alpha: 0.04) 
                 : AppCores.fundo(context),
           ),
         ),
@@ -170,40 +171,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
+        // Top Header
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, AppEspacamento.lg, AppEspacamento.lg, 8),
+            padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 20, AppEspacamento.lg, 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: estaConectado ? AppCores.sucesso : Colors.grey,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: estaConectado 
+                            ? AppCores.sucesso.withValues(alpha: 0.12) 
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                          color: estaConectado 
+                              ? AppCores.sucesso.withValues(alpha: 0.3) 
+                              : Colors.grey.withValues(alpha: 0.2),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          estaConectado ? "PROTEÇÃO ATIVA (DoH TLS 1.3)" : "DESPROTEGIDO",
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: estaConectado ? AppCores.sucesso : AppCores.textoSuave(context),
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2,
-                            fontSize: 10,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: estaConectado ? AppCores.sucesso : Colors.grey,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Text(
+                            estaConectado ? "PROTEGIDO (DoH TLS 1.3)" : "DESPROTEGIDO",
+                            style: TextStyle(
+                              color: estaConectado ? AppCores.sucesso : AppCores.textoSuave(context),
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                              fontSize: 9.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
-                      "Sync DNS",
+                      "Sync DNS Pro",
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
@@ -215,11 +232,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(LucideIcons.search, size: 20),
-                      tooltip: "Diagnóstico de Domínio",
-                      onPressed: _abrirModalTesteDominio,
+                    _buildGlassActionCircle(
+                      icon: LucideIcons.search,
+                      onTap: _abrirModalTesteDominio,
                     ),
+                    const SizedBox(width: 8),
                     _buildThemeToggle(modoTema),
                   ],
                 ),
@@ -232,51 +249,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildModernStatusCard(estaConectado, provedorAtual, tempoSegundos, tipoConexao, proxyAtivo, totalBloqueados),
-              const SizedBox(height: AppEspacamento.md),
+              const SizedBox(height: 10),
+              // Hero Command Center (Double-Bezel Master Orb Card)
+              _buildHeroCommandCenter(estaConectado, provedorAtual, tempoSegundos, tipoConexao, proxyAtivo, totalBloqueados, latencias),
+              const SizedBox(height: 12),
+              
+              // Smart Auto Connect Bar
               _buildSmartAutoConnectCard(estaConectado),
-              const SizedBox(height: AppEspacamento.md),
+              const SizedBox(height: 12),
+              
+              // IP & Leak Test Tile
               _buildLeakTestCard(conexaoInfo),
-              const SizedBox(height: AppEspacamento.lg),
+              const SizedBox(height: 20),
 
-              // Header Provedores Globais
+              // Provedores DNS Oficiais
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      "Servidores Oficiais",
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    "Servidores Oficiais",
+                    style: GoogleFonts.inter(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: AppCores.texto(context),
                     ),
                   ),
                   if (estaConectado)
                     TextButton.icon(
                       onPressed: _desconectarGeral,
-                      icon: const Icon(LucideIcons.power, size: 14, color: AppCores.primario),
-                      label: const Text("Desconectar", style: TextStyle(color: AppCores.primario, fontSize: 12, fontWeight: FontWeight.bold)),
+                      icon: const Icon(LucideIcons.power, size: 13, color: AppCores.primario),
+                      label: const Text("Desconectar", style: TextStyle(color: AppCores.primario, fontSize: 11.5, fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.sm),
+              const SizedBox(height: 10),
+
+              // Asymmetric Bento Grid
+              // Card 1: Cloudflare Hero Wide Card
+              _buildWideHeroBentoCard(
+                title: "Cloudflare 1.1.1.1",
+                ip: "1.1.1.1 / 1.0.0.1",
+                badge: "⚡ ROTA ULTRA RÁPIDA",
+                color: const Color(0xFFF38020),
+                icon: LucideIcons.zap,
+                selecionado: estaConectado && provedorAtual == "Cloudflare",
+                latencia: latencias["Cloudflare"] ?? 9,
+                onTap: () => _selecionarProvedor("Cloudflare", ["1.1.1.1", "1.0.0.1"]),
+              ),
+              const SizedBox(height: 10),
+
+              // Row 2: Google & AdGuard
               Row(
                 children: [
-                  Expanded(
-                    child: _buildBentoCard(
-                      "Cloudflare", 
-                      "1.1.1.1", 
-                      "⚡ Mais Rápido",
-                      LucideIcons.zap, 
-                      const Color(0xFFF38020),
-                      estaConectado && provedorAtual == "Cloudflare",
-                      latencias["Cloudflare"] ?? 9,
-                      () => _selecionarProvedor("Cloudflare", ["1.1.1.1", "1.0.0.1"]),
-                    ),
-                  ),
-                  const SizedBox(width: AppEspacamento.md),
                   Expanded(
                     child: _buildBentoCard(
                       "Google DNS", 
@@ -289,39 +314,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       () => _selecionarProvedor("Google", ["8.8.8.8", "8.8.4.4"]),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: AppEspacamento.md),
-              Row(
-                children: [
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _buildBentoCard(
                       "AdGuard", 
                       "94.140.14.14", 
                       "🚫 Sem Anúncios",
                       LucideIcons.shield_alert, 
-                      const Color(0xFF68BC71),
+                      const Color(0xFF10B981),
                       estaConectado && provedorAtual == "AdGuard",
                       latencias["AdGuard"] ?? 18,
                       () => _selecionarProvedor("AdGuard", ["94.140.14.14", "94.140.15.15"]),
                     ),
                   ),
-                  const SizedBox(width: AppEspacamento.md),
-                  Expanded(
-                    child: _buildBentoCard(
-                      "OpenDNS", 
-                      "208.67.222.222", 
-                      "👨‍👩‍👧‍👦 Filtro Familiar",
-                      LucideIcons.globe_lock, 
-                      const Color(0xFFE95420),
-                      estaConectado && provedorAtual == "OpenDNS",
-                      latencias["OpenDNS"] ?? 22,
-                      () => _selecionarProvedor("OpenDNS", ["208.67.222.222", "208.67.220.220"]),
-                    ),
-                  ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.md),
+              const SizedBox(height: 10),
+
+              // Row 3: Quad9 & Control D
               Row(
                 children: [
                   Expanded(
@@ -330,13 +340,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       "9.9.9.9", 
                       "🔒 Anti-Malware",
                       LucideIcons.shield, 
-                      const Color(0xFF9C27B0),
+                      const Color(0xFF8B5CF6),
                       estaConectado && provedorAtual == "Quad9",
                       latencias["Quad9"] ?? 16,
                       () => _selecionarProvedor("Quad9", ["9.9.9.9", "149.112.112.112"]),
                     ),
                   ),
-                  const SizedBox(width: AppEspacamento.md),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: _buildBentoCard(
                       "Control D", 
@@ -351,33 +361,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.lg),
+              const SizedBox(height: 10),
 
-              // Seção Custom DNS
+              // Card OpenDNS
+              _buildWideHeroBentoCard(
+                title: "OpenDNS (Cisco Umbrella)",
+                ip: "208.67.222.222 / 208.67.220.220",
+                badge: "👨‍👩‍👧‍👦 FILTRO FAMILIAR",
+                color: const Color(0xFFE95420),
+                icon: LucideIcons.globe_lock,
+                selecionado: estaConectado && provedorAtual == "OpenDNS",
+                latencia: latencias["OpenDNS"] ?? 22,
+                onTap: () => _selecionarProvedor("OpenDNS", ["208.67.222.222", "208.67.220.220"]),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Servidores Customizados
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "Servidores Personalizados",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                    style: GoogleFonts.inter(
                       fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: AppCores.texto(context),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppCores.primario),
+                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppCores.primario, size: 20),
                     onPressed: _abrirModalAdicionarDns,
                   ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.xs),
+              const SizedBox(height: 6),
               ...customDnsList.map((custom) {
                 final isCurrent = estaConectado && provedorAtual == custom.nome;
                 final lat = latencias[custom.nome] ?? 20;
                 return _buildCustomDnsTile(custom, isCurrent, lat);
               }),
 
-              const SizedBox(height: AppEspacamento.lg),
+              const SizedBox(height: 14),
               _buildPremiumProxySection(estaConectado, tipoConexao, proxyAtivo),
               const SizedBox(height: 110),
             ]),
@@ -387,211 +413,191 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildSmartAutoConnectCard(bool estaConectado) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppCores.superficie(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-        border: Border.all(color: AppCores.borda(context)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _isAutoConnecting ? null : _executarAutoConnect,
-          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppCores.primario.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: _isAutoConnecting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(LucideIcons.sparkles, color: AppCores.primario, size: 16),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Otimização de Rota & Bypass de ISP",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        _isAutoConnecting 
-                            ? "Testando rotas criptografadas..." 
-                            : "Conecta ao servidor mais rápido via DoH.",
-                        style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context)),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(LucideIcons.chevron_right, size: 16, color: Colors.grey),
-              ],
-            ),
+  Widget _buildGlassActionCircle({required IconData icon, required VoidCallback onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(100),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context),
+            shape: BoxShape.circle,
+            border: Border.all(color: AppCores.borda(context)),
           ),
+          child: Icon(icon, size: 17, color: AppCores.texto(context)),
         ),
       ),
     );
   }
 
   Widget _buildThemeToggle(ThemeMode modo) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppCores.superficie(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-        border: Border.all(color: AppCores.borda(context)),
-      ),
-      child: IconButton(
-        icon: Icon(
-          modo == ThemeMode.light ? LucideIcons.moon : LucideIcons.sun,
-          size: 18,
-          color: AppCores.texto(context),
-        ),
-        onPressed: () {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
           HapticFeedback.mediumImpact();
           ref.read(temaProvider.notifier).state = 
               modo == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
         },
+        borderRadius: BorderRadius.circular(100),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context),
+            shape: BoxShape.circle,
+            border: Border.all(color: AppCores.borda(context)),
+          ),
+          child: Icon(
+            modo == ThemeMode.light ? LucideIcons.moon : LucideIcons.sun,
+            size: 17,
+            color: AppCores.texto(context),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildModernStatusCard(
+  // Hero Command Center com Doppelrand Double-Bezel
+  Widget _buildHeroCommandCenter(
     bool ativo, 
     String provedor, 
     int tempoSegundos,
     String tipoConexao,
     dynamic proxyAtivo,
     int totalBloqueados,
+    Map<String, int> latencias,
   ) {
+    final currentLatency = latencias[provedor] ?? 9;
+
     return Container(
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
+        color: AppCores.moldura(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioExtraGrande),
+        border: Border.all(
+          color: ativo 
+              ? AppCores.primario.withValues(alpha: 0.4) 
+              : AppCores.borda(context),
+        ),
         boxShadow: [
           if (ativo)
             BoxShadow(
-              color: AppCores.primario.withValues(alpha: 0.22),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+              color: AppCores.primario.withValues(alpha: 0.25),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
             ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
-        child: Container(
-          padding: const EdgeInsets.all(AppEspacamento.lg),
-          decoration: BoxDecoration(
-            color: ativo 
-                ? AppCores.primario.withValues(alpha: 0.95) 
-                : AppCores.superficie(context),
-            borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
-            border: Border.all(
-              color: ativo ? Colors.white24 : AppCores.borda(context),
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ativo ? "ESCUDO DE PRIVACIDADE" : "SISTEMA DESPROTEGIDO",
-                          style: TextStyle(
-                            fontSize: 10, 
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                            color: ativo ? Colors.white70 : AppCores.textoSuave(context),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          ativo ? "Protegido" : "Desconectado",
-                          style: TextStyle(
-                            fontSize: 28, 
-                            fontWeight: FontWeight.w900,
-                            color: ativo ? Colors.white : AppCores.texto(context),
-                          ),
-                        ),
-                        if (ativo) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            "Tempo: ${_formatarTempo(tempoSegundos)} • $totalBloqueados anúncios bloqueados",
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.85),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  _buildPowerButton(ativo),
-                ],
-              ),
-              const SizedBox(height: AppEspacamento.md),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: ativo ? Colors.white.withValues(alpha: 0.12) : AppCores.fundo(context).withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      ativo ? LucideIcons.shield_check : LucideIcons.shield_off, 
-                      color: ativo ? Colors.white : AppCores.primario, 
-                      size: 18
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        ativo 
-                            ? (tipoConexao == 'proxy' && proxyAtivo != null 
-                                ? "Túnel Proxy: ${proxyAtivo.ip}:${proxyAtivo.porta}" 
-                                : "Conectado a $provedor via DoH Criptografado")
-                            : "Selecione Cloudflare ou Google para navegar sem bloqueios",
+      child: Container(
+        padding: const EdgeInsets.all(AppEspacamento.lg),
+        decoration: BoxDecoration(
+          color: ativo ? const Color(0xFF0B142A) : AppCores.superficie(context),
+          borderRadius: BorderRadius.circular(AppBordas.raioExtraGrande - 3),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ativo ? "STATUS DA CONEXÃO" : "SISTEMA SEGURO",
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: 9.5, 
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                          color: ativo ? AppCores.cianoNeon : AppCores.textoSuave(context),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        ativo ? "Proteção Ativa" : "Desprotegido",
+                        style: GoogleFonts.inter(
+                          fontSize: 26, 
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
                           color: ativo ? Colors.white : AppCores.texto(context),
                         ),
                       ),
-                    ),
-                    if (ativo)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
+                      if (ativo) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          "Tempo: ${_formatarTempo(tempoSegundos)} • $provedor",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
                         ),
-                        child: const Text(
-                          "DoH TLS",
-                          style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                  ],
+                      ],
+                    ],
+                  ),
                 ),
+                _buildPowerButton(ativo),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 3-Pillar Telemetry Strip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: ativo ? Colors.white.withValues(alpha: 0.06) : AppCores.fundo(context),
+                borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+                border: Border.all(color: ativo ? Colors.white.withValues(alpha: 0.1) : AppCores.borda(context)),
               ),
-            ],
-          ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildTelemetryItem(
+                    label: "LATÊNCIA",
+                    value: ativo ? "${currentLatency}ms" : "--",
+                    color: AppCores.sucesso,
+                  ),
+                  _buildMiniDivider(),
+                  _buildTelemetryItem(
+                    label: "BLOQUEIOS",
+                    value: "$totalBloqueados",
+                    color: AppCores.cianoNeon,
+                  ),
+                  _buildMiniDivider(),
+                  _buildTelemetryItem(
+                    label: "PROTOCOL",
+                    value: "DoH TLS",
+                    color: AppCores.acentoRoxo,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildTelemetryItem({required String label, required String value, required Color color}) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, letterSpacing: 1.0, color: Colors.grey.shade400),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: color),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniDivider() {
+    return Container(width: 1, height: 22, color: Colors.white.withValues(alpha: 0.15));
   }
 
   Widget _buildPowerButton(bool ativo) {
@@ -605,22 +611,172 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       },
       child: Container(
-        width: 64,
-        height: 64,
+        width: 62,
+        height: 62,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: ativo ? Colors.white : AppCores.primario,
+          gradient: ativo ? AppCores.gradientePrimario : null,
+          color: ativo ? null : AppCores.moldura(context),
+          border: Border.all(
+            color: ativo ? AppCores.cianoNeon.withValues(alpha: 0.5) : AppCores.borda(context),
+            width: 1.5,
+          ),
           boxShadow: [
-            BoxShadow(
-              color: (ativo ? Colors.white : AppCores.primario).withValues(alpha: 0.35),
-              blurRadius: 18,
-            ),
+            if (ativo)
+              BoxShadow(
+                color: AppCores.primario.withValues(alpha: 0.45),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Icon(
           LucideIcons.power,
-          color: ativo ? AppCores.primario : Colors.white,
-          size: 28,
+          color: ativo ? Colors.white : AppCores.textoSuave(context),
+          size: 26,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmartAutoConnectCard(bool estaConectado) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: AppCores.moldura(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
+        border: Border.all(color: AppCores.borda(context)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isAutoConnecting ? null : _executarAutoConnect,
+          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: AppCores.primario.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: _isAutoConnecting
+                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(LucideIcons.sparkles, color: AppCores.primario, size: 15),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Otimização Inteligente de Rota",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                      ),
+                      Text(
+                        _isAutoConnecting ? "Calculando latências DoH..." : "Conecta automaticamente ao DNS com menor ping.",
+                        style: TextStyle(fontSize: 10.5, color: AppCores.textoSuave(context)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(LucideIcons.chevron_right, size: 15, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideHeroBentoCard({
+    required String title,
+    required String ip,
+    required String badge,
+    required Color color,
+    required IconData icon,
+    required bool selecionado,
+    required int latencia,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: AppCores.moldura(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
+        border: Border.all(color: selecionado ? color : AppCores.borda(context)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: selecionado ? color.withValues(alpha: 0.08) : AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              title, 
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(badge, style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: color)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(ip, style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context))),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppCores.sucesso.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text("${latencia}ms", style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppCores.sucesso)),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -636,64 +792,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     int latencia,
     VoidCallback onTap,
   ) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppEspacamento.md),
-        decoration: BoxDecoration(
-          color: selecionado ? color.withValues(alpha: 0.08) : AppCores.superficie(context),
-          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-          border: Border.all(
-            color: selecionado ? color : AppCores.borda(context),
-            width: selecionado ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: AppCores.moldura(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
+        border: Border.all(color: selecionado ? color : AppCores.borda(context)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: selecionado ? color.withValues(alpha: 0.08) : AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: 18),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: latencia < 20 ? AppCores.sucesso.withValues(alpha: 0.15) : Colors.orange.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    "${latencia}ms",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: latencia < 20 ? AppCores.sucesso : Colors.orange,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color, size: 16),
                     ),
-                  ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppCores.sucesso.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text("${latencia}ms", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: AppCores.sucesso)),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 10),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                const SizedBox(height: 1),
+                Text(ip, style: TextStyle(color: AppCores.textoSuave(context), fontSize: 10.5)),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-            ),
-            const SizedBox(height: 1),
-            Text(
-              "$ip • $badge",
-              style: TextStyle(color: AppCores.textoSuave(context), fontSize: 11),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -702,52 +852,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildCustomDnsTile(CustomDnsModel custom, bool isCurrent, int latencia) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: isCurrent ? AppCores.primario.withValues(alpha: 0.08) : AppCores.superficie(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-        border: Border.all(
-          color: isCurrent ? AppCores.primario : AppCores.borda(context),
-          width: isCurrent ? 2 : 1,
-        ),
+        color: AppCores.moldura(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
+        border: Border.all(color: isCurrent ? AppCores.primario : AppCores.borda(context)),
       ),
-      child: ListTile(
-        dense: true,
-        onTap: () => _selecionarProvedor(custom.nome, [custom.dnsPrincipal, custom.dnsSecundario]),
-        leading: Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: isCurrent ? AppCores.primario : AppCores.primario.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isCurrent ? Icons.check : LucideIcons.network,
-            size: 15,
-            color: isCurrent ? Colors.white : AppCores.primario,
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isCurrent ? AppCores.primario.withValues(alpha: 0.08) : AppCores.superficie(context),
+          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
         ),
-        title: Text(custom.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        subtitle: Text(custom.dnsPrincipal, style: const TextStyle(fontSize: 11)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppCores.sucesso.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                "${latencia}ms",
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppCores.sucesso),
-              ),
+        child: ListTile(
+          dense: true,
+          onTap: () => _selecionarProvedor(custom.nome, [custom.dnsPrincipal, custom.dnsSecundario]),
+          leading: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isCurrent ? AppCores.primario : AppCores.primario.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.grey),
-              onPressed: () {
-                ref.read(customDnsListProvider.notifier).remover(custom.id);
-              },
+            child: Icon(
+              isCurrent ? Icons.check : LucideIcons.network,
+              size: 14,
+              color: isCurrent ? Colors.white : AppCores.primario,
             ),
-          ],
+          ),
+          title: Text(custom.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          subtitle: Text(custom.dnsPrincipal, style: const TextStyle(fontSize: 10.5)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppCores.sucesso.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text("${latencia}ms", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppCores.sucesso)),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.grey),
+                onPressed: () {
+                  ref.read(customDnsListProvider.notifier).remover(custom.id);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -759,7 +910,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
+        borderRadius: BorderRadius.circular(AppBordas.raioGrande),
         gradient: AppCores.gradientePrimario,
       ),
       child: Material(
@@ -769,42 +920,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             HapticFeedback.lightImpact();
             setState(() => _currentIndex = 1);
           },
-          borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
           child: Padding(
             padding: const EdgeInsets.all(AppEspacamento.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(LucideIcons.globe, color: Colors.white, size: 32),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(100),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white24,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(LucideIcons.globe, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isProxyConectado ? "Proxy Ativo: ${proxyAtivo?.ip ?? ''}" : "Servidores Proxy Globais",
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
                       ),
-                      child: const Row(
-                        children: [
-                          Text("Ver Proxies", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
-                          SizedBox(width: 4),
-                          Icon(LucideIcons.chevron_right, color: Colors.white, size: 14),
-                        ],
+                      const SizedBox(height: 2),
+                      Text(
+                        "Navegação criptografada e túnel anônimo.",
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 11),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  isProxyConectado ? "Proxy Ativo: ${proxyAtivo?.ip ?? ''}" : "Servidores Proxy Globais",
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  "Navegação com túnel criptografado e anonimato garantido.",
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12),
-                ),
+                const Icon(LucideIcons.chevron_right, color: Colors.white, size: 18),
               ],
             ),
           ),
@@ -821,49 +967,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final pais = data['country_name'] ?? 'Brasil';
         
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: AppCores.superficie(context),
-            borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            color: AppCores.moldura(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
             border: Border.all(color: AppCores.borda(context)),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: AppCores.sucesso.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: AppCores.sucesso.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(LucideIcons.activity, color: AppCores.sucesso, size: 14),
                 ),
-                child: const Icon(LucideIcons.activity, color: AppCores.sucesso, size: 15),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Diagnóstico de IP & DNS",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                    Text(
-                      "$ip • $cidade, $pais",
-                      style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context)),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Diagnóstico de IP & DNS", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                      Text("$ip • $cidade, $pais", style: TextStyle(fontSize: 10.5, color: AppCores.textoSuave(context)), overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
                 ),
-              ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(LucideIcons.refresh_cw, size: 14),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  ref.invalidate(conexaoInfoProvider);
-                },
-              ),
-            ],
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(LucideIcons.refresh_cw, size: 14),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    ref.invalidate(conexaoInfoProvider);
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -880,7 +1026,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Floating Navigation Bar 100% responsiva e com áreas de toque generosas
   Widget _buildFloatingNavBar() {
     return Positioned(
       bottom: 20,
@@ -962,12 +1107,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       "Cloudflare": "https://1.1.1.1/dns-query",
       "AdGuard": "https://94.140.14.14/dns-query",
       "OpenDNS": "https://208.67.222.222/dns-query",
+      "Quad9": "https://9.9.9.9/dns-query",
+      "Control D": "https://76.76.2.0/dns-query",
     };
-    final dohUrl = dohMap[nome] ?? (ips[0] == '9.9.9.9' ? 'https://9.9.9.9/dns-query' : 'https://1.1.1.1/dns-query');
+    final dohUrl = dohMap[nome] ?? 'https://1.1.1.1/dns-query';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("Conectando ao DNS $nome (${ips[0]})..."),
+        content: Text("Conectando a $nome (${ips[0]})..."),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppCores.primario,
         duration: const Duration(seconds: 2),

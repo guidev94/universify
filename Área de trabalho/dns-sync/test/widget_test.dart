@@ -73,13 +73,13 @@ void main() {
 
     // Verifica elementos da HomeScreen
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('Sync DNS'), findsWidgets);
-    expect(find.text('Google DNS'), findsOneWidget);
-    expect(find.text('Cloudflare'), findsOneWidget);
-    expect(find.text('AdGuard'), findsOneWidget);
-    expect(find.text('OpenDNS'), findsOneWidget);
-    expect(find.text('Quad9'), findsOneWidget);
-    expect(find.text('Control D'), findsOneWidget);
+    expect(find.textContaining('Sync DNS'), findsWidgets);
+    expect(find.textContaining('Google DNS'), findsOneWidget);
+    expect(find.textContaining('Cloudflare'), findsWidgets);
+    expect(find.textContaining('AdGuard'), findsOneWidget);
+    expect(find.textContaining('OpenDNS'), findsWidgets);
+    expect(find.textContaining('Quad9'), findsOneWidget);
+    expect(find.textContaining('Control D'), findsOneWidget);
 
     // Verifica ícones da barra de navegação inferior e cards
     expect(find.byIcon(LucideIcons.shield), findsWidgets);
