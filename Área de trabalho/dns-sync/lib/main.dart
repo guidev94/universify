@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_styles.dart';
-import 'presentation/screens/home_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 import 'presentation/providers/proxy_provider.dart';
 import 'data/services/notificacao_service.dart';
 
@@ -36,7 +36,7 @@ class DnsSyncApp extends ConsumerWidget {
       theme: AppEstilos.temaClaro,
       darkTheme: AppEstilos.temaEscuro,
       themeMode: modoTema,
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

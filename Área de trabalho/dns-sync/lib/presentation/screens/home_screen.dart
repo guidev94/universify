@@ -321,6 +321,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: AppEspacamento.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildBentoCard(
+                      "Quad9", 
+                      "9.9.9.9", 
+                      "🔒 Anti-Malware",
+                      LucideIcons.shield, 
+                      const Color(0xFF9C27B0),
+                      estaConectado && provedorAtual == "Quad9",
+                      latencias["Quad9"] ?? 16,
+                      () => _selecionarProvedor("Quad9", ["9.9.9.9", "149.112.112.112"]),
+                    ),
+                  ),
+                  const SizedBox(width: AppEspacamento.md),
+                  Expanded(
+                    child: _buildBentoCard(
+                      "Control D", 
+                      "76.76.2.0", 
+                      "🛡️ Sem Logs",
+                      LucideIcons.lock, 
+                      const Color(0xFF00ACC1),
+                      estaConectado && provedorAtual == "Control D",
+                      latencias["Control D"] ?? 20,
+                      () => _selecionarProvedor("Control D", ["76.76.2.0", "76.76.10.0"]),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppEspacamento.lg),
 
               // Seção Custom DNS
