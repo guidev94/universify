@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/canal_nativo.dart';
@@ -22,17 +21,21 @@ class _SpeedTestScreenState extends ConsumerState<SpeedTestScreen> {
   void _compartilharSpeedResult(dynamic metrics, dynamic ispInfo) {
     HapticFeedback.mediumImpact();
     final isp = ispInfo?.isp ?? "Provedor Local";
+    final ip = ispInfo?.ip ?? "";
     final city = ispInfo?.city ?? "Brasil";
+    final country = ispInfo?.country ?? "Brasil";
     final flag = ispInfo?.flag ?? "🌐";
 
     final texto = """
 🚀 *Resultado do Speed Test • Sync DNS Pro*
-$flag *Provedor:* $isp ($city)
+$flag *País & Cidade:* $country, $city
+📡 *Provedor:* $isp
+🌐 *IP Público:* $ip
 📥 *Download:* ${metrics.downloadSpeed.toStringAsFixed(1)} Mbps
 📤 *Upload:* ${metrics.uploadSpeed.toStringAsFixed(1)} Mbps
 ⚡ *Ping:* ${metrics.ping} ms | *Jitter:* ${metrics.jitter} ms
 🛡️ *Perda:* ${metrics.packetLoss}% | *Bufferbloat:* ${metrics.bufferbloatGrade}
-🔒 *Proteção DNS:* Criptografada via Sync DNS
+🔒 *Proteção:* DNS Criptografado via Sync DNS
 """;
 
     CanalNativo.compartilharResultado(texto, titulo: "Compartilhar Teste de Velocidade");
@@ -41,16 +44,19 @@ $flag *Provedor:* $isp ($city)
   void _compartilharVideoResult(dynamic videoMetrics, dynamic ispInfo) {
     HapticFeedback.mediumImpact();
     final isp = ispInfo?.isp ?? "Provedor Local";
+    final ip = ispInfo?.ip ?? "";
+    final country = ispInfo?.country ?? "Brasil";
     final flag = ispInfo?.flag ?? "🌐";
 
     final texto = """
 🎬 *Diagnóstico de Streaming de Vídeo • Sync DNS*
-$flag *Provedor:* $isp
+$flag *Localização:* $country
+📡 *Provedor:* $isp (IP: $ip)
 📺 *Qualidade Máxima:* ${videoMetrics.maxResolution}
-⚡ *Bitrate do Stream:* ${videoMetrics.bitrateMbps.toStringAsFixed(1)} Mbps
+⚡ *Bitrate de Vídeo:* ${videoMetrics.bitrateMbps.toStringAsFixed(1)} Mbps
 ⏱️ *Tempo de Resposta (TTFB):* ${videoMetrics.ttfbMs} ms
-⏳ *Buffer Estimado:* ${videoMetrics.loadTimeEstimate}
-✅ *Suporte 4K Ultra HD:* ${videoMetrics.isSupported4K ? 'Sim (Perfeito)' : 'Não'}
+⏳ *Tempo de Buffer:* ${videoMetrics.loadTimeEstimate}
+✅ *Pronto para 4K Ultra HD:* ${videoMetrics.isSupported4K ? 'Sim (Fluido)' : 'Não'}
 """;
 
     CanalNativo.compartilharResultado(texto, titulo: "Compartilhar Diagnóstico de Vídeo");
@@ -84,14 +90,14 @@ $flag *Provedor:* $isp
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            "DIAGNÓSTICO EM TEMPO REAL",
+                            "DIAGNÓSTICO DE REDE & MÍDIA",
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 2,
                               color: AppCores.primario,
                             ),
-                          ).animate().fadeIn(),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             "Speed & Video Test",
@@ -101,7 +107,7 @@ $flag *Provedor:* $isp
                               letterSpacing: -0.5,
                               color: AppCores.texto(context),
                             ),
-                          ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
+                          ),
                         ],
                       ),
                       IconButton(
@@ -120,7 +126,7 @@ $flag *Provedor:* $isp
                 ),
               ),
 
-              // Card Inteligente de Detecção de ISP / Provedor Real
+              // Card Inteligente de Detecção de ISP e IP
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
@@ -140,12 +146,9 @@ $flag *Provedor:* $isp
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _selectedTab == 0
-                        ? _buildSpeedTabContent(metrics, isSpeedRunning, ispAsync.value)
-                        : _buildVideoTabContent(videoMetrics, isVideoRunning, ispAsync.value),
-                  ),
+                  child: _selectedTab == 0
+                      ? _buildSpeedTabContent(metrics, isSpeedRunning, ispAsync.value)
+                      : _buildVideoTabContent(videoMetrics, isVideoRunning, ispAsync.value),
                 ),
               ),
             ],
@@ -231,7 +234,7 @@ $flag *Provedor:* $isp
               ),
             ],
           ),
-        ).animate().fadeIn();
+        );
       },
       loading: () => Container(
         height: 54,
@@ -348,14 +351,14 @@ $flag *Provedor:* $isp
     return Column(
       key: const ValueKey("VideoTab"),
       children: [
-        const SizedBox(height: 8),
-        _buildVideoResolutionHub(videoMetrics),
-        const SizedBox(height: 16),
+        const SizedBox(height: 4),
+        _buildVideoResolutionHub(videoMetrics, isRunning),
+        const SizedBox(height: 14),
         _buildVideoMetricsGrid(videoMetrics),
         const SizedBox(height: 20),
 
         _buildActionButton(
-          label: isRunning ? "AVALIANDO STREAMING..." : "INICIAR TESTE DE VÍDEO (4K / 1080p)",
+          label: isRunning ? "AVALIANDO REPRODUÇÃO..." : "INICIAR TESTE DE VÍDEO (4K / 1080p)",
           isRunning: isRunning,
           onTap: () => ref.read(videoTestProvider.notifier).runVideoTest(),
         ),
@@ -373,10 +376,13 @@ $flag *Provedor:* $isp
     );
   }
 
-  Widget _buildVideoResolutionHub(dynamic videoMetrics) {
+  Widget _buildVideoResolutionHub(dynamic videoMetrics, bool isRunning) {
+    final bool isIdle = videoMetrics.stage == 'idle';
+    final bool isComplete = videoMetrics.stage == 'complete';
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppEspacamento.xl),
+      padding: const EdgeInsets.all(AppEspacamento.lg),
       decoration: BoxDecoration(
         color: AppCores.superficie(context),
         borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
@@ -391,72 +397,134 @@ $flag *Provedor:* $isp
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "CAPACIDADE DE STREAMING",
+                "DIAGNÓSTICO DE STREAMING",
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: AppCores.primario),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppCores.sucesso.withValues(alpha: 0.15),
+                  color: isComplete 
+                      ? AppCores.sucesso.withValues(alpha: 0.15) 
+                      : (isRunning ? AppCores.primario.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15)),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  videoMetrics.stage == 'complete' ? "VERIFICADO" : (videoMetrics.stage == 'idle' ? "PRONTO" : "ANALISANDO"),
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppCores.sucesso),
+                child: Row(
+                  children: [
+                    if (isRunning) ...[
+                      const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      isComplete ? "VERIFICADO" : (isRunning ? "TESTANDO" : "PRONTO"),
+                      style: TextStyle(
+                        fontSize: 10, 
+                        fontWeight: FontWeight.bold, 
+                        color: isComplete ? AppCores.sucesso : (isRunning ? AppCores.primario : Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            videoMetrics.maxResolution,
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: AppCores.texto(context),
-              letterSpacing: -0.5,
+          const SizedBox(height: 14),
+
+          if (isIdle) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppCores.fundo(context),
+                borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.play_circle_outline_rounded, size: 40, color: AppCores.primario),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Avaliação de Resolução e Buffer",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Verifica a estabilidade para YouTube, Netflix, Prime Video e Twitch em 4K e 1080p.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context)),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            "Tempo estimado de buffer: ${videoMetrics.loadTimeEstimate}",
-            style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context), fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 20),
+          ] else ...[
+            Text(
+              videoMetrics.maxResolution,
+              style: GoogleFonts.inter(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                color: AppCores.texto(context),
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Estimativa de buffer: ${videoMetrics.loadTimeEstimate}",
+              style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context), fontWeight: FontWeight.w600),
+            ),
+            if (isRunning) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: videoMetrics.progress,
+                  backgroundColor: AppCores.fundo(context),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppCores.primario),
+                  minHeight: 6,
+                ),
+              ),
+            ],
+          ],
+
+          const SizedBox(height: 18),
 
           // Tiers de Resoluções
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildResolutionBadge("4K (2160p)", videoMetrics.isSupported4K, LucideIcons.tv),
-              _buildResolutionBadge("1080p FHD", videoMetrics.isSupported1080p, LucideIcons.monitor),
-              _buildResolutionBadge("720p HD", videoMetrics.isSupported720p, LucideIcons.smartphone),
+              _buildResolutionBadge("4K (2160p)", isComplete ? videoMetrics.isSupported4K : null, LucideIcons.tv),
+              _buildResolutionBadge("1080p FHD", isComplete ? videoMetrics.isSupported1080p : null, LucideIcons.monitor),
+              _buildResolutionBadge("720p HD", isComplete ? videoMetrics.isSupported720p : null, LucideIcons.smartphone),
             ],
           ),
         ],
       ),
-    ).animate().fadeIn();
+    );
   }
 
-  Widget _buildResolutionBadge(String label, bool isSupported, IconData icon) {
+  Widget _buildResolutionBadge(String label, bool? isSupported, IconData icon) {
+    Color badgeColor = Colors.grey;
+    String statusText = "Aguardando";
+
+    if (isSupported != null) {
+      badgeColor = isSupported ? AppCores.sucesso : Colors.red;
+      statusText = isSupported ? "Fluido" : "Instável";
+    }
+
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: isSupported ? AppCores.sucesso.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.1),
+            color: badgeColor.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: isSupported ? AppCores.sucesso : Colors.grey, size: 20),
+          child: Icon(icon, color: badgeColor, size: 20),
         ),
         const SizedBox(height: 6),
         Text(
           label,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSupported ? AppCores.texto(context) : Colors.grey),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: badgeColor),
         ),
         Text(
-          isSupported ? "Suportado" : "Instável",
-          style: TextStyle(fontSize: 9, color: isSupported ? AppCores.sucesso : Colors.grey, fontWeight: FontWeight.bold),
+          statusText,
+          style: TextStyle(fontSize: 9, color: badgeColor, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -588,7 +656,7 @@ $flag *Provedor:* $isp
           ),
         ],
       ),
-    ).animate().fadeIn();
+    );
   }
 
   Widget _buildDetailedMetricsGrid(BuildContext context, dynamic metrics, dynamic ispInfo) {
@@ -647,7 +715,7 @@ $flag *Provedor:* $isp
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1);
+    );
   }
 
   Widget _buildMetricItem(BuildContext context, String label, String value, String unit, IconData icon, Color color) {
@@ -715,7 +783,7 @@ $flag *Provedor:* $isp
           ),
         ),
       ),
-    ).animate(target: isRunning ? 0 : 1).scale().fadeIn();
+    );
   }
 }
 

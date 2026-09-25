@@ -19,11 +19,11 @@ class VideoTestMetrics {
     this.bitrateMbps = 0.0,
     this.ttfbMs = 0,
     this.bufferTimePercent = 0.0,
-    this.maxResolution = '4K Ultra HD (2160p)',
+    this.maxResolution = 'Não Testado',
     this.loadTimeEstimate = '--',
-    this.isSupported4K = true,
-    this.isSupported1080p = true,
-    this.isSupported720p = true,
+    this.isSupported4K = false,
+    this.isSupported1080p = false,
+    this.isSupported720p = false,
   });
 
   VideoTestMetrics copyWith({
@@ -61,15 +61,19 @@ class VideoStreamingTestService {
   Future<VideoTestMetrics> executarTesteVideo({
     required Function(VideoTestMetrics currentMetrics) onProgress,
   }) async {
-    // 1. Inicia medição de TTFB (Time to First Byte do vídeo)
-    onProgress(VideoTestMetrics(stage: 'initiating', progress: 0.1));
+    // 1. Inicia medição de TTFB
+    onProgress(VideoTestMetrics(
+      stage: 'initiating',
+      progress: 0.1,
+      maxResolution: 'Medindo TTFB...',
+    ));
 
     final ttfbStopwatch = Stopwatch()..start();
-    int ttfbMs = 45;
+    int ttfbMs = 42;
     int totalBytes = 0;
     double maxBitrate = 0.0;
 
-    final url = "https://speed.cloudflare.com/__down?bytes=12000000"; // 12MB Stream chunk
+    final url = "https://speed.cloudflare.com/__down?bytes=10000000";
     final overallStopwatch = Stopwatch()..start();
 
     try {
@@ -83,6 +87,7 @@ class VideoStreamingTestService {
         stage: 'buffering',
         progress: 0.25,
         ttfbMs: ttfbMs,
+        maxResolution: 'Carregando Buffer...',
       ));
 
       if (response.statusCode == 200) {
@@ -93,18 +98,27 @@ class VideoStreamingTestService {
             final currentMbps = (totalBytes * 8.0) / elapsedSec / 1000000.0;
             if (currentMbps > maxBitrate) maxBitrate = currentMbps;
 
-            final progress = (0.25 + (totalBytes / 12000000.0) * 0.75).clamp(0.0, 0.98);
+            final progress = (0.25 + (totalBytes / 10000000.0) * 0.75).clamp(0.0, 0.98);
+            
+            final bool is4k = currentMbps >= 25.0;
+            final bool is1080 = currentMbps >= 10.0;
+            final bool is720 = currentMbps >= 5.0;
+
             onProgress(VideoTestMetrics(
               stage: 'streaming',
               progress: progress,
               bitrateMbps: currentMbps,
               ttfbMs: ttfbMs,
+              maxResolution: is4k ? '4K Ultra HD (2160p)' : (is1080 ? 'Full HD (1080p)' : (is720 ? 'HD (720p)' : 'SD (480p)')),
+              isSupported4K: is4k,
+              isSupported1080p: is1080,
+              isSupported720p: is720,
             ));
           }
         }
       }
     } catch (e) {
-      // Fallback gracioso caso timeout de rede
+      // Fallback
     }
 
     overallStopwatch.stop();
@@ -113,13 +127,12 @@ class VideoStreamingTestService {
         ? ((totalBytes * 8.0) / totalSec / 1000000.0)
         : (maxBitrate > 0 ? maxBitrate : 48.5);
 
-    // Classificação de Resolução
     final bool sup4K = finalBitrate >= 25.0 && ttfbMs < 350;
     final bool sup1080 = finalBitrate >= 10.0;
     final bool sup720 = finalBitrate >= 5.0;
 
-    String maxRes = '4K Ultra HD (2160p)';
-    String loadEst = '0.6s instantâneo';
+    String maxRes;
+    String loadEst;
 
     if (sup4K) {
       maxRes = '4K Ultra HD (2160p)';

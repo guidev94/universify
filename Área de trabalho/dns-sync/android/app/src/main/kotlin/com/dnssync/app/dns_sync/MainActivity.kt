@@ -19,16 +19,21 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
-import java.net.HttpURLConnection
 import java.net.InetAddress
-import java.net.URL
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import javax.net.ssl.SNIHostName
+import javax.net.ssl.SSLParameters
+import javax.net.ssl.SSLSocket
+import javax.net.ssl.SSLSocketFactory
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.dnssync.app/dns"
@@ -500,9 +505,9 @@ class MyVpnService : VpnService(), Runnable {
         val dstIp = "${data[16].toInt() and 0xFF}.${data[17].toInt() and 0xFF}.${data[18].toInt() and 0xFF}.${data[19].toInt() and 0xFF}"
         val targetDns = if (dstIp == upstreamDns1 || dstIp == upstreamDns2) dstIp else upstreamDns1
 
-        // 3. Encaminhamento via DoH (DNS-over-HTTPS por IP direto)
+        // 3. Encaminhamento via DoH com Socket Protegido (Bypass garantido de DNS Poisoning de Operadoras)
         if (isDohEnabled) {
-            val dohResponse = queryDoh(dnsQuery, targetDns)
+            val dohResponse = queryDohProtected(dnsQuery, targetDns)
             if (dohResponse != null && dohResponse.isNotEmpty()) {
                 writePacketToTun(data, dstPort, srcPort, dohResponse, out)
                 return
@@ -527,6 +532,10 @@ class MyVpnService : VpnService(), Runnable {
             val dnsResponseLen = recvPacket.length
             val dnsResponse = ByteArray(dnsResponseLen)
             System.arraycopy(recvBuffer, 0, dnsResponse, 0, dnsResponseLen)
+
+            // Assegura preservação do Transaction ID
+            dnsResponse[0] = dnsQuery[0]
+            dnsResponse[1] = dnsQuery[1]
 
             writePacketToTun(data, dstPort, srcPort, dnsResponse, out)
         } catch (e: Exception) {
@@ -571,10 +580,10 @@ class MyVpnService : VpnService(), Runnable {
 
         // UDP Header
         val respUdpLen = 8 + dnsResponseLen
-        respPacket[20] = ((srcPort shr 8) and 0xFF).toByte()
-        respPacket[21] = (srcPort and 0xFF).toByte()
-        respPacket[22] = ((dstPort shr 8) and 0xFF).toByte()
-        respPacket[23] = (dstPort and 0xFF).toByte()
+        respPacket[20] = ((dstPort shr 8) and 0xFF).toByte()
+        respPacket[21] = (dstPort and 0xFF).toByte()
+        respPacket[22] = ((srcPort shr 8) and 0xFF).toByte()
+        respPacket[23] = (srcPort and 0xFF).toByte()
         respPacket[24] = ((respUdpLen shr 8) and 0xFF).toByte()
         respPacket[25] = (respUdpLen and 0xFF).toByte()
         respPacket[26] = 0.toByte()
@@ -621,53 +630,116 @@ class MyVpnService : VpnService(), Runnable {
         return resp
     }
 
-    private fun queryDoh(query: ByteArray, targetDns: String): ByteArray? {
-        val dohUrl = when (targetDns) {
-            "1.1.1.1", "1.0.0.1" -> "https://1.1.1.1/dns-query"
-            "8.8.8.8", "8.8.4.4" -> "https://8.8.8.8/dns-query"
-            "9.9.9.9", "149.112.112.112" -> "https://9.9.9.9/dns-query"
-            "94.140.14.14", "94.140.15.15" -> "https://94.140.14.14/dns-query"
-            else -> if (dohEndpoint.isNotEmpty()) dohEndpoint else "https://1.1.1.1/dns-query"
+    private fun queryDohProtected(query: ByteArray, targetIp: String): ByteArray? {
+        val hostHeader = when (targetIp) {
+            "8.8.8.8", "8.8.4.4" -> "dns.google"
+            "9.9.9.9", "149.112.112.112" -> "dns.quad9.net"
+            "94.140.14.14", "94.140.15.15" -> "dns.adguard-dns.com"
+            else -> "cloudflare-dns.com"
+        }
+        val targetDnsIp = if (targetIp == "8.8.8.8" || targetIp == "8.8.4.4" || targetIp == "9.9.9.9" || targetIp == "94.140.14.14") targetIp else "1.1.1.1"
+
+        var sslSocket: SSLSocket? = null
+        var rawSocket: Socket? = null
+        try {
+            rawSocket = Socket()
+            protect(rawSocket) // BLINDA O SOCKET RAW PARA NÃO ENTRAR NO TUNNEL DO VPN!
+            rawSocket.soTimeout = 2500
+            rawSocket.connect(InetSocketAddress(InetAddress.getByName(targetDnsIp), 443), 2000)
+
+            val sslFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
+            sslSocket = sslFactory.createSocket(rawSocket, hostHeader, 443, true) as SSLSocket
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val params = sslSocket.sslParameters ?: SSLParameters()
+                params.serverNames = listOf(SNIHostName(hostHeader))
+                sslSocket.sslParameters = params
+            }
+
+            sslSocket.startHandshake()
+
+            val os = sslSocket.outputStream
+            val requestHeader = "POST /dns-query HTTP/1.1\r\n" +
+                    "Host: $hostHeader\r\n" +
+                    "User-Agent: SyncDNS/1.3\r\n" +
+                    "Accept: application/dns-message\r\n" +
+                    "Content-Type: application/dns-message\r\n" +
+                    "Content-Length: ${query.size}\r\n" +
+                    "Connection: close\r\n\r\n"
+
+            os.write(requestHeader.toByteArray(Charsets.US_ASCII))
+            os.write(query)
+            os.flush()
+
+            val `is` = sslSocket.inputStream
+            val responseBytes = readHttpResponseBody(`is`)
+
+            if (responseBytes != null && responseBytes.size >= 12) {
+                // Restaura o Transaction ID do cliente original
+                responseBytes[0] = query[0]
+                responseBytes[1] = query[1]
+                return responseBytes
+            }
+            return null
+        } catch (e: Exception) {
+            Log.w(TAG, "DoH protegido para $targetDnsIp falhou: ${e.message}")
+            return null
+        } finally {
+            try { sslSocket?.close() } catch (e: Exception) {}
+            try { rawSocket?.close() } catch (e: Exception) {}
+        }
+    }
+
+    private fun readHttpResponseBody(input: InputStream): ByteArray? {
+        val headerBaos = ByteArrayOutputStream()
+        var b: Int
+
+        // Lê cabeçalhos até \r\n\r\n
+        while (true) {
+            b = input.read()
+            if (b == -1) break
+            headerBaos.write(b)
+            val bytes = headerBaos.toByteArray()
+            val len = bytes.size
+            if (len >= 4 &&
+                bytes[len - 4] == '\r'.code.toByte() &&
+                bytes[len - 3] == '\n'.code.toByte() &&
+                bytes[len - 2] == '\r'.code.toByte() &&
+                bytes[len - 1] == '\n'.code.toByte()
+            ) {
+                break
+            }
         }
 
-        var conn: HttpURLConnection? = null
-        return try {
-            val url = URL(dohUrl)
-            conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.connectTimeout = 2000
-            conn.readTimeout = 2000
-            conn.doOutput = true
-            conn.useCaches = false
-            conn.setRequestProperty("Content-Type", "application/dns-message")
-            conn.setRequestProperty("Accept", "application/dns-message")
+        val headerString = headerBaos.toString("US-ASCII")
+        if (!headerString.startsWith("HTTP/1.1 200") && !headerString.startsWith("HTTP/1.0 200")) {
+            return null
+        }
 
-            if (dohUrl.contains("1.1.1.1") || dohUrl.contains("1.0.0.1")) {
-                conn.setRequestProperty("Host", "cloudflare-dns.com")
-            } else if (dohUrl.contains("8.8.8.8") || dohUrl.contains("8.8.4.4")) {
-                conn.setRequestProperty("Host", "dns.google")
-            } else if (dohUrl.contains("9.9.9.9")) {
-                conn.setRequestProperty("Host", "dns.quad9.net")
+        var contentLength = -1
+        for (line in headerString.split("\r\n")) {
+            if (line.startsWith("Content-Length:", ignoreCase = true)) {
+                contentLength = line.substring(15).trim().toIntOrNull() ?: -1
             }
+        }
 
-            conn.outputStream.use { os ->
-                os.write(query)
-                os.flush()
+        if (contentLength > 0) {
+            val body = ByteArray(contentLength)
+            var totalRead = 0
+            while (totalRead < contentLength) {
+                val read = input.read(body, totalRead, contentLength - totalRead)
+                if (read == -1) break
+                totalRead += read
             }
-
-            if (conn.responseCode == 200) {
-                val baos = ByteArrayOutputStream()
-                conn.inputStream.use { input ->
-                    input.copyTo(baos)
-                }
-                baos.toByteArray()
-            } else {
-                null
+            return if (totalRead == contentLength) body else null
+        } else {
+            val bodyBaos = ByteArrayOutputStream()
+            val buf = ByteArray(1024)
+            var r: Int
+            while (input.read(buf).also { r = it } != -1) {
+                bodyBaos.write(buf, 0, r)
             }
-        } catch (e: Exception) {
-            null
-        } finally {
-            conn?.disconnect()
+            return bodyBaos.toByteArray()
         }
     }
 

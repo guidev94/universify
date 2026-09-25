@@ -1036,7 +1036,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _abrirModalTesteDominio() {
-    final domainController = TextEditingController(text: "erome.com");
+    final domainController = TextEditingController(text: "cloudflare.com");
     bool isResolving = false;
     String resolutionResult = "";
     int resolutionTimeMs = 0;
@@ -1076,7 +1076,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      "Teste a resolução de qualquer domínio (ex: erome.com, x.com) através do túnel DNS ativo.",
+                      "Teste a resolução de qualquer domínio (ex: cloudflare.com, google.com) através do túnel DNS ativo.",
                       style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
                     ),
                     const SizedBox(height: 16),
@@ -1087,7 +1087,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             controller: domainController,
                             decoration: const InputDecoration(
                               labelText: "Domínio para testar",
-                              hintText: "erome.com",
+                              hintText: "cloudflare.com",
                               prefixIcon: Icon(LucideIcons.globe, size: 18),
                             ),
                           ),
