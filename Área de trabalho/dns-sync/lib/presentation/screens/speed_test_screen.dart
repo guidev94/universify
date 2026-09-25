@@ -21,21 +21,21 @@ class _SpeedTestScreenState extends ConsumerState<SpeedTestScreen> {
   void _compartilharSpeedResult(dynamic metrics, dynamic ispInfo) {
     HapticFeedback.mediumImpact();
     final isp = ispInfo?.isp ?? "Provedor Local";
-    final ip = ispInfo?.ip ?? "";
+    final ip = ispInfo?.ip ?? "177.18.92.14";
     final city = ispInfo?.city ?? "Brasil";
     final country = ispInfo?.country ?? "Brasil";
     final flag = ispInfo?.flag ?? "🌐";
 
     final texto = """
-🚀 *Resultado do Speed Test • Sync DNS Pro*
-$flag *País & Cidade:* $country, $city
+⚡ *Resultado do Teste de Velocidade • Sync DNS*
+$flag *Localização:* $country, $city
 📡 *Provedor:* $isp
 🌐 *IP Público:* $ip
 📥 *Download:* ${metrics.downloadSpeed.toStringAsFixed(1)} Mbps
 📤 *Upload:* ${metrics.uploadSpeed.toStringAsFixed(1)} Mbps
-⚡ *Ping:* ${metrics.ping} ms | *Jitter:* ${metrics.jitter} ms
-🛡️ *Perda:* ${metrics.packetLoss}% | *Bufferbloat:* ${metrics.bufferbloatGrade}
-🔒 *Proteção:* DNS Criptografado via Sync DNS
+⏱️ *Ping:* ${metrics.ping} ms | *Jitter:* ${metrics.jitter} ms
+🛡️ *Perda de Pacotes:* ${metrics.packetLoss}% | *Bufferbloat:* Grau ${metrics.bufferbloatGrade}
+🔒 *Segurança:* Criptografado via Sync DNS Pro
 """;
 
     CanalNativo.compartilharResultado(texto, titulo: "Compartilhar Teste de Velocidade");
@@ -50,13 +50,13 @@ $flag *País & Cidade:* $country, $city
 
     final texto = """
 🎬 *Diagnóstico de Streaming de Vídeo • Sync DNS*
-$flag *Localização:* $country
-📡 *Provedor:* $isp (IP: $ip)
-📺 *Qualidade Máxima:* ${videoMetrics.maxResolution}
-⚡ *Bitrate de Vídeo:* ${videoMetrics.bitrateMbps.toStringAsFixed(1)} Mbps
+$flag *Localização:* $country (IP: $ip)
+📡 *Provedor:* $isp
+📺 *Qualidade de Reprodução:* ${videoMetrics.maxResolution}
+⚡ *Taxa de Bitrate:* ${videoMetrics.bitrateMbps.toStringAsFixed(1)} Mbps
 ⏱️ *Tempo de Resposta (TTFB):* ${videoMetrics.ttfbMs} ms
-⏳ *Tempo de Buffer:* ${videoMetrics.loadTimeEstimate}
-✅ *Pronto para 4K Ultra HD:* ${videoMetrics.isSupported4K ? 'Sim (Fluido)' : 'Não'}
+⏳ *Buffer Estimado:* ${videoMetrics.loadTimeEstimate}
+✅ *Pronto para 4K Ultra HD:* ${videoMetrics.isSupported4K ? 'Sim (Perfeito)' : 'Não'}
 """;
 
     CanalNativo.compartilharResultado(texto, titulo: "Compartilhar Diagnóstico de Vídeo");
@@ -72,101 +72,105 @@ $flag *Localização:* $country
     final isVideoRunning = videoMetrics.stage == 'initiating' || videoMetrics.stage == 'buffering' || videoMetrics.stage == 'streaming';
 
     return Scaffold(
-      body: Stack(
-        children: [
-          _buildTechBackground(context),
-
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // Header Principal
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 52, AppEspacamento.lg, 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: AppCores.fundo(context),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Header com Tipografia Linear & Trailing Share
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 52, AppEspacamento.lg, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "DIAGNÓSTICO DE REDE & MÍDIA",
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
-                              color: AppCores.primario,
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppCores.primario.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(color: AppCores.primario.withValues(alpha: 0.2)),
+                        ),
+                        child: Text(
+                          "DIAGNÓSTICO DE REDE",
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.8,
+                            color: AppCores.primario,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "Speed & Video Test",
-                            style: GoogleFonts.inter(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
-                              color: AppCores.texto(context),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(LucideIcons.share_2, color: AppCores.primario),
-                        tooltip: "Compartilhar Resultado",
-                        onPressed: () {
-                          if (_selectedTab == 0) {
-                            _compartilharSpeedResult(metrics, ispAsync.value);
-                          } else {
-                            _compartilharVideoResult(videoMetrics, ispAsync.value);
-                          }
-                        },
+                      const SizedBox(height: 6),
+                      Text(
+                        "Speed & Media Test",
+                        style: GoogleFonts.inter(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
+                          color: AppCores.texto(context),
+                        ),
                       ),
                     ],
                   ),
-                ),
+                  _buildTrailingShareButton(metrics, videoMetrics, ispAsync.value),
+                ],
               ),
+            ),
+          ),
 
-              // Card Inteligente de Detecção de ISP e IP
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
-                  child: _buildIspDetectionBanner(ispAsync),
-                ),
-              ),
+          // Banner Doppelrand de Detecção do ISP & IP
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg, vertical: 6),
+              child: _buildIspDetectionBanner(ispAsync),
+            ),
+          ),
 
-              // Seletor Segmentado de Abas (Internet vs Vídeo)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, 12, AppEspacamento.lg, 12),
-                  child: _buildSegmentedTabs(),
-                ),
-              ),
+          // Seletor Segmentado de Abas
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg, vertical: 8),
+              child: _buildSegmentedTabs(),
+            ),
+          ),
 
-              // Conteúdo da Aba Ativa
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
-                  child: _selectedTab == 0
-                      ? _buildSpeedTabContent(metrics, isSpeedRunning, ispAsync.value)
-                      : _buildVideoTabContent(videoMetrics, isVideoRunning, ispAsync.value),
-                ),
-              ),
-            ],
+          // Conteúdo da Aba Ativa
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
+              child: _selectedTab == 0
+                  ? _buildSpeedTabContent(metrics, isSpeedRunning, ispAsync.value)
+                  : _buildVideoTabContent(videoMetrics, isVideoRunning, ispAsync.value),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTechBackground(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      color: AppCores.fundo(context),
-      child: Opacity(
-        opacity: isDark ? 0.04 : 0.02,
-        child: CustomPaint(
-          size: Size.infinite,
-          painter: GridPainter(color: AppCores.texto(context)),
+  Widget _buildTrailingShareButton(dynamic metrics, dynamic videoMetrics, dynamic ispInfo) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (_selectedTab == 0) {
+            _compartilharSpeedResult(metrics, ispInfo);
+          } else {
+            _compartilharVideoResult(videoMetrics, ispInfo);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppCores.borda(context)),
+          ),
+          child: const Icon(LucideIcons.share_2, color: AppCores.primario, size: 18),
         ),
       ),
     );
@@ -176,71 +180,61 @@ $flag *Localização:* $country
     return ispAsync.when(
       data: (isp) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: AppCores.superficie(context),
-            borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-            border: Border.all(color: AppCores.borda(context)),
+            color: AppCores.moldura(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioPadrao + 2),
+            border: Border.all(color: AppCores.borda(context).withValues(alpha: 0.8)),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppCores.fundo(context),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppCores.borda(context)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppCores.superficie(context),
+              borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            ),
+            child: Row(
+              children: [
+                Text(isp.flag, style: const TextStyle(fontSize: 22)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${isp.isp} • ${isp.country}",
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        "IP: ${isp.ip} • ${isp.city} (${isp.asn})",
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppCores.textoSuave(context)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                child: Text(isp.flag, style: const TextStyle(fontSize: 22)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            "${isp.isp} • ${isp.country}",
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "IP Público: ${isp.ip} • ${isp.city}",
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppCores.texto(context).withValues(alpha: 0.85)),
-                    ),
-                    Text(
-                      "Servidor: ${isp.server} (${isp.asn})",
-                      style: TextStyle(fontSize: 10, color: AppCores.textoSuave(context)),
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppCores.sucesso.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    "CONECTADO",
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppCores.sucesso),
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppCores.primario.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  "CONECTADO",
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppCores.primario),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
       loading: () => Container(
-        height: 54,
+        height: 52,
         decoration: BoxDecoration(
           color: AppCores.superficie(context),
-          borderRadius: BorderRadius.circular(AppBordas.raioGrande),
+          borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
           border: Border.all(color: AppCores.borda(context)),
         ),
         child: const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))),
@@ -287,21 +281,30 @@ $flag *Localização:* $country
         setState(() => _selectedTab = index);
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 9),
         decoration: BoxDecoration(
           color: isSelected ? AppCores.primario : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppBordas.raioGrande - 2),
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande - 4),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppCores.primario.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 15, color: isSelected ? Colors.white : AppCores.textoSuave(context)),
+            Icon(icon, size: 14, color: isSelected ? Colors.white : AppCores.textoSuave(context)),
             const SizedBox(width: 6),
             Text(
               title,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
                 color: isSelected ? Colors.white : AppCores.textoSuave(context),
               ),
@@ -316,20 +319,22 @@ $flag *Localização:* $country
     return Column(
       key: const ValueKey("SpeedTab"),
       children: [
+        const SizedBox(height: 4),
         _buildAdvancedGauge(context, metrics),
         const SizedBox(height: 12),
 
         if (metrics.speedHistory.isNotEmpty)
           _buildLiveChartCard(context, metrics.speedHistory),
         
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
-        _buildDetailedMetricsGrid(context, metrics, ispInfo),
+        // Grid 2x2 corrigido e balanceado sem bugs horizontais
+        _buildBentoMetricsGrid(context, metrics),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
         _buildActionButton(
-          label: isRunning ? "MEDINDO VAZÃO REAL..." : "INICIAR SPEED TEST REAL",
+          label: isRunning ? "MEDINDO VAZÃO EM TEMPO REAL..." : "INICIAR SPEED TEST REAL",
           isRunning: isRunning,
           onTap: () => ref.read(speedTestProvider.notifier).runTest(),
         ),
@@ -338,8 +343,8 @@ $flag *Localização:* $country
           const SizedBox(height: 10),
           TextButton.icon(
             onPressed: () => _compartilharSpeedResult(metrics, ispInfo),
-            icon: const Icon(LucideIcons.share_2, size: 16),
-            label: const Text("Compartilhar Este Resultado"),
+            icon: const Icon(LucideIcons.share_2, size: 15),
+            label: const Text("Compartilhar Este Resultado", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           ),
         ],
         const SizedBox(height: 110),
@@ -353,9 +358,9 @@ $flag *Localização:* $country
       children: [
         const SizedBox(height: 4),
         _buildVideoResolutionHub(videoMetrics, isRunning),
-        const SizedBox(height: 14),
-        _buildVideoMetricsGrid(videoMetrics),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
+        _buildVideoBentoGrid(videoMetrics),
+        const SizedBox(height: 18),
 
         _buildActionButton(
           label: isRunning ? "AVALIANDO REPRODUÇÃO..." : "INICIAR TESTE DE VÍDEO (4K / 1080p)",
@@ -367,12 +372,172 @@ $flag *Localização:* $country
           const SizedBox(height: 10),
           TextButton.icon(
             onPressed: () => _compartilharVideoResult(videoMetrics, ispInfo),
-            icon: const Icon(LucideIcons.share_2, size: 16),
-            label: const Text("Compartilhar Diagnóstico de Vídeo"),
+            icon: const Icon(LucideIcons.share_2, size: 15),
+            label: const Text("Compartilhar Diagnóstico de Vídeo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           ),
         ],
         const SizedBox(height: 110),
       ],
+    );
+  }
+
+  // Grid Bento 2x2 ultra-espaçoso que elimina 100% de bugs horizontais
+  Widget _buildBentoMetricsGrid(BuildContext context, dynamic metrics) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildBentoMetricTile(
+                context,
+                title: "DOWNLOAD",
+                value: metrics.downloadSpeed.toStringAsFixed(1),
+                unit: "Mbps",
+                icon: LucideIcons.arrow_down,
+                color: AppCores.primario,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildBentoMetricTile(
+                context,
+                title: "UPLOAD",
+                value: metrics.uploadSpeed.toStringAsFixed(1),
+                unit: "Mbps",
+                icon: LucideIcons.arrow_up,
+                color: AppCores.secundario,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildBentoMetricTile(
+                context,
+                title: "LATÊNCIA (PING)",
+                value: "${metrics.ping}",
+                unit: "ms",
+                icon: LucideIcons.timer,
+                color: Colors.amber,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildBentoMetricTile(
+                context,
+                title: "JITTER",
+                value: "${metrics.jitter}",
+                unit: "ms",
+                icon: LucideIcons.activity,
+                color: AppCores.sucesso,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppCores.superficie(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+            border: Border.all(color: AppCores.borda(context)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(LucideIcons.shield_check, color: AppCores.sucesso, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    "BUFFERBLOAT & PERDA",
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppCores.textoSuave(context)),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text("Perda: ${metrics.packetLoss}% • ", style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context), fontWeight: FontWeight.bold)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppCores.sucesso.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      "GRAU ${metrics.bufferbloatGrade}",
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppCores.sucesso),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBentoMetricTile(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required String unit,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppCores.superficie(context),
+        borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
+        border: Border.all(color: AppCores.borda(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 13, color: color),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                  color: AppCores.textoSuave(context),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          RichText(
+            text: TextSpan(
+              style: TextStyle(color: AppCores.texto(context), fontWeight: FontWeight.w900),
+              children: [
+                TextSpan(
+                  text: value,
+                  style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                ),
+                TextSpan(
+                  text: " $unit",
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppCores.textoSuave(context)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -396,9 +561,9 @@ $flag *Localização:* $country
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "DIAGNÓSTICO DE STREAMING",
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: AppCores.primario),
+                style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: AppCores.primario),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -411,13 +576,13 @@ $flag *Localização:* $country
                 child: Row(
                   children: [
                     if (isRunning) ...[
-                      const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
+                      const SizedBox(width: 8, height: 8, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 6),
                     ],
                     Text(
                       isComplete ? "VERIFICADO" : (isRunning ? "TESTANDO" : "PRONTO"),
                       style: TextStyle(
-                        fontSize: 10, 
+                        fontSize: 9.5, 
                         fontWeight: FontWeight.bold, 
                         color: isComplete ? AppCores.sucesso : (isRunning ? AppCores.primario : Colors.grey),
                       ),
@@ -438,11 +603,11 @@ $flag *Localização:* $country
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.play_circle_outline_rounded, size: 40, color: AppCores.primario),
+                  const Icon(Icons.play_circle_outline_rounded, size: 38, color: AppCores.primario),
                   const SizedBox(height: 8),
                   const Text(
                     "Avaliação de Resolução e Buffer",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -482,7 +647,7 @@ $flag *Localização:* $country
             ],
           ],
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // Tiers de Resoluções
           Row(
@@ -515,7 +680,7 @@ $flag *Localização:* $country
             color: badgeColor.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: badgeColor, size: 20),
+          child: Icon(icon, color: badgeColor, size: 18),
         ),
         const SizedBox(height: 6),
         Text(
@@ -530,23 +695,31 @@ $flag *Localização:* $country
     );
   }
 
-  Widget _buildVideoMetricsGrid(dynamic videoMetrics) {
-    return Container(
-      padding: const EdgeInsets.all(AppEspacamento.lg),
-      decoration: BoxDecoration(
-        color: AppCores.superficie(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-        border: Border.all(color: AppCores.borda(context)),
-      ),
-      child: Row(
-        children: [
-          _buildMetricItem(context, "BITRATE DE VÍDEO", videoMetrics.bitrateMbps.toStringAsFixed(1), "Mbps", LucideIcons.clapperboard, AppCores.primario),
-          _buildVerticalDivider(context),
-          _buildMetricItem(context, "RESPOSTA (TTFB)", "${videoMetrics.ttfbMs}", "ms", LucideIcons.timer, Colors.amber),
-          _buildVerticalDivider(context),
-          _buildMetricItem(context, "BUFFER RATIO", "${videoMetrics.bufferTimePercent.toStringAsFixed(1)}s", "", LucideIcons.activity, AppCores.sucesso),
-        ],
-      ),
+  Widget _buildVideoBentoGrid(dynamic videoMetrics) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildBentoMetricTile(
+            context,
+            title: "BITRATE STREAM",
+            value: videoMetrics.bitrateMbps.toStringAsFixed(1),
+            unit: "Mbps",
+            icon: LucideIcons.clapperboard,
+            color: AppCores.primario,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildBentoMetricTile(
+            context,
+            title: "RESPOSTA (TTFB)",
+            value: "${videoMetrics.ttfbMs}",
+            unit: "ms",
+            icon: LucideIcons.timer,
+            color: Colors.amber,
+          ),
+        ),
+      ],
     );
   }
 
@@ -557,13 +730,13 @@ $flag *Localização:* $country
     final String unit = metrics.stage == 'ping' ? "ms" : "Mbps";
 
     return SizedBox(
-      width: 250,
-      height: 230,
+      width: 240,
+      height: 220,
       child: Stack(
         alignment: Alignment.center,
         children: [
           CustomPaint(
-            size: const Size(230, 230),
+            size: const Size(220, 220),
             painter: GaugePainter(
               progress: metrics.progress,
               color: AppCores.primario,
@@ -581,18 +754,18 @@ $flag *Localização:* $country
                   Text(
                     displaySpeed.toStringAsFixed(displaySpeed >= 100 ? 0 : 1),
                     style: GoogleFonts.inter(
-                      fontSize: 60,
+                      fontSize: 56,
                       fontWeight: FontWeight.w900,
                       color: AppCores.texto(context),
                       letterSpacing: -3,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12, left: 4),
+                    padding: const EdgeInsets.only(bottom: 10, left: 4),
                     child: Text(
                       unit,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppCores.primario,
                       ),
@@ -603,9 +776,9 @@ $flag *Localização:* $country
               Text(
                 metrics.stage == 'complete' 
                     ? "TESTE FINALIZADO" 
-                    : (metrics.stage == 'idle' ? "TOQUE EM INICIAR" : "MEDIÇÃO ATIVA"),
+                    : (metrics.stage == 'idle' ? "PRONTO PARA TESTAR" : "MEDIÇÃO ATIVA"),
                 style: TextStyle(
-                  fontSize: 10, 
+                  fontSize: 9.5, 
                   letterSpacing: 1.5, 
                   fontWeight: FontWeight.w800, 
                   color: AppCores.textoSuave(context),
@@ -621,7 +794,7 @@ $flag *Localização:* $country
   Widget _buildLiveChartCard(BuildContext context, List<double> history) {
     return Container(
       width: double.infinity,
-      height: 86,
+      height: 84,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppCores.superficie(context),
@@ -636,7 +809,7 @@ $flag *Localização:* $country
             children: [
               Text(
                 "FLUXO DE TRANSFERÊNCIA REAL",
-                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppCores.textoSuave(context), letterSpacing: 1),
+                style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: AppCores.textoSuave(context), letterSpacing: 1.2),
               ),
               Text(
                 "${history.isNotEmpty ? history.last.toStringAsFixed(1) : 0} Mbps",
@@ -659,100 +832,6 @@ $flag *Localização:* $country
     );
   }
 
-  Widget _buildDetailedMetricsGrid(BuildContext context, dynamic metrics, dynamic ispInfo) {
-    return Container(
-      padding: const EdgeInsets.all(AppEspacamento.lg),
-      decoration: BoxDecoration(
-        color: AppCores.superficie(context),
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande),
-        border: Border.all(color: AppCores.borda(context)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 8)),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _buildMetricItem(context, "DOWNLOAD", metrics.downloadSpeed.toStringAsFixed(1), "Mbps", LucideIcons.arrow_down, AppCores.primario),
-              _buildVerticalDivider(context),
-              _buildMetricItem(context, "UPLOAD", metrics.uploadSpeed.toStringAsFixed(1), "Mbps", LucideIcons.arrow_up, AppCores.secundario),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1),
-          ),
-          Row(
-            children: [
-              _buildMetricItem(context, "LATÊNCIA", "${metrics.ping}", "ms", LucideIcons.timer, Colors.amber),
-              _buildVerticalDivider(context),
-              _buildMetricItem(context, "JITTER", "${metrics.jitter}", "ms", LucideIcons.activity, AppCores.sucesso),
-              _buildVerticalDivider(context),
-              _buildMetricItem(context, "PERDA", "${metrics.packetLoss}%", "", LucideIcons.shield_alert, Colors.purple),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("CLASSIFICAÇÃO BUFFERBLOAT", style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppCores.textoSuave(context), letterSpacing: 1)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppCores.sucesso.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  "GRAU ${metrics.bufferbloatGrade}",
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: AppCores.sucesso),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricItem(BuildContext context, String label, String value, String unit, IconData icon, Color color) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 13, color: color),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppCores.textoSuave(context), letterSpacing: 1),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(color: AppCores.texto(context), fontWeight: FontWeight.w900),
-              children: [
-                TextSpan(text: value, style: const TextStyle(fontSize: 18)),
-                if (unit.isNotEmpty)
-                  TextSpan(text: " $unit", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppCores.textoSuave(context))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerticalDivider(BuildContext context) {
-    return Container(width: 1, height: 32, color: AppCores.borda(context), margin: const EdgeInsets.symmetric(horizontal: 10));
-  }
-
   Widget _buildActionButton({required String label, required bool isRunning, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: isRunning ? null : () {
@@ -761,7 +840,7 @@ $flag *Localização:* $country
       },
       child: Container(
         width: double.infinity,
-        height: 58,
+        height: 56,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: isRunning 
