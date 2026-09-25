@@ -19,7 +19,6 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.InputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.HttpURLConnection
@@ -40,7 +39,7 @@ class MainActivity: FlutterActivity() {
     private var pendingProvider: String? = null
     private var pendingProxyHost: String? = null
     private var pendingProxyPort: Int = 0
-    private var pendingUseDoh: Boolean = false
+    private var pendingUseDoh: Boolean = true
     private var pendingDohUrl: String = ""
     private var pendingBypassPackages: ArrayList<String>? = null
     private var pendingResult: MethodChannel.Result? = null
@@ -75,10 +74,10 @@ class MainActivity: FlutterActivity() {
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "aplicarDns" -> {
-                    val principal = call.argument<String>("principal") ?: "8.8.8.8"
-                    val secundario = call.argument<String>("secundario") ?: "1.1.1.1"
-                    val provedor = call.argument<String>("provedor") ?: "Custom"
-                    val useDoh = call.argument<Boolean>("useDoh") ?: false
+                    val principal = call.argument<String>("principal") ?: "1.1.1.1"
+                    val secundario = call.argument<String>("secundario") ?: "1.0.0.1"
+                    val provedor = call.argument<String>("provedor") ?: "Cloudflare"
+                    val useDoh = call.argument<Boolean>("useDoh") ?: true
                     val dohUrl = call.argument<String>("dohUrl") ?: ""
                     val enableAdBlock = call.argument<Boolean>("enableAdBlock") ?: true
                     val bypassPackages = call.argument<ArrayList<String>>("bypassPackages") ?: arrayListOf()
@@ -107,8 +106,8 @@ class MainActivity: FlutterActivity() {
 
                     val intent = VpnService.prepare(this)
                     if (intent != null) {
-                        pendingDns1 = "8.8.8.8"
-                        pendingDns2 = "1.1.1.1"
+                        pendingDns1 = "1.1.1.1"
+                        pendingDns2 = "1.0.0.1"
                         pendingProvider = "Proxy ($pais)"
                         pendingProxyHost = host
                         pendingProxyPort = porta
@@ -158,9 +157,9 @@ class MainActivity: FlutterActivity() {
                     startProxyVpn(pendingProxyHost!!, pendingProxyPort, pendingProvider ?: "Proxy")
                 } else {
                     startDnsVpn(
-                        pendingDns1, 
-                        pendingDns2, 
-                        pendingProvider ?: "Google",
+                        pendingDns1 ?: "1.1.1.1", 
+                        pendingDns2 ?: "1.0.0.1", 
+                        pendingProvider ?: "Cloudflare",
                         pendingUseDoh,
                         pendingDohUrl,
                         true,
@@ -179,7 +178,7 @@ class MainActivity: FlutterActivity() {
         p: String?, 
         s: String?, 
         provider: String,
-        useDoh: Boolean = false,
+        useDoh: Boolean = true,
         dohUrl: String = "",
         enableAdBlock: Boolean = true,
         bypassPackages: ArrayList<String> = arrayListOf()
@@ -204,8 +203,8 @@ class MainActivity: FlutterActivity() {
     private fun startProxyVpn(host: String, port: Int, provider: String) {
         val intent = Intent(this, MyVpnService::class.java).apply {
             action = "START"
-            putExtra("dns1", "8.8.8.8")
-            putExtra("dns2", "1.1.1.1")
+            putExtra("dns1", "1.1.1.1")
+            putExtra("dns2", "1.0.0.1")
             putExtra("provider", provider)
             putExtra("proxyHost", host)
             putExtra("proxyPort", port)
@@ -250,7 +249,6 @@ class MyVpnService : VpnService(), Runnable {
         var onStateChangeListener: ((Boolean, String) -> Unit)? = null
         var onAdBlockedListener: ((Int, String) -> Unit)? = null
 
-        // Conjunto de domínios conhecidos de anúncios e rastreadores para bloqueio local
         val AD_BLOCKLIST = hashSetOf(
             "doubleclick.net", "googleadservices.com", "googlesyndication.com",
             "adservice.google.com", "app-measurement.com", "analytics.google.com",
@@ -269,25 +267,26 @@ class MyVpnService : VpnService(), Runnable {
     private var vpnThread: Thread? = null
     private var executorService: ExecutorService? = null
     private val shouldRun = AtomicBoolean(false)
-    private var upstreamDns1: String = "8.8.8.8"
-    private var upstreamDns2: String = "1.1.1.1"
-    private var isDohEnabled: Boolean = false
+    private var upstreamDns1: String = "1.1.1.1"
+    private var upstreamDns2: String = "1.0.0.1"
+    private var isDohEnabled: Boolean = true
     private var dohEndpoint: String = ""
     private var isAdBlockEnabled: Boolean = true
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createNotificationChannel()
         val action = intent?.action ?: "START"
         if (action == "STOP") {
             stopVpn()
             return START_NOT_STICKY
         }
 
-        upstreamDns1 = intent?.getStringExtra("dns1") ?: "8.8.8.8"
-        upstreamDns2 = intent?.getStringExtra("dns2") ?: "1.1.1.1"
-        val providerName = intent?.getStringExtra("provider") ?: "Google"
+        upstreamDns1 = intent?.getStringExtra("dns1") ?: "1.1.1.1"
+        upstreamDns2 = intent?.getStringExtra("dns2") ?: "1.0.0.1"
+        val providerName = intent?.getStringExtra("provider") ?: "Cloudflare"
         val proxyHost = intent?.getStringExtra("proxyHost")
         val proxyPort = intent?.getIntExtra("proxyPort", 0) ?: 0
-        isDohEnabled = intent?.getBooleanExtra("useDoh", false) ?: false
+        isDohEnabled = intent?.getBooleanExtra("useDoh", true) ?: true
         dohEndpoint = intent?.getStringExtra("dohUrl") ?: ""
         isAdBlockEnabled = intent?.getBooleanExtra("enableAdBlock", true) ?: true
         val bypassPackages = intent?.getStringArrayListExtra("bypassPackages") ?: arrayListOf()
@@ -324,14 +323,15 @@ class MyVpnService : VpnService(), Runnable {
                 Log.w(TAG, "IPv6 anti-leak fallback: ${e.message}")
             }
 
-            // Servidores DNS Primário e Secundário
-            if (dns1.isNotEmpty()) {
-                builder.addDnsServer(dns1)
-                builder.addRoute(dns1, 32)
-            }
-            if (dns2.isNotEmpty() && dns2 != dns1) {
-                builder.addDnsServer(dns2)
-                builder.addRoute(dns2, 32)
+            // Servidores DNS e rotas para interceptação
+            val publicDns = listOf(dns1, dns2, "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "94.140.14.14", "208.67.222.222")
+            for (d in publicDns.distinct()) {
+                if (d.isNotEmpty()) {
+                    try {
+                        builder.addDnsServer(d)
+                        builder.addRoute(d, 32)
+                    } catch (e: Exception) {}
+                }
             }
 
             // Suporte a Proxy HTTP no TUN (Android 10+)
@@ -341,7 +341,7 @@ class MyVpnService : VpnService(), Runnable {
                 }
             }
 
-            // Split Tunneling: adiciona pacotes que devem ignorar a VPN
+            // Split Tunneling
             try {
                 builder.addDisallowedApplication(packageName)
                 for (pkg in bypassPackages) {
@@ -367,7 +367,7 @@ class MyVpnService : VpnService(), Runnable {
 
                 executorService = Executors.newFixedThreadPool(16)
                 vpnThread = Thread(this, "SyncDnsVpnThread").apply { start() }
-                Log.i(TAG, "SyncDNS VPN estabelecida com sucesso para $providerName (DoH: $isDohEnabled, AdBlock: $isAdBlockEnabled)")
+                Log.i(TAG, "SyncDNS VPN ativa para $providerName (DoH Ativo: $isDohEnabled)")
             } else {
                 Log.e(TAG, "Falha ao estabelecer interface TUN")
                 stopSelf()
@@ -471,7 +471,7 @@ class MyVpnService : VpnService(), Runnable {
 
         val ihl = (versionAndIhl and 0x0F) * 4
         val protocol = data[9].toInt() and 0xFF
-        if (protocol != 17) return
+        if (protocol != 17) return // UDP
 
         val dstPort = ((data[ihl + 2].toInt() and 0xFF) shl 8) or (data[ihl + 3].toInt() and 0xFF)
         if (dstPort != 53) return
@@ -484,40 +484,39 @@ class MyVpnService : VpnService(), Runnable {
         val dnsQuery = ByteArray(dnsPayloadLen)
         System.arraycopy(data, ihl + 8, dnsQuery, 0, dnsPayloadLen)
 
-        // 1. Extrair domínio solicitado (QNAME)
+        // 1. Extração do domínio solicitado (QNAME)
         val domain = extractDomainName(dnsQuery)
 
-        // 2. Bloqueador de Anúncios e Rastreadores Local
+        // 2. Bloqueio local de anúncios (se ativado)
         if (isAdBlockEnabled && domain.isNotEmpty() && isBlockedDomain(domain)) {
             val blockedTotal = blockedAdsCount.incrementAndGet()
             onAdBlockedListener?.invoke(blockedTotal, domain)
             
-            // Retorna resposta sintética NXDOMAIN ou 0.0.0.0 localmente sem usar internet
             val syntheticResponse = createBlockDnsResponse(dnsQuery)
             writePacketToTun(data, dstPort, srcPort, syntheticResponse, out)
             return
         }
 
-        // 3. Encaminhamento via DNS-over-HTTPS (DoH) se ativado
-        if (isDohEnabled && dohEndpoint.isNotEmpty()) {
-            val dohResponse = queryDoh(dnsQuery, dohEndpoint)
+        val dstIp = "${data[16].toInt() and 0xFF}.${data[17].toInt() and 0xFF}.${data[18].toInt() and 0xFF}.${data[19].toInt() and 0xFF}"
+        val targetDns = if (dstIp == upstreamDns1 || dstIp == upstreamDns2) dstIp else upstreamDns1
+
+        // 3. Encaminhamento via DoH (DNS-over-HTTPS por IP direto)
+        if (isDohEnabled) {
+            val dohResponse = queryDoh(dnsQuery, targetDns)
             if (dohResponse != null && dohResponse.isNotEmpty()) {
                 writePacketToTun(data, dstPort, srcPort, dohResponse, out)
                 return
             }
         }
 
-        // 4. Encaminhamento padrão via UDP protegido
+        // 4. Fallback para UDP protegido se DoH falhar
         var socket: DatagramSocket? = null
         try {
             socket = DatagramSocket()
             protect(socket)
             socket.soTimeout = 2000
 
-            val dstIp = "${data[16].toInt() and 0xFF}.${data[17].toInt() and 0xFF}.${data[18].toInt() and 0xFF}.${data[19].toInt() and 0xFF}"
-            val targetDns = if (dstIp == upstreamDns1 || dstIp == upstreamDns2) dstIp else upstreamDns1
             val targetAddr = InetAddress.getByName(targetDns)
-            
             val sendPacket = DatagramPacket(dnsQuery, dnsQuery.size, targetAddr, 53)
             socket.send(sendPacket)
 
@@ -617,23 +616,39 @@ class MyVpnService : VpnService(), Runnable {
     private fun createBlockDnsResponse(query: ByteArray): ByteArray {
         val resp = ByteArray(query.size + 16)
         System.arraycopy(query, 0, resp, 0, query.size)
-        // Set Flags: Standard response, Authoritative, No Error / NXDOMAIN
         resp[2] = 0x81.toByte()
         resp[3] = 0x83.toByte() // NXDOMAIN
         return resp
     }
 
-    private fun queryDoh(query: ByteArray, urlString: String): ByteArray? {
+    private fun queryDoh(query: ByteArray, targetDns: String): ByteArray? {
+        val dohUrl = when (targetDns) {
+            "1.1.1.1", "1.0.0.1" -> "https://1.1.1.1/dns-query"
+            "8.8.8.8", "8.8.4.4" -> "https://8.8.8.8/dns-query"
+            "9.9.9.9", "149.112.112.112" -> "https://9.9.9.9/dns-query"
+            "94.140.14.14", "94.140.15.15" -> "https://94.140.14.14/dns-query"
+            else -> if (dohEndpoint.isNotEmpty()) dohEndpoint else "https://1.1.1.1/dns-query"
+        }
+
         var conn: HttpURLConnection? = null
         return try {
-            val url = URL(urlString)
+            val url = URL(dohUrl)
             conn = url.openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.connectTimeout = 2000
             conn.readTimeout = 2000
             conn.doOutput = true
+            conn.useCaches = false
             conn.setRequestProperty("Content-Type", "application/dns-message")
             conn.setRequestProperty("Accept", "application/dns-message")
+
+            if (dohUrl.contains("1.1.1.1") || dohUrl.contains("1.0.0.1")) {
+                conn.setRequestProperty("Host", "cloudflare-dns.com")
+            } else if (dohUrl.contains("8.8.8.8") || dohUrl.contains("8.8.4.4")) {
+                conn.setRequestProperty("Host", "dns.google")
+            } else if (dohUrl.contains("9.9.9.9")) {
+                conn.setRequestProperty("Host", "dns.quad9.net")
+            }
 
             conn.outputStream.use { os ->
                 os.write(query)

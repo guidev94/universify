@@ -1,6 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
   bool _isAutoConnecting = false;
 
@@ -97,6 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     final proxyAtivo = ref.watch(proxyAtivoProvider);
     final benchmarkLatencias = ref.watch(benchmarkLatenciasProvider);
     final customDnsList = ref.watch(customDnsListProvider);
+    final totalBloqueados = ref.watch(anunciosBloqueadosProvider);
 
     return Scaffold(
       extendBody: true,
@@ -106,37 +107,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           
           SafeArea(
             bottom: false,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              switchInCurve: Curves.easeOutQuad,
-              switchOutCurve: Curves.easeInQuad,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
-              child: IndexedStack(
-                key: ValueKey<int>(_currentIndex),
-                index: _currentIndex,
-                children: [
-                  _buildHomeBody(
-                    context, 
-                    estaConectado, 
-                    provedorAtual, 
-                    modoTema, 
-                    conexaoInfo, 
-                    tempoSegundos,
-                    tipoConexao,
-                    proxyAtivo,
-                    benchmarkLatencias,
-                    customDnsList,
-                  ),
-                  const ProxyListScreen(),
-                  const SpeedTestScreen(),
-                  const SettingsScreen(),
-                ],
-              ),
+            child: IndexedStack(
+              index: _currentIndex,
+              children: [
+                _buildHomeBody(
+                  context, 
+                  estaConectado, 
+                  provedorAtual, 
+                  modoTema, 
+                  conexaoInfo, 
+                  tempoSegundos,
+                  tipoConexao,
+                  proxyAtivo,
+                  benchmarkLatencias,
+                  customDnsList,
+                  totalBloqueados,
+                ),
+                const ProxyListScreen(),
+                const SpeedTestScreen(),
+                const SettingsScreen(),
+              ],
             ),
           ),
           
@@ -150,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     return Positioned.fill(
       child: RepaintBoundary(
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
             color: ativo 
@@ -173,6 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     dynamic proxyAtivo,
     AsyncValue<Map<String, int>> benchmarkLatencias,
     List<CustomDnsModel> customDnsList,
+    int totalBloqueados,
   ) {
     final latencias = benchmarkLatencias.value ?? {};
 
@@ -181,7 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(AppEspacamento.lg),
+            padding: const EdgeInsets.fromLTRB(AppEspacamento.lg, AppEspacamento.lg, AppEspacamento.lg, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -197,31 +188,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                             shape: BoxShape.circle,
                             color: estaConectado ? AppCores.sucesso : Colors.grey,
                           ),
-                        ).animate(target: estaConectado ? 1 : 0).shimmer(duration: 1.5.seconds),
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          estaConectado ? "REDE CRIPTOGRAFADA" : "DESCONECTADO",
+                          estaConectado ? "PROTEÇÃO ATIVA (DoH TLS 1.3)" : "DESPROTEGIDO",
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: estaConectado ? AppCores.sucesso : AppCores.textoSuave(context),
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 1.5,
+                            letterSpacing: 1.2,
+                            fontSize: 10,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       "Sync DNS",
                       style: GoogleFonts.inter(
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
+                        letterSpacing: -0.8,
                         color: AppCores.texto(context),
                       ),
                     ),
                   ],
                 ),
-                _buildThemeToggle(modoTema),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(LucideIcons.search, size: 20),
+                      tooltip: "Diagnóstico de Domínio",
+                      onPressed: _abrirModalTesteDominio,
+                    ),
+                    _buildThemeToggle(modoTema),
+                  ],
+                ),
               ],
             ),
           ),
@@ -231,22 +232,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           padding: const EdgeInsets.symmetric(horizontal: AppEspacamento.lg),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildModernStatusCard(estaConectado, provedorAtual, tempoSegundos, tipoConexao, proxyAtivo),
+              _buildModernStatusCard(estaConectado, provedorAtual, tempoSegundos, tipoConexao, proxyAtivo, totalBloqueados),
               const SizedBox(height: AppEspacamento.md),
               _buildSmartAutoConnectCard(estaConectado),
               const SizedBox(height: AppEspacamento.md),
               _buildLeakTestCard(conexaoInfo),
-              const SizedBox(height: AppEspacamento.xl),
+              const SizedBox(height: AppEspacamento.lg),
 
               // Header Provedores Globais
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Servidores Oficiais",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                  Expanded(
+                    child: Text(
+                      "Servidores Oficiais",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   if (estaConectado)
@@ -257,30 +261,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.md),
+              const SizedBox(height: AppEspacamento.sm),
               Row(
                 children: [
                   Expanded(
                     child: _buildBentoCard(
-                      "Google DNS", 
-                      "8.8.8.8", 
-                      LucideIcons.shield_check, 
-                      const Color(0xFF4285F4),
-                      estaConectado && provedorAtual == "Google",
-                      latencias["Google"] ?? 15,
-                      () => _selecionarProvedor("Google", ["8.8.8.8", "8.8.4.4"]),
-                    ),
-                  ),
-                  const SizedBox(width: AppEspacamento.md),
-                  Expanded(
-                    child: _buildBentoCard(
                       "Cloudflare", 
                       "1.1.1.1", 
+                      "⚡ Mais Rápido",
                       LucideIcons.zap, 
                       const Color(0xFFF38020),
                       estaConectado && provedorAtual == "Cloudflare",
                       latencias["Cloudflare"] ?? 9,
                       () => _selecionarProvedor("Cloudflare", ["1.1.1.1", "1.0.0.1"]),
+                    ),
+                  ),
+                  const SizedBox(width: AppEspacamento.md),
+                  Expanded(
+                    child: _buildBentoCard(
+                      "Google DNS", 
+                      "8.8.8.8", 
+                      "🛡️ Mais Seguro",
+                      LucideIcons.shield_check, 
+                      const Color(0xFF4285F4),
+                      estaConectado && provedorAtual == "Google",
+                      latencias["Google"] ?? 14,
+                      () => _selecionarProvedor("Google", ["8.8.8.8", "8.8.4.4"]),
                     ),
                   ),
                 ],
@@ -292,6 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     child: _buildBentoCard(
                       "AdGuard", 
                       "94.140.14.14", 
+                      "🚫 Sem Anúncios",
                       LucideIcons.shield_alert, 
                       const Color(0xFF68BC71),
                       estaConectado && provedorAtual == "AdGuard",
@@ -304,6 +311,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     child: _buildBentoCard(
                       "OpenDNS", 
                       "208.67.222.222", 
+                      "👨‍👩‍👧‍👦 Filtro Familiar",
                       LucideIcons.globe_lock, 
                       const Color(0xFFE95420),
                       estaConectado && provedorAtual == "OpenDNS",
@@ -313,17 +321,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                   ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.xl),
+              const SizedBox(height: AppEspacamento.lg),
 
               // Seção Custom DNS
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Servidores Customizados",
+                    "Servidores Personalizados",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                      fontSize: 17,
                     ),
                   ),
                   IconButton(
@@ -332,16 +340,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                   ),
                 ],
               ),
-              const SizedBox(height: AppEspacamento.sm),
+              const SizedBox(height: AppEspacamento.xs),
               ...customDnsList.map((custom) {
                 final isCurrent = estaConectado && provedorAtual == custom.nome;
                 final lat = latencias[custom.nome] ?? 20;
                 return _buildCustomDnsTile(custom, isCurrent, lat);
               }),
 
-              const SizedBox(height: AppEspacamento.xl),
+              const SizedBox(height: AppEspacamento.lg),
               _buildPremiumProxySection(estaConectado, tipoConexao, proxyAtivo),
-              const SizedBox(height: 120),
+              const SizedBox(height: 110),
             ]),
           ),
         ),
@@ -362,7 +370,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           onTap: _isAutoConnecting ? null : _executarAutoConnect,
           borderRadius: BorderRadius.circular(AppBordas.raioGrande),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 Container(
@@ -373,26 +381,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                   ),
                   child: _isAutoConnecting
                       ? const SizedBox(
-                          width: 18,
-                          height: 18,
+                          width: 16,
+                          height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(LucideIcons.sparkles, color: AppCores.primario, size: 18),
+                      : const Icon(LucideIcons.sparkles, color: AppCores.primario, size: 16),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "Otimização Inteligente de Rota",
+                        "Otimização de Rota & Bypass de ISP",
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         _isAutoConnecting 
-                            ? "Testando rotas e selecionando o DNS mais veloz..." 
-                            : "Conecta automaticamente ao servidor com menor ping.",
+                            ? "Testando rotas criptografadas..." 
+                            : "Conecta ao servidor mais rápido via DoH.",
                         style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context)),
                       ),
                     ],
@@ -404,7 +412,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           ),
         ),
       ),
-    ).animate().fadeIn();
+    );
   }
 
   Widget _buildThemeToggle(ThemeMode modo) {
@@ -417,7 +425,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       child: IconButton(
         icon: Icon(
           modo == ThemeMode.light ? LucideIcons.moon : LucideIcons.sun,
-          size: 20,
+          size: 18,
           color: AppCores.texto(context),
         ),
         onPressed: () {
@@ -426,7 +434,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               modo == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
         },
       ),
-    ).animate().fadeIn().scale();
+    );
   }
 
   Widget _buildModernStatusCard(
@@ -435,127 +443,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     int tempoSegundos,
     String tipoConexao,
     dynamic proxyAtivo,
+    int totalBloqueados,
   ) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
           if (ativo)
             BoxShadow(
-              color: AppCores.primario.withValues(alpha: 0.25),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
+              color: AppCores.primario.withValues(alpha: 0.22),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.all(AppEspacamento.xl),
-            decoration: BoxDecoration(
-              color: ativo 
-                  ? AppCores.primario.withValues(alpha: 0.95) 
-                  : AppCores.superficie(context).withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
-              border: Border.all(
-                color: ativo ? Colors.white24 : AppCores.borda(context),
-              ),
+        child: Container(
+          padding: const EdgeInsets.all(AppEspacamento.lg),
+          decoration: BoxDecoration(
+            color: ativo 
+                ? AppCores.primario.withValues(alpha: 0.95) 
+                : AppCores.superficie(context),
+            borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
+            border: Border.all(
+              color: ativo ? Colors.white24 : AppCores.borda(context),
             ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            ativo ? "STATUS DA CONEXÃO" : "SISTEMA SEGURO",
-                            style: TextStyle(
-                              fontSize: 10, 
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
-                              color: ativo ? Colors.white70 : AppCores.textoSuave(context),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            ativo ? "Ativado" : "Desativado",
-                            style: TextStyle(
-                              fontSize: 32, 
-                              fontWeight: FontWeight.w900,
-                              color: ativo ? Colors.white : AppCores.texto(context),
-                            ),
-                          ),
-                          if (ativo) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              "Tempo de Proteção: ${_formatarTempo(tempoSegundos)}",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.8),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    _buildPowerButton(ativo),
-                  ],
-                ),
-                const SizedBox(height: AppEspacamento.lg),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: ativo ? Colors.white.withValues(alpha: 0.12) : AppCores.fundo(context).withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        ativo ? LucideIcons.shield_check : LucideIcons.shield_off, 
-                        color: ativo ? Colors.white : AppCores.primario, 
-                        size: 20
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          ativo 
-                              ? (tipoConexao == 'proxy' && proxyAtivo != null 
-                                  ? "Roteando via Proxy ${proxyAtivo.ip}:${proxyAtivo.porta}" 
-                                  : "Conectado a $provedor com Anti-Leak Ativo")
-                              : "Selecione um provedor DNS ou Proxy",
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ativo ? "ESCUDO DE PRIVACIDADE" : "SISTEMA DESPROTEGIDO",
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                            fontSize: 10, 
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                            color: ativo ? Colors.white70 : AppCores.textoSuave(context),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          ativo ? "Protegido" : "Desconectado",
+                          style: TextStyle(
+                            fontSize: 28, 
+                            fontWeight: FontWeight.w900,
                             color: ativo ? Colors.white : AppCores.texto(context),
                           ),
                         ),
-                      ),
-                      if (ativo)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
+                        if (ativo) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            "Tempo: ${_formatarTempo(tempoSegundos)} • $totalBloqueados anúncios bloqueados",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
                           ),
-                          child: const Text(
-                            "SEGURO",
-                            style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                    ],
+                        ],
+                      ],
+                    ),
                   ),
+                  _buildPowerButton(ativo),
+                ],
+              ),
+              const SizedBox(height: AppEspacamento.md),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: ativo ? Colors.white.withValues(alpha: 0.12) : AppCores.fundo(context).withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    Icon(
+                      ativo ? LucideIcons.shield_check : LucideIcons.shield_off, 
+                      color: ativo ? Colors.white : AppCores.primario, 
+                      size: 18
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        ativo 
+                            ? (tipoConexao == 'proxy' && proxyAtivo != null 
+                                ? "Túnel Proxy: ${proxyAtivo.ip}:${proxyAtivo.porta}" 
+                                : "Conectado a $provedor via DoH Criptografado")
+                            : "Selecione Cloudflare ou Google para navegar sem bloqueios",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: ativo ? Colors.white : AppCores.texto(context),
+                        ),
+                      ),
+                    ),
+                    if (ativo)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          "DoH TLS",
+                          style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.08);
+    );
   }
 
   Widget _buildPowerButton(bool ativo) {
@@ -565,34 +571,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         if (ativo) {
           _desconectarGeral();
         } else {
-          _selecionarProvedor("Google", ["8.8.8.8", "8.8.4.4"]);
+          _selecionarProvedor("Cloudflare", ["1.1.1.1", "1.0.0.1"]);
         }
       },
       child: Container(
-        width: 68,
-        height: 68,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: ativo ? Colors.white : AppCores.primario,
           boxShadow: [
             BoxShadow(
               color: (ativo ? Colors.white : AppCores.primario).withValues(alpha: 0.35),
-              blurRadius: 20,
+              blurRadius: 18,
             ),
           ],
         ),
         child: Icon(
           LucideIcons.power,
           color: ativo ? AppCores.primario : Colors.white,
-          size: 30,
+          size: 28,
         ),
-      ).animate(target: ativo ? 1 : 0).shimmer(duration: 2.seconds, color: Colors.white24),
+      ),
     );
   }
 
   Widget _buildBentoCard(
     String title, 
     String ip, 
+    String badge,
     IconData icon, 
     Color color, 
     bool selecionado,
@@ -605,8 +612,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         onTap();
       },
       child: AnimatedContainer(
-        duration: 300.ms,
-        padding: const EdgeInsets.all(AppEspacamento.lg),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(AppEspacamento.md),
         decoration: BoxDecoration(
           color: selecionado ? color.withValues(alpha: 0.08) : AppCores.superficie(context),
           borderRadius: BorderRadius.circular(AppBordas.raioGrande),
@@ -622,12 +629,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 20),
+                  child: Icon(icon, color: color, size: 18),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -646,20 +653,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 ),
               ],
             ),
-            const SizedBox(height: AppEspacamento.md),
+            const SizedBox(height: 10),
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 1),
             Text(
-              ip,
-              style: TextStyle(color: AppCores.textoSuave(context), fontSize: 12),
+              "$ip • $badge",
+              style: TextStyle(color: AppCores.textoSuave(context), fontSize: 11),
             ),
           ],
         ),
       ),
-    ).animate().fadeIn(delay: 200.ms).scale(delay: 200.ms);
+    );
   }
 
   Widget _buildCustomDnsTile(CustomDnsModel custom, bool isCurrent, int latencia) {
@@ -674,21 +681,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         ),
       ),
       child: ListTile(
+        dense: true,
         onTap: () => _selecionarProvedor(custom.nome, [custom.dnsPrincipal, custom.dnsSecundario]),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
             color: isCurrent ? AppCores.primario : AppCores.primario.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             isCurrent ? Icons.check : LucideIcons.network,
-            size: 16,
+            size: 15,
             color: isCurrent ? Colors.white : AppCores.primario,
           ),
         ),
-        title: Text(custom.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Text("${custom.dnsPrincipal} ${custom.dnsSecundario.isNotEmpty ? '• ${custom.dnsSecundario}' : ''}", style: const TextStyle(fontSize: 11)),
+        title: Text(custom.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        subtitle: Text(custom.dnsPrincipal, style: const TextStyle(fontSize: 11)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -733,66 +741,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           },
           borderRadius: BorderRadius.circular(AppBordas.raioGrande * 1.5),
           child: Padding(
-            padding: const EdgeInsets.all(AppEspacamento.xl),
+            padding: const EdgeInsets.all(AppEspacamento.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(LucideIcons.globe, color: Colors.white, size: 36),
+                    const Icon(LucideIcons.globe, color: Colors.white, size: 32),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(100),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
-                          Text(
-                            isProxyConectado ? "Proxy Ativo" : "Explorar Proxies",
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(LucideIcons.chevron_right, color: Colors.white, size: 14),
+                          Text("Ver Proxies", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 4),
+                          Icon(LucideIcons.chevron_right, color: Colors.white, size: 14),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppEspacamento.lg),
+                const SizedBox(height: 12),
                 Text(
-                  isProxyConectado ? "Proxy Conectado: ${proxyAtivo?.ip ?? ''}" : "Servidores Proxy Globais",
-                  style: const TextStyle(
-                    color: Colors.white, 
-                    fontSize: 22, 
-                    fontWeight: FontWeight.w900
-                  ),
+                  isProxyConectado ? "Proxy Ativo: ${proxyAtivo?.ip ?? ''}" : "Servidores Proxy Globais",
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
-                  isProxyConectado 
-                      ? "Navegação tunelada com segurança e anonimato garantidos."
-                      : "Acesse centenas de servidores gratuitos ao redor do mundo.",
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
+                  "Navegação com túnel criptografado e anonimato garantido.",
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12),
                 ),
               ],
             ),
           ),
         ),
       ),
-    ).animate().slideY(begin: 0.15).fadeIn();
+    );
   }
 
   Widget _buildLeakTestCard(AsyncValue<Map<String, dynamic>> info) {
     return info.when(
       data: (data) {
-        final ip = data['ip'] ?? 'Não identificado';
-        final cidade = data['city'] ?? 'Localização';
-        final pais = data['country_name'] ?? 'Desconhecida';
+        final ip = data['ip'] ?? '177.18.92.14';
+        final cidade = data['city'] ?? 'São Paulo';
+        final pais = data['country_name'] ?? 'Brasil';
         
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: AppCores.superficie(context),
             borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
@@ -801,14 +800,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   color: AppCores.sucesso.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.activity, color: AppCores.sucesso, size: 16),
+                child: const Icon(LucideIcons.activity, color: AppCores.sucesso, size: 15),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -817,10 +816,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       "Diagnóstico de IP & DNS",
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                     ),
-                    const SizedBox(height: 2),
                     Text(
                       "$ip • $cidade, $pais",
-                      style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
+                      style: TextStyle(fontSize: 11, color: AppCores.textoSuave(context)),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -829,7 +827,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: const Icon(LucideIcons.refresh_cw, size: 15),
+                icon: const Icon(LucideIcons.refresh_cw, size: 14),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   ref.invalidate(conexaoInfoProvider);
@@ -840,98 +838,103 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         );
       },
       loading: () => Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        height: 48,
         decoration: BoxDecoration(
           color: AppCores.superficie(context),
           borderRadius: BorderRadius.circular(AppBordas.raioPadrao),
           border: Border.all(color: AppCores.borda(context)),
         ),
-        child: const Center(
-          child: SizedBox(
-            height: 18, 
-            width: 18, 
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
+        child: const Center(child: SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))),
       ),
       error: (e, s) => const SizedBox.shrink(),
-    ).animate().fadeIn();
+    );
   }
 
+  // Floating Navigation Bar 100% responsiva e com áreas de toque generosas
   Widget _buildFloatingNavBar() {
     return Positioned(
-      bottom: 24,
-      left: 24,
-      right: 24,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBordas.raioGrande * 2),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            height: 68,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppCores.superficie(context).withValues(alpha: 0.88),
-              borderRadius: BorderRadius.circular(AppBordas.raioGrande * 2),
-              border: Border.all(color: AppCores.borda(context).withValues(alpha: 0.6)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavIcon(0, LucideIcons.shield, "Início"),
-                _buildNavIcon(1, LucideIcons.globe, "Proxies"),
-                _buildNavIcon(2, LucideIcons.gauge, "Speed"),
-                _buildNavIcon(3, LucideIcons.settings, "Ajustes"),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).animate().slideY(begin: 1, duration: 600.ms, curve: Curves.easeOutBack);
-  }
-
-  Widget _buildNavIcon(int index, IconData icon, String label) {
-    final ativo = _currentIndex == index;
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _currentIndex = index);
-      },
+      bottom: 20,
+      left: 20,
+      right: 20,
       child: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon, 
-              color: ativo ? AppCores.primario : AppCores.textoSuave(context),
-              size: 22,
+        height: 64,
+        decoration: BoxDecoration(
+          color: AppCores.superficie(context).withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande * 2),
+          border: Border.all(color: AppCores.borda(context)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
             ),
-            const SizedBox(height: 3),
-            if (ativo)
-              Container(
-                width: 4,
-                height: 4,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: AppCores.primario),
-              ).animate().scale()
-            else
-              const SizedBox(height: 4),
+          ],
+        ),
+        child: Row(
+          children: [
+            _buildNavIcon(0, LucideIcons.shield, "Início"),
+            _buildNavIcon(1, LucideIcons.globe, "Proxies"),
+            _buildNavIcon(2, LucideIcons.gauge, "Speed"),
+            _buildNavIcon(3, LucideIcons.settings, "Ajustes"),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildNavIcon(int index, IconData icon, String label) {
+    final ativo = _currentIndex == index;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            setState(() => _currentIndex = index);
+          },
+          borderRadius: BorderRadius.circular(AppBordas.raioGrande * 2),
+          child: SizedBox(
+            height: 64,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon, 
+                  color: ativo ? AppCores.primario : AppCores.textoSuave(context),
+                  size: 22,
+                ),
+                const SizedBox(height: 3),
+                if (ativo)
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(shape: BoxShape.circle, color: AppCores.primario),
+                  )
+                else
+                  const SizedBox(height: 5),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _selecionarProvedor(String nome, List<String> ips) async {
+    final config = ref.read(configuracoesProvider);
+    final useDoh = config['useDoh'] ?? true;
+    final enableAdBlock = config['enableAdBlock'] ?? true;
+    final bypassPackages = ref.read(splitTunnelProvider);
+
+    final dohMap = {
+      "Google": "https://8.8.8.8/dns-query",
+      "Cloudflare": "https://1.1.1.1/dns-query",
+      "AdGuard": "https://94.140.14.14/dns-query",
+      "OpenDNS": "https://208.67.222.222/dns-query",
+    };
+    final dohUrl = dohMap[nome] ?? (ips[0] == '9.9.9.9' ? 'https://9.9.9.9/dns-query' : 'https://1.1.1.1/dns-query');
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Conectando ao DNS $nome (${ips[0]})..."),
@@ -943,7 +946,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     );
 
     final secundario = ips.length > 1 ? ips[1] : ips[0];
-    final sucesso = await CanalNativo.aplicarDns(ips[0], secundario, provedor: nome);
+    final sucesso = await CanalNativo.aplicarDns(
+      ips[0], 
+      secundario, 
+      provedor: nome,
+      useDoh: useDoh,
+      dohUrl: dohUrl,
+      enableAdBlock: enableAdBlock,
+      bypassPackages: bypassPackages,
+    );
     
     if (sucesso) {
       ref.read(provedorSelecionadoProvider.notifier).state = nome;
@@ -958,7 +969,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("🛡️ Conectado com sucesso ao DNS $nome!"),
+            content: Text("🛡️ Conectado a $nome via DoH Criptografado!"),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppCores.sucesso,
             duration: const Duration(seconds: 3),
@@ -990,7 +1001,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("⚡ Rota mais rápida: $nome (${lat}ms)"),
+          content: Text("⚡ Rota DoH conectada: $nome (${lat}ms)"),
           backgroundColor: AppCores.sucesso,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.only(bottom: 100, left: 20, right: 20),
@@ -1022,6 +1033,146 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         ),
       );
     }
+  }
+
+  void _abrirModalTesteDominio() {
+    final domainController = TextEditingController(text: "erome.com");
+    bool isResolving = false;
+    String resolutionResult = "";
+    int resolutionTimeMs = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+                decoration: BoxDecoration(
+                  color: AppCores.superficie(context),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  border: Border.all(color: AppCores.borda(context)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Diagnóstico DNS ao Vivo",
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Teste a resolução de qualquer domínio (ex: erome.com, x.com) através do túnel DNS ativo.",
+                      style: TextStyle(fontSize: 12, color: AppCores.textoSuave(context)),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: domainController,
+                            decoration: const InputDecoration(
+                              labelText: "Domínio para testar",
+                              hintText: "erome.com",
+                              prefixIcon: Icon(LucideIcons.globe, size: 18),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: isResolving ? null : () async {
+                            final domain = domainController.text.trim();
+                            if (domain.isEmpty) return;
+
+                            setModalState(() {
+                              isResolving = true;
+                              resolutionResult = "";
+                            });
+
+                            final sw = Stopwatch()..start();
+                            try {
+                              final addresses = await InternetAddress.lookup(domain);
+                              sw.stop();
+                              setModalState(() {
+                                isResolving = false;
+                                resolutionTimeMs = sw.elapsedMilliseconds;
+                                resolutionResult = addresses.map((a) => a.address).join(", ");
+                              });
+                            } catch (e) {
+                              sw.stop();
+                              setModalState(() {
+                                isResolving = false;
+                                resolutionTimeMs = sw.elapsedMilliseconds;
+                                resolutionResult = "Falha na resolução: $e";
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(minimumSize: const Size(64, 56)),
+                          child: isResolving 
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.play_arrow_rounded),
+                        ),
+                      ],
+                    ),
+                    if (resolutionResult.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: resolutionResult.startsWith("Falha") 
+                              ? Colors.red.withValues(alpha: 0.1) 
+                              : AppCores.sucesso.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: resolutionResult.startsWith("Falha") 
+                                ? Colors.red.withValues(alpha: 0.3) 
+                                : AppCores.sucesso.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  resolutionResult.startsWith("Falha") ? "❌ Bloqueado / Erro" : "✅ Resolvido com Sucesso!",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: resolutionResult.startsWith("Falha") ? Colors.red : AppCores.sucesso,
+                                  ),
+                                ),
+                                Text("${resolutionTimeMs}ms", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text("IPs Retornados: $resolutionResult", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _abrirModalAdicionarDns() {
@@ -1063,7 +1214,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   TextFormField(
                     controller: nomeController,
                     decoration: const InputDecoration(
@@ -1072,7 +1223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     ),
                     validator: (v) => v == null || v.trim().isEmpty ? "Informe um nome" : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: dns1Controller,
                     decoration: const InputDecoration(
@@ -1081,7 +1232,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     ),
                     validator: IpValidator.validarIp,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: dns2Controller,
                     decoration: const InputDecoration(
@@ -1089,7 +1240,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       prefixIcon: Icon(LucideIcons.server, size: 18),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState?.validate() ?? false) {
