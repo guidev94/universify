@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a26">
+  <meta name="description" content="Lulicraft: sandbox de blocos cozy com mundos autorais, personagens, itens raros e multiplayer por convite. Explore, construa e devolva a cor ao mundo.">
+  <title>Lulicraft: um mundo de blocos, luz e descobertas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23b8ff6a'/%3E%3Cpath d='M24 16h10v24h14v8H24z' fill='%23101a26'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas" aria-label="Mundo 3D de Lulicraft"></canvas>
+
+    <section id="menu" class="screen menu-screen">
+      <div class="menu-glow menu-glow-a" aria-hidden="true"></div>
+      <div class="menu-glow menu-glow-b" aria-hidden="true"></div>
+      <header class="menu-top">
+        <div class="brand">
+          <img class="brand-mark" src="logo.png" alt="">
+          <div class="brand-copy">
+            <h1>Lulicraft</h1>
+            <p>Um mundo de blocos, luz e descobertas.</p>
+          </div>
+        </div>
+        <div class="menu-actions">
+          <button id="btn-settings" class="icon-btn" title="Configurações" aria-label="Configurações">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.24.6.82 1 1.55 1H21a2 2 0 1 1 0 4h-.09c-.73 0-1.31.4-1.51 1Z"/></svg>
+          </button>
+          <button id="btn-fullscreen-menu" class="icon-btn" title="Tela cheia (F11)" aria-label="Entrar em tela cheia">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
+          <button id="btn-multiplayer" class="ghost-btn">Jogar com amigos</button>
+          <button id="btn-character" class="ghost-btn">Personagem</button>
+          <button id="btn-tutorial-menu" class="ghost-btn">Como jogar</button>
+        </div>
+      </header>
+
+      <main class="menu-main">
+        <section class="menu-hero">
+          <div class="hero-copy">
+            <span class="eyebrow">Lobby de Lumi</span>
+            <h2>Seu mundo está<br><em>pronto para jogar.</em></h2>
+            <p>Continue de onde parou ou escolha um mundo abaixo. Skins, ferramentas mágicas e multiplayer por convite.</p>
+            <div class="hero-actions">
+              <button id="btn-quick-play" class="primary-btn big">Jogar agora</button>
+              <button id="btn-create" class="secondary-btn big">Criar mundo</button>
+              <button id="btn-daily" class="ghost-btn big">Mundo do dia</button>
+            </div>
+            <div class="hero-badges">
+              <span><i class="mini-diamond"></i> Salvo no navegador</span>
+              <span><i class="mini-diamond"></i> Sem contas</span>
+              <span><i class="mini-diamond"></i> Multiplayer por convite</span>
+            </div>
+          </div>
+          <div class="hero-art">
+            <img class="hero-logo" src="logo.png" alt="Logo do Lulicraft">
+          </div>
+        </section>
+
+        <section class="worlds-section prebuilt-section">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Prontos para jogar</span>
+              <h3>Mundos criados</h3>
+            </div>
+            <p class="section-note">Escolha um cenário e comece em segundos.</p>
+          </div>
+          <div id="prebuilt-grid" class="prebuilt-grid"></div>
+        </section>
+
+        <section class="worlds-section">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Continue de onde parou</span>
+              <h3>Seus mundos</h3>
+            </div>
+            <div class="section-actions">
+              <button id="btn-import" class="ghost-btn">Importar</button>
+              <button id="btn-code" class="ghost-btn">Entrar com código</button>
+            </div>
+          </div>
+          <div id="worlds-grid" class="worlds-grid"></div>
+          <div id="worlds-empty" class="empty-worlds hidden">
+            <div class="empty-icon" aria-hidden="true">✦</div>
+            <h4>Seu primeiro mundo está a um clique.</h4>
+            <p>Crie um mundo novo ou jogue o mundo do dia. Tudo fica salvo aqui, no seu navegador.</p>
+            <button id="btn-create-empty" class="primary-btn">Criar meu primeiro mundo</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="menu-footer">
+        <span>Feito para jogar junto.</span>
+        <span>Sem contas. Sem anúncios. Multiplayer usa conexão direta entre navegadores.</span>
+        <span class="footer-version">v1.0 · spec-driven</span>
+      </footer>
+    </section>
+
+    <section id="loading" class="screen loading-screen hidden" aria-live="polite">
+      <div class="loading-card">
+        <img class="loading-logo" src="logo.png" alt="">
+        <h2 id="loading-title">Preparando seu mundo</h2>
+        <p id="loading-text">Plantando árvores arco-íris…</p>
+        <div class="progress"><div id="loading-bar"></div></div>
+        <small id="loading-tip">Dica: itens raros brilham no escuro.</small>
+      </div>
+    </section>
+
+    <section id="hud" class="hud hidden" aria-label="HUD do jogo">
+      <div class="hud-top">
+        <div class="hud-left">
+          <div class="world-chip">
+            <span class="dot" aria-hidden="true"></span>
+            <div>
+              <strong id="hud-world-name">Mundo</strong>
+              <small id="hud-biome">Prado Musgo</small>
+            </div>
+          </div>
+          <div class="stat-chip" title="Fragmentos de Lumi">
+            <span class="lumi-icon" aria-hidden="true">✦</span>
+            <span id="hud-lumi">0</span>
+          </div>
+          <div id="quest-chip" class="quest-chip">
+            <span class="quest-star" aria-hidden="true">✦</span>
+            <span id="quest-text">Colete 5 Fragmentos de Lumi</span>
+            <b id="quest-progress">0/5</b>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div id="hud-coords" class="stat-chip hidden" title="Coordenadas">X 0 · Y 0 · Z 0</div>
+          <div id="hud-players" class="stat-chip" title="Exploradores online">◈ 1 online</div>
+          <div id="clock-chip" class="stat-chip" title="Hora do mundo">
+            <span id="clock-icon" aria-hidden="true">☀</span>
+            <span id="clock-text">Manhã</span>
+          </div>
+          <button id="btn-sound" class="icon-btn" title="Som" aria-label="Alternar som">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"/></svg>
+          </button>
+          <button id="btn-fullscreen" class="icon-btn" title="Tela cheia (F11)" aria-label="Entrar em tela cheia">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
+          <button id="btn-photo" class="icon-btn" title="Modo foto" aria-label="Modo foto">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13" r="4"/><path d="M8 7l1.5-2h5L16 7"/></svg>
+          </button>
+          <button id="btn-pause" class="icon-btn" title="Pausa" aria-label="Pausar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="buffs" class="buffs"></div>
+      <div id="crosshair" class="crosshair" aria-hidden="true"></div>
+      <div id="hint" class="hint">Clique para capturar o mouse · WASD para andar</div>
+
+      <div id="mobile-controls" class="mobile-controls hidden">
+        <div id="joystick" class="joystick" aria-label="Controle de movimento">
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <div class="touch-actions">
+          <button id="btn-fly" class="touch-btn small" aria-label="Alternar voo">V</button>
+          <button id="btn-jump" class="touch-btn" aria-label="Pular">↑</button>
+          <button id="btn-break" class="touch-btn break" aria-label="Quebrar bloco">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l7-7"/><path d="M9 4l11 11-3 3L6 7l3-3Z"/></svg>
+          </button>
+          <button id="btn-place" class="touch-btn place" aria-label="Colocar bloco ou usar arma">+</button>
+        </div>
+      </div>
+
+      <div id="hand" class="hand hidden" aria-hidden="true"><img id="hand-item" alt=""></div>
+
+      <div class="hud-bottom">
+        <div id="hotbar" class="hotbar" role="toolbar" aria-label="Barra rápida"></div>
+        <div class="hud-hint-row">
+          <span id="hint-text">E mochila · C forja · F5 visão · F11 tela cheia</span>
+          <button id="btn-inventory" class="ghost-btn small">Mochila</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+    <div id="modal-layer" class="modal-layer hidden">
+      <section id="inventory-modal" class="modal inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Seu inventário</span>
+            <h2 id="inventory-title">Mochila de Lumi</h2>
+          </div>
+          <button class="close-btn" data-close="inventory" aria-label="Fechar inventário">×</button>
+        </header>
+        <nav class="tabs" id="inventory-tabs" aria-label="Abas do inventário">
+          <button data-tab="backpack" class="tab active">Mochila</button>
+          <button data-tab="pouch" class="tab">Sementes</button>
+          <button data-tab="craft" class="tab">Forja</button>
+          <button data-tab="album" class="tab">Coleção</button>
+        </nav>
+        <div id="inventory-body" class="inventory-body"></div>
+        <footer class="modal-foot">
+          <span id="inventory-hint">Clique para pegar · Shift+clique para mover</span>
+          <button id="btn-creative-palette" class="ghost-btn hidden">Paleta criativa</button>
+        </footer>
+      </section>
+
+      <section id="chest-modal" class="modal chest-modal hidden" role="dialog" aria-modal="true" aria-labelledby="chest-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Guardado no mundo</span>
+            <h2 id="chest-title">Baú de Lumi</h2>
+          </div>
+          <button class="close-btn" data-close="chest" aria-label="Fechar baú">×</button>
+        </header>
+        <div class="chest-body">
+          <div>
+            <h3 class="grid-title">No baú</h3>
+            <div id="chest-grid" class="slot-grid chest-grid"></div>
+          </div>
+          <div>
+            <h3 class="grid-title">Sua mochila</h3>
+            <div id="chest-inventory-grid" class="slot-grid chest-grid"></div>
+          </div>
+        </div>
+        <footer class="modal-foot"><span>Shift+clique move a pilha inteira.</span></footer>
+      </section>
+
+      <section id="pause-modal" class="modal pause-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Respire um pouco</span>
+            <h2 id="pause-title">Pausa</h2>
+          </div>
+          <button class="close-btn" data-close="pause" aria-label="Continuar">×</button>
+        </header>
+        <div class="pause-body">
+          <div class="pause-hero">
+            <div class="pause-badge" id="pause-badge">✦</div>
+            <div>
+              <strong id="pause-world-name">Mundo</strong>
+              <small id="pause-world-meta">seed · 0 min</small>
+            </div>
+          </div>
+          <div class="pause-grid">
+            <button id="btn-resume" class="primary-btn">Continuar</button>
+            <button id="btn-save" class="secondary-btn">Salvar agora</button>
+            <button id="btn-invite" class="ghost-btn">Convidar amigos</button>
+            <button id="btn-pause-photo" class="ghost-btn">Modo foto</button>
+            <button id="btn-third-person" class="ghost-btn">Visão 3ª pessoa (F5)</button>
+            <button id="btn-pause-fullscreen" class="ghost-btn">Tela cheia (F11)</button>
+            <button id="btn-export" class="ghost-btn">Exportar mundo</button>
+            <button id="btn-world-code" class="ghost-btn">Código do mundo</button>
+            <button id="btn-pause-settings" class="ghost-btn">Configurações</button>
+            <button id="btn-quit" class="ghost-btn danger">Sair para o menu</button>
+          </div>
+          <div class="pause-note">Tudo é salvo automaticamente a cada 15 segundos.</div>
+        </div>
+      </section>
+
+      <section id="create-modal" class="modal create-modal hidden" role="dialog" aria-modal="true" aria-labelledby="create-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Um novo começo</span>
+            <h2 id="create-title">Criar mundo</h2>
+          </div>
+          <button class="close-btn" data-close="create" aria-label="Fechar">×</button>
+        </header>
+        <div class="create-body">
+          <label class="field">
+            <span>Nome do mundo</span>
+            <input id="world-name-input" type="text" maxlength="32" placeholder="Meu Mundo de Lumi" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Seed <small>o mesmo código gera o mesmo mundo</small></span>
+            <div class="seed-row">
+              <input id="world-seed-input" type="text" maxlength="64" placeholder="lumi-aurora" autocomplete="off">
+              <button id="btn-random-seed" class="icon-btn" title="Seed aleatória" aria-label="Seed aleatória">⟳</button>
+            </div>
+          </label>
+          <div class="field">
+            <span>Modo de jogo</span>
+            <div class="mode-row" id="mode-row">
+              <button class="mode-card active" data-mode="adventure">
+                <strong>Aventura Cozy</strong>
+                <small>Recursos, forja e descobertas.</small>
+              </button>
+              <button class="mode-card" data-mode="creative">
+                <strong>Criativo</strong>
+                <small>Blocos infinitos e voo livre.</small>
+              </button>
+            </div>
+          </div>
+          <label class="toggle-row kit-toggle">
+            <span><strong>Kit de Raros</strong><small>Comece com ferramentas, sementes e tesouros raros.</small></span>
+            <input id="world-rare-kit" type="checkbox">
+          </label>
+          <div class="create-note">Você pode ter até 5 mundos. Tudo fica salvo no seu navegador.</div>
+        </div>
+        <footer class="modal-foot">
+          <button id="btn-create-cancel" class="ghost-btn">Cancelar</button>
+          <button id="btn-create-confirm" class="primary-btn">Criar e jogar</button>
+        </footer>
+      </section>
+
+
+      <section id="multiplayer-modal" class="modal multiplayer-modal hidden" role="dialog" aria-modal="true" aria-labelledby="multiplayer-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Jogue junto</span>
+            <h2 id="multiplayer-title">Multiplayer</h2>
+          </div>
+          <button class="close-btn" data-close="multiplayer" aria-label="Fechar multiplayer">×</button>
+        </header>
+        <div class="multiplayer-body">
+          <div id="multiplayer-status" class="multiplayer-status" role="status" aria-live="polite">
+            <span class="status-dot"></span>
+            <span id="multiplayer-status-text">Crie uma sala ou entre com um convite.</span>
+          </div>
+          <div class="multiplayer-grid">
+            <div class="multiplayer-card">
+              <span class="eyebrow">Anfitrião</span>
+              <h3>Criar sala</h3>
+              <p>Abra um mundo e convide até 5 amigos. O mundo fica no seu navegador.</p>
+              <button id="btn-host-room" class="primary-btn">Criar sala</button>
+              <div id="room-box" class="room-box hidden">
+                <span class="room-label">Código da sala</span>
+                <strong id="room-code">-----</strong>
+                <button id="btn-copy-invite" class="secondary-btn">Copiar convite</button>
+                <div id="room-players" class="room-players"></div>
+                <button id="btn-leave-room" class="ghost-btn danger">Sair da sala</button>
+              </div>
+            </div>
+            <div class="multiplayer-card">
+              <span class="eyebrow">Visitante</span>
+              <h3>Entrar com convite</h3>
+              <p>Cole o código de 5 letras que seu amigo enviou.</p>
+              <label class="field">
+                <span>Código do convite</span>
+                <input id="join-code" type="text" maxlength="5" placeholder="ABC12" autocomplete="off" spellcheck="false">
+              </label>
+              <button id="btn-join-room" class="primary-btn">Entrar na sala</button>
+              <small class="multiplayer-note">Conexão direta entre navegadores (WebRTC). Sem contas e sem chat.</small>
+            </div>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <span>Até 6 exploradores por sala.</span>
+          <button id="btn-multiplayer-close" class="ghost-btn">Fechar</button>
+        </footer>
+      </section>
+
+      <section id="character-modal" class="modal character-modal hidden" role="dialog" aria-modal="true" aria-labelledby="character-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Seu explorador</span>
+            <h2 id="character-title">Skins e personagem</h2>
+          </div>
+          <button class="close-btn" data-close="character" aria-label="Fechar personagem">×</button>
+        </header>
+        <div class="character-body">
+          <div class="character-stage">
+            <div id="character-preview" class="character-preview accessory-leaf" aria-hidden="true">
+              <div class="avatar-hair"></div>
+              <div class="avatar-head">
+                <span class="avatar-eye left"></span>
+                <span class="avatar-eye right"></span>
+                <span class="avatar-smile"></span>
+              </div>
+              <div class="avatar-body"></div>
+              <div class="avatar-arm left"></div>
+              <div class="avatar-arm right"></div>
+              <div class="avatar-leg left"></div>
+              <div class="avatar-leg right"></div>
+              <div class="avatar-accessory"></div>
+            </div>
+            <strong id="character-preview-name" class="character-preview-name">Lumi</strong>
+            <small>Seu personagem aparece nas fotos e no multiplayer.</small>
+          </div>
+          <div class="character-controls">
+            <label class="field">
+              <span>Nome do personagem</span>
+              <input id="character-name" type="text" maxlength="16" placeholder="Lumi" autocomplete="off">
+            </label>
+            <div class="field">
+              <span>Skins</span>
+              <div id="character-presets" class="character-presets"></div>
+            </div>
+            <div id="character-colors" class="character-colors"></div>
+            <div class="field">
+              <span>Skin de arma</span>
+              <div id="weapon-skins" class="weapon-skins"></div>
+            </div>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <button id="btn-character-cancel" class="ghost-btn">Cancelar</button>
+          <button id="btn-character-save" class="primary-btn">Salvar personagem</button>
+        </footer>
+      </section>
+
+      <section id="tutorial" class="modal tutorial hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">4 passos e você já sabe</span>
+            <h2 id="tutorial-title">Bem-vindo ao Lulicraft</h2>
+          </div>
+          <button class="close-btn" data-close="tutorial" aria-label="Fechar tutorial">×</button>
+        </header>
+        <div class="tutorial-body">
+          <div class="tutorial-art" id="tutorial-art" aria-hidden="true">✦</div>
+          <div class="tutorial-copy">
+            <span id="tutorial-step-label" class="eyebrow">Passo 1 de 4</span>
+            <h3 id="tutorial-step-title">Mova-se pelo mundo</h3>
+            <p id="tutorial-step-text">Use WASD para andar, o mouse para olhar e Espaço para pular. No celular, use o joystick e arraste a tela.</p>
+            <div class="tutorial-dots" id="tutorial-dots"></div>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <button id="btn-tutorial-skip" class="ghost-btn">Pular</button>
+          <button id="btn-tutorial-next" class="primary-btn">Próximo</button>
+        </footer>
+      </section>
+
+      <section id="settings-modal" class="modal settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Do seu jeito</span>
+            <h2 id="settings-title">Configurações</h2>
+          </div>
+          <button class="close-btn" data-close="settings" aria-label="Fechar configurações">×</button>
+        </header>
+        <div class="settings-body">
+          <label class="toggle-row">
+            <span><strong>Som</strong><small>Efeitos suaves de descoberta e construção.</small></span>
+            <input id="setting-sound" type="checkbox" checked>
+          </label>
+          <label class="toggle-row">
+            <span><strong>Tutorial</strong><small>Mostrar o guia de 4 passos.</small></span>
+            <button id="btn-replay-tutorial" class="ghost-btn small">Rever tutorial</button>
+          </label>
+          <label class="field">
+            <span>Sensibilidade do mouse <small id="sens-value">1.0×</small></span>
+            <input id="setting-sens" type="range" min="0.4" max="2.2" step="0.1" value="1">
+          </label>
+          <label class="toggle-row">
+            <span><strong>Coordenadas no HUD</strong><small>Mostra X, Y e Z durante o jogo.</small></span>
+            <input id="setting-coords" type="checkbox">
+          </label>
+          <div class="settings-note">O single-player não coleta dados. O multiplayer usa WebRTC direto após um convite; o PeerJS Cloud só faz a sinalização.</div>
+        </div>
+        <footer class="modal-foot"><button id="btn-settings-done" class="primary-btn">Pronto</button></footer>
+      </section>
+
+      <section id="code-modal" class="modal code-modal hidden" role="dialog" aria-modal="true" aria-labelledby="code-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Compartilhe um mundo</span>
+            <h2 id="code-title">Código do mundo</h2>
+          </div>
+          <button class="close-btn" data-close="code" aria-label="Fechar">×</button>
+        </header>
+        <div class="code-body">
+          <p>Envie este código para alguém criar o mesmo terreno, com o mesmo nome e modo.</p>
+          <textarea id="world-code-output" readonly rows="4" spellcheck="false"></textarea>
+          <div class="code-actions">
+            <button id="btn-copy-code" class="primary-btn">Copiar código</button>
+            <button id="btn-code-import-toggle" class="ghost-btn">Entrar com um código</button>
+          </div>
+          <div id="code-import-box" class="code-import-box hidden">
+            <label class="field">
+              <span>Código recebido</span>
+              <input id="world-code-input" type="text" maxlength="400" placeholder="LC1…" autocomplete="off">
+            </label>
+            <button id="btn-code-import" class="secondary-btn">Criar mundo do código</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="photo-bar" class="photo-bar hidden">
+      <span class="photo-label">Modo foto</span>
+      <button id="btn-photo-download" class="primary-btn">Baixar foto</button>
+      <button id="btn-card-download" class="secondary-btn">Cartão do Mundo</button>
+      <button id="btn-photo-exit" class="ghost-btn">Sair</button>
+    </div>
+
+    <div id="drag-ghost" class="drag-ghost hidden" aria-hidden="true"></div>
+
+    <input id="import-file" type="file" accept=".lulicraft,.json,application/json" class="hidden">
+  </div>
+
+  <script src="src/vendor/peerjs.min.js"></script>
+  <script type="module" src="src/game/main.js"></script>
+</body>
+</html>
