@@ -146,8 +146,10 @@ async function pageFor(port, label) {
 async function prepare(cdp) {
   await cdp.send('Page.navigate', { url: `${ORIGIN}/?menu=1&debug=1` });
   await cdp.waitFor('!!window.__lulicraft');
-  await cdp.evaluate("localStorage.clear(); localStorage.setItem('lulicraft:settings', JSON.stringify({ tutorialDone: true })); location.reload();");
-  await cdp.waitFor('!!window.__lulicraft && !document.getElementById("menu").classList.contains("hidden")');
+  await cdp.evaluate("localStorage.clear(); localStorage.setItem('lulicraft:settings', JSON.stringify({ tutorialDone: true }));");
+  const fresh = Date.now();
+  await cdp.send('Page.navigate', { url: `${ORIGIN}/?menu=1&debug=1&fresh=${fresh}` });
+  await cdp.waitFor(`location.search.includes('fresh=${fresh}') && document.readyState === 'complete' && !!window.__lulicraft && !document.getElementById("menu").classList.contains("hidden")`);
 }
 
 let server = null;
@@ -176,7 +178,24 @@ try {
   await host.waitFor('!document.getElementById("multiplayer-modal").classList.contains("hidden")');
   await host.evaluate('document.getElementById("btn-host-room").click()');
   console.log('waiting for host room code');
-  const code = await host.waitFor("window.__lulicraft.multiplayer?.code?.length === 5 ? window.__lulicraft.multiplayer.code : ''", 45000);
+  let code;
+  try {
+    code = await host.waitFor("window.__lulicraft.multiplayer?.code?.length === 5 ? window.__lulicraft.multiplayer.code : ''", 45000);
+  } catch (error) {
+    const diagnostic = await host.evaluate(`(() => {
+      const mp = window.__lulicraft.multiplayer;
+      return {
+        status: mp?.lastStatus,
+        role: mp?.role,
+        code: mp?.code,
+        modal: document.getElementById('multiplayer-modal')?.innerText?.slice(0, 500),
+        toast: document.getElementById('toast')?.textContent
+      };
+    })()`);
+    console.error('host diagnostic', diagnostic);
+    console.error('host exceptions', host.exceptions, host.consoleErrors);
+    throw error;
+  }
   await host.waitFor('window.__lulicraft.running === true && window.__lulicraft.multiplayer?.connected === true', 45000);
   const hostInfo = await host.evaluate('({ seed: window.__lulicraft.world.seed, players: window.__lulicraft.multiplayer.players.size })');
   console.log('host ready', code, hostInfo);
@@ -185,7 +204,7 @@ try {
   await guest.front();
   await prepare(guest);
   await guest.send('Page.navigate', { url: `${ORIGIN}/?join=${code}&debug=1` });
-  await guest.waitFor('!!window.__lulicraft && !document.getElementById("multiplayer-modal").classList.contains("hidden")');
+  await guest.waitFor(`location.search.includes('join=${code}') && !!window.__lulicraft && !document.getElementById("multiplayer-modal").classList.contains("hidden")`);
   const prefilled = await guest.evaluate('document.getElementById("join-code").value');
   await guest.evaluate('document.getElementById("btn-join-room").click()');
   console.log('waiting for guest world');

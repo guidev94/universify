@@ -22,6 +22,13 @@
 | 2026-10-27 | Terceira pessoa com avatar local, F5, F11 e roda na hotbar | Aproximar a sensação de jogo de blocos sem perder acessibilidade |
 | 2026-10-27 | Limite de 12 mundos locais | Dar espaço para experimentar sem estourar o localStorage |
 | 2026-10-27 | Vercel hospeda o cliente; sala ao vivo usa PeerJS | Site estático não compartilha localStorage entre navegadores |
+| 2026-10-27 | Pets cosméticos com 4 tipos e 8 cores | Identidade afetiva sem vantagem de gameplay |
+| 2026-10-27 | NPCs fixos perto do spawn com fala contextual | Dar vida ao mundo sem chat livre ou servidor |
+| 2026-10-27 | 6 mundos de cidades brasileiras curados | Representatividade e rejogabilidade sem custo de backend |
+| 2026-10-27 | Ranking local de tempo por mundo | Metas leves sem competição global nem contas |
+| 2026-10-27 | Mochila expansível até 512 linhas | Evitar perda de itens em sessões longas e kits grandes |
+| 2026-10-27 | Pouso por hold de Espaço (4 s) | Evitar queda brusca no voo criativo infantil |
+| 2026-10-27 | Pacotes gráficos auto/pixel/turbo | Ajustar legibilidade e performance sem build |
 
 ## Bloqueios
 
@@ -35,6 +42,8 @@
 - Atlas com inset de UV evita sangramento de tiles vizinhos.
 - Colisão por eixo + auto-step é mais amigável para crianças que física realista.
 - Raridade precisa de mais de uma pista (cor, forma, som, texto) para acessibilidade.
+- IDs numéricos legados de itens exigem `String(id)` antes de métodos de string na UI.
+- Testes E2E de multiplayer são ótimos para pegar regressões de inicialização fora do single-player.
 
 ## TODOs
 
@@ -42,6 +51,10 @@
 - [x] Criar testes automatizados de save/load e regras puras.
 - [x] Criar smoke test e E2E multiplayer.
 - [ ] Medir FPS real em celular médio.
+- [ ] Revisar enquadramento da logo e risco de marca "MINECRAFT MOD".
+- [ ] Adicionar crescimento offline do jardim.
+- [ ] Criar missões curtas de NPC.
+- [ ] Revisar header mobile e sobreposição do sol decorativo.
 - [x] Revisar textos com linguagem 7+ e remover travessões.
 - [x] Definir política de slots para mundos prontos e Mundo do Dia (limite 12).
 

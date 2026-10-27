@@ -20,13 +20,28 @@
 - [x] Avatares remotos, sincronização de blocos, baús e posições.
 - [x] Testes unitários, smoke test e E2E multiplayer em dois navegadores.
 
+## M1.2: Expansão 1.2 (entregue)
+
+- [x] Pets cosméticos com 4 tipos, 8 cores, preview e companheiro 3D que segue o jogador.
+- [x] Interações de pet: reação a salto, pouso, craft, forja e petisco craftável.
+- [x] NPCs cozy (Lia, Theo e Nina) com nome, fala contextual e tecla R.
+- [x] 6 mundos inspirados em cidades brasileiras no lobby.
+- [x] Ranking local de tempo por mundo, com abertura direta pelo card.
+- [x] Inventário expansível até 512 linhas de mochila, sem truncar itens.
+- [x] Pouso seguro segurando Espaço por 4 s durante o voo criativo.
+- [x] Animações de caminhada, salto, voo, craft e picareta.
+- [x] Pacotes gráficos leves: automático, pixel suave e turbo leve.
+- [x] Testes unitários e E2E cobrindo os novos sistemas.
+
 ## M1: Polimento cozy (próximo)
 
-- [ ] Criaturas Lumis passivas (vagalumes, lumis que seguem o jogador).
+- [ ] Criaturas Lumis selvagens (vagalumes, lumis que aparecem nos biomas).
 - [ ] Ciclo climático suave (chuva de pétalas, aurora noturna).
 - [ ] Sons ambientes por bioma e trilha adaptativa.
-- [ ] Sistema de "jardim": plantar sementes e ver crescimento em tempo real.
+- [ ] Sistema de "jardim": plantar sementes e ver crescimento em tempo real e offline.
 - [ ] Balões de dica contextuais para crianças que ficam paradas.
+- [ ] Missões curtas de NPC com recompensas cosméticas.
+- [ ] Álbum de fotos com molduras e legendas.
 
 ## M2: Construção social assíncrona
 
@@ -59,6 +74,7 @@
 
 ## Critérios de saída por milestone
 
+- M1.2: 30 min de sessão sem erro no console; pets, NPCs, cidades e ranking funcionando em desktop e mobile.
 - M1: 30 min de sessão sem erro no console; 3 criaturas e 2 eventos climáticos.
 - M2: código de mundo < 2 KB para mundo novo; importar em < 1 s.
 - M3: axe-core sem violações críticas; navegação 100% por teclado.

@@ -4,6 +4,10 @@ function emptyArray(size) {
   return new Array(size).fill(null);
 }
 
+const BACKPACK_ROW = 9;
+const MIN_BACKPACK_ROWS = 3;
+const MAX_BACKPACK_ROWS = 512;
+
 export function makeSlot(id, count = 1) {
   return { id, count };
 }
@@ -54,12 +58,28 @@ export class Inventory {
 
   load(data) {
     if (Array.isArray(data.hotbar)) this.hotbar = cloneSlots(data.hotbar).slice(0, 9);
-    if (Array.isArray(data.backpack)) this.backpack = cloneSlots(data.backpack).slice(0, 27);
+    if (Array.isArray(data.backpack)) this.backpack = cloneSlots(data.backpack).slice(0, MAX_BACKPACK_ROWS * BACKPACK_ROW);
     if (Array.isArray(data.pouch)) this.pouch = cloneSlots(data.pouch).slice(0, 9);
     while (this.hotbar.length < 9) this.hotbar.push(null);
-    while (this.backpack.length < 27) this.backpack.push(null);
+    while (this.backpack.length < MIN_BACKPACK_ROWS * BACKPACK_ROW) this.backpack.push(null);
     while (this.pouch.length < 9) this.pouch.push(null);
     this.selected = Math.max(0, Math.min(8, Number(data.selected) || 0));
+  }
+
+  expandBackpackRow() {
+    if (this.backpack.length >= MAX_BACKPACK_ROWS * BACKPACK_ROW) return null;
+    const row = emptyArray(BACKPACK_ROW);
+    this.backpack.push(...row);
+    return row;
+  }
+
+  expandBackpack(rows = 1) {
+    let expanded = false;
+    for (let i = 0; i < rows; i++) {
+      if (!this.expandBackpackRow()) break;
+      expanded = true;
+    }
+    return expanded;
   }
 
   serialize() {
@@ -82,7 +102,11 @@ export class Inventory {
   addItem(id, count = 1) {
     const item = getItem(id);
     const arrays = isPouchItem(item) ? this.pouchArrays() : [this.hotbar, this.backpack];
-    return addToArrays(id, count, arrays);
+    let left = addToArrays(id, count, arrays);
+    while (left > 0 && this.expandBackpack()) {
+      left = addToArrays(id, left, arrays);
+    }
+    return left;
   }
 
   addMany(items) {
@@ -176,7 +200,7 @@ export class Inventory {
         if (remaining <= 0) return true;
       }
     }
-    return remaining <= 0;
+    return remaining <= 0 || this.backpack.length < MAX_BACKPACK_ROWS * BACKPACK_ROW;
   }
 
   canAddMany(items) {
@@ -218,7 +242,7 @@ export class Inventory {
 
   clear() {
     this.hotbar = emptyArray(9);
-    this.backpack = emptyArray(27);
+    this.backpack = emptyArray(MIN_BACKPACK_ROWS * BACKPACK_ROW);
     this.pouch = emptyArray(9);
     this.selected = 0;
   }
@@ -243,7 +267,7 @@ export function swapOrMerge(arrA, iA, arrB, iB) {
   arrB[iB] = a;
 }
 
-export function quickMove(sourceArr, sourceIndex, destArrays) {
+export function quickMove(sourceArr, sourceIndex, destArrays, grow = null) {
   const slot = sourceArr[sourceIndex];
   if (!slot) return false;
   const max = maxStack(slot.id);
@@ -266,6 +290,15 @@ export function quickMove(sourceArr, sourceIndex, destArrays) {
         arr[i] = { id: slot.id, count: add };
         remaining -= add;
       }
+    }
+  }
+  while (remaining > 0 && grow) {
+    const row = grow();
+    if (!row) break;
+    for (let i = 0; i < row.length && remaining > 0; i++) {
+      const add = Math.min(max, remaining);
+      row[i] = { id: slot.id, count: add };
+      remaining -= add;
     }
   }
   if (remaining <= 0) sourceArr[sourceIndex] = null;

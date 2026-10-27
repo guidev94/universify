@@ -29,6 +29,9 @@ export class Player {
     this.stepTimer = 0;
     this.lastJumpAt = 0;
     this.callbacks = {};
+    this.landingHold = 0;
+    this.landing = false;
+    this.holdToLandSeconds = 4;
   }
 
   setCallbacks(callbacks) {
@@ -109,7 +112,15 @@ export class Player {
 
     if (this.fly) {
       let vertical = 0;
-      if (input.jump) vertical = this.flySpeed * speedBuff;
+      if (input.jump) {
+        this.landingHold = Math.min(this.holdToLandSeconds, this.landingHold + dt);
+        if (this.landingHold >= this.holdToLandSeconds) this.landing = true;
+      } else {
+        this.landingHold = 0;
+        this.landing = false;
+      }
+      if (this.landing) vertical = -Math.max(4.6, this.flySpeed * 0.62);
+      else if (input.jump) vertical = this.flySpeed * speedBuff;
       else if (input.sprint) vertical = -this.flySpeed * speedBuff;
       this.velocity.y += (vertical - this.velocity.y) * Math.min(1, 12 * dt);
       this.onGround = false;
@@ -141,6 +152,14 @@ export class Player {
     this.moveAxis('x', this.velocity.x * dt);
     this.moveAxis('z', this.velocity.z * dt);
     this.moveAxis('y', this.velocity.y * dt);
+
+    if (this.fly && this.landing && this.onGround) {
+      this.fly = false;
+      this.landing = false;
+      this.landingHold = 0;
+      this.velocity.set(0, 0, 0);
+      this.callbacks.land?.();
+    }
 
     if (!this.fly) {
       const grounded = this.collidesAt(this.position.x, this.position.y - 0.04, this.position.z);
@@ -249,6 +268,11 @@ export class Player {
       if (distance > maxDist) break;
     }
     return null;
+  }
+
+  cancelLanding() {
+    this.landingHold = 0;
+    this.landing = false;
   }
 
   setPosition(x, y, z) {

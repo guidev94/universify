@@ -60,7 +60,16 @@
 - 9 skins com silhueta reconhecível: Lumi (folha), Nino (estrela), Bia (flor), Tico (óculos), Dara (faixa), Sol (estrela), Maya (flor), Kai (óculos), Luna (faixa).
 - Cores em pares de contraste suave; acessório sempre legível a 48 px.
 - O mesmo avatar aparece no cartão do mundo e na sala multiplayer.
+- Pets: silhuetas pequenas e arredondadas, 4 tipos e 8 cores; nunca parecem inimigos.
+- NPCs: cores quentes, nome flutuante legível e fala curta em balão.
 - Sem roupas pagas, armas de combate, dano ou expressões assustadoras. As armas são ferramentas mágicas de brincadeira.
+
+## Lobby e cidades
+
+- Sol, nuvens e colinas em camadas dão profundidade sem competir com o conteúdo.
+- Cards de cidade usam selo de UF, gradiente próprio e botão Explorar.
+- O sol decorativo fica atrás do conteúdo; em telas pequenas, reduzir opacidade para não atrapalhar a leitura.
+- A logo atual tem moldura verde de selo e referência a "MINECRAFT MOD"; revisar para uma marca 100% autoral antes de publicação comercial.
 
 ## Movimento
 

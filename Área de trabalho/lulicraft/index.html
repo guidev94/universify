@@ -17,14 +17,19 @@
     <canvas id="game-canvas" aria-label="Mundo 3D de Lulicraft"></canvas>
 
     <section id="menu" class="screen menu-screen">
-      <div class="menu-glow menu-glow-a" aria-hidden="true"></div>
-      <div class="menu-glow menu-glow-b" aria-hidden="true"></div>
+      <div class="menu-sky" aria-hidden="true">
+        <span class="menu-sun"></span>
+        <span class="menu-cloud cloud-a"></span>
+        <span class="menu-cloud cloud-b"></span>
+        <span class="menu-cloud cloud-c"></span>
+        <span class="menu-hills"></span>
+      </div>
       <header class="menu-top">
         <div class="brand">
           <img class="brand-mark" src="logo.png" alt="">
           <div class="brand-copy">
             <h1>Lulicraft</h1>
-            <p>Um mundo de blocos, luz e descobertas.</p>
+            <p>Blocos, luz e descobertas.</p>
           </div>
         </div>
         <div class="menu-actions">
@@ -42,35 +47,61 @@
 
       <main class="menu-main">
         <section class="menu-hero">
-          <div class="hero-copy">
-            <span class="eyebrow">Lobby de Lumi</span>
-            <h2>Seu mundo está<br><em>pronto para jogar.</em></h2>
-            <p>Continue de onde parou ou escolha um mundo abaixo. Skins, ferramentas mágicas e multiplayer por convite.</p>
-            <div class="hero-actions">
-              <button id="btn-quick-play" class="primary-btn big">Jogar agora</button>
-              <button id="btn-create" class="secondary-btn big">Criar mundo</button>
-              <button id="btn-daily" class="ghost-btn big">Mundo do dia</button>
-            </div>
-            <div class="hero-badges">
-              <span><i class="mini-diamond"></i> Salvo no navegador</span>
-              <span><i class="mini-diamond"></i> Sem contas</span>
-              <span><i class="mini-diamond"></i> Multiplayer por convite</span>
-            </div>
-          </div>
-          <div class="hero-art">
+          <div class="title-lockup">
             <img class="hero-logo" src="logo.png" alt="Logo do Lulicraft">
+            <p class="title-tagline">Um sandbox cozy de blocos</p>
           </div>
+          <div class="hero-actions title-actions">
+            <button id="btn-quick-play" class="primary-btn big">Jogar agora</button>
+            <button id="btn-random-world" class="secondary-btn big">Mundo surpresa</button>
+            <button id="btn-create" class="ghost-btn big">Criar mundo</button>
+            <button id="btn-daily" class="ghost-btn big">Mundo do dia</button>
+          </div>
+          <p class="title-hint">WASD para andar · mouse para olhar · E para a mochila</p>
         </section>
 
         <section class="worlds-section prebuilt-section">
           <div class="section-head">
             <div>
-              <span class="eyebrow">Prontos para jogar</span>
-              <h3>Mundos criados</h3>
+              <span class="eyebrow">Escolha e jogue</span>
+              <h3>Mundos prontos</h3>
             </div>
-            <p class="section-note">Escolha um cenário e comece em segundos.</p>
+            <p class="section-note">Cenários autorais para começar em segundos.</p>
           </div>
           <div id="prebuilt-grid" class="prebuilt-grid"></div>
+        </section>
+
+        <section class="worlds-section community-section">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Feitos por exploradores</span>
+              <h3>Mundos da comunidade</h3>
+            </div>
+            <p class="section-note">Seeds compartilhadas para visitar e se inspirar.</p>
+          </div>
+          <div id="community-grid" class="community-grid"></div>
+        </section>
+
+        <section class="worlds-section brazil-section">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Do Brasil para o mundo</span>
+              <h3>Cidades para explorar</h3>
+            </div>
+            <p class="section-note">Mundos inspirados em cartões-postais brasileiros.</p>
+          </div>
+          <div id="city-grid" class="community-grid city-grid"></div>
+        </section>
+
+        <section id="ranking-section" class="worlds-section ranking-section hidden">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Seu tempo de exploração</span>
+              <h3>Ranking de tempo</h3>
+            </div>
+            <p class="section-note">Os mundos em que você passou mais tempo.</p>
+          </div>
+          <div id="ranking-list" class="ranking-list"></div>
         </section>
 
         <section class="worlds-section">
@@ -156,6 +187,15 @@
       <div id="buffs" class="buffs"></div>
       <div id="crosshair" class="crosshair" aria-hidden="true"></div>
       <div id="hint" class="hint">Clique para capturar o mouse · WASD para andar</div>
+      <div id="landing-hint" class="landing-hint hidden" aria-live="polite">
+        <span>Segure Espaço para pousar</span>
+        <div class="landing-bar"><i id="landing-progress"></i></div>
+      </div>
+      <div id="npc-hint" class="npc-hint hidden" aria-live="polite">
+        <strong id="npc-name">Amigo de Lumi</strong>
+        <span id="npc-line">Chegue mais perto para conversar.</span>
+        <small>R para conversar</small>
+      </div>
 
       <div id="mobile-controls" class="mobile-controls hidden">
         <div id="joystick" class="joystick" aria-label="Controle de movimento">
@@ -182,6 +222,7 @@
       </div>
     </section>
 
+    <div id="pickup-feed" class="pickup-feed" aria-live="polite" aria-atomic="false"></div>
     <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
 
     <div id="modal-layer" class="modal-layer hidden">
@@ -296,7 +337,7 @@
             <span><strong>Kit de Raros</strong><small>Comece com ferramentas, sementes e tesouros raros.</small></span>
             <input id="world-rare-kit" type="checkbox">
           </label>
-          <div class="create-note">Você pode ter até 5 mundos. Tudo fica salvo no seu navegador.</div>
+          <div class="create-note">Você pode ter até 12 mundos. Tudo fica salvo no seu navegador.</div>
         </div>
         <footer class="modal-foot">
           <button id="btn-create-cancel" class="ghost-btn">Cancelar</button>
@@ -362,18 +403,42 @@
         <div class="character-body">
           <div class="character-stage">
             <div id="character-preview" class="character-preview accessory-leaf" aria-hidden="true">
+              <div class="avatar-shadow"></div>
+              <div class="avatar-platform"></div>
               <div class="avatar-hair"></div>
               <div class="avatar-head">
+                <span class="avatar-ear left"></span>
+                <span class="avatar-ear right"></span>
+                <span class="avatar-brow left"></span>
+                <span class="avatar-brow right"></span>
                 <span class="avatar-eye left"></span>
                 <span class="avatar-eye right"></span>
+                <span class="avatar-nose"></span>
+                <span class="avatar-cheek left"></span>
+                <span class="avatar-cheek right"></span>
                 <span class="avatar-smile"></span>
               </div>
-              <div class="avatar-body"></div>
-              <div class="avatar-arm left"></div>
-              <div class="avatar-arm right"></div>
-              <div class="avatar-leg left"></div>
-              <div class="avatar-leg right"></div>
+              <div class="avatar-neck"></div>
+              <div class="avatar-body">
+                <span class="avatar-collar"></span>
+                <span class="avatar-belt"></span>
+                <span class="avatar-pocket"></span>
+              </div>
+              <div class="avatar-arm left"><span class="avatar-hand"></span></div>
+              <div class="avatar-arm right"><span class="avatar-hand"></span></div>
+              <div class="avatar-leg left"><span class="avatar-shoe"></span></div>
+              <div class="avatar-leg right"><span class="avatar-shoe"></span></div>
               <div class="avatar-accessory"></div>
+              <div id="pet-preview" class="pet-preview" aria-hidden="true">
+                <span class="pet-tail"></span>
+                <span class="pet-ear left"></span>
+                <span class="pet-ear right"></span>
+                <span class="pet-body"></span>
+                <span class="pet-head"></span>
+                <span class="pet-eye left"></span>
+                <span class="pet-eye right"></span>
+                <span class="pet-nose"></span>
+              </div>
             </div>
             <strong id="character-preview-name" class="character-preview-name">Lumi</strong>
             <small>Seu personagem aparece nas fotos e no multiplayer.</small>
@@ -391,6 +456,12 @@
             <div class="field">
               <span>Skin de arma</span>
               <div id="weapon-skins" class="weapon-skins"></div>
+            </div>
+            <div class="field">
+              <span>Companheiro</span>
+              <div id="pet-types" class="pet-types"></div>
+              <div id="pet-colors" class="pet-colors"></div>
+              <small id="pet-preview-label" class="pet-preview-label">Lumi, sua companhia.</small>
             </div>
           </div>
         </div>
@@ -447,6 +518,14 @@
           <label class="toggle-row">
             <span><strong>Coordenadas no HUD</strong><small>Mostra X, Y e Z durante o jogo.</small></span>
             <input id="setting-coords" type="checkbox">
+          </label>
+          <label class="field">
+            <span>Pacote visual <small>mods gráficos leves</small></span>
+            <select id="setting-graphics">
+              <option value="auto">Cozy automático</option>
+              <option value="pixel">Pixel suave</option>
+              <option value="turbo">Turbo leve</option>
+            </select>
           </label>
           <div class="settings-note">O single-player não coleta dados. O multiplayer usa WebRTC direto após um convite; o PeerJS Cloud só faz a sinalização.</div>
         </div>

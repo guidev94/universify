@@ -3,8 +3,9 @@ import { World, BIOMES, CHUNK_SIZE, WORLD_HEIGHT, chestKey, chunkKey } from './w
 import { Player } from './player.js';
 import { Inventory } from './inventory.js';
 import { GameUI } from './ui.js';
-import { getWeaponSkin, normalizeCharacter } from './characters.js';
+import { getWeaponSkin, getPet, normalizeCharacter } from './characters.js';
 import { getPrebuilt } from './prebuilt.js';
+import { randomSeed, randomWorldName } from './seeds.js';
 import { Multiplayer, normalizeRoomCode } from './multiplayer.js';
 import { AudioEngine } from './audio.js';
 import { B, getAtlasTexture, getBlock, isPlantBlock, isSolidBlock } from './blocks.js';
@@ -297,6 +298,13 @@ let photoMode = false;
 let starting = false;
 let thirdPerson = false;
 let localAvatar = null;
+let companion = null;
+let npcs = [];
+let nearestNpc = null;
+let lastNpcPromptId = null;
+let avatarCraftTimer = 0;
+let petBubbleTimer = 0;
+let graphicsQuality = settings.quality || 'auto';
 
 let stats = { ...DEFAULT_STATS };
 let achievements = {};
@@ -674,6 +682,7 @@ function acquireDrops(drops) {
     if (added > 0) {
       discoverItem(drop.id, added);
       audio.pickup(getRarity(drop.id).key);
+      ui.showPickup(drop.id, added);
     }
     if (left > 0) overflow += left;
   }
@@ -723,6 +732,7 @@ function eatItem(id) {
   ui.renderHotbar(inventory, currentWorld.mode === 'creative');
   audio.eat();
   ui.swingHand();
+  petReact('treat');
   const labels = list.map(([buff]) => (buff === 'speed' ? 'Velocidade' : 'Salto alto'));
   ui.toast({
     title: 'Energia de Lumi!',
@@ -837,7 +847,9 @@ function plantSeed(id, hit) {
   player.refreshAbilities(inventory);
   ui.renderHotbar(inventory, currentWorld.mode === 'creative');
   audio.craft('raro');
-  ui.swingHand();
+  avatarCraftTimer = 0.55;
+  ui.swingHand('craft');
+  petReact('plant');
   particles.burst(target.x + 0.5, target.y + 1, target.z + 0.5, '#ffb3c7', 28, 1.4, 3);
   ui.toast({
     title: 'Árvore arco-íris!',
@@ -915,6 +927,10 @@ function tryPlace() {
   const slot = inventory.selectedSlot();
   if (!slot) return;
   const item = getItem(slot.id);
+  if (item.id === 'pet_treat') {
+    feedPet();
+    return;
+  }
   const hit = player.raycast();
   if (item.category === 'arma') {
     useWeapon(item, hit);
@@ -1041,42 +1057,361 @@ function disposeAvatar(avatar) {
 
 function createAvatarModel(characterInput, name, { tag = true } = {}) {
   const group = new THREE.Group();
-  const material = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.02 });
-  const box = (width, height, depth, color, x, y, z) => {
+  const material = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.86, metalness: 0.02 });
+  const shade = (color, amount) => {
+    const value = new THREE.Color(color);
+    value.offsetHSL(0, 0, amount);
+    return `#${value.getHexString()}`;
+  };
+  const addBox = (parent, width, height, depth, color, x, y, z) => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material(color));
     mesh.position.set(x, y, z);
-    group.add(mesh);
+    parent.add(mesh);
     return mesh;
   };
   const character = normalizeCharacter(characterInput);
-  box(0.62, 0.72, 0.34, character.shirt, 0, 1.12, 0);
-  box(0.5, 0.5, 0.5, character.skin, 0, 1.72, 0);
-  box(0.54, 0.14, 0.54, character.hair, 0, 2.0, 0);
-  const leftArm = box(0.16, 0.62, 0.2, character.shirt, -0.4, 1.12, 0);
-  const rightArm = box(0.16, 0.62, 0.2, character.shirt, 0.4, 1.12, 0);
-  const leftLeg = box(0.22, 0.62, 0.24, character.pants, -0.16, 0.42, 0);
-  const rightLeg = box(0.22, 0.62, 0.24, character.pants, 0.16, 0.42, 0);
-  box(0.24, 0.12, 0.3, '#24344f', -0.16, 0.08, 0.03);
-  box(0.24, 0.12, 0.3, '#24344f', 0.16, 0.08, 0.03);
-  box(0.07, 0.08, 0.03, '#1b2430', -0.12, 1.78, 0.262);
-  box(0.07, 0.08, 0.03, '#1b2430', 0.12, 1.78, 0.262);
-  box(0.13, 0.03, 0.03, '#7a3b4a', 0, 1.61, 0.262);
-  if (character.accessory === 'leaf') box(0.26, 0.1, 0.18, '#6fd13c', 0.16, 2.09, 0);
-  else if (character.accessory === 'star') box(0.18, 0.18, 0.1, '#ffc94d', 0, 2.1, 0.02);
-  else if (character.accessory === 'flower') box(0.16, 0.16, 0.16, '#ff7ad9', 0.16, 2.09, 0);
-  else if (character.accessory === 'goggles') box(0.56, 0.1, 0.08, '#7cd6ff', 0, 1.78, 0.27);
-  else if (character.accessory === 'bandana') box(0.56, 0.1, 0.56, '#ff8a6b', 0, 1.94, 0);
+
+  addBox(group, 0.62, 0.72, 0.34, character.shirt, 0, 1.12, 0);
+  addBox(group, 0.64, 0.08, 0.36, shade(character.shirt, -0.18), 0, 0.83, 0);
+  addBox(group, 0.34, 0.06, 0.36, shade(character.shirt, 0.16), 0, 1.44, 0);
+  addBox(group, 0.1, 0.16, 0.02, shade(character.shirt, -0.1), -0.18, 1.2, 0.181);
+  addBox(group, 0.1, 0.16, 0.02, shade(character.shirt, -0.1), 0.18, 1.2, 0.181);
+
+  addBox(group, 0.5, 0.5, 0.5, character.skin, 0, 1.72, 0);
+  addBox(group, 0.54, 0.14, 0.54, character.hair, 0, 2.0, 0);
+  addBox(group, 0.08, 0.3, 0.5, character.hair, -0.27, 1.76, 0);
+  addBox(group, 0.08, 0.3, 0.5, character.hair, 0.27, 1.76, 0);
+  addBox(group, 0.5, 0.08, 0.06, character.hair, 0, 1.98, 0.28);
+  addBox(group, 0.09, 0.1, 0.02, '#f7f3e8', -0.12, 1.78, 0.256);
+  addBox(group, 0.09, 0.1, 0.02, '#f7f3e8', 0.12, 1.78, 0.256);
+  addBox(group, 0.045, 0.07, 0.025, '#1b2430', -0.1, 1.78, 0.268);
+  addBox(group, 0.045, 0.07, 0.025, '#1b2430', 0.1, 1.78, 0.268);
+  addBox(group, 0.14, 0.03, 0.03, '#7a3b4a', 0, 1.61, 0.262);
+
+  const armPivot = (x) => {
+    const pivot = new THREE.Group();
+    pivot.position.set(x, 1.44, 0);
+    group.add(pivot);
+    addBox(pivot, 0.16, 0.5, 0.2, character.shirt, 0, -0.25, 0);
+    addBox(pivot, 0.15, 0.12, 0.18, character.skin, 0, -0.55, 0);
+    return pivot;
+  };
+  const legPivot = (x) => {
+    const pivot = new THREE.Group();
+    pivot.position.set(x, 0.74, 0);
+    group.add(pivot);
+    addBox(pivot, 0.22, 0.55, 0.24, character.pants, 0, -0.3, 0);
+    addBox(pivot, 0.24, 0.12, 0.3, '#24344f', 0, -0.62, 0.03);
+    return pivot;
+  };
+  const leftArm = armPivot(-0.4);
+  const rightArm = armPivot(0.4);
+  const leftLeg = legPivot(-0.16);
+  const rightLeg = legPivot(0.16);
+
+  if (character.accessory === 'leaf') addBox(group, 0.26, 0.1, 0.18, '#6fd13c', 0.16, 2.1, 0);
+  else if (character.accessory === 'star') addBox(group, 0.18, 0.18, 0.1, '#ffc94d', 0, 2.12, 0.02);
+  else if (character.accessory === 'flower') addBox(group, 0.16, 0.16, 0.16, '#ff7ad9', 0.16, 2.1, 0);
+  else if (character.accessory === 'goggles') addBox(group, 0.56, 0.1, 0.08, '#7cd6ff', 0, 1.78, 0.27);
+  else if (character.accessory === 'bandana') addBox(group, 0.56, 0.1, 0.56, '#ff8a6b', 0, 1.94, 0);
+
   group.userData.limbs = { leftArm, rightArm, leftLeg, rightLeg };
   group.userData.character = character;
   if (tag) group.add(makeNameTag(name));
   return group;
 }
 
+function createPetModel(characterInput) {
+  const character = normalizeCharacter(characterInput);
+  const pet = getPet(character);
+  const base = character.petColor || pet.color;
+  const group = new THREE.Group();
+  const material = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.02 });
+  const shade = (color, amount) => {
+    const value = new THREE.Color(color);
+    value.offsetHSL(0, 0, amount);
+    return `#${value.getHexString()}`;
+  };
+  const addBox = (parent, width, height, depth, color, x, y, z) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material(color));
+    mesh.position.set(x, y, z);
+    parent.add(mesh);
+    return mesh;
+  };
+
+  const dark = shade(base, -0.2);
+  const light = shade(base, 0.18);
+  addBox(group, 0.4, 0.34, 0.5, base, 0, 0.34, 0);
+  addBox(group, 0.3, 0.26, 0.28, light, 0, 0.56, 0.22);
+  addBox(group, 0.08, 0.08, 0.03, '#17231f', -0.08, 0.59, 0.37);
+  addBox(group, 0.08, 0.08, 0.03, '#17231f', 0.08, 0.59, 0.37);
+  addBox(group, 0.05, 0.03, 0.02, '#fff7e6', -0.075, 0.61, 0.386);
+  addBox(group, 0.05, 0.03, 0.02, '#fff7e6', 0.075, 0.61, 0.386);
+  addBox(group, 0.06, 0.04, 0.03, '#7a3b4a', 0, 0.5, 0.38);
+
+  const ears = [];
+  if (character.petType === 'coelho') {
+    ears.push(addBox(group, 0.09, 0.34, 0.08, base, -0.09, 0.84, 0.18));
+    ears.push(addBox(group, 0.09, 0.34, 0.08, base, 0.09, 0.84, 0.18));
+    ears.push(addBox(group, 0.05, 0.2, 0.02, '#ffb3c7', -0.09, 0.84, 0.225));
+    ears.push(addBox(group, 0.05, 0.2, 0.02, '#ffb3c7', 0.09, 0.84, 0.225));
+  } else if (character.petType === 'coruja') {
+    ears.push(addBox(group, 0.1, 0.12, 0.08, dark, -0.12, 0.74, 0.18));
+    ears.push(addBox(group, 0.1, 0.12, 0.08, dark, 0.12, 0.74, 0.18));
+    addBox(group, 0.06, 0.22, 0.3, light, -0.22, 0.38, 0);
+    addBox(group, 0.06, 0.22, 0.3, light, 0.22, 0.38, 0);
+  } else {
+    ears.push(addBox(group, 0.12, 0.13, 0.08, dark, -0.12, 0.73, 0.18));
+    ears.push(addBox(group, 0.12, 0.13, 0.08, dark, 0.12, 0.73, 0.18));
+    addBox(group, 0.09, 0.08, 0.04, '#ffb3c7', -0.12, 0.72, 0.225);
+    addBox(group, 0.09, 0.08, 0.04, '#ffb3c7', 0.12, 0.72, 0.225);
+  }
+
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.4, -0.26);
+  group.add(tail);
+  addBox(tail, 0.1, 0.1, 0.3, dark, 0, 0.02, -0.13);
+  addBox(tail, 0.12, 0.12, 0.12, light, 0, 0.02, -0.28);
+
+  const legs = [];
+  for (const x of [-0.13, 0.13]) {
+    for (const z of [-0.16, 0.16]) {
+      legs.push(addBox(group, 0.1, 0.2, 0.1, dark, x, 0.1, z));
+    }
+  }
+
+  group.userData.parts = { tail, ears, legs, petType: character.petType };
+  group.userData.pet = pet;
+  return group;
+}
+
+function removeCompanion() {
+  if (!companion) return;
+  scene.remove(companion);
+  disposeAvatar(companion);
+  companion = null;
+}
+
+function refreshCompanion() {
+  if (!player) return;
+  removeCompanion();
+  companion = createPetModel(settings.character);
+  companion.position.copy(player.position);
+  companion.position.y += 0.04;
+  scene.add(companion);
+}
+
+function updateCompanion(dt) {
+  if (!companion || !player) return;
+  const yaw = player.yaw;
+  const behindX = Math.sin(yaw) * 1.55;
+  const behindZ = Math.cos(yaw) * 1.55;
+  const sideX = Math.cos(yaw) * 0.72;
+  const sideZ = -Math.sin(yaw) * 0.72;
+  const target = new THREE.Vector3(
+    player.position.x + behindX + sideX,
+    player.position.y + 0.04,
+    player.position.z + behindZ + sideZ
+  );
+  const distance = companion.position.distanceTo(target);
+  if (distance > 14) companion.position.copy(target);
+  else companion.position.lerp(target, Math.min(1, dt * 4.2));
+  if (distance > 1.2) companion.rotation.y = Math.atan2(player.position.x - companion.position.x, player.position.z - companion.position.z);
+  const parts = companion.userData.parts;
+  if (parts) {
+    const time = performance.now() * 0.006;
+    companion.position.y = target.y + Math.sin(time) * 0.025;
+    parts.tail.rotation.y = Math.sin(time * 1.7) * 0.45;
+    parts.ears.forEach((ear, index) => {
+      ear.rotation.z = Math.sin(time * 2.1 + index) * 0.12;
+    });
+    const moving = distance > 0.25;
+    parts.legs.forEach((leg, index) => {
+      leg.position.y = 0.1 + (moving ? Math.max(0, Math.sin(time * 2.6 + index * 1.6)) * 0.035 : 0);
+    });
+  }
+  petBubbleTimer -= dt;
+  if (distance < 2.4 && petBubbleTimer <= 0) {
+    petBubbleTimer = 8 + Math.random() * 5;
+    petReact('idle');
+  }
+}
+
+function petReact(kind = 'happy') {
+  if (!companion) return;
+  const pet = companion.userData.pet || { color: '#b8ff6a', name: 'Lumi' };
+  const color = kind === 'treat' ? '#ffb3c7' : kind === 'craft' ? '#ffc94d' : pet.color;
+  particles.burst(companion.position.x, companion.position.y + 0.55, companion.position.z, color, kind === 'craft' ? 18 : 10, 0.55, 1.7);
+  if (kind === 'treat' || kind === 'craft' || kind === 'land') audio.pet(kind);
+}
+
+function feedPet() {
+  if (!inventory || !player) return;
+  if (!companion) refreshCompanion();
+  if (currentWorld.mode !== 'creative') inventory.removeOneSelected();
+  player.refreshAbilities(inventory);
+  ui.renderHotbar(inventory, currentWorld.mode === 'creative');
+  audio.eat();
+  ui.swingHand('craft');
+  petReact('treat');
+  ui.toast({
+    title: 'Petisco de Lumi!',
+    body: `${companion?.userData.pet?.name || 'Seu companheiro'} adorou o agrado.`,
+    rarity: 'incomum',
+    icon: getItemIcon('pet_treat')
+  });
+  updateHud(true);
+}
+
+const NPC_DEFS = [
+  {
+    id: 'lia',
+    name: 'Lia, jardineira',
+    shirt: '#ffb3c7',
+    pants: '#4d6b45',
+    hair: '#5a3b2e',
+    accent: '#b8ff6a',
+    offset: { x: 4.5, z: 3.5 },
+    lines: [
+      'As flores gostam quando você planta perto da água.',
+      'Já viu uma árvore arco-íris? Ela nasce de uma semente prismática.',
+      'Seu companheiro fica mais feliz com petiscos de Lumi.'
+    ]
+  },
+  {
+    id: 'theo',
+    name: 'Theo, construtor',
+    shirt: '#7cd6ff',
+    pants: '#2f4f6f',
+    hair: '#24344f',
+    accent: '#ffc94d',
+    offset: { x: -5, z: 4 },
+    lines: [
+      'Uma casa pequena com telhado colorido já parece um lar.',
+      'Tábuas e gravetos abrem a porta para quase toda ferramenta.',
+      'No modo Criativo, aperte V e segure Espaço por 4 segundos para pousar.'
+    ]
+  },
+  {
+    id: 'nina',
+    name: 'Nina, cartógrafa',
+    shirt: '#b07cff',
+    pants: '#3f3a63',
+    hair: '#6f4630',
+    accent: '#ff7ad9',
+    offset: { x: 0.5, z: -5.5 },
+    lines: [
+      'Cada bioma guarda uma cor diferente de Lumi.',
+      'O mundo do dia é o mesmo para todo mundo. Compare descobertas!',
+      'Se encontrar um baú de santuário, olhe bem antes de quebrar.'
+    ]
+  }
+];
+
+function npcGroundY(x, z, startY) {
+  const bx = Math.floor(x);
+  const bz = Math.floor(z);
+  for (let y = Math.min(WORLD_HEIGHT - 2, Math.max(1, Math.floor(startY) + 6)); y > 0; y--) {
+    if (world?.isSolid(bx, y - 1, bz) && !world.isSolid(bx, y, bz)) return y;
+  }
+  return startY;
+}
+
+function createNpcModel(def) {
+  const group = new THREE.Group();
+  const material = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.02 });
+  const addBox = (width, height, depth, color, x, y, z) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material(color));
+    mesh.position.set(x, y, z);
+    group.add(mesh);
+    return mesh;
+  };
+  addBox(0.56, 0.68, 0.32, def.shirt, 0, 1.08, 0);
+  addBox(0.44, 0.44, 0.44, '#f2c9a0', 0, 1.6, 0);
+  addBox(0.48, 0.13, 0.48, def.hair, 0, 1.85, 0);
+  addBox(0.08, 0.08, 0.03, '#17231f', -0.1, 1.65, 0.23);
+  addBox(0.08, 0.08, 0.03, '#17231f', 0.1, 1.65, 0.23);
+  addBox(0.14, 0.035, 0.03, '#7a3b4a', 0, 1.49, 0.23);
+  addBox(0.16, 0.48, 0.18, def.shirt, -0.36, 1.08, 0);
+  addBox(0.16, 0.48, 0.18, def.shirt, 0.36, 1.08, 0);
+  addBox(0.2, 0.52, 0.22, def.pants, -0.15, 0.5, 0);
+  addBox(0.2, 0.52, 0.22, def.pants, 0.15, 0.5, 0);
+  addBox(0.18, 0.12, 0.05, def.accent, 0, 1.24, 0.18);
+  group.add(makeNameTag(def.name));
+  group.userData.def = def;
+  return group;
+}
+
+function clearNpcs() {
+  for (const npc of npcs) {
+    scene.remove(npc.group);
+    disposeAvatar(npc.group);
+  }
+  npcs = [];
+  nearestNpc = null;
+  lastNpcPromptId = null;
+  if (ui) ui.setNpcPrompt(null);
+}
+
+function spawnNpcs(spawn) {
+  clearNpcs();
+  if (!world || !spawn) return;
+  for (const def of NPC_DEFS) {
+    const x = spawn.x + def.offset.x;
+    const z = spawn.z + def.offset.z;
+    const y = npcGroundY(x, z, spawn.y);
+    const group = createNpcModel(def);
+    group.position.set(x, y, z);
+    group.rotation.y = Math.atan2(spawn.x - x, spawn.z - z);
+    scene.add(group);
+    npcs.push({ group, def, baseY: y, index: 0 });
+  }
+}
+
+function updateNpcs(dt) {
+  if (!player || !npcs.length) return;
+  let found = null;
+  let foundDistance = Infinity;
+  for (const npc of npcs) {
+    const dx = player.position.x - npc.group.position.x;
+    const dz = player.position.z - npc.group.position.z;
+    const distance = Math.hypot(dx, dz);
+    npc.group.position.y = npc.baseY + Math.sin(performance.now() * 0.0025 + npc.group.position.x) * 0.035;
+    if (distance < 6) npc.group.rotation.y = Math.atan2(dx, dz);
+    if (distance < 4.5 && distance < foundDistance) {
+      found = npc;
+      foundDistance = distance;
+    }
+  }
+  nearestNpc = found;
+  if (found) {
+    const id = `${found.def.id}:${found.index}`;
+    if (id !== lastNpcPromptId) {
+      lastNpcPromptId = id;
+      ui.setNpcPrompt({ name: found.def.name, line: found.def.lines[found.index] });
+    }
+  } else if (lastNpcPromptId !== null) {
+    lastNpcPromptId = null;
+    ui.setNpcPrompt(null);
+  }
+}
+
+function talkToNpc() {
+  if (!nearestNpc || !running || !ready || uiOpen || paused || photoMode) return;
+  const npc = nearestNpc;
+  npc.index = (npc.index + 1) % npc.def.lines.length;
+  lastNpcPromptId = `${npc.def.id}:${npc.index}`;
+  ui.setNpcPrompt({ name: npc.def.name, line: npc.def.lines[npc.index] });
+  ui.toast({ title: npc.def.name, body: npc.def.lines[npc.index], rarity: 'comum' });
+  audio.npc();
+  petReact('idle');
+}
+
 function createRemoteAvatar(data) {
   const character = normalizeCharacter(data.character);
   const group = createAvatarModel(character, data.name, { tag: true });
   group.position.set(finite(data.x), finite(data.y, 24, -8, 80), finite(data.z));
-  group.userData.signature = `${data.name}|${character.skin}|${character.shirt}|${character.pants}|${character.hair}|${character.accessory}`;
+  group.userData.signature = `${data.name}|${character.skin}|${character.shirt}|${character.pants}|${character.hair}|${character.accessory}|${character.petType}|${character.petColor}`;
   scene.add(group);
   return group;
 }
@@ -1096,7 +1431,7 @@ function refreshLocalAvatar() {
   scene.add(localAvatar);
 }
 
-function updateLocalAvatar() {
+function updateLocalAvatar(dt = 0) {
   if (!localAvatar || !player) return;
   localAvatar.visible = thirdPerson && !photoMode;
   if (!localAvatar.visible) return;
@@ -1105,12 +1440,38 @@ function updateLocalAvatar() {
   const moving = player.onGround && Math.hypot(player.velocity.x, player.velocity.z) > 0.35;
   const swing = moving ? Math.sin(performance.now() * 0.012) * 0.42 : 0;
   const limbs = localAvatar.userData.limbs;
-  if (limbs) {
-    limbs.leftArm.rotation.x = swing;
-    limbs.rightArm.rotation.x = -swing;
-    limbs.leftLeg.rotation.x = -swing * 0.8;
-    limbs.rightLeg.rotation.x = swing * 0.8;
+  if (!limbs) return;
+  if (avatarCraftTimer > 0) {
+    avatarCraftTimer = Math.max(0, avatarCraftTimer - dt);
+    const craftSwing = Math.sin((0.55 - avatarCraftTimer) * 18) * 0.35;
+    limbs.leftArm.rotation.x = -1.25 + craftSwing;
+    limbs.rightArm.rotation.x = -1.05 - craftSwing;
+    limbs.leftArm.rotation.z = -0.18;
+    limbs.rightArm.rotation.z = 0.18;
+    limbs.leftLeg.rotation.x = 0;
+    limbs.rightLeg.rotation.x = 0;
+    return;
   }
+  limbs.leftArm.rotation.z = 0;
+  limbs.rightArm.rotation.z = 0;
+  if (player.fly) {
+    limbs.leftArm.rotation.x = -0.9 + Math.sin(performance.now() * 0.006) * 0.08;
+    limbs.rightArm.rotation.x = -0.9 - Math.sin(performance.now() * 0.006) * 0.08;
+    limbs.leftLeg.rotation.x = 0.18;
+    limbs.rightLeg.rotation.x = -0.18;
+    return;
+  }
+  if (!player.onGround) {
+    limbs.leftArm.rotation.x = -1.1;
+    limbs.rightArm.rotation.x = -1.1;
+    limbs.leftLeg.rotation.x = 0.35;
+    limbs.rightLeg.rotation.x = -0.2;
+    return;
+  }
+  limbs.leftArm.rotation.x = swing;
+  limbs.rightArm.rotation.x = -swing;
+  limbs.leftLeg.rotation.x = -swing * 0.8;
+  limbs.rightLeg.rotation.x = swing * 0.8;
 }
 
 function cameraClearDistance(target, forward, maxDistance) {
@@ -1171,7 +1532,7 @@ function updateRemoteAvatars(dt) {
   for (const data of multiplayer.players.values()) {
     if (!data || !data.id || data.id === multiplayer.selfId) continue;
     seen.add(data.id);
-    const signature = `${data.name}|${data.character?.skin}|${data.character?.shirt}|${data.character?.pants}|${data.character?.hair}|${data.character?.accessory}`;
+    const signature = `${data.name}|${data.character?.skin}|${data.character?.shirt}|${data.character?.pants}|${data.character?.hair}|${data.character?.accessory}|${data.character?.petType}|${data.character?.petColor}`;
     let avatar = remoteAvatars.get(data.id);
     if (!avatar || avatar.userData.signature !== signature) {
       if (avatar) removeRemoteAvatar(data.id);
@@ -1290,6 +1651,8 @@ function saveNow({ silent = false } = {}) {
 function resetWorld() {
   clearRemoteAvatars();
   removeLocalAvatar();
+  removeCompanion();
+  clearNpcs();
   thirdPerson = false;
   for (const key of [...chunkMeshes.keys()]) removeChunkMeshes(key);
   chunkMeshes.clear();
@@ -1395,8 +1758,19 @@ async function startWorld(snapshot, { fresh = false, rareKit = false, joined = f
     player = new Player(camera, world, fresh ? { x: 0, y: 24, z: 0 } : snapshot.player);
     player.setCallbacks({
       step: () => audio.step(),
-      jump: () => audio.jump(),
-      doubleJump: () => audio.jump(),
+      jump: () => {
+        audio.jump();
+        petReact('jump');
+      },
+      doubleJump: () => {
+        audio.jump();
+        petReact('jump');
+      },
+      land: () => {
+        audio.land();
+        petReact('land');
+        ui.showHint('Pouso suave concluído.', 2200);
+      },
       respawn: () => ui.toast({ title: 'De volta ao início', body: 'Você voltou para um lugar seguro.', rarity: 'comum' })
     });
     player.fly = snapshot.mode === 'creative' ? !!snapshot.player?.fly : false;
@@ -1436,6 +1810,8 @@ async function startWorld(snapshot, { fresh = false, rareKit = false, joined = f
     if (joined && snapshot.mode !== 'creative') inventory.giveStarterKit();
 
     ensureSafePosition();
+    spawnNpcs(world.findSpawn());
+    refreshCompanion();
     player.yaw = fresh ? spawnYaw : Number(snapshot.player?.yaw) || 0;
     player.pitch = fresh ? 0 : Number(snapshot.player?.pitch) || 0;
     player.update(0, EMPTY_INPUT);
@@ -1547,12 +1923,27 @@ function onPrebuiltWorld(entry) {
   startWorld(snapshotFromEntry(result.entry), { fresh: true, rareKit: !!entry.rareKit });
 }
 
+function onRandomWorld() {
+  const seed = randomSeed();
+  const result = createWorld({
+    name: randomWorldName(seed),
+    seed,
+    mode: Math.random() < 0.22 ? 'creative' : 'adventure'
+  });
+  if (!result.ok) {
+    ui.toast({ title: 'Não foi possível criar', body: result.error || 'Tente outro nome ou seed.', rarity: 'comum' });
+    return;
+  }
+  startWorld(snapshotFromEntry(result.entry), { fresh: true });
+}
+
 function onCharacterSave(character) {
   settings.character = normalizeCharacter(character);
   saveSettings({ character: settings.character });
   ui.applySettings(settings);
   refreshLocalAvatar();
-  ui.toast({ title: 'Personagem salvo!', body: `${settings.character.name} está pronto para explorar.`, rarity: 'incomum' });
+  refreshCompanion();
+  ui.toast({ title: 'Personagem salvo!', body: `${settings.character.name} e seu companheiro estão prontos para explorar.`, rarity: 'incomum' });
 }
 
 async function onHostRoom() {
@@ -1801,7 +2192,9 @@ function onCraft(recipeId) {
   ui.renderHotbar(inventory, creative);
   ui.renderInventory();
   audio.craft(getRarity(recipe.out.id).key);
-  ui.swingHand();
+  avatarCraftTimer = 0.55;
+  ui.swingHand('craft');
+  petReact('craft');
   const item = getItem(recipe.out.id);
   ui.toast({
     title: 'Forjado!',
@@ -1857,6 +2250,8 @@ function onPause() {
   saveNow({ silent: true });
   clearHeldInputs();
   document.exitPointerLock?.();
+  ui.setNpcPrompt(null);
+  ui.setLandingProgress(0);
   ui.openPause({
     name: currentWorld?.name || 'Mundo',
     seed: currentWorld?.seed || 'lumi',
@@ -1943,6 +2338,26 @@ function onCoordsToggle(show) {
   updateHud(true);
 }
 
+function applyGraphics(quality) {
+  graphicsQuality = ['auto', 'pixel', 'turbo'].includes(quality) ? quality : 'auto';
+  document.body.dataset.graphics = graphicsQuality;
+  renderer.setPixelRatio(graphicsQuality === 'turbo' ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+}
+
+function onQuality(value) {
+  settings.quality = ['auto', 'pixel', 'turbo'].includes(value) ? value : 'auto';
+  saveSettings({ quality: settings.quality });
+  applyGraphics(settings.quality);
+  ui.applySettings(settings);
+  const labels = { auto: 'Cozy automático', pixel: 'Pixel suave', turbo: 'Turbo leve' };
+  ui.showHint(`Pacote visual: ${labels[settings.quality]}.`, 2600);
+}
+
+function onOpenWorld(world) {
+  if (world?.id) onPlayWorld(world.id);
+}
+
 function isFullscreen() {
   return !!document.fullscreenElement;
 }
@@ -2022,7 +2437,9 @@ function toggleFly() {
   }
   player.fly = !player.fly;
   player.velocity.y = 0;
-  ui.showHint(player.fly ? 'Voo ativado · Espaço sobe · Shift desce' : 'Voo desativado', 3200);
+  player.cancelLanding();
+  ui.setLandingProgress(0);
+  ui.showHint(player.fly ? 'Voo ativado · Espaço sobe · Shift desce · Segure Espaço 4 s para pousar' : 'Voo desativado', 3600);
   audio.ui();
 }
 
@@ -2087,6 +2504,8 @@ ui = new GameUI({
   onQuickPlay: quickPlay,
   onCreateWorld,
   onPrebuiltWorld,
+  onCommunityWorld: onPrebuiltWorld,
+  onRandomWorld,
   onCharacterSave,
   onHostRoom,
   onJoinRoom,
@@ -2114,6 +2533,9 @@ ui = new GameUI({
   onSoundToggle,
   onSensitivity,
   onCoordsToggle,
+  onQuality,
+  onCityWorld: onPrebuiltWorld,
+  onOpenWorld,
   onFullscreen,
   onThirdPerson,
   onModalState,
@@ -2158,7 +2580,11 @@ if (params.get('debug') === '1') {
     get ready() { return ready; },
     get thirdPerson() { return thirdPerson; },
     get localAvatar() { return localAvatar; },
+    get companion() { return companion; },
+    get npcs() { return npcs; },
     toggleThirdPerson,
+    talkToNpc,
+    feedPet,
     tryBreak,
     tryPlace,
     useWeapon,
@@ -2171,6 +2597,7 @@ if (params.get('debug') === '1') {
 }
 
 ui.applySettings(settings);
+applyGraphics(settings.quality);
 ui.setFullscreen(isFullscreen());
 audio.setEnabled(settings.sound);
 ui.setTouchMode(isTouch);
@@ -2193,7 +2620,7 @@ if (!isStorageAvailable()) {
 }
 
 window.addEventListener('resize', () => {
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(graphicsQuality === 'turbo' ? 1 : Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -2234,6 +2661,11 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'KeyV') {
     event.preventDefault();
     toggleFly();
+    return;
+  }
+  if (event.code === 'KeyR') {
+    event.preventDefault();
+    talkToNpc();
     return;
   }
   if (event.code === 'KeyF') {
@@ -2497,7 +2929,10 @@ function loop(now) {
     if (active) {
       playtimeSession += dt * 1000;
       player.update(dt, readInput());
-      updateLocalAvatar();
+      updateLocalAvatar(dt);
+      updateCompanion(dt);
+      updateNpcs(dt);
+      ui.setLandingProgress(player.fly ? player.landingHold / player.holdToLandSeconds : 0);
       updateThirdPersonCamera(dt);
       audio.ambientTick(dt, isNightTime());
 

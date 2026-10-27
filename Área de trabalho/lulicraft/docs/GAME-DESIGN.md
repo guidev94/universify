@@ -21,7 +21,8 @@ Explorar → avistar algo brilhante → quebrar/coletar → celebrar descoberta
 3. Coletar recursos e 1 a 2 itens raros.
 4. Craftar algo que abre novas possibilidades (picareta, botas, lâmpada).
 5. Construir ou decorar um cantinho.
-6. Salvar/fotografar/compartilhar.
+6. Conversar com um NPC, alimentar o pet ou completar uma descoberta.
+7. Salvar/fotografar/compartilhar.
 
 ### Loop de longo prazo
 
@@ -76,6 +77,14 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 5. **Forja**, receitas.
 6. **Álbum**, coleção, não armazena.
 
+## 6.1 Mochila expansível
+
+- A mochila começa com 27 slots e cresce em linhas de 9 quando necessário.
+- Limite técnico: 512 linhas, suficiente para sessões longas e kits grandes.
+- Itens de semente e alimento continuam priorizando a Bolsa de Sementes.
+- A expansão é automática ao coletar, craftar ou receber loot; nada é truncado.
+- O save preserva o tamanho atual da mochila.
+
 ## 7. Raridade e recompensa
 
 - Comum, Incomum, Raro, Épico, Lendário, Mítico.
@@ -116,6 +125,36 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 - Compartilhar é sempre uma ação explícita do jogador.
 - Convite de sala é opt-in; não há chat nem lista pública de salas.
 
+## 11.1 Pets e NPCs
+
+### Pets
+- 4 tipos: Lumi, Gatinho, Coruja e Coelho.
+- 8 cores cosméticas; a cor é aplicada ao modelo 3D e ao preview.
+- O pet segue o jogador, balança cauda/orelhas, reage a salto, pouso, craft e forja.
+- Petisco de Lumi é craftável e alimenta o pet com uma reação alegre.
+- Pet é cosmético: não coleta, não bloqueia dano e não altera progressão.
+
+### NPCs
+- Lia, jardineira; Theo, construtor; Nina, observadora.
+- Ficam perto do spawn, têm nome flutuante e uma fala curta.
+- Aproximar mostra um balão com a tecla R.
+- Conversar abre uma fala contextual e um som suave.
+- Sem chat livre, sem coleta de dados, sem diálogo ramificado complexo.
+
+## 11.2 Cidades brasileiras
+
+- 6 mundos curados: Rio de Lumi, Avenida das Cores, Pelourinho de Blocos, Pontes do Recife, Amazônia Encantada e Ilha da Magia.
+- Cada card mostra cidade/UF, ideia, modo, selo e botão Explorar.
+- Seeds fixas e determinísticas; nenhum backend necessário.
+- O objetivo é representatividade e inspiração para construir, não replicar monumentos com precisão.
+
+## 11.3 Ranking de tempo
+
+- Lista local dos mundos do jogador, ordenada por tempo jogado.
+- Mostra nome, seed, modo e tempo formatado.
+- Abre o mundo diretamente pelo botão do ranking.
+- Sem ranking global, sem contas, sem comparação entre crianças.
+
 ## 12. Personagens
 
 - 9 skins/presets: Lumi, Nino, Bia, Tico, Dara, Sol, Maya, Kai e Luna.
@@ -140,6 +179,25 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 - Convidado entra com personagem próprio e starter kit.
 - Se o host sair, a sala fecha e o convidado continua no mundo local.
 - Segurança: convite não é senha; compartilhe só com pessoas de confiança.
+
+## 14.1 Controles e conforto
+
+- `WASD` anda, mouse olha, `Espaço` pula e `Shift` corre.
+- No Criativo, `V` alterna voo; segurar `Espaço` por 4 s desce e pousa com segurança.
+- `E` mochila, `C` forja, `M` som, `F` foto, `F5` terceira pessoa, `F11` tela cheia, `F3` coordenadas.
+- `R` conversa com o NPC próximo.
+- `1` a `9` selecionam a hotbar; a roda do mouse também troca de slot.
+- `Esc` fecha o painel atual ou abre a pausa.
+
+## 14.2 Pacotes gráficos
+
+| Pacote | Efeito | Para quem |
+|---|---|---|
+| **Cozy automático** | Qualidade padrão e animações completas | Maioria dos dispositivos |
+| **Pixel suave** | `image-rendering: pixelated`, visual retrô | Quem gosta de pixel art |
+| **Turbo leve** | Reduz animações decorativas e custo visual | Notebooks simples e celulares |
+
+A preferência fica salva e é aplicada no menu e no jogo.
 
 ## 15. Métricas de diversão
 

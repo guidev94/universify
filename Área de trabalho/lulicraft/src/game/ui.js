@@ -7,10 +7,16 @@ import {
   COLOR_SWATCHES,
   WEAPON_SKINS,
   DEFAULT_CHARACTER,
+  PETS,
+  PET_COLORS,
   characterFromPreset,
+  getPet,
   normalizeCharacter
 } from './characters.js';
 import { PREBUILT_WORLDS } from './prebuilt.js';
+import { COMMUNITY_WORLDS } from './community.js';
+import { BRAZIL_WORLDS } from './brazil.js';
+import { randomSeed } from './seeds.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -36,9 +42,6 @@ const TUTORIAL_STEPS = [
     text: 'Minérios brilhantes, baús de santuário e árvores arco-íris escondem itens raros. Cada descoberta entra no seu Álbum.'
   }
 ];
-
-const SEED_WORDS_A = ['lumi', 'aurora', 'coral', 'musgo', 'nuvem', 'prisma', 'mel', 'estrela', 'jardim', 'orvalho'];
-const SEED_WORDS_B = ['feliz', 'doce', 'brilhante', 'sereno', 'magico', 'tranquilo', 'colorido', 'secreto'];
 
 function el(tag, className = '', text = '') {
   const node = document.createElement(tag);
@@ -66,7 +69,7 @@ export class GameUI {
       seed: '',
       playerName: ''
     };
-    this.settings = { sound: true, tutorialDone: false, sensitivity: 1, showCoords: false, character: DEFAULT_CHARACTER };
+    this.settings = { sound: true, tutorialDone: false, sensitivity: 1, showCoords: false, quality: 'auto', character: DEFAULT_CHARACTER };
     this.character = normalizeCharacter(DEFAULT_CHARACTER);
     this.pendingCharacter = null;
     this.settingsFromPause = false;
@@ -133,9 +136,9 @@ export class GameUI {
       this.actions.onCreateWorld?.(data);
     });
     $('btn-random-seed')?.addEventListener('click', () => {
-      const seed = `${SEED_WORDS_A[Math.floor(Math.random() * SEED_WORDS_A.length)]}-${SEED_WORDS_B[Math.floor(Math.random() * SEED_WORDS_B.length)]}-${Math.floor(Math.random() * 900 + 100)}`;
-      if ($('world-seed-input')) $('world-seed-input').value = seed;
+      if ($('world-seed-input')) $('world-seed-input').value = randomSeed();
     });
+    $('btn-random-world')?.addEventListener('click', () => this.actions.onRandomWorld?.());
     document.querySelectorAll('.mode-card').forEach((card) => {
       card.addEventListener('click', () => {
         this.createMode = card.dataset.mode === 'creative' ? 'creative' : 'adventure';
@@ -205,11 +208,12 @@ export class GameUI {
     $('character-presets')?.addEventListener('click', (event) => {
       const card = event.target.closest('[data-character-preset]');
       if (!card || !this.pendingCharacter) return;
-      const name = this.pendingCharacter.name;
-      const weaponSkin = this.pendingCharacter.weaponSkin;
+      const { name, weaponSkin, petType, petColor } = this.pendingCharacter;
       this.pendingCharacter = characterFromPreset(card.dataset.characterPreset);
       this.pendingCharacter.name = name || this.pendingCharacter.name;
       this.pendingCharacter.weaponSkin = weaponSkin || this.pendingCharacter.weaponSkin;
+      this.pendingCharacter.petType = petType || this.pendingCharacter.petType;
+      this.pendingCharacter.petColor = petColor || this.pendingCharacter.petColor;
       this.renderCharacterEditor();
     });
     $('character-colors')?.addEventListener('click', (event) => {
@@ -228,6 +232,21 @@ export class GameUI {
       this.pendingCharacter.weaponSkin = skin.dataset.weaponSkin;
       this.renderCharacterEditor();
     });
+    $('pet-types')?.addEventListener('click', (event) => {
+      const card = event.target.closest('[data-pet-type]');
+      if (!card || !this.pendingCharacter) return;
+      const pet = PETS.find((entry) => entry.id === card.dataset.petType);
+      if (!pet) return;
+      this.pendingCharacter.petType = pet.id;
+      this.pendingCharacter.petColor = pet.color;
+      this.renderCharacterEditor();
+    });
+    $('pet-colors')?.addEventListener('click', (event) => {
+      const swatch = event.target.closest('[data-pet-color]');
+      if (!swatch || !this.pendingCharacter) return;
+      this.pendingCharacter.petColor = swatch.dataset.petColor;
+      this.renderCharacterEditor();
+    });
     $('setting-sound')?.addEventListener('change', (event) => this.actions.onSoundToggle?.(event.target.checked));
     $('setting-sens')?.addEventListener('input', (event) => {
       const value = Number(event.target.value) || 1;
@@ -235,6 +254,7 @@ export class GameUI {
       this.actions.onSensitivity?.(value);
     });
     $('setting-coords')?.addEventListener('change', (event) => this.actions.onCoordsToggle?.(event.target.checked));
+    $('setting-graphics')?.addEventListener('change', (event) => this.actions.onQuality?.(event.target.value));
     $('btn-replay-tutorial')?.addEventListener('click', () => {
       this.closeSettings();
       this.openTutorial(true);
@@ -268,6 +288,7 @@ export class GameUI {
     if ($('setting-sens')) $('setting-sens').value = String(this.settings.sensitivity || 1);
     if ($('sens-value')) $('sens-value').textContent = `${Number(this.settings.sensitivity || 1).toFixed(1)}×`;
     if ($('setting-coords')) $('setting-coords').checked = !!this.settings.showCoords;
+    if ($('setting-graphics')) $('setting-graphics').value = this.settings.quality || 'auto';
     if (this.settings.character) this.character = normalizeCharacter(this.settings.character);
     if ($('btn-character')) $('btn-character').title = `Personagem: ${this.character.name}`;
     this.setSound(this.settings.sound);
@@ -294,6 +315,9 @@ export class GameUI {
     if (empty) empty.classList.toggle('hidden', worlds.length > 0);
     if ($('btn-daily')) $('btn-daily').title = `Seed de hoje: ${dailyInfo.seed}`;
     this.renderPrebuiltWorlds();
+    this.renderCommunityWorlds();
+    this.renderCityWorlds();
+    this.renderRanking(worlds);
   }
 
   renderPrebuiltWorlds() {
@@ -320,6 +344,67 @@ export class GameUI {
       card.appendChild(body);
       grid.appendChild(card);
     }
+  }
+
+  renderCommunityWorlds() {
+    this.renderShowcaseWorlds('community-grid', COMMUNITY_WORLDS, 'onCommunityWorld', 'Visitar');
+  }
+
+  renderCityWorlds() {
+    this.renderShowcaseWorlds('city-grid', BRAZIL_WORLDS, 'onCityWorld', 'Explorar', true);
+  }
+
+  renderShowcaseWorlds(gridId, entries, actionName, cta, city = false) {
+    const grid = $(gridId);
+    if (!grid) return;
+    grid.textContent = '';
+    for (const entry of entries) {
+      const card = el('article', `community-card${city ? ' city-card' : ''}`);
+      card.style.setProperty('--accent', entry.accent);
+      const art = el('div', `community-art${city ? ' city-art' : ''}`);
+      art.appendChild(el('span', 'community-emoji', entry.emoji));
+      if (city) art.appendChild(el('span', 'city-state', entry.state));
+      const body = el('div', 'community-body');
+      const top = el('div', 'community-top');
+      top.appendChild(el('span', 'community-creator', city ? `${entry.city} · ${entry.state}` : `por ${entry.creator}`));
+      top.appendChild(el('span', 'community-likes', `♥ ${entry.likes}`));
+      body.appendChild(top);
+      body.appendChild(el('h4', '', entry.name));
+      body.appendChild(el('p', '', entry.desc));
+      const foot = el('div', 'community-foot');
+      foot.appendChild(el('span', 'world-stat', entry.mode === 'creative' ? 'Criativo' : 'Aventura Cozy'));
+      if (entry.rareKit) foot.appendChild(el('span', 'world-stat rare-kit-chip', 'Kit de Raros'));
+      const play = el('button', 'primary-btn', cta);
+      play.type = 'button';
+      play.addEventListener('click', () => this.actions[actionName]?.(entry));
+      foot.appendChild(play);
+      body.appendChild(foot);
+      card.appendChild(art);
+      card.appendChild(body);
+      grid.appendChild(card);
+    }
+  }
+
+  renderRanking(worlds) {
+    const section = $('ranking-section');
+    const list = $('ranking-list');
+    if (!section || !list) return;
+    const ranked = [...(worlds || [])].sort((a, b) => (b.playtime || 0) - (a.playtime || 0)).slice(0, 5);
+    section.classList.toggle('hidden', ranked.length === 0);
+    list.textContent = '';
+    ranked.forEach((world, index) => {
+      const row = el('button', 'ranking-row');
+      row.type = 'button';
+      row.addEventListener('click', () => this.actions.onOpenWorld?.(world));
+      const medal = el('span', `ranking-medal rank-${index + 1}`, ['✦', '◆', '●', '4', '5'][index]);
+      const info = el('span', 'ranking-info');
+      info.appendChild(el('strong', '', world.name || 'Mundo'));
+      info.appendChild(el('small', '', `${formatPlaytime(world.playtime)} explorando`));
+      row.appendChild(medal);
+      row.appendChild(info);
+      row.appendChild(el('span', 'ranking-time', formatPlaytime(world.playtime)));
+      list.appendChild(row);
+    });
   }
 
   buildDailyCard(daily) {
@@ -463,18 +548,49 @@ export class GameUI {
     if (hand && handItem) {
       hand.classList.toggle('hidden', !selected || this.thirdPerson);
       if (selected) {
-        handItem.src = getItemIcon(selected.id);
-        handItem.alt = getItem(selected.id).name;
+        const itemId = String(selected.id);
+        const item = getItem(itemId);
+        handItem.src = getItemIcon(itemId);
+        handItem.alt = item.name;
+        hand.dataset.item = itemId;
+        hand.dataset.category = item.category || 'material';
+        hand.dataset.tool = itemId.endsWith('_pickaxe') ? 'pickaxe' : item.weapon?.kind || '';
+      } else {
+        delete hand.dataset.item;
+        delete hand.dataset.category;
+        delete hand.dataset.tool;
       }
     }
   }
 
-  swingHand() {
+  swingHand(kind = 'use') {
     const hand = $('hand');
     if (!hand) return;
     hand.classList.remove('swing');
+    hand.dataset.swing = kind;
     void hand.offsetWidth;
     hand.classList.add('swing');
+  }
+
+  setLandingProgress(progress) {
+    const hint = $('landing-hint');
+    const bar = $('landing-progress');
+    if (!hint || !bar) return;
+    const value = Math.max(0, Math.min(1, progress));
+    hint.classList.toggle('hidden', value <= 0.001);
+    bar.style.width = `${value * 100}%`;
+  }
+
+  setNpcPrompt(npc) {
+    const hint = $('npc-hint');
+    if (!hint) return;
+    if (!npc) {
+      hint.classList.add('hidden');
+      return;
+    }
+    hint.classList.remove('hidden');
+    if ($('npc-name')) $('npc-name').textContent = npc.name;
+    if ($('npc-line')) $('npc-line').textContent = npc.line || 'Vamos explorar juntos?';
   }
 
   setThirdPerson(active) {
@@ -556,6 +672,22 @@ export class GameUI {
       this.toastTimers.delete(timer);
     }, 3800);
     this.toastTimers.add(timer);
+  }
+
+  showPickup(itemId, count = 1) {
+    const feed = $('pickup-feed');
+    if (!feed) return;
+    const item = getItem(itemId);
+    if (!item) return;
+    while (feed.children.length >= 5) feed.firstElementChild?.remove();
+    const chip = el('div', 'pickup-chip');
+    const img = el('img');
+    img.src = getItemIcon(itemId);
+    img.alt = '';
+    chip.appendChild(img);
+    chip.appendChild(el('strong', '', `+${count} ${item.name}`));
+    feed.appendChild(chip);
+    setTimeout(() => chip.remove(), 2100);
   }
 
   openLayer(modalId) {
@@ -788,6 +920,35 @@ export class GameUI {
       }
     }
 
+    const petTypes = $('pet-types');
+    if (petTypes) {
+      petTypes.textContent = '';
+      for (const pet of PETS) {
+        const button = el('button', 'pet-type');
+        button.type = 'button';
+        button.dataset.petType = pet.id;
+        button.classList.toggle('active', character.petType === pet.id);
+        button.appendChild(el('span', 'pet-type-icon', pet.icon));
+        button.appendChild(el('span', '', pet.name));
+        petTypes.appendChild(button);
+      }
+    }
+
+    const petColors = $('pet-colors');
+    if (petColors) {
+      petColors.textContent = '';
+      for (const color of PET_COLORS) {
+        const swatch = el('button', 'color-swatch pet-color');
+        swatch.type = 'button';
+        swatch.style.setProperty('--swatch', color);
+        swatch.dataset.petColor = color;
+        swatch.title = `Cor do companheiro: ${color}`;
+        swatch.setAttribute('aria-label', `Cor do companheiro ${color}`);
+        swatch.classList.toggle('active', character.petColor === color);
+        petColors.appendChild(swatch);
+      }
+    }
+
     const weaponSkins = $('weapon-skins');
     if (weaponSkins) {
       weaponSkins.textContent = '';
@@ -815,7 +976,11 @@ export class GameUI {
       preview.style.setProperty('--pants', character.pants);
       preview.style.setProperty('--hair', character.hair);
       preview.className = `character-preview accessory-${character.accessory}`;
+      preview.style.setProperty('--pet', character.petColor);
+      preview.dataset.pet = character.petType;
     }
+    const pet = getPet(character);
+    if ($('pet-preview-label')) $('pet-preview-label').textContent = `${pet.name}: ${pet.desc}`;
     if ($('character-preview-name')) $('character-preview-name').textContent = character.name || 'Explorador';
   }
 
@@ -1245,7 +1410,8 @@ export class GameUI {
     else if (type === 'hotbar') destinations = [this.state.inventory.backpack, this.state.inventory.pouch];
     else if (type === 'pouch') destinations = [this.state.inventory.backpack, this.state.inventory.hotbar];
     else destinations = [this.state.inventory.hotbar, this.state.inventory.pouch];
-    quickMove(arr, index, destinations);
+    const canGrow = destinations.includes(this.state.inventory?.backpack);
+    quickMove(arr, index, destinations, canGrow ? () => this.state.inventory?.expandBackpackRow() : null);
     this.actions.onInventoryChanged?.();
     this.renderOpenPanels();
   }

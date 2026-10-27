@@ -20,6 +20,9 @@ src/
   game/save.js           mundos, snapshot, autosave, export
   game/characters.js     presets, cores e normalização do personagem
   game/prebuilt.js       mundos prontos e flags de Kit de Raros
+  game/community.js      mundos curados da comunidade
+  game/brazil.js         mundos inspirados em cidades brasileiras
+  game/seeds.js          seeds aleatórias e nomes de mundo
   game/multiplayer.js    PeerJS P2P, salas, protocolo e sanitização
   game/audio.js          WebAudio procedural
   game/ui.js             HUD, modais, tutorial, cartões
@@ -36,7 +39,9 @@ main.js
   ├─ Player.update(dt) → física + colisão + câmera
   ├─ Interaction → raycast → break/place → World.setBlock → diff
   ├─ Multiplayer.update() → player/block/chest sync (se conectado)
-  ├─ UI.render() → hotbar, buffs, toasts, jogadores
+  ├─ UI.render() → hotbar, buffs, toasts, jogadores, pets, NPCs e hints
+  ├─ updateCompanion() → pet segue, reage e anima
+  ├─ updateNpcs() → proximidade, fala e tecla R
   └─ Save.autosave() a cada 15 s (host/single-player)
 ```
 
@@ -54,6 +59,10 @@ main.js
 | PeerJS vendorizado + P2P | Servidor próprio | Sem backend, convite simples e baixo custo |
 | Host autoritativo para o mundo | Sincronização total | Evita conflitos e mantém o mundo no anfitrião |
 | Convidado continua sozinho se o host sair | Encerrar sessão | Evita perder a exploração |
+| Pets e NPCs no cliente | Servidor de entidades | Zero backend e comportamento previsível |
+| Ranking local por tempo | Ranking global | Sem contas, sem competição entre crianças |
+| Mochila expansível em memória | Slots fixos | Evita perda de itens e mantém save simples |
+| Pacotes gráficos via CSS | Builds separados | Ajuste imediato sem pipeline |
 
 ## Modelo de dados
 
@@ -86,6 +95,9 @@ Ver `.specs/features/save-worlds/design.md`.
 - Pixel ratio limitado a 2 (1.5 em mobile).
 - Sombras desligadas; iluminação por hemisphere + directional.
 - `frustumCulled` padrão; meshes por chunk.
+- Pets e NPCs são poucos modelos reutilizados; animações são transformações simples.
+- Modo `turbo` reduz animações decorativas e `image-rendering` para hardware fraco.
+- Mochila cresce sob demanda, sem alocar 512 linhas por padrão.
 
 ## Multiplayer
 
@@ -122,8 +134,8 @@ Ver `.specs/features/save-worlds/design.md`.
 
 ## Testes
 
-- `npm test`: 9 testes unitários de personagens, mundos prontos, códigos de sala, geração, inventário, receitas, save e slots.
-- `npm run test:e2e`: smoke test no Chrome headless (menu, personagem, Kit de Raros, mundo).
+- `npm test`: 14 testes unitários de personagens, pets, mundos prontos, comunidade, cidades, códigos de sala, geração, inventário expansível, receitas, save e slots.
+- `npm run test:e2e`: smoke test no Chrome headless (menu, cidades, personagem/pet, gráficos, Kit de Raros, mundo, NPCs, companheiro, pouso e inventário).
 - `npm run test:mp`: dois Chrome headless separados (host/convidado), convite, sync de bloco, saída e host-offline.
 - `npm run test:all`: executa os três em sequência.
 - Roteiro manual em `docs/TEST-PLAN.md`.

@@ -63,6 +63,7 @@
 | `star_sling` | Estilingue Estelar | Raro | arma | estrelinhas que brilham |
 | `sun_hammer` | Martelo Solar | Épico | arma | 3×3 + salto alto |
 | `aurora_bow` | Arco Aurora | Lendário | arma | flechas de aurora |
+| `pet_treat` | Petisco de Lumi | Incomum | pet | alimenta e alegra o pet |
 
 ### Kit de Raros
 
@@ -96,6 +97,28 @@ Usado pelo checkbox "Kit de Raros" e pelos mundos Noite de Aurora / Caixa de Rar
 | `petal_blade` | `flower_pink` ×2 + `stick` ×2 |
 | `sun_hammer` | `stone` ×4 + `stick` ×2 + `lumi_shard` ×2 |
 | `aurora_bow` | `aurora_gem` ×2 + `stick` ×3 + `cloud_feather` ×1 |
+| `pet_treat` ×2 | `berry` ×2 + `lumi_shard` ×1 |
+
+## Pets
+
+| ID | Nome | Cor padrão | Personalidade |
+|---|---|---|---|
+| `lumi` | Lumi | `#b8ff6a` | brilha e balança a cauda |
+| `gatinho` | Gatinho | `#ffb15c` | curioso e calmo |
+| `coruja` | Coruja | `#7cd6ff` | observa tudo do alto |
+| `coelho` | Coelho | `#ff9fc7` | pula quando você pula |
+
+Cores disponíveis: 8 swatches cosméticos. O pet segue o jogador, reage a salto, pouso, craft, forja e petisco. Não coleta itens nem altera regras.
+
+## NPCs
+
+| Nome | Papel | Fala de exemplo |
+|---|---|---|
+| **Lia** | jardineira | "As flores gostam quando você planta perto da água." |
+| **Theo** | construtor | "Uma casa pequena já vira um lar." |
+| **Nina** | observadora | "O céu muda de cor quando a aurora acorda." |
+
+Os NPCs ficam perto do spawn e podem ser conversados com `R`.
 
 ## Skins de arma
 

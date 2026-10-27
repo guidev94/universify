@@ -14,8 +14,11 @@ const { B } = await import('../src/game/blocks.js');
 const { Inventory } = await import('../src/game/inventory.js');
 const { ITEMS, getItem, getRarity, rarityRank } = await import('../src/game/items.js');
 const { RECIPES, getRecipe } = await import('../src/game/recipes.js');
-const { CHARACTER_PRESETS, DEFAULT_CHARACTER, WEAPON_SKINS, characterFromPreset, getWeaponSkin, normalizeCharacter } = await import('../src/game/characters.js');
+const { CHARACTER_PRESETS, DEFAULT_CHARACTER, WEAPON_SKINS, PETS, characterFromPreset, getWeaponSkin, getPet, normalizeCharacter } = await import('../src/game/characters.js');
 const { PREBUILT_WORLDS, getPrebuilt } = await import('../src/game/prebuilt.js');
+const { COMMUNITY_WORLDS, getCommunityWorld } = await import('../src/game/community.js');
+const { BRAZIL_WORLDS, getBrazilWorld } = await import('../src/game/brazil.js');
+const { randomSeed, randomWorldName } = await import('../src/game/seeds.js');
 const { normalizeRoomCode, makeRoomCode } = await import('../src/game/multiplayer.js');
 const save = await import('../src/game/save.js');
 
@@ -63,6 +66,10 @@ test('characters normalize presets and reject invalid colors', () => {
   assert.equal(normalizeCharacter({ weaponSkin: 'petal' }).weaponSkin, 'petal');
   assert.equal(normalizeCharacter({ weaponSkin: 'nope' }).weaponSkin, 'aurora');
   assert.equal(getWeaponSkin({ weaponSkin: 'solar' }).color, '#ffc94d');
+  assert.equal(PETS.length, 4);
+  assert.equal(normalizeCharacter({ petType: 'coruja', petColor: '#ABC123' }).petColor, '#abc123');
+  assert.equal(getPet({ petType: 'coelho' }).id, 'coelho');
+  assert.equal(getPet({ petType: 'nope' }).id, 'lumi');
 });
 
 test('weapon items are non-violent magical tools with recipes', () => {
@@ -87,6 +94,57 @@ test('prebuilt worlds have unique ids and valid modes', () => {
     assert.equal(getPrebuilt(world.id), world);
   }
   assert.equal(getPrebuilt('missing'), null);
+});
+
+test('community worlds are curated, unique and playable', () => {
+  assert.equal(COMMUNITY_WORLDS.length, 6);
+  assert.equal(new Set(COMMUNITY_WORLDS.map((world) => world.id)).size, COMMUNITY_WORLDS.length);
+  assert.equal(new Set(COMMUNITY_WORLDS.map((world) => world.seed)).size, COMMUNITY_WORLDS.length);
+  for (const world of COMMUNITY_WORLDS) {
+    assert.ok(['adventure', 'creative'].includes(world.mode));
+    assert.ok(world.name.length > 2);
+    assert.ok(world.creator.length > 1);
+    assert.ok(world.likes > 0);
+    assert.equal(getCommunityWorld(world.id), world);
+  }
+  assert.equal(getCommunityWorld('missing'), null);
+});
+
+test('brazil city worlds are curated, unique and playable', () => {
+  assert.equal(BRAZIL_WORLDS.length, 6);
+  assert.equal(new Set(BRAZIL_WORLDS.map((world) => world.id)).size, BRAZIL_WORLDS.length);
+  assert.equal(new Set(BRAZIL_WORLDS.map((world) => world.seed)).size, BRAZIL_WORLDS.length);
+  for (const world of BRAZIL_WORLDS) {
+    assert.ok(['adventure', 'creative'].includes(world.mode));
+    assert.ok(world.city.length > 2);
+    assert.ok(world.state.length === 2);
+    assert.ok(world.name.length > 2);
+    assert.equal(getBrazilWorld(world.id), world);
+  }
+  assert.equal(getBrazilWorld('missing'), null);
+});
+
+test('pet treats are craftable and inventory grows without truncating', () => {
+  assert.equal(getItem('pet_treat').category, 'pet');
+  assert.ok(RECIPES.some((recipe) => recipe.out.id === 'pet_treat'));
+
+  const inventory = new Inventory();
+  for (let i = 0; i < 48; i++) inventory.addItem('stick', 64);
+  assert.equal(inventory.countItem('stick'), 48 * 64);
+  assert.ok(inventory.backpack.length > 27);
+  const restored = new Inventory(inventory.serialize());
+  assert.equal(restored.countItem('stick'), 48 * 64);
+  assert.equal(restored.backpack.length, inventory.backpack.length);
+});
+
+test('random seeds are readable and world names stay short', () => {
+  for (let i = 0; i < 30; i++) {
+    const seed = randomSeed();
+    assert.match(seed, /^[a-z]+-[a-z]+-\d{3}$/);
+    const name = randomWorldName(seed);
+    assert.ok(name.startsWith('Mundo '));
+    assert.ok(name.length <= 20);
+  }
 });
 
 test('multiplayer invite codes are short, safe and normalized', () => {

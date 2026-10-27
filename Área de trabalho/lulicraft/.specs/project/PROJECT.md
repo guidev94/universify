@@ -47,6 +47,18 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 - Multiplayer P2P com convite, até 6 exploradores, sem contas e sem chat.
 - Testes unitários, smoke test e teste multiplayer com dois navegadores.
 
+## 5.1 Expansão v1.2 (entregue)
+
+- Pets cosméticos com 4 tipos, 8 cores e companheiro 3D que segue e reage ao jogador.
+- Petisco craftável e interação de alimentar pet.
+- 3 NPCs cozy com fala contextual e tecla R.
+- 6 mundos inspirados em cidades brasileiras.
+- Ranking local de tempo por mundo.
+- Mochila expansível até 512 linhas, sem truncar itens.
+- Pouso seguro segurando Espaço por 4 s no voo criativo.
+- Pacotes gráficos auto, pixel suave e turbo leve.
+- Animações de caminhada, salto, voo, craft e picareta.
+
 ## 6. Fora de escopo
 
 - Servidores dedicados, contas, nuvem, matchmaking público e chat.
@@ -78,6 +90,11 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 - **Cartão do Mundo**: imagem gerada com foto, nome, seed e conquistas.
 - **Sala**: sessão multiplayer P2P identificada por um código de 5 caracteres.
 - **Kit de Raros**: conjunto inicial opcional com 10 itens de raridade alta.
+- **Pet**: companheiro cosmético que segue o jogador e reage a ações.
+- **Petisco**: item craftável que alimenta o pet sem alterar vantagem de gameplay.
+- **NPC cozy**: personagem fixo com fala curta e contextual, sem chat livre.
+- **Cidade para explorar**: mundo curado inspirado em um cartão-postal brasileiro.
+- **Ranking de tempo**: lista local de tempo jogado por mundo, sem servidor.
 
 ## 9. Referências de qualidade
 

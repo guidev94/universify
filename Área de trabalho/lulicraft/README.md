@@ -30,6 +30,8 @@ Não abra `index.html` via `file://`; os ES Modules e o WebGL precisam de um ser
 | Colocar / usar arma | clique direito | botão colocar |
 | Pular | `Espaço` | botão pular |
 | Voar | `V` (modo Criativo) | botão voar |
+| Pousar | segurar `Espaço` por 4 s | botão descer |
+| Conversar com NPC | `R` | botão interagir |
 | Mochila | `E` | botão Mochila |
 | Forja | `C` | aba Forja |
 | Hotbar | `1` a `9` ou roda do mouse | toque no slot |
@@ -47,12 +49,18 @@ Não abra `index.html` via `file://`; os ES Modules e o WebGL precisam de um ser
 - Hotbar, mochila, bolsa de sementes, baús, forja e álbum de coleção.
 - 6 raridades, itens autorais, drops raros, efeitos e conquistas.
 - 9 skins de personagem, 4 skins de arma, cores personalizadas e nome.
+- 4 pets cosméticos com 8 cores, preview e companheiro 3D que segue e reage.
+- 3 NPCs cozy com fala contextual e tecla R.
 - 5 armas mágicas sem combate: pétalas, bolhas, estrelas, martelo solar e arco aurora.
 - Novos alimentos: Frutinha Arco-Íris, Biscoito Estelar e Algodão-doce de Nuvem.
 - Terceira pessoa com avatar local, mão com item e animação de quebrar, colocar, usar arma e forjar.
 - Contador de exploradores online sempre visível no HUD.
 - Entrada direta no jogo: o lobby só aparece com `?menu=1`.
 - 6 mundos prontos, incluindo dois com Kit de Raros.
+- 6 mundos inspirados em cidades brasileiras e 6 mundos da comunidade.
+- Ranking local de tempo por mundo.
+- Mochila expansível até 512 linhas, sem truncar itens.
+- Pacotes gráficos auto, pixel suave e turbo leve.
 - Salvar/carregar, autosave, exportar/importar arquivo e código de mundo.
 - Seed do dia, modo foto e cartão compartilhável.
 - Multiplayer P2P com convite, até 6 exploradores por sala.
@@ -113,7 +121,8 @@ src/
   game/
     blocks.js items.js recipes.js world.js mesher.js
     player.js inventory.js save.js audio.js ui.js
-    characters.js prebuilt.js multiplayer.js main.js
+    characters.js prebuilt.js community.js brazil.js seeds.js
+    multiplayer.js main.js
   vendor/
     three.module.js
     peerjs.min.js
@@ -139,6 +148,7 @@ docs/     design, arquitetura, arte, conteúdo e plano de testes
 - Multiplayer depende da disponibilidade do serviço público PeerJS e de WebRTC.
 - Sem chat, sincronização de inventário completo ou persistência oficial do mundo no lado do convidado durante a sala.
 - Sem build/minificação; os arquivos são servidos como estão.
+- A logo atual contém referência visual a "MINECRAFT MOD"; revisar antes de publicação comercial.
 
 ## Documentação
 
@@ -147,4 +157,5 @@ docs/     design, arquitetura, arte, conteúdo e plano de testes
 - [`docs/CONTENT-ITEMS.md`](docs/CONTENT-ITEMS.md)
 - [`docs/ART-BIBLE.md`](docs/ART-BIBLE.md)
 - [`docs/TEST-PLAN.md`](docs/TEST-PLAN.md)
+- [`docs/ROADMAP-EXPERIENCES.md`](docs/ROADMAP-EXPERIENCES.md)
 - [`.specs/project/STATE.md`](.specs/project/STATE.md)

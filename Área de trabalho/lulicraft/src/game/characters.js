@@ -84,6 +84,15 @@ export const CHARACTER_PRESETS = [
 
 export const CHARACTER_ACCESSORIES = ['none', 'leaf', 'star', 'flower', 'goggles', 'bandana'];
 
+export const PETS = [
+  { id: 'lumi', name: 'Lumi', icon: '✦', color: '#b8ff6a', desc: 'Uma raposinha de luz que adora descobrir itens novos.' },
+  { id: 'gato', name: 'Gatinho', icon: '♢', color: '#ffb3c7', desc: 'Curioso e elegante, sempre um passo atrás de você.' },
+  { id: 'coruja', name: 'Coruja', icon: '☾', color: '#7cd6ff', desc: 'Observa tudo do alto e reage quando você forja.' },
+  { id: 'coelho', name: 'Coelho', icon: '❀', color: '#f7f3e8', desc: 'Pula junto com você e adora doces de nuvem.' }
+];
+
+export const PET_COLORS = ['#b8ff6a', '#7cd6ff', '#ff8a6b', '#ffb3c7', '#b07cff', '#ffc94d', '#f7f3e8', '#24344f'];
+
 export const WEAPON_SKINS = [
   { id: 'aurora', name: 'Aurora', color: '#b07cff' },
   { id: 'petal', name: 'Pétala', color: '#ff7ad9' },
@@ -107,7 +116,9 @@ export const DEFAULT_CHARACTER = {
   pants: CHARACTER_PRESETS[0].pants,
   hair: CHARACTER_PRESETS[0].hair,
   accessory: CHARACTER_PRESETS[0].accessory,
-  weaponSkin: 'aurora'
+  weaponSkin: 'aurora',
+  petType: 'lumi',
+  petColor: '#b8ff6a'
 };
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
@@ -133,7 +144,9 @@ export function characterFromPreset(id) {
     pants: preset.pants,
     hair: preset.hair,
     accessory: preset.accessory,
-    weaponSkin: 'aurora'
+    weaponSkin: 'aurora',
+    petType: 'lumi',
+    petColor: '#b8ff6a'
   };
 }
 
@@ -151,7 +164,9 @@ export function normalizeCharacter(value) {
     pants: safeColor(source.pants, preset.pants),
     hair: safeColor(source.hair, preset.hair),
     accessory: CHARACTER_ACCESSORIES.includes(source.accessory) ? source.accessory : preset.accessory,
-    weaponSkin: WEAPON_SKINS.some((entry) => entry.id === source.weaponSkin) ? source.weaponSkin : 'aurora'
+    weaponSkin: WEAPON_SKINS.some((entry) => entry.id === source.weaponSkin) ? source.weaponSkin : 'aurora',
+    petType: PETS.some((entry) => entry.id === source.petType) ? source.petType : 'lumi',
+    petColor: safeColor(source.petColor, PETS.find((entry) => entry.id === source.petType)?.color || '#b8ff6a')
   };
 }
 
@@ -163,4 +178,9 @@ export function getWeaponSkin(character) {
 export function characterLabel(character) {
   const value = normalizeCharacter(character);
   return value.name || 'Explorador';
+}
+
+export function getPet(character) {
+  const value = normalizeCharacter(character);
+  return PETS.find((entry) => entry.id === value.petType) || PETS[0];
 }

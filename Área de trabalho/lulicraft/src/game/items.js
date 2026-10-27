@@ -91,6 +91,17 @@ function drawCookie(ctx) {
   rect(ctx, 8, 11, 1, 1, '#6f4630');
 }
 
+function drawPaw(ctx) {
+  rect(ctx, 5, 7, 6, 5, '#ffb3c7');
+  rect(ctx, 6, 6, 4, 6, '#ffd0df');
+  rect(ctx, 3, 4, 2, 3, '#ffb3c7');
+  rect(ctx, 6, 2, 2, 3, '#ffb3c7');
+  rect(ctx, 9, 2, 2, 3, '#ffb3c7');
+  rect(ctx, 12, 4, 2, 3, '#ffb3c7');
+  rect(ctx, 6, 8, 1, 1, '#fff1f6');
+  rect(ctx, 9, 8, 1, 1, '#e07fa2');
+}
+
 function drawCandy(ctx) {
   poly(ctx, [[4, 3], [7, 5], [9, 5], [12, 3], [12, 8], [9, 6], [7, 6], [4, 8]], '#ff8ad9');
   rect(ctx, 7, 8, 2, 7, '#f2e6c9');
@@ -247,6 +258,7 @@ const ICON_DRAWERS = {
   berry: drawBerry,
   cookie: drawCookie,
   candy: drawCandy,
+  paw: drawPaw,
   sapling: drawSapling,
   blade: drawPetalBlade,
   bubble_wand: drawBubbleWand,
@@ -377,6 +389,15 @@ addItem({
   category: 'ferramenta',
   stack: 1,
   icon: { kind: 'pick_aurora' }
+});
+addItem({
+  id: 'pet_treat',
+  name: 'Petisco de Lumi',
+  desc: 'Um agrado coração para seu companheiro ficar ainda mais feliz.',
+  rarity: 'incomum',
+  category: 'pet',
+  stack: 16,
+  icon: { kind: 'paw' }
 });
 addItem({
   id: 'cloud_boots',
@@ -516,7 +537,7 @@ export const COLLECTION_IDS = [
   'lumi_shard', 'aurora_gem', 'star_mushroom', 'prism_seed', 'cloud_feather',
   'heart_lumi', 'lumi_charm', 'crown_lumi', 'wood_pickaxe', 'stone_pickaxe',
   'crystal_pickaxe', 'aurora_pickaxe', 'cloud_boots', 'star_soup', 'berry',
-  'moon_berry', 'rainbow_berry', 'star_cookie', 'cloud_candy',
+  'moon_berry', 'rainbow_berry', 'star_cookie', 'cloud_candy', 'pet_treat',
   'petal_blade', 'bubble_wand', 'star_sling', 'sun_hammer', 'aurora_bow',
   'rainbow_sapling', B.CRYSTAL, B.RAINBOW_LOG, B.RAINBOW_LEAVES,
   B.MUSHROOM_STAR, B.PRISM, B.CLOUD, B.LUMI_LAMP, B.CORAL, B.BERRY_BUSH
@@ -597,6 +618,7 @@ const LOOT_TABLE = [
   { id: 'rainbow_berry', weight: 5, min: 1, max: 2 },
   { id: 'star_cookie', weight: 6, min: 1, max: 2 },
   { id: 'cloud_candy', weight: 3, min: 1, max: 1 },
+  { id: 'pet_treat', weight: 6, min: 1, max: 2 },
   { id: 'bubble_wand', weight: 5, min: 1, max: 1 },
   { id: 'star_sling', weight: 3, min: 1, max: 1 },
   { id: 'petal_blade', weight: 3, min: 1, max: 1 },

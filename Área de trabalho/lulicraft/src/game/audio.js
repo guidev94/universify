@@ -217,6 +217,35 @@ export class AudioEngine {
     this.tone(240, 0.09, 'sine', 0.06, 0, 330);
   }
 
+  land() {
+    this.tone(180, 0.12, 'sine', 0.08, 0, 110);
+    this.noise(0.12, 460, 0.045);
+  }
+
+  pet(kind = 'happy') {
+    if (kind === 'treat') {
+      [660, 880, 990].forEach((freq, index) => this.tone(freq, 0.12, 'sine', 0.055, index * 0.06));
+      return;
+    }
+    if (kind === 'craft') {
+      this.tone(740, 0.08, 'sine', 0.04, 0, 990);
+      this.tone(990, 0.1, 'sine', 0.035, 0.06, 1240);
+      return;
+    }
+    if (kind === 'land') {
+      this.tone(420, 0.08, 'sine', 0.04, 0, 620);
+      return;
+    }
+    this.tone(620, 0.06, 'sine', 0.035, 0, 780);
+    this.tone(780, 0.08, 'sine', 0.025, 0.05, 920);
+  }
+
+  npc() {
+    [392, 494, 587].forEach((freq, index) => {
+      this.tone(freq, 0.11, 'triangle', 0.045, index * 0.07);
+    });
+  }
+
   weapon(kind = 'star') {
     if (kind === 'bubble') {
       this.tone(680, 0.12, 'sine', 0.07, 0, 980);

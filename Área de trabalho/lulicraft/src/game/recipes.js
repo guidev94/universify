@@ -111,6 +111,12 @@ export const RECIPES = [
     hint: 'Doce de nuvem para saltos bem altos.'
   },
   {
+    id: 'pet_treat',
+    out: { id: 'pet_treat', count: 2 },
+    ingredients: [{ id: 'berry', count: 2 }, { id: 'lumi_shard', count: 1 }],
+    hint: 'Um petisco para agradar seu companheiro.'
+  },
+  {
     id: 'bubble_wand',
     out: { id: 'bubble_wand', count: 1 },
     ingredients: [{ id: B.CLOUD, count: 2 }, { id: 'stick', count: 2 }],
