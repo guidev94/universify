@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="mint" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#E2FFC0"/>
+      <stop offset="0.42" stop-color="#B8FF6A"/>
+      <stop offset="1" stop-color="#4FBF79"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D8FAFF"/>
+      <stop offset="0.5" stop-color="#7CD6FF"/>
+      <stop offset="1" stop-color="#3C9FD1"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE9F2"/>
+      <stop offset="0.55" stop-color="#FFA8C8"/>
+      <stop offset="1" stop-color="#E66B9D"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M392 286c0-42 34-76 76-76s76 34 76 76v330h176c42 0 76 34 76 76s-34 76-76 76H468c-42 0-76-34-76-76V286Z" fill="url(#mint)"/>
+    <path d="M544 326c96-86 196-92 268-58-8 92-70 168-176 194-54 13-92-6-92-42 0-34 0-62 0-94Z" fill="url(#leaf)"/>
+    <path d="M576 368c58-38 120-52 176-46-22 44-66 80-132 96-28 8-44-4-44-22 0-10 0-18 0-28Z" fill="#FFFFFF" fill-opacity="0.3"/>
+    <path d="M566 404c30 26 70 38 116 34" fill="none" stroke="#1E6C8C" stroke-opacity="0.28" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g filter="url(#soft)" opacity="0.8">
+    <path d="M760 222l18 50 50 18-50 18-18 50-18-50-50-18 50-18 18-50Z" fill="#FFA8C8"/>
+  </g>
+  <path d="M760 208l18 50 50 18-50 18-18 50-18-50-50-18 50-18 18-50Z" fill="url(#spark)"/>
+  <circle cx="324" cy="724" r="16" fill="#FFD76A"/>
+  <circle cx="286" cy="672" r="9" fill="#7CD6FF" fill-opacity="0.85"/>
+  <circle cx="790" cy="654" r="11" fill="#B8FF6A" fill-opacity="0.85"/>
+</svg>

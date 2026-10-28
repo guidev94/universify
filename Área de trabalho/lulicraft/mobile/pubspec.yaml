@@ -1,0 +1,55 @@
+name: lulicraft
+description: "Lulicraft: um sandbox cozy de blocos, luz e descobertas."
+publish_to: 'none'
+version: 1.4.1+15
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  package_info_plus: ^10.2.2
+  shared_preferences: ^2.5.6
+  url_launcher: ^6.3.3
+  wakelock_plus: ^1.8.2
+  webview_flutter: ^4.14.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/branding/
+    - assets/web/
+    - assets/web/assets/
+    - assets/web/src/
+    - assets/web/src/core/
+    - assets/web/src/game/
+    - assets/web/src/vendor/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/icon.png
+  adaptive_icon_background: "#060D11"
+  adaptive_icon_foreground: assets/branding/icon_foreground.png
+  remove_alpha_ios: true
+  min_sdk_android: 23
+
+flutter_native_splash:
+  color: "#0A131B"
+  image: assets/branding/splash.png
+  android_12:
+    color: "#0A131B"
+    image: assets/branding/splash.png
+    icon_background_color: "#0A131B"
+  ios: true
+  android: true

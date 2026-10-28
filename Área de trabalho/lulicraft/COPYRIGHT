@@ -1,0 +1,19 @@
+Lulicraft
+Copyright © 2026 guidev94
+https://github.com/guidev94
+
+Todos os direitos reservados.
+
+O código, os mundos, os personagens, os itens, as texturas procedurais, os textos,
+a identidade visual e os demais materiais deste repositório são de autoria de
+guidev94, salvo quando indicado de outra forma.
+
+Este repositório não concede, por si só, uma licença open-source. O uso, a cópia,
+a modificação, a distribuição ou a publicação comercial dependem de autorização
+expressa do autor.
+
+Bibliotecas de terceiros mantêm suas próprias licenças e avisos de copyright,
+conforme os arquivos incluídos em `src/vendor/` e as dependências declaradas em
+`package.json`.
+
+Contato: https://github.com/guidev94
