@@ -2,7 +2,7 @@
 
 ## 1. Norte
 
-O jogo já entrega o loop base: explorar, coletar, construir, forjar, colecionar e compartilhar. As próximas melhorias devem aumentar **tempo até a primeira descoberta**, **vontade de voltar amanhã** e **orgulho de mostrar o que criou**, sem adicionar combate, contas, chat aberto ou monetização.
+O jogo já entrega o loop base: explorar, coletar, construir, forjar, colecionar e compartilhar. As próximas melhorias devem aumentar **tempo até a primeira descoberta**, **vontade de voltar amanhã** e **orgulho de mostrar o que criou**, sem adicionar combate, contas, chat livre ou monetização.
 
 Prioridade:
 

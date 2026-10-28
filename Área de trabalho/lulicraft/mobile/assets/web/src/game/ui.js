@@ -1,0 +1,2194 @@
+import { getItem, getItemIcon, getRarity, rarityRank, RARITY, COLLECTION_IDS, CREATIVE_PALETTE } from './items.js';
+import { RECIPES } from './recipes.js';
+import { addToArrays, quickMove } from './inventory.js';
+import { thumbnailFor, encodeWorldCode, decodeWorldCode, getDaily } from './save.js';
+import {
+  CHARACTER_PRESETS,
+  COLOR_SWATCHES,
+  WEAPON_SKINS,
+  DEFAULT_CHARACTER,
+  PETS,
+  PET_COLORS,
+  HAIR_STYLES,
+  OUTFITS,
+  HATS,
+  GLASSES,
+  BACK_ITEMS,
+  characterFromPreset,
+  getPet,
+  normalizeCharacter
+} from './characters.js';
+import { PREBUILT_WORLDS } from './prebuilt.js';
+import { COMMUNITY_WORLDS } from './community.js';
+import { BRAZIL_WORLDS } from './brazil.js';
+import { randomSeed } from './seeds.js';
+import { listContentPacks, parseContentPack, saveContentPack, removeContentPack, setActivePack, getActivePackId, getPackBlockIds } from './content-packs.js';
+import { CHAT_PHRASES, getChatPhrase } from './chat.js';
+
+const $ = (id) => document.getElementById(id);
+
+const TUTORIAL_STEPS = [
+  {
+    art: '✦',
+    title: 'Mova-se pelo mundo',
+    text: 'Use WASD para andar, o mouse para olhar e Espaço para pular. No celular, use o joystick e arraste a tela para olhar.'
+  },
+  {
+    art: '◆',
+    title: 'Quebre e coloque blocos',
+    text: 'Clique com o botão esquerdo para quebrar. Clique com o direito para colocar o bloco ou usar a arma mágica selecionada.'
+  },
+  {
+    art: '▦',
+    title: 'Sua mochila tem abas',
+    text: 'Aperte E para abrir a mochila. Lá ficam a bolsa de sementes, a Forja de receitas e o Álbum de coleção.'
+  },
+  {
+    art: '★',
+    title: 'Descubra itens raros',
+    text: 'Minérios brilhantes, baús de santuário e árvores arco-íris escondem itens raros. Cada descoberta entra no seu Álbum.'
+  }
+];
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem('lulicraft:favorites');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveFavorites(favorites) {
+  try {
+    localStorage.setItem('lulicraft:favorites', JSON.stringify([...favorites]));
+  } catch {
+    // favorites are a convenience, never block the inventory
+  }
+}
+
+function el(tag, className = '', text = '') {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function formatPlaytime(ms) {
+  const minutes = Math.floor((Number(ms) || 0) / 60000);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return `${hours} h ${rest} min`;
+}
+
+export class GameUI {
+  constructor(actions = {}) {
+    this.actions = actions;
+    this.state = {
+      inventory: null,
+      mode: 'adventure',
+      world: null,
+      worldName: 'Mundo',
+      seed: '',
+      playerName: ''
+    };
+    this.settings = { sound: true, tutorialDone: false, sensitivity: 1, showCoords: false, quality: 'auto', character: DEFAULT_CHARACTER };
+    this.character = normalizeCharacter(DEFAULT_CHARACTER);
+    this.pendingCharacter = null;
+    this.settingsFromPause = false;
+    this.currentTab = 'backpack';
+    this.held = null;
+    this.dragSource = null;
+    this.thirdPerson = false;
+    this.chest = null;
+    this.inventoryOpen = false;
+    this.chestOpen = false;
+    this.pauseOpen = false;
+    this.modalOpen = false;
+    this.itemLabelTimer = null;
+    this.lastItemLabelId = '';
+    this.tutorialStep = 0;
+    this.tutorialForce = false;
+    this.createMode = 'adventure';
+    this.multiplayerFromPause = false;
+    this.multiplayerState = { status: 'idle', message: 'Crie uma sala ou entre com um convite.', code: '', invite: '', players: [], selfId: '' };
+    this.lastPhotoInfo = null;
+    this.toastTimers = new Set();
+    this.chatAvailable = false;
+    this.chatOpen = false;
+    this.inventoryQuery = '';
+    this.inventorySort = 'name';
+    this.favoritesOnly = false;
+    this.favorites = loadFavorites();
+    this.bind();
+  }
+
+  bind() {
+    $('btn-quick-play')?.addEventListener('click', () => this.actions.onQuickPlay?.());
+    $('btn-create')?.addEventListener('click', () => this.openCreate());
+    $('btn-create-empty')?.addEventListener('click', () => this.openCreate());
+    $('btn-daily')?.addEventListener('click', () => this.actions.onDaily?.());
+    $('btn-import')?.addEventListener('click', () => $('import-file')?.click());
+    $('import-file')?.addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (file) this.actions.onImportFile?.(file);
+    });
+    $('btn-code')?.addEventListener('click', () => this.openCode('', true));
+    $('btn-settings')?.addEventListener('click', () => this.openSettings());
+    $('btn-character')?.addEventListener('click', () => this.openCharacter());
+    $('btn-multiplayer')?.addEventListener('click', () => this.openMultiplayer());
+    $('btn-invite')?.addEventListener('click', () => this.openMultiplayer());
+    $('btn-quick-chat')?.addEventListener('click', () => this.toggleChat());
+    $('btn-chat-close')?.addEventListener('click', () => this.toggleChat(false));
+    $('chat-phrases')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-chat-id]');
+      if (!button) return;
+      this.actions.onChatPhrase?.(button.dataset.chatId);
+    });
+    $('btn-tutorial-menu')?.addEventListener('click', () => this.openTutorial(true));
+    $('btn-missions-close')?.addEventListener('click', () => this.closeMissions());
+    $('btn-pause-map')?.addEventListener('click', () => this.actions.onOpenMap?.());
+    $('btn-pause-missions')?.addEventListener('click', () => this.actions.onOpenMissions?.());
+    $('btn-packs')?.addEventListener('click', () => this.openPacks());
+    $('btn-packs-close')?.addEventListener('click', () => this.closePacks());
+    $('btn-pack-example')?.addEventListener('click', () => {
+      if ($('pack-json')) $('pack-json').value = JSON.stringify({
+        version: 1,
+        id: 'aurora-suave',
+        name: 'Aurora Suave',
+        author: 'Lumi',
+        description: 'Uma paleta calma com cristais e flores.',
+        palette: { lumi: '#b8ff6a', pink: '#ff9edb', sky: '#8fe6ff' },
+        blocks: [1, 14, 22, 23]
+      }, null, 2);
+    });
+    $('btn-pack-import')?.addEventListener('click', () => this.installPack($('pack-json')?.value || ''));
+    $('pack-file')?.addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file) return;
+      if (file.size > 64 * 1024) {
+        this.packFeedback('O arquivo passa de 64 KB.', 'error');
+        return;
+      }
+      this.installPack(await file.text());
+    });
+
+    document.querySelectorAll('[data-close]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.close;
+        if (target === 'inventory') this.closeInventory();
+        else if (target === 'chest') this.closeChest();
+        else if (target === 'pause') this.closePause();
+        else if (target === 'create') this.closeCreate();
+        else if (target === 'tutorial') this.closeTutorial();
+        else if (target === 'settings') this.closeSettings();
+        else if (target === 'character') this.closeCharacter();
+        else if (target === 'multiplayer') this.closeMultiplayer();
+        else if (target === 'code') this.closeCode();
+        else if (target === 'missions-modal') this.closeMissions();
+        else if (target === 'packs') this.closePacks();
+      });
+    });
+
+    $('btn-create-cancel')?.addEventListener('click', () => this.closeCreate());
+    $('btn-create-confirm')?.addEventListener('click', () => {
+      const data = {
+        name: $('world-name-input')?.value || '',
+        seed: $('world-seed-input')?.value || '',
+        mode: this.createMode,
+        rareKit: !!$('world-rare-kit')?.checked
+      };
+      this.actions.onCreateWorld?.(data);
+    });
+    $('btn-random-seed')?.addEventListener('click', () => {
+      if ($('world-seed-input')) $('world-seed-input').value = randomSeed();
+    });
+    $('btn-random-world')?.addEventListener('click', () => this.actions.onRandomWorld?.());
+    document.querySelectorAll('.mode-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        this.createMode = card.dataset.mode === 'creative' ? 'creative' : 'adventure';
+        document.querySelectorAll('.mode-card').forEach((other) => other.classList.toggle('active', other === card));
+      });
+    });
+
+    $('inventory-tabs')?.addEventListener('click', (event) => {
+      const tab = event.target.closest('[data-tab]');
+      if (!tab) return;
+      this.currentTab = tab.dataset.tab;
+      document.querySelectorAll('#inventory-tabs .tab').forEach((button) => button.classList.toggle('active', button === tab));
+      this.renderInventory();
+    });
+
+    $('inventory-search')?.addEventListener('input', (event) => {
+      this.inventoryQuery = String(event.target.value || '').slice(0, 32);
+      this.renderInventory();
+    });
+    $('inventory-sort')?.addEventListener('change', (event) => {
+      this.inventorySort = event.target.value;
+      this.renderInventory();
+    });
+    $('btn-inventory-favorites')?.addEventListener('click', () => {
+      this.favoritesOnly = !this.favoritesOnly;
+      $('btn-inventory-favorites')?.setAttribute('aria-pressed', this.favoritesOnly ? 'true' : 'false');
+      $('btn-inventory-favorites')?.classList.toggle('active', this.favoritesOnly);
+      this.renderInventory();
+    });
+    $('inventory-body')?.addEventListener('pointerdown', (event) => this.handleSlotDown(event));
+    $('inventory-body')?.addEventListener('contextmenu', (event) => this.handleSlotContext(event));
+    $('chest-modal')?.addEventListener('pointerdown', (event) => this.handleSlotDown(event));
+    $('chest-modal')?.addEventListener('contextmenu', (event) => this.handleSlotContext(event));
+    document.addEventListener('pointermove', (event) => this.updateGhost(event.clientX, event.clientY));
+    document.addEventListener('pointerup', (event) => this.handlePointerUp(event));
+    document.addEventListener('pointercancel', () => this.hideGhost());
+
+    $('hotbar')?.addEventListener('click', (event) => {
+      const slot = event.target.closest('.hotbar-slot');
+      if (slot) this.actions.onSelectHotbar?.(Number(slot.dataset.index));
+    });
+
+    $('btn-inventory')?.addEventListener('click', () => this.openInventory('backpack'));
+    $('btn-creative-palette')?.addEventListener('click', () => this.openCreativePalette());
+    const petChip = $('pet-chip');
+    if (petChip) {
+      petChip.addEventListener('click', () => this.actions.onPetToggle?.());
+      petChip.addEventListener('keydown', (event) => {
+        if (event.code === 'Enter' || event.code === 'Space') {
+          event.preventDefault();
+          this.actions.onPetToggle?.();
+        }
+      });
+    }
+
+    $('btn-pause')?.addEventListener('click', () => this.actions.onPause?.());
+    $('btn-resume')?.addEventListener('click', () => this.closePause());
+    $('btn-save')?.addEventListener('click', () => this.actions.onSave?.());
+    $('btn-pause-photo')?.addEventListener('click', () => this.actions.onPhoto?.());
+    $('btn-export')?.addEventListener('click', () => this.actions.onExport?.());
+    $('btn-world-code')?.addEventListener('click', () => this.actions.onWorldCode?.());
+    $('btn-pause-settings')?.addEventListener('click', () => this.openSettings());
+    $('btn-quit')?.addEventListener('click', () => this.actions.onQuit?.());
+
+    $('btn-sound')?.addEventListener('click', () => this.actions.onSoundToggle?.());
+    $('btn-fullscreen-menu')?.addEventListener('click', () => this.actions.onFullscreen?.());
+    $('btn-fullscreen')?.addEventListener('click', () => this.actions.onFullscreen?.());
+    $('btn-pause-fullscreen')?.addEventListener('click', () => this.actions.onFullscreen?.());
+    $('btn-third-person')?.addEventListener('click', () => this.actions.onThirdPerson?.());
+    for (const id of ['btn-view', 'btn-view-touch']) {
+      $(id)?.addEventListener('click', () => this.actions.onThirdPerson?.());
+    }
+    $('btn-photo')?.addEventListener('click', () => this.actions.onPhoto?.());
+    $('btn-photo-exit')?.addEventListener('click', () => this.closePhoto());
+    $('btn-photo-download')?.addEventListener('click', () => this.actions.onPhotoDownload?.());
+    $('btn-card-download')?.addEventListener('click', () => this.actions.onCardDownload?.());
+
+    $('btn-settings-done')?.addEventListener('click', () => this.closeSettings());
+    $('btn-multiplayer-close')?.addEventListener('click', () => this.closeMultiplayer());
+    $('btn-host-room')?.addEventListener('click', () => this.actions.onHostRoom?.());
+    $('btn-join-room')?.addEventListener('click', () => this.actions.onJoinRoom?.($('join-code')?.value || ''));
+    $('join-code')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') this.actions.onJoinRoom?.($('join-code')?.value || '');
+    });
+    $('btn-copy-invite')?.addEventListener('click', () => this.copyText(this.multiplayerState.invite, 'Convite copiado!'));
+    $('btn-leave-room')?.addEventListener('click', () => this.actions.onLeaveRoom?.());
+    $('btn-character-cancel')?.addEventListener('click', () => this.closeCharacter());
+    $('btn-character-save')?.addEventListener('click', () => this.saveCharacter());
+    $('character-name')?.addEventListener('input', (event) => {
+      if (!this.pendingCharacter) return;
+      this.pendingCharacter.name = String(event.target.value || '').slice(0, 16);
+      this.renderCharacterPreview();
+    });
+    $('character-presets')?.addEventListener('click', (event) => {
+      const card = event.target.closest('[data-character-preset]');
+      if (!card || !this.pendingCharacter) return;
+      const { name, weaponSkin, petType, petColor, petName } = this.pendingCharacter;
+      this.pendingCharacter = characterFromPreset(card.dataset.characterPreset);
+      this.pendingCharacter.name = name || this.pendingCharacter.name;
+      this.pendingCharacter.weaponSkin = weaponSkin || this.pendingCharacter.weaponSkin;
+      this.pendingCharacter.petType = petType || this.pendingCharacter.petType;
+      this.pendingCharacter.petColor = petColor || this.pendingCharacter.petColor;
+      this.pendingCharacter.petName = petName || this.pendingCharacter.petName;
+      this.renderCharacterEditor();
+    });
+    $('character-colors')?.addEventListener('click', (event) => {
+      const swatch = event.target.closest('[data-character-part]');
+      if (!swatch || !this.pendingCharacter) return;
+      const part = swatch.dataset.characterPart;
+      if (!['skin', 'shirt', 'pants', 'hair', 'shoes'].includes(part)) return;
+      this.pendingCharacter[part] = swatch.dataset.color;
+      this.pendingCharacter.custom = true;
+      this.pendingCharacter.preset = 'custom';
+      this.renderCharacterEditor();
+    });
+    const styleGroups = [
+      ['character-hair', 'hairStyle'],
+      ['character-outfits', 'outfit'],
+      ['character-hats', 'hat'],
+      ['character-glasses', 'glasses'],
+      ['character-backs', 'back']
+    ];
+    for (const [id, field] of styleGroups) {
+      $(id)?.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-style-value]');
+        if (!option || !this.pendingCharacter) return;
+        this.pendingCharacter[field] = option.dataset.styleValue;
+        this.pendingCharacter.custom = true;
+        this.pendingCharacter.preset = 'custom';
+        this.renderCharacterEditor();
+      });
+    }
+    $('btn-character-random')?.addEventListener('click', () => {
+      if (!this.pendingCharacter) return;
+      const pick = (list) => list[Math.floor(Math.random() * list.length)];
+      const preset = pick(CHARACTER_PRESETS);
+      const palette = {
+        skin: pick(COLOR_SWATCHES.skin),
+        shirt: pick(COLOR_SWATCHES.shirt),
+        pants: pick(COLOR_SWATCHES.pants),
+        hair: pick(COLOR_SWATCHES.hair),
+        shoes: pick(COLOR_SWATCHES.shoes)
+      };
+      const pet = pick(PETS);
+      this.pendingCharacter = {
+        ...this.pendingCharacter,
+        ...palette,
+        preset: 'custom',
+        custom: true,
+        hairStyle: pick(HAIR_STYLES).id,
+        outfit: pick(OUTFITS).id,
+        hat: pick(HATS).id,
+        glasses: pick(GLASSES).id,
+        back: pick(BACK_ITEMS).id,
+        accessory: preset.accessory,
+        petType: pet.id,
+        petColor: pick(PET_COLORS),
+        petName: pet.name
+      };
+      this.pendingCharacter.name = preset.name;
+      this.renderCharacterEditor();
+    });
+    $('pet-name')?.addEventListener('input', (event) => {
+      if (!this.pendingCharacter) return;
+      this.pendingCharacter.petName = String(event.target.value || '').slice(0, 14);
+      this.renderCharacterPreview();
+    });
+    $('weapon-skins')?.addEventListener('click', (event) => {
+      const skin = event.target.closest('[data-weapon-skin]');
+      if (!skin || !this.pendingCharacter) return;
+      this.pendingCharacter.weaponSkin = skin.dataset.weaponSkin;
+      this.renderCharacterEditor();
+    });
+    $('pet-types')?.addEventListener('click', (event) => {
+      const card = event.target.closest('[data-pet-type]');
+      if (!card || !this.pendingCharacter) return;
+      const pet = PETS.find((entry) => entry.id === card.dataset.petType);
+      if (!pet) return;
+      const previous = getPet(this.pendingCharacter);
+      this.pendingCharacter.petType = pet.id;
+      this.pendingCharacter.petColor = pet.color;
+      if (!this.pendingCharacter.petName || this.pendingCharacter.petName === previous.name) {
+        this.pendingCharacter.petName = pet.name;
+      }
+      this.renderCharacterEditor();
+    });
+    $('pet-colors')?.addEventListener('click', (event) => {
+      const swatch = event.target.closest('[data-pet-color]');
+      if (!swatch || !this.pendingCharacter) return;
+      this.pendingCharacter.petColor = swatch.dataset.petColor;
+      this.renderCharacterEditor();
+    });
+    $('setting-sound')?.addEventListener('change', (event) => this.actions.onSoundToggle?.(event.target.checked));
+    $('setting-sens')?.addEventListener('input', (event) => {
+      const value = Number(event.target.value) || 1;
+      if ($('sens-value')) $('sens-value').textContent = `${value.toFixed(1)}×`;
+      this.actions.onSensitivity?.(value);
+    });
+    $('setting-touchsens')?.addEventListener('input', (event) => {
+      const value = Number(event.target.value) || 1.6;
+      if ($('touchsens-value')) $('touchsens-value').textContent = `${value.toFixed(1)}×`;
+      this.actions.onTouchSensitivity?.(value);
+    });
+    $('setting-invert')?.addEventListener('change', (event) => this.actions.onInvertY?.(event.target.checked));
+    $('setting-fov')?.addEventListener('input', (event) => {
+      const value = Number(event.target.value) || 74;
+      if ($('fov-value')) $('fov-value').textContent = `${Math.round(value)}°`;
+      this.actions.onFov?.(value);
+    });
+    $('setting-viewbob')?.addEventListener('change', (event) => this.actions.onViewBob?.(event.target.checked));
+    $('setting-lefthand')?.addEventListener('change', (event) => this.actions.onLeftHand?.(event.target.checked));
+    $('setting-third')?.addEventListener('change', (event) => this.actions.onStartThird?.(event.target.checked));
+    $('setting-uiscale')?.addEventListener('change', (event) => this.actions.onUiScale?.(event.target.value));
+    $('setting-fps')?.addEventListener('change', (event) => this.actions.onShowFps?.(event.target.checked));
+    $('setting-particles')?.addEventListener('change', (event) => this.actions.onParticles?.(event.target.checked));
+    $('setting-clouds')?.addEventListener('change', (event) => this.actions.onClouds?.(event.target.checked));
+    $('setting-coords')?.addEventListener('change', (event) => this.actions.onCoordsToggle?.(event.target.checked));
+    $('setting-graphics')?.addEventListener('change', (event) => this.actions.onQuality?.(event.target.value));
+    $('btn-settings-reset')?.addEventListener('click', () => this.actions.onResetSettings?.());
+    $('btn-replay-tutorial')?.addEventListener('click', () => {
+      this.closeSettings();
+      this.openTutorial(true);
+    });
+
+    $('btn-tutorial-next')?.addEventListener('click', () => this.nextTutorial());
+    $('btn-tutorial-skip')?.addEventListener('click', () => this.closeTutorial());
+
+    $('btn-copy-code')?.addEventListener('click', () => this.copyCode());
+    $('btn-code-import-toggle')?.addEventListener('click', () => {
+      $('code-import-box')?.classList.toggle('hidden');
+      $('world-code-input')?.focus();
+    });
+    $('btn-code-import')?.addEventListener('click', () => {
+      const code = $('world-code-input')?.value || '';
+      this.actions.onImportCode?.(code);
+    });
+  }
+
+  setActions(actions) {
+    this.actions = { ...this.actions, ...actions };
+  }
+
+  setState(patch) {
+    this.state = { ...this.state, ...patch };
+  }
+
+  applySettings(settings) {
+    this.settings = { ...this.settings, ...settings };
+    if ($('setting-sound')) $('setting-sound').checked = !!this.settings.sound;
+    if ($('setting-sens')) $('setting-sens').value = String(this.settings.sensitivity || 1);
+    if ($('sens-value')) $('sens-value').textContent = `${Number(this.settings.sensitivity || 1).toFixed(1)}×`;
+    if ($('setting-touchsens')) $('setting-touchsens').value = String(this.settings.touchSensitivity || 1.6);
+    if ($('touchsens-value')) $('touchsens-value').textContent = `${Number(this.settings.touchSensitivity || 1.6).toFixed(1)}×`;
+    if ($('setting-invert')) $('setting-invert').checked = !!this.settings.invertY;
+    if ($('setting-fov')) $('setting-fov').value = String(this.settings.fov || 74);
+    if ($('fov-value')) $('fov-value').textContent = `${Math.round(Number(this.settings.fov || 74))}°`;
+    if ($('setting-viewbob')) $('setting-viewbob').checked = this.settings.viewBob !== false;
+    if ($('setting-lefthand')) $('setting-lefthand').checked = !!this.settings.leftHand;
+    if ($('setting-third')) $('setting-third').checked = !!this.settings.startThird;
+    if ($('setting-uiscale')) $('setting-uiscale').value = this.settings.uiScale || 'normal';
+    if ($('setting-fps')) $('setting-fps').checked = !!this.settings.showFps;
+    if ($('setting-particles')) $('setting-particles').checked = this.settings.particles !== false;
+    if ($('setting-clouds')) $('setting-clouds').checked = this.settings.clouds !== false;
+    if ($('setting-coords')) $('setting-coords').checked = !!this.settings.showCoords;
+    if ($('setting-graphics')) $('setting-graphics').value = this.settings.quality || 'auto';
+    if (this.settings.character) this.character = normalizeCharacter(this.settings.character);
+    if ($('btn-character')) $('btn-character').title = `Personagem: ${this.character.name}`;
+    this.setSound(this.settings.sound);
+    this.setUiScale(this.settings.uiScale);
+    this.setLeftHand(this.settings.leftHand);
+  }
+
+  setSound(enabled) {
+    const button = $('btn-sound');
+    if (button) button.classList.toggle('muted', !enabled);
+  }
+
+  renderMenu(worlds, daily) {
+    const grid = $('worlds-grid');
+    if (!grid) return;
+    grid.textContent = '';
+    const dailyInfo = daily || getDaily();
+    const dailyCard = this.buildDailyCard(dailyInfo);
+    grid.appendChild(dailyCard);
+
+    for (const world of worlds) {
+      grid.appendChild(this.buildWorldCard(world));
+    }
+
+    const empty = $('worlds-empty');
+    if (empty) empty.classList.toggle('hidden', worlds.length > 0);
+    if ($('btn-daily')) $('btn-daily').title = `Seed de hoje: ${dailyInfo.seed}`;
+    this.renderPrebuiltWorlds();
+    this.renderCommunityWorlds();
+    this.renderCityWorlds();
+    this.renderRanking(worlds);
+  }
+
+  renderPrebuiltWorlds() {
+    const grid = $('prebuilt-grid');
+    if (!grid) return;
+    grid.textContent = '';
+    for (const entry of PREBUILT_WORLDS) {
+      const card = el('article', 'prebuilt-card');
+      card.style.setProperty('--accent', entry.accent);
+      const art = el('div', 'prebuilt-art');
+      art.appendChild(el('span', 'prebuilt-emoji', entry.emoji));
+      const body = el('div', 'prebuilt-body');
+      body.appendChild(el('h4', '', entry.name));
+      body.appendChild(el('p', '', entry.desc));
+      const foot = el('div', 'prebuilt-foot');
+      foot.appendChild(el('span', 'world-stat', entry.mode === 'creative' ? 'Criativo' : 'Aventura Cozy'));
+      if (entry.rareKit) foot.appendChild(el('span', 'world-stat rare-kit-chip', 'Kit de Raros'));
+      const play = el('button', 'primary-btn', 'Jogar');
+      play.type = 'button';
+      play.addEventListener('click', () => this.actions.onPrebuiltWorld?.(entry));
+      foot.appendChild(play);
+      body.appendChild(foot);
+      card.appendChild(art);
+      card.appendChild(body);
+      grid.appendChild(card);
+    }
+  }
+
+  renderCommunityWorlds() {
+    this.renderShowcaseWorlds('community-grid', COMMUNITY_WORLDS, 'onCommunityWorld', 'Visitar');
+  }
+
+  renderCityWorlds() {
+    this.renderShowcaseWorlds('city-grid', BRAZIL_WORLDS, 'onCityWorld', 'Explorar', true);
+  }
+
+  renderShowcaseWorlds(gridId, entries, actionName, cta, city = false) {
+    const grid = $(gridId);
+    if (!grid) return;
+    grid.textContent = '';
+    for (const entry of entries) {
+      const card = el('article', `community-card${city ? ' city-card' : ''}`);
+      card.style.setProperty('--accent', entry.accent);
+      const art = el('div', `community-art${city ? ' city-art' : ''}`);
+      art.appendChild(el('span', 'community-emoji', entry.emoji));
+      if (city) art.appendChild(el('span', 'city-state', entry.state));
+      const body = el('div', 'community-body');
+      const top = el('div', 'community-top');
+      top.appendChild(el('span', 'community-creator', city ? `${entry.city} · ${entry.state}` : `por ${entry.creator}`));
+      top.appendChild(el('span', 'community-likes', `♥ ${entry.likes}`));
+      body.appendChild(top);
+      body.appendChild(el('h4', '', entry.name));
+      body.appendChild(el('p', '', entry.desc));
+      const foot = el('div', 'community-foot');
+      foot.appendChild(el('span', 'world-stat', entry.mode === 'creative' ? 'Criativo' : 'Aventura Cozy'));
+      if (entry.rareKit) foot.appendChild(el('span', 'world-stat rare-kit-chip', 'Kit de Raros'));
+      const play = el('button', 'primary-btn', cta);
+      play.type = 'button';
+      play.addEventListener('click', () => this.actions[actionName]?.(entry));
+      foot.appendChild(play);
+      body.appendChild(foot);
+      card.appendChild(art);
+      card.appendChild(body);
+      grid.appendChild(card);
+    }
+  }
+
+  renderRanking(worlds) {
+    const section = $('ranking-section');
+    const list = $('ranking-list');
+    if (!section || !list) return;
+    const ranked = [...(worlds || [])].sort((a, b) => (b.playtime || 0) - (a.playtime || 0)).slice(0, 5);
+    section.classList.toggle('hidden', ranked.length === 0);
+    list.textContent = '';
+    ranked.forEach((world, index) => {
+      const row = el('button', 'ranking-row');
+      row.type = 'button';
+      row.addEventListener('click', () => this.actions.onOpenWorld?.(world));
+      const medal = el('span', `ranking-medal rank-${index + 1}`, ['✦', '◆', '●', '4', '5'][index]);
+      const info = el('span', 'ranking-info');
+      info.appendChild(el('strong', '', world.name || 'Mundo'));
+      info.appendChild(el('small', '', `${formatPlaytime(world.playtime)} explorando`));
+      row.appendChild(medal);
+      row.appendChild(info);
+      row.appendChild(el('span', 'ranking-time', formatPlaytime(world.playtime)));
+      list.appendChild(row);
+    });
+  }
+
+  buildDailyCard(daily) {
+    const card = el('article', 'world-card daily-card');
+    const thumb = el('div', 'world-thumb');
+    const palette = thumbnailFor(daily.seed);
+    thumb.style.setProperty('--c1', palette.c1);
+    thumb.style.setProperty('--c2', palette.c2);
+    thumb.style.setProperty('--c3', palette.c3);
+    const badge = el('span', 'world-thumb-badge', 'Mundo do Dia');
+    thumb.appendChild(badge);
+    const body = el('div', 'world-card-body');
+    const title = el('div', 'world-card-title');
+    const titleWrap = el('div');
+    titleWrap.appendChild(el('h4', '', 'Mundo do Dia'));
+    titleWrap.appendChild(el('small', '', daily.seed));
+    title.appendChild(titleWrap);
+    body.appendChild(title);
+    const stats = el('div', 'world-card-stats');
+    stats.appendChild(el('span', 'world-stat', 'Aventura Cozy'));
+    stats.appendChild(el('span', 'world-stat', 'Mesmo mundo para todos'));
+    body.appendChild(stats);
+    const actions = el('div', 'world-card-actions');
+    const play = el('button', 'primary-btn', 'Jogar o mundo de hoje');
+    play.type = 'button';
+    play.addEventListener('click', () => this.actions.onDaily?.());
+    actions.appendChild(play);
+    body.appendChild(actions);
+    card.appendChild(thumb);
+    card.appendChild(body);
+    return card;
+  }
+
+  buildWorldCard(world) {
+    const card = el('article', 'world-card');
+    const thumb = el('div', 'world-thumb');
+    const palette = world.thumb || thumbnailFor(world.seed);
+    thumb.style.setProperty('--c1', palette.c1);
+    thumb.style.setProperty('--c2', palette.c2);
+    thumb.style.setProperty('--c3', palette.c3);
+    const badge = el('span', 'world-thumb-badge', world.mode === 'creative' ? 'Criativo' : 'Aventura Cozy');
+    thumb.appendChild(badge);
+    const body = el('div', 'world-card-body');
+    const title = el('div', 'world-card-title');
+    const titleWrap = el('div');
+    titleWrap.appendChild(el('h4', '', world.name || 'Mundo'));
+    titleWrap.appendChild(el('small', '', `seed ${world.seed || 'lumi'}`));
+    title.appendChild(titleWrap);
+    body.appendChild(title);
+    const stats = el('div', 'world-card-stats');
+    stats.appendChild(el('span', 'world-stat', `${formatPlaytime(world.playtime)} jogados`));
+    stats.appendChild(el('span', 'world-stat', `${world.rare || 0} raros`));
+    body.appendChild(stats);
+    const actions = el('div', 'world-card-actions');
+    const play = el('button', 'primary-btn', 'Jogar');
+    play.type = 'button';
+    play.addEventListener('click', () => this.actions.onPlayWorld?.(world.id));
+    const exportBtn = el('button', 'icon-action', '↓');
+    exportBtn.type = 'button';
+    exportBtn.title = 'Exportar mundo';
+    exportBtn.setAttribute('aria-label', `Exportar ${world.name}`);
+    exportBtn.addEventListener('click', () => this.actions.onExportWorld?.(world.id));
+    const deleteBtn = el('button', 'icon-action', '×');
+    deleteBtn.type = 'button';
+    deleteBtn.title = 'Apagar mundo';
+    deleteBtn.setAttribute('aria-label', `Apagar ${world.name}`);
+    deleteBtn.addEventListener('click', () => this.actions.onDeleteWorld?.(world.id));
+    actions.appendChild(play);
+    actions.appendChild(exportBtn);
+    actions.appendChild(deleteBtn);
+    body.appendChild(actions);
+    card.appendChild(thumb);
+    card.appendChild(body);
+    return card;
+  }
+
+  showMenu() {
+    $('menu')?.classList.remove('hidden');
+    $('hud')?.classList.add('hidden');
+    $('loading')?.classList.add('hidden');
+    $('photo-bar')?.classList.add('hidden');
+    $('rotate-hint')?.classList.add('hidden');
+    document.body.classList.remove('in-game');
+    this.hideAllModals();
+    document.body.classList.remove('photo-mode');
+  }
+
+  hideMenu() {
+    $('menu')?.classList.add('hidden');
+  }
+
+  showLoading(title, text) {
+    $('loading')?.classList.remove('hidden');
+    if ($('loading-title')) $('loading-title').textContent = title || 'Preparando seu mundo';
+    if ($('loading-text')) $('loading-text').textContent = text || 'Plantando árvores arco-íris…';
+    if ($('loading-bar')) $('loading-bar').style.width = '4%';
+  }
+
+  setLoading(progress, text) {
+    if ($('loading-bar')) $('loading-bar').style.width = `${Math.max(4, Math.min(100, progress))}%`;
+    if (text && $('loading-text')) $('loading-text').textContent = text;
+  }
+
+  hideLoading() {
+    $('loading')?.classList.add('hidden');
+  }
+
+  showHUD() {
+    $('hud')?.classList.remove('hidden');
+    document.body.classList.add('in-game');
+  }
+
+  hideHUD() {
+    $('hud')?.classList.add('hidden');
+  }
+
+  renderHotbar(inventory, creative) {
+    const hotbar = $('hotbar');
+    if (!hotbar) return;
+    hotbar.textContent = '';
+    for (let i = 0; i < 9; i++) {
+      const slot = inventory?.hotbar?.[i] || null;
+      const button = el('button', 'hotbar-slot');
+      button.type = 'button';
+      button.dataset.index = String(i);
+      button.setAttribute('aria-label', slot ? `Slot ${i + 1}: ${getItem(slot.id).name} x${slot.count}` : `Slot ${i + 1} vazio`);
+      if (i === inventory?.selected) button.classList.add('selected');
+      if (slot) {
+        const rarity = getRarity(slot.id);
+        button.style.setProperty('--rarity', rarity.color);
+        const img = el('img');
+        img.src = getItemIcon(slot.id);
+        img.alt = getItem(slot.id).name;
+        button.appendChild(img);
+        if (slot.count > 1) button.appendChild(el('span', 'slot-count', String(slot.count)));
+        button.title = `${getItem(slot.id).name}${creative ? ' (infinito)' : ''}`;
+      }
+      button.appendChild(el('span', 'slot-key', String(i + 1)));
+      hotbar.appendChild(button);
+    }
+    const selected = inventory?.hotbar?.[inventory?.selected] || null;
+    const hand = $('hand');
+    const handItem = $('hand-item');
+    if (hand && handItem) {
+      hand.classList.toggle('hidden', !selected || this.thirdPerson);
+      if (selected) {
+        const itemId = String(selected.id);
+        const item = getItem(itemId);
+        handItem.src = getItemIcon(itemId);
+        handItem.alt = item.name;
+        hand.dataset.item = itemId;
+        hand.dataset.category = item.category || 'material';
+        hand.dataset.tool = itemId.endsWith('_pickaxe') ? 'pickaxe' : item.weapon?.kind || '';
+      } else {
+        delete hand.dataset.item;
+        delete hand.dataset.category;
+        delete hand.dataset.tool;
+      }
+    }
+    this.showItemLabel(selected, creative);
+  }
+
+  showItemLabel(slot, creative = false) {
+    const label = $('item-label');
+    if (!label) return;
+    const id = slot ? String(slot.id) : '';
+    if (id === this.lastItemLabelId) return;
+    this.lastItemLabelId = id;
+    clearTimeout(this.itemLabelTimer);
+    if (!slot) {
+      label.classList.remove('visible');
+      label.textContent = '';
+      return;
+    }
+    const item = getItem(id);
+    const countLabel = slot.count > 1 ? ` ×${slot.count}` : '';
+    label.textContent = `${item.name}${countLabel}${creative ? ' ∞' : ''}`;
+    label.style.setProperty('--rarity', getRarity(id).color);
+    label.classList.add('visible');
+    this.itemLabelTimer = setTimeout(() => label.classList.remove('visible'), 1600);
+  }
+
+  swingHand(kind = 'use') {
+    const hand = $('hand');
+    if (!hand) return;
+    hand.classList.remove('swing');
+    hand.dataset.swing = kind;
+    void hand.offsetWidth;
+    hand.classList.add('swing');
+  }
+
+  setLandingProgress(progress) {
+    const hint = $('landing-hint');
+    const bar = $('landing-progress');
+    if (!hint || !bar) return;
+    const value = Math.max(0, Math.min(1, progress));
+    hint.classList.toggle('hidden', value <= 0.001);
+    bar.style.width = `${value * 100}%`;
+  }
+
+  setMiningProgress(progress) {
+    const crosshair = $('crosshair');
+    if (!crosshair) return;
+    const value = Math.max(0, Math.min(1, Number(progress) || 0));
+    crosshair.classList.toggle('mining', value > 0.002);
+    crosshair.style.setProperty('--mining', value.toFixed(3));
+  }
+
+  setTargetInfo(info) {
+    const chip = $('target-chip');
+    if (!chip) return;
+    if (!info) {
+      chip.classList.add('hidden');
+      return;
+    }
+    chip.classList.remove('hidden');
+    if ($('target-name')) $('target-name').textContent = info.name || 'Bloco';
+    if ($('target-action')) $('target-action').textContent = info.action || '';
+  }
+
+  setNpcPrompt(npc) {
+    const hint = $('npc-hint');
+    if (!hint) return;
+    if (!npc) {
+      hint.classList.add('hidden');
+      return;
+    }
+    hint.classList.remove('hidden');
+    if ($('npc-name')) $('npc-name').textContent = npc.name;
+    if ($('npc-line')) $('npc-line').textContent = npc.line || 'Vamos explorar juntos?';
+  }
+
+  setThirdPerson(active) {
+    this.thirdPerson = !!active;
+    const hand = $('hand');
+    const selected = this.state?.inventory?.hotbar?.[this.state?.inventory?.selected] || null;
+    if (hand) hand.classList.toggle('hidden', this.thirdPerson || !selected);
+    const label = this.thirdPerson ? '3ª' : '1ª';
+    const title = this.thirdPerson ? 'Voltar para primeira pessoa (F5)' : 'Ver em terceira pessoa (F5)';
+    for (const id of ['btn-view', 'btn-view-touch']) {
+      const button = $(id);
+      if (!button) continue;
+      button.setAttribute('aria-pressed', this.thirdPerson ? 'true' : 'false');
+      button.title = title;
+      button.setAttribute('aria-label', title);
+      const text = button.querySelector('.view-btn-label') || button.querySelector('span');
+      if (text) text.textContent = label;
+    }
+    if ($('btn-third-person')) {
+      $('btn-third-person').textContent = this.thirdPerson ? 'Visão 1ª pessoa (F5)' : 'Visão 3ª pessoa (F5)';
+      $('btn-third-person').classList.toggle('active', this.thirdPerson);
+    }
+  }
+
+  setUiScale(scale) {
+    const value = ['compact', 'normal', 'large'].includes(scale) ? scale : 'normal';
+    document.body.dataset.uiScale = value;
+  }
+
+  setLeftHand(enabled) {
+    document.body.dataset.leftHand = enabled ? 'true' : 'false';
+  }
+
+  setFps(value, show) {
+    const chip = $('fps-chip');
+    if (!chip) return;
+    const fps = Math.max(0, Math.round(Number(value) || 0));
+    chip.classList.toggle('hidden', !show);
+    chip.textContent = `${fps} FPS`;
+    chip.classList.toggle('low', show && fps > 0 && fps < 40);
+    chip.classList.toggle('critical', show && fps > 0 && fps < 24);
+  }
+
+  flashRotateHint(ms = 6500) {
+    const hint = $('rotate-hint');
+    if (!hint || !document.body.classList.contains('touch-mode')) return;
+    hint.classList.remove('hidden');
+    clearTimeout(this.rotateHintTimer);
+    this.rotateHintTimer = setTimeout(() => hint.classList.add('hidden'), ms);
+  }
+
+  setFullscreen(active) {
+    for (const id of ['btn-fullscreen-menu', 'btn-fullscreen', 'btn-pause-fullscreen']) {
+      const button = $(id);
+      if (!button) continue;
+      button.title = active ? 'Sair da tela cheia (F11)' : 'Entrar em tela cheia (F11)';
+      button.setAttribute('aria-label', active ? 'Sair da tela cheia' : 'Entrar em tela cheia');
+      button.classList.toggle('active', !!active);
+    }
+  }
+
+  renderHUD(data) {
+    if (!data) return;
+    if ($('hud-world-name')) $('hud-world-name').textContent = data.worldName || 'Mundo';
+    if ($('hud-biome')) $('hud-biome').textContent = data.biome || 'Prado Musgo';
+    if ($('hud-lumi')) $('hud-lumi').textContent = String(data.lumi || 0);
+    if ($('clock-text')) $('clock-text').textContent = data.clock || 'Manhã';
+    if ($('clock-icon')) $('clock-icon').textContent = data.clockIcon || '☀';
+    if ($('quest-text')) $('quest-text').textContent = data.quest || 'Colete 5 Fragmentos de Lumi';
+    if ($('quest-progress')) $('quest-progress').textContent = data.questProgress || '0/5';
+    const buffs = $('buffs');
+    if (buffs) {
+      buffs.textContent = '';
+      for (const buff of data.buffs || []) {
+        buffs.appendChild(el('span', 'buff', `${buff.label} · ${buff.seconds}s`));
+      }
+    }
+    const coords = $('hud-coords');
+    if (coords) {
+      const show = data.showCoords;
+      coords.classList.toggle('hidden', !show);
+      if (show) coords.textContent = `X ${Math.round(data.coords?.x || 0)} · Y ${Math.round(data.coords?.y || 0)} · Z ${Math.round(data.coords?.z || 0)}`;
+    }
+    const petChip = $('pet-chip');
+    if (petChip) {
+      petChip.classList.toggle('hidden', !data.hasPet);
+      if ($('pet-chip-name')) $('pet-chip-name').textContent = data.petName || 'Lumi';
+      const hearts = Math.max(0, Math.min(5, Number(data.petHearts) || 0));
+      if ($('pet-chip-hearts')) $('pet-chip-hearts').textContent = '♥'.repeat(hearts) + '♡'.repeat(5 - hearts);
+      if ($('pet-chip-mode')) $('pet-chip-mode').textContent = data.petMode === 'stay' ? 'Fica' : 'Segue';
+      petChip.classList.toggle('staying', data.petMode === 'stay');
+    }
+  }
+
+  showHint(text, duration = 4200) {
+    const hint = $('hint');
+    if (!hint) return;
+    hint.textContent = text;
+    hint.style.opacity = '1';
+    clearTimeout(this.hintTimer);
+    this.hintTimer = setTimeout(() => {
+      hint.style.opacity = '0';
+    }, duration);
+  }
+
+  toast({ title, body, rarity = 'comum', icon = null }) {
+    const container = $('toasts');
+    if (!container) return;
+    while (container.children.length >= 4) container.firstElementChild?.remove();
+    const tone = RARITY[rarity] || RARITY.comum;
+    const toast = el('div', 'toast');
+    toast.style.setProperty('--rarity', tone.color);
+    const head = el('div', 'toast-head');
+    if (icon) {
+      const iconBox = el('span', 'toast-icon');
+      const img = el('img');
+      img.src = icon;
+      img.alt = '';
+      iconBox.appendChild(img);
+      head.appendChild(iconBox);
+    }
+    head.appendChild(el('span', 'toast-title', title || 'Descoberta'));
+    toast.appendChild(head);
+    if (body) toast.appendChild(el('div', 'toast-body', body));
+    if (rarity && rarity !== 'comum') toast.appendChild(el('span', 'toast-rarity', `${tone.label} · ${'★'.repeat(tone.stars)}`));
+    container.appendChild(toast);
+    const timer = setTimeout(() => {
+      toast.classList.add('out');
+      setTimeout(() => toast.remove(), 220);
+      this.toastTimers.delete(timer);
+    }, 3800);
+    this.toastTimers.add(timer);
+  }
+
+  showPickup(itemId, count = 1) {
+    const feed = $('pickup-feed');
+    if (!feed) return;
+    const item = getItem(itemId);
+    if (!item) return;
+    while (feed.children.length >= 5) feed.firstElementChild?.remove();
+    const chip = el('div', 'pickup-chip');
+    const img = el('img');
+    img.src = getItemIcon(itemId);
+    img.alt = '';
+    chip.appendChild(img);
+    chip.appendChild(el('strong', '', `+${count} ${item.name}`));
+    feed.appendChild(chip);
+    setTimeout(() => chip.remove(), 2100);
+  }
+
+  openLayer(modalId) {
+    $('modal-layer')?.classList.remove('hidden');
+    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal', 'missions-modal', 'packs-modal'].forEach((id) => {
+      $(id)?.classList.toggle('hidden', id !== modalId);
+    });
+    if (!this.modalOpen) {
+      this.modalOpen = true;
+      this.actions.onModalState?.(true);
+    }
+  }
+
+  hideLayer() {
+    $('modal-layer')?.classList.add('hidden');
+    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal', 'missions-modal', 'packs-modal'].forEach((id) => {
+      $(id)?.classList.add('hidden');
+    });
+    this.inventoryOpen = false;
+    this.chestOpen = false;
+    this.pauseOpen = false;
+    if (this.modalOpen) {
+      this.modalOpen = false;
+      this.actions.onModalState?.(false);
+    }
+  }
+
+  hideAllModals() {
+    this.returnHeld(true);
+    this.hideGhost();
+    this.hideLayer();
+    this.toggleChat(false);
+  }
+
+  openInventory(tab = 'backpack') {
+    this.currentTab = tab;
+    document.querySelectorAll('#inventory-tabs .tab').forEach((button) => {
+      button.classList.toggle('active', button.dataset.tab === tab);
+    });
+    this.inventoryOpen = true;
+    this.chestOpen = false;
+    this.pauseOpen = false;
+    this.openLayer('inventory-modal');
+    this.renderInventory();
+  }
+
+  closeInventory() {
+    if (!this.returnHeld()) return;
+    this.inventoryOpen = false;
+    this.hideLayer();
+    this.actions.onInventoryChanged?.();
+  }
+
+  openChest(items, key, inventory) {
+    this.chest = { items, key };
+    this.state.inventory = inventory;
+    this.inventoryOpen = false;
+    this.chestOpen = true;
+    this.pauseOpen = false;
+    this.openLayer('chest-modal');
+    this.renderChest();
+  }
+
+  closeChest() {
+    if (!this.returnHeld()) return;
+    const key = this.chest?.key;
+    const items = (this.chest?.items || []).map((slot) => (slot ? { ...slot } : null));
+    this.chestOpen = false;
+    this.chest = null;
+    this.hideLayer();
+    this.actions.onChestClose?.(key, items);
+    this.actions.onInventoryChanged?.();
+  }
+
+  openPause(info = {}) {
+    this.pauseOpen = true;
+    this.inventoryOpen = false;
+    this.chestOpen = false;
+    if ($('pause-world-name')) $('pause-world-name').textContent = info.name || this.state.worldName || 'Mundo';
+    if ($('pause-world-meta')) $('pause-world-meta').textContent = `seed ${info.seed || this.state.seed || 'lumi'} · ${formatPlaytime(info.playtime || 0)}`;
+    this.openLayer('pause-modal');
+  }
+
+  closePause() {
+    this.pauseOpen = false;
+    this.hideLayer();
+    this.actions.onResume?.();
+  }
+
+  openCreate() {
+    if ($('world-name-input')) $('world-name-input').value = '';
+    if ($('world-seed-input')) $('world-seed-input').value = '';
+    this.createMode = 'adventure';
+    document.querySelectorAll('.mode-card').forEach((card) => card.classList.toggle('active', card.dataset.mode === 'adventure'));
+    this.openLayer('create-modal');
+    setTimeout(() => $('world-name-input')?.focus(), 60);
+  }
+
+  closeCreate() {
+    this.hideLayer();
+  }
+
+  openMultiplayer() {
+    this.multiplayerFromPause = !!this.pauseOpen;
+    this.renderMultiplayer();
+    this.openLayer('multiplayer-modal');
+  }
+
+  closeMultiplayer(force = false) {
+    const fromPause = this.multiplayerFromPause && !force;
+    this.multiplayerFromPause = false;
+    if (fromPause) {
+      this.openLayer('pause-modal');
+      return;
+    }
+    this.hideLayer();
+  }
+
+  setMultiplayerState(patch = {}) {
+    this.multiplayerState = { ...this.multiplayerState, ...patch };
+    this.setChatAvailable(this.multiplayerState.status === 'connected');
+    this.renderMultiplayer();
+  }
+
+  setChatAvailable(available) {
+    this.chatAvailable = !!available;
+    $('btn-quick-chat')?.classList.toggle('hidden', !this.chatAvailable);
+    if (!this.chatAvailable) this.toggleChat(false);
+  }
+
+  toggleChat(force) {
+    const open = typeof force === 'boolean' ? force : !this.chatOpen;
+    if (open && !this.chatAvailable) return;
+    this.chatOpen = open;
+    $('quick-chat')?.classList.toggle('hidden', !open);
+    $('btn-quick-chat')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) this.renderChatPhrases();
+  }
+
+  renderChatPhrases() {
+    const wrap = $('chat-phrases');
+    if (!wrap || wrap.childElementCount) return;
+    for (const phrase of CHAT_PHRASES) {
+      const button = el('button', 'chat-phrase');
+      button.type = 'button';
+      button.dataset.chatId = phrase.id;
+      button.appendChild(el('span', 'chat-glyph', phrase.glyph));
+      button.appendChild(el('span', '', phrase.text));
+      wrap.appendChild(button);
+    }
+  }
+
+  pushChatMessage(entry = {}) {
+    const phrase = getChatPhrase(entry.id);
+    if (!phrase) return;
+    const feed = $('chat-feed');
+    if (!feed) return;
+    const line = el('div', 'chat-line');
+    if (entry.self) line.classList.add('self');
+    line.appendChild(el('strong', 'chat-name', String(entry.name || 'Explorador').slice(0, 16)));
+    line.appendChild(el('span', 'chat-text', `${phrase.glyph} ${phrase.text}`));
+    feed.appendChild(line);
+    while (feed.childElementCount > 6) feed.firstElementChild?.remove();
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  setJoinCode(code) {
+    if ($('join-code')) $('join-code').value = String(code || '').toUpperCase().slice(0, 5);
+  }
+
+  renderMultiplayer() {
+    const state = this.multiplayerState;
+    const status = $('multiplayer-status');
+    const text = $('multiplayer-status-text');
+    if (text) text.textContent = state.message || 'Crie uma sala ou entre com um convite.';
+    if (status) {
+      status.classList.toggle('busy', ['hosting', 'joining', 'reconnecting'].includes(state.status));
+      status.classList.toggle('error', state.status === 'error');
+      status.classList.toggle('ok', state.status === 'connected');
+    }
+    const room = $('room-box');
+    if (room) room.classList.toggle('hidden', !state.code);
+    if ($('room-code')) $('room-code').textContent = state.code || '-----';
+    const host = $('btn-host-room');
+    if (host) {
+      host.disabled = !!state.code;
+      host.textContent = state.code ? 'Sala criada' : 'Criar sala';
+    }
+    const join = $('btn-join-room');
+    if (join) join.disabled = !!state.code;
+    if ($('btn-leave-room')) $('btn-leave-room').classList.toggle('hidden', !state.code);
+    const players = Array.isArray(state.players) ? state.players : [];
+    const list = $('room-players');
+    if (list) {
+      list.textContent = '';
+      if (!players.length) {
+        list.appendChild(el('span', 'room-player empty', 'Só você por enquanto.'));
+      } else {
+        for (const player of players) {
+          const chip = el('span', 'room-player');
+          chip.appendChild(el('i', 'player-dot'));
+          chip.appendChild(el('span', '', player.name || 'Explorador'));
+          if (player.id === state.selfId) chip.appendChild(el('small', '', 'você'));
+          list.appendChild(chip);
+        }
+      }
+    }
+    const hudPlayers = $('hud-players');
+    if (hudPlayers) {
+      const online = Math.max(1, players.length);
+      hudPlayers.classList.remove('hidden');
+      hudPlayers.textContent = `◈ ${online} online`;
+      hudPlayers.title = players.length ? players.map((player) => player.name || 'Explorador').join(' · ') : 'Você está explorando sozinho';
+    }
+  }
+
+  openCharacter() {
+    this.pendingCharacter = normalizeCharacter(this.character);
+    this.renderCharacterEditor();
+    this.openLayer('character-modal');
+    setTimeout(() => $('character-name')?.focus(), 60);
+  }
+
+  closeCharacter() {
+    this.pendingCharacter = null;
+    this.hideLayer();
+  }
+
+  renderCharacterEditor() {
+    const character = this.pendingCharacter || this.character;
+    if ($('character-name')) $('character-name').value = character.name;
+    if ($('pet-name')) $('pet-name').value = character.petName || '';
+
+    const presets = $('character-presets');
+    if (presets) {
+      presets.textContent = '';
+      for (const preset of CHARACTER_PRESETS) {
+        const card = el('button', 'character-preset');
+        card.type = 'button';
+        card.dataset.characterPreset = preset.id;
+        card.classList.toggle('active', !character.custom && character.preset === preset.id);
+        const chips = el('span', 'preset-colors');
+        for (const color of [preset.hair, preset.skin, preset.shirt, preset.pants, preset.shoes]) {
+          const chip = el('i');
+          chip.style.background = color;
+          chips.appendChild(chip);
+        }
+        card.appendChild(chips);
+        card.appendChild(el('strong', '', preset.name));
+        card.appendChild(el('small', 'preset-style', `${OUTFITS.find((entry) => entry.id === preset.outfit)?.name || 'Traje'} · ${HAIR_STYLES.find((entry) => entry.id === preset.hairStyle)?.name || 'Cabelo'}`));
+        presets.appendChild(card);
+      }
+    }
+
+    const styleConfig = [
+      ['character-hair', 'hairStyle', HAIR_STYLES],
+      ['character-outfits', 'outfit', OUTFITS],
+      ['character-hats', 'hat', HATS],
+      ['character-glasses', 'glasses', GLASSES],
+      ['character-backs', 'back', BACK_ITEMS]
+    ];
+    for (const [id, field, list] of styleConfig) {
+      const container = $(id);
+      if (!container) continue;
+      container.textContent = '';
+      for (const option of list) {
+        const button = el('button', 'style-option');
+        button.type = 'button';
+        button.dataset.styleValue = option.id;
+        button.classList.toggle('active', character[field] === option.id);
+        button.setAttribute('aria-label', option.name);
+        button.title = option.name;
+        button.appendChild(el('i', `style-icon style-${field}-${option.id}`));
+        button.appendChild(el('span', '', option.name));
+        container.appendChild(button);
+      }
+    }
+
+    const colors = $('character-colors');
+    if (colors) {
+      colors.textContent = '';
+      const labels = { skin: 'Pele', shirt: 'Camisa', pants: 'Calça', hair: 'Cabelo', shoes: 'Sapatos' };
+      for (const part of ['skin', 'shirt', 'pants', 'hair', 'shoes']) {
+        const row = el('div', 'color-row');
+        row.appendChild(el('span', 'color-label', labels[part]));
+        const swatches = el('div', 'color-swatches');
+        for (const color of COLOR_SWATCHES[part]) {
+          const swatch = el('button', 'color-swatch');
+          swatch.type = 'button';
+          swatch.style.setProperty('--swatch', color);
+          swatch.dataset.characterPart = part;
+          swatch.dataset.color = color;
+          swatch.title = `${labels[part]}: ${color}`;
+          swatch.setAttribute('aria-label', `${labels[part]} ${color}`);
+          swatch.classList.toggle('active', character[part] === color);
+          swatches.appendChild(swatch);
+        }
+        row.appendChild(swatches);
+        colors.appendChild(row);
+      }
+    }
+
+    const petTypes = $('pet-types');
+    if (petTypes) {
+      petTypes.textContent = '';
+      for (const pet of PETS) {
+        const button = el('button', 'pet-type');
+        button.type = 'button';
+        button.dataset.petType = pet.id;
+        button.classList.toggle('active', character.petType === pet.id);
+        button.appendChild(el('span', 'pet-type-icon', pet.icon));
+        button.appendChild(el('span', '', pet.name));
+        petTypes.appendChild(button);
+      }
+    }
+
+    const petColors = $('pet-colors');
+    if (petColors) {
+      petColors.textContent = '';
+      for (const color of PET_COLORS) {
+        const swatch = el('button', 'color-swatch pet-color');
+        swatch.type = 'button';
+        swatch.style.setProperty('--swatch', color);
+        swatch.dataset.petColor = color;
+        swatch.title = `Cor do companheiro: ${color}`;
+        swatch.setAttribute('aria-label', `Cor do companheiro ${color}`);
+        swatch.classList.toggle('active', character.petColor === color);
+        petColors.appendChild(swatch);
+      }
+    }
+
+    const weaponSkins = $('weapon-skins');
+    if (weaponSkins) {
+      weaponSkins.textContent = '';
+      for (const skin of WEAPON_SKINS) {
+        const button = el('button', 'weapon-skin');
+        button.type = 'button';
+        button.dataset.weaponSkin = skin.id;
+        button.style.setProperty('--skin-color', skin.color);
+        button.classList.toggle('active', character.weaponSkin === skin.id);
+        button.appendChild(el('i'));
+        button.appendChild(el('span', '', skin.name));
+        weaponSkins.appendChild(button);
+      }
+    }
+
+    this.renderCharacterPreview();
+  }
+
+  renderCharacterPreview() {
+    const character = this.pendingCharacter || this.character;
+    const preview = $('character-preview');
+    if (preview) {
+      preview.style.setProperty('--skin', character.skin);
+      preview.style.setProperty('--shirt', character.shirt);
+      preview.style.setProperty('--pants', character.pants);
+      preview.style.setProperty('--hair', character.hair);
+      preview.className = `character-preview accessory-${character.accessory}`;
+      preview.style.setProperty('--pet', character.petColor);
+      preview.style.setProperty('--shoes', character.shoes);
+      preview.dataset.pet = character.petType;
+      preview.dataset.hairStyle = character.hairStyle;
+      preview.dataset.outfit = character.outfit;
+      preview.dataset.hat = character.hat;
+      preview.dataset.glasses = character.glasses;
+      preview.dataset.back = character.back;
+    }
+    const pet = getPet(character);
+    const petLabel = character.petName && character.petName !== pet.name
+      ? `${character.petName}, seu ${pet.name.toLowerCase()}`
+      : pet.name;
+    if ($('pet-preview-label')) $('pet-preview-label').textContent = `${petLabel}: ${pet.desc}`;
+    if ($('character-preview-name')) $('character-preview-name').textContent = character.name || 'Explorador';
+  }
+
+  saveCharacter() {
+    const character = normalizeCharacter(this.pendingCharacter || this.character);
+    this.character = character;
+    this.settings.character = character;
+    this.actions.onCharacterSave?.(character);
+    this.closeCharacter();
+  }
+
+  openMissions(missions = []) {
+    this.missions = Array.isArray(missions) ? missions : [];
+    this.openLayer('missions-modal');
+    this.renderMissions();
+  }
+
+  closeMissions() {
+    this.hideLayer();
+  }
+
+  renderMissions() {
+    const list = $('missions-list');
+    if (!list) return;
+    list.textContent = '';
+    for (const mission of this.missions) {
+      const row = el('div', `mission-row${mission.done ? ' done' : ''}`);
+      row.appendChild(el('span', 'mission-icon', mission.icon || '✦'));
+      const copy = el('div', 'mission-copy');
+      copy.appendChild(el('strong', '', mission.title || 'Missão'));
+      copy.appendChild(el('span', '', mission.desc || ''));
+      const bar = el('div', 'mission-bar');
+      const fill = el('i');
+      fill.style.setProperty('--progress', `${Math.min(100, Math.round((mission.value / Math.max(1, mission.target)) * 100))}%`);
+      bar.appendChild(fill);
+      copy.appendChild(bar);
+      row.appendChild(copy);
+      row.appendChild(el('span', 'mission-count', mission.done ? 'Concluída' : `${Math.min(mission.value, mission.target)}/${mission.target}`));
+      list.appendChild(row);
+    }
+  }
+
+  openPacks() {
+    this.packsFromSettings = !$('settings-modal')?.classList.contains('hidden');
+    this.openLayer('packs-modal');
+    this.renderPacks();
+  }
+
+  closePacks() {
+    if (this.packsFromSettings) {
+      this.packsFromSettings = false;
+      this.openLayer('settings-modal');
+      return;
+    }
+    this.hideLayer();
+  }
+
+  packFeedback(message, kind = '') {
+    const node = $('pack-feedback');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `pack-feedback ${kind}`.trim();
+  }
+
+  renderPacks() {
+    const list = $('packs-list');
+    if (!list) return;
+    list.textContent = '';
+    const packs = listContentPacks();
+    const activeId = getActivePackId();
+    if (!packs.length) {
+      list.appendChild(el('p', 'recipe-hint', 'Nenhum pacote instalado. Cole um JSON ou use o exemplo.'));
+      return;
+    }
+    for (const pack of packs) {
+      const row = el('div', `pack-row${pack.id === activeId ? ' active' : ''}`);
+      const copy = el('div', 'pack-copy');
+      copy.appendChild(el('strong', '', pack.name));
+      copy.appendChild(el('small', '', `${pack.author} · ${pack.blocks.length} blocos${pack.description ? ` · ${pack.description}` : ''}`));
+      const use = el('button', 'ghost-btn small', pack.id === activeId ? 'Ativo' : 'Usar');
+      use.type = 'button';
+      use.disabled = pack.id === activeId;
+      use.addEventListener('click', () => {
+        setActivePack(pack.id);
+        this.renderPacks();
+        this.packFeedback(`${pack.name} ativado.`, 'ok');
+      });
+      const remove = el('button', 'ghost-btn small', 'Remover');
+      remove.type = 'button';
+      remove.addEventListener('click', () => {
+        removeContentPack(pack.id);
+        this.renderPacks();
+        this.packFeedback(`${pack.name} removido.`, 'ok');
+      });
+      row.appendChild(copy);
+      row.appendChild(use);
+      row.appendChild(remove);
+      list.appendChild(row);
+    }
+  }
+
+  installPack(text) {
+    const result = parseContentPack(text);
+    if (!result.ok) {
+      this.packFeedback(result.error, 'error');
+      return;
+    }
+    const saved = saveContentPack(result.pack);
+    if (!saved.ok) {
+      this.packFeedback(saved.error, 'error');
+      return;
+    }
+    setActivePack(saved.pack.id);
+    if ($('pack-json')) $('pack-json').value = '';
+    this.renderPacks();
+    this.packFeedback(`${saved.pack.name} instalado e ativado.`, 'ok');
+  }
+
+  openSettings() {
+    this.settingsFromPause = !!this.pauseOpen;
+    this.openLayer('settings-modal');
+    this.applySettings(this.settings);
+  }
+
+  closeSettings() {
+    const fromPause = this.settingsFromPause;
+    this.settingsFromPause = false;
+    if (fromPause) {
+      this.openLayer('pause-modal');
+      this.actions.onSettingsClose?.(true);
+      return;
+    }
+    this.hideLayer();
+    this.actions.onSettingsClose?.(false);
+  }
+
+  openTutorial(force = false) {
+    this.tutorialStep = 0;
+    this.tutorialForce = force;
+    this.openLayer('tutorial');
+    this.renderTutorial();
+  }
+
+  renderTutorial() {
+    const step = TUTORIAL_STEPS[this.tutorialStep];
+    if (!step) return;
+    if ($('tutorial-step-label')) $('tutorial-step-label').textContent = `Passo ${this.tutorialStep + 1} de ${TUTORIAL_STEPS.length}`;
+    if ($('tutorial-step-title')) $('tutorial-step-title').textContent = step.title;
+    if ($('tutorial-step-text')) $('tutorial-step-text').textContent = step.text;
+    if ($('tutorial-art')) $('tutorial-art').textContent = step.art;
+    const dots = $('tutorial-dots');
+    if (dots) {
+      dots.textContent = '';
+      TUTORIAL_STEPS.forEach((_, index) => {
+        dots.appendChild(el('span', `tutorial-dot${index === this.tutorialStep ? ' active' : ''}`));
+      });
+    }
+    if ($('btn-tutorial-next')) $('btn-tutorial-next').textContent = this.tutorialStep === TUTORIAL_STEPS.length - 1 ? 'Começar a jogar' : 'Próximo';
+  }
+
+  nextTutorial() {
+    if (this.tutorialStep >= TUTORIAL_STEPS.length - 1) {
+      this.closeTutorial();
+      return;
+    }
+    this.tutorialStep += 1;
+    this.renderTutorial();
+  }
+
+  closeTutorial() {
+    this.hideLayer();
+    this.actions.onTutorialDone?.();
+  }
+
+  openCode(code, importMode = false) {
+    this.codeFromPause = !!this.pauseOpen;
+    if ($('world-code-output')) $('world-code-output').value = code || '';
+    $('code-import-box')?.classList.toggle('hidden', !importMode);
+    if ($('world-code-input')) $('world-code-input').value = '';
+    this.openLayer('code-modal');
+    if (importMode) setTimeout(() => $('world-code-input')?.focus(), 60);
+  }
+
+  closeCode(force = false) {
+    const fromPause = this.codeFromPause && !force;
+    this.codeFromPause = false;
+    if (fromPause) {
+      this.openLayer('pause-modal');
+      return;
+    }
+    this.hideLayer();
+  }
+
+  copyCode() {
+    const code = $('world-code-output')?.value || '';
+    this.copyText(code, 'Código copiado!');
+  }
+
+  async copyText(text, message) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.toast({ title: message || 'Copiado!', body: 'Agora é só compartilhar.', rarity: 'incomum' });
+      return;
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try {
+        document.execCommand('copy');
+        this.toast({ title: message || 'Copiado!', body: 'Agora é só compartilhar.', rarity: 'incomum' });
+      } catch {
+        this.toast({ title: 'Não foi possível copiar', body: 'Selecione o texto e copie manualmente.', rarity: 'comum' });
+      }
+      area.remove();
+    }
+  }
+
+  openPhoto() {
+    $('hud')?.classList.add('hidden');
+    $('photo-bar')?.classList.remove('hidden');
+    document.body.classList.add('photo-mode');
+    this.actions.onPhotoEnter?.();
+  }
+
+  closePhoto() {
+    $('photo-bar')?.classList.add('hidden');
+    $('hud')?.classList.remove('hidden');
+    document.body.classList.remove('photo-mode');
+    this.actions.onPhotoExit?.();
+  }
+
+  setTouchMode(isTouch) {
+    $('mobile-controls')?.classList.toggle('hidden', !isTouch);
+    document.body.classList.toggle('touch-mode', isTouch);
+  }
+
+  arrayFor(type) {
+    if (type === 'chest') return this.chest?.items || null;
+    if (!this.state.inventory) return null;
+    if (type === 'hotbar') return this.state.inventory.hotbar;
+    if (type === 'backpack') return this.state.inventory.backpack;
+    if (type === 'pouch') return this.state.inventory.pouch;
+    return null;
+  }
+
+  slotElement(slot, type, index) {
+    const button = el('button', 'slot');
+    button.type = 'button';
+    button.dataset.type = type;
+    button.dataset.index = String(index);
+    if (slot) {
+      const item = getItem(slot.id);
+      button.dataset.itemId = String(slot.id);
+      button.dataset.itemName = `${item.name} ${item.id}`.toLowerCase();
+      const rarity = getRarity(slot.id);
+      button.classList.add('has-item');
+      button.style.setProperty('--rarity', rarity.color);
+      button.title = `${item.name} · ${rarity.label}${slot.count > 1 ? ` ×${slot.count}` : ''}\n${item.desc}`;
+      button.setAttribute('aria-label', `${item.name}, ${rarity.label}, quantidade ${slot.count}`);
+      const img = el('img');
+      img.src = getItemIcon(slot.id);
+      img.alt = item.name;
+      button.appendChild(img);
+      if (slot.count > 1) button.appendChild(el('span', 'slot-count', String(slot.count)));
+    } else {
+      button.setAttribute('aria-label', 'Slot vazio');
+      button.appendChild(el('span', 'slot-empty-mark', '·'));
+    }
+    return button;
+  }
+
+  renderInventory() {
+    const body = $('inventory-body');
+    if (!body) return;
+    body.textContent = '';
+    const inventory = this.state.inventory;
+    if (!inventory) return;
+    if ($('btn-creative-palette')) $('btn-creative-palette').classList.toggle('hidden', this.state.mode !== 'creative');
+
+    const showTools = this.currentTab === 'backpack';
+    $('inventory-tools')?.classList.toggle('hidden', !showTools);
+    if ($('inventory-search') && $('inventory-search').value !== this.inventoryQuery) $('inventory-search').value = this.inventoryQuery;
+    if ($('inventory-sort') && $('inventory-sort').value !== this.inventorySort) $('inventory-sort').value = this.inventorySort;
+    $('btn-inventory-favorites')?.setAttribute('aria-pressed', this.favoritesOnly ? 'true' : 'false');
+    $('btn-inventory-favorites')?.classList.toggle('active', this.favoritesOnly);
+
+    if (this.currentTab === 'backpack') {
+      body.appendChild(this.renderItemSummary(inventory));
+      body.appendChild(this.gridSection('Barra rápida', 'Sempre à mão', inventory.hotbar, 'hotbar'));
+      body.appendChild(this.gridSection('Mochila', `${inventory.backpack.filter(Boolean).length}/27 slots`, inventory.backpack, 'backpack'));
+      if (this.state.mode === 'creative') body.appendChild(this.creativePalette());
+    } else if (this.currentTab === 'pouch') {
+      body.appendChild(this.gridSection('Bolsa de Sementes', 'Sementes e alimentos entram aqui automaticamente', inventory.pouch, 'pouch', 'pouch-grid'));
+    } else if (this.currentTab === 'craft') {
+      body.appendChild(this.renderCrafting());
+    } else if (this.currentTab === 'album') {
+      body.appendChild(this.renderAlbum());
+    }
+    this.applySlotFilter(body);
+    this.updateGhostPosition();
+  }
+
+  matchesQuery(id) {
+    const query = this.inventoryQuery.trim().toLowerCase();
+    if (!query) return true;
+    const item = getItem(id);
+    return `${item.name} ${item.id} ${item.desc}`.toLowerCase().includes(query);
+  }
+
+  applySlotFilter(root) {
+    const query = this.inventoryQuery.trim().toLowerCase();
+    for (const slot of root.querySelectorAll('.slot[data-item-id]')) {
+      const hidden = !!query && !String(slot.dataset.itemName || '').includes(query);
+      slot.classList.toggle('filtered-out', hidden);
+    }
+  }
+
+  renderItemSummary(inventory) {
+    const totals = new Map();
+    for (const arr of inventory.arrays()) {
+      for (const slot of arr) {
+        if (!slot) continue;
+        totals.set(slot.id, (totals.get(slot.id) || 0) + slot.count);
+      }
+    }
+    const wrap = el('div', 'inventory-summary');
+    const head = el('div', 'inventory-section-title');
+    const text = el('div');
+    text.appendChild(el('h3', '', 'Resumo por item'));
+    head.appendChild(text);
+    head.appendChild(el('span', '', `${totals.size} tipos · total somado`));
+    wrap.appendChild(head);
+    if (!totals.size) {
+      wrap.appendChild(el('p', 'recipe-hint', 'Sua mochila está vazia. Quebre blocos ou use a paleta criativa.'));
+      return wrap;
+    }
+    const grid = el('div', 'summary-grid');
+    const query = this.inventoryQuery.trim().toLowerCase();
+    let entries = Array.from(totals.entries()).filter(([id]) => {
+      if (this.favoritesOnly && !this.favorites.has(String(id))) return false;
+      return !query || this.matchesQuery(id);
+    });
+    entries.sort((a, b) => {
+      const itemA = getItem(a[0]);
+      const itemB = getItem(b[0]);
+      if (this.inventorySort === 'count') return b[1] - a[1] || itemA.name.localeCompare(itemB.name, 'pt-BR');
+      if (this.inventorySort === 'rarity') return rarityRank(getItem(b[0]).rarity) - rarityRank(getItem(a[0]).rarity) || itemA.name.localeCompare(itemB.name, 'pt-BR');
+      if (this.inventorySort === 'favorite') {
+        const favA = this.favorites.has(String(a[0])) ? 1 : 0;
+        const favB = this.favorites.has(String(b[0])) ? 1 : 0;
+        if (favA !== favB) return favB - favA;
+      }
+      return itemA.name.localeCompare(itemB.name, 'pt-BR');
+    });
+    if (!entries.length) {
+      grid.appendChild(el('p', 'recipe-hint', 'Nenhum item combina com a busca.'));
+    }
+    for (const [id, total] of entries) {
+      const item = getItem(id);
+      const rarity = getRarity(id);
+      const card = el('button', 'summary-card');
+      card.type = 'button';
+      card.style.setProperty('--rarity', rarity.color);
+      card.title = `${item.name} · ${total} no total`;
+      card.setAttribute('aria-label', `${item.name}, total ${total}`);
+      const img = el('img');
+      img.src = getItemIcon(id);
+      img.alt = '';
+      const copy = el('span', 'summary-copy');
+      copy.appendChild(el('strong', '', item.name));
+      copy.appendChild(el('small', '', `${total} no total`));
+      const favorite = el('span', 'summary-fav', this.favorites.has(String(id)) ? '★' : '☆');
+      const favoriteLabel = this.favorites.has(String(id)) ? 'Remover dos favoritos' : 'Marcar como favorito';
+      favorite.title = favoriteLabel;
+      favorite.setAttribute('role', 'button');
+      favorite.setAttribute('tabindex', '0');
+      favorite.setAttribute('aria-label', `${favoriteLabel}: ${item.name}`);
+      const toggleFavorite = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.favorites.has(String(id))) this.favorites.delete(String(id));
+        else this.favorites.add(String(id));
+        saveFavorites(this.favorites);
+        this.renderInventory();
+      };
+      favorite.addEventListener('click', toggleFavorite);
+      favorite.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') toggleFavorite(event);
+      });
+      card.appendChild(img);
+      card.appendChild(copy);
+      card.appendChild(favorite);
+      card.addEventListener('click', () => {
+        const hotbarIndex = inventory.hotbar.findIndex((slot) => slot && slot.id === id);
+        if (hotbarIndex >= 0) {
+          this.actions.onSelectHotbar?.(hotbarIndex);
+          this.toast({ title: item.name, body: 'Selecionado na hotbar.', rarity: item.rarity, icon: getItemIcon(id) });
+          return;
+        }
+        if (this.state.mode === 'creative') {
+          this.actions.onCreativePick?.(id);
+          return;
+        }
+        this.actions.onMoveToHotbar?.(id);
+      });
+      grid.appendChild(card);
+    }
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  gridSection(title, subtitle, slots, type, extraClass = '') {
+    const wrap = el('div', 'inventory-columns');
+    const head = el('div', 'inventory-section-title');
+    const text = el('div');
+    text.appendChild(el('h3', '', title));
+    head.appendChild(text);
+    head.appendChild(el('span', '', subtitle));
+    wrap.appendChild(head);
+    const grid = el('div', `slot-grid ${extraClass}`.trim());
+    slots.forEach((slot, index) => grid.appendChild(this.slotElement(slot, type, index)));
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  creativePalette() {
+    const wrap = el('div', 'creative-palette');
+    wrap.appendChild(el('h3', '', 'Paleta criativa'));
+    const grid = el('div', 'creative-grid');
+    const palette = [...CREATIVE_PALETTE, ...getPackBlockIds()];
+    const visible = palette.filter((id) => this.matchesQuery(id));
+    if (!visible.length) grid.appendChild(el('p', 'recipe-hint', 'Nenhum bloco combina com a busca.'));
+    for (const id of visible) {
+      const button = el('button', 'creative-block');
+      button.type = 'button';
+      button.title = getItem(id).name;
+      button.setAttribute('aria-label', `Pegar ${getItem(id).name}`);
+      const img = el('img');
+      img.src = getItemIcon(id);
+      img.alt = getItem(id).name;
+      button.appendChild(img);
+      button.addEventListener('click', () => {
+        this.actions.onCreativePick?.(id);
+        this.renderInventory();
+        this.renderHotbar(this.state.inventory, true);
+      });
+      grid.appendChild(button);
+    }
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  openCreativePalette() {
+    this.currentTab = 'backpack';
+    this.renderInventory();
+  }
+
+  renderCrafting() {
+    const wrap = el('div');
+    wrap.appendChild(el('h3', '', 'Forja de Lumis'));
+    const sub = el('p', 'recipe-hint', 'Escolha uma receita. Os ingredientes saem de todos os seus inventários.');
+    wrap.appendChild(sub);
+    const list = el('div', 'recipe-list');
+    for (const recipe of RECIPES) {
+      const item = getItem(recipe.out.id);
+      const rarity = getRarity(recipe.out.id);
+      const can = this.state.mode === 'creative' || this.state.inventory.canCraft(recipe.ingredients);
+      const card = el('div', `recipe-card${can ? '' : ' locked'}`);
+      card.style.setProperty('--rarity', rarity.color);
+      const icon = el('div', 'recipe-icon');
+      const img = el('img');
+      img.src = getItemIcon(recipe.out.id);
+      img.alt = item.name;
+      icon.appendChild(img);
+      const info = el('div');
+      info.appendChild(el('div', 'recipe-name', `${item.name}${recipe.out.count > 1 ? ` ×${recipe.out.count}` : ''}`));
+      info.appendChild(el('div', 'recipe-hint', recipe.hint || ''));
+      const ingredients = el('div', 'recipe-ingredients');
+      for (const ing of recipe.ingredients) {
+        const have = this.state.inventory.countItem(ing.id);
+        const chip = el('span', `ingredient ${have >= ing.count ? 'ok' : 'missing'}`, `${getItem(ing.id).name} ${have}/${ing.count}`);
+        ingredients.appendChild(chip);
+      }
+      info.appendChild(ingredients);
+      const button = el('button', 'primary-btn', 'Criar');
+      button.type = 'button';
+      button.disabled = !can;
+      button.addEventListener('click', () => {
+        this.actions.onCraft?.(recipe.id);
+      });
+      card.appendChild(icon);
+      card.appendChild(info);
+      card.appendChild(button);
+      list.appendChild(card);
+    }
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  renderAlbum() {
+    const discovered = new Set((this.state.world?.discovered || []).map((id) => String(id)));
+    const wrap = el('div');
+    const head = el('div', 'album-head');
+    const title = el('div');
+    title.appendChild(el('h3', '', 'Álbum de Coleção'));
+    head.appendChild(title);
+    const count = COLLECTION_IDS.filter((id) => discovered.has(String(id))).length;
+    head.appendChild(el('span', 'recipe-hint', `${count}/${COLLECTION_IDS.length} descobertos`));
+    wrap.appendChild(head);
+    const bar = el('div', 'album-progress');
+    const fill = el('div');
+    fill.style.width = `${(count / COLLECTION_IDS.length) * 100}%`;
+    bar.appendChild(fill);
+    wrap.appendChild(bar);
+    const grid = el('div', 'album-grid');
+    for (const id of COLLECTION_IDS) {
+      const item = getItem(id);
+      const known = discovered.has(String(id));
+      const card = el('div', `album-item${known ? '' : ' unknown'}`);
+      const rarity = getRarity(id);
+      card.style.setProperty('--rarity', rarity.color);
+      const img = el('img');
+      img.src = getItemIcon(id);
+      img.alt = known ? item.name : 'Item não descoberto';
+      card.appendChild(img);
+      card.appendChild(el('strong', '', known ? item.name : '???'));
+      card.appendChild(el('small', '', known ? `${rarity.label} · ${'★'.repeat(rarity.stars)}` : 'Não descoberto'));
+      if (known) card.title = item.desc;
+      grid.appendChild(card);
+    }
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  renderChest() {
+    const grid = $('chest-grid');
+    const invGrid = $('chest-inventory-grid');
+    if (!grid || !invGrid || !this.chest || !this.state.inventory) return;
+    grid.textContent = '';
+    invGrid.textContent = '';
+    this.chest.items.forEach((slot, index) => grid.appendChild(this.slotElement(slot, 'chest', index)));
+    const inv = this.state.inventory;
+    let index = 0;
+    for (const slot of inv.hotbar) {
+      invGrid.appendChild(this.slotElement(slot, 'hotbar', index));
+      index += 1;
+    }
+    inv.backpack.forEach((slot, i) => invGrid.appendChild(this.slotElement(slot, 'backpack', i)));
+    this.updateGhostPosition();
+  }
+
+  handleSlotDown(event) {
+    const slotEl = event.target.closest('.slot');
+    if (!slotEl) return;
+    event.preventDefault();
+    const type = slotEl.dataset.type;
+    const index = Number(slotEl.dataset.index);
+    const arr = this.arrayFor(type);
+    if (!arr) return;
+    if (event.shiftKey) {
+      this.quickMoveSlot(type, index);
+      return;
+    }
+    if (this.held) {
+      this.placeHeld(type, index);
+      this.dragSource = null;
+    this.thirdPerson = false;
+    } else if (arr[index]) {
+      this.held = { ...arr[index] };
+      arr[index] = null;
+      this.dragSource = { type, index };
+      this.actions.onInventoryChanged?.();
+    }
+    this.renderOpenPanels();
+    this.updateGhostPosition(event.clientX, event.clientY);
+  }
+
+  handleSlotContext(event) {
+    const slotEl = event.target.closest('.slot');
+    if (!slotEl) return;
+    event.preventDefault();
+    const type = slotEl.dataset.type;
+    const index = Number(slotEl.dataset.index);
+    const arr = this.arrayFor(type);
+    if (!arr) return;
+    if (!this.held) {
+      const slot = arr[index];
+      if (slot && slot.count > 1) {
+        const half = Math.ceil(slot.count / 2);
+        slot.count -= half;
+        this.held = { id: slot.id, count: half };
+      }
+    } else {
+      const slot = arr[index];
+      if (!slot) {
+        arr[index] = { id: this.held.id, count: 1 };
+        this.held.count -= 1;
+        if (this.held.count <= 0) this.held = null;
+      } else if (slot.id === this.held.id) {
+        const max = getItem(slot.id).stack || 64;
+        if (slot.count < max) {
+          slot.count += 1;
+          this.held.count -= 1;
+          if (this.held.count <= 0) this.held = null;
+        }
+      }
+    }
+    this.renderOpenPanels();
+    this.updateGhostPosition(event.clientX, event.clientY);
+  }
+
+  handlePointerUp(event) {
+    if (!this.held || !this.dragSource) return;
+    const slotEl = document.elementFromPoint(event.clientX, event.clientY)?.closest('.slot');
+    if (!slotEl) return;
+    const type = slotEl.dataset.type;
+    const index = Number(slotEl.dataset.index);
+    if (type === this.dragSource.type && index === this.dragSource.index) return;
+    this.placeHeld(type, index);
+    this.dragSource = null;
+    this.thirdPerson = false;
+    this.renderOpenPanels();
+    this.updateGhostPosition();
+  }
+
+  placeHeld(type, index) {
+    const arr = this.arrayFor(type);
+    if (!arr || !this.held) return;
+    const target = arr[index];
+    if (!target) {
+      arr[index] = this.held;
+      this.held = null;
+    } else if (target.id === this.held.id) {
+      const max = getItem(target.id).stack || 64;
+      const space = max - target.count;
+      const add = Math.min(space, this.held.count);
+      target.count += add;
+      this.held.count -= add;
+      if (this.held.count <= 0) this.held = null;
+    } else {
+      arr[index] = this.held;
+      this.held = target;
+    }
+    this.actions.onInventoryChanged?.();
+  }
+
+  quickMoveSlot(type, index) {
+    const arr = this.arrayFor(type);
+    if (!arr || !arr[index]) return;
+    let destinations;
+    if (type === 'chest') destinations = [this.state.inventory.hotbar, this.state.inventory.backpack, this.state.inventory.pouch];
+    else if (this.chestOpen) destinations = [this.chest.items];
+    else if (type === 'hotbar') destinations = [this.state.inventory.backpack, this.state.inventory.pouch];
+    else if (type === 'pouch') destinations = [this.state.inventory.backpack, this.state.inventory.hotbar];
+    else destinations = [this.state.inventory.hotbar, this.state.inventory.pouch];
+    const canGrow = destinations.includes(this.state.inventory?.backpack);
+    quickMove(arr, index, destinations, canGrow ? () => this.state.inventory?.expandBackpackRow() : null);
+    this.actions.onInventoryChanged?.();
+    this.renderOpenPanels();
+  }
+
+  returnHeld(silent = false) {
+    if (!this.held) return true;
+    const inventory = this.state.inventory;
+    if (!inventory) {
+      this.held = null;
+      return true;
+    }
+    let left = inventory.addItem(this.held.id, this.held.count);
+    if (left > 0 && this.chest) {
+      left = addToArrays(this.held.id, left, [this.chest.items]);
+    }
+    if (left > 0) {
+      if (!silent) this.toast({ title: 'Mochila cheia', body: 'Crie espaço antes de fechar o inventário.', rarity: 'comum' });
+      return false;
+    }
+    this.held = null;
+    this.hideGhost();
+    return true;
+  }
+
+  renderOpenPanels() {
+    if (this.inventoryOpen) this.renderInventory();
+    if (this.chestOpen) this.renderChest();
+    this.renderHotbar(this.state.inventory, this.state.mode === 'creative');
+  }
+
+  updateGhostPosition(x = this.lastPointerX, y = this.lastPointerY) {
+    this.lastPointerX = x;
+    this.lastPointerY = y;
+    const ghost = $('drag-ghost');
+    if (!ghost) return;
+    if (!this.held) {
+      ghost.classList.add('hidden');
+      return;
+    }
+    ghost.classList.remove('hidden');
+    ghost.textContent = '';
+    const img = el('img');
+    img.src = getItemIcon(this.held.id);
+    img.alt = '';
+    ghost.appendChild(img);
+    if (x != null && y != null) {
+      ghost.style.left = `${x}px`;
+      ghost.style.top = `${y}px`;
+    }
+  }
+
+  updateGhost(x, y) {
+    if (!this.held) return;
+    this.updateGhostPosition(x, y);
+  }
+
+  hideGhost() {
+    $('drag-ghost')?.classList.add('hidden');
+  }
+
+  showPhotoInfo(info) {
+    this.lastPhotoInfo = info;
+  }
+
+  downloadPhoto(canvas, info) {
+    if (!canvas) return;
+    const width = Math.min(1920, canvas.width);
+    const height = Math.round((canvas.height / canvas.width) * width);
+    const out = document.createElement('canvas');
+    out.width = width;
+    out.height = height;
+    const ctx = out.getContext('2d');
+    ctx.drawImage(canvas, 0, 0, width, height);
+    this.drawWatermark(ctx, width, height, info);
+    this.downloadDataUrl(out.toDataURL('image/png'), `lulicraft-foto-${Date.now()}.png`);
+    this.toast({ title: 'Foto salva!', body: 'Sua lembrança de Lumi foi baixada.', rarity: 'incomum' });
+  }
+
+  drawWatermark(ctx, width, height, info) {
+    ctx.save();
+    const size = Math.max(14, Math.round(width * 0.018));
+    ctx.font = `800 ${size}px "Nunito", sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillText(`Lulicraft · ${info?.worldName || 'Mundo'}`, width - size * 1.6, height - size * 1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillText(`Lulicraft · ${info?.worldName || 'Mundo'}`, width - size * 1.5, height - size * 1.6);
+    ctx.restore();
+  }
+
+  downloadCard(canvas, info = {}) {
+    if (!canvas) return;
+    const W = 1080;
+    const H = 1350;
+    const out = document.createElement('canvas');
+    out.width = W;
+    out.height = H;
+    const ctx = out.getContext('2d');
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#0b141f');
+    bg.addColorStop(0.5, '#14283a');
+    bg.addColorStop(1, '#0b141f');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    const imgH = 900;
+    const sourceRatio = canvas.width / canvas.height;
+    const targetRatio = W / imgH;
+    let sx = 0;
+    let sy = 0;
+    let sw = canvas.width;
+    let sh = canvas.height;
+    if (sourceRatio > targetRatio) {
+      sw = canvas.height * targetRatio;
+      sx = (canvas.width - sw) / 2;
+    } else {
+      sh = canvas.width / targetRatio;
+      sy = (canvas.height - sh) / 2;
+    }
+    ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, W, imgH);
+
+    const overlay = ctx.createLinearGradient(0, imgH - 260, 0, imgH + 80);
+    overlay.addColorStop(0, 'rgba(11,20,31,0)');
+    overlay.addColorStop(0.65, 'rgba(11,20,31,0.85)');
+    overlay.addColorStop(1, '#0b141f');
+    ctx.fillStyle = overlay;
+    ctx.fillRect(0, imgH - 260, W, 340);
+
+    ctx.save();
+    ctx.fillStyle = '#b8ff6a';
+    ctx.font = '800 28px "Baloo 2", "Nunito", sans-serif';
+    ctx.fillText('LULICRAFT · CARTÃO DO MUNDO', 72, 78);
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
+    ctx.font = '700 22px "Nunito", sans-serif';
+    ctx.fillText('Um mundo de blocos, luz e descobertas.', 72, 114);
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = '#f7f3e8';
+    ctx.font = '800 76px "Baloo 2", "Nunito", sans-serif';
+    const title = info.worldName || 'Meu Mundo de Lumi';
+    ctx.fillText(this.truncate(ctx, title, W - 144), 72, 1010);
+    ctx.fillStyle = '#9fb3ae';
+    ctx.font = '700 26px "Nunito", sans-serif';
+    ctx.fillText(`seed ${info.seed || 'lumi'} · ${info.characterName || 'Lumi'} · ${info.mode === 'creative' ? 'Criativo' : 'Aventura Cozy'}`, 72, 1054);
+
+    const stats = [
+      ['✦', `${info.rare || 0} raros encontrados`],
+      ['▦', `${info.discovered || 0} itens no álbum`],
+      ['◆', `${info.blocks || 0} blocos transformados`]
+    ];
+    ctx.font = '700 28px "Nunito", sans-serif';
+    stats.forEach(([icon, label], index) => {
+      const y = 1130 + index * 48;
+      ctx.fillStyle = '#b8ff6a';
+      ctx.fillText(icon, 72, y);
+      ctx.fillStyle = '#dce9e4';
+      ctx.fillText(label, 112, y);
+    });
+
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(72, 1268, W - 144, 2);
+    ctx.fillStyle = '#6f8580';
+    ctx.font = '700 20px "Nunito", sans-serif';
+    ctx.fillText('Feito com Lulicraft · sem contas, sem anúncios', 72, 1308);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#b8ff6a';
+    ctx.fillText(info.biome || 'Prado Musgo', W - 72, 1308);
+    ctx.restore();
+
+    this.downloadDataUrl(out.toDataURL('image/png'), `lulicraft-cartao-${Date.now()}.png`);
+    this.toast({ title: 'Cartão do Mundo salvo!', body: 'Compartilhe sua descoberta com quem quiser.', rarity: 'raro' });
+  }
+
+  truncate(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let result = text;
+    while (result.length > 1 && ctx.measureText(`${result}…`).width > maxWidth) result = result.slice(0, -1);
+    return `${result}…`;
+  }
+
+  downloadDataUrl(url, filename) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+}

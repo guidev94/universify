@@ -23,7 +23,7 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 1. **Fácil em 30 segundos**, entrar, mover, quebrar e colocar sem tutorial obrigatório.
 2. **Autoral de verdade**, nenhum bloco, item, bioma ou nome copiado; estética "Lumi".
 3. **Descoberta recompensadora**, raridade visível, brilho, som e registro no álbum.
-4. **Seguro por padrão**, sem combate, sem dano, sem chat, sem coleta de dados, sem monetização.
+4. **Seguro por padrão**, sem combate, sem dano, sem chat livre, sem coleta de dados, sem monetização.
 5. **Compartilhável**, seed, código de mundo e cartão de foto em um clique.
 6. **Leve**, roda em notebook simples, Chromebook e celular; sem build step.
 
@@ -40,11 +40,11 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 
 ## 5. Expansão v1.1 (entregue)
 
-- Personagens cosméticos com 9 skins/presets, cores personalizadas e nome.
+- Personagens cosméticos com 18 presets do Lumi Crew, cores personalizadas e nome.
 - 5 armas mágicas sem dano para brincadeiras e buffs.
-- 6 mundos prontos, incluindo dois com Kit de Raros.
+- 7 mundos prontos, incluindo Minha Casa e três com Kit de Raros.
 - Kit de Raros opcional na criação de mundo.
-- Multiplayer P2P com convite, até 6 exploradores, sem contas e sem chat.
+- Multiplayer P2P com convite, até 6 exploradores, sem contas e com chat por frases prontas.
 - Testes unitários, smoke test e teste multiplayer com dois navegadores.
 
 ## 5.1 Expansão v1.2 (entregue)
@@ -59,11 +59,30 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 - Pacotes gráficos auto, pixel suave e turbo leve.
 - Animações de caminhada, salto, voo, craft e picareta.
 
+## 5.2 Expansão v1.4 e Lulicraft 2.0 (entregue)
+
+- App Flutter **Lulicraft Pocket** com shell nativo, WebView e servidor HTTP local empacotado.
+- Atalho de visão 1ª/3ª pessoa no HUD e nos controles de toque.
+- Viewmodel por categoria (picareta, arma, arco, bloco) com muzzle alinhado, recuo e flash.
+- Configurações ampliadas: FOV, inverter Y, sensibilidade de toque, canhoto, view bob, FPS, partículas, nuvens, escala de UI e iniciar em 3ª pessoa.
+- UX mobile: safe areas, alvos de 48 px, layout canhoto e dica de paisagem.
+- Bridge `window.LulicraftNative` para o app Flutter.
+- Copyright © 2026 guidev94 em menu, README, arquivo `COPYRIGHT` e tela Sobre.
+- Backlog priorizado de UI/UX, jogabilidade, itens e funcionalidades em `.specs/project/BACKLOG.md`.
+- Marca autoral com favicon, ícone adaptativo e splash.
+- Construção criativa com seleção de bloco, feedback e resumo agregado da mochila.
+- Mundo Minha Casa com casa rosa, cidade, praça e baús raros.
+- Blocos rosa, menta e lavanda; Lumi Crew com 18 presets.
+- Pet à frente do jogador, mão e arma com animações distintas.
+- Chat seguro por frases prontas com rate limit.
+- Áudio ambiente procedural por bioma.
+
 ## 6. Fora de escopo
 
-- Servidores dedicados, contas, nuvem, matchmaking público e chat.
+- Servidores dedicados, contas, nuvem, matchmaking público e chat livre.
 - Combate, vida/morte, fome, dano de queda.
-- Mobile nativo (App Store/Play Store), contas e nuvem.
+- Port nativo completo do engine voxel em Dart/Flutter.
+- Publicação automática nas lojas ou contratação de contas de desenvolvedor.
 - Microtransações, anúncios, loot boxes.
 - Mods/plugins de terceiros.
 
@@ -95,6 +114,9 @@ Um jogo de mundo aberto em blocos onde crianças e famílias constroem, exploram
 - **NPC cozy**: personagem fixo com fala curta e contextual, sem chat livre.
 - **Cidade para explorar**: mundo curado inspirado em um cartão-postal brasileiro.
 - **Ranking de tempo**: lista local de tempo jogado por mundo, sem servidor.
+- **Lulicraft Pocket**: app Flutter que empacota o jogo web em uma WebView com servidor local.
+- **Bridge nativa**: objeto JavaScript `window.LulicraftNative` que troca configurações e ações com o app.
+- **Muzzle**: ponto de saída visual do projétil, alinhado à mão do personagem.
 
 ## 9. Referências de qualidade
 

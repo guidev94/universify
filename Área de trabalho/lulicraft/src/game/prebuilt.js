@@ -58,6 +58,16 @@ export const PREBUILT_WORLDS = [
     emoji: '✧',
     desc: 'Comece com um kit lendário: ferramentas, sementes e tesouros raros.',
     rareKit: true
+  },
+  {
+    id: 'minha-casa',
+    name: 'Minha Casa',
+    seed: 'lumi-minha-casa',
+    mode: 'creative',
+    accent: '#ffa8c8',
+    emoji: '⌂',
+    desc: 'Uma casa rosa, uma cidade inteira e baús cheios de raridades.',
+    rareKit: true
   }
 ];
 

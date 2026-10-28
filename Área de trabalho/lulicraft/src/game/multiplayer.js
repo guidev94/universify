@@ -1,4 +1,5 @@
 import { normalizeCharacter } from './characters.js';
+import { sanitizeChat, CHAT_RATE_MS, HOST_CHAT_RATE_MS } from './chat.js';
 
 const PEER_PREFIX = 'lulicraft-v1-';
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -166,6 +167,8 @@ export class Multiplayer {
     this.accumulator = 0;
     this.lastStatus = 'idle';
     this.destroyed = false;
+    this.lastChatAt = 0;
+    this.hostChatTimes = new Map();
   }
 
   get connected() {
@@ -373,6 +376,8 @@ export class Multiplayer {
     this.hostConn = null;
     this.connections.clear();
     this.players.clear();
+    this.hostChatTimes.clear();
+    this.lastChatAt = 0;
     this.role = null;
     this.code = '';
     this.invite = '';
@@ -424,6 +429,25 @@ export class Multiplayer {
       if (!patch) return;
       this.callbacks.onPatch?.(patch);
       this.broadcast({ type: 'patch', patch }, conn.peer);
+      return;
+    }
+    if (message.type === 'chat') {
+      const id = sanitizeChat(message.id);
+      if (!id) return;
+      const now = Date.now();
+      const last = this.hostChatTimes.get(conn.peer) || 0;
+      if (now - last < HOST_CHAT_RATE_MS) return;
+      this.hostChatTimes.set(conn.peer, now);
+      const player = this.players.get(conn.peer);
+      const payload = {
+        type: 'chat',
+        id,
+        playerId: conn.peer,
+        name: cleanName(player?.name || 'Explorador'),
+        at: now
+      };
+      this.callbacks.onChat?.({ ...payload, self: false });
+      this.broadcast(payload);
       return;
     }
     if (message.type === 'leave') this.removePlayer(conn.peer);
@@ -486,6 +510,18 @@ export class Multiplayer {
       if (patch) this.callbacks.onPatch?.(patch);
       return;
     }
+    if (message.type === 'chat') {
+      const id = sanitizeChat(message.id);
+      if (!id) return;
+      this.callbacks.onChat?.({
+        id,
+        playerId: String(message.playerId || '').slice(0, 80),
+        name: cleanName(message.name),
+        at: Number.isFinite(message.at) ? message.at : Date.now(),
+        self: String(message.playerId || '') === this.selfId
+      });
+      return;
+    }
     if (message.type === 'left') {
       this.players.delete(message.id);
       this.emitPlayers();
@@ -495,6 +531,7 @@ export class Multiplayer {
   removePlayer(id) {
     if (!id) return;
     this.connections.delete(id);
+    this.hostChatTimes.delete(id);
     const existed = this.players.delete(id);
     if (existed) {
       this.broadcast({ type: 'left', id });
@@ -539,6 +576,29 @@ export class Multiplayer {
   sendPatch(patch) {
     const clean = sanitizePatch(patch);
     return clean ? this.send({ type: 'patch', patch: clean }) : false;
+  }
+
+  sendChat(id) {
+    if (!this.connected) return 'offline';
+    const clean = sanitizeChat(id);
+    if (!clean) return 'invalid';
+    const now = Date.now();
+    if (now - this.lastChatAt < CHAT_RATE_MS) return 'rate';
+    this.lastChatAt = now;
+    if (this.isHost) {
+      const player = this.players.get(this.selfId);
+      const payload = {
+        type: 'chat',
+        id: clean,
+        playerId: this.selfId,
+        name: cleanName(player?.name || this.profile.name),
+        at: now
+      };
+      this.broadcast(payload);
+      this.callbacks.onChat?.({ ...payload, self: true });
+      return 'sent';
+    }
+    return this.send({ type: 'chat', id: clean }) ? 'sent' : 'offline';
   }
 
   update(dt, player) {
@@ -609,6 +669,8 @@ export class Multiplayer {
     this.hostConn = null;
     this.connections.clear();
     this.players.clear();
+    this.hostChatTimes.clear();
+    this.lastChatAt = 0;
     this.role = null;
     this.code = '';
     this.invite = '';

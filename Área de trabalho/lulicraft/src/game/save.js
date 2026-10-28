@@ -204,7 +204,24 @@ export function normalizeSnapshot(snapshot, fallbackId) {
 
 export function getSettings() {
   const store = storage();
-  const defaults = { sound: true, tutorialDone: false, sensitivity: 1, showCoords: false, quality: 'auto', character: null };
+  const defaults = {
+    sound: true,
+    tutorialDone: false,
+    sensitivity: 1,
+    touchSensitivity: 1.6,
+    invertY: false,
+    fov: 74,
+    viewBob: true,
+    leftHand: false,
+    startThird: false,
+    showFps: false,
+    particles: true,
+    clouds: true,
+    showCoords: false,
+    quality: 'auto',
+    uiScale: 'normal',
+    character: null
+  };
   if (!store) return defaults;
   return { ...defaults, ...safeParse(store.getItem(SETTINGS_KEY), {}) };
 }

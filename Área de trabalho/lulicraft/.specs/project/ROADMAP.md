@@ -33,14 +33,52 @@
 - [x] Pacotes gráficos leves: automático, pixel suave e turbo leve.
 - [x] Testes unitários e E2E cobrindo os novos sistemas.
 
+## M1.3: Mobile e controles (em andamento)
+
+- [x] Atalho de visão 1ª/3ª pessoa no HUD, no toque e F5.
+- [x] Poses por categoria, muzzle alinhado, recuo e flash.
+- [x] Configurações ampliadas (FOV, inverter Y, toque, canhoto, FPS, partículas, nuvens, escala).
+- [x] Safe areas, alvos de toque, layout canhoto e dica de paisagem.
+- [x] Bridge `window.LulicraftNative` e overrides por query string.
+- [x] App Flutter `mobile/` com servidor local e WebView.
+- [x] Home, Ajustes e Sobre nativos com settings persistidos e sincronizados.
+- [x] Ícone adaptativo, splash e build debug do app.
+- [x] Back do sistema em camadas (overlay → pausa → menu) e pause no lifecycle.
+- [ ] Validação em aparelho real (AVD 16 KB atual falha ao criar o isolate do engine).
+
+## M1.4: Lulicraft 2.0 (entregue)
+
+- [x] Marca autoral e favicon.
+- [x] Construção criativa com seleção de bloco e feedback.
+- [x] Resumo agregado da mochila.
+- [x] Pet à frente com animações de marcha e olhar.
+- [x] Mão e arma com animações distintas.
+- [x] Chat seguro por frases prontas com rate limit.
+- [x] Mundo Minha Casa com casa rosa, cidade e baús raros.
+- [x] Blocos rosa, menta e lavanda.
+- [x] Lumi Crew com 18 presets e blink no avatar.
+- [x] Áudio ambiente por bioma.
+- [x] Testes unitários, E2E e multiplayer atualizados.
+- [x] Sync mobile e assets de marca.
+- [x] Undo/redo de construção, pick block e atalhos de inventário.
+- [x] Busca, ordenação e favoritos no resumo da mochila.
+- [x] Mapa local com biomas, baús e NPCs.
+- [x] Diário de missões com progresso.
+- [x] Vilas procedurais e rotina de NPCs.
+- [x] Pacotes de conteúdo JSON com paleta e blocos extras.
+- [x] 15 prints reproduzíveis em `docs/screenshots`.
+- [x] APK/AAB assinados com keystore de upload.
+
 ## M1: Polimento cozy (próximo)
 
 - [ ] Criaturas Lumis selvagens (vagalumes, lumis que aparecem nos biomas).
 - [ ] Ciclo climático suave (chuva de pétalas, aurora noturna).
-- [ ] Sons ambientes por bioma e trilha adaptativa.
+- [x] Sons ambientes por bioma e trilha adaptativa.
+- [ ] Trilha musical adaptativa.
 - [ ] Sistema de "jardim": plantar sementes e ver crescimento em tempo real e offline.
 - [ ] Balões de dica contextuais para crianças que ficam paradas.
-- [ ] Missões curtas de NPC com recompensas cosméticas.
+- [x] Diário de missões curtas com progresso.
+- [ ] Ramificações de missão por NPC com recompensas cosméticas.
 - [ ] Álbum de fotos com molduras e legendas.
 
 ## M2: Construção social assíncrona
@@ -68,7 +106,9 @@
 
 ## M5: Plataformas
 
-- [ ] Empacotamento Capacitor (Android/iOS).
+- [x] App Flutter shell (Android/iOS) com WebView e servidor local.
+- [x] Assinatura de release com keystore de upload.
+- [ ] Publicação nas lojas.
 - [ ] Suporte a gamepad.
 - [ ] Sincronização opcional por arquivo (sem conta).
 

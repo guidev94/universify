@@ -1,6 +1,6 @@
 {
   "name": "lulicraft",
-  "version": "1.2.0",
+  "version": "1.4.1",
   "private": true,
   "type": "module",
   "description": "Lulicraft - um sandbox cozy de blocos, luz e descobertas.",
@@ -9,6 +9,11 @@
     "test": "node --test tests/core.test.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "test:mp": "node tests/multiplayer.e2e.mjs",
-    "test:all": "npm test && npm run test:e2e && npm run test:mp"
+    "test:all": "npm test && npm run test:e2e && npm run test:mp",
+    "screenshots": "node tests/screenshots.mjs",
+    "mobile:sync": "node scripts/sync-mobile.mjs",
+    "mobile:analyze": "cd mobile && dart analyze",
+    "mobile:test": "cd mobile && flutter test",
+    "mobile:build": "npm run mobile:sync && cd mobile && flutter build apk --release"
   }
 }

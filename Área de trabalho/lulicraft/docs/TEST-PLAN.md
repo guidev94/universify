@@ -7,11 +7,12 @@ npm test          # unitários
 npm run test:e2e  # smoke no Chrome headless
 npm run test:mp   # host + convidado em dois Chrome headless
 npm run test:all  # todos
+npm run screenshots # 15 prints em docs/screenshots
 ```
 
 Cobertura atual:
 
-- [x] Personagens: 9 skins/presets, normalização, cores e nome.
+- [x] Personagens: 18 presets, normalização, unicidade de ids, cores e nome.
 - [x] Pets: 4 tipos, 8 cores, normalização e persistência no personagem.
 - [x] Armas mágicas: itens, receitas, uso e projéteis sem dano.
 - [x] Mundos prontos: 6 entradas únicas, modos e seeds.
@@ -25,6 +26,9 @@ Cobertura atual:
 - [x] Companheiro 3D segue o jogador e reage a ações.
 - [x] Pouso seguro: segurar Espaço por 4 s desliga o voo e esconde o hint.
 - [x] Multiplayer: convite, link, sync de bloco, saída e host-offline.
+- [x] Pacotes de conteúdo: JSON inválido, id inseguro, cor/bloco desconhecido e limites.
+- [x] Mapa local, diário de missões, busca/favoritos, pacotes e pausa cobertos pelo script de prints.
+- [x] Assinatura release: APK, AAB e splits por ABI verificados com `apksigner`/`jarsigner`.
 
 ## 2. Roteiro manual: primeira sessão (criança)
 
@@ -46,6 +50,11 @@ Cobertura atual:
 | 14 | Voar e segurar Espaço por 4 s | Jogador desce e pousa sem queda brusca |
 | 15 | Coletar muitos itens | Mochila cresce e nada é perdido |
 | 16 | Alternar pacote gráfico | Preferência salva e visual muda |
+| 17 | Abrir mapa com Tab | Biomas, baús, NPCs e jogador aparecem |
+| 18 | Abrir missões com J | Progresso e barras coerentes com os stats |
+| 19 | Buscar e favoritar item | Resumo filtra, favorito persiste e hotbar não some |
+| 20 | Instalar pacote JSON | Paleta muda, blocos entram na paleta criativa |
+| 21 | Desfazer/refazer | Blocos e baús voltam sem duplicar |
 
 ## 3. Matriz de dispositivos
 
@@ -72,6 +81,11 @@ Cobertura atual:
 - Pouso cancelado ao soltar Espaço antes de 4 s.
 - Mochila no limite técnico de 512 linhas.
 - Pacote gráfico `turbo` com `prefers-reduced-motion`.
+- Pacote JSON com HTML no nome (deve ser renderizado como texto).
+- Pacote JSON com bloco inexistente ou paleta fora da allowlist.
+- Mapa aberto perto de borda de chunk e com baú em chunk não carregado.
+- Missão com stats ausentes/corrompidos.
+- Undo depois de quebrar um baú com itens.
 
 ## 5. Acessibilidade
 
@@ -94,8 +108,8 @@ Cobertura atual:
 - Multiplayer só conecta após ação explícita; PeerJS Cloud é usado para signaling.
 - Nenhum `innerHTML` com nome de mundo/seed/personagem.
 - Importação rejeita campos desconhecidos perigosos.
-- Nenhum dado pessoal solicitado; sem chat ou contas.
-- Nome, personagem, coordenadas, blocos, baús e patches são sanitizados.
+- Nenhum dado pessoal solicitado; chat apenas com allowlist de frases e sem contas.
+- Nome, personagem, coordenadas, blocos, baús, patches e frases de chat são sanitizados.
 
 ## 8. Critérios de release
 
@@ -106,3 +120,5 @@ Cobertura atual:
 - Mobile sem overflow, header legível e cards de cidade em uma coluna.
 - Pet e NPC não causam erros no console em 10 min.
 - Documentação e specs atualizadas.
+- 15 prints gerados por `npm run screenshots` e revisados visualmente.
+- APK/AAB assinados com certificado `CN=Lulicraft` e versão `1.4.1` (`15`).

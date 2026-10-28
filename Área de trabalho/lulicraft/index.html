@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101a26">
+  <meta name="author" content="guidev94">
   <meta name="description" content="Lulicraft: sandbox de blocos cozy com mundos autorais, personagens, itens raros e multiplayer por convite. Explore, construa e devolva a cor ao mundo.">
   <title>Lulicraft: um mundo de blocos, luz e descobertas</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23b8ff6a'/%3E%3Cpath d='M24 16h10v24h14v8H24z' fill='%23101a26'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="logo-mark.svg">
+  <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -128,7 +130,8 @@
       <footer class="menu-footer">
         <span>Feito para jogar junto.</span>
         <span>Sem contas. Sem anúncios. Multiplayer usa conexão direta entre navegadores.</span>
-        <span class="footer-version">v1.0 · spec-driven</span>
+        <span class="footer-credit">© 2026 <a href="https://github.com/guidev94" target="_blank" rel="noopener noreferrer">guidev94</a></span>
+        <span class="footer-version">v1.3 · spec-driven</span>
       </footer>
     </section>
 
@@ -164,11 +167,25 @@
         </div>
         <div class="hud-right">
           <div id="hud-coords" class="stat-chip hidden" title="Coordenadas">X 0 · Y 0 · Z 0</div>
+          <div id="pet-chip" class="stat-chip pet-chip hidden" role="button" tabindex="0" title="Clique para alternar entre seguir e ficar">
+            <span class="pet-chip-dot" aria-hidden="true"></span>
+            <span id="pet-chip-name">Lumi</span>
+            <span id="pet-chip-hearts" class="pet-hearts">♥♥♥</span>
+            <span id="pet-chip-mode" class="pet-mode-label">Segue</span>
+          </div>
           <div id="hud-players" class="stat-chip" title="Exploradores online">◈ 1 online</div>
+          <button id="btn-quick-chat" class="icon-btn quick-chat-btn hidden" title="Falas rápidas" aria-label="Abrir falas rápidas" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></svg>
+          </button>
           <div id="clock-chip" class="stat-chip" title="Hora do mundo">
             <span id="clock-icon" aria-hidden="true">☀</span>
             <span id="clock-text">Manhã</span>
           </div>
+          <div id="fps-chip" class="stat-chip hidden" title="Quadros por segundo">60 FPS</div>
+          <button id="btn-view" class="icon-btn view-btn" title="Alternar visão (F5)" aria-label="Alternar primeira e terceira pessoa" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="view-btn-label" aria-hidden="true">1ª</span>
+          </button>
           <button id="btn-sound" class="icon-btn" title="Som" aria-label="Alternar som">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"/></svg>
           </button>
@@ -185,7 +202,14 @@
       </div>
 
       <div id="buffs" class="buffs"></div>
-      <div id="crosshair" class="crosshair" aria-hidden="true"></div>
+      <div id="crosshair" class="crosshair" aria-hidden="true">
+        <span class="crosshair-ring"></span>
+        <span class="crosshair-dot"></span>
+      </div>
+      <div id="target-chip" class="target-chip hidden" aria-live="polite">
+        <strong id="target-name">Bloco</strong>
+        <span id="target-action">Segure para quebrar</span>
+      </div>
       <div id="hint" class="hint">Clique para capturar o mouse · WASD para andar</div>
       <div id="landing-hint" class="landing-hint hidden" aria-live="polite">
         <span>Segure Espaço para pousar</span>
@@ -201,6 +225,10 @@
         <div id="joystick" class="joystick" aria-label="Controle de movimento">
           <div id="joystick-knob" class="joystick-knob"></div>
         </div>
+        <button id="btn-view-touch" class="touch-btn small touch-view" aria-label="Alternar primeira e terceira pessoa" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>1ª</span>
+        </button>
         <div class="touch-actions">
           <button id="btn-fly" class="touch-btn small" aria-label="Alternar voo">V</button>
           <button id="btn-jump" class="touch-btn" aria-label="Pular">↑</button>
@@ -211,16 +239,49 @@
         </div>
       </div>
 
+      <div id="rotate-hint" class="rotate-hint hidden" aria-live="polite">
+        <span aria-hidden="true">↻</span>
+        <strong>Gire o celular</strong>
+        <small>Paisagem deixa a exploração mais confortável.</small>
+      </div>
+
       <div id="hand" class="hand hidden" aria-hidden="true"><img id="hand-item" alt=""></div>
 
       <div class="hud-bottom">
+        <div id="item-label" class="item-label" aria-live="polite" aria-atomic="true"></div>
         <div id="hotbar" class="hotbar" role="toolbar" aria-label="Barra rápida"></div>
         <div class="hud-hint-row">
-          <span id="hint-text">E mochila · C forja · F5 visão · F11 tela cheia</span>
+          <span id="hint-text">E mochila · C forja · B paleta · Ctrl+Z desfazer · G pet · F5 visão</span>
           <button id="btn-inventory" class="ghost-btn small">Mochila</button>
         </div>
       </div>
+
+      <aside id="quick-chat" class="quick-chat hidden" aria-label="Falas rápidas" aria-live="polite">
+        <header class="quick-chat-head">
+          <div>
+            <span class="eyebrow">Sem texto livre</span>
+            <strong>Falas rápidas</strong>
+          </div>
+          <button id="btn-chat-close" class="close-btn small" aria-label="Fechar falas rápidas">×</button>
+        </header>
+        <div id="chat-feed" class="chat-feed" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <div id="chat-phrases" class="chat-phrases"></div>
+        <small class="chat-safety">Escolha uma frase pronta. O Lulicraft nunca pede nome, endereço ou senha.</small>
+      </aside>
     </section>
+
+    <aside id="map-overlay" class="map-overlay hidden" aria-label="Mapa local">
+      <header class="map-head">
+        <div>
+          <span class="eyebrow">Ao seu redor</span>
+          <strong>Mapa de Lumi</strong>
+        </div>
+        <button id="btn-map-close" class="close-btn small" type="button" aria-label="Fechar mapa">×</button>
+      </header>
+      <canvas id="map-canvas" width="384" height="384" aria-label="Mapa de biomos e construções"></canvas>
+      <div id="map-legend" class="map-legend"></div>
+      <small class="map-tip">Tab abre e fecha. O mapa mostra 64 blocos ao redor.</small>
+    </aside>
 
     <div id="pickup-feed" class="pickup-feed" aria-live="polite" aria-atomic="false"></div>
     <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
@@ -240,9 +301,25 @@
           <button data-tab="craft" class="tab">Forja</button>
           <button data-tab="album" class="tab">Coleção</button>
         </nav>
+        <div id="inventory-tools" class="inventory-tools">
+          <label class="inventory-search">
+            <span>Buscar</span>
+            <input id="inventory-search" type="search" maxlength="32" placeholder="Nome do item ou bloco" autocomplete="off">
+          </label>
+          <label class="inventory-sort">
+            <span>Ordenar</span>
+            <select id="inventory-sort">
+              <option value="name">Nome</option>
+              <option value="rarity">Raridade</option>
+              <option value="count">Quantidade</option>
+              <option value="favorite">Favoritos primeiro</option>
+            </select>
+          </label>
+          <button id="btn-inventory-favorites" class="ghost-btn small" type="button" aria-pressed="false">Favoritos</button>
+        </div>
         <div id="inventory-body" class="inventory-body"></div>
         <footer class="modal-foot">
-          <span id="inventory-hint">Clique para pegar · Shift+clique para mover</span>
+          <span id="inventory-hint">Clique para pegar · Shift+clique para mover · B paleta</span>
           <button id="btn-creative-palette" class="ghost-btn hidden">Paleta criativa</button>
         </footer>
       </section>
@@ -288,6 +365,8 @@
             <button id="btn-resume" class="primary-btn">Continuar</button>
             <button id="btn-save" class="secondary-btn">Salvar agora</button>
             <button id="btn-invite" class="ghost-btn">Convidar amigos</button>
+            <button id="btn-pause-map" class="ghost-btn">Mapa local</button>
+            <button id="btn-pause-missions" class="ghost-btn">Missões</button>
             <button id="btn-pause-photo" class="ghost-btn">Modo foto</button>
             <button id="btn-third-person" class="ghost-btn">Visão 3ª pessoa (F5)</button>
             <button id="btn-pause-fullscreen" class="ghost-btn">Tela cheia (F11)</button>
@@ -295,6 +374,7 @@
             <button id="btn-world-code" class="ghost-btn">Código do mundo</button>
             <button id="btn-pause-settings" class="ghost-btn">Configurações</button>
             <button id="btn-quit" class="ghost-btn danger">Sair para o menu</button>
+            <button id="btn-native-home" class="ghost-btn danger hidden">Voltar ao início do app</button>
           </div>
           <div class="pause-note">Tudo é salvo automaticamente a cada 15 segundos.</div>
         </div>
@@ -382,7 +462,7 @@
                 <input id="join-code" type="text" maxlength="5" placeholder="ABC12" autocomplete="off" spellcheck="false">
               </label>
               <button id="btn-join-room" class="primary-btn">Entrar na sala</button>
-              <small class="multiplayer-note">Conexão direta entre navegadores (WebRTC). Sem contas e sem chat.</small>
+              <small class="multiplayer-note">Conexão direta entre navegadores (WebRTC). Sem contas. Chat apenas com frases prontas.</small>
             </div>
           </div>
         </div>
@@ -396,16 +476,17 @@
         <header class="modal-head">
           <div>
             <span class="eyebrow">Seu explorador</span>
-            <h2 id="character-title">Skins e personagem</h2>
+            <h2 id="character-title">Lumi Crew</h2>
           </div>
           <button class="close-btn" data-close="character" aria-label="Fechar personagem">×</button>
         </header>
         <div class="character-body">
           <div class="character-stage">
-            <div id="character-preview" class="character-preview accessory-leaf" aria-hidden="true">
+            <div id="character-preview" class="character-preview" aria-hidden="true">
               <div class="avatar-shadow"></div>
               <div class="avatar-platform"></div>
-              <div class="avatar-hair"></div>
+              <div class="avatar-back"></div>
+              <div class="avatar-hair"><span class="avatar-hair-extra"></span></div>
               <div class="avatar-head">
                 <span class="avatar-ear left"></span>
                 <span class="avatar-ear right"></span>
@@ -423,16 +504,20 @@
                 <span class="avatar-collar"></span>
                 <span class="avatar-belt"></span>
                 <span class="avatar-pocket"></span>
+                <span class="avatar-outfit-detail"></span>
               </div>
               <div class="avatar-arm left"><span class="avatar-hand"></span></div>
               <div class="avatar-arm right"><span class="avatar-hand"></span></div>
               <div class="avatar-leg left"><span class="avatar-shoe"></span></div>
               <div class="avatar-leg right"><span class="avatar-shoe"></span></div>
               <div class="avatar-accessory"></div>
+              <div class="avatar-glasses"></div>
               <div id="pet-preview" class="pet-preview" aria-hidden="true">
                 <span class="pet-tail"></span>
                 <span class="pet-ear left"></span>
                 <span class="pet-ear right"></span>
+                <span class="pet-wing left"></span>
+                <span class="pet-wing right"></span>
                 <span class="pet-body"></span>
                 <span class="pet-head"></span>
                 <span class="pet-eye left"></span>
@@ -441,27 +526,62 @@
               </div>
             </div>
             <strong id="character-preview-name" class="character-preview-name">Lumi</strong>
-            <small>Seu personagem aparece nas fotos e no multiplayer.</small>
+            <small>Personagens autorais do Lumi Crew aparecem nas fotos e no multiplayer.</small>
           </div>
           <div class="character-controls">
-            <label class="field">
-              <span>Nome do personagem</span>
-              <input id="character-name" type="text" maxlength="16" placeholder="Lumi" autocomplete="off">
-            </label>
+            <div class="character-name-row">
+              <label class="field">
+                <span>Nome do personagem</span>
+                <input id="character-name" type="text" maxlength="16" placeholder="Lumi" autocomplete="off">
+              </label>
+              <button id="btn-character-random" class="ghost-btn small" type="button" title="Sortear um visual completo">Sortear visual</button>
+            </div>
             <div class="field">
-              <span>Skins</span>
+              <span>Estilos prontos</span>
               <div id="character-presets" class="character-presets"></div>
             </div>
-            <div id="character-colors" class="character-colors"></div>
+            <div class="wardrobe-grid">
+              <div class="field">
+                <span>Cabelo</span>
+                <div id="character-hair" class="style-options"></div>
+              </div>
+              <div class="field">
+                <span>Roupa</span>
+                <div id="character-outfits" class="style-options"></div>
+              </div>
+              <div class="field">
+                <span>Chapéu</span>
+                <div id="character-hats" class="style-options"></div>
+              </div>
+              <div class="field">
+                <span>Óculos</span>
+                <div id="character-glasses" class="style-options"></div>
+              </div>
+              <div class="field">
+                <span>Costas</span>
+                <div id="character-backs" class="style-options"></div>
+              </div>
+            </div>
+            <div class="field">
+              <span>Cores do traje</span>
+              <div id="character-colors" class="character-colors"></div>
+            </div>
             <div class="field">
               <span>Skin de arma</span>
               <div id="weapon-skins" class="weapon-skins"></div>
             </div>
-            <div class="field">
+            <div class="field pet-field">
               <span>Companheiro</span>
               <div id="pet-types" class="pet-types"></div>
-              <div id="pet-colors" class="pet-colors"></div>
+              <div class="pet-name-row">
+                <label class="field compact">
+                  <span>Nome do pet</span>
+                  <input id="pet-name" type="text" maxlength="14" placeholder="Lumi" autocomplete="off">
+                </label>
+                <div id="pet-colors" class="pet-colors"></div>
+              </div>
               <small id="pet-preview-label" class="pet-preview-label">Lumi, sua companhia.</small>
+              <small class="pet-command-hint">No mundo: <b>G</b> faz carinho · <b>H</b> alterna seguir/ficar · petisco abre interações.</small>
             </div>
           </div>
         </div>
@@ -494,6 +614,21 @@
         </footer>
       </section>
 
+      <section id="missions-modal" class="modal missions-modal hidden" role="dialog" aria-modal="true" aria-labelledby="missions-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Diário de Lumi</span>
+            <h2 id="missions-title">Missões de Lumi</h2>
+          </div>
+          <button class="close-btn" data-close="missions-modal" aria-label="Fechar missões">×</button>
+        </header>
+        <div id="missions-list" class="missions-list"></div>
+        <footer class="modal-foot">
+          <span>Pressione J para abrir este diário.</span>
+          <button id="btn-missions-close" class="primary-btn">Continuar explorando</button>
+        </footer>
+      </section>
+
       <section id="settings-modal" class="modal settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <header class="modal-head">
           <div>
@@ -503,33 +638,132 @@
           <button class="close-btn" data-close="settings" aria-label="Fechar configurações">×</button>
         </header>
         <div class="settings-body">
-          <label class="toggle-row">
-            <span><strong>Som</strong><small>Efeitos suaves de descoberta e construção.</small></span>
-            <input id="setting-sound" type="checkbox" checked>
-          </label>
-          <label class="toggle-row">
-            <span><strong>Tutorial</strong><small>Mostrar o guia de 4 passos.</small></span>
-            <button id="btn-replay-tutorial" class="ghost-btn small">Rever tutorial</button>
-          </label>
-          <label class="field">
-            <span>Sensibilidade do mouse <small id="sens-value">1.0×</small></span>
-            <input id="setting-sens" type="range" min="0.4" max="2.2" step="0.1" value="1">
-          </label>
-          <label class="toggle-row">
-            <span><strong>Coordenadas no HUD</strong><small>Mostra X, Y e Z durante o jogo.</small></span>
-            <input id="setting-coords" type="checkbox">
-          </label>
-          <label class="field">
-            <span>Pacote visual <small>mods gráficos leves</small></span>
-            <select id="setting-graphics">
-              <option value="auto">Cozy automático</option>
-              <option value="pixel">Pixel suave</option>
-              <option value="turbo">Turbo leve</option>
-            </select>
-          </label>
+          <section class="settings-group" aria-labelledby="settings-audio-title">
+            <h3 id="settings-audio-title" class="settings-group-title">Áudio e câmera</h3>
+            <label class="toggle-row">
+              <span><strong>Som</strong><small>Efeitos suaves de descoberta e construção.</small></span>
+              <input id="setting-sound" type="checkbox" checked>
+            </label>
+            <label class="field">
+              <span>Sensibilidade do mouse <small id="sens-value">1.0×</small></span>
+              <input id="setting-sens" type="range" min="0.4" max="2.2" step="0.1" value="1">
+            </label>
+            <label class="field">
+              <span>Sensibilidade do toque <small id="touchsens-value">1.6×</small></span>
+              <input id="setting-touchsens" type="range" min="0.6" max="2.6" step="0.1" value="1.6">
+            </label>
+            <label class="toggle-row">
+              <span><strong>Inverter eixo Y</strong><small>Arrastar para cima olha para baixo.</small></span>
+              <input id="setting-invert" type="checkbox">
+            </label>
+            <label class="field">
+              <span>Campo de visão <small id="fov-value">74°</small></span>
+              <input id="setting-fov" type="range" min="60" max="100" step="1" value="74">
+            </label>
+            <label class="toggle-row">
+              <span><strong>Balanço ao caminhar</strong><small>Balanço suave da câmera e do item.</small></span>
+              <input id="setting-viewbob" type="checkbox" checked>
+            </label>
+          </section>
+
+          <section class="settings-group" aria-labelledby="settings-controls-title">
+            <h3 id="settings-controls-title" class="settings-group-title">Controles</h3>
+            <label class="toggle-row">
+              <span><strong>Modo canhoto</strong><small>Espelha o item e aproxima os botões da esquerda.</small></span>
+              <input id="setting-lefthand" type="checkbox">
+            </label>
+            <label class="toggle-row">
+              <span><strong>Começar em 3ª pessoa</strong><small>Bom para quem gosta de ver o personagem.</small></span>
+              <input id="setting-third" type="checkbox">
+            </label>
+            <label class="field">
+              <span>Escala da interface</span>
+              <select id="setting-uiscale">
+                <option value="compact">Compacta</option>
+                <option value="normal">Padrão</option>
+                <option value="large">Ampliada</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="settings-group" aria-labelledby="settings-hud-title">
+            <h3 id="settings-hud-title" class="settings-group-title">Interface e desempenho</h3>
+            <label class="toggle-row">
+              <span><strong>Coordenadas no HUD</strong><small>Mostra X, Y e Z durante o jogo.</small></span>
+              <input id="setting-coords" type="checkbox">
+            </label>
+            <label class="toggle-row">
+              <span><strong>Contador de FPS</strong><small>Ajuda a ajustar o pacote visual.</small></span>
+              <input id="setting-fps" type="checkbox">
+            </label>
+            <label class="toggle-row">
+              <span><strong>Partículas ambientais</strong><small>Vaga-lumes, pétalas e neve.</small></span>
+              <input id="setting-particles" type="checkbox" checked>
+            </label>
+            <label class="toggle-row">
+              <span><strong>Nuvens</strong><small>Camada de nuvens no céu.</small></span>
+              <input id="setting-clouds" type="checkbox" checked>
+            </label>
+            <label class="field">
+              <span>Pacote visual <small>mods gráficos leves</small></span>
+              <select id="setting-graphics">
+                <option value="auto">Cozy automático</option>
+                <option value="pixel">Pixel suave</option>
+                <option value="turbo">Turbo leve</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="settings-group" aria-labelledby="settings-help-title">
+            <h3 id="settings-help-title" class="settings-group-title">Ajuda</h3>
+            <label class="toggle-row">
+              <span><strong>Tutorial</strong><small>Mostrar o guia de 4 passos.</small></span>
+              <button id="btn-replay-tutorial" class="ghost-btn small">Rever tutorial</button>
+            </label>
+          </section>
+
+          <section class="settings-group" aria-labelledby="settings-content-title">
+            <h3 id="settings-content-title" class="settings-group-title">Conteúdo</h3>
+            <label class="toggle-row">
+              <span><strong>Pacotes de conteúdo</strong><small>Paletas e blocos extras em JSON, sem código executável.</small></span>
+              <button id="btn-packs" class="ghost-btn small">Gerenciar</button>
+            </label>
+          </section>
+
           <div class="settings-note">O single-player não coleta dados. O multiplayer usa WebRTC direto após um convite; o PeerJS Cloud só faz a sinalização.</div>
+          <div class="settings-credit">© 2026 <a href="https://github.com/guidev94" target="_blank" rel="noopener noreferrer">guidev94</a> · feito com carinho para jogar junto</div>
         </div>
-        <footer class="modal-foot"><button id="btn-settings-done" class="primary-btn">Pronto</button></footer>
+        <footer class="modal-foot">
+          <button id="btn-settings-reset" class="ghost-btn">Restaurar padrões</button>
+          <button id="btn-settings-done" class="primary-btn">Pronto</button>
+        </footer>
+      </section>
+
+      <section id="packs-modal" class="modal packs-modal hidden" role="dialog" aria-modal="true" aria-labelledby="packs-title">
+        <header class="modal-head">
+          <div>
+            <span class="eyebrow">Conteúdo seguro</span>
+            <h2 id="packs-title">Pacotes de conteúdo</h2>
+          </div>
+          <button class="close-btn" data-close="packs" aria-label="Fechar pacotes">×</button>
+        </header>
+        <div class="packs-body">
+          <div id="packs-list" class="packs-list"></div>
+          <label class="field">
+            <span>Cole um pacote JSON <small>até 64 KB</small></span>
+            <textarea id="pack-json" rows="7" spellcheck="false" placeholder='{"version":1,"id":"aurora","name":"Aurora","palette":{"lumi":"#b8ff6a"},"blocks":[1,14]}'></textarea>
+          </label>
+          <div class="packs-actions">
+            <button id="btn-pack-example" class="ghost-btn small">Usar exemplo</button>
+            <label class="ghost-btn small file-label">Importar arquivo<input id="pack-file" type="file" accept="application/json,.json" hidden></label>
+            <button id="btn-pack-import" class="primary-btn small">Instalar pacote</button>
+          </div>
+          <p id="pack-feedback" class="pack-feedback" role="status"></p>
+        </div>
+        <footer class="modal-foot">
+          <span>Pacotes mudam só cores e blocos da paleta criativa.</span>
+          <button id="btn-packs-close" class="primary-btn">Pronto</button>
+        </footer>
       </section>
 
       <section id="code-modal" class="modal code-modal hidden" role="dialog" aria-modal="true" aria-labelledby="code-title">

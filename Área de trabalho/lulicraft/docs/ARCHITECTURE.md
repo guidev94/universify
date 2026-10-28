@@ -23,6 +23,8 @@ src/
   game/community.js      mundos curados da comunidade
   game/brazil.js         mundos inspirados em cidades brasileiras
   game/seeds.js          seeds aleatórias e nomes de mundo
+  game/build-history.js  undo/redo de blocos e baús
+  game/content-packs.js  pacotes JSON, allowlist e paleta ativa
   game/multiplayer.js    PeerJS P2P, salas, protocolo e sanitização
   game/audio.js          WebAudio procedural
   game/ui.js             HUD, modais, tutorial, cartões
@@ -38,10 +40,13 @@ main.js
   ├─ ChunkManager.update(player) → gera/mesha raio 4
   ├─ Player.update(dt) → física + colisão + câmera
   ├─ Interaction → raycast → break/place → World.setBlock → diff
+  ├─ BuildHistory → undo/redo de blocos e baús
   ├─ Multiplayer.update() → player/block/chest sync (se conectado)
   ├─ UI.render() → hotbar, buffs, toasts, jogadores, pets, NPCs e hints
   ├─ updateCompanion() → pet segue, reage e anima
-  ├─ updateNpcs() → proximidade, fala e tecla R
+  ├─ updateNpcs() → rotina, proximidade, fala e tecla R
+  ├─ drawMap() → canvas 2D sob demanda (Tab)
+  ├─ currentMissions() → progresso derivado de stats (J)
   └─ Save.autosave() a cada 15 s (host/single-player)
 ```
 
@@ -63,6 +68,11 @@ main.js
 | Ranking local por tempo | Ranking global | Sem contas, sem competição entre crianças |
 | Mochila expansível em memória | Slots fixos | Evita perda de itens e mantém save simples |
 | Pacotes gráficos via CSS | Builds separados | Ajuste imediato sem pipeline |
+| Histórico de construção em memória | Log persistente | Undo/redo leve; save continua só com diffs |
+| Mapa em canvas 2D | Minimapa 3D | Barato, legível e sem segunda câmera |
+| Pacotes JSON com allowlist | Mods com JS | Conteúdo de comunidade sem execução de código |
+| Missões derivadas de stats | Estado de missão no save | Menos migração e menos bugs |
+| Vilas no gerador de chunk | Estruturas manuais | Descoberta procedural determinística |
 
 ## Modelo de dados
 
@@ -106,11 +116,11 @@ Ver `.specs/features/save-worlds/design.md`.
 - Máximo de 6 jogadores; host retransmite mensagens e mantém o snapshot.
 - Estado sincronizado: posição/yaw/pitch, blocos, baús, patches de chunk e lista de jogadores.
 - Convidado recebe starter kit, não salva o mundo durante a sala e continua localmente se o host sair.
-- Sem chat, voz, contas, matchmaking público ou moderação.
+- Chat por allowlist de frases prontas com rate limit; sem texto livre, voz, contas, matchmaking público ou moderação.
 
 ### Protocolo resumido
 
-`welcome`, `hello`, `join`, `player`, `block`, `chest`, `patch`, `players`, `leave`, `left`.
+`welcome`, `hello`, `join`, `player`, `block`, `chest`, `patch`, `chat`, `players`, `leave`, `left`.
 
 ## Segurança
 

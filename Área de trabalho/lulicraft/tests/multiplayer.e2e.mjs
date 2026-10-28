@@ -228,6 +228,30 @@ try {
   await wait(1500);
   const guestBlock = await guest.evaluate(`window.__lulicraft.world.getBlock(${block.x}, ${block.y}, ${block.z})`);
 
+  console.log('testing safe chat');
+  const chat = await host.evaluate(`(() => {
+    const mp = window.__lulicraft.multiplayer;
+    const first = mp.sendChat('hello');
+    const invalid = mp.sendChat('<img src=x onerror=alert(1)>');
+    const rate = mp.sendChat('thanks');
+    window.__lulicraft.ui.setChatAvailable(true);
+    window.__lulicraft.ui.toggleChat(true);
+    return {
+      first,
+      invalid,
+      rate,
+      feed: document.querySelectorAll('#chat-feed .chat-line').length,
+      text: document.querySelector('#chat-feed .chat-line')?.textContent || '',
+      phrases: document.querySelectorAll('#chat-phrases .chat-phrase').length
+    };
+  })()`);
+  await wait(1200);
+  const guestChat = await guest.evaluate(`(() => ({
+    feed: document.querySelectorAll('#chat-feed .chat-line').length,
+    text: document.querySelector('#chat-feed .chat-line')?.textContent || '',
+    injected: document.querySelector('#chat-feed')?.innerHTML.includes('<img')
+  }))()`);
+
   console.log('testing guest leave');
   await guest.evaluate('window.__lulicraft.multiplayer.leave()');
   await wait(1500);
@@ -259,6 +283,8 @@ try {
     guestRole: guestInfo.role,
     hudPlayers,
     guestBlock,
+    chat,
+    guestChat,
     hostAfterGuestLeave,
     guestAfterHostLeave,
     exceptions: host.exceptions.length + guest.exceptions.length,
@@ -273,6 +299,12 @@ try {
   if (guestInfo.role !== 'guest') failures.push(`guest role: ${guestInfo.role}`);
   if (!hudPlayers.includes('2')) failures.push(`hud players: ${hudPlayers}`);
   if (guestBlock !== 5) failures.push(`guest block: ${guestBlock}`);
+  if (chat.first !== 'sent') failures.push(`chat send: ${JSON.stringify(chat)}`);
+  if (chat.invalid !== 'invalid') failures.push(`chat invalid allowlist: ${JSON.stringify(chat)}`);
+  if (chat.rate !== 'rate') failures.push(`chat rate limit: ${JSON.stringify(chat)}`);
+  if (chat.phrases !== 12) failures.push(`chat phrases: ${chat.phrases}`);
+  if (chat.feed !== 1 || !chat.text.includes('Oi!')) failures.push(`host chat feed: ${JSON.stringify(chat)}`);
+  if (guestChat.feed !== 1 || !guestChat.text.includes('Oi!') || guestChat.injected) failures.push(`guest chat feed: ${JSON.stringify(guestChat)}`);
   if (hostAfterGuestLeave !== 1) failures.push(`host players after leave: ${hostAfterGuestLeave}`);
   if (!guestAfterHostLeave.running) failures.push('guest stopped after host left');
   if (guestAfterHostLeave.role !== null) failures.push(`guest role after host left: ${guestAfterHostLeave.role}`);

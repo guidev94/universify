@@ -106,6 +106,14 @@ let server = null;
 let chrome = null;
 let cdp = null;
 
+async function waitForTrue(expression, timeout = 6000) {
+  try {
+    return !!(await cdp.waitFor(expression, timeout));
+  } catch {
+    return false;
+  }
+}
+
 try {
   if (!existsSync(CHROME)) throw new Error(`Chrome not found at ${CHROME}`);
   server = spawn(PYTHON, ['-m', 'http.server', String(HTTP_PORT), '--bind', '127.0.0.1'], {
@@ -124,6 +132,10 @@ try {
     '--use-gl=swiftshader',
     '--enable-unsafe-swiftshader',
     '--ozone-platform=headless',
+    '--disable-background-timer-throttling',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+    '--disable-features=CalculateNativeWinOcclusion',
     '--noerrdialogs',
     '--no-first-run',
     '--window-size=1280,900',
@@ -139,6 +151,13 @@ try {
   await cdp.open();
   await cdp.send('Runtime.enable');
   await cdp.send('Page.enable');
+  await cdp.send('Page.bringToFront');
+  try {
+    await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: true });
+    await cdp.send('Page.setWebLifecycleState', { state: 'active' });
+  } catch {
+    // optional hardening, older Chrome builds may not support it
+  }
 
   await cdp.send('Page.navigate', { url: `http://127.0.0.1:${HTTP_PORT}/?menu=1&debug=1` });
   await cdp.waitFor('!!window.__lulicraft && !document.getElementById("menu").classList.contains("hidden")');
@@ -182,6 +201,18 @@ try {
   results.weaponSkins = await cdp.evaluate('document.querySelectorAll("#weapon-skins .weapon-skin").length');
   results.petTypes = await cdp.evaluate('document.querySelectorAll("#pet-types .pet-type").length');
   results.petColors = await cdp.evaluate('document.querySelectorAll("#pet-colors .pet-color").length');
+  results.hairStyles = await cdp.evaluate('document.querySelectorAll("#character-hair .style-option").length');
+  results.outfits = await cdp.evaluate('document.querySelectorAll("#character-outfits .style-option").length');
+  results.hats = await cdp.evaluate('document.querySelectorAll("#character-hats .style-option").length');
+  results.glasses = await cdp.evaluate('document.querySelectorAll("#character-glasses .style-option").length');
+  results.backs = await cdp.evaluate('document.querySelectorAll("#character-backs .style-option").length');
+  await cdp.evaluate('document.querySelector("[data-style-value=\\\"crown\\\"]").click()');
+  results.hatAfterClick = await cdp.evaluate('document.getElementById("character-preview").dataset.hat');
+  await cdp.evaluate(`
+    const petName = document.getElementById('pet-name');
+    petName.value = 'Nina';
+    petName.dispatchEvent(new Event('input', { bubbles: true }));
+  `);
   results.petPreview = await cdp.evaluate('document.getElementById("character-preview").dataset.pet');
   await cdp.evaluate('document.querySelector("[data-pet-type=\\\"coruja\\\"]").click()');
   results.petPreviewAfterClick = await cdp.evaluate('document.getElementById("character-preview").dataset.pet');
@@ -197,6 +228,7 @@ try {
   results.savedCharacter = await cdp.evaluate('JSON.parse(localStorage.getItem("lulicraft:settings")).character.name');
   results.savedWeaponSkin = await cdp.evaluate('JSON.parse(localStorage.getItem("lulicraft:settings")).character.weaponSkin');
   results.savedPetType = await cdp.evaluate('JSON.parse(localStorage.getItem("lulicraft:settings")).character.petType');
+  results.savedPetName = await cdp.evaluate('JSON.parse(localStorage.getItem("lulicraft:settings")).character.petName');
   await cdp.evaluate('document.getElementById("btn-settings").click()');
   await cdp.waitFor('!document.getElementById("settings-modal").classList.contains("hidden")');
   await cdp.evaluate(`
@@ -235,7 +267,7 @@ try {
     window.__lulicraft.player.position.set(npc.group.position.x, npc.baseY, npc.group.position.z + 2.2);
     return npc.def.name;
   })()`);
-  await wait(450);
+  await waitForTrue('!document.getElementById("npc-hint").classList.contains("hidden")', 6000);
   results.npcHintVisible = await cdp.evaluate('!document.getElementById("npc-hint").classList.contains("hidden")');
   results.npcTalk = await cdp.evaluate(`(() => {
     window.__lulicraft.talkToNpc();
@@ -253,6 +285,14 @@ try {
     window.__lulicraft.toggleThirdPerson();
     return { active: window.__lulicraft.thirdPerson, visible: !!window.__lulicraft.localAvatar?.visible };
   })()`);
+  results.viewButton = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    const btn = document.getElementById('btn-view');
+    btn.click();
+    const first = { third: g.thirdPerson, pressed: btn.getAttribute('aria-pressed'), label: btn.textContent.trim() };
+    btn.click();
+    return { first, back: g.thirdPerson, touchButton: !!document.getElementById('btn-view-touch') };
+  })()`);
   results.handSwing = await cdp.evaluate(`(() => {
     window.__lulicraft.ui.swingHand();
     return document.getElementById('hand').classList.contains('swing');
@@ -269,7 +309,7 @@ try {
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true }));
     return { fly: game.player.fly, hold: game.player.landingHold };
   })()`);
-  await wait(1800);
+  await waitForTrue('window.__lulicraft.player.fly === false', 8000);
   results.landingAfter = await cdp.evaluate(`(() => {
     window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space', key: ' ', bubbles: true }));
     return { fly: window.__lulicraft.player.fly, hintHidden: document.getElementById('landing-hint').classList.contains('hidden') };
@@ -283,6 +323,138 @@ try {
     window.__lulicraft.useWeapon(window.__lulicraft.getItem('bubble_wand'), null);
     return { ok: window.__lulicraft.projectiles.items.length > before, before, after: window.__lulicraft.projectiles.items.length };
   })()`);
+  results.viewmodel = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    if (g.thirdPerson) g.toggleThirdPerson();
+    const found = g.inventory.findSlot('aurora_pickaxe');
+    if (found && found.arr === g.inventory.hotbar) g.inventory.select(found.index);
+    return { third: g.thirdPerson };
+  })()`);
+  await waitForTrue('window.__lulicraft.viewModel.visible && window.__lulicraft.viewModel.children.length > 0', 6000);
+  results.viewmodelAfter = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    return { visible: g.viewModel.visible, children: g.viewModel.children.length, selected: g.inventory.selectedSlot()?.id || null };
+  })()`);
+  results.itemLabel = await cdp.evaluate(`(() => {
+    const slots = document.querySelectorAll('#hotbar .hotbar-slot');
+    slots[1]?.click();
+    const label = document.getElementById('item-label');
+    return {
+      visible: label.classList.contains('visible'),
+      text: label.textContent,
+      slot: window.__lulicraft.inventory.selectedSlot()?.id || null
+    };
+  })()`);
+  results.thirdCamera = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    g.toggleThirdPerson();
+    return { third: g.thirdPerson };
+  })()`);
+  await waitForTrue(`(() => {
+    const g = window.__lulicraft;
+    const dist = g.camera.position.distanceTo(g.localAvatar.position);
+    return g.localAvatar.visible && dist > 1.5 && dist < 6.5 && !g.viewModel.visible;
+  })()`, 8000);
+  results.thirdCameraAfter = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    return {
+      dist: g.camera.position.distanceTo(g.localAvatar.position),
+      avatarVisible: g.localAvatar.visible,
+      yawDelta: Math.abs(g.localAvatar.rotation.y - (g.player.yaw + Math.PI)),
+      viewmodelHidden: !g.viewModel.visible
+    };
+  })()`);
+  await cdp.evaluate('window.__lulicraft.toggleThirdPerson()');
+  await wait(250);
+  results.pet = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    if (g.companion) g.companion.position.copy(g.player.position);
+    const before = g.petHappiness;
+    g.petCompanion();
+    const after = g.petHappiness;
+    g.togglePetMode();
+    const stay = {
+      mode: g.petMode,
+      label: document.getElementById('pet-chip-mode').textContent,
+      chip: !document.getElementById('pet-chip').classList.contains('hidden')
+    };
+    g.togglePetMode();
+    return { before, after, bubble: !!g.petBubble, stay, back: g.petMode };
+  })()`);
+  results.petChipClick = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    document.getElementById('pet-chip').click();
+    const modeAfter = g.petMode;
+    const label = document.getElementById('pet-chip-mode').textContent;
+    g.togglePetMode();
+    return { modeAfter, label, restored: g.petMode };
+  })()`);
+  await wait(300);
+  results.ambient = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    return { particles: g.ambientField.items.length, clouds: g.cloudLayer.clouds.length, draw: g.ambientField.geometry.drawRange.count };
+  })()`);
+  results.miningSetup = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    if (g.thirdPerson) g.toggleThirdPerson();
+    const found = g.inventory.findSlot('aurora_pickaxe');
+    if (found && found.arr === g.inventory.hotbar) g.inventory.select(found.index);
+    const spawn = g.world.findSpawn();
+    g.player.position.set(spawn.x, spawn.y + 0.4, spawn.z);
+    g.player.velocity.set(0, 0, 0);
+    g.player.fly = false;
+    g.player.pitch = -1.5;
+    return { selected: g.inventory.selectedSlot()?.id || null };
+  })()`);
+  await waitForTrue('window.__lulicraft.player.onGround === true', 5000);
+  results.mining = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    g.player.pitch = -1.5;
+    g.player.velocity.set(0, 0, 0);
+    const hit = g.player.raycast();
+    if (!hit) return { hit: false };
+    window.__miningTarget = [hit.x, hit.y, hit.z];
+    window.__miningBrokeBefore = g.stats.blocksBroken;
+    const before = g.world.getBlock(hit.x, hit.y, hit.z);
+    g.startMining();
+    return { hit: true, before, block: hit.block };
+  })()`);
+  await waitForTrue(`(() => {
+    const g = window.__lulicraft;
+    return g.stats.blocksBroken > (window.__miningBrokeBefore || 0);
+  })()`, 8000);
+  results.miningAfter = await cdp.evaluate(`(() => {
+    const g = window.__lulicraft;
+    g.stopMining();
+    const target = window.__miningTarget || [0, 0, 0];
+    const after = g.world.getBlock(target[0], target[1], target[2]);
+    return {
+      broken: g.stats.blocksBroken > (window.__miningBrokeBefore || 0),
+      after,
+      progressReset: g.mining.progress === 0
+    };
+  })()`);
+  results.nativeSettings = await cdp.evaluate(`(() => {
+    const applied = window.LulicraftNative.setSettings({ fov: 84, leftHand: true, invertY: true, showCoords: true, touchSensitivity: 1.8 });
+    const state = window.LulicraftNative.getState();
+    return {
+      fov: window.__lulicraft.camera.fov,
+      appliedFov: applied.fov,
+      leftHand: document.body.dataset.leftHand,
+      invertY: window.LulicraftNative.getSettings().invertY,
+      touchSensitivity: window.LulicraftNative.getSettings().touchSensitivity,
+      showCoords: applied.showCoords,
+      running: state.running,
+      world: state.world,
+      thirdPerson: state.thirdPerson
+    };
+  })()`);
+  await wait(900);
+  results.nativeCoordsVisible = await cdp.evaluate(`(() => {
+    const visible = !document.getElementById('hud-coords').classList.contains('hidden');
+    window.LulicraftNative.setSettings({ fov: 74, leftHand: false, invertY: false, showCoords: false, touchSensitivity: 1 });
+    return visible;
+  })()`);
   results.exceptions = cdp.exceptions.length;
   results.consoleErrors = cdp.consoleErrors.length;
 
@@ -295,17 +467,23 @@ try {
   writeFileSync('/tmp/lulicraft-e2e.png', Buffer.from(shot.data, 'base64'));
 
   const failures = [];
-  if (results.prebuiltCards !== 6) failures.push(`prebuilt cards: ${results.prebuiltCards}`);
+  if (results.prebuiltCards !== 7) failures.push(`prebuilt cards: ${results.prebuiltCards}`);
   if (results.communityCards !== 6) failures.push(`community cards: ${results.communityCards}`);
   if (results.cityCards !== 6) failures.push(`city cards: ${results.cityCards}`);
   if (!results.randomWorldButton) failures.push('random world button missing');
   if (!results.characterButton) failures.push('character button missing');
-  if (results.presets !== 9) failures.push(`presets: ${results.presets}`);
+  if (results.presets !== 18) failures.push(`presets: ${results.presets}`);
   if (results.avatarDetails < 6) failures.push(`avatar details: ${results.avatarDetails}`);
-  if (results.swatches !== 30) failures.push(`swatches: ${results.swatches}`);
-  if (results.weaponSkins !== 4) failures.push(`weapon skins: ${results.weaponSkins}`);
+  if (results.swatches !== 42) failures.push(`swatches: ${results.swatches}`);
+  if (results.weaponSkins !== 6) failures.push(`weapon skins: ${results.weaponSkins}`);
   if (results.petTypes !== 4) failures.push(`pet types: ${results.petTypes}`);
   if (results.petColors !== 8) failures.push(`pet colors: ${results.petColors}`);
+  if (results.hairStyles !== 8) failures.push(`hair styles: ${results.hairStyles}`);
+  if (results.outfits !== 5) failures.push(`outfits: ${results.outfits}`);
+  if (results.hats !== 9) failures.push(`hats: ${results.hats}`);
+  if (results.glasses !== 4) failures.push(`glasses: ${results.glasses}`);
+  if (results.backs !== 5) failures.push(`backs: ${results.backs}`);
+  if (results.hatAfterClick !== 'crown') failures.push(`hat click: ${results.hatAfterClick}`);
   if (results.petPreview !== 'lumi') failures.push(`pet preview: ${results.petPreview}`);
   if (results.petPreviewAfterClick !== 'coruja') failures.push(`pet preview click: ${results.petPreviewAfterClick}`);
   if (!results.logoLoaded) failures.push('hero logo did not load');
@@ -313,6 +491,7 @@ try {
   if (results.savedCharacter !== 'Teste E2E') failures.push(`saved character: ${results.savedCharacter}`);
   if (results.savedWeaponSkin !== 'solar') failures.push(`saved weapon skin: ${results.savedWeaponSkin}`);
   if (results.savedPetType !== 'coruja') failures.push(`saved pet type: ${results.savedPetType}`);
+  if (results.savedPetName !== 'Nina') failures.push(`saved pet name: ${results.savedPetName}`);
   if (results.graphicsMode !== 'turbo') failures.push(`graphics mode: ${results.graphicsMode}`);
   if (results.savedGraphics !== 'turbo') failures.push(`saved graphics: ${results.savedGraphics}`);
   if (!results.running) failures.push('world did not start');
@@ -335,6 +514,28 @@ try {
   if (!results.handSwing) failures.push('hand swing missing');
   if (!results.pickupChip.includes('+3')) failures.push(`pickup chip: ${results.pickupChip}`);
   if (!results.weaponUse.ok) failures.push(`weapon use: ${JSON.stringify(results.weaponUse)}`);
+  if (!results.viewmodelAfter?.visible || results.viewmodelAfter.children < 1) failures.push(`viewmodel: ${JSON.stringify(results.viewmodelAfter)}`);
+  if (results.viewmodelAfter?.selected !== 'aurora_pickaxe') failures.push(`viewmodel selection: ${JSON.stringify(results.viewmodelAfter)}`);
+  if (!results.itemLabel?.visible || !results.itemLabel?.text) failures.push(`item label: ${JSON.stringify(results.itemLabel)}`);
+  if (results.petChipClick?.modeAfter !== 'stay' || results.petChipClick?.label !== 'Fica' || results.petChipClick?.restored !== 'follow') failures.push(`pet chip click: ${JSON.stringify(results.petChipClick)}`);
+  if (!results.thirdCameraAfter?.avatarVisible) failures.push('third person avatar hidden');
+  if (results.thirdCameraAfter?.yawDelta > 0.02) failures.push(`third person facing: ${JSON.stringify(results.thirdCameraAfter)}`);
+  if (results.thirdCameraAfter?.dist < 1.5 || results.thirdCameraAfter?.dist > 6.5) failures.push(`third person camera distance: ${JSON.stringify(results.thirdCameraAfter)}`);
+  if (!results.thirdCameraAfter?.viewmodelHidden) failures.push('viewmodel visible in third person');
+  if (!(results.pet?.after >= results.pet?.before)) failures.push(`pet happiness: ${JSON.stringify(results.pet)}`);
+  if (!results.pet?.bubble) failures.push('pet speech bubble missing');
+  if (results.pet?.stay?.mode !== 'stay' || results.pet?.stay?.label !== 'Fica' || !results.pet?.stay?.chip) failures.push(`pet stay: ${JSON.stringify(results.pet?.stay)}`);
+  if (results.pet?.back !== 'follow') failures.push(`pet follow restore: ${JSON.stringify(results.pet)}`);
+  if (!(results.ambient?.particles > 0) || !(results.ambient?.clouds > 0) || !(results.ambient?.draw > 0)) failures.push(`ambient: ${JSON.stringify(results.ambient)}`);
+  if (results.miningSetup?.selected !== 'aurora_pickaxe') failures.push(`mining setup: ${JSON.stringify(results.miningSetup)}`);
+  if (!results.mining?.hit || !results.miningAfter?.broken || results.miningAfter?.after !== 0 || !results.miningAfter?.progressReset) failures.push(`hold mining: ${JSON.stringify(results.mining)} ${JSON.stringify(results.miningAfter)}`);
+  if (results.viewButton?.first?.third !== false || results.viewButton?.first?.pressed !== 'false') failures.push(`view button first person: ${JSON.stringify(results.viewButton)}`);
+  if (results.viewButton?.back !== true || results.viewButton?.first?.label !== '1ª') failures.push(`view button restore: ${JSON.stringify(results.viewButton)}`);
+  if (!results.viewButton?.touchButton) failures.push('touch view button missing');
+  if (results.nativeSettings?.fov !== 84 || results.nativeSettings?.appliedFov !== 84) failures.push(`native fov: ${JSON.stringify(results.nativeSettings)}`);
+  if (results.nativeSettings?.leftHand !== 'true' || results.nativeSettings?.invertY !== true) failures.push(`native hand/invert: ${JSON.stringify(results.nativeSettings)}`);
+  if (results.nativeSettings?.touchSensitivity !== 1.8 || !results.nativeSettings?.showCoords || !results.nativeCoordsVisible) failures.push(`native touch/coords: ${JSON.stringify(results.nativeSettings)} ${results.nativeCoordsVisible}`);
+  if (!results.nativeSettings?.running || !results.nativeSettings?.world) failures.push(`native state: ${JSON.stringify(results.nativeSettings)}`);
   if (!results.autoPlay) failures.push('root did not auto quick play');
   if (!results.menuHiddenOnLoad) failures.push('menu visible on root load');
   if (results.exceptions > 0) failures.push(`runtime exceptions: ${results.exceptions}`);

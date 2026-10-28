@@ -1,4 +1,4 @@
-import { getItem, getItemIcon, getRarity, RARITY, COLLECTION_IDS, CREATIVE_PALETTE } from './items.js';
+import { getItem, getItemIcon, getRarity, rarityRank, RARITY, COLLECTION_IDS, CREATIVE_PALETTE } from './items.js';
 import { RECIPES } from './recipes.js';
 import { addToArrays, quickMove } from './inventory.js';
 import { thumbnailFor, encodeWorldCode, decodeWorldCode, getDaily } from './save.js';
@@ -9,6 +9,11 @@ import {
   DEFAULT_CHARACTER,
   PETS,
   PET_COLORS,
+  HAIR_STYLES,
+  OUTFITS,
+  HATS,
+  GLASSES,
+  BACK_ITEMS,
   characterFromPreset,
   getPet,
   normalizeCharacter
@@ -17,6 +22,8 @@ import { PREBUILT_WORLDS } from './prebuilt.js';
 import { COMMUNITY_WORLDS } from './community.js';
 import { BRAZIL_WORLDS } from './brazil.js';
 import { randomSeed } from './seeds.js';
+import { listContentPacks, parseContentPack, saveContentPack, removeContentPack, setActivePack, getActivePackId, getPackBlockIds } from './content-packs.js';
+import { CHAT_PHRASES, getChatPhrase } from './chat.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,6 +49,24 @@ const TUTORIAL_STEPS = [
     text: 'Minérios brilhantes, baús de santuário e árvores arco-íris escondem itens raros. Cada descoberta entra no seu Álbum.'
   }
 ];
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem('lulicraft:favorites');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveFavorites(favorites) {
+  try {
+    localStorage.setItem('lulicraft:favorites', JSON.stringify([...favorites]));
+  } catch {
+    // favorites are a convenience, never block the inventory
+  }
+}
 
 function el(tag, className = '', text = '') {
   const node = document.createElement(tag);
@@ -82,6 +107,8 @@ export class GameUI {
     this.chestOpen = false;
     this.pauseOpen = false;
     this.modalOpen = false;
+    this.itemLabelTimer = null;
+    this.lastItemLabelId = '';
     this.tutorialStep = 0;
     this.tutorialForce = false;
     this.createMode = 'adventure';
@@ -89,6 +116,12 @@ export class GameUI {
     this.multiplayerState = { status: 'idle', message: 'Crie uma sala ou entre com um convite.', code: '', invite: '', players: [], selfId: '' };
     this.lastPhotoInfo = null;
     this.toastTimers = new Set();
+    this.chatAvailable = false;
+    this.chatOpen = false;
+    this.inventoryQuery = '';
+    this.inventorySort = 'name';
+    this.favoritesOnly = false;
+    this.favorites = loadFavorites();
     this.bind();
   }
 
@@ -108,7 +141,41 @@ export class GameUI {
     $('btn-character')?.addEventListener('click', () => this.openCharacter());
     $('btn-multiplayer')?.addEventListener('click', () => this.openMultiplayer());
     $('btn-invite')?.addEventListener('click', () => this.openMultiplayer());
+    $('btn-quick-chat')?.addEventListener('click', () => this.toggleChat());
+    $('btn-chat-close')?.addEventListener('click', () => this.toggleChat(false));
+    $('chat-phrases')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-chat-id]');
+      if (!button) return;
+      this.actions.onChatPhrase?.(button.dataset.chatId);
+    });
     $('btn-tutorial-menu')?.addEventListener('click', () => this.openTutorial(true));
+    $('btn-missions-close')?.addEventListener('click', () => this.closeMissions());
+    $('btn-pause-map')?.addEventListener('click', () => this.actions.onOpenMap?.());
+    $('btn-pause-missions')?.addEventListener('click', () => this.actions.onOpenMissions?.());
+    $('btn-packs')?.addEventListener('click', () => this.openPacks());
+    $('btn-packs-close')?.addEventListener('click', () => this.closePacks());
+    $('btn-pack-example')?.addEventListener('click', () => {
+      if ($('pack-json')) $('pack-json').value = JSON.stringify({
+        version: 1,
+        id: 'aurora-suave',
+        name: 'Aurora Suave',
+        author: 'Lumi',
+        description: 'Uma paleta calma com cristais e flores.',
+        palette: { lumi: '#b8ff6a', pink: '#ff9edb', sky: '#8fe6ff' },
+        blocks: [1, 14, 22, 23]
+      }, null, 2);
+    });
+    $('btn-pack-import')?.addEventListener('click', () => this.installPack($('pack-json')?.value || ''));
+    $('pack-file')?.addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file) return;
+      if (file.size > 64 * 1024) {
+        this.packFeedback('O arquivo passa de 64 KB.', 'error');
+        return;
+      }
+      this.installPack(await file.text());
+    });
 
     document.querySelectorAll('[data-close]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -122,6 +189,8 @@ export class GameUI {
         else if (target === 'character') this.closeCharacter();
         else if (target === 'multiplayer') this.closeMultiplayer();
         else if (target === 'code') this.closeCode();
+        else if (target === 'missions-modal') this.closeMissions();
+        else if (target === 'packs') this.closePacks();
       });
     });
 
@@ -154,6 +223,20 @@ export class GameUI {
       this.renderInventory();
     });
 
+    $('inventory-search')?.addEventListener('input', (event) => {
+      this.inventoryQuery = String(event.target.value || '').slice(0, 32);
+      this.renderInventory();
+    });
+    $('inventory-sort')?.addEventListener('change', (event) => {
+      this.inventorySort = event.target.value;
+      this.renderInventory();
+    });
+    $('btn-inventory-favorites')?.addEventListener('click', () => {
+      this.favoritesOnly = !this.favoritesOnly;
+      $('btn-inventory-favorites')?.setAttribute('aria-pressed', this.favoritesOnly ? 'true' : 'false');
+      $('btn-inventory-favorites')?.classList.toggle('active', this.favoritesOnly);
+      this.renderInventory();
+    });
     $('inventory-body')?.addEventListener('pointerdown', (event) => this.handleSlotDown(event));
     $('inventory-body')?.addEventListener('contextmenu', (event) => this.handleSlotContext(event));
     $('chest-modal')?.addEventListener('pointerdown', (event) => this.handleSlotDown(event));
@@ -169,6 +252,16 @@ export class GameUI {
 
     $('btn-inventory')?.addEventListener('click', () => this.openInventory('backpack'));
     $('btn-creative-palette')?.addEventListener('click', () => this.openCreativePalette());
+    const petChip = $('pet-chip');
+    if (petChip) {
+      petChip.addEventListener('click', () => this.actions.onPetToggle?.());
+      petChip.addEventListener('keydown', (event) => {
+        if (event.code === 'Enter' || event.code === 'Space') {
+          event.preventDefault();
+          this.actions.onPetToggle?.();
+        }
+      });
+    }
 
     $('btn-pause')?.addEventListener('click', () => this.actions.onPause?.());
     $('btn-resume')?.addEventListener('click', () => this.closePause());
@@ -184,6 +277,9 @@ export class GameUI {
     $('btn-fullscreen')?.addEventListener('click', () => this.actions.onFullscreen?.());
     $('btn-pause-fullscreen')?.addEventListener('click', () => this.actions.onFullscreen?.());
     $('btn-third-person')?.addEventListener('click', () => this.actions.onThirdPerson?.());
+    for (const id of ['btn-view', 'btn-view-touch']) {
+      $(id)?.addEventListener('click', () => this.actions.onThirdPerson?.());
+    }
     $('btn-photo')?.addEventListener('click', () => this.actions.onPhoto?.());
     $('btn-photo-exit')?.addEventListener('click', () => this.closePhoto());
     $('btn-photo-download')?.addEventListener('click', () => this.actions.onPhotoDownload?.());
@@ -208,23 +304,76 @@ export class GameUI {
     $('character-presets')?.addEventListener('click', (event) => {
       const card = event.target.closest('[data-character-preset]');
       if (!card || !this.pendingCharacter) return;
-      const { name, weaponSkin, petType, petColor } = this.pendingCharacter;
+      const { name, weaponSkin, petType, petColor, petName } = this.pendingCharacter;
       this.pendingCharacter = characterFromPreset(card.dataset.characterPreset);
       this.pendingCharacter.name = name || this.pendingCharacter.name;
       this.pendingCharacter.weaponSkin = weaponSkin || this.pendingCharacter.weaponSkin;
       this.pendingCharacter.petType = petType || this.pendingCharacter.petType;
       this.pendingCharacter.petColor = petColor || this.pendingCharacter.petColor;
+      this.pendingCharacter.petName = petName || this.pendingCharacter.petName;
       this.renderCharacterEditor();
     });
     $('character-colors')?.addEventListener('click', (event) => {
       const swatch = event.target.closest('[data-character-part]');
       if (!swatch || !this.pendingCharacter) return;
       const part = swatch.dataset.characterPart;
-      if (!['skin', 'shirt', 'pants', 'hair'].includes(part)) return;
+      if (!['skin', 'shirt', 'pants', 'hair', 'shoes'].includes(part)) return;
       this.pendingCharacter[part] = swatch.dataset.color;
       this.pendingCharacter.custom = true;
       this.pendingCharacter.preset = 'custom';
       this.renderCharacterEditor();
+    });
+    const styleGroups = [
+      ['character-hair', 'hairStyle'],
+      ['character-outfits', 'outfit'],
+      ['character-hats', 'hat'],
+      ['character-glasses', 'glasses'],
+      ['character-backs', 'back']
+    ];
+    for (const [id, field] of styleGroups) {
+      $(id)?.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-style-value]');
+        if (!option || !this.pendingCharacter) return;
+        this.pendingCharacter[field] = option.dataset.styleValue;
+        this.pendingCharacter.custom = true;
+        this.pendingCharacter.preset = 'custom';
+        this.renderCharacterEditor();
+      });
+    }
+    $('btn-character-random')?.addEventListener('click', () => {
+      if (!this.pendingCharacter) return;
+      const pick = (list) => list[Math.floor(Math.random() * list.length)];
+      const preset = pick(CHARACTER_PRESETS);
+      const palette = {
+        skin: pick(COLOR_SWATCHES.skin),
+        shirt: pick(COLOR_SWATCHES.shirt),
+        pants: pick(COLOR_SWATCHES.pants),
+        hair: pick(COLOR_SWATCHES.hair),
+        shoes: pick(COLOR_SWATCHES.shoes)
+      };
+      const pet = pick(PETS);
+      this.pendingCharacter = {
+        ...this.pendingCharacter,
+        ...palette,
+        preset: 'custom',
+        custom: true,
+        hairStyle: pick(HAIR_STYLES).id,
+        outfit: pick(OUTFITS).id,
+        hat: pick(HATS).id,
+        glasses: pick(GLASSES).id,
+        back: pick(BACK_ITEMS).id,
+        accessory: preset.accessory,
+        petType: pet.id,
+        petColor: pick(PET_COLORS),
+        petName: pet.name
+      };
+      this.pendingCharacter.name = preset.name;
+      this.renderCharacterEditor();
+    });
+    $('pet-name')?.addEventListener('input', (event) => {
+      if (!this.pendingCharacter) return;
+      this.pendingCharacter.petName = String(event.target.value || '').slice(0, 14);
+      this.renderCharacterPreview();
     });
     $('weapon-skins')?.addEventListener('click', (event) => {
       const skin = event.target.closest('[data-weapon-skin]');
@@ -237,8 +386,12 @@ export class GameUI {
       if (!card || !this.pendingCharacter) return;
       const pet = PETS.find((entry) => entry.id === card.dataset.petType);
       if (!pet) return;
+      const previous = getPet(this.pendingCharacter);
       this.pendingCharacter.petType = pet.id;
       this.pendingCharacter.petColor = pet.color;
+      if (!this.pendingCharacter.petName || this.pendingCharacter.petName === previous.name) {
+        this.pendingCharacter.petName = pet.name;
+      }
       this.renderCharacterEditor();
     });
     $('pet-colors')?.addEventListener('click', (event) => {
@@ -253,8 +406,27 @@ export class GameUI {
       if ($('sens-value')) $('sens-value').textContent = `${value.toFixed(1)}×`;
       this.actions.onSensitivity?.(value);
     });
+    $('setting-touchsens')?.addEventListener('input', (event) => {
+      const value = Number(event.target.value) || 1.6;
+      if ($('touchsens-value')) $('touchsens-value').textContent = `${value.toFixed(1)}×`;
+      this.actions.onTouchSensitivity?.(value);
+    });
+    $('setting-invert')?.addEventListener('change', (event) => this.actions.onInvertY?.(event.target.checked));
+    $('setting-fov')?.addEventListener('input', (event) => {
+      const value = Number(event.target.value) || 74;
+      if ($('fov-value')) $('fov-value').textContent = `${Math.round(value)}°`;
+      this.actions.onFov?.(value);
+    });
+    $('setting-viewbob')?.addEventListener('change', (event) => this.actions.onViewBob?.(event.target.checked));
+    $('setting-lefthand')?.addEventListener('change', (event) => this.actions.onLeftHand?.(event.target.checked));
+    $('setting-third')?.addEventListener('change', (event) => this.actions.onStartThird?.(event.target.checked));
+    $('setting-uiscale')?.addEventListener('change', (event) => this.actions.onUiScale?.(event.target.value));
+    $('setting-fps')?.addEventListener('change', (event) => this.actions.onShowFps?.(event.target.checked));
+    $('setting-particles')?.addEventListener('change', (event) => this.actions.onParticles?.(event.target.checked));
+    $('setting-clouds')?.addEventListener('change', (event) => this.actions.onClouds?.(event.target.checked));
     $('setting-coords')?.addEventListener('change', (event) => this.actions.onCoordsToggle?.(event.target.checked));
     $('setting-graphics')?.addEventListener('change', (event) => this.actions.onQuality?.(event.target.value));
+    $('btn-settings-reset')?.addEventListener('click', () => this.actions.onResetSettings?.());
     $('btn-replay-tutorial')?.addEventListener('click', () => {
       this.closeSettings();
       this.openTutorial(true);
@@ -287,11 +459,25 @@ export class GameUI {
     if ($('setting-sound')) $('setting-sound').checked = !!this.settings.sound;
     if ($('setting-sens')) $('setting-sens').value = String(this.settings.sensitivity || 1);
     if ($('sens-value')) $('sens-value').textContent = `${Number(this.settings.sensitivity || 1).toFixed(1)}×`;
+    if ($('setting-touchsens')) $('setting-touchsens').value = String(this.settings.touchSensitivity || 1.6);
+    if ($('touchsens-value')) $('touchsens-value').textContent = `${Number(this.settings.touchSensitivity || 1.6).toFixed(1)}×`;
+    if ($('setting-invert')) $('setting-invert').checked = !!this.settings.invertY;
+    if ($('setting-fov')) $('setting-fov').value = String(this.settings.fov || 74);
+    if ($('fov-value')) $('fov-value').textContent = `${Math.round(Number(this.settings.fov || 74))}°`;
+    if ($('setting-viewbob')) $('setting-viewbob').checked = this.settings.viewBob !== false;
+    if ($('setting-lefthand')) $('setting-lefthand').checked = !!this.settings.leftHand;
+    if ($('setting-third')) $('setting-third').checked = !!this.settings.startThird;
+    if ($('setting-uiscale')) $('setting-uiscale').value = this.settings.uiScale || 'normal';
+    if ($('setting-fps')) $('setting-fps').checked = !!this.settings.showFps;
+    if ($('setting-particles')) $('setting-particles').checked = this.settings.particles !== false;
+    if ($('setting-clouds')) $('setting-clouds').checked = this.settings.clouds !== false;
     if ($('setting-coords')) $('setting-coords').checked = !!this.settings.showCoords;
     if ($('setting-graphics')) $('setting-graphics').value = this.settings.quality || 'auto';
     if (this.settings.character) this.character = normalizeCharacter(this.settings.character);
     if ($('btn-character')) $('btn-character').title = `Personagem: ${this.character.name}`;
     this.setSound(this.settings.sound);
+    this.setUiScale(this.settings.uiScale);
+    this.setLeftHand(this.settings.leftHand);
   }
 
   setSound(enabled) {
@@ -486,6 +672,8 @@ export class GameUI {
     $('hud')?.classList.add('hidden');
     $('loading')?.classList.add('hidden');
     $('photo-bar')?.classList.add('hidden');
+    $('rotate-hint')?.classList.add('hidden');
+    document.body.classList.remove('in-game');
     this.hideAllModals();
     document.body.classList.remove('photo-mode');
   }
@@ -512,6 +700,7 @@ export class GameUI {
 
   showHUD() {
     $('hud')?.classList.remove('hidden');
+    document.body.classList.add('in-game');
   }
 
   hideHUD() {
@@ -561,6 +750,27 @@ export class GameUI {
         delete hand.dataset.tool;
       }
     }
+    this.showItemLabel(selected, creative);
+  }
+
+  showItemLabel(slot, creative = false) {
+    const label = $('item-label');
+    if (!label) return;
+    const id = slot ? String(slot.id) : '';
+    if (id === this.lastItemLabelId) return;
+    this.lastItemLabelId = id;
+    clearTimeout(this.itemLabelTimer);
+    if (!slot) {
+      label.classList.remove('visible');
+      label.textContent = '';
+      return;
+    }
+    const item = getItem(id);
+    const countLabel = slot.count > 1 ? ` ×${slot.count}` : '';
+    label.textContent = `${item.name}${countLabel}${creative ? ' ∞' : ''}`;
+    label.style.setProperty('--rarity', getRarity(id).color);
+    label.classList.add('visible');
+    this.itemLabelTimer = setTimeout(() => label.classList.remove('visible'), 1600);
   }
 
   swingHand(kind = 'use') {
@@ -581,6 +791,26 @@ export class GameUI {
     bar.style.width = `${value * 100}%`;
   }
 
+  setMiningProgress(progress) {
+    const crosshair = $('crosshair');
+    if (!crosshair) return;
+    const value = Math.max(0, Math.min(1, Number(progress) || 0));
+    crosshair.classList.toggle('mining', value > 0.002);
+    crosshair.style.setProperty('--mining', value.toFixed(3));
+  }
+
+  setTargetInfo(info) {
+    const chip = $('target-chip');
+    if (!chip) return;
+    if (!info) {
+      chip.classList.add('hidden');
+      return;
+    }
+    chip.classList.remove('hidden');
+    if ($('target-name')) $('target-name').textContent = info.name || 'Bloco';
+    if ($('target-action')) $('target-action').textContent = info.action || '';
+  }
+
   setNpcPrompt(npc) {
     const hint = $('npc-hint');
     if (!hint) return;
@@ -598,6 +828,48 @@ export class GameUI {
     const hand = $('hand');
     const selected = this.state?.inventory?.hotbar?.[this.state?.inventory?.selected] || null;
     if (hand) hand.classList.toggle('hidden', this.thirdPerson || !selected);
+    const label = this.thirdPerson ? '3ª' : '1ª';
+    const title = this.thirdPerson ? 'Voltar para primeira pessoa (F5)' : 'Ver em terceira pessoa (F5)';
+    for (const id of ['btn-view', 'btn-view-touch']) {
+      const button = $(id);
+      if (!button) continue;
+      button.setAttribute('aria-pressed', this.thirdPerson ? 'true' : 'false');
+      button.title = title;
+      button.setAttribute('aria-label', title);
+      const text = button.querySelector('.view-btn-label') || button.querySelector('span');
+      if (text) text.textContent = label;
+    }
+    if ($('btn-third-person')) {
+      $('btn-third-person').textContent = this.thirdPerson ? 'Visão 1ª pessoa (F5)' : 'Visão 3ª pessoa (F5)';
+      $('btn-third-person').classList.toggle('active', this.thirdPerson);
+    }
+  }
+
+  setUiScale(scale) {
+    const value = ['compact', 'normal', 'large'].includes(scale) ? scale : 'normal';
+    document.body.dataset.uiScale = value;
+  }
+
+  setLeftHand(enabled) {
+    document.body.dataset.leftHand = enabled ? 'true' : 'false';
+  }
+
+  setFps(value, show) {
+    const chip = $('fps-chip');
+    if (!chip) return;
+    const fps = Math.max(0, Math.round(Number(value) || 0));
+    chip.classList.toggle('hidden', !show);
+    chip.textContent = `${fps} FPS`;
+    chip.classList.toggle('low', show && fps > 0 && fps < 40);
+    chip.classList.toggle('critical', show && fps > 0 && fps < 24);
+  }
+
+  flashRotateHint(ms = 6500) {
+    const hint = $('rotate-hint');
+    if (!hint || !document.body.classList.contains('touch-mode')) return;
+    hint.classList.remove('hidden');
+    clearTimeout(this.rotateHintTimer);
+    this.rotateHintTimer = setTimeout(() => hint.classList.add('hidden'), ms);
   }
 
   setFullscreen(active) {
@@ -631,6 +903,15 @@ export class GameUI {
       const show = data.showCoords;
       coords.classList.toggle('hidden', !show);
       if (show) coords.textContent = `X ${Math.round(data.coords?.x || 0)} · Y ${Math.round(data.coords?.y || 0)} · Z ${Math.round(data.coords?.z || 0)}`;
+    }
+    const petChip = $('pet-chip');
+    if (petChip) {
+      petChip.classList.toggle('hidden', !data.hasPet);
+      if ($('pet-chip-name')) $('pet-chip-name').textContent = data.petName || 'Lumi';
+      const hearts = Math.max(0, Math.min(5, Number(data.petHearts) || 0));
+      if ($('pet-chip-hearts')) $('pet-chip-hearts').textContent = '♥'.repeat(hearts) + '♡'.repeat(5 - hearts);
+      if ($('pet-chip-mode')) $('pet-chip-mode').textContent = data.petMode === 'stay' ? 'Fica' : 'Segue';
+      petChip.classList.toggle('staying', data.petMode === 'stay');
     }
   }
 
@@ -692,7 +973,7 @@ export class GameUI {
 
   openLayer(modalId) {
     $('modal-layer')?.classList.remove('hidden');
-    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal'].forEach((id) => {
+    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal', 'missions-modal', 'packs-modal'].forEach((id) => {
       $(id)?.classList.toggle('hidden', id !== modalId);
     });
     if (!this.modalOpen) {
@@ -703,7 +984,7 @@ export class GameUI {
 
   hideLayer() {
     $('modal-layer')?.classList.add('hidden');
-    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal'].forEach((id) => {
+    ['inventory-modal', 'chest-modal', 'pause-modal', 'create-modal', 'character-modal', 'multiplayer-modal', 'tutorial', 'settings-modal', 'code-modal', 'missions-modal', 'packs-modal'].forEach((id) => {
       $(id)?.classList.add('hidden');
     });
     this.inventoryOpen = false;
@@ -719,6 +1000,7 @@ export class GameUI {
     this.returnHeld(true);
     this.hideGhost();
     this.hideLayer();
+    this.toggleChat(false);
   }
 
   openInventory(tab = 'backpack') {
@@ -807,7 +1089,50 @@ export class GameUI {
 
   setMultiplayerState(patch = {}) {
     this.multiplayerState = { ...this.multiplayerState, ...patch };
+    this.setChatAvailable(this.multiplayerState.status === 'connected');
     this.renderMultiplayer();
+  }
+
+  setChatAvailable(available) {
+    this.chatAvailable = !!available;
+    $('btn-quick-chat')?.classList.toggle('hidden', !this.chatAvailable);
+    if (!this.chatAvailable) this.toggleChat(false);
+  }
+
+  toggleChat(force) {
+    const open = typeof force === 'boolean' ? force : !this.chatOpen;
+    if (open && !this.chatAvailable) return;
+    this.chatOpen = open;
+    $('quick-chat')?.classList.toggle('hidden', !open);
+    $('btn-quick-chat')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) this.renderChatPhrases();
+  }
+
+  renderChatPhrases() {
+    const wrap = $('chat-phrases');
+    if (!wrap || wrap.childElementCount) return;
+    for (const phrase of CHAT_PHRASES) {
+      const button = el('button', 'chat-phrase');
+      button.type = 'button';
+      button.dataset.chatId = phrase.id;
+      button.appendChild(el('span', 'chat-glyph', phrase.glyph));
+      button.appendChild(el('span', '', phrase.text));
+      wrap.appendChild(button);
+    }
+  }
+
+  pushChatMessage(entry = {}) {
+    const phrase = getChatPhrase(entry.id);
+    if (!phrase) return;
+    const feed = $('chat-feed');
+    if (!feed) return;
+    const line = el('div', 'chat-line');
+    if (entry.self) line.classList.add('self');
+    line.appendChild(el('strong', 'chat-name', String(entry.name || 'Explorador').slice(0, 16)));
+    line.appendChild(el('span', 'chat-text', `${phrase.glyph} ${phrase.text}`));
+    feed.appendChild(line);
+    while (feed.childElementCount > 6) feed.firstElementChild?.remove();
+    feed.scrollTop = feed.scrollHeight;
   }
 
   setJoinCode(code) {
@@ -875,6 +1200,7 @@ export class GameUI {
   renderCharacterEditor() {
     const character = this.pendingCharacter || this.character;
     if ($('character-name')) $('character-name').value = character.name;
+    if ($('pet-name')) $('pet-name').value = character.petName || '';
 
     const presets = $('character-presets');
     if (presets) {
@@ -885,22 +1211,47 @@ export class GameUI {
         card.dataset.characterPreset = preset.id;
         card.classList.toggle('active', !character.custom && character.preset === preset.id);
         const chips = el('span', 'preset-colors');
-        for (const color of [preset.hair, preset.skin, preset.shirt, preset.pants]) {
+        for (const color of [preset.hair, preset.skin, preset.shirt, preset.pants, preset.shoes]) {
           const chip = el('i');
           chip.style.background = color;
           chips.appendChild(chip);
         }
         card.appendChild(chips);
         card.appendChild(el('strong', '', preset.name));
+        card.appendChild(el('small', 'preset-style', `${OUTFITS.find((entry) => entry.id === preset.outfit)?.name || 'Traje'} · ${HAIR_STYLES.find((entry) => entry.id === preset.hairStyle)?.name || 'Cabelo'}`));
         presets.appendChild(card);
+      }
+    }
+
+    const styleConfig = [
+      ['character-hair', 'hairStyle', HAIR_STYLES],
+      ['character-outfits', 'outfit', OUTFITS],
+      ['character-hats', 'hat', HATS],
+      ['character-glasses', 'glasses', GLASSES],
+      ['character-backs', 'back', BACK_ITEMS]
+    ];
+    for (const [id, field, list] of styleConfig) {
+      const container = $(id);
+      if (!container) continue;
+      container.textContent = '';
+      for (const option of list) {
+        const button = el('button', 'style-option');
+        button.type = 'button';
+        button.dataset.styleValue = option.id;
+        button.classList.toggle('active', character[field] === option.id);
+        button.setAttribute('aria-label', option.name);
+        button.title = option.name;
+        button.appendChild(el('i', `style-icon style-${field}-${option.id}`));
+        button.appendChild(el('span', '', option.name));
+        container.appendChild(button);
       }
     }
 
     const colors = $('character-colors');
     if (colors) {
       colors.textContent = '';
-      const labels = { skin: 'Pele', shirt: 'Camisa', pants: 'Calça', hair: 'Cabelo' };
-      for (const part of ['skin', 'shirt', 'pants', 'hair']) {
+      const labels = { skin: 'Pele', shirt: 'Camisa', pants: 'Calça', hair: 'Cabelo', shoes: 'Sapatos' };
+      for (const part of ['skin', 'shirt', 'pants', 'hair', 'shoes']) {
         const row = el('div', 'color-row');
         row.appendChild(el('span', 'color-label', labels[part]));
         const swatches = el('div', 'color-swatches');
@@ -977,10 +1328,19 @@ export class GameUI {
       preview.style.setProperty('--hair', character.hair);
       preview.className = `character-preview accessory-${character.accessory}`;
       preview.style.setProperty('--pet', character.petColor);
+      preview.style.setProperty('--shoes', character.shoes);
       preview.dataset.pet = character.petType;
+      preview.dataset.hairStyle = character.hairStyle;
+      preview.dataset.outfit = character.outfit;
+      preview.dataset.hat = character.hat;
+      preview.dataset.glasses = character.glasses;
+      preview.dataset.back = character.back;
     }
     const pet = getPet(character);
-    if ($('pet-preview-label')) $('pet-preview-label').textContent = `${pet.name}: ${pet.desc}`;
+    const petLabel = character.petName && character.petName !== pet.name
+      ? `${character.petName}, seu ${pet.name.toLowerCase()}`
+      : pet.name;
+    if ($('pet-preview-label')) $('pet-preview-label').textContent = `${petLabel}: ${pet.desc}`;
     if ($('character-preview-name')) $('character-preview-name').textContent = character.name || 'Explorador';
   }
 
@@ -990,6 +1350,113 @@ export class GameUI {
     this.settings.character = character;
     this.actions.onCharacterSave?.(character);
     this.closeCharacter();
+  }
+
+  openMissions(missions = []) {
+    this.missions = Array.isArray(missions) ? missions : [];
+    this.openLayer('missions-modal');
+    this.renderMissions();
+  }
+
+  closeMissions() {
+    this.hideLayer();
+  }
+
+  renderMissions() {
+    const list = $('missions-list');
+    if (!list) return;
+    list.textContent = '';
+    for (const mission of this.missions) {
+      const row = el('div', `mission-row${mission.done ? ' done' : ''}`);
+      row.appendChild(el('span', 'mission-icon', mission.icon || '✦'));
+      const copy = el('div', 'mission-copy');
+      copy.appendChild(el('strong', '', mission.title || 'Missão'));
+      copy.appendChild(el('span', '', mission.desc || ''));
+      const bar = el('div', 'mission-bar');
+      const fill = el('i');
+      fill.style.setProperty('--progress', `${Math.min(100, Math.round((mission.value / Math.max(1, mission.target)) * 100))}%`);
+      bar.appendChild(fill);
+      copy.appendChild(bar);
+      row.appendChild(copy);
+      row.appendChild(el('span', 'mission-count', mission.done ? 'Concluída' : `${Math.min(mission.value, mission.target)}/${mission.target}`));
+      list.appendChild(row);
+    }
+  }
+
+  openPacks() {
+    this.packsFromSettings = !$('settings-modal')?.classList.contains('hidden');
+    this.openLayer('packs-modal');
+    this.renderPacks();
+  }
+
+  closePacks() {
+    if (this.packsFromSettings) {
+      this.packsFromSettings = false;
+      this.openLayer('settings-modal');
+      return;
+    }
+    this.hideLayer();
+  }
+
+  packFeedback(message, kind = '') {
+    const node = $('pack-feedback');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `pack-feedback ${kind}`.trim();
+  }
+
+  renderPacks() {
+    const list = $('packs-list');
+    if (!list) return;
+    list.textContent = '';
+    const packs = listContentPacks();
+    const activeId = getActivePackId();
+    if (!packs.length) {
+      list.appendChild(el('p', 'recipe-hint', 'Nenhum pacote instalado. Cole um JSON ou use o exemplo.'));
+      return;
+    }
+    for (const pack of packs) {
+      const row = el('div', `pack-row${pack.id === activeId ? ' active' : ''}`);
+      const copy = el('div', 'pack-copy');
+      copy.appendChild(el('strong', '', pack.name));
+      copy.appendChild(el('small', '', `${pack.author} · ${pack.blocks.length} blocos${pack.description ? ` · ${pack.description}` : ''}`));
+      const use = el('button', 'ghost-btn small', pack.id === activeId ? 'Ativo' : 'Usar');
+      use.type = 'button';
+      use.disabled = pack.id === activeId;
+      use.addEventListener('click', () => {
+        setActivePack(pack.id);
+        this.renderPacks();
+        this.packFeedback(`${pack.name} ativado.`, 'ok');
+      });
+      const remove = el('button', 'ghost-btn small', 'Remover');
+      remove.type = 'button';
+      remove.addEventListener('click', () => {
+        removeContentPack(pack.id);
+        this.renderPacks();
+        this.packFeedback(`${pack.name} removido.`, 'ok');
+      });
+      row.appendChild(copy);
+      row.appendChild(use);
+      row.appendChild(remove);
+      list.appendChild(row);
+    }
+  }
+
+  installPack(text) {
+    const result = parseContentPack(text);
+    if (!result.ok) {
+      this.packFeedback(result.error, 'error');
+      return;
+    }
+    const saved = saveContentPack(result.pack);
+    if (!saved.ok) {
+      this.packFeedback(saved.error, 'error');
+      return;
+    }
+    setActivePack(saved.pack.id);
+    if ($('pack-json')) $('pack-json').value = '';
+    this.renderPacks();
+    this.packFeedback(`${saved.pack.name} instalado e ativado.`, 'ok');
   }
 
   openSettings() {
@@ -1130,6 +1597,8 @@ export class GameUI {
     button.dataset.index = String(index);
     if (slot) {
       const item = getItem(slot.id);
+      button.dataset.itemId = String(slot.id);
+      button.dataset.itemName = `${item.name} ${item.id}`.toLowerCase();
       const rarity = getRarity(slot.id);
       button.classList.add('has-item');
       button.style.setProperty('--rarity', rarity.color);
@@ -1155,7 +1624,15 @@ export class GameUI {
     if (!inventory) return;
     if ($('btn-creative-palette')) $('btn-creative-palette').classList.toggle('hidden', this.state.mode !== 'creative');
 
+    const showTools = this.currentTab === 'backpack';
+    $('inventory-tools')?.classList.toggle('hidden', !showTools);
+    if ($('inventory-search') && $('inventory-search').value !== this.inventoryQuery) $('inventory-search').value = this.inventoryQuery;
+    if ($('inventory-sort') && $('inventory-sort').value !== this.inventorySort) $('inventory-sort').value = this.inventorySort;
+    $('btn-inventory-favorites')?.setAttribute('aria-pressed', this.favoritesOnly ? 'true' : 'false');
+    $('btn-inventory-favorites')?.classList.toggle('active', this.favoritesOnly);
+
     if (this.currentTab === 'backpack') {
+      body.appendChild(this.renderItemSummary(inventory));
       body.appendChild(this.gridSection('Barra rápida', 'Sempre à mão', inventory.hotbar, 'hotbar'));
       body.appendChild(this.gridSection('Mochila', `${inventory.backpack.filter(Boolean).length}/27 slots`, inventory.backpack, 'backpack'));
       if (this.state.mode === 'creative') body.appendChild(this.creativePalette());
@@ -1166,7 +1643,117 @@ export class GameUI {
     } else if (this.currentTab === 'album') {
       body.appendChild(this.renderAlbum());
     }
+    this.applySlotFilter(body);
     this.updateGhostPosition();
+  }
+
+  matchesQuery(id) {
+    const query = this.inventoryQuery.trim().toLowerCase();
+    if (!query) return true;
+    const item = getItem(id);
+    return `${item.name} ${item.id} ${item.desc}`.toLowerCase().includes(query);
+  }
+
+  applySlotFilter(root) {
+    const query = this.inventoryQuery.trim().toLowerCase();
+    for (const slot of root.querySelectorAll('.slot[data-item-id]')) {
+      const hidden = !!query && !String(slot.dataset.itemName || '').includes(query);
+      slot.classList.toggle('filtered-out', hidden);
+    }
+  }
+
+  renderItemSummary(inventory) {
+    const totals = new Map();
+    for (const arr of inventory.arrays()) {
+      for (const slot of arr) {
+        if (!slot) continue;
+        totals.set(slot.id, (totals.get(slot.id) || 0) + slot.count);
+      }
+    }
+    const wrap = el('div', 'inventory-summary');
+    const head = el('div', 'inventory-section-title');
+    const text = el('div');
+    text.appendChild(el('h3', '', 'Resumo por item'));
+    head.appendChild(text);
+    head.appendChild(el('span', '', `${totals.size} tipos · total somado`));
+    wrap.appendChild(head);
+    if (!totals.size) {
+      wrap.appendChild(el('p', 'recipe-hint', 'Sua mochila está vazia. Quebre blocos ou use a paleta criativa.'));
+      return wrap;
+    }
+    const grid = el('div', 'summary-grid');
+    const query = this.inventoryQuery.trim().toLowerCase();
+    let entries = Array.from(totals.entries()).filter(([id]) => {
+      if (this.favoritesOnly && !this.favorites.has(String(id))) return false;
+      return !query || this.matchesQuery(id);
+    });
+    entries.sort((a, b) => {
+      const itemA = getItem(a[0]);
+      const itemB = getItem(b[0]);
+      if (this.inventorySort === 'count') return b[1] - a[1] || itemA.name.localeCompare(itemB.name, 'pt-BR');
+      if (this.inventorySort === 'rarity') return rarityRank(getItem(b[0]).rarity) - rarityRank(getItem(a[0]).rarity) || itemA.name.localeCompare(itemB.name, 'pt-BR');
+      if (this.inventorySort === 'favorite') {
+        const favA = this.favorites.has(String(a[0])) ? 1 : 0;
+        const favB = this.favorites.has(String(b[0])) ? 1 : 0;
+        if (favA !== favB) return favB - favA;
+      }
+      return itemA.name.localeCompare(itemB.name, 'pt-BR');
+    });
+    if (!entries.length) {
+      grid.appendChild(el('p', 'recipe-hint', 'Nenhum item combina com a busca.'));
+    }
+    for (const [id, total] of entries) {
+      const item = getItem(id);
+      const rarity = getRarity(id);
+      const card = el('button', 'summary-card');
+      card.type = 'button';
+      card.style.setProperty('--rarity', rarity.color);
+      card.title = `${item.name} · ${total} no total`;
+      card.setAttribute('aria-label', `${item.name}, total ${total}`);
+      const img = el('img');
+      img.src = getItemIcon(id);
+      img.alt = '';
+      const copy = el('span', 'summary-copy');
+      copy.appendChild(el('strong', '', item.name));
+      copy.appendChild(el('small', '', `${total} no total`));
+      const favorite = el('span', 'summary-fav', this.favorites.has(String(id)) ? '★' : '☆');
+      const favoriteLabel = this.favorites.has(String(id)) ? 'Remover dos favoritos' : 'Marcar como favorito';
+      favorite.title = favoriteLabel;
+      favorite.setAttribute('role', 'button');
+      favorite.setAttribute('tabindex', '0');
+      favorite.setAttribute('aria-label', `${favoriteLabel}: ${item.name}`);
+      const toggleFavorite = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.favorites.has(String(id))) this.favorites.delete(String(id));
+        else this.favorites.add(String(id));
+        saveFavorites(this.favorites);
+        this.renderInventory();
+      };
+      favorite.addEventListener('click', toggleFavorite);
+      favorite.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') toggleFavorite(event);
+      });
+      card.appendChild(img);
+      card.appendChild(copy);
+      card.appendChild(favorite);
+      card.addEventListener('click', () => {
+        const hotbarIndex = inventory.hotbar.findIndex((slot) => slot && slot.id === id);
+        if (hotbarIndex >= 0) {
+          this.actions.onSelectHotbar?.(hotbarIndex);
+          this.toast({ title: item.name, body: 'Selecionado na hotbar.', rarity: item.rarity, icon: getItemIcon(id) });
+          return;
+        }
+        if (this.state.mode === 'creative') {
+          this.actions.onCreativePick?.(id);
+          return;
+        }
+        this.actions.onMoveToHotbar?.(id);
+      });
+      grid.appendChild(card);
+    }
+    wrap.appendChild(grid);
+    return wrap;
   }
 
   gridSection(title, subtitle, slots, type, extraClass = '') {
@@ -1187,7 +1774,10 @@ export class GameUI {
     const wrap = el('div', 'creative-palette');
     wrap.appendChild(el('h3', '', 'Paleta criativa'));
     const grid = el('div', 'creative-grid');
-    for (const id of CREATIVE_PALETTE) {
+    const palette = [...CREATIVE_PALETTE, ...getPackBlockIds()];
+    const visible = palette.filter((id) => this.matchesQuery(id));
+    if (!visible.length) grid.appendChild(el('p', 'recipe-hint', 'Nenhum bloco combina com a busca.'));
+    for (const id of visible) {
       const button = el('button', 'creative-block');
       button.type = 'button';
       button.title = getItem(id).name;

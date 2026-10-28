@@ -188,9 +188,11 @@ export class Player {
       this.stepTimer = 0;
     }
 
-    const bob = this.onGround && length > 0.1 ? Math.sin(this.stepTimer * 18) * 0.028 : 0;
+    if (this.cameraLocked) return;
+    const bobEnabled = this.viewBob !== false;
+    const bob = bobEnabled && this.onGround && length > 0.1 ? Math.sin(this.stepTimer * 18) * 0.028 : 0;
     this.camera.position.set(this.position.x, this.position.y + EYE_HEIGHT + bob, this.position.z);
-    this.camera.rotation.set(this.pitch, this.yaw, Math.sin(this.stepTimer * 9) * 0.006, 'YXZ');
+    this.camera.rotation.set(this.pitch, this.yaw, bobEnabled ? Math.sin(this.stepTimer * 9) * 0.006 : 0, 'YXZ');
   }
 
   moveAxis(axis, amount) {

@@ -1,3 +1,11 @@
+const BIOME_AMBIENCE = {
+  meadow: { filter: 620, gain: 0.014, min: 3.4, max: 7.5 },
+  forest: { filter: 430, gain: 0.018, min: 2.8, max: 6.2 },
+  desert: { filter: 980, gain: 0.009, min: 4.2, max: 8.5 },
+  tundra: { filter: 1180, gain: 0.008, min: 4.8, max: 9 },
+  coast: { filter: 760, gain: 0.02, min: 3.2, max: 6.8 }
+};
+
 export class AudioEngine {
   constructor(enabled = true) {
     this.enabled = enabled;
@@ -7,6 +15,7 @@ export class AudioEngine {
     this.ambience = null;
     this.ambienceBuffer = null;
     this.ambienceTimer = 3;
+    this.biome = 'meadow';
   }
 
   setEnabled(enabled) {
@@ -74,19 +83,32 @@ export class AudioEngine {
     const ctx = this.ensure();
     const buffer = this.getAmbienceNoise();
     if (!ctx || !buffer) return;
+    const config = BIOME_AMBIENCE[this.biome] || BIOME_AMBIENCE.meadow;
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.loop = true;
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.value = 520;
+    filter.frequency.value = config.filter;
     const gain = ctx.createGain();
-    gain.gain.value = 0.014;
+    gain.gain.value = config.gain;
     src.connect(filter);
     filter.connect(gain);
     gain.connect(this.master);
     src.start();
-    this.ambience = { src, gain };
+    this.ambience = { src, gain, filter };
+  }
+
+  setBiome(biome = 'meadow') {
+    if (!biome || this.biome === biome) return;
+    this.biome = BIOME_AMBIENCE[biome] ? biome : 'meadow';
+    if (!this.ambience) return;
+    const ctx = this.ensure();
+    if (!ctx) return;
+    const config = BIOME_AMBIENCE[this.biome];
+    this.ambience.filter.frequency.setTargetAtTime(config.filter, ctx.currentTime, 0.35);
+    this.ambience.gain.gain.setTargetAtTime(config.gain, ctx.currentTime, 0.5);
+    this.ambienceTimer = Math.min(this.ambienceTimer, 0.6);
   }
 
   stopAmbience() {
@@ -106,16 +128,38 @@ export class AudioEngine {
     this.startAmbience();
     this.ambienceTimer -= dt;
     if (this.ambienceTimer > 0) return;
-    this.ambienceTimer = night ? 5 + Math.random() * 5 : 3.5 + Math.random() * 4.5;
+    const config = BIOME_AMBIENCE[this.biome] || BIOME_AMBIENCE.meadow;
+    this.ambienceTimer = night ? 4.6 + Math.random() * 4.8 : config.min + Math.random() * (config.max - config.min);
     if (night) {
-      this.tone(1320 + Math.random() * 240, 0.04, 'sine', 0.012, 0, 1180);
-      this.tone(1760 + Math.random() * 200, 0.035, 'sine', 0.009, 0.09, 1520);
-    } else {
-      const base = 1900 + Math.random() * 500;
-      this.tone(base, 0.045, 'sine', 0.018, 0, base * 1.35);
-      this.tone(base * 1.18, 0.04, 'sine', 0.014, 0.075, base * 1.55);
-      if (Math.random() > 0.5) this.tone(base * 1.32, 0.035, 'sine', 0.01, 0.16, base * 1.7);
+      this.tone(1180 + Math.random() * 180, 0.035, 'sine', 0.01, 0, 1040);
+      this.tone(1640 + Math.random() * 220, 0.03, 'sine', 0.008, 0.11, 1420);
+      return;
     }
+    if (this.biome === 'forest') {
+      this.tone(520 + Math.random() * 160, 0.08, 'sine', 0.012, 0, 680);
+      this.noise(0.24, 2800, 0.008, 0.05);
+      return;
+    }
+    if (this.biome === 'desert') {
+      this.noise(0.32, 1500, 0.012);
+      if (Math.random() > 0.55) this.tone(880 + Math.random() * 240, 0.16, 'triangle', 0.01, 0.1, 1320);
+      return;
+    }
+    if (this.biome === 'tundra') {
+      this.noise(0.28, 2200, 0.009);
+      this.tone(1480 + Math.random() * 200, 0.22, 'sine', 0.009, 0.08, 1960);
+      return;
+    }
+    if (this.biome === 'coast') {
+      this.noise(0.42, 700, 0.018);
+      this.noise(0.2, 1300, 0.008, 0.18);
+      if (Math.random() > 0.5) this.tone(940 + Math.random() * 180, 0.14, 'triangle', 0.012, 0.22, 1260);
+      return;
+    }
+    const base = 1900 + Math.random() * 500;
+    this.tone(base, 0.045, 'sine', 0.018, 0, base * 1.35);
+    this.tone(base * 1.18, 0.04, 'sine', 0.014, 0.075, base * 1.55);
+    if (Math.random() > 0.5) this.tone(base * 1.32, 0.035, 'sine', 0.01, 0.16, base * 1.7);
   }
 
   getNoise() {

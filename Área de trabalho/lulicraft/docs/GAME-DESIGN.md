@@ -123,14 +123,14 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 - Seed do dia, código de mundo, cartão do mundo, modo foto, álbum.
 - Zero upload automático, zero conta, zero analytics.
 - Compartilhar é sempre uma ação explícita do jogador.
-- Convite de sala é opt-in; não há chat nem lista pública de salas.
+- Convite de sala é opt-in; o chat usa frases prontas e não há lista pública de salas.
 
 ## 11.1 Pets e NPCs
 
 ### Pets
 - 4 tipos: Lumi, Gatinho, Coruja e Coelho.
 - 8 cores cosméticas; a cor é aplicada ao modelo 3D e ao preview.
-- O pet segue o jogador, balança cauda/orelhas, reage a salto, pouso, craft e forja.
+- O pet anda à frente do jogador, balança cauda/orelhas, anima patas e reage a salto, pouso, craft e forja.
 - Petisco de Lumi é craftável e alimenta o pet com uma reação alegre.
 - Pet é cosmético: não coleta, não bloqueia dano e não altera progressão.
 
@@ -141,14 +141,28 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 - Conversar abre uma fala contextual e um som suave.
 - Sem chat livre, sem coleta de dados, sem diálogo ramificado complexo.
 
-## 11.2 Cidades brasileiras
+## 11.2 Vilas e rotina
+
+- Chunks elegíveis geram vilas com duas casas, praça, lampiões, flores e um baú.
+- O Mundo Minha Casa não recebe vila procedural para preservar a cidade autoral.
+- NPCs caminham em um raio curto, param e olham para o jogador quando ele se aproxima.
+- A vila é determinística pela seed; não há NPCs hostis ou invasão de construções.
+
+## 11.3 Mapa e missões
+
+- O mapa local mostra 64 blocos ao redor, com cores por bioma, baús, NPCs e a direção do jogador.
+- O diário de missões acompanha coleta de Lumi, blocos colocados, biomas, itens forjados e carinho do pet.
+- Missões não criam economia paralela; o progresso vem dos stats já existentes.
+- O mapa é consulta, não fast travel.
+
+## 11.4 Cidades brasileiras
 
 - 6 mundos curados: Rio de Lumi, Avenida das Cores, Pelourinho de Blocos, Pontes do Recife, Amazônia Encantada e Ilha da Magia.
 - Cada card mostra cidade/UF, ideia, modo, selo e botão Explorar.
 - Seeds fixas e determinísticas; nenhum backend necessário.
 - O objetivo é representatividade e inspiração para construir, não replicar monumentos com precisão.
 
-## 11.3 Ranking de tempo
+## 11.5 Ranking de tempo
 
 - Lista local dos mundos do jogador, ordenada por tempo jogado.
 - Mostra nome, seed, modo e tempo formatado.
@@ -157,8 +171,8 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 
 ## 12. Personagens
 
-- 9 skins/presets: Lumi, Nino, Bia, Tico, Dara, Sol, Maya, Kai e Luna.
-- 4 skins de arma: Aurora, Pétala, Solar e Bolha.
+- 18 presets do Lumi Crew: Lumi, Nino, Bia, Tico, Dara, Sol, Maya, Kai, Luna, Nori, Iris, Zoe, Pipo, Nara, Teo, Yumi, Cacau e Vivi.
+- 6 skins de arma: Aurora, Pétala, Solar, Bolha, Menta e Doce.
 - 5 armas mágicas sem dano: Lâmina de Pétalas, Varinha de Bolhas, Estilingue Estelar, Martelo Solar e Arco Aurora.
 - Nome + 4 cores + acessório; tudo cosmético.
 - Aparência aparece no cartão do mundo e nos avatares multiplayer.
@@ -166,8 +180,9 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 
 ## 13. Mundos prontos e Kit de Raros
 
-- 6 cards no menu: Jardim de Lumi, Vale Arco-Íris, Ilha das Nuvens, Deserto Coral, Noite de Aurora e Caixa de Raros.
-- Dois mundos usam Kit de Raros; o checkbox também permite ativá-lo em qualquer mundo novo.
+- 7 cards no menu: Jardim de Lumi, Vale Arco-Íris, Ilha das Nuvens, Deserto Coral, Noite de Aurora, Caixa de Raros e Minha Casa.
+- Três mundos usam Kit de Raros; o checkbox também permite ativá-lo em qualquer mundo novo.
+- Minha Casa traz uma casa rosa, cidade ao redor, praça e baús raros determinísticos.
 - Kit de Raros: 10 itens raros+ para uma primeira sessão cheia de descobertas.
 - Kit é opcional; o início normal continua com o kit inicial cozy.
 
@@ -175,7 +190,7 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 
 - Até 6 exploradores por sala, por convite de 5 caracteres ou link.
 - Host mantém o mundo e retransmite blocos, baús, posições e patches.
-- Sem chat, voz, contas, matchmaking público ou combate.
+- Chat apenas com frases prontas; sem texto livre, voz, contas, matchmaking público ou combate.
 - Convidado entra com personagem próprio e starter kit.
 - Se o host sair, a sala fecha e o convidado continua no mundo local.
 - Segurança: convite não é senha; compartilhe só com pessoas de confiança.
@@ -187,9 +202,21 @@ Sem árvore de habilidades. A progressão é **horizontal e por descoberta**.
 - `E` mochila, `C` forja, `M` som, `F` foto, `F5` terceira pessoa, `F11` tela cheia, `F3` coordenadas.
 - `R` conversa com o NPC próximo.
 - `1` a `9` selecionam a hotbar; a roda do mouse também troca de slot.
+- `Shift+1` a `Shift+9` trocam o slot selecionado com o alvo.
+- `Tab` abre o mapa local; `J` abre o diário de missões.
+- `Ctrl/Cmd+Z` desfaz e `Ctrl/Cmd+Y` refaz a última construção.
+- `B` abre a paleta criativa; `Q` guarda o item selecionado.
+- Clique do meio copia o bloco apontado.
 - `Esc` fecha o painel atual ou abre a pausa.
 
-## 14.2 Pacotes gráficos
+## 14.2 Pacotes de conteúdo
+
+- Pacotes JSON instalam paletas e blocos extras na paleta criativa.
+- Validação por allowlist: versão, id, nome, autor, descrição, cores e blocos conhecidos.
+- Limite de 64 KB e 8 pacotes; nada de JavaScript, HTML ou caminhos de arquivo.
+- O pacote ativo muda variáveis CSS e a lista de blocos criativos; não altera save nem regras.
+
+## 14.3 Pacotes gráficos
 
 | Pacote | Efeito | Para quem |
 |---|---|---|

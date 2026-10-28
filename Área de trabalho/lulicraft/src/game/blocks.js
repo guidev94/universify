@@ -29,14 +29,18 @@ export const B = {
   CLOUD: 25,
   BEDROCK: 26,
   CORAL: 27,
-  BERRY_BUSH: 28
+  BERRY_BUSH: 28,
+  PINK_PLANKS: 29,
+  MINT_PLANKS: 30,
+  LAVENDER_PLANKS: 31
 };
 
 const TILE_NAMES = [
   'grass_top', 'grass_side', 'dirt', 'stone', 'cobble', 'sand', 'coral_stone', 'snow',
   'ice', 'log_top', 'log_side', 'leaves', 'rainbow_log_top', 'rainbow_log_side', 'rainbow_leaves', 'planks',
   'crystal', 'lumi_ore', 'aurora_ore', 'water', 'flower_pink', 'flower_blue', 'tall_grass', 'mushroom_star',
-  'chest_top', 'chest_side', 'lumi_lamp', 'prism', 'cloud', 'bedrock', 'coral', 'berry_bush'
+  'chest_top', 'chest_side', 'lumi_lamp', 'prism', 'cloud', 'bedrock', 'coral', 'berry_bush',
+  'pink_planks', 'mint_planks', 'lavender_planks'
 ];
 
 export const TILE = Object.fromEntries(TILE_NAMES.map((name, i) => [name, i]));
@@ -385,6 +389,42 @@ function drawTile(ctx, index, rand) {
       ctx.fillRect(4, 10, 1, 1);
       ctx.fillRect(9, 7, 1, 1);
       break;
+    case 'pink_planks':
+      fill(ctx, '#f4a9c4');
+      for (let y = 0; y < TILE_SIZE; y += 4) {
+        ctx.fillStyle = y % 8 === 0 ? '#e98fb2' : '#f7b8cf';
+        ctx.fillRect(0, y, TILE_SIZE, 1);
+      }
+      speckle(ctx, rand, ['#ffc2d8', '#dc7ea2', '#ffd6e5'], 24);
+      ctx.fillStyle = '#b95f82';
+      ctx.fillRect(3, 2, 1, 2);
+      ctx.fillRect(11, 6, 1, 2);
+      ctx.fillRect(7, 10, 1, 2);
+      break;
+    case 'mint_planks':
+      fill(ctx, '#9ee6c1');
+      for (let y = 0; y < TILE_SIZE; y += 4) {
+        ctx.fillStyle = y % 8 === 0 ? '#7fd2ab' : '#b2f0d0';
+        ctx.fillRect(0, y, TILE_SIZE, 1);
+      }
+      speckle(ctx, rand, ['#c6f7df', '#6bbf98', '#d9fff0'], 24);
+      ctx.fillStyle = '#4b9a77';
+      ctx.fillRect(3, 2, 1, 2);
+      ctx.fillRect(11, 6, 1, 2);
+      ctx.fillRect(7, 10, 1, 2);
+      break;
+    case 'lavender_planks':
+      fill(ctx, '#c4b2f0');
+      for (let y = 0; y < TILE_SIZE; y += 4) {
+        ctx.fillStyle = y % 8 === 0 ? '#ad97df' : '#d4c5fa';
+        ctx.fillRect(0, y, TILE_SIZE, 1);
+      }
+      speckle(ctx, rand, ['#e2d7ff', '#9a80d1', '#eee8ff'], 24);
+      ctx.fillStyle = '#7d63b4';
+      ctx.fillRect(3, 2, 1, 2);
+      ctx.fillRect(11, 6, 1, 2);
+      ctx.fillRect(7, 10, 1, 2);
+      break;
   }
 }
 
@@ -684,6 +724,30 @@ def(B.BERRY_BUSH, 'Arbusto de Mel', {
   category: 'planta',
   color: '#ffd76a',
   drop: { id: 'berry', min: 1, max: 2, extra: { id: B.BERRY_BUSH, chance: 0.5 } }
+});
+
+def(B.PINK_PLANKS, 'Tábuas Rosas', {
+  tiles: 'pink_planks',
+  color: '#f4a9c4',
+  hardness: 0.8,
+  rarity: 'incomum',
+  drop: { id: B.PINK_PLANKS }
+});
+
+def(B.MINT_PLANKS, 'Tábuas Menta', {
+  tiles: 'mint_planks',
+  color: '#9ee6c1',
+  hardness: 0.8,
+  rarity: 'incomum',
+  drop: { id: B.MINT_PLANKS }
+});
+
+def(B.LAVENDER_PLANKS, 'Tábuas Lavanda', {
+  tiles: 'lavender_planks',
+  color: '#c4b2f0',
+  hardness: 0.8,
+  rarity: 'incomum',
+  drop: { id: B.LAVENDER_PLANKS }
 });
 
 export function getBlock(id) {

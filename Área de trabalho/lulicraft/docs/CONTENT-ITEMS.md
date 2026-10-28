@@ -17,6 +17,9 @@
 | `rainbow_log` | Tronco Arco-Íris | bosque | `rainbow_log` | listrado |
 | `rainbow_leaves` | Folhas Prisma | bosque | `rainbow_leaves` | pastel |
 | `planks` | Tábua de Mel | craft | `planks` | construção |
+| `pink_planks` | Tábuas Rosas | Minha Casa/craft | `pink_planks` | construção autoral |
+| `mint_planks` | Tábuas Menta | Minha Casa/craft | `mint_planks` | construção autoral |
+| `lavender_planks` | Tábuas Lavanda | Minha Casa/craft | `lavender_planks` | construção autoral |
 | `crystal` | Cristal de Lumi | cavernas/tundra | `crystal` | brilha |
 | `lumi_ore` | Minério de Lumi | cavernas | `lumi_shard` | veios dourados |
 | `aurora_ore` | Minério Aurora | cavernas profundas | `aurora_gem` | veios violeta |

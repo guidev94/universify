@@ -12,15 +12,18 @@ globalThis.localStorage = {
 const { World, BIOMES, CHUNK_SIZE, WORLD_HEIGHT, SEA_LEVEL, chestKey } = await import('../src/game/world.js');
 const { B } = await import('../src/game/blocks.js');
 const { Inventory } = await import('../src/game/inventory.js');
-const { ITEMS, getItem, getRarity, rarityRank } = await import('../src/game/items.js');
+const { ITEMS, getItem, getRarity, rarityRank, isRare } = await import('../src/game/items.js');
 const { RECIPES, getRecipe } = await import('../src/game/recipes.js');
-const { CHARACTER_PRESETS, DEFAULT_CHARACTER, WEAPON_SKINS, PETS, characterFromPreset, getWeaponSkin, getPet, normalizeCharacter } = await import('../src/game/characters.js');
+const { CHARACTER_PRESETS, DEFAULT_CHARACTER, WEAPON_SKINS, PETS, HAIR_STYLES, OUTFITS, HATS, GLASSES, BACK_ITEMS, characterFromPreset, characterSignature, getWeaponSkin, getPet, normalizeCharacter } = await import('../src/game/characters.js');
 const { PREBUILT_WORLDS, getPrebuilt } = await import('../src/game/prebuilt.js');
 const { COMMUNITY_WORLDS, getCommunityWorld } = await import('../src/game/community.js');
 const { BRAZIL_WORLDS, getBrazilWorld } = await import('../src/game/brazil.js');
 const { randomSeed, randomWorldName } = await import('../src/game/seeds.js');
 const { normalizeRoomCode, makeRoomCode } = await import('../src/game/multiplayer.js');
+const { CHAT_PHRASES, sanitizeChat, getChatPhrase, CHAT_RATE_MS, HOST_CHAT_RATE_MS } = await import('../src/game/chat.js');
 const save = await import('../src/game/save.js');
+const packs = await import('../src/game/content-packs.js');
+const { BuildHistory, makeChange } = await import('../src/game/build-history.js');
 
 function resetStorage() {
   store.clear();
@@ -61,8 +64,19 @@ test('characters normalize presets and reject invalid colors', () => {
   assert.equal(custom.custom, true);
 
   assert.equal(normalizeCharacter(null).preset, 'lumi');
-  assert.equal(CHARACTER_PRESETS.length, 9);
-  assert.equal(WEAPON_SKINS.length, 4);
+  assert.equal(CHARACTER_PRESETS.length, 18);
+  assert.equal(new Set(CHARACTER_PRESETS.map((preset) => preset.id)).size, CHARACTER_PRESETS.length);
+  for (const entry of CHARACTER_PRESETS) {
+    const fromPreset = characterFromPreset(entry.id);
+    assert.equal(fromPreset.preset, entry.id);
+    assert.equal(fromPreset.name, entry.name);
+    assert.ok(HAIR_STYLES.some((style) => style.id === entry.hairStyle));
+    assert.ok(OUTFITS.some((outfit) => outfit.id === entry.outfit));
+    assert.ok(HATS.some((hat) => hat.id === entry.hat));
+    assert.ok(GLASSES.some((glasses) => glasses.id === entry.glasses));
+    assert.ok(BACK_ITEMS.some((back) => back.id === entry.back));
+  }
+  assert.equal(WEAPON_SKINS.length, 6);
   assert.equal(normalizeCharacter({ weaponSkin: 'petal' }).weaponSkin, 'petal');
   assert.equal(normalizeCharacter({ weaponSkin: 'nope' }).weaponSkin, 'aurora');
   assert.equal(getWeaponSkin({ weaponSkin: 'solar' }).color, '#ffc94d');
@@ -70,6 +84,36 @@ test('characters normalize presets and reject invalid colors', () => {
   assert.equal(normalizeCharacter({ petType: 'coruja', petColor: '#ABC123' }).petColor, '#abc123');
   assert.equal(getPet({ petType: 'coelho' }).id, 'coelho');
   assert.equal(getPet({ petType: 'nope' }).id, 'lumi');
+});
+
+test('wardrobe layers default from presets and validate ids', () => {
+  const preset = characterFromPreset('nori');
+  assert.equal(preset.hairStyle, 'spacebuns');
+  assert.equal(preset.outfit, 'hoodie');
+  assert.equal(preset.hat, 'cap');
+  assert.equal(preset.glasses, 'shades');
+  assert.equal(preset.back, 'backpack');
+  assert.ok(HAIR_STYLES.length >= 8);
+  assert.ok(OUTFITS.length >= 5);
+  assert.ok(HATS.length >= 9);
+  assert.ok(GLASSES.length >= 4);
+  assert.ok(BACK_ITEMS.length >= 5);
+
+  const fallback = normalizeCharacter({ preset: 'lumi', hairStyle: 'nope', outfit: 'nope', hat: 'nope', glasses: 'nope', back: 'nope' });
+  assert.equal(fallback.hairStyle, 'bob');
+  assert.equal(fallback.outfit, 'tee');
+  assert.equal(fallback.hat, 'leaf');
+  assert.equal(fallback.glasses, 'none');
+  assert.equal(fallback.back, 'none');
+
+  const legacy = normalizeCharacter({ preset: 'lumi', accessory: 'goggles' });
+  assert.equal(legacy.glasses, 'goggles');
+  assert.equal(legacy.hat, 'leaf');
+
+  assert.equal(normalizeCharacter({ petName: '<Nina>' }).petName, 'Nina');
+  assert.equal(normalizeCharacter({ petType: 'coruja' }).petName, 'Coruja');
+  assert.equal(characterSignature({ preset: 'lumi' }, 'Lumi'), characterSignature(characterFromPreset('lumi')));
+  assert.notEqual(characterSignature({ preset: 'lumi', hat: 'crown' }), characterSignature({ preset: 'lumi' }));
 });
 
 test('weapon items are non-violent magical tools with recipes', () => {
@@ -84,8 +128,8 @@ test('weapon items are non-violent magical tools with recipes', () => {
 });
 
 test('prebuilt worlds have unique ids and valid modes', () => {
-  assert.equal(PREBUILT_WORLDS.length, 6);
-  assert.equal(PREBUILT_WORLDS.filter((world) => world.rareKit).length, 2);
+  assert.equal(PREBUILT_WORLDS.length, 7);
+  assert.equal(PREBUILT_WORLDS.filter((world) => world.rareKit).length, 3);
   assert.equal(new Set(PREBUILT_WORLDS.map((world) => world.id)).size, PREBUILT_WORLDS.length);
   assert.equal(new Set(PREBUILT_WORLDS.map((world) => world.seed)).size, PREBUILT_WORLDS.length);
   for (const world of PREBUILT_WORLDS) {
@@ -147,6 +191,21 @@ test('random seeds are readable and world names stay short', () => {
   }
 });
 
+test('chat only accepts allowlisted phrase ids', () => {
+  assert.ok(CHAT_PHRASES.length >= 8);
+  assert.equal(new Set(CHAT_PHRASES.map((phrase) => phrase.id)).size, CHAT_PHRASES.length);
+  assert.equal(sanitizeChat('hello'), 'hello');
+  assert.equal(sanitizeChat(' HELLO '), 'hello');
+  assert.equal(sanitizeChat('<script>alert(1)</script>'), null);
+  assert.equal(sanitizeChat('free text here'), null);
+  assert.equal(sanitizeChat(null), null);
+  assert.equal(sanitizeChat({ id: 'hello' }), null);
+  assert.equal(getChatPhrase('thanks').text, 'Obrigado!');
+  assert.equal(getChatPhrase('nope'), null);
+  assert.ok(CHAT_RATE_MS >= 1000);
+  assert.ok(HOST_CHAT_RATE_MS >= CHAT_RATE_MS);
+});
+
 test('multiplayer invite codes are short, safe and normalized', () => {
   for (let i = 0; i < 40; i++) {
     const code = makeRoomCode();
@@ -192,6 +251,22 @@ test('world block edits persist as diffs and chests are addressable', () => {
   world.setChest(3, y, 5, [{ id: 'aurora_gem', count: 2 }]);
   assert.equal(world.chests.has(chestKey(3, y, 5)), true);
   assert.deepEqual(world.chests.get(chestKey(3, y, 5)), [{ id: 'aurora_gem', count: 2 }]);
+});
+
+test('Minha Casa spawns at the door with rare chests', () => {
+  const world = new World({ seed: 'lumi-minha-casa' });
+  const spawn = world.findSpawn();
+  assert.equal(spawn.x, 0.5);
+  assert.equal(spawn.z, 6.5);
+  assert.equal(spawn.yaw, 0);
+  world.getChunk(0, 0);
+  assert.equal(world.getBlock(0, 28, 5), B.AIR, 'door is open');
+  assert.equal(world.getBlock(0, 27, 5), B.PINK_PLANKS, 'porch step exists');
+  assert.equal(world.getBlock(5, 28, 0), B.PINK_PLANKS, 'house wall is pink');
+  assert.equal(world.getBlock(0, 34, 0), B.PRISM, 'roof is prism');
+  assert.ok(world.chests.size >= 4, 'home has chests');
+  const rare = [...world.chests.values()].filter((items) => items.some((slot) => slot && isRare(slot.id)));
+  assert.ok(rare.length >= 4, 'home chests contain rare loot');
 });
 
 test('inventory starter and rare kits are usable and rare-only', () => {
@@ -266,4 +341,66 @@ test('world slots are capped at twelve', () => {
   assert.equal(extra.ok, false);
   assert.match(extra.error, /12 mundos/);
   assert.equal(save.canCreateWorld(), false);
+});
+
+
+test('content packs validate palette, blocks and unsafe payloads', () => {
+  const valid = packs.parseContentPack(JSON.stringify({
+    version: 1,
+    id: 'aurora-suave',
+    name: 'Aurora Suave',
+    author: 'Lumi',
+    palette: { lumi: '#B8FF6A', pink: '#ff9edb' },
+    blocks: [B.GRASS, B.CRYSTAL]
+  }));
+  assert.equal(valid.ok, true);
+  assert.equal(valid.pack.id, 'aurora-suave');
+  assert.equal(valid.pack.palette.lumi, '#b8ff6a');
+  assert.deepEqual(valid.pack.blocks, [B.GRASS, B.CRYSTAL]);
+
+  assert.equal(packs.parseContentPack('{').ok, false);
+  assert.equal(packs.parseContentPack(JSON.stringify({ version: 1, id: '../evil', name: 'X' })).ok, false);
+  assert.equal(packs.parseContentPack(JSON.stringify({ version: 1, id: 'safe-id', name: 'X', palette: { hack: '#ffffff' } })).ok, false);
+  assert.equal(packs.parseContentPack(JSON.stringify({ version: 1, id: 'safe-id', name: 'X', palette: { lumi: 'red' } })).ok, false);
+  assert.equal(packs.parseContentPack(JSON.stringify({ version: 1, id: 'safe-id', name: 'X', blocks: [999] })).ok, false);
+  assert.equal(packs.parseContentPack(JSON.stringify({ version: 1, id: 'safe-id', name: 'X', blocks: [0] })).ok, false);
+});
+
+
+test('build history undoes and redoes blocks without growing forever', () => {
+  const history = new BuildHistory(3);
+  const change = (x) => makeChange({ x, y: 2, z: 3, before: B.AIR, after: B.GRASS });
+  history.record('a', [change(1)]);
+  history.record('b', [change(2)]);
+  history.record('c', [change(3)]);
+  history.record('d', [change(4)]);
+  assert.equal(history.canUndo, true);
+  assert.equal(history.undo().changes.length, 1);
+  assert.equal(history.undo().changes.length, 1);
+  assert.equal(history.undo().changes.length, 1);
+  assert.equal(history.undo(), null);
+  assert.equal(history.redo().changes.length, 1);
+  assert.equal(history.redo().changes.length, 1);
+  assert.equal(history.redo().changes.length, 1);
+  assert.equal(history.redo(), null);
+  assert.equal(history.undoStack.length, 3);
+});
+
+test('build history clones chest loot and exposes the next entry', () => {
+  const history = new BuildHistory(4);
+  const loot = [{ id: 'lumi_shard', count: 3 }];
+  history.record('baú', [makeChange({
+    x: 1, y: 2, z: 3,
+    before: B.CHEST, after: B.AIR,
+    chestBefore: [{ id: 'lumi_shard', count: 3 }],
+    chestAfter: null,
+    loot
+  })]);
+  loot[0].count = 99;
+  const pending = history.peekUndo();
+  assert.equal(pending.changes[0].loot[0].count, 3);
+  assert.equal(history.peekRedo(), null);
+  history.undo();
+  assert.equal(history.peekUndo(), null);
+  assert.equal(history.peekRedo().label, 'baú');
 });

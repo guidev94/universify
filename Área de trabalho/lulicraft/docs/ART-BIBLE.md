@@ -56,8 +56,8 @@
 ## Personagens
 
 - Avatar blocky, proporções fofas, sem detalhes agressivos.
-- 4 skins de arma (Aurora, Pétala, Solar, Bolha) mudam a cor dos efeitos.
-- 9 skins com silhueta reconhecível: Lumi (folha), Nino (estrela), Bia (flor), Tico (óculos), Dara (faixa), Sol (estrela), Maya (flor), Kai (óculos), Luna (faixa).
+- 6 skins de arma (Aurora, Pétala, Solar, Bolha, Menta e Doce) mudam a cor dos efeitos.
+- 18 presets com silhueta reconhecível; Lumi, Nino, Bia, Tico, Dara, Sol, Maya, Kai, Luna, Nori, Iris, Zoe, Pipo, Nara, Teo, Yumi, Cacau e Vivi.
 - Cores em pares de contraste suave; acessório sempre legível a 48 px.
 - O mesmo avatar aparece no cartão do mundo e na sala multiplayer.
 - Pets: silhuetas pequenas e arredondadas, 4 tipos e 8 cores; nunca parecem inimigos.
@@ -69,7 +69,7 @@
 - Sol, nuvens e colinas em camadas dão profundidade sem competir com o conteúdo.
 - Cards de cidade usam selo de UF, gradiente próprio e botão Explorar.
 - O sol decorativo fica atrás do conteúdo; em telas pequenas, reduzir opacidade para não atrapalhar a leitura.
-- A logo atual tem moldura verde de selo e referência a "MINECRAFT MOD"; revisar para uma marca 100% autoral antes de publicação comercial.
+- A marca é autoral: Lumi com folha e spark, em verde, creme e rosa; sem referência a Minecraft.
 
 ## Movimento
 
